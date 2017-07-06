@@ -106,8 +106,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     namespaceValue = SamlConstants.DefaultActionNamespace;
 
                 var action = reader.ReadElementContentAsString();
-                reader.MoveToContent();
-                reader.ReadEndElement();
                 return new SamlAction(action, new Uri(namespaceValue));
             }
             catch (Exception ex)
@@ -320,7 +318,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 attribute.Namespace = nameSpace;
 
                 // TODO is this the right thing?
-                var claimType = string.IsNullOrEmpty(nameSpace) ? name : nameSpace + "/" + name;
+                attribute.ClaimType = string.IsNullOrEmpty(nameSpace) ? name : nameSpace + "/" + name;
 
                 reader.MoveToContent();
                 reader.Read();

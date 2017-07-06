@@ -219,34 +219,34 @@ namespace Microsoft.IdentityModel.Tests
                                     <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</saml:ConfirmationMethod>
                                 </saml:SubjectConfirmation>
                             </saml:Subject>
-                            <saml:Attribute AttributeName = ""Country"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                            <saml:Attribute AttributeName = ""country"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>USA</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""NameIdentifier"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                            <saml:Attribute AttributeName = ""nameidentifier"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                                <saml:AttributeValue>Bob</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""Email"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                            <saml:Attribute AttributeName = ""emailaddress"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>Bob@contoso.com</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""GivenName"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                            <saml:Attribute AttributeName = ""givenname"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>Bob</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""HomePhone"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                            <saml:Attribute AttributeName = ""homephone"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>555.1212</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""Role"" AttributeNamespace= ""http://schemas.microsoft.com/ws/2008/06/identity/claims"">
+                            <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>Developer</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""Role"" AttributeNamespace= ""http://schemas.microsoft.com/ws/2008/06/identity/claims"">
+                            <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>Sales</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""Name"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
-                              <saml:AttributeValue>Jean-S�bastien</saml:AttributeValue>
+                            <saml:Attribute AttributeName = ""name"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
+                              <saml:AttributeValue>Jean-Sébastien</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.microsoft.com/ws/2008/06/identity/claims"">
+                            <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>role1</saml:AttributeValue>
                             </saml:Attribute>
-                            <saml:Attribute AttributeName = ""role"" AttributeNamespace= ""http://schemas.microsoft.com/ws/2008/06/identity/claims"">
+                            <saml:Attribute AttributeName = ""roles"" AttributeNamespace= ""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"">
                               <saml:AttributeValue>roles1</saml:AttributeValue>
                             </saml:Attribute>
                           </saml:AttributeStatement>

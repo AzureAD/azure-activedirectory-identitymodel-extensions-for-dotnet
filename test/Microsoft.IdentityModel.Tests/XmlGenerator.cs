@@ -25,8 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -99,8 +101,92 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         public static string KeyInfoXml(string @namespace, XmlEement x509Data)
-        {           
+        {
             return string.Format(KeyInfoTemplate, @namespace, XmlEement.Generate(x509Data));
+        }
+
+        public static string NotBeforeXml(string notBefore)
+        {
+            if (string.IsNullOrEmpty(notBefore))
+                return string.Empty;
+
+            return $"NotBefore = \"{notBefore}\"";
+        }
+
+        public static string NotOnOrAfterXml(string notOnOrAfter)
+        {
+            if (string.IsNullOrEmpty(notOnOrAfter))
+                return string.Empty;
+
+            return $"NotOnOrAfter = \"{notOnOrAfter}\"";
+        }
+
+
+        public static string SamlActionTemplate
+        {
+            get => "<Action Namespace=\"{0}\" xmlns=\"{1}\">{2}</Action>";
+        }
+
+        public static string SamlActionXml(string @namespace, string actionNamespace, string action)
+        {
+            return string.Format(SamlActionTemplate, actionNamespace, @namespace, action);
+        }
+
+        public static string SamlAttributeValueTemplate
+        {
+            get => "<AttributeValue xmlns=\"{0}\">{1}</AttributeValue>";
+        }
+
+        public static string SamlAttributeValueXml(string @namespace, string value)
+        {
+            return string.Format(SamlAttributeValueTemplate, @namespace, value);
+        }
+
+        public static string SamlAttributeTemplate
+        {
+            get => "<Attribute AttributeName=\"{0}\" AttributeNamespace=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</Attribute>";
+        }
+
+        public static string SamlAttributeXml(string name, string attributeNs, IEnumerable<string> attributes)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = string.Empty;
+
+            if (string.IsNullOrEmpty(attributeNs))
+                attributeNs = string.Empty;
+
+            return string.Format(SamlAttributeTemplate, name, attributeNs, (attributes == null) ? string.Empty : string.Concat(attributes));
+        }
+
+        public static string SamlAudienceTemplate
+        {
+            get => "<Audience xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</Audience>";
+        }
+
+        public static string SamlAudienceXml(string audience)
+        {
+            return string.Format(SamlAudienceTemplate, audience);
+        }
+
+        public static string SamlAudienceRestrictionConditionTemplate
+        {
+            get => "<AudienceRestrictionCondition xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</AudienceRestrictionCondition>";
+        }
+
+        public static string SamlAudienceRestrictionConditionXml(IEnumerable<string> audiences)
+        {
+            return string.Format(SamlAudienceRestrictionConditionTemplate, string.Concat(audiences));
+            //return GenerateCompositeXml(SamlAudienceRestrictionConditionTemplate, audiences);
+        }
+
+        public static string SamlConditionsTemplate
+        {
+            get => "<Conditions {0} {1} xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</Conditions>";
+        }
+
+        public static string SamlConditionsXml(string notBefore, string notOnOrAfter, IEnumerable<string> conditions)
+        {
+            return string.Format(SamlConditionsTemplate, NotBeforeXml(notBefore), NotOnOrAfterXml(notOnOrAfter), (conditions == null) ? string.Empty : string.Concat(conditions));
         }
 
         public static string Generate(KeyInfo keyInfo)

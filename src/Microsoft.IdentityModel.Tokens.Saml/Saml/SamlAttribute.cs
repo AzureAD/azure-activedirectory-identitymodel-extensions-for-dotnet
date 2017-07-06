@@ -43,7 +43,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private string _originalIssuer;
         private string _attributeValueXsiType = ClaimValueTypes.String;
         private List<Claim> _claims;
-        private string _claimType;
 
         // TODO remove this internal
         /// <summary>
@@ -77,13 +76,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             Name = name;
             Namespace = ns;
-            _claimType = string.IsNullOrEmpty(_nameSpace) ? _name : _nameSpace + "/" + _name;
+            ClaimType = string.IsNullOrEmpty(_nameSpace) ? _name : _nameSpace + "/" + _name;
         }
-
-        /// <summary>
-        /// Gets a collection of <see cref="ICollection{String}"/> representing attributes.
-        /// </summary>
-        public ICollection<string> Values { get; }
 
         // TODO don't think this is still needed
         /// <summary>
@@ -113,6 +107,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 _attributeValueXsiType = value;
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the ClaimType of the attribute.
+        /// </summary>
+        public string ClaimType
+        {
+            get; set;
         }
 
         /// <summary>
@@ -160,6 +162,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="ICollection{String}"/> representing attributes.
+        /// </summary>
+        public ICollection<string> Values { get; }
+
         // TODO - hide this behind SamlToken.Claims OR SamlAssertion.Claims.
         internal virtual ReadOnlyCollection<Claim> ExtractClaims()
         {
@@ -171,7 +178,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     if (value == null)
                         throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11504));
 
-                    tempClaims.Add(new Claim(_claimType, value));
+                    tempClaims.Add(new Claim(ClaimType, value));
                 }
 
                 _claims = tempClaims;

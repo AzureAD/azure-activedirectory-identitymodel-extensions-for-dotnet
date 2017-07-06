@@ -32,13 +32,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     public class SamlTheoryData : TheoryDataBase
     {
+        public SamlActionTestSet ActionTestSet { get; set; }
+
         public string Actor { get; set; }
+
+        public SamlAttributeTestSet AttributeTestSet { get; set; }
+
+        public SamlAudienceRestrictionConditionTestSet AudienceRestrictionConditionTestSet { get; set; }
 
         public TokenValidationParameters ActorTokenValidationParameters { get; set; }
 
         public IEnumerable<string> Audiences { get; set; }
 
         public bool CanRead { get; set; }
+
+        public SamlConditionsTestSet ConditionsTestSet { get; set; }
 
         public SecurityTokenHandler Handler { get; set; }
 

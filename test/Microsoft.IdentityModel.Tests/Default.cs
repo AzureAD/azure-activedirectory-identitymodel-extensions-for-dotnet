@@ -29,7 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -99,6 +101,16 @@ namespace Microsoft.IdentityModel.Tests
             get => TokenValidationParameters(null, AsymmetricSigningKey);
         }
 
+        public static string AttributeName
+        {
+            get => "Country";
+        }
+
+        public static string AttributeNamespace
+        {
+            get => "http://schemas.xmlsoap.org/ws/2005/05/identity/claims";
+        }
+
         public static string Audience
         {
             get => "http://Default.Audience.com";
@@ -159,6 +171,11 @@ namespace Microsoft.IdentityModel.Tests
             get => "http://Default.ClientId";
         }
 
+        public static string Country
+        {
+            get => "USA";
+        }
+
         public static KeyInfo KeyInfo
         {
             get => new KeyInfo
@@ -198,9 +215,19 @@ namespace Microsoft.IdentityModel.Tests
             get => DateTime.Parse("2017-03-17T18:33:37.080Z");
         }
 
+        public static string NotBeforeString
+        {
+            get => "2017-03-17T18:33:37.080Z";
+        }
+
         public static DateTime NotOnOrAfter
         {
             get => DateTime.Parse("2017-03-18T18:33:37.080Z");
+        }
+
+        public static string NotOnOrAfterString
+        {
+            get => "2017-03-18T18:33:37.080Z";
         }
 
         public static string OriginalIssuer
@@ -243,9 +270,44 @@ namespace Microsoft.IdentityModel.Tests
             get => "Default.RoleClaimType";
         }
 
+        public static SamlAction SamlAction
+        {
+            get => new SamlAction("Action", new Uri(SamlConstants.DefaultActionNamespace));
+        }
+
         public static string SamlAssertionID
         {
             get => "_b95759d0-73ae-4072-a140-567ade10a7ad";
+        }
+
+        public static SamlAudienceRestrictionCondition SamlAudienceRestrictionConditionSingleAudience
+        {
+            get => new SamlAudienceRestrictionCondition(Default.Audience);
+        }
+
+        public static SamlAudienceRestrictionCondition SamlAudienceRestrictionConditionMultiAudience
+        {
+            get => new SamlAudienceRestrictionCondition(Default.Audiences);
+        }
+
+        public static SamlAttribute SamlAttributeSingleValue
+        {
+            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, Default.Country);
+        }
+
+        public static SamlAttribute SamlAttributeMultiValue
+        {
+            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { Default.Country, "England" });
+        }
+
+        public static SamlConditions SamlConditionsSingleCondition
+        {
+            get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionSingleAudience });
+        }
+
+        public static SamlConditions SamlConditionsMultiCondition
+        {
+            get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionMultiAudience });
         }
 
         public static string SamlConfirmationMethod

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -559,6 +560,317 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+        #endregion
+
+        #region Saml
+
+        #region SamlAction
+        public static SamlActionTestSet SamlActionValueNull
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), null)
+                };
+            }
+        }
+
+        public static SamlActionTestSet SamlActionValueEmptyString
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), String.Empty)
+                };
+            }
+        }
+
+        public static SamlActionTestSet SamlActionNamespaceNull
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, null, Default.SamlAction.Value)
+                };
+            }
+        }
+
+        public static SamlActionTestSet SamlActionNamespaceEmptyString
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, string.Empty, Default.SamlAction.Value)
+                };
+            }
+        }
+
+        public static SamlActionTestSet SamlActionNamespaceNotAbsoluteUri
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, "namespace", Default.SamlAction.Value)
+                };
+            }
+        }
+
+        public static SamlActionTestSet SamlActionValid
+        {
+            get
+            {
+                return new SamlActionTestSet
+                {
+                    Action = Default.SamlAction,
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), Default.SamlAction.Value)
+                };
+            }
+        }
+        #endregion
+
+        #region SamlAttribute
+        public static SamlAttributeTestSet SamlAttributeNameNull
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(null, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeNameEmptyString
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(string.Empty, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeNameSpaceNull
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, null, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeNameSpaceEmptyString
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, string.Empty, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeValueNull
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, null )
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeValueEmpty
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { }),
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, string.Empty) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeSingleValue
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeSingleValue,
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
+                };
+            }
+        }
+
+        public static SamlAttributeTestSet SamlAttributeMultiValue
+        {
+            get
+            {
+                return new SamlAttributeTestSet
+                {
+                    Attribute = Default.SamlAttributeMultiValue,
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, new List<string>
+                            { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country),
+                              XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, "England")  })
+                };
+            }
+        }
+        #endregion
+
+        #region SamlAudienceRestrictionCondition
+        public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionNoAudience
+        {
+            get
+            {
+                return new SamlAudienceRestrictionConditionTestSet
+                {
+                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
+                    Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { })
+                };
+            }
+        }
+
+        public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionEmptyAudience
+        {
+            get
+            {
+                return new SamlAudienceRestrictionConditionTestSet
+                {
+                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
+                    Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { XmlGenerator.SamlAudienceXml(string.Empty) })
+                };
+            }
+        }
+
+        public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionInvaidElement
+        {
+            get
+            {
+                return new SamlAudienceRestrictionConditionTestSet
+                {
+                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
+                    Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { XmlGenerator.SamlActionXml(null, null, null) })
+                };
+            }
+        }
+
+        public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionSingleAudience
+        {
+            get
+            {
+                return new SamlAudienceRestrictionConditionTestSet
+                {
+                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
+                    Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { XmlGenerator.SamlAudienceXml(Default.Audience) })
+                };
+            }
+        }
+
+        public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionMultiAudience
+        {
+            get
+            {
+                var audiences = new List<string>();
+                foreach (var audience in Default.Audiences)
+                {
+                    audiences.Add(XmlGenerator.SamlAudienceXml(audience));
+                }
+
+                return new SamlAudienceRestrictionConditionTestSet
+                {
+                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionMultiAudience,
+                    Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(audiences)
+                };
+            }
+        }
+        #endregion
+
+        #region SamlConditions
+        public static SamlConditionsTestSet SamlConditionsNoNbf
+        {
+            get
+            {
+                return new SamlConditionsTestSet
+                {
+                    Conditions = new SamlConditions(DateTimeUtil.GetMinValue(DateTimeKind.Utc), Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionSingleAudience }),
+                    Xml = XmlGenerator.SamlConditionsXml(null, Default.NotOnOrAfterString, new List<string> { SamlAudienceRestrictionConditionSingleAudience.Xml })
+                };
+            }
+        }
+
+        public static SamlConditionsTestSet SamlConditionsNoNotOnOrAfter
+        {
+            get
+            {
+                return new SamlConditionsTestSet
+                {
+                    Conditions = new SamlConditions(Default.NotBefore, DateTimeUtil.GetMaxValue(DateTimeKind.Utc), new List<SamlCondition> { Default.SamlAudienceRestrictionConditionSingleAudience }),
+                    Xml = XmlGenerator.SamlConditionsXml(Default.NotBeforeString, null, new List<string> { SamlAudienceRestrictionConditionSingleAudience.Xml })
+                };
+            }
+        }
+
+        public static SamlConditionsTestSet SamlConditionsNoCondition
+        {
+            get
+            {
+                return new SamlConditionsTestSet
+                {
+                    Conditions = new SamlConditions(DateTimeUtil.GetMinValue(DateTimeKind.Utc), DateTimeUtil.GetMaxValue(DateTimeKind.Utc)),
+                    Xml = XmlGenerator.SamlConditionsXml(null, null, null)
+                };
+            }
+        }
+
+        public static SamlConditionsTestSet SamlConditionsSingleCondition
+        {
+            get
+            {
+                return new SamlConditionsTestSet
+                {
+                    Conditions = Default.SamlConditionsSingleCondition,
+                    Xml = XmlGenerator.SamlConditionsXml(Default.NotBeforeString, Default.NotOnOrAfterString, new List<string> { SamlAudienceRestrictionConditionSingleAudience.Xml })
+                };
+            }
+        }
+
+        public static SamlConditionsTestSet SamlConditionsMultiCondition
+        {
+            get
+            {
+                return new SamlConditionsTestSet
+                {
+                    Conditions = new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition>
+                        { Default.SamlAudienceRestrictionConditionSingleAudience,
+                          Default.SamlAudienceRestrictionConditionMultiAudience }),
+                    Xml = XmlGenerator.SamlConditionsXml(Default.NotBeforeString, Default.NotOnOrAfterString,
+                            new List<string> { SamlAudienceRestrictionConditionSingleAudience.Xml, SamlAudienceRestrictionConditionMultiAudience.Xml })
+                };
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Signature

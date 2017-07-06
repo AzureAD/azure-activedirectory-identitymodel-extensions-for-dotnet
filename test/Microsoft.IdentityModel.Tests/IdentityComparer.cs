@@ -392,14 +392,18 @@ namespace Microsoft.IdentityModel.Tests
                 return AreWsFederationConfigurationsEqual(t1 as WsFederationConfiguration, t2 as WsFederationConfiguration, context);
             else if (t1 is WsFederationMessage)
                 return AreWsFederationMessagesEqual(t1 as WsFederationMessage, t2 as WsFederationMessage, context);
+            else if (t1 is SamlAction)
+                return AreSamlActionsEqual(t1 as SamlAction, t2 as SamlAction, context);
             else if (t1 is SamlAssertion)
-                return AreSamlAssertionEqual(t1 as SamlAssertion, t2 as SamlAssertion, context);
+                return AreSamlAssertionsEqual(t1 as SamlAssertion, t2 as SamlAssertion, context);
             else if (t1 is SamlAdvice)
-                return AreSamlAdviceEqual(t1 as SamlAdvice, t2 as SamlAdvice, context);
+                return AreSamlAdvicesEqual(t1 as SamlAdvice, t2 as SamlAdvice, context);
+            else if (t1 is SamlAttribute)
+                return AreSamlAttributesEqual(t1 as SamlAttribute, t2 as SamlAttribute, context);
+            else if (t1 is SamlAudienceRestrictionCondition)
+                return AreSamlAudienceRestrictionConditionsEqual(t1 as SamlAudienceRestrictionCondition, t2 as SamlAudienceRestrictionCondition, context);
             else if (t1 is SamlConditions)
                 return AreSamlConditionsEqual(t1 as SamlConditions, t2 as SamlConditions, context);
-            else if (t1 is SamlCondition)
-                return AreSamlConditionEqual(t1 as SamlCondition, t2 as SamlCondition, context);
             else if (t1 is SamlStatement)
                 return AreSamlStatementEqual(t1 as SamlStatement, t2 as SamlStatement, context);
             else
@@ -410,7 +414,16 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static bool AreSamlAssertionEqual(SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
+        public static bool AreSamlActionsEqual(SamlAction action1, SamlAction action2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(action1, action2, context))
+                CompareAllPublicProperties(action1, action2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlAssertionsEqual(SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(assertion1, assertion2, context))
@@ -419,7 +432,7 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreSamlAdviceEqual(SamlAdvice advice1, SamlAdvice advice2, CompareContext context)
+        public static bool AreSamlAdvicesEqual(SamlAdvice advice1, SamlAdvice advice2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(advice1, advice2, context))
@@ -428,7 +441,16 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreSamlConditionEqual(SamlCondition condition1, SamlCondition condition2, CompareContext context)
+        public static bool AreSamlAttributesEqual(SamlAttribute attribute1, SamlAttribute attribute2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(attribute1, attribute2, context))
+                CompareAllPublicProperties(attribute1, attribute2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlAudienceRestrictionConditionsEqual(SamlAudienceRestrictionCondition condition1, SamlAudienceRestrictionCondition condition2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(condition1, condition2, context))
