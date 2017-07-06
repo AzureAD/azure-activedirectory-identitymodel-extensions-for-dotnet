@@ -142,13 +142,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ActorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ActorTests(JwtTheoryData theoryData)
+        public void Actor(JwtTheoryData theoryData)
         {
             var context = new CompareContext();
             try
             {
-                SecurityToken validatedToken;
-                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out validatedToken).Identity as ClaimsIdentity;
+                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
                 var actorIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Actor, theoryData.ActorTokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
                 IdentityComparer.AreEqual(claimsIdentity.Actor, actorIdentity, context);
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -181,7 +180,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ActorTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
                         TestId = "Test1",
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
                     }
@@ -202,7 +201,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
                         TestId = "Test2",
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
-                        Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
                     }
@@ -223,7 +222,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
                         TestId = "Test3",
                         ExpectedException = ExpectedException.NoExceptionExpected,
-                        Jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
                     }
@@ -512,22 +511,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(handler.SetDefaultTimesOnTokenCreation);
         }
 
-        private bool RunCanReadStringVariation(string securityToken, JwtSecurityTokenHandler tokenHandler, ExpectedException expectedException)
-        {
-            bool retVal = false;
-            try
-            {
-                retVal = tokenHandler.CanReadToken(securityToken);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-
-            return retVal;
-        }
-
         [Fact]
         public void MaximumTokenSizeInBytes()
         {
@@ -544,17 +527,64 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ValidateTokenTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ValidateToken(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
+
+            TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateTokenTheoryData
+        {
+            get
+            {
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "Token: null",
+                        ValidationParameters = new TokenValidationParameters()
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10209:"),
+                        TestId = "Token.length > MaximumTokenSizeInBytes",
+                        Token = EncodedJwts.Asymmetric_LocalSts,
+                        TokenHandler = new JwtSecurityTokenHandler{ MaximumTokenSizeInBytes = 100 },
+                        ValidationParameters = new TokenValidationParameters()
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
+                        TestId = "Token = Guid().NewGuid().ToString()",
+                        Token = Guid.NewGuid().ToString(),
+                        ValidationParameters = new TokenValidationParameters()
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "Token = '      ' (whitespace)",
+                        Token = "     ",
+                        ValidationParameters = new TokenValidationParameters()
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "TokenValidationParameters: null",
+                        Token = EncodedJwts.Asymmetric_1024,
+                    }
+                };
+            }
+        }
+
         [Fact]
         public void ValidateTokens()
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-
-            TestUtilities.ValidateToken(null, new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException());
-            TestUtilities.ValidateToken(EncodedJwts.Asymmetric_LocalSts, new TokenValidationParameters(), new JwtSecurityTokenHandler() { MaximumTokenSizeInBytes = 100 }, ExpectedException.ArgumentException(substringExpected: "IDX10209:"));
-            TestUtilities.ValidateToken("ValidateToken_String_Only_IllFormed", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentException(substringExpected: "IDX10709:"));
-            TestUtilities.ValidateToken("     ", new TokenValidationParameters(), tokenHandler, ExpectedException.ArgumentNullException());
-            TestUtilities.ValidateToken(EncodedJwts.Asymmetric_LocalSts, null, tokenHandler, ExpectedException.ArgumentNullException());
-
             var tvpNoValidation =
                 new TokenValidationParameters
                 {
@@ -603,7 +633,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating issuer signing key validator
-            validationParameters = SignatureValidationParameters(Default.AsymmetricSigningKey);
+            validationParameters = SignatureValidationParameters(Default.AsymmetricSigningKey, null);
             validationParameters.ValidateIssuerSigningKey = true;
             validationParameters.IssuerSigningKeyValidator = (key, token, parameters) => { return true; };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
@@ -614,7 +644,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:", propertiesExpected: properties));
 
             // no keys provided
-            validationParameters = SignatureValidationParameters();
+            validationParameters = SignatureValidationParameters(null, null);
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"));
 
             // user returns one key
@@ -622,7 +652,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
 
             // validating custom crypto provider factory
-            validationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048);
+            validationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048, null);
             validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
             TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"));
         }
@@ -757,157 +787,256 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Fact]
-        public void SignatureValidation()
+        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("SignatureValidationTheoryData")]
+        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void SignatureValidation(JwtTheoryData theoryData)
         {
-            // "Security Key Identifier not found",
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
-            TokenValidationParameters validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_LocalSts);
-            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"), validationParameters, tokenHandler, expectedException);
+            TestUtilities.WriteHeader($"{this}.SignatureValidation", theoryData);
 
-            // "Asymmetric_LocalSts"
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_LocalSts);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningKey null, SigningKeys single key",
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey> { KeyingMaterial.X509SecurityKey_LocalSts });
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "Asymmetric_1024"
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.X509SecurityKey_1024);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "kid" is not present, but an "x5t" is present.
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_2048);
-            JwtSecurityToken jwt =
-                new JwtSecurityToken
-                (
-                    issuer: Default.Issuer,
-                    audience: Default.Audience,
-                    claims: ClaimSets.Simple(Default.Issuer, Default.Issuer),
-                    signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
-                    expires: DateTime.UtcNow + TimeSpan.FromHours(10),
-                    notBefore: DateTime.UtcNow
-                );
-            jwt.Header[JwtHeaderParameterNames.Kid] = null;
-            jwt.Header[JwtHeaderParameterNames.X5t] = KeyingMaterial.DefaultCert_2048.Thumbprint;
-            TestUtilities.ValidateToken(tokenHandler.WriteToken(jwt), validationParameters, tokenHandler, expectedException);
-
-            // "Signature missing, just two parts",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:");
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultX509Key_Public_2048);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningKey and SigningKeys both null",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:");
-            validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "SigningKeys empty",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:");
-            validationParameters = SignatureValidationParameters(signingKeys: new List<SecurityKey>());
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // signature missing, "ValidateSignature = true"
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:");
-            validationParameters = SignatureValidationParameters();
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
-
-            // signature missing, ValidateSignature = false"
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters.RequireSignedTokens = false;
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1")), validationParameters, tokenHandler, expectedException);
-
-            // custom signature validator
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters();
-            validationParameters.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
-            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
-
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10505:");
-            validationParameters.SignatureValidator = ((token, parameters) => { return null; });
-            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
-
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
-            validationParameters.RequireSignedTokens = false;
-            validationParameters.SignatureValidator = ValidationDelegates.SignatureValidatorThrows;
-            TestUtilities.ValidateToken(JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"), validationParameters, tokenHandler, expectedException);
-
-            // "Symmetric_256"
-            expectedException = ExpectedException.NoExceptionExpected;
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_256);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
-
-            // "BinaryKey 56Bits",
-            expectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:");
-            validationParameters = SignatureValidationParameters(signingKey: KeyingMaterial.DefaultSymmetricSecurityKey_56);
-            TestUtilities.ValidateToken((JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts")), validationParameters, tokenHandler, expectedException);
+            TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
         }
 
-        private static TokenValidationParameters SignatureValidationParameters(SecurityKey signingKey = null, IEnumerable<SecurityKey> signingKeys = null)
+        public static TheoryData<JwtTheoryData> SignatureValidationTheoryData
+        {
+            get
+            {
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:"),
+                        TestId = "Security Key Identifier not found",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.X509SecurityKey_LocalSts, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "Asymmetric_LocalSts",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.X509SecurityKey_LocalSts, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "SigningKey null, SigningKeys single key",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(null, new List<SecurityKey> { KeyingMaterial.X509SecurityKey_LocalSts })
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "Asymmetric_1024",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.X509SecurityKey_1024, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "'kid' is missing, 'x5t' is present.",
+                        Token = EncodedJwts.JwsKidNullX5t,
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:"),
+                        TestId = "Signature missing, required",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.DefaultX509Key_Public_2048, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:"),
+                        TestId = "SigningKey and SigningKeys both null",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(null, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:"),
+                        TestId = "SigningKeys empty",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(null, new List<SecurityKey>())
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:"),
+                        TestId = "signature missing, RequireSignedTokens = true",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(null, null)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "signature missing, RequireSignedTokens = false",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(null, null, false)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "custom signature validator",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(null, null, true, ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10505:"),
+                        TestId = "signature validator returns null",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(null, null, true, ValidationDelegates.SignatureValidatorReturnsNull)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("SignatureValidatorThrows"),
+                        TestId = "Signature validator throws",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = SignatureValidationParameters(null, null, true, ValidationDelegates.SignatureValidatorThrows)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "EncodedJwts.Symmetric_256",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.DefaultSymmetricSecurityKey_256, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:"),
+                        TestId = "BinaryKey 56Bits",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"),
+                        ValidationParameters = SignatureValidationParameters(KeyingMaterial.DefaultSymmetricSecurityKey_56, null),
+                    },
+                };
+            }
+        }
+
+        private static TokenValidationParameters SignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys)
+        {
+            return SignatureValidationParameters(signingKey, signingKeys, true);
+        }
+
+        private static TokenValidationParameters SignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens)
+        {
+            return SignatureValidationParameters(signingKey, signingKeys, requireSignedTokens, null);
+        }
+
+        private static TokenValidationParameters SignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator)
         {
             return new TokenValidationParameters()
             {
                 IssuerSigningKey = signingKey,
                 IssuerSigningKeys = signingKeys,
                 RequireExpirationTime = false,
+                RequireSignedTokens = requireSignedTokens,
+                SignatureValidator = signatureValidator,
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = false
             };
         }
 
-        [Fact]
-        public void IssuerValidation()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("IssuerValidationTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void IssuerValidation(JwtTheoryData theoryData)
         {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            string jwt = (tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, signingCredentials: Default.AsymmetricSigningCredentials) as JwtSecurityToken).RawData;
-            TokenValidationParameters validationParameters = new TokenValidationParameters() { IssuerSigningKey = Default.AsymmetricSigningKey, ValidateAudience = false, ValidateLifetime = false };
-            Dictionary<string, object> properties = new Dictionary<string, object>();
+            TestUtilities.WriteHeader($"{this}.IssuerValidation", theoryData);
 
-            // ValidateIssuer == true, validIssuer null, validIssuers null
-            properties.Add("InvalidIssuer", Default.Issuer);
-            ExpectedException ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204", propertiesExpected: properties);
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
+            TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
+        }
 
-            // no issuers
-            ee = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10205", propertiesExpected: properties);
-            validationParameters.ValidIssuers = new List<string>();
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
+        public static TheoryData<JwtTheoryData> IssuerValidationTheoryData
+        {
+            get
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, Default.ClaimsIdentity, null, null, null, null);
+                var properties = new Dictionary<string, object>
+                {
+                    {"InvalidIssuer", Default.Issuer }
+                };
 
-            // delegate ignored on virtual call
-            ee = ExpectedException.NoExceptionExpected;
-            validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
 
-            // VaidateIssuer == false
-            ee = ExpectedException.NoExceptionExpected;
-            validationParameters.ValidateIssuer = false;
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204", propertiesExpected: properties),
+                        Token = jwt,
+                        TestId = "ValidIssuer == null, ValidIssuers == null",
+                        ValidationParameters = IssuerValidationParameters(null, null, null, true)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10205", propertiesExpected: properties),
+                        TestId = "ValidIssuers = List<string>()",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(null, new List<string>(), null, true)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "NotDefault.Issuer: ValidateIssuer: false",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(NotDefault.Issuer, null, null, false)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "NotDefault.Issuers: ValidateIssuer: false",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(null, NotDefault.Issuers, null, false)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "ValidationDelegates.IssuerValidatorEcho",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(null, null, ValidationDelegates.IssuerValidatorEcho, true)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "Default.Issuer",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(null, Default.Issuers, null, true)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "Default.Issuers",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(null, Default.Issuers, null, true)
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "ValidationDelegates.IssuerValidatorThrows, ValidateIssuer: false",
+                        Token = jwt,
+                        ValidationParameters = IssuerValidationParameters(
+                            Default.Issuer,
+                            Default.Issuers,
+                            ValidationDelegates.IssuerValidatorThrows,
+                            false)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IssuerValidatorThrows"),
+                        Token = jwt,
+                        TestId = "ValidationDelegates.IssuerValidatorThrows, ValidateIssuer: true",
+                        ValidationParameters = IssuerValidationParameters(
+                            Default.Issuer,
+                            Default.Issuers,
+                            ValidationDelegates.IssuerValidatorThrows,
+                            true)
+                    },
+                };
 
-            // no issuers should NOT fail. vaidate issuer is not needed.
-            ee = ExpectedException.NoExceptionExpected;
-            validationParameters.ValidIssuers = new List<string>() { "http://Simple.CertData_2049" };
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ee);
-
-            // matches ValidIssuer
-            validationParameters.ValidateIssuer = true;
-            validationParameters.ValidIssuer = Default.Issuer;
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
-
-            // matches ValidIssuers
-            validationParameters.ValidIssuer = null;
-            validationParameters.ValidIssuers = new string[] { "http://Simple.CertData_2048", Default.Issuer };
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
-
-            validationParameters.ValidateIssuer = false;
-            validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorThrows;
-            TestUtilities.ValidateToken(jwt, validationParameters, tokenHandler, ExpectedException.NoExceptionExpected);
+            }
+        }
+        private static TokenValidationParameters IssuerValidationParameters(string validIssuer, IEnumerable<string> validIssuers, IssuerValidator issuerValidator, bool validateIssuer)
+        {
+            return new TokenValidationParameters
+            {
+                IssuerValidator = issuerValidator,
+                RequireSignedTokens = false,
+                ValidateAudience = false,
+                ValidateIssuer = validateIssuer,
+                ValidateLifetime = false,
+                ValidIssuer = validIssuer,
+                ValidIssuers = validIssuers
+            };
         }
 
         [Fact]
@@ -1029,7 +1158,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             try
             {
-                var token = theoryData.TokenHandler.WriteToken(theoryData.Token);
+                var token = theoryData.TokenHandler.WriteToken(theoryData.SecurityToken);
                 if (theoryData.TokenType == TokenType.JWE)
                     Assert.True(token.Split('.').Length == 5);
                 else
@@ -1051,28 +1180,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 ExpectedException = ExpectedException.ArgumentNullException(),
                 TestId = "Test1",
-                Token = null
+                SecurityToken = null
             });
 
             theoryData.Add(new JwtTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
                 TestId = "Test2",
-                Token = new CustomSecurityToken()
+                SecurityToken = new CustomSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
                 TestId = "Test3",
-                Token = new CustomSecurityToken()
+                SecurityToken = new CustomSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
                 ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10736:"),
                 TestId = "Test4",
-                Token = new JwtSecurityToken(
+                SecurityToken = new JwtSecurityToken(
                                 new JwtHeader(Default.SymmetricSigningCredentials),
                                 new JwtSecurityToken(),
                                 "ey",
@@ -1086,7 +1215,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10735:"),
                 TestId = "Test5",
-                Token = new JwtSecurityToken(
+                SecurityToken = new JwtSecurityToken(
                                 new JwtHeader(),
                                 new JwtSecurityToken(),
                                 "ey",
@@ -1101,7 +1230,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new JwtTheoryData
             {
                 TestId = "Test6",
-                Token = new JwtSecurityToken(
+                SecurityToken = new JwtSecurityToken(
                     new JwtHeader(Default.SymmetricEncryptingCredentials),
                     new JwtSecurityToken(header, payload),
                     "ey",
@@ -1115,7 +1244,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new JwtTheoryData()
             {
                 TestId = "Test7",
-                Token = new JwtSecurityToken(
+                SecurityToken = new JwtSecurityToken(
                     new JwtHeader(Default.SymmetricSigningCredentials),
                     new JwtPayload() ),
                 TokenType = TokenType.JWS
@@ -1135,7 +1264,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new JwtTheoryData
             {
                 TestId = "Test8",
-                Token = new JwtSecurityToken(
+                SecurityToken = new JwtSecurityToken(
                         new JwtHeader(Default.SymmetricEncryptingCredentials),
                             innerToken,
                             "ey",

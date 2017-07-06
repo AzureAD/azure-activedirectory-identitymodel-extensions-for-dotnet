@@ -35,7 +35,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Tests
 {
     /// <summary>
-    /// When a test case throws an exception, this class helps to determine if the exception is as exptected.
+    /// When a test case throws an exception, this class helps to determine if the exception is as expected.
     /// Really just a helper for wrapping things.
     /// </summary>
     public class ExpectedException
@@ -87,10 +87,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static ExpectedException NoExceptionExpected 
         { 
-            get 
-            { 
-                return new ExpectedException(); 
-            } 
+            get { return new ExpectedException(); }
         }
 
         public static ExpectedException NotSupportedException(string substringExpected = null, Type inner = null, string contains = null)

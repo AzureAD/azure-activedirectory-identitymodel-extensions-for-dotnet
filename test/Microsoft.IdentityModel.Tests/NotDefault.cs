@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
@@ -101,7 +102,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string Issuer
         {
-            get { return Default.Issuer.Replace("Default", "NotDefault"); }
+            get => Guid.NewGuid().ToString();
+        }
+
+        public static IEnumerable<string> Issuers
+        {
+            get => new List<string> { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
         }
 
         public static string NameClaimType

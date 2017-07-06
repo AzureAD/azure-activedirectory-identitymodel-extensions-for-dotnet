@@ -36,9 +36,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public TokenValidationParameters ActorTokenValidationParameters { get; set; }
 
-        public string Jwt { get; set; }
+        public string Token { get; set; }
 
-        public SecurityToken Token { get; set; }
+        public SecurityToken SecurityToken { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
 

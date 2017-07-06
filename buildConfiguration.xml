@@ -14,16 +14,16 @@
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
     </src>
     <test>
-      <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
+      <project name="Microsoft.IdentityModel.Logging.Tests" test="no"/>
       <project name="Microsoft.IdentityModel.Tests" test="no" />
-      <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Net45.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Tokens.Tests" test="no" />
       <project name="System.IdentityModel.Tokens.Jwt.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Xml.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Xml.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Protocols.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="no" />
     </test>
   </projects>
 </root>

@@ -69,8 +69,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SecurityToken SignatureValidatorReturnsJwtTokenAsIs(string token, TokenValidationParameters validationParameters)
         {
-            JwtSecurityToken jwt = new JwtSecurityToken(token);
-            return jwt;
+            return new JwtSecurityToken(token);
+        }
+
+        public static SecurityToken SignatureValidatorReturnsNull(string token, TokenValidationParameters validationParameters)
+        {
+            return null;
         }
 
         public static SecurityToken SignatureValidatorThrows(string token, TokenValidationParameters validationParameters)

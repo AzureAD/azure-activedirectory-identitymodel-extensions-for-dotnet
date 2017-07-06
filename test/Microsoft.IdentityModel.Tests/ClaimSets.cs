@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Contains a nubmer of different claims sets used to test roundtripping claims sets.
+    /// Contains a number of different claims sets used to test round tripping claims sets.
     /// </summary>
     public static class ClaimSets
     {
@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         /// <summary>
-        /// Claims containing global unicode chars. Gleemed from a number of sources.
+        /// Claims containing global Unicode chars. Gleamed from a number of sources.
         /// </summary>
         /// <param name="issuer"></param>
         /// <param name="originalIssuer"></param>
@@ -390,7 +390,7 @@ namespace Microsoft.IdentityModel.Tests
         }
         
         /// <summary>
-        /// Returns an enumeration containing duplicate claims. Used to test dups.
+        /// Returns an enumeration containing duplicate claims. Used to test duplicates.
         /// </summary>
         /// <param name="issuer"></param>
         /// <param name="originalIssuer"></param>
@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Complex type. Used for testing roundtripping using complex claims.
+    /// Complex type. Used for testing round tripping using complex claims.
     /// </summary>
     public class Entity
     {
@@ -480,7 +480,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Contained in Entity class to test complext claims
+    /// Contained in Entity class to test complex claims
     /// </summary>
     public class AuthTime
     {
@@ -488,7 +488,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Contained in Entity class to test complext claims
+    /// Contained in Entity class to test complex claims
     /// </summary>
     public class Acr
     {
@@ -496,7 +496,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Contained in Entity class to test complext claims
+    /// Contained in Entity class to test complex claims
     /// </summary>
     public class Request
     {
@@ -508,7 +508,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Contained in Entity class to test complext claims
+    /// Contained in Entity class to test complex claims
     /// </summary>
     public class Address
     {
