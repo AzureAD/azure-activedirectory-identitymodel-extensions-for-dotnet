@@ -46,7 +46,8 @@ namespace Microsoft.IdentityModel.Tests
             InnerTypeExpected = innerTypeExpected;
             SubstringExpected = substringExpected;
             TypeExpected = typeExpected;
-            PropertiesExpected = propertiesExpected;
+            if (propertiesExpected != null)
+                PropertiesExpected = propertiesExpected;
         }
 
         public static bool DefaultVerbose { get; set; } = false;
@@ -293,7 +294,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public Type InnerTypeExpected { get; set; }
 
-        public Dictionary<string, object> PropertiesExpected { get; set; }
+        public Dictionary<string, object> PropertiesExpected { get; set; } = new Dictionary<string, object>();
 
         public string SubstringExpected { get; set; }
 

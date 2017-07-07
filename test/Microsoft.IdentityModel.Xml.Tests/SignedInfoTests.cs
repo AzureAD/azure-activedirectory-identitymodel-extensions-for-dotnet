@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SignedInfoConstructorTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SignedInfoConstructor(DSigTheoryData theoryData)
+        public void SignedInfoConstructor(SignedInfoTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignedInfoConstructor", theoryData);
             List<string> errors = new List<string>();
@@ -62,13 +62,13 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(errors);
         }
 
-        public static TheoryData<DSigTheoryData> SignedInfoConstructorTheoryData
+        public static TheoryData<SignedInfoTheoryData> SignedInfoConstructorTheoryData
         {
             get
             {
-                return new TheoryData<DSigTheoryData>
+                return new TheoryData<SignedInfoTheoryData>
                 {
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         First = true,
                         TestId = "Constructor"
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SignedInfoReadFromTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SignedInfoReadFrom(DSigTheoryData theoryData)
+        public void SignedInfoReadFrom(SignedInfoTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
             var context = new CompareContext($"{this}.SignedInfoReadFrom, {theoryData.TestId}");
@@ -88,13 +88,13 @@ namespace Microsoft.IdentityModel.Xml.Tests
             var errors = new List<string>();
             try
             {
-                var sr = new StringReader(theoryData.SignedInfoTestSet.Xml);
+                var sr = new StringReader(theoryData.Xml);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 var signedInfo = new SignedInfo();
                 signedInfo.ReadFrom(reader);
                 theoryData.ExpectedException.ProcessNoException(context.Diffs);
                 if (theoryData.ExpectedException.TypeExpected == null)
-                    IdentityComparer.AreEqual(signedInfo, theoryData.SignedInfoTestSet.SignedInfo, context);
+                    IdentityComparer.AreEqual(signedInfo, theoryData.SignedInfo, context);
             }
             catch (Exception ex)
             {
@@ -104,76 +104,93 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<DSigTheoryData> SignedInfoReadFromTheoryData
+        public static TheoryData<SignedInfoTheoryData> SignedInfoReadFromTheoryData
         {
             get
             {
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                return new TheoryData<DSigTheoryData>
+                return new TheoryData<SignedInfoTheoryData>
                 {
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         First = true,
-                        SignedInfoTestSet = ReferenceXml.SignedInfoValid,
-                        TestId = nameof(ReferenceXml.SignedInfoValid)
+                        SignedInfo = ReferenceXml.SignedInfoValid.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoValid),
+                        Xml = ReferenceXml.SignedInfoValid.Xml
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
-                        SignedInfoTestSet = ReferenceXml.SignInfoStartsWithWhiteSpace,
+                        SignedInfo = ReferenceXml.SignInfoStartsWithWhiteSpace.SignedInfo,
                         TestId = nameof(ReferenceXml.SignInfoStartsWithWhiteSpace),
+                        Xml = ReferenceXml.SignInfoStartsWithWhiteSpace.Xml
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoCanonicalizationMethodMissing,
-                        TestId = nameof(ReferenceXml.SignedInfoCanonicalizationMethodMissing)
+                        SignedInfo = ReferenceXml.SignedInfoCanonicalizationMethodMissing.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoCanonicalizationMethodMissing),
+                        Xml = ReferenceXml.SignedInfoCanonicalizationMethodMissing.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'"),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoReferenceMissing,
-                        TestId = nameof(ReferenceXml.SignedInfoReferenceMissing)
+                        SignedInfo = ReferenceXml.SignedInfoReferenceMissing.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoReferenceMissing),
+                        Xml = ReferenceXml.SignedInfoReferenceMissing.Xml
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Transforms'"),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoTransformsMissing,
-                        TestId = nameof(ReferenceXml.SignedInfoTransformsMissing)
+                        SignedInfo = ReferenceXml.SignedInfoTransformsMissing.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoTransformsMissing),
+                        Xml = ReferenceXml.SignedInfoTransformsMissing.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Transforms', "),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoNoTransforms,
-                        TestId = nameof(ReferenceXml.SignedInfoNoTransforms)
+                        SignedInfo = ReferenceXml.SignedInfoNoTransforms.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoNoTransforms),
+                        Xml = ReferenceXml.SignedInfoNoTransforms.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018: Unable to read xml. A Reference contains an unknown transform "),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod,
-                        TestId = nameof(ReferenceXml.SignedInfoUnknownCanonicalizationtMethod)
+                        SignedInfo = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoUnknownCanonicalizationtMethod),
+                        Xml = ReferenceXml.SignedInfoUnknownCanonicalizationtMethod.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlException), "IDX21018: Unable to read xml. A Reference contains an unknown transform "),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoUnknownTransform,
-                        TestId = nameof(ReferenceXml.SignedInfoUnknownTransform)
+                        SignedInfo = ReferenceXml.SignedInfoUnknownTransform.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoUnknownTransform),
+                        Xml = ReferenceXml.SignedInfoUnknownTransform.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestMethod', "),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestMethod,
-                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestMethod)
+                        SignedInfo = ReferenceXml.SignedInfoMissingDigestMethod.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestMethod),
+                        Xml = ReferenceXml.SignedInfoMissingDigestMethod.Xml,
                     },
-                    new DSigTheoryData
+                    new SignedInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read xml. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestValue', "),
-                        SignedInfoTestSet = ReferenceXml.SignedInfoMissingDigestValue,
-                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestValue)
+                        SignedInfo = ReferenceXml.SignedInfoMissingDigestValue.SignedInfo,
+                        TestId = nameof(ReferenceXml.SignedInfoMissingDigestValue),
+                        Xml = ReferenceXml.SignedInfoMissingDigestValue.Xml,
                     }
                 };
             }
         }
+    }
+
+    public class SignedInfoTheoryData : TheoryDataBase
+    {
+        public SignedInfo SignedInfo { get; set; }
+
+        public string Xml { get; set; }
     }
 }

@@ -37,6 +37,11 @@ namespace Microsoft.IdentityModel.Tests
     /// </summary>
     public static class ValidationDelegates
     {
+        public static bool AudienceValidatorReturnsFalse(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return false;
+        }
+
         public static bool AudienceValidatorReturnsTrue(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return true;
@@ -44,7 +49,22 @@ namespace Microsoft.IdentityModel.Tests
 
         public static bool AudienceValidatorThrows(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
-            throw new SecurityTokenInvalidAudienceException("AudienceValidatorThrows");
+            throw new SecurityTokenInvalidAudienceException($"{typeof(ValidationDelegates)}.AudienceValidatorThrows");
+        }
+
+        public static bool IssuerSecurityKeyValidatorReturnsFalse(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            return false;
+        }
+
+        public static bool IssuerSecurityKeyValidatorReturnsTrue(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            return true;
+        }
+
+        public static bool IssuerSecurityKeyValidatorThrows(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidSigningKeyException("IssuerSecurityKeyValidatorThrows");
         }
 
         public static string IssuerValidatorEcho(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
@@ -52,9 +72,19 @@ namespace Microsoft.IdentityModel.Tests
             return issuer;
         }
 
+        public static string IssuerValidatorReturnsNull(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return null;
+        }
+
         public static string IssuerValidatorThrows(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenInvalidIssuerException("IssuerValidatorThrows");
+        }
+
+        public static bool LifetimeValidatorReturnsFalse(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return false;
         }
 
         public static bool LifetimeValidatorReturnsTrue(DateTime? expires, DateTime? notBefore, SecurityToken token, TokenValidationParameters validationParameters)

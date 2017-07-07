@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Text;
-using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
@@ -35,17 +34,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
-    public class DSigTheoryData : TheoryDataBase
-    {
-        public KeyInfoTestSet KeyInfoTestSet { get; set; }
-
-        public SignatureTestSet SignatureTestSet { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public SignedInfoTestSet SignedInfoTestSet { get; set; }
-    }
-
     /// <summary>
     /// DSigCryptoProviderFactory and DSignatureProvider are used to simulate failures and get deeper in the stack
     /// </summary>

@@ -392,92 +392,38 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: variation.Expires);
         }
 
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(ValidEncodedSegmentsData))]
+        [Theory, MemberData(nameof(JwtSegmentTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        public void JwtSegment(JwtTheoryData theoryData)
         {
             try
             {
-                var jwtToken = new JwtSecurityToken(jwt);
-                ee.ProcessNoException();
-                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+                var jwtToken = new JwtSecurityToken(theoryData.Token);
+                theoryData.ExpectedException.ProcessNoException();
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, theoryData.TestId);
             }
             catch (Exception ex)
             {
-                ee.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
-        public static TheoryData<string, string, ExpectedException> ValidEncodedSegmentsData()
+        public static TheoryData<JwtTheoryData> JwtSegmentTheoryData
         {
-            return JwtTestData.ValidEncodedSegmentsData();
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidEncodedSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidEncodedSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
+            get
             {
-                var jwtToken = new JwtSecurityToken(jwt);
-                ee.ProcessNoException();
-                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+                var theoryData = new TheoryData<JwtTheoryData>();
+
+                JwtTestData.InvalidRegExSegmentsData("IDX10709:", theoryData);
+                JwtTestData.InvalidNumberOfSegmentsData("IDX10709:", theoryData);
+                JwtTestData.InvalidEncodedSegmentsData("", theoryData);
+                JwtTestData.ValidEncodedSegmentsData(theoryData);
+
+                return theoryData;
             }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
 
-        public static TheoryData<string, string, ExpectedException> InvalidEncodedSegmentsData()
-        {
-            return JwtTestData.InvalidEncodedSegmentsData("");
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidNumberOfSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
-            {
-                new JwtSecurityToken(jwt);
-
-                ee.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
-
-        public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData()
-        {
-            return JwtTestData.InvalidNumberOfSegmentsData("IDX10709:");
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidRegExSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidRegExSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
-            {
-                new JwtSecurityToken(jwt);
-
-                ee.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
-
-        public static TheoryData<string, string, ExpectedException> InvalidRegExSegmentsData()
-        {
-            return JwtTestData.InvalidRegExSegmentsData("IDX10709:");
         }
     }
 }

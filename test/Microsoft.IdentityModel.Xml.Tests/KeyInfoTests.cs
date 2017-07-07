@@ -38,19 +38,17 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("KeyInfoReadFromTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void KeyInfoReadFrom(DSigTheoryData theoryData)
+        public void KeyInfoReadFrom(KeyInfoTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.KeyInfoReadFrom", theoryData);
-            var context = new CompareContext($"{this}.QueryStringTest, {theoryData.TestId}");
+            var context = new CompareContext($"{this}.KeyInfoReadFrom, {theoryData.TestId}");
             try
             {
-                var sr = new StringReader(theoryData.KeyInfoTestSet.Xml);
-                var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
                 var keyInfo = new KeyInfo();
-                keyInfo.ReadFrom(reader);
+                keyInfo.ReadFrom(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
                 theoryData.ExpectedException.ProcessNoException();
 
-                IdentityComparer.AreEqual(keyInfo, theoryData.KeyInfoTestSet.KeyInfo, context);
+                IdentityComparer.AreKeyInfosEqual(keyInfo, theoryData.KeyInfo, context);
             }
             catch (Exception ex)
             {
@@ -60,101 +58,124 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<DSigTheoryData> KeyInfoReadFromTheoryData
+        public static TheoryData<KeyInfoTheoryData> KeyInfoReadFromTheoryData
         {
             get
             {
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
-                return new TheoryData<DSigTheoryData>
+                return new TheoryData<KeyInfoTheoryData>
                 {
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         First = true,
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWrongElement,
-                        TestId = nameof(ReferenceXml.KeyInfoWrongElement)
+                        KeyInfo = ReferenceXml.KeyInfoWrongElement.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoWrongElement),
+                        Xml = ReferenceXml.KeyInfoWrongElement.Xml,
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         First = true,
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWrongNameSpace,
-                        TestId = nameof(ReferenceXml.KeyInfoWrongNameSpace)
+                        KeyInfo = ReferenceXml.KeyInfoWrongNameSpace.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoWrongNameSpace),
+                        Xml = ReferenceXml.KeyInfoWrongNameSpace.Xml,
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleCertificate,
-                        TestId = nameof(ReferenceXml.KeyInfoSingleCertificate)
+                        KeyInfo = ReferenceXml.KeyInfoSingleCertificate.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleCertificate),
+                        Xml = ReferenceXml.KeyInfoSingleCertificate.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleIssuerSerial,
-                        TestId = nameof(ReferenceXml.KeyInfoSingleIssuerSerial)
+                        KeyInfo = ReferenceXml.KeyInfoSingleIssuerSerial.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleIssuerSerial),
+                        Xml = ReferenceXml.KeyInfoSingleIssuerSerial.Xml,
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleSKI,
-                        TestId = nameof(ReferenceXml.KeyInfoSingleSKI)
+                        KeyInfo = ReferenceXml.KeyInfoSingleSKI.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleSKI),
+                        Xml = ReferenceXml.KeyInfoSingleSKI.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoSingleSubjectName,
-                        TestId = nameof(ReferenceXml.KeyInfoSingleSubjectName)
+                        KeyInfo = ReferenceXml.KeyInfoSingleSubjectName.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoSingleSubjectName),
+                        Xml = ReferenceXml.KeyInfoSingleSubjectName.Xml
                     },
-                    new DSigTheoryData
-                    {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleCertificates,
-                        TestId = nameof(ReferenceXml.KeyInfoMultipleCertificates)
-                    },
-                    new DSigTheoryData
-                    {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleIssuerSerial,
-                        TestId = nameof(ReferenceXml.KeyInfoMultipleIssuerSerial)
-                    },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSKI,
-                        TestId = nameof(ReferenceXml.KeyInfoMultipleSKI)
+                        KeyInfo = ReferenceXml.KeyInfoMultipleCertificates.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleCertificates),
+                        Xml = ReferenceXml.KeyInfoMultipleCertificates.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
-                        KeyInfoTestSet = ReferenceXml.KeyInfoMultipleSubjectName,
-                        TestId = nameof(ReferenceXml.KeyInfoMultipleSubjectName)
+                        KeyInfo = ReferenceXml.KeyInfoMultipleIssuerSerial.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleIssuerSerial),
+                        Xml = ReferenceXml.KeyInfoMultipleIssuerSerial.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWithWhitespace,
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfo = ReferenceXml.KeyInfoMultipleSKI.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleSKI),
+                        Xml = ReferenceXml.KeyInfoMultipleSKI.Xml
+                    },
+                    new KeyInfoTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21015:"),
+                        KeyInfo = ReferenceXml.KeyInfoMultipleSubjectName.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoMultipleSubjectName),
+                        Xml = ReferenceXml.KeyInfoMultipleSubjectName.Xml
+                    },
+                    new KeyInfoTheoryData
+                    {
+                        KeyInfo = ReferenceXml.KeyInfoWithWhitespace.KeyInfo,
                         TestId = nameof(ReferenceXml.KeyInfoWithWhitespace),
+                        Xml = ReferenceXml.KeyInfoWithWhitespace.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownX509DataElements,
-                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownX509DataElements)
+                        KeyInfo = ReferenceXml.KeyInfoWithUnknownX509DataElements.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownX509DataElements),
+                        Xml = ReferenceXml.KeyInfoWithUnknownX509DataElements.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWithAllElements,
-                        TestId = nameof(ReferenceXml.KeyInfoWithAllElements)
+                        KeyInfo = ReferenceXml.KeyInfoWithAllElements.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoWithAllElements),
+                        Xml = ReferenceXml.KeyInfoWithAllElements.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
-                        KeyInfoTestSet = ReferenceXml.KeyInfoWithUnknownElements,
-                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownElements)
+                        KeyInfo = ReferenceXml.KeyInfoWithUnknownElements.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoWithUnknownElements),
+                        Xml = ReferenceXml.KeyInfoWithUnknownElements.Xml
                     },
-                    new DSigTheoryData
+                    new KeyInfoTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)),
-                        KeyInfoTestSet = ReferenceXml.KeyInfoMalformedCertificate,
-                        TestId = nameof(ReferenceXml.KeyInfoMalformedCertificate)
+                        KeyInfo = ReferenceXml.KeyInfoMalformedCertificate.KeyInfo,
+                        TestId = nameof(ReferenceXml.KeyInfoMalformedCertificate),
+                        Xml = ReferenceXml.KeyInfoMalformedCertificate.Xml,
                     }
                 };
             }
         }
     }
+
+    public class KeyInfoTheoryData : TheoryDataBase
+    {
+        public string Xml { get; set; }
+
+        public KeyInfo KeyInfo { get; set; }
+    }
+
 }

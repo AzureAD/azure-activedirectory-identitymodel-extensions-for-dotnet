@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string AsymmetricJwt
         {
-            get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2));
+            get => Jwt(SecurityTokenDescriptor(AsymmetricSigningCredentials));
         }
 
         public static SecurityTokenDescriptor AsymmetricSignSecurityTokenDescriptor(List<Claim> claims)
@@ -351,7 +351,7 @@ namespace Microsoft.IdentityModel.Tests
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimSets.DefaultClaimsIdentity : new ClaimsIdentity(claims)
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
             };
         }
 
@@ -514,6 +514,16 @@ namespace Microsoft.IdentityModel.Tests
             return SecurityTokenDescriptor(null, SymmetricSigningCredentials, claims);
         }
 
+        public static TokenValidationParameters SymmetricSignTokenValidationParameters
+        {
+            get => new TokenValidationParameters
+            {
+                ValidAudience = Audience,
+                ValidIssuer = Issuer,
+                IssuerSigningKey = SymmetricSigningKey
+            };
+        }
+
         public static SigningCredentials SymmetricSigningCredentials
         {
             get
@@ -526,6 +536,11 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static SecurityKey SymmetricSigningKey
+        {
+            get => KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key;
+        }
+
         public static SymmetricSecurityKey SymmetricSigningKey56
         {
             get
@@ -533,6 +548,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_56.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_56.KeyId };
             }
         }
+
         public static SymmetricSecurityKey SymmetricSigningKey64
         {
             get
@@ -614,6 +630,12 @@ namespace Microsoft.IdentityModel.Tests
                 ValidAudience = Audience,
                 ValidIssuer = Issuer,
             };
+        }
+
+
+        public static string UnsignedJwt
+        {
+            get => (new JwtSecurityTokenHandler()).CreateEncodedJwt(Issuer, Audience, ClaimsIdentity, null, null, null, null);
         }
     }
 }

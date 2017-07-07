@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,29 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
-using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml;
+using Microsoft.IdentityModel.Xml;
 
-namespace System.IdentityModel.Tokens.Jwt.Tests
+namespace Microsoft.IdentityModel.Tests
 {
-    public class JwtTheoryData : TheoryDataBase
+    public static class XmlUtilities
     {
-        public string Actor { get; set; }
+        public static XmlDictionaryReader CreateDictionaryReader(string xml)
+        {
+            return XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml)));
+        }
 
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
-
-        public bool CanRead { get; set; } = true;
-
-        public SecurityToken SecurityToken { get; set; }
-
-        public string Token { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-        public JwtSecurityTokenHandler TokenHandler { get; set; } = new JwtSecurityTokenHandler();
-
-        public TokenType TokenType { get; set; }
-
-        public TokenValidationParameters ValidationParameters { get; set; }
+        public static XmlTokenStreamReader CreateXmlTokenStreamReader(string xml)
+        {
+            return new XmlTokenStreamReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+        }
     }
 }

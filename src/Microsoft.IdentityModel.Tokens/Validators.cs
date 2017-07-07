@@ -62,7 +62,10 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
                 if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken))
+                    {
+                        InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
+                    });
 
                 return;
             }

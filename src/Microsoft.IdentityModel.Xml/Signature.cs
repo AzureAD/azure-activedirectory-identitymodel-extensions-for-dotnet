@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Xml
 
         public byte[] SignatureBytes { get; set; }
 
+        // TODO - should this be an XmlTokenStreamReader?
         public void ReadFrom(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);

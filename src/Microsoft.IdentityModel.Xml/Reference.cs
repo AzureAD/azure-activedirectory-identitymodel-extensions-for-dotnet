@@ -142,8 +142,8 @@ namespace Microsoft.IdentityModel.Xml
             }
             finally
             {
-
-                providerFactory.ReleaseHashAlgorithm(hashAlg);
+                if (hashAlg != null)
+                    providerFactory.ReleaseHashAlgorithm(hashAlg);
             }
         }
 

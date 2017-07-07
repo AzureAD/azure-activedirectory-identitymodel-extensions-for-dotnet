@@ -35,179 +35,193 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public static class JwtTestData
     {
-        public static TheoryData<string, string, ExpectedException> ValidEncodedSegmentsData()
+        public static TheoryData<JwtTheoryData> ValidEncodedSegmentsData(TheoryData<JwtTheoryData> theoryData)
         {
             string[] tokenParts = EncodedJwts.Asymmetric_LocalSts.Split('.');
-            var dataSet = new TheoryData<string, string, ExpectedException>();
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = nameof(EncodedJwts.OverClaims),
+                Token = EncodedJwts.OverClaims
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "'EncodedJwts.Asymmetric_LocalSts.Split, two parts'",
+                Token = string.Format("{0}.{1}.", tokenParts[0], tokenParts[1]),
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = nameof(EncodedJwts.Asymmetric_LocalSts),
+                Token = EncodedJwts.Asymmetric_LocalSts,
+            });
 
-            dataSet.Add(
-                "Test1",
-                EncodedJwts.OverClaims,
-                ExpectedException.NoExceptionExpected
-            );
-
-            dataSet.Add(
-                "Test2",
-                string.Format("{0}.{1}.", tokenParts[0], tokenParts[1]),
-                ExpectedException.NoExceptionExpected
-            );
-
-            dataSet.Add(
-                "Test3",
-                EncodedJwts.Asymmetric_LocalSts,
-                ExpectedException.NoExceptionExpected
-            );
-
-            return dataSet;
+            return theoryData;
         }
 
-        public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData(string errorString)
+        public static TheoryData<JwtTheoryData> InvalidNumberOfSegmentsData(string errorString, TheoryData<JwtTheoryData> theoryData)
         {
-            var dataSet = new TheoryData<string, string, ExpectedException>();
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentNullException(),
+                TestId = "null"
+            });
 
-            dataSet.Add(
-                "Test1",
-                null,
-                ExpectedException.ArgumentNullException()
-            );
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentNullException(),
+                TestId = "emptystring",
+                Token = ""
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentException(errorString),
+                TestId = "a",
+                Token = "a"
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentException(errorString),
+                TestId = "a.b",
+                Token = "a.b"
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentException(errorString),
+                TestId = "a.b.c.d",
+                Token = "a.b.c.d"
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                ExpectedException = ExpectedException.ArgumentException(errorString),
+                TestId = "a.b.c.d.e.f",
+                Token = "a.b.c.d.e.f"
+            });
 
-            dataSet.Add(
-                "Test2",
-                "",
-                ExpectedException.ArgumentNullException()
-            );
-
-            dataSet.Add(
-                "Test3",
-                "a",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test4",
-                "a.b",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test5",
-                "a.b.c.d",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test6",
-                "a.b.c.d.e.f",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            return dataSet;
+            return theoryData;
         }
 
-        public static TheoryData<string, string, ExpectedException> InvalidRegExSegmentsData(string errorString)
+        public static TheoryData<JwtTheoryData> InvalidRegExSegmentsData(string errorString, TheoryData<JwtTheoryData> theoryData)
         {
             var validRegEx = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9";
             var invalidRegEx = "eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1Z CI6Imh0";
-            var dataSet = new TheoryData<string, string, ExpectedException>();
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId =  "'invalidRegEx: first position'",
+                Token = invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: second position'",
+                Token = validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position'",
+                Token = validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fourth position'",
+                Token = validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position'",
+                Token = validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: first position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (dir)'",
+                Token = validRegEx + ".." + invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fourth position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: first position (dir, Cipher text missing)'",
+                Token = invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (dir, Cipher text missing)'",
+                Token = validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (four parts)'",
+                Token = validRegEx + "." + invalidRegEx + ".",
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position (dir, Cipher text missing)'",
+                Token = validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'Encoding == SignedEncodedJwts.Asymmetric_LocalSts'",
+                Token = "SignedEncodedJwts.Asymmetric_LocalSts",
+                ExpectedException = ExpectedException.ArgumentException(errorString)
+            });
 
-            dataSet.Add(
-                "Test1",
-                invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test2",
-                validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test3",
-                validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test4",
-                validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test5",
-                validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test6",
-                invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test7",
-                validRegEx + ".." + invalidRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test8",
-                invalidRegEx + ".." + validRegEx + "." + invalidRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test9",
-                invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + invalidRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test10",
-                invalidRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test11",
-                validRegEx + "." + invalidRegEx + "." + validRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test12",
-                validRegEx + "." + invalidRegEx + ".",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test13",
-                validRegEx + "." + validRegEx + "." + invalidRegEx,
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            dataSet.Add(
-                "Test14",
-                "SignedEncodedJwts.Asymmetric_LocalSts",
-                ExpectedException.ArgumentException(errorString)
-            );
-
-            return dataSet;
+            return theoryData;
         }
 
-        public static TheoryData<string, string, ExpectedException> InvalidEncodedSegmentsData(string errorString)
+        public static TheoryData<JwtTheoryData> InvalidEncodedSegmentsData(string errorString, TheoryData<JwtTheoryData> theoryData)
         {
-            var dataSet = new TheoryData<string, string, ExpectedException>();
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = true,
+                TestId = nameof(EncodedJwts.InvalidPayload),
+                Token = EncodedJwts.InvalidPayload,
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10723:", inner: typeof(FormatException))
+            });
 
-            dataSet.Add(
-                "Test1",
-                EncodedJwts.InvalidPayload,
-                ExpectedException.ArgumentException(substringExpected: "IDX10723:", inner: typeof(FormatException))
-            );
-
-            return dataSet;
+            return theoryData;
         }
     }
 }
