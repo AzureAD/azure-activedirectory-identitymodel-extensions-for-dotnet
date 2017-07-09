@@ -105,8 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 else
                     namespaceValue = SamlConstants.DefaultActionNamespace;
 
-                var action = reader.ReadElementContentAsString();
-                return new SamlAction(action, new Uri(namespaceValue));
+                return new SamlAction(reader.ReadElementContentAsString(), new Uri(namespaceValue));
             }
             catch (Exception ex)
             {

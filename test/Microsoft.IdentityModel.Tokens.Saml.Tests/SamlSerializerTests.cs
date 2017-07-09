@@ -297,17 +297,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNameSpaceNull,
+                        AttributeTestSet = ReferenceXml.SamlAttributeNamespaceNull,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNameSpaceNull)
+                        TestId = nameof(ReferenceXml.SamlAttributeNamespaceNull)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNameSpaceEmptyString,
+                        AttributeTestSet = ReferenceXml.SamlAttributeNamespaceEmptyString,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNameSpaceEmptyString)
+                        TestId = nameof(ReferenceXml.SamlAttributeNamespaceEmptyString)
                     },
                     new SamlTheoryData()
                     {

@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlAttributeStatement GetAttributeStatement(IEnumerable<Claim> claims)
         {
-            string defaultNameSpace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims";
+            string defaultNamespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims";
             Collection<SamlAttribute> attributes = new Collection<SamlAttribute>();
             foreach (var claim in claims)
             {
@@ -80,17 +80,17 @@ namespace Microsoft.IdentityModel.Tests
                     name = type.Substring(lastSlashIndex + 1);
                 }
 
-                type = defaultNameSpace;
+                type = defaultNamespace;
 
                 //if (!type.Contains("/"))
                 //{
-                //    type = defaultNameSpace;
+                //    type = defaultNamespace;
                 //}
                 //else
                 //{
                 //    int lastSlashIndex = type.LastIndexOf('/');
                 //    name = type.Substring(lastSlashIndex + 1);
-                //    type = defaultNameSpace;
+                //    type = defaultNamespace;
                 //}
 
                 string value = claim.Value;

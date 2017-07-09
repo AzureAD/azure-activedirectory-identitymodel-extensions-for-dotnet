@@ -663,7 +663,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlAttributeTestSet SamlAttributeNameSpaceNull
+        public static SamlAttributeTestSet SamlAttributeNamespaceNull
         {
             get
             {
@@ -675,7 +675,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlAttributeTestSet SamlAttributeNameSpaceEmptyString
+        public static SamlAttributeTestSet SamlAttributeNamespaceEmptyString
         {
             get
             {
