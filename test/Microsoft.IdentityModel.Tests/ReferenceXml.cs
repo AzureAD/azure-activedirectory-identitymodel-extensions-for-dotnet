@@ -732,7 +732,7 @@ namespace Microsoft.IdentityModel.Tests
                     Attribute = Default.SamlAttributeMultiValue,
                     Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, new List<string>
                             { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country),
-                              XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, "England")  })
+                              XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country)  })
                 };
             }
         }

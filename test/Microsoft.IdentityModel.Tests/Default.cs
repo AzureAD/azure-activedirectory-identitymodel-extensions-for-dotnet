@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlAttribute SamlAttributeMultiValue
         {
-            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { Default.Country, "England" });
+            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { Default.Country, Default.Country });
         }
 
         public static SamlConditions SamlConditionsSingleCondition
