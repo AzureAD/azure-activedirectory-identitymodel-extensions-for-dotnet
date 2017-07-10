@@ -158,6 +158,16 @@ namespace Microsoft.IdentityModel.Tests
             return string.Format(SamlAttributeTemplate, name, attributeNs, (attributes == null) ? string.Empty : string.Concat(attributes));
         }
 
+        public static string SamlAttributeStatementTemplate
+        {
+            get => "<AttributeStatement xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</AttributeStatement>";
+        }
+
+        public static string SamlAttributeStatementXml(string subject, string attributes)
+        {
+            return string.Format(SamlAttributeStatementTemplate, subject, attributes);
+        }
+
         public static string SamlAudienceTemplate
         {
             get => "<Audience xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</Audience>";
@@ -176,7 +186,36 @@ namespace Microsoft.IdentityModel.Tests
         public static string SamlAudienceRestrictionConditionXml(IEnumerable<string> audiences)
         {
             return string.Format(SamlAudienceRestrictionConditionTemplate, string.Concat(audiences));
-            //return GenerateCompositeXml(SamlAudienceRestrictionConditionTemplate, audiences);
+        }
+
+        public static string SamlSubjectLocalityTemplate
+        {
+            get => "<SubjectLocality IPAddress=\"{0}\" DNSAddress=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
+        }
+
+        public static string SamlSubjectLocalityXml(string ipAddress, string dnsAddress)
+        {
+            return string.Format(SamlSubjectLocalityTemplate, ipAddress, dnsAddress);
+        }
+
+        public static string SamlAuthorityBindingTemplate
+        {
+            get => "<AuthorityBinding AuthorityKind=\"{0}\" Location=\"{1}\" Binding=\"{2}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
+        }
+
+        public static string SamlAuthorityBindingXml(string authorityKind, string location, string binding)
+        {
+            return string.Format(SamlAuthorityBindingTemplate, authorityKind, location, binding);
+        }
+
+        public static string SamlAuthenticationStatementTemplate
+        {
+            get => "<AuthenticationStatement AuthenticationMethod=\"{0}\" AuthenticationInstant=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</AuthenticationStatement>";
+        }
+
+        public static string SamlAuthenticationStatementXml(string method, string instant, string subject, string subjectLocality, string binding)
+        {
+            return string.Format(SamlAuthenticationStatementTemplate, method, instant, subject, subjectLocality, binding);
         }
 
         public static string SamlConditionsTemplate
@@ -187,6 +226,96 @@ namespace Microsoft.IdentityModel.Tests
         public static string SamlConditionsXml(string notBefore, string notOnOrAfter, IEnumerable<string> conditions)
         {
             return string.Format(SamlConditionsTemplate, NotBeforeXml(notBefore), NotOnOrAfterXml(notOnOrAfter), (conditions == null) ? string.Empty : string.Concat(conditions));
+        }
+
+        public static string SamlNameIdentifierTemplate
+        {
+            get => "<NameIdentifier NameQualifier=\"{0}\" Format=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</NameIdentifier>";
+        }
+
+        public static string SamlNameIdentifierXml(string nameQualifier, string format, string name)
+        {
+            return string.Format(SamlNameIdentifierTemplate, nameQualifier, format, name);
+        }
+
+        public static string SamlConfirmationMethodTemplate
+        {
+            get => "<ConfirmationMethod xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</ConfirmationMethod>";
+        }
+
+        public static string SamlConfirmationMethodXml(string confirmationMethod)
+        {
+            return string.Format(SamlConfirmationMethodTemplate, confirmationMethod);
+        }
+
+        public static string SamlAdviceTemplate
+        {
+            get => "<Advice xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</Advice>";
+        }
+
+        public static string SamlAdviceXml(string assertionIDRef, string assertion)
+        {
+            return string.Format(SamlAdviceTemplate, assertionIDRef, assertion);
+        }
+
+        public static string SamlAssertionTemplate
+        {
+            get => "<Assertion MajorVersion=\"{0}\" MinorVersion=\"{1}\" AssertionID=\"{2}\" Issuer=\"{3}\" IssueInstant=\"{4}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{5}{6}{7}{8}</Assertion>";
+        }
+
+        public static string SamlAssertionXml(string majorVersion, string minorVersion, string assertionId, string issuer, string issueInstant, string conditions, string advices, string statements, string signatures)
+        {
+            return string.Format(SamlAssertionTemplate, majorVersion, minorVersion, assertionId, issuer, issueInstant, conditions, advices, statements, signatures);
+        }
+
+        public static string SamlAssertionIDRefTemplate
+        {
+            get => "<AssertionIDReference xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</AssertionIDReference>";
+        }
+
+        public static string SamlAssertionIDRefXml(string assertionID)
+        {
+            return string.Format(SamlAssertionIDRefTemplate, assertionID);
+        }
+        public static string SamlAuthorizationDecisionStatementTemplate
+        {
+            get => "<AuthorizationDecisionStatement Resource=\"{0}\" Decision=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</AuthorizationDecisionStatement>";
+        }
+
+        public static string SamlAuthorizationDecisionStatementXml(string resource, string decision, string subject, string action, string evidence)
+        {
+            return string.Format(SamlAuthorizationDecisionStatementTemplate, resource, decision, subject, action, evidence);
+        }
+
+        public static string SamlEvidenceTemplate
+        {
+            get => "<Evidence xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</Evidence>";
+        }
+
+        public static string SamlEvidenceXml(string assertionIdRef, string assertion)
+        {
+            return string.Format(SamlEvidenceTemplate, assertionIdRef, assertion);
+        }
+
+        public static string SamlSubjectConfirmationTemplate
+        {
+            get => "<SubjectConfirmation xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}<SubjectConfirmationData>\"{1}\"</SubjectConfirmationData></SubjectConfirmation>";
+        }
+
+        public static string SamlSubjectConfirmationXml(List<string> confirmations, string confirmationData)
+        {
+
+            return string.Format(SamlSubjectConfirmationTemplate, (confirmations == null) ? string.Empty : string.Concat(confirmations), confirmationData);
+        }
+
+        public static string SamlSubjectTemplate
+        {
+            get => "<Subject xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</Subject>";
+        }
+
+        public static string SamlSubjectXml(string nameIdentifier, string confirmation)
+        {
+            return string.Format(SamlSubjectTemplate, nameIdentifier, confirmation);
         }
 
         public static string Generate(KeyInfo keyInfo)

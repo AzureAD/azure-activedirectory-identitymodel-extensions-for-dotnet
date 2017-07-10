@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
@@ -468,30 +469,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(authInstance))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationInstant);
 
-                var authenticationInstant = DateTime.ParseExact(
+                authenticationStatement.AuthenticationInstant = DateTime.ParseExact(
                     authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
                 var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
                 if (string.IsNullOrEmpty(authenticationMethod))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationMethod);
 
+                authenticationStatement.AuthenticationMethod = authenticationMethod;
+
+                reader.ReadStartElement();
                 authenticationStatement.Subject = ReadSubject(reader);
                 if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
                 {
-                    var dnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
-                    var ipAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
+                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
+                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
 
-                    if (reader.IsEmptyElement)
-                    {
-                        reader.MoveToContent();
-                        reader.Read();
-                    }
-                    else
-                    {
-                        reader.MoveToContent();
-                        reader.Read();
+                    bool isEmptyElement = reader.IsEmptyElement;
+                    reader.MoveToContent();
+                    reader.Read();
+
+                    if (!isEmptyElement)
                         reader.ReadEndElement();
-                    }
                 }
 
                 while (reader.IsStartElement())
@@ -560,17 +559,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(location))
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11513));
 
-                if (reader.IsEmptyElement)
-                {
-                    reader.MoveToContent();
-                    reader.Read();
-                }
-                else
-                {
-                    reader.MoveToContent();
-                    reader.Read();
+                bool isEmptyElement = reader.IsEmptyElement;
+                reader.MoveToContent();
+                reader.Read();
+
+                if (!isEmptyElement)
                     reader.ReadEndElement();
-                }
 
                 return new SamlAuthorityBinding(authorityKind, binding, location);
             }
@@ -605,6 +599,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(resource))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Resource);
 
+                statement.Resource = resource;
+
                 var decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
                 if (string.IsNullOrEmpty(decisionString))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
@@ -616,6 +612,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 else
                     statement.AccessDecision = SamlAccessDecision.Indeterminate;
 
+                reader.ReadStartElement();
                 statement.Subject = ReadSubject(reader);
                 while (reader.IsStartElement())
                 {

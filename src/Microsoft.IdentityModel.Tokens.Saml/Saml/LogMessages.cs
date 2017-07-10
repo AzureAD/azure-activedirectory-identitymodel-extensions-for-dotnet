@@ -54,11 +54,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11111 = "IDX11111: When reading '{0}', '{1}' was not a Absolute Uri, was: '{2}'.";
         internal const string IDX11112 = "IDX11112: Exception thrown while reading '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
         internal const string IDX11114 = "IDX11114: Unable to read SamlSecurityToken. Expecting XmlReader sto be at element: '{0}', found 'Empty Element'.";
-        internal const string IDX11115 = "IDX11115: Unable to read for SamlSecurityToken. Element: '{0}' was missing Attribute: '{1}'.";
-        internal const string IDX11116 = "IDX11116: Unable to read for SamlSecurityToken. MajorVersion must be '1' was: '{0}'.";
-        internal const string IDX11117 = "IDX11117: Unable to read for SamlSecurityToken. MinorVersion must be '1' was: '{0}'.";
+        internal const string IDX11115 = "IDX11115: Unable to read SamlSecurityToken. Element: '{0}' was missing Attribute: '{1}'.";
+        internal const string IDX11116 = "IDX11116: Unable to read SamlSecurityToken. MajorVersion must be '1' was: '{0}'.";
+        internal const string IDX11117 = "IDX11117: Unable to read SamlSecurityToken. MinorVersion must be '1' was: '{0}'.";
         internal const string IDX11118 = "IDX11118: Unable to read condition : '{0}'. SamlSecurityToken only support AudienceRestrictionCondition and DoNotCacheCondition.";
-        internal const string IDX11119 = "IDX11119: Unable to read for SamlSecurityToken. Element: '{0}' was missing element: '{1}' when reading element: '{2}'.";
+        internal const string IDX11119 = "IDX11119: Unable to read SamlSecurityToken. Element: '{0}' was missing element: '{1}' when reading element: '{2}'.";
         internal const string IDX11120 = "IDX11120: Unable to read SamlSecurityToken. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX11121 = "IDX11121: Invalid SAML AssertionID: '{0}'.";
         internal const string IDX11122 = "IDX11122: Exception thrown while reading '{0}' for SamlSecurityToken. Inner exception: '{1}'.";

@@ -571,7 +571,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlActionTestSet
                 {
-                    Action = Default.SamlAction,
                     Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), null)
                 };
             }
@@ -583,7 +582,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlActionTestSet
                 {
-                    Action = Default.SamlAction,
                     Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), String.Empty)
                 };
             }
@@ -619,7 +617,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlActionTestSet
                 {
-                    Action = Default.SamlAction,
                     Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, "namespace", Default.SamlAction.Value)
                 };
             }
@@ -638,6 +635,228 @@ namespace Microsoft.IdentityModel.Tests
         }
         #endregion
 
+        #region SamlAdvice
+        public static SamlAdviceTestSet AdviceNoAssertionIDRefAndAssertion
+        {
+            get
+            {
+                return new SamlAdviceTestSet
+                {
+                    Advice = new SamlAdvice(),
+                    Xml = XmlGenerator.SamlAdviceXml(null, null)
+                };
+            }
+        }
+
+        public static SamlAdviceTestSet AdviceWithAssertionIDRef
+        {
+            get
+            {
+                return new SamlAdviceTestSet
+                {
+                    Advice = new SamlAdvice(new string[] { Default.SamlAssertionID }),
+                    Xml = XmlGenerator.SamlAdviceXml(XmlGenerator.SamlAssertionIDRefXml(Default.SamlAssertionID), null)
+                };
+            }
+        }
+
+        // TODO : Add this test case after complete SamlAssertion test cases
+        public static SamlAdviceTestSet SamlAdviceWithAssertions
+        {
+            get
+            {
+                return new SamlAdviceTestSet
+                {
+                    Advice = new SamlAdvice(new List<SamlAssertion> { SamlAssertionNoSignature.Assertion }),
+                    Xml = XmlGenerator.SamlAdviceXml(null, SamlAssertionNoSignature.Xml)
+                };
+            }
+        }
+
+        public static SamlAdviceTestSet SamlAdviceWithWrongElement
+        {
+            get
+            {
+                return new SamlAdviceTestSet
+                {
+                    Xml = XmlGenerator.SamlAdviceXml(SamlActionValid.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAdviceTestSet SamlAdviceWithAssertionIDRefAndAssertions
+        {
+            get
+            {
+                return new SamlAdviceTestSet
+                {
+                    Advice = new SamlAdvice(new string[] { Default.SamlAssertionID }, new List<SamlAssertion> { SamlAssertionNoSignature.Assertion }),
+                    Xml = XmlGenerator.SamlAdviceXml(XmlGenerator.SamlAssertionIDRefXml(Default.SamlAssertionID), SamlAssertionNoSignature.Xml)
+                };
+            }
+        }
+        #endregion
+
+        #region SamlAssertion
+        public static SamlAssertionTestSet SamlAssertionMissMajorVersion
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(null, Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionWrongMajorVersion
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(2), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMissMinorVersion
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), null, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionWrongMinorVersion
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(2), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMissAssertionID
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), null, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionWrongAssertionID
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), "12345", Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMissIssuer
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, null, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMissIssuerInstant
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, null, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionNoCondition
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, null, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionNoAdvice
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, null, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, null, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMissStatement
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, null, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionWrongElementInStatementPlace
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlActionValid.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionNoSignature
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMultiStatements
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAttributeStatementSingleAttribute.Xml), null)
+                };
+            }
+        }
+        #endregion
+
         #region SamlAttribute
         public static SamlAttributeTestSet SamlAttributeNameNull
         {
@@ -645,7 +864,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = Default.SamlAttributeSingleValue,
                     Xml = XmlGenerator.SamlAttributeXml(null, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
                 };
             }
@@ -657,7 +875,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = Default.SamlAttributeSingleValue,
                     Xml = XmlGenerator.SamlAttributeXml(string.Empty, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
                 };
             }
@@ -669,7 +886,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = Default.SamlAttributeSingleValue,
                     Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, null, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
                 };
             }
@@ -681,7 +897,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = Default.SamlAttributeSingleValue,
                     Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, string.Empty, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, Default.Country) })
                 };
             }
@@ -693,19 +908,18 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = Default.SamlAttributeSingleValue,
-                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, null )
+                    Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, null)
                 };
             }
         }
 
-        public static SamlAttributeTestSet SamlAttributeValueEmpty
+        public static SamlAttributeTestSet SamlAttributeValueEmptyString
         {
             get
             {
                 return new SamlAttributeTestSet
                 {
-                    Attribute = new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { }),
+                    Attribute = new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { string.Empty }),
                     Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, new List<string> { XmlGenerator.SamlAttributeValueXml(SamlConstants.Namespace, string.Empty) })
                 };
             }
@@ -738,6 +952,213 @@ namespace Microsoft.IdentityModel.Tests
         }
         #endregion
 
+        #region SamlAttributeStatement
+        public static SamlAttributeStatementTestSet SamlAttributeStatementMissSubject
+        {
+            get
+            {
+                return new SamlAttributeStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAttributeStatementXml(null, SamlAttributeSingleValue.Xml)
+                };
+            }
+        }
+
+        public static SamlAttributeStatementTestSet SamlAttributeStatementMissAttribute
+        {
+            get
+            {
+                return new SamlAttributeStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAttributeStatementXml(SamlSubjectWithNameIdentifierAndConfirmation.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAttributeStatementTestSet SamlAttributeStatementSingleAttribute
+        {
+            get
+            {
+                return new SamlAttributeStatementTestSet
+                {
+                    AttributeStatement = new SamlAttributeStatement(SamlSubjectWithNameIdentifierAndConfirmation.Subject, SamlAttributeSingleValue.Attribute),
+                    Xml = XmlGenerator.SamlAttributeStatementXml(SamlSubjectWithNameIdentifierAndConfirmation.Xml, SamlAttributeSingleValue.Xml)
+                };
+            }
+        }
+
+        public static SamlAttributeStatementTestSet SamlAttributeStatementMultiAttributes
+        {
+            get
+            {
+                return new SamlAttributeStatementTestSet
+                {
+                    AttributeStatement = new SamlAttributeStatement(SamlSubjectWithNameIdentifierAndConfirmation.Subject,
+                                new List<SamlAttribute> { SamlAttributeSingleValue.Attribute, SamlAttributeSingleValue.Attribute }),
+                    Xml = XmlGenerator.SamlAttributeStatementXml(SamlSubjectWithNameIdentifierAndConfirmation.Xml, string.Concat(SamlAttributeSingleValue.Xml, SamlAttributeSingleValue.Xml))
+                };
+            }
+        }
+        #endregion
+
+        #region SamlAuthenticationStatement
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissSubject
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, null, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                        XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissMethod
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(null, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                        XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissInstant
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, null, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                        XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementNoSubjectLocality
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), null, null,
+                                        new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, null,
+                                        XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementNoIPAddress
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, string.Empty,
+                                        new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(null, Default.DNSAddress),
+                                XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementNoDNSAddress
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), string.Empty, Default.IPAddress,
+                                        new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, null),
+                                XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementNoAuthorityBinding
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress, null),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress), null)
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissAuthorityKind
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                XmlGenerator.SamlAuthorityBindingXml(null, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissLocation
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, null, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMissBinding
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, null))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementValid
+        {
+            get
+            {
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
+                                        new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
+                };
+            }
+        }
+
+        public static SamlAuthenticationStatementTestSet SamlAuthenticationStatementMultiBinding
+        {
+            get
+            {
+                string authorityBinding = XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding);
+                SamlAuthorityBinding binding = new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding);
+                return new SamlAuthenticationStatementTestSet
+                {
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
+                                        new List<SamlAuthorityBinding> { binding, binding }),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                                string.Concat(authorityBinding, authorityBinding))
+                };
+            }
+        }
+        #endregion
+
         #region SamlAudienceRestrictionCondition
         public static SamlAudienceRestrictionConditionTestSet SamlAudienceRestrictionConditionNoAudience
         {
@@ -745,7 +1166,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAudienceRestrictionConditionTestSet
                 {
-                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
                     Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { })
                 };
             }
@@ -757,7 +1177,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAudienceRestrictionConditionTestSet
                 {
-                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
                     Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { XmlGenerator.SamlAudienceXml(string.Empty) })
                 };
             }
@@ -769,7 +1188,6 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAudienceRestrictionConditionTestSet
                 {
-                    AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionSingleAudience,
                     Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(new string[] { XmlGenerator.SamlActionXml(null, null, null) })
                 };
             }
@@ -801,6 +1219,88 @@ namespace Microsoft.IdentityModel.Tests
                 {
                     AudienceRestrictionCondition = Default.SamlAudienceRestrictionConditionMultiAudience,
                     Xml = XmlGenerator.SamlAudienceRestrictionConditionXml(audiences)
+                };
+            }
+        }
+        #endregion
+
+        #region SamlAuthorizationDecisionStatement
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionMissResource
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(null, Default.SamlAccessDecision.ToString(), SamlSubjectWithNameIdentifierAndConfirmation.Xml, SamlActionValid.Xml, SamlEvidenceWithAssertionIDRef.Xml)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionMissAccessDecision
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, null, SamlSubjectWithNameIdentifierAndConfirmation.Xml, SamlActionValid.Xml, SamlEvidenceWithAssertionIDRef.Xml)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionMissSubject
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, Default.SamlAccessDecision.ToString(), null, SamlActionValid.Xml, SamlEvidenceWithAssertionIDRef.Xml)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionMissAction
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, Default.SamlAccessDecision.ToString(), SamlSubjectWithNameIdentifierAndConfirmation.Xml, null, SamlEvidenceWithAssertionIDRef.Xml)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionNoEvidence
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    AuthorizationDecision = new SamlAuthorizationDecisionStatement(SamlSubjectWithNameIdentifierAndConfirmation.Subject, Default.SamlResource, Default.SamlAccessDecision, new List<SamlAction> { SamlActionValid.Action }),
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, Default.SamlAccessDecision.ToString(), SamlSubjectWithNameIdentifierAndConfirmation.Xml, SamlActionValid.Xml, null)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionSingleAction
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    AuthorizationDecision = new SamlAuthorizationDecisionStatement(SamlSubjectWithNameIdentifierAndConfirmation.Subject, Default.SamlResource, Default.SamlAccessDecision, new List<SamlAction> { SamlActionValid.Action }, SamlEvidenceWithAssertionIDRef.Evidence),
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, Default.SamlAccessDecision.ToString(), SamlSubjectWithNameIdentifierAndConfirmation.Xml, SamlActionValid.Xml, SamlEvidenceWithAssertionIDRef.Xml)
+                };
+            }
+        }
+
+        public static SamlAuthorizationDecisionStatementTestSet SamlAuthorizationDecisionMultiActions
+        {
+            get
+            {
+                return new SamlAuthorizationDecisionStatementTestSet
+                {
+                    AuthorizationDecision = new SamlAuthorizationDecisionStatement(SamlSubjectWithNameIdentifierAndConfirmation.Subject, Default.SamlResource, Default.SamlAccessDecision, new List<SamlAction> { SamlActionValid.Action, SamlActionValid.Action }, SamlEvidenceWithAssertionIDRef.Evidence),
+                    Xml = XmlGenerator.SamlAuthorizationDecisionStatementXml(Default.SamlResource, Default.SamlAccessDecision.ToString(), SamlSubjectWithNameIdentifierAndConfirmation.Xml, string.Concat(SamlActionValid.Xml, SamlActionValid.Xml), SamlEvidenceWithAssertionIDRef.Xml)
                 };
             }
         }
@@ -866,6 +1366,234 @@ namespace Microsoft.IdentityModel.Tests
                           Default.SamlAudienceRestrictionConditionMultiAudience }),
                     Xml = XmlGenerator.SamlConditionsXml(Default.NotBeforeString, Default.NotOnOrAfterString,
                             new List<string> { SamlAudienceRestrictionConditionSingleAudience.Xml, SamlAudienceRestrictionConditionMultiAudience.Xml })
+                };
+            }
+        }
+        #endregion
+
+        #region SamlEvdience
+        public static SamlEvidenceTestSet SamlEvidenceMissAssertionIDRefAndAssertion
+        {
+            get
+            {
+                return new SamlEvidenceTestSet
+                {
+                    Xml = XmlGenerator.SamlEvidenceXml(null, null)
+                };
+            }
+        }
+
+        public static SamlEvidenceTestSet SamlEvidenceWithAssertionIDRef
+        {
+            get
+            {
+                return new SamlEvidenceTestSet
+                {
+                    Evidence = new SamlEvidence(new string[] { Default.SamlAssertionID }),
+                    Xml = XmlGenerator.SamlEvidenceXml(XmlGenerator.SamlAssertionIDRefXml(Default.SamlAssertionID), null)
+                };
+            }
+        }
+
+        // TODO : Add this test case after complete SamlAssertion test cases
+        public static SamlEvidenceTestSet SamlEvidenceWithAssertions
+        {
+            get
+            {
+                return new SamlEvidenceTestSet
+                {
+                    Evidence = new SamlEvidence(new List<SamlAssertion> { SamlAssertionNoSignature.Assertion }),
+                    Xml = XmlGenerator.SamlEvidenceXml(null, SamlAssertionNoSignature.Xml)
+                };
+            }
+        }
+
+        public static SamlEvidenceTestSet SamlEvidenceWithWrongElement
+        {
+            get
+            {
+                return new SamlEvidenceTestSet
+                {
+                    Xml = XmlGenerator.SamlEvidenceXml(SamlActionValid.Xml, null)
+                };
+            }
+        }
+
+        public static SamlEvidenceTestSet SamlEvidenceWithAssertionIDRefAndAssertions
+        {
+            get
+            {
+                return new SamlEvidenceTestSet
+                {
+                    Evidence = new SamlEvidence(new string[] { Default.SamlAssertionID }, new List<SamlAssertion> { SamlAssertionNoSignature.Assertion }),
+                    Xml = XmlGenerator.SamlEvidenceXml(XmlGenerator.SamlAssertionIDRefXml(Default.SamlAssertionID), SamlAssertionNoSignature.Xml)
+                };
+            }
+        }
+        #endregion
+
+        #region SamlSubject
+        public static SamlSubjectTestSet SamlSubjectNameIdentifierNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(null, null, null, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(null, XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) },
+                                        Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectNameQualifierNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, null, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(null, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectNameQualifierEmptyString
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, string.Empty, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(string.Empty, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectFormatNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(null, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, null, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectFormatEmptystring
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(string.Empty, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, string.Empty, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectNameNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, null),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectNameEmptyString
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, string.Empty),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectConfirmationDataNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, null),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, null))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectConfirmationDataEmptyString
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, string.Empty),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, string.Empty))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectConfirmationMethodNull
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(null, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectConfirmationMethodEmptyString
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject), 
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(string.Empty) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectWithNameIdentifierAndConfirmation
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject), 
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
+        public static SamlSubjectTestSet SamlSubjectWithMultiConfirmationMethods
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod, Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod), XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
                 };
             }
         }

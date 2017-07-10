@@ -35,26 +35,68 @@ namespace Microsoft.IdentityModel.Tests
 #region Saml
     public class SamlActionTestSet
     {
-        public string Xml { get; set; }
         public SamlAction Action { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlAdviceTestSet
+    {
+        public SamlAdvice Advice { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlAssertionTestSet
+    {
+        public SamlAssertion Assertion { get; set; }
+        public string Xml { get; set; }
     }
 
     public class SamlAudienceRestrictionConditionTestSet
     {
-        public string Xml { get; set; }
         public SamlAudienceRestrictionCondition AudienceRestrictionCondition { get; set; }
+        public string Xml { get; set; }
     }
 
     public class SamlAttributeTestSet
     {
-        public string Xml { get; set; }
         public SamlAttribute Attribute { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlAttributeStatementTestSet
+    {
+        public SamlAttributeStatement AttributeStatement { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlAuthenticationStatementTestSet
+    {
+        public SamlAuthenticationStatement AuthenticationStatement { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlAuthorizationDecisionStatementTestSet
+    {
+        public SamlAuthorizationDecisionStatement AuthorizationDecision { get; set; }
+        public string Xml { get; set; }
     }
 
     public class SamlConditionsTestSet
     {
-        public string Xml { get; set; }
         public SamlConditions Conditions { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlEvidenceTestSet
+    {
+        public SamlEvidence Evidence { get; set; }
+        public string Xml { get; set; }
+    }
+
+    public class SamlSubjectTestSet
+    {
+        public SamlSubject Subject { get; set; }
+        public string Xml { get; set; }
     }
 #endregion
 
