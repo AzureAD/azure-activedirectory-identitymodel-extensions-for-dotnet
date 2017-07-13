@@ -7,7 +7,8 @@
     <Description>Includes types that provide support for WsFederation protocol.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Protocols.WsFederation</PackageId>
-    <TargetFrameworks>net45;net451;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,7 +7,8 @@
     <Description>Includes types that provide support for Reading / Writing XML Enveloped Signatures.</Description>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Xml</PackageId>
-    <TargetFrameworks>net45;net451;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
