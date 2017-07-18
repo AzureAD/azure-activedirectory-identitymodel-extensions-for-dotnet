@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return new SamlAssertion(Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
+                return new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
                     {
                         Signature = Default.Signature
                     };
@@ -81,17 +81,6 @@ namespace Microsoft.IdentityModel.Tests
                 }
 
                 type = defaultNamespace;
-
-                //if (!type.Contains("/"))
-                //{
-                //    type = defaultNamespace;
-                //}
-                //else
-                //{
-                //    int lastSlashIndex = type.LastIndexOf('/');
-                //    name = type.Substring(lastSlashIndex + 1);
-                //    type = defaultNamespace;
-                //}
 
                 string value = claim.Value;
                 SamlAttribute attribute = new SamlAttribute(type, name, claim.Value);

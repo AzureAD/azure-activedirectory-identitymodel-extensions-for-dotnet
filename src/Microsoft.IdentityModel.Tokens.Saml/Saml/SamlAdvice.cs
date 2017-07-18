@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
@@ -72,11 +71,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="assertions"><see cref="IEnumerable{SamlAssertion}"/>.</param>
         public SamlAdvice(IEnumerable<string> references, IEnumerable<SamlAssertion> assertions)
         {
-            if (references != null)
-                AssertionIdReferences = new List<string>(references);
-
-            if (assertions != null)
-                Assertions = new List<SamlAssertion>(assertions);
+            AssertionIdReferences = (references != null) ? new List<string>(references) : new List<string>();
+            Assertions = (assertions != null) ? new List<SamlAssertion>(assertions) : new List<SamlAssertion>();
         }
 
         /// <summary>
@@ -86,7 +82,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             get;
         }
-
 
         /// <summary>
         /// Gets a collection of <see cref="ICollection{SamlAssertion}"/> representating the assertions in the <see cref="SamlAdvice"/>.

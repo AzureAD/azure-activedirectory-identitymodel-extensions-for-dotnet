@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml

@@ -131,9 +131,24 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static string AuthenticationInstant
+        {
+            get => "2017-03-18T18:33:37.080Z";
+        }
+
+        public static string AuthenticationMethod
+        {
+            get => "urn:oasis:names:tc:SAML:1.0:am:password";
+        }
+
         public static string AuthenticationType
         {
             get => "Default.Federation";
+        }
+
+        public static string AuthorityKind
+        {
+            get => "samlp:AttributeQuery";
         }
 
         public static string AuthorizedParty
@@ -144,6 +159,11 @@ namespace Microsoft.IdentityModel.Tests
         public static string Azp
         {
             get => "http://Default.Azp.com";
+        }
+
+        public static string Binding
+        {
+            get => "http://www.w3.org/";
         }
 
         public static string CertificateData
@@ -186,6 +206,11 @@ namespace Microsoft.IdentityModel.Tests
             get => "USA";
         }
 
+        public static string DNSAddress
+        {
+            get => "corp.microsoft.com";
+        }
+
         public static KeyInfo KeyInfo
         {
             get => new KeyInfo
@@ -195,9 +220,14 @@ namespace Microsoft.IdentityModel.Tests
             };
         }
 
-        public static DateTime IssueInstant
+        public static string IPAddress
         {
-            get => DateTime.Parse("2017 - 03 - 17T18: 33:37.095Z");
+            get => "127.0.0.1";
+        }
+
+        public static string IssueInstant
+        {
+            get => "2017-03-17T18:33:37.095Z";
         }
 
         public static string Issuer
@@ -215,9 +245,24 @@ namespace Microsoft.IdentityModel.Tests
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
 
+        public static string Location
+        {
+            get => "http://www.w3.org/";
+        }
+
         public static string NameClaimType
         {
             get => "Default.NameClaimType";
+        }
+
+        public static string NameQualifier
+        {
+            get => "NameIdentifier";
+        }
+
+        public static string NameIdentifierFormat
+        {
+            get => "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
         }
 
         public static string Nonce
@@ -280,15 +325,26 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2";
         }
+
         public static string RoleClaimType
         {
             get => "Default.RoleClaimType";
+        }
+
+        public static SamlAccessDecision SamlAccessDecision
+        {
+            get => SamlAccessDecision.Permit;
         }
 
         public static SamlAction SamlAction
         {
             get => new SamlAction("Action", new Uri(SamlConstants.DefaultActionNamespace));
         }
+
+        //public static SamlAssertion SamlAssertion
+        //{
+        //    get => new SamlAssertion(SamlAssertionID, Issuer, IssueInstant, null, null, new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(null, null, Subject), SamlAttributeSingleValue)});
+        //}
 
         public static string SamlAssertionID
         {
@@ -325,9 +381,19 @@ namespace Microsoft.IdentityModel.Tests
             get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionMultiAudience });
         }
 
+        public static string SamlConfirmationData
+        {
+            get => "Default.ConfirmationData";
+        }
+
         public static string SamlConfirmationMethod
         {
             get => "urn:oasis:names:tc:SAML:1.0:cm:bearer";
+        }
+
+        public static string SamlResource
+        {
+            get => "http://www.w3.org/";
         }
 
         public static SecurityTokenDescriptor SecurityTokenDescriptor()
@@ -393,7 +459,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string Subject
         {
-            get => "Default.Subject";
+            get => "urn:oasis:nams:tc:SAML:1.1:nameid-format:X509SubjectName";
         }
 
         public static EncryptingCredentials SymmetricEncryptingCredentials

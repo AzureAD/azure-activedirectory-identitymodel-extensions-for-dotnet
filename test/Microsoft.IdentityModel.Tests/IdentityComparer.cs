@@ -400,10 +400,18 @@ namespace Microsoft.IdentityModel.Tests
                 return AreSamlAdvicesEqual(t1 as SamlAdvice, t2 as SamlAdvice, context);
             else if (t1 is SamlAttribute)
                 return AreSamlAttributesEqual(t1 as SamlAttribute, t2 as SamlAttribute, context);
+            else if (t1 is SamlAttributeStatement)
+                return AreSamlAttributeStatementsEqual(t1 as SamlAttributeStatement, t2 as SamlAttributeStatement, context);
             else if (t1 is SamlAudienceRestrictionCondition)
                 return AreSamlAudienceRestrictionConditionsEqual(t1 as SamlAudienceRestrictionCondition, t2 as SamlAudienceRestrictionCondition, context);
+            else if (t1 is SamlAuthenticationStatement)
+                return AreSamlAuthenticationStatementsEqual(t1 as SamlAuthenticationStatement, t2 as SamlAuthenticationStatement, context);
+            else if (t1 is SamlAuthorizationDecisionStatement)
+                return AreSamlAuthorizationDecisionStatementsEqual(t1 as SamlAuthorizationDecisionStatement, t2 as SamlAuthorizationDecisionStatement, context);
             else if (t1 is SamlConditions)
                 return AreSamlConditionsEqual(t1 as SamlConditions, t2 as SamlConditions, context);
+            else if (t1 is SamlEvidence)
+                return AreSamlEvidencesEqual(t1 as SamlEvidence, t2 as SamlEvidence, context);
             else if (t1 is SamlStatement)
                 return AreSamlStatementEqual(t1 as SamlStatement, t2 as SamlStatement, context);
             else
@@ -450,6 +458,15 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
+        public static bool AreSamlAttributeStatementsEqual(SamlAttributeStatement statement1, SamlAttributeStatement statement2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(statement1, statement2, context))
+                CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreSamlAudienceRestrictionConditionsEqual(SamlAudienceRestrictionCondition condition1, SamlAudienceRestrictionCondition condition2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -459,11 +476,38 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
+        public static bool AreSamlAuthenticationStatementsEqual(SamlAuthenticationStatement statement1, SamlAuthenticationStatement statement2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(statement1, statement2, context))
+                CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlAuthorizationDecisionStatementsEqual(SamlAuthorizationDecisionStatement statement1, SamlAuthorizationDecisionStatement statement2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(statement1, statement2, context))
+                CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreSamlConditionsEqual(SamlConditions conditions1, SamlConditions conditions2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(conditions1, conditions2, context))
                 CompareAllPublicProperties(conditions1, conditions2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlEvidencesEqual(SamlEvidence evidence1, SamlEvidence evidence2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(evidence1, evidence2, context))
+                CompareAllPublicProperties(evidence1, evidence2, localContext);
 
             return context.Merge(localContext);
         }

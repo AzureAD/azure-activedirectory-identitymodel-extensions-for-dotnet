@@ -36,17 +36,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public string Actor { get; set; }
 
+        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
+
+        public SamlAdviceTestSet AdviceTestSet { get; set; }
+
+        public SamlAssertionTestSet AssertionTestSet { get; set; }
+
         public SamlAttributeTestSet AttributeTestSet { get; set; }
+
+        public SamlAttributeStatementTestSet AttributeStatementTestSet { get; set; }
 
         public SamlAudienceRestrictionConditionTestSet AudienceRestrictionConditionTestSet { get; set; }
 
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
+        public SamlAuthenticationStatementTestSet AuthenticationStatementTestSet { get; set; }
 
         public IEnumerable<string> Audiences { get; set; }
+
+        public SamlAuthorizationDecisionStatementTestSet AuthorizationDecisionTestSet { get; set; }
 
         public bool CanRead { get; set; }
 
         public SamlConditionsTestSet ConditionsTestSet { get; set; }
+
+        public SamlEvidenceTestSet EvidenceTestSet { get; set; }
 
         public SecurityTokenHandler Handler { get; set; }
 
@@ -55,6 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public SamlSerializer SamlSerializer { get; set; }
 
         public SamlSecurityTokenTestSet SamlSecurityTokenTestSet { get; set; }
+
+        public SamlSubjectTestSet SubjectTestSet { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
 
