@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Xml;
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
-    /// Contains WsFederation metadata that can be populated from a xml string.
+    /// Contains WsFederation metadata that can be populated from a XML string.
     /// </summary>
     public class WsFederationConfiguration
     {
@@ -49,12 +49,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Gets or sets the token issuer.
         /// </summary>
-        public string Issuer { get; set; }
+        public string Issuer
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets the <see cref="IList{SecurityKey}"/> that the IdentityProvider indicates are to be used signing keys.
         /// </summary>
-        public IList<SecurityKey> SigningKeys
+        public ICollection<SecurityKey> SigningKeys
         {
             get;
         }
@@ -62,12 +66,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// The &lt;Signature> element that was found when reading metadata.
         /// </summary>
-        public Signature Signature { get; set; }
+        public Signature Signature
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Get the <see cref="IList{KeyInfo}"/> that the IdentityProvider indicates are to be used signing keys.
         /// </summary>
-        public IList<KeyInfo> KeyInfos
+        public ICollection<KeyInfo> KeyInfos
         {
             get;
         }
@@ -75,6 +83,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Gets or sets token endpoint.
         /// </summary>
-        public string TokenEndpoint { get; set; }
+        public string TokenEndpoint
+        {
+            get;
+            set;
+        }
     }
 }
