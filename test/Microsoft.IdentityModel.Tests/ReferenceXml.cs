@@ -850,7 +850,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementMultiAttributes.AttributeStatement }),
                     Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAttributeStatementSingleAttribute.Xml), null)
                 };
             }

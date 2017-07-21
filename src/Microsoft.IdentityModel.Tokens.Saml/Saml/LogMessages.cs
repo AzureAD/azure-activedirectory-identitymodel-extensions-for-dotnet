@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX10721 = "IDX10721: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'.";
 
+        // signature creation / validation
+        internal const string IDX10512 = "IDX10512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
+        internal const string IDX10513 = "IDX10513: Unable to process Saml attribute. A SamlSubject must contain either or both of Name and ConfirmationMethod.";
+        internal const string IDX10514 = "IDX10514: Unable to create SamlStatement. A SamlStatement must be one of SamlAuthenticationStatement, SamlAttributeStatement or SamlAuthorizationDecisionStatement.";
+
         // SamlSerializer reading
         internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";
         internal const string IDX11101 = "IDX11101: Saml Unexpected element found '{0}' while reading.";
