@@ -488,7 +488,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static string MetadataNoKeyInfoInSignature
+        public static string MetadataUnknownElementBeforeSignatureEndElement
         {
             get
             {
@@ -740,7 +740,7 @@ namespace Microsoft.IdentityModel.Tests
                 var configuration = new WsFederationConfiguration()
                 {
                     Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
-                    Signature = new Signature(new SignedInfo())
+                    Signature = new Signature()
                     {
                         KeyInfo = new KeyInfo
                         {
@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.Tests
                             Kid = X509CertificateKeyId1
                         },
                         SignatureValue = AADCommonMetadataSignatureValue,
-                        SignatureBytes = Convert.FromBase64String(AADCommonMetadataSignatureValue),
+                        SignedInfo = new SignedInfo()
                     },
                     TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed"
                 };
@@ -786,7 +786,7 @@ namespace Microsoft.IdentityModel.Tests
                 var configuration = new WsFederationConfiguration()
                 {
                     Issuer = IssuerForCommon,
-                    Signature = new Signature(new SignedInfo())
+                    Signature = new Signature
                     {
                         KeyInfo = new KeyInfo
                         {
@@ -794,7 +794,7 @@ namespace Microsoft.IdentityModel.Tests
                             Kid = X509CertificateKeyId1
                         },
                         SignatureValue = AADCommonMetadataSignatureValue,
-                        SignatureBytes = Convert.FromBase64String(AADCommonMetadataSignatureValue),
+                        SignedInfo = new SignedInfo()
                     },
                     TokenEndpoint = TokenEndpointForCommon
                 };

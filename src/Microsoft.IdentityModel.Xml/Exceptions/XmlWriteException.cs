@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Xml
         [Serializable]
 #endif
     /// <summary>
-    /// This exception is thrown when a problem occurs when writing xml.
+    /// This exception is thrown when a problem occurs writing XML.
     /// </summary>
     public class XmlWriteException : XmlException
     {

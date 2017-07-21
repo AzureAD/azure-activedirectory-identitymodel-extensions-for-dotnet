@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
@@ -39,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlSerializer
     {
+        private DSigSerializer _dsigSerializer = new DSigSerializer();
+
         /// <summary>
         /// Instantiates a new instance of <see cref="SamlSerializer"/>.
         /// </summary>
@@ -56,8 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>True if the URI is valid, false otherwise.</returns>
         internal static bool CanCreateValidUri(string uriString, UriKind uriKind)
         {
-            Uri tempUri;
-            return Uri.TryCreate(uriString, uriKind, out tempUri);
+            return Uri.TryCreate(uriString, uriKind, out Uri tempUri);
         }
 
         internal static bool IsAssertionIdValid(string assertionId)
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAssertion"/> element.</param>
         /// <returns>A <see cref="SamlAssertion"/> instance.</returns>
-        public virtual SamlAssertion ReadAssertion(XmlDictionaryReader reader)
+        public virtual SamlAssertion ReadAssertion(XmlReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
@@ -888,9 +888,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {
-                        var keyInfo = new KeyInfo();
-                        keyInfo.ReadFrom(reader);
-                        subject.KeyInfo = keyInfo;
+                        subject.KeyInfo = _dsigSerializer.ReadKeyInfo(reader);
                     }
 
                     if ((subject.ConfirmationMethods.Count == 0) && (string.IsNullOrEmpty(subject.Name)))

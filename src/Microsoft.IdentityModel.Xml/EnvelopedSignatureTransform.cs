@@ -25,58 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Security.Cryptography;
-using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
+using static Microsoft.IdentityModel.Xml.XmlSignatureConstants;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Defines a XML transform that removes the XML nodes associated with the Signature.
+    /// </summary>
     public sealed class EnvelopedSignatureTransform : Transform
     {
-        private string _prefix = XmlSignatureConstants.Prefix;
-
+        /// <summary>
+        /// Creates an EnvelopedSignatureTransform
+        /// </summary>
         public EnvelopedSignatureTransform()
         {
-            Algorithm = XmlSignatureConstants.Algorithms.EnvelopedSignature;
         }
 
-        internal override object Process(XmlTokenStreamReader reader)
+        /// <summary>
+        /// Sets the reader to exclude the &lt;Signature> element
+        /// </summary>
+        /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
+        /// <returns><see cref="XmlTokenStreamReader"/>with exclusion set.</returns>
+        public override XmlTokenStream Process(XmlTokenStream tokenStream)
         {
-            if (reader == null)
-                LogArgumentNullException(nameof(reader));
+            if (tokenStream == null)
+                LogArgumentNullException(nameof(tokenStream));
 
-            // The Enveloped Signature Transform is supposed to remove the
-            // Signature which encloses the transform element. Previous versions
-            // of this code stripped out all Signature elements at any depth,
-            // which did not allow nested signed structures. By specifying '1'
-            // as the depth, we narrow our range of support so that we require
-            // that the enveloped signature be a direct child of the element
-            // being signed.
-            reader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace, 1);
-            return reader;
-        }
-
-        // this transform is not allowed as the last one in a chain
-        internal override byte[] ProcessAndDigest(XmlTokenStreamReader reader, HashAlgorithm hash)
-        {
-            throw LogExceptionMessage(new NotSupportedException("UnsupportedLastTransform"));
-        }
-
-        public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
-        {
-            reader.MoveToContent();
-            string algorithm = XmlUtil.ReadEmptyElementAndRequiredAttribute(reader,
-                XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace, XmlSignatureConstants.Attributes.Algorithm, out _prefix);
-            if (algorithm != Algorithm)
-                throw LogExceptionMessage(new CryptographicException("AlgorithmMismatchForTransform"));
-        }
-
-        public override void WriteTo(XmlDictionaryWriter writer)
-        {
-            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
-            writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, Algorithm);
-            writer.WriteEndElement();
+            tokenStream.SetElementExclusion(Elements.Signature, Namespace);
+            return tokenStream;
         }
     }
 }

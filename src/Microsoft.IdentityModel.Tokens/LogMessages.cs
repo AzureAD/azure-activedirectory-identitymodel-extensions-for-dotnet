@@ -153,7 +153,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10669 = "IDX10669: Failed to create symmetric algorithm.";
         public const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
         public const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
-        public const string IDX10672 = "IDX10672: GetKeyedHasAlgorithm returned null, key: {0}, algorithm {1}.";
+        public const string IDX10672 = "IDX10672: GetKeyedHashAlgorithm returned null, key: {0}, algorithm {1}.";
+        public const string IDX10673 = "IDX10673: GetHashAlgorithm returned null, algorithm {0}.";
 
 
         // security keys

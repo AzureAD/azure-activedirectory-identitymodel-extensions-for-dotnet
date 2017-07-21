@@ -25,26 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
-using System.Xml;
-
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Defines a XMLTransform
+    /// </summary>
     public abstract class Transform
     {
-        public string Algorithm { get; protected set; }
-
-        public virtual bool NeedsInclusiveContext
-        {
-            get { return false; }
-        }
-
-        internal abstract object Process(XmlTokenStreamReader input);
-
-        internal abstract byte[] ProcessAndDigest(XmlTokenStreamReader input, HashAlgorithm hash);
-
-        public abstract void ReadFrom(XmlDictionaryReader reader, bool preserveComments);
-
-        public abstract void WriteTo(XmlDictionaryWriter writer);
+        /// <summary>
+        /// Called to transform a <see cref="XmlTokenStream"/>
+        /// </summary>
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> to process.</param>
+        /// <returns></returns>
+        public abstract XmlTokenStream Process(XmlTokenStream tokenStream);
     }
 }

@@ -26,69 +26,42 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
+using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    internal static class CryptoHelper
+    /// <summary>
+    /// Base class for a XmlDsig element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/
+    /// </summary>
+    public class DSigElement
     {
-        private static RandomNumberGenerator _random;
-
         /// <summary>
-        /// Provides an integer-domain mathematical operation for 
-        /// Ceiling( dividend / divisor ). 
+        /// Initializes a <see cref="DSigElement"/> instance.
         /// </summary>
-        /// <param name="dividend"></param>
-        /// <param name="divisor"></param>
-        /// <returns></returns>
-        public static int CeilingDivide(int dividend, int divisor)
+        protected DSigElement()
         {
-            int remainder, quotient;
-
-            remainder = dividend % divisor;
-            quotient = dividend / divisor;
-
-            if (remainder > 0)
-                quotient++;
-
-            return quotient;
         }
 
-        public static RandomNumberGenerator RandomNumberGenerator
+        /// <summary>
+        /// Gets or sets the Id.
+        /// </summary>
+        public string Id
         {
-            get
-            {
-                if (_random == null)
-                    _random = RandomNumberGenerator.Create();
-
-                return _random;
-            }
+            get;
+            set;
         }
 
-
         /// <summary>
-        /// This method generates a random byte array used as entropy with the given size. 
+        /// Gets or sets the prefix associated with the element.
         /// </summary>
-        /// <param name="sizeInBits"></param>
-        /// <returns></returns>
-        public static byte[] GenerateRandomBytes(int sizeInBits)
+        public string Prefix
         {
-            int sizeInBytes = sizeInBits / 8;
-            if (sizeInBits <= 0)
-                throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits)));
-            else if (sizeInBytes * 8 != sizeInBits)
-                throw LogExceptionMessage(new ArgumentException(nameof(sizeInBits)));
-
-            byte[] data = new byte[sizeInBytes];
-#if DESKTOPNET45
-            // TODO .net 1.4
-            RandomNumberGenerator.GetNonZeroBytes(data);
-#endif
-            return data;
+            get;
+            set;
         }
     }
 }
-
-
-

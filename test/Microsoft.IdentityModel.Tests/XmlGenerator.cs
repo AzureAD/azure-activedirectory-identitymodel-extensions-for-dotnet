@@ -27,8 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
-using Microsoft.IdentityModel.Tokens.Saml;
+using System.Xml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -120,7 +121,6 @@ namespace Microsoft.IdentityModel.Tests
 
             return $"NotOnOrAfter = \"{notOnOrAfter}\"";
         }
-
 
         public static string SamlActionTemplate
         {
@@ -344,28 +344,52 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string Generate(Signature signature)
         {
-            return string.Format(SignatureTemplate, XmlSignatureConstants.Namespace, Generate(signature.SignedInfo), signature.SignatureValue, Generate(signature.KeyInfo));
+            var signatureBytes = XmlUtilities.GenerateSignatureBytes(signature.SignedInfo, Default.AsymmetricSigningKey);
+            signature.SignatureValue = Convert.ToBase64String(signatureBytes);
+            var memoryStream = new MemoryStream();
+            var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+            var serializer = new DSigSerializer();
+            serializer.WriteSignature(writer, signature);
+            writer.Flush();
+
+            // for debugging purposes use a local variable.
+            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            return retval;
         }
 
         public static string Generate(SignedInfo signedInfo)
         {
-            return string.Format(SignedInfoTemplate, XmlSignatureConstants.Namespace, signedInfo.CanonicalizationMethod, signedInfo.SignatureAlgorithm, ReferenceXml(signedInfo.Reference));
+            var memoryStream = new MemoryStream();
+            var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+            var serializer = new DSigSerializer();
+            serializer.WriteSignedInfo(writer, signedInfo);
+            writer.Flush();
+
+            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            return retval;
         }
 
         public static string ReferenceTemplate
         {
-            get => "<Reference URI=\"{0}\"><Transforms><Transform Algorithm=\"{1}\" /><Transform Algorithm=\"{2}\" /></Transforms><DigestMethod Algorithm=\"{3}\" /><DigestValue>{4}</DigestValue></Reference>";
+            get => "<{0}Reference Id=\"{1}\" Type=\"{2}\" URI=\"{3}\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><Transforms><Transform Algorithm=\"{4}\" /><Transform Algorithm=\"{5}\" /></Transforms><DigestMethod Algorithm=\"{6}\" /><DigestValue>{7}</DigestValue></{0}Reference>";
         }
 
-        public static string ReferenceXml(string referenceUri, string envelopingAlgorithm, string c14nAlgorithm, string digestAlgorithm, string digestValue)
+        public static string ReferenceXml(string prefix, string id, string type, string referenceUri, string envelopingAlgorithm, string c14nAlgorithm, string digestAlgorithm, string digestValue)
         {
-            return string.Format(ReferenceTemplate, referenceUri, envelopingAlgorithm, c14nAlgorithm, digestAlgorithm, digestValue);
+            return string.Format(ReferenceTemplate, prefix, id, type, referenceUri, envelopingAlgorithm, c14nAlgorithm, digestAlgorithm, digestValue);
         }
 
         // Always assumes two transforms
         public static string ReferenceXml(Reference reference)
         {
-            return string.Format(ReferenceTemplate, reference.Uri, reference.TransformChain[0].Algorithm, reference.TransformChain[1].Algorithm, reference.DigestAlgorithm, reference.DigestText);
+            var memoryStream = new MemoryStream();
+            var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+            var serializer = new DSigSerializer();
+            serializer.WriteReference(writer, reference);
+            writer.Flush();
+
+            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            return retval;
         }
 
         public static string RoleDescriptorTemplate
@@ -401,6 +425,21 @@ namespace Microsoft.IdentityModel.Tests
         public static string SingleSignOnServiceTemplate
         {
             get => "<SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://login.microsoftonline.com/common/saml2\" />";
+        }
+
+        public static string TransformTemplate
+        {
+            get => "<{0}{1} {2} = \"{3}\" {4} />";
+        }
+
+        public static string TransformXml(string prefix, string attributeName, string algorithm, string @namespace )
+        {
+            return string.Format(TransformTemplate, prefix, XmlSignatureConstants.Elements.Transform, attributeName, algorithm, @namespace);
+        }
+
+        public static string TransformXml(string prefix, string element, string attributeName, string algorithm, string @namespace)
+        {
+            return string.Format(TransformTemplate, prefix, element, attributeName, algorithm, @namespace);
         }
     }
 }

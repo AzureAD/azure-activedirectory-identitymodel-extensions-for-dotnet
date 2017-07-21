@@ -41,6 +41,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     public class WsFederationMetadataSerializer
     {
+
+        private DSigSerializer _dsigSerializer = new DSigSerializer();
+
         /// <summary>
         /// Metadata serializer for WsFed.
         /// </summary>
@@ -142,10 +145,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
             {
-                KeyInfo keyInfo = new KeyInfo();
-                keyInfo.ReadFrom(reader);
+                var keyInfo = _dsigSerializer.ReadKeyInfo(reader);
                 configuration.KeyInfos.Add(keyInfo);
-
                 if (!string.IsNullOrEmpty(keyInfo.CertificateData))
                 {
                     var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));

@@ -5,10 +5,14 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Tokens</AssemblyName>
     <Description>Includes types that provide support for SecurityTokens, Cryptographic operations: Signing, Verifying Signatures, Encryption.</Description>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Tokens</PackageId>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <DocumentationFile>bin\Release\net45\Microsoft.IdentityModel.Tokens.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

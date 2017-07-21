@@ -25,53 +25,98 @@
 //
 //------------------------------------------------------------------------------
 
-
+using System;
 using System.Collections.Generic;
 using System.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Maintains a collection of XML nodes obtained when reading signed XML.
+    /// </summary>
     public class XmlTokenStream
     {
         private List<XmlTokenEntry> _entries = new List<XmlTokenEntry>();
         private string _excludedElement;
-        private int? _excludedElementDepth;
         private string _excludedElementNamespace;
 
+        /// <summary>
+        /// Initializes a <see cref="XmlTokenStream"/>
+        /// </summary>
         public XmlTokenStream()
         {
         }
 
+        /// <summary>
+        /// Adds a XML node to the collection.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null.</exception>
         public void Add(XmlNodeType type, string value)
         {
             _entries.Add(new XmlTokenEntry(type, value));
         }
 
-        public void AddAttribute(string prefix, string localName, string namespaceUri, string value)
+        /// <summary>
+        /// Adds a XML attribute node to the collection
+        /// </summary>
+        /// <param name="prefix">the XML prefix.</param>
+        /// <param name="localName">the local name of the attribute.</param>
+        /// <param name="namespace">the namespace of the attribute.</param>
+        /// <param name="value">the value of the attribute.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="localName"/> is null or empty.</exception>
+        public void AddAttribute(string prefix, string localName, string @namespace, string value)
         {
-            _entries.Add(new XmlTokenEntry(XmlNodeType.Attribute, prefix, localName, namespaceUri, value));
+            if (string.IsNullOrEmpty(localName))
+                throw LogArgumentNullException(nameof(localName));
+
+            _entries.Add(new XmlTokenEntry(XmlNodeType.Attribute, prefix, localName, @namespace, value));
         }
 
-        public void AddElement(string prefix, string localName, string namespaceUri, bool isEmptyElement)
+        /// <summary>
+        /// Adds a XML element node to the collection
+        /// </summary>
+        /// <param name="prefix">the XML prefix.</param>
+        /// <param name="localName">the local name of the element.</param>
+        /// <param name="namespace">the namespace of the attribute.</param>
+        /// <param name="isEmptyElement">value indicating if the element is empty.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="localName"/> is null or empty.</exception>
+        public void AddElement(string prefix, string localName, string @namespace, bool isEmptyElement)
         {
-             _entries.Add(new XmlTokenEntry(XmlNodeType.Element, prefix, localName, namespaceUri, isEmptyElement));
+            if (string.IsNullOrEmpty(localName))
+                throw LogArgumentNullException(nameof(localName));
+
+            _entries.Add(new XmlTokenEntry(XmlNodeType.Element, prefix, localName, @namespace, isEmptyElement));
         }
 
-        public void SetElementExclusion(string excludedElement, string excludedElementNamespace)
+        /// <summary>
+        /// Sets the name and namespace of which element to exclude. Normally this is the &lt;Signature> element.
+        /// </summary>
+        /// <param name="element">the name of the Element to exclude.</param>
+        /// <param name="namespace">the namespace of the Element to exclude.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        public void SetElementExclusion(string element, string @namespace)
         {
-            SetElementExclusion(excludedElement, excludedElementNamespace, null);
+            if (string.IsNullOrEmpty(element))
+                throw LogArgumentNullException(nameof(element));
+
+            _excludedElement = element;
+            _excludedElementNamespace = @namespace;
         }
 
-        public void SetElementExclusion(string excludedElement, string excludedElementNamespace, int? excludedElementDepth)
+        /// <summary>
+        /// Writes the XML nodes into the <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">the <see cref="XmlWriter"/> to use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        public void WriteTo(XmlWriter writer)
         {
-            _excludedElement = excludedElement;
-            _excludedElementDepth = excludedElementDepth;
-            _excludedElementNamespace = excludedElementNamespace;
-        }
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
 
-        public void WriteTo(XmlDictionaryWriter writer)
-        {
-            var streamWriter = new XmlTokenStreamWriter(_entries, _excludedElement, _excludedElementDepth, _excludedElementNamespace);
+            var streamWriter = new XmlTokenStreamWriter(_entries, _excludedElement, _excludedElementNamespace);
             streamWriter.WriteTo(writer);
         }
     }

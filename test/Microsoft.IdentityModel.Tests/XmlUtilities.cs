@@ -25,10 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -37,12 +36,50 @@ namespace Microsoft.IdentityModel.Tests
     {
         public static XmlDictionaryReader CreateDictionaryReader(string xml)
         {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
             return XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml)));
         }
 
-        public static XmlTokenStreamReader CreateXmlTokenStreamReader(string xml)
+        public static EnvelopedSignatureReader CreateEnvelopedSignatureReader(string xml)
         {
-            return new XmlTokenStreamReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            return new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+        }
+
+        public static XmlTokenStream CreateXmlTokenStream(string xml)
+        {
+            var envelopedSignatureReader = CreateEnvelopedSignatureReader(xml);
+            while (envelopedSignatureReader.Read());
+            return envelopedSignatureReader.TokenStream;
+        }
+
+        public static byte[] CreateDigestBytes(string xml, bool includeComments)
+        {
+            using (var stream = new MemoryStream())
+            {
+                ExclusiveCanonicalizationTransform.WriteCanonicalStream(stream, CreateXmlTokenStream(xml), includeComments);
+                stream.Flush();
+                stream.Position = 0;
+                return Default.HashAlgorithm.ComputeHash(stream);
+            }
+        }
+
+        public static byte[] GenerateSignatureBytes(SignedInfo signedInfo, SecurityKey key)
+        {
+            using (var stream = new MemoryStream())
+            {
+                var serailizer = new DSigSerializer();
+                var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+                var includeComments = signedInfo.CanonicalizationMethod == SecurityAlgorithms.ExclusiveC14nWithComments;
+                writer.StartCanonicalization(stream, includeComments, null);
+                serailizer.WriteSignedInfo(writer, signedInfo);
+                writer.EndCanonicalization();
+                writer.Flush();
+                stream.Position = 0;
+                var provider = key.CryptoProviderFactory.CreateForSigning(key, signedInfo.SignatureMethod);
+                return provider.Sign(stream.ToArray());
+            }
         }
     }
 }

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-// derived types that are usefull across multiple handlers / protocols.
+// derived types that are useful across multiple handlers / protocols.
 
 using System;
 using System.Collections.Generic;

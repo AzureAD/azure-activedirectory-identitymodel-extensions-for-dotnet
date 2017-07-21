@@ -28,10 +28,6 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-/// <summary>
-/// Contains primitive types and classes used across DSig testing: KeyInfo, SignedInfo, Signature, Reference etc...
-/// </summary>
-
 namespace Microsoft.IdentityModel.Xml.Tests
 {
     /// <summary>

@@ -41,24 +41,10 @@ namespace Microsoft.IdentityModel.Xml
         public const string TransformationParameters = "TransformationParameters";
         public const string ExclusiveC14nPrefix = "ec";
         public const string ExclusiveC14nInclusiveNamespaces = "InclusiveNamespaces";
-        public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";
-        public const string ExclusiveC14nWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#";
         public const string XmlNamespace = "http://www.w3.org/XML/1998/namespace";
         public const string XmlNamespaceNamespace = "http://www.w3.org/2000/xmlns/";
         public const string XmlNamepspacePrefix = "xmlns";
         public const string XmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance";
-
-        public static class Algorithms
-        {
-            // Canonicalization.
-            public const string ExcC14N = "http://www.w3.org/2001/10/xml-exc-c14n#";
-            public const string ExcC14NWithComments = "http://www.w3.org/2001/10/xml-exc-c14n#WithComments";
-            // Message Digest
-            public const string Sha1 = Namespace + "sha1";
-            // Enveloped Signature.
-            public const string EnvelopedSignature = Namespace + "enveloped-signature";
-
-        }
 
         public static class Attributes
         {

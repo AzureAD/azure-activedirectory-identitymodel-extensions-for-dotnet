@@ -25,51 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-#if EncryptedTokens
+using Microsoft.IdentityModel.Tests;
+using Xunit;
 
-using System.Xml;
-
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Xml.Tests
 {
-    internal class EncryptionMethodElement
+    public class EnvelopedSignatureTransformTests
     {
-        public string Algorithm { get; set; }
-
-        public string Parameters { get; set; }
-
-        public void ReadXml(XmlDictionaryReader reader)
+        [Fact]
+        public void Constructor()
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
-
-            Algorithm = reader.GetAttribute(XmlEncryptionConstants.Attributes.Algorithm, null);
-            if (!reader.IsEmptyElement)
-            {
-                //
-                // Trace unread missing element
-                //
-
-                string xml = reader.ReadOuterXml();
-            }
-            else
-            {
-                //
-                // Read to the next element
-                //
-                reader.Read();
-            }
+            TestUtilities.WriteHeader($"{this}", "Constructor", true);
+            var transform = new EnvelopedSignatureTransform();
         }
-
-        public void WriteXml(XmlWriter writer)
-        {
-            // <EncryptionMethod>
-            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
-
-            writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Algorithm, null, Algorithm);
-
-            // </EncryptionMethod>
-            writer.WriteEndElement();
-        }
-
     }
 }
-#endif

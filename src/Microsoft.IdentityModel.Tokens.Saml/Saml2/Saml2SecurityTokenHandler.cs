@@ -441,13 +441,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            using (var sr = new StringReader(token))
+            using (var stringReader = new StringReader(token))
             {
-                using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    var assertion = Serializer.ReadAssertion(reader);
-                    return new Saml2SecurityToken(assertion);
-                }
+                return new Saml2SecurityToken(Serializer.ReadAssertion(XmlReader.Create(stringReader)));
             }
         }
 

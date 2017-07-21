@@ -60,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             Value = name;
             Format = format;
-            ExternalEncryptedKeys = new List<SecurityKeyIdentifierClause>();
         }
 
         /// <summary>
@@ -69,15 +68,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public EncryptingCredentials EncryptingCredentials
         {
             get; set;
-        }
-
-        /// <summary>
-        /// Gets additional encrypted keys which will be specified external to the 
-        /// EncryptedData element, as children of the EncryptedId element.
-        /// </summary>
-        public ICollection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
-        {
-            get;
         }
 
         /// <summary>

@@ -39,13 +39,11 @@ namespace Microsoft.IdentityModel.Xml
 
         public XmlTokenStreamWriter(IList<XmlTokenEntry> entries,
                                      string excludedElement,
-                                     int? excludedElementDepth,
                                      string excludedElementNamespace)
         {
             _entries = entries ?? throw LogArgumentNullException(nameof(entries));
             Count = entries.Count;
             ExcludedElement = excludedElement;
-            ExcludedElementDepth = excludedElementDepth;
             ExcludedElementNamespace = excludedElementNamespace;
         }
 
@@ -79,9 +77,9 @@ namespace Microsoft.IdentityModel.Xml
             get { return _entries[_position]._localName; }
         }
 
-        public string NamespaceUri
+        public string Namespace
         {
-            get { return _entries[_position]._namespaceUri; }
+            get { return _entries[_position]._namespace; }
         }
 
         public string Value
@@ -95,11 +93,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         public string ExcludedElementNamespace
-        {
-            get;
-        }
-
-        public int? ExcludedElementDepth
         {
             get;
         }
@@ -146,7 +139,7 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
-        public void WriteTo(XmlDictionaryWriter writer)
+        public void WriteTo(XmlWriter writer)
         {
             if (writer == null)
                 throw LogExceptionMessage(new ArgumentNullException(nameof(writer)));
@@ -165,16 +158,15 @@ namespace Microsoft.IdentityModel.Xml
                         bool isEmpty = IsEmptyElement;
                         depth++;
                         if (include
-                            && (ExcludedElementDepth == null || ExcludedElementDepth == (depth - 1))
                             && LocalName == ExcludedElement
-                            && NamespaceUri == ExcludedElementNamespace)
+                            && Namespace == ExcludedElementNamespace)
                         {
                             include = false;
                             recordedDepth = depth;
                         }
                         if (include)
                         {
-                            writer.WriteStartElement(Prefix, LocalName, NamespaceUri);
+                            writer.WriteStartElement(Prefix, LocalName, Namespace);
                         }
                         if (MoveToFirstAttribute())
                         {
@@ -182,7 +174,7 @@ namespace Microsoft.IdentityModel.Xml
                             {
                                 if (include)
                                 {
-                                    writer.WriteAttributeString(Prefix, LocalName, NamespaceUri, Value);
+                                    writer.WriteAttributeString(Prefix, LocalName, Namespace, Value);
                                 }
                             }
                             while (MoveToNextAttribute());

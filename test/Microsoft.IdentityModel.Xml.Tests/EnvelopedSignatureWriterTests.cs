@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
@@ -37,14 +38,13 @@ namespace Microsoft.IdentityModel.Xml.Tests
     {
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("EnvelopedSignatureWriterTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ConstructorTheoryData")]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
             try
             {
-                var envelopedReader = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId);
+                var envelopedWriter = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> EnvelopedSignatureWriterTheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> ConstructorTheoryData
         {
             get
             {
@@ -103,5 +103,52 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return theoryData;
             }
         }
+
+        [Theory, MemberData("WriteXmlTheoryData")]
+        public void WriteXml(EnvelopedSignatureTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteXml", theoryData);
+            var context = new CompareContext($"{this}.WriteXml, {theoryData.TestId}");
+            try
+            {
+                var stream = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(stream);
+                var envelopedWriter = new EnvelopedSignatureWriter(writer, theoryData.SigningCredentials, theoryData.ReferenceId);
+                envelopedWriter.WriteStartElement("OuterXml");
+                envelopedWriter.WriteAttributeString(XmlSignatureConstants.Attributes.Id, Default.ReferenceUri);
+                envelopedWriter.WriteStartElement("InnerXml");
+                envelopedWriter.WriteAttributeString("innerAttribute", "innerValue");
+                envelopedWriter.WriteEndElement();
+                envelopedWriter.WriteEndElement();
+                var xml = Encoding.UTF8.GetString(stream.ToArray());
+                theoryData.ExpectedException.ProcessNoException(context);
+                var envelopedReader = new EnvelopedSignatureReader(XmlUtilities.CreateDictionaryReader(xml));
+                while (envelopedReader.Read());
+                envelopedReader.Signature.Verify(theoryData.SigningCredentials.Key);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<EnvelopedSignatureTheoryData> WriteXmlTheoryData
+        {
+            get
+            {
+                return new TheoryData<EnvelopedSignatureTheoryData>()
+                {
+                    new EnvelopedSignatureTheoryData
+                    {
+                        ReferenceId = Default.ReferenceUri,
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Xml = Default.OuterXml
+                    }
+                };
+            }
+        }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 }

@@ -33,75 +33,73 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class XmlTokenStreamReader : DelegatingXmlDictionaryReader
+    internal class XmlTokenStreamReader : DelegatingXmlDictionaryReader
     {
         private MemoryStream _contentStream;
         private TextReader _contentReader;
         private int _depth;
         private bool _disposed;
         private bool _recordDone;
-        private XmlTokenStream _xmlTokens;
 
-        public XmlTokenStreamReader(XmlDictionaryReader reader)
+        public XmlTokenStreamReader(XmlReader reader)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
             if (!reader.IsStartElement())
-                throw LogExceptionMessage(new ArgumentException(LogMessages.IDX21102));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX21102, reader.NodeType)));
 
-            InnerReader = reader;
-            _xmlTokens = new XmlTokenStream();
+            InnerReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+            XmlTokens = new XmlTokenStream();
             Record();
         }
 
         public XmlTokenStream XmlTokens
         {
-            get { return _xmlTokens; }
+            get;
         }
 
-#if DESKTOPNET45
-        // TODO - replacement on CORE
+#if DESKTOPNET45 || DESKTOPNET451
         public override void Close()
         {
             OnEndOfContent();
-            base.InnerReader.Close();
+            _reader.Close();
         }
 #endif
         public override void MoveToAttribute(int index)
         {
             OnEndOfContent();
-            base.InnerReader.MoveToAttribute(index);
+            InnerReader.MoveToAttribute(index);
         }
 
         public override bool MoveToAttribute(string name)
         {
             OnEndOfContent();
-            return base.InnerReader.MoveToAttribute(name);
+            return InnerReader.MoveToAttribute(name);
         }
 
-        public override bool MoveToAttribute(string name, string ns)
+        public override bool MoveToAttribute(string name, string @namespace)
         {
             OnEndOfContent();
-            return base.InnerReader.MoveToAttribute(name, ns);
+            return InnerReader.MoveToAttribute(name, @namespace);
         }
 
         public override bool MoveToElement()
         {
             OnEndOfContent();
-            return base.MoveToElement();
+            return InnerReader.MoveToElement();
         }
 
         public override bool MoveToFirstAttribute()
         {
             OnEndOfContent();
-            return base.MoveToFirstAttribute();
+            return InnerReader.MoveToFirstAttribute();
         }
 
         public override bool MoveToNextAttribute()
         {
             OnEndOfContent();
-            return base.MoveToNextAttribute();
+            return InnerReader.MoveToNextAttribute();
         }
 
         void OnEndOfContent()
@@ -128,7 +126,7 @@ namespace Microsoft.IdentityModel.Xml
         public override bool Read()
         {
             OnEndOfContent();
-            if (!base.Read())
+            if (!InnerReader.Read())
                 return false;
 
             if (!_recordDone)
@@ -141,7 +139,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             XmlUtil.ValidateBufferBounds(buffer, offset, count);
 
-            // Concatentate text nodes to get entire element value before attempting to convert
+            // Concatenate text nodes to get entire element value before attempting to convert
             // XmlDictionaryReader.CreateDictionaryReader(XmlReader) creates a reader that returns base64 in a single text node
             // XmlDictionaryReader.CreateTextReader(Stream) creates a reader that produces multiple text and whitespace nodes
             // Attribute nodes consist of only a single value
@@ -154,7 +152,7 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 else
                 {
-                    StringBuilder fullText = new StringBuilder(1000);
+                    var fullText = new StringBuilder(1000);
                     while (NodeType != XmlNodeType.Element && NodeType != XmlNodeType.EndElement)
                     {
                         switch (NodeType)
@@ -214,21 +212,22 @@ namespace Microsoft.IdentityModel.Xml
 
         void Record()
         {
-            switch (NodeType)
+            switch (InnerReader.NodeType)
             {
                 case XmlNodeType.Element:
                 {
-                    bool isEmpty = base.InnerReader.IsEmptyElement;
-                    _xmlTokens.AddElement(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, isEmpty);
-                    if (base.InnerReader.MoveToFirstAttribute())
+                    bool isEmpty = InnerReader.IsEmptyElement;
+                    XmlTokens.AddElement(InnerReader.Prefix, InnerReader.LocalName, InnerReader.NamespaceURI, isEmpty);
+                    if (InnerReader.MoveToFirstAttribute())
                     {
                         do
                         {
-                            _xmlTokens.AddAttribute(base.InnerReader.Prefix, base.InnerReader.LocalName, base.InnerReader.NamespaceURI, base.InnerReader.Value);
+                            XmlTokens.AddAttribute(InnerReader.Prefix, InnerReader.LocalName, InnerReader.NamespaceURI, InnerReader.Value);
                         }
-                        while (base.InnerReader.MoveToNextAttribute());
-                        base.InnerReader.MoveToElement();
+                        while (InnerReader.MoveToNextAttribute());
+                            InnerReader.MoveToElement();
                     }
+
                     if (!isEmpty)
                     {
                         _depth++;
@@ -248,12 +247,12 @@ namespace Microsoft.IdentityModel.Xml
                 case XmlNodeType.SignificantWhitespace:
                 case XmlNodeType.Whitespace:
                 {
-                    _xmlTokens.Add(NodeType, Value);
+                    XmlTokens.Add(NodeType, Value);
                     break;
                 }
                 case XmlNodeType.EndElement:
                 {
-                    _xmlTokens.Add(NodeType, Value);
+                    XmlTokens.Add(NodeType, Value);
                     if (--_depth == 0)
                         _recordDone = true;
 
@@ -266,7 +265,7 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 default:
                 {
-                    throw LogExceptionMessage(new XmlException(LogMessages.IDX21023));
+                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX21023, InnerReader.NodeType)));
                 }
             }
         }
@@ -278,11 +277,10 @@ namespace Microsoft.IdentityModel.Xml
             if (_disposed)
                 return;
 
+            _disposed = true;
+
             if (disposing)
             {
-                //
-                // Free all of our managed resources
-                //
                 if (_contentReader != null)
                 {
                     _contentReader.Dispose();
@@ -295,8 +293,6 @@ namespace Microsoft.IdentityModel.Xml
                     _contentStream = null;
                 }
             }
-
-            _disposed = true;
         }
     }
 }

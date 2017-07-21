@@ -26,8 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
-using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -38,19 +36,25 @@ namespace Microsoft.IdentityModel.Xml.Tests
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SignatureConstructorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureConstructor(SignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureConstructor", theoryData);
+            var context = new CompareContext($"{this}.SignatureConstructor, {theoryData.TestId}");
             try
             {
-                var signature = new Signature(theoryData.SignedInfo);
-                theoryData.ExpectedException.ProcessNoException();
+                var signature = new Signature()
+                {
+                    SignedInfo = theoryData.SignedInfo
+                };
+
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SignatureTheoryData> SignatureConstructorTheoryData
@@ -61,7 +65,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     new SignatureTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'value' cannot be a 'null' or an empty object."),
                         First = true,
                         SignedInfo = null,
                         TestId = "SignedInfo NULL"
@@ -70,78 +74,22 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("SignatureReadFromTheoryData")]
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SignatureReadFrom(SignatureTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.SignatureReadFrom", theoryData);
-            var context = new CompareContext($"{this}.SignatureReadFrom, {theoryData.TestId}");
-            try
-            {
-                var sr = new StringReader(theoryData.Xml);
-                var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
-                var signature = new Signature(new SignedInfo());
-                signature.ReadFrom(reader);
-                theoryData.ExpectedException.ProcessNoException();
-
-                IdentityComparer.AreEqual(signature, theoryData.Signature, context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<SignatureTheoryData> SignatureReadFromTheoryData
-        {
-            get
-            {
-                // uncomment to view exception displayed to user
-                // ExpectedException.DefaultVerbose = true;
-
-                return new TheoryData<SignatureTheoryData>
-                {
-                    new SignatureTheoryData
-                    {
-                        First = true,
-                        Signature = ReferenceXml.Signature_UnknownDigestAlgorithm.Signature,
-                        TestId = nameof(ReferenceXml.Signature_UnknownDigestAlgorithm),
-                        Xml = ReferenceXml.Signature_UnknownDigestAlgorithm.Xml
-                    },
-                    new SignatureTheoryData
-                    {
-                        Signature = ReferenceXml.Signature_UnknownSignatureAlgorithm.Signature,
-                        TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm),
-                        Xml = ReferenceXml.Signature_UnknownSignatureAlgorithm.Xml
-                    }
-                };
-            }
-        }
-
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("SignatureVerifyTheoryData")]
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureVerify(SignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureVerify", theoryData);
             var context = new CompareContext($"{this}.SignatureVerify, {theoryData.TestId}");
             try
             {
-                var tokenStreamingReader = XmlUtilities.CreateXmlTokenStreamReader(theoryData.Xml);
-                var signature = new Signature(new SignedInfo());
-                signature.ReadFrom(tokenStreamingReader);
-                signature.TokenSource = tokenStreamingReader;
+                var signature = theoryData.Serializer.ReadSignature(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                signature.SignedInfo.References[0].TokenStream = theoryData.TokenStream;
                 signature.Verify(theoryData.SecurityKey);
-                theoryData.ExpectedException.ProcessNoException();
-
+                theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(signature, theoryData.Signature, context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -156,6 +104,15 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 var theoryData = new TheoryData<SignatureTheoryData>();
 
+                theoryData.Add(new SignatureTheoryData
+                {
+                    SecurityKey = Default.AsymmetricSigningKey,
+                    Signature = SignatureTestSet.DefaultSignature.Signature,
+                    TestId = nameof(SignatureTestSet.DefaultSignature),
+                    TokenStream = Default.TokenStream,
+                    Xml = SignatureTestSet.DefaultSignature.Xml
+                });
+
                 // use SecurityKey that will validate the SignedInfo
                 var key  = ReferenceXml.DefaultAADSigningKey;
                 key.CryptoProviderFactory = new DSigCryptoProviderFactory();
@@ -164,9 +121,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21203:"),
                     SecurityKey = key,
-                    Signature = ReferenceXml.Signature_UnknownDigestAlgorithm.Signature,
-                    TestId = "CryptoProvider returns a null SignatureProvider",
-                    Xml = ReferenceXml.Signature_UnknownDigestAlgorithm.Xml
+                    Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
+                    TestId = "Signature_CryptoProvider returns a null SignatureProvider",
+                    TokenStream = Default.TokenStream,
+                    Xml = SignatureTestSet.UnknownDigestAlgorithm.Xml
                 });
 
                 key = ReferenceXml.DefaultAADSigningKey;
@@ -179,32 +137,64 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     ExpectedException = ExpectedException.NotSupportedException("IDX10640:"),
                     SecurityKey = key,
-                    Signature = ReferenceXml.Signature_UnknownDigestAlgorithm.Signature,
-                    TestId = nameof(ReferenceXml.Signature_UnknownDigestAlgorithm),
-                    Xml = ReferenceXml.Signature_UnknownDigestAlgorithm.Xml
+                    Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
+                    TestId = nameof(SignatureTestSet.UnknownDigestAlgorithm),
+                    TokenStream = Default.TokenStream,
+                    Xml = SignatureTestSet.UnknownDigestAlgorithm.Xml
                 });
 
                 theoryData.Add(new SignatureTheoryData
                 {
                     ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
                     SecurityKey = ReferenceXml.DefaultAADSigningKey,
-                    Signature = ReferenceXml.Signature_UnknownSignatureAlgorithm.Signature,
-                    TestId = nameof(ReferenceXml.Signature_UnknownSignatureAlgorithm),
-                    Xml = ReferenceXml.Signature_UnknownSignatureAlgorithm.Xml
+                    Signature = SignatureTestSet.UnknownSignatureAlgorithm.Signature,
+                    TestId = nameof(SignatureTestSet.UnknownSignatureAlgorithm),
+                    TokenStream = Default.TokenStream,
+                    Xml = SignatureTestSet.UnknownSignatureAlgorithm.Xml
                 });
 
                 return theoryData;
             }
         }
+
+        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
     public class SignatureTheoryData : TheoryDataBase
     {
-        public SecurityKey SecurityKey { get; set; }
+        public SecurityKey SecurityKey
+        {
+            get;
+            set;
+        }
 
-        public Signature Signature { get; set; }
+        public DSigSerializer Serializer
+        {
+            get;
+            set;
+        } = new DSigSerializer();
 
-        public SignedInfo SignedInfo { get; set; }
+        public Signature Signature
+        {
+            get;
+            set;
+        }
 
-        public string Xml { get; set; }
+        public SignedInfo SignedInfo
+        {
+            get;
+            set;
+        }
+
+        public XmlTokenStream TokenStream
+        {
+            get;
+            set;
+        }
+
+        public string Xml
+        {
+            get;
+            set;
+        }
     }
 }

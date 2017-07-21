@@ -27,213 +27,109 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using System.Xml;
-using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
-using static Microsoft.IdentityModel.Logging.LogHelper;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Reads and writes a  https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo
+    /// Represents a XmlDsig KeyInfo element as per:  https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo
     /// </summary>
     /// <remarks>Only a single 'X509Certificate' is supported. Multiples that include intermediate and root certs are not supported.</remarks>
     public class KeyInfo
     {
         // TODO - IssuerSerial needs to have a structure as 'IssuerName' and 'SerialNumber'
         /// <summary>
-        /// Instantiates a <see cref="Keyinfo"/>.
+        /// Initializes an instance of <see cref="KeyInfo"/>.
         /// </summary>
-        public KeyInfo() {}
+        public KeyInfo()
+        {
+        }
 
         /// <summary>
-        /// Get the 'X509CertificateData' value
+        /// Initializes an instance of <see cref="KeyInfo"/>.
         /// </summary>
-        public string CertificateData { get; set; }
+        /// <param name="certificate">the <see cref="X509Certificate2"/>to populate the X509Data.</param>
+        public KeyInfo(X509Certificate2 certificate)
+        {
+            CertificateData = Convert.ToBase64String(certificate.RawData);
+            Kid = certificate.Thumbprint;
+        }
 
         /// <summary>
-        /// Gets and sets the IssuerName that is part of a 'X509IssuerSerial'
+        /// Initializes an instance of <see cref="KeyInfo"/>.
         /// </summary>
-        public string IssuerName { get; set; }
+        /// <param name="key">the <see cref="SecurityKey"/>to populate the <see cref="KeyInfo"/>.</param>
+        public KeyInfo(SecurityKey key)
+        {
+            if (key is X509SecurityKey x509Key)
+            {
+                CertificateData = Convert.ToBase64String(x509Key.Certificate.RawData);
+                Kid = x509Key.Certificate.Thumbprint;
+            }
+        }
 
         /// <summary>
-        /// Gets and sets the a kid that reflects the type of 'X509Data'
+        /// Get or sets the 'X509CertificateData' value
+        /// </summary>
+        public string CertificateData
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the IssuerName that is part of a 'X509IssuerSerial'
+        /// </summary>
+        public string IssuerName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the a kid that reflects the type of 'X509Data'
         /// For multiple X509Data the last one will be used
         /// </summary>
-        public string Kid { get; set; }
-
-        /// <summary>
-        /// Gets and sets the Uri associated with the RetrievalMethod
-        /// </summary>
-        public string RetrievalMethodUri { get; set; }
-
-        /// <summary>
-        /// Get and sets the SerialNumber that is part of a 'X509IssuerSerial'
-        /// </summary>
-        public string SerialNumber { get; set; }
-
-        /// <summary>
-        /// Gets and sets the 'X509SKI' value
-        /// </summary>
-        public string SKI { get; set; }
-
-        /// <summary>
-        /// Get and sets the 'X509SubjectName' value
-        /// </summary>
-        public string SubjectName { get; set; }
-
-        /// <summary>
-        /// Reads https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo
-        /// </summary>
-        /// <param name="reader"><see cref="XmlReader"/> pointing at <see cref="XmlSignatureConstants.Elements.KeyInfo"/>.</param>
-        /// <remarks>Only handles IssuerSerial, Ski, SubjectName, Certificate. Unsupported types are skipped. Only a X509 data element is supported.</remarks>
-        public virtual void ReadFrom(XmlReader reader)
+        public string Kid
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
-
-            try
-            {
-                // <KeyInfo>
-                reader.ReadStartElement();
-
-                while (reader.IsStartElement())
-                {
-                    // <X509Data>
-                    if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace))
-                    {
-                        reader.ReadStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
-                        while (reader.IsStartElement())
-                        {
-                            if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace))
-                            {
-                                // multiple certs
-                                if (CertificateData != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509Certificate);
-
-                                ReadCertificate(reader);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace))
-                            {
-                                if (SerialNumber != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509IssuerSerial);
-
-                                ReadIssuerSerial(reader);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace))
-                            {
-                                if (SKI != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509SKI);
-
-                                ReadSKI(reader);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace))
-                            {
-                                if (SubjectName != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509SubjectName);
-
-                                ReadSubjectName(reader);
-                            }
-                            else
-                            {
-                                // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>
-                                Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
-                            }
-                        }
-
-                        // </X509Data>
-                        reader.ReadEndElement();
-                    }
-                    // <RetrievalMethod>
-                    else if (reader.IsStartElement(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace))
-                    {
-                        RetrievalMethodUri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI);
-                        reader.ReadOuterXml();
-                    }
-                    // TODO <KeyName>
-                    //else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace))
-                    //{
-                    //}
-                    // TODO <KeyValue>
-                    //else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace))
-                    //{
-                    //}
-                    else
-                    {
-                        // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>
-                        Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
-                    }
-                }
-
-                // </KeyInfo>
-                reader.ReadEndElement();
-            }
-            catch(Exception ex)
-            {
-                if (ex is XmlReadException)
-                    throw;
-
-                throw XmlUtil.LogReadException(LogMessages.IDX21017, ex, XmlSignatureConstants.Elements.KeyInfo, ex);
-            }
+            get;
+            set;
         }
 
         /// <summary>
-        /// Parses the "X509Certificate" element.
+        /// Gets or sets the Uri associated with the RetrievalMethod
         /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently positioning on the <see cref="XmlSignatureConstants.Elements.X509Certificate"/> element.</param>
-        private void ReadCertificate(XmlReader reader)
+        public string RetrievalMethodUri
         {
-            CertificateData = reader.ReadElementContentAsString();
-            var embededCert = new X509Certificate2(Convert.FromBase64String(CertificateData));
-            Kid = embededCert.Thumbprint;
+            get;
+            set;
         }
 
         /// <summary>
-        /// Parses the "X509IssuerSerial" element.
+        /// Get or sets the SerialNumber that is part of a 'X509IssuerSerial'
         /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently positioning on the <see cref="XmlSignatureConstants.Elements.X509IssuerSerial"/> element.</param>
-        private void ReadIssuerSerial(XmlReader reader)
+        public string SerialNumber
         {
-            reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
-
-            if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
-
-            IssuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
-
-            if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
-
-            SerialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
-            Kid = SerialNumber;
-
-            reader.ReadEndElement();
-         }
-
-        /// <summary>
-        /// Parses the "X509SKI" element.
-        /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently pointing at the <see cref="XmlSignatureConstants.Elements.X509SKI"/> element.</param>
-        private void ReadSKI(XmlReader reader)
-        {
-            SKI = reader.ReadElementContentAsString();
-            Kid = SKI;
+            get;
+            set;
         }
 
         /// <summary>
-        /// Parses the "X509SubjectName" element.
+        /// Gets or sets the 'X509SKI' value
         /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently pointing at the <see cref="XmlSignatureConstants.Elements.X509SubjectName"/> element.</param>
-        private void ReadSubjectName(XmlReader reader)
+        public string SKI
         {
-            SubjectName = reader.ReadElementContentAsString();
-            Kid = SubjectName;
+            get;
+            set;
         }
 
-        public virtual void WriteTo(XmlWriter writer)
+        /// <summary>
+        /// Get or sets the 'X509SubjectName' value
+        /// </summary>
+        public string SubjectName
         {
-            if (writer == null)
-                LogArgumentNullException(nameof(writer));
-
-            // TODO serialize
+            get;
+            set;
         }
     }
 }

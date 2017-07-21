@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -33,210 +36,171 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Represents the &lt;Reference> element in a &lt;SignedInfo> clause.
+    /// Represents a XmlDsig Reference element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Reference
     /// </summary>
     public class Reference
     {
-        private ElementWithAlgorithmAttribute _digestMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.DigestMethod);
-        private DigestValueElement _digestValueElement = new DigestValueElement();
-        private string _prefix = XmlSignatureConstants.Prefix;
+        private XmlTokenStream _tokenStream;
 
+        /// <summary>
+        /// Initializes an instance of <see cref="Reference"/>
+        /// </summary>
         public Reference()
         {
-            TransformChain = new TransformChain();
         }
 
-        public Reference(params Transform[] transforms)
+        /// <summary>
+        /// Initializes an instance of <see cref="Reference"/>.
+        /// </summary>
+        /// <param name="transforms">an <see cref="IEnumerable{T}"/> of transforms to apply.</param>
+        public Reference(IEnumerable<string> transforms)
         {
             if (transforms == null)
                 LogArgumentNullException(nameof(transforms));
 
-            TransformChain = new TransformChain(transforms);
-        }
-
-        public string DigestAlgorithm
-        {
-            get { return _digestMethodElement.Algorithm; }
-            set { _digestMethodElement.Algorithm = value; }
-        }
-
-        public string  DigestText { get; set; }
-
-        public byte[]  DigestBytes { get; set; }
-
-        public string Id { get; set; }
-
-        public TransformChain TransformChain { get; }
-
-        public string Type { get; set; }
-
-        public string Uri { get; set; }
-
-        public bool Verified { get; set; }
-
-        internal bool Verify(CryptoProviderFactory cryptoProviderFactory, XmlTokenStreamReader tokenStream)
-        {
-            Verified = Utility.AreEqual(ComputeDigest(cryptoProviderFactory, tokenStream), DigestBytes);
-            return Verified;
+            Transforms = new List<string>(transforms);
         }
 
         /// <summary>
-        /// We look at the URI reference to decide if we should preserve comments while canonicalization.
-        /// Only when the reference is xpointer(/) or xpointer(id(SomeId)) do we preserve comments during canonicalization 
-        /// of the reference element for computing the digest.
+        /// Gets or sets the DigestMethod to use when creating the hash.
         /// </summary>
-        /// <param name="uri">The Uri reference </param>
-        /// <returns>true if comments should be preserved.</returns>
-        private static bool ShouldPreserveComments(string uri)
+        public string DigestMethod
         {
-            bool preserveComments = false;
+            get;
+            set;
+        }
 
-            if (!string.IsNullOrEmpty(uri))
+        /// <summary>
+        /// Gets or set the Base64 encoding of the hashed octets.
+        /// </summary>
+        public string DigestValue
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the id of this Reference.
+        /// </summary>
+        public string Id
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the prefix to use when writing the &lt;Reference> element.
+        /// </summary>
+        public string Prefix
+        {
+            get;
+            set;
+        } = XmlSignatureConstants.Prefix;
+
+        /// <summary>
+        /// Gets or set the <see cref="XmlTokenStream"/> that is associated with the <see cref="DigestValue"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public XmlTokenStream TokenStream
+        {
+            get => _tokenStream;
+            set => _tokenStream = value ?? throw LogArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IList{T}"/> of transforms to apply.
+        /// </summary>
+        public IList<string> Transforms
+        {
+            get;
+        } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets the Type of this Reference.
+        /// </summary>
+        public string Type
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the Uri of this Reference.
+        /// </summary>
+        public string Uri
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Verifies that the <see cref="DigestValue" /> equals the hashed value of the <see cref="TokenStream"/> after
+        /// <see cref="Transforms"/> have been applied.
+        /// </summary>
+        /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
+        public void Verify(CryptoProviderFactory cryptoProviderFactory)
+        {
+            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory, TokenStream), Convert.FromBase64String(DigestValue)))
+                throw LogExceptionMessage(new CryptographicException(FormatInvariant(LogMessages.IDX21201, Id)));
+        }
+
+        /// <summary>
+        /// Writes into a stream and then hashes the bytes.
+        /// </summary>
+        /// <param name="tokenStream">the set of XML nodes to read.</param>
+        /// <param name="hash">the hash algorithm to apply.</param>
+        /// <returns>hash of the octets.</returns>
+        private byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hash)
+        {
+            using (var stream = new MemoryStream())
             {
-                //removes the hash
-                string idref = uri.Substring(1);
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
+                {
+                    tokenStream.WriteTo(writer);
+                    writer.Flush();
+                }
 
-                if (idref == "xpointer(/)")
-                {
-                    preserveComments = true;
-                }
-                else if (idref.StartsWith("xpointer(id(", StringComparison.Ordinal) && (idref.IndexOf(")", StringComparison.Ordinal) > 0))
-                {
-                    // Dealing with XPointer of type #xpointer(id("ID")). Other XPointer support isn't handled here and is anyway optional 
-                    preserveComments = true;
-                }
+                stream.Flush();
+                stream.Position = 0;
+                return hash.ComputeHash(stream);
             }
-
-            return preserveComments;
         }
 
-        // TODO - hook this up to write
-        internal void ComputeAndSetDigest()
+        /// <summary>
+        /// Computes the digest of this reference by applying the transforms over the tokenStream.
+        /// </summary>
+        /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> that will supply the <see cref="HashAlgorithm"/>.</param>
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/>that contains the XML nodes to hash.</param>
+        /// <returns></returns>
+        protected byte[] ComputeDigest(CryptoProviderFactory cryptoProviderFactory, XmlTokenStream tokenStream)
         {
-            //_digestValueElement.Value = ComputeDigest();
-        }
+            if (cryptoProviderFactory == null)
+                throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
-        //public byte[] ComputeDigest()
-        //{
-        //    if (TransformChain.TransformCount == 0)
-        //        throw LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
-
-        //    if (_resolvedXmlSource == null)
-        //        throw LogExceptionMessage(new CryptographicException("UnableToResolveReferenceUriForSignature, this.uri"));
-
-        //    return TransformChain.TransformToDigest(_resolvedXmlSource, DigestAlgorithm);
-        //}
-
-        private byte[] ComputeDigest(CryptoProviderFactory providerFactory, XmlTokenStreamReader tokenStream)
-        {
             if (tokenStream == null)
                 throw LogArgumentNullException(nameof(tokenStream));
 
-            if (TransformChain.Count == 0)
-                throw LogExceptionMessage(new NotSupportedException("EmptyTransformChainNotSupported"));
+            var hashAlg = cryptoProviderFactory.CreateHashAlgorithm(DigestMethod);
+            if (hashAlg == null)
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(Tokens.LogMessages.IDX10673, DigestMethod)));
 
-            var hashAlg = providerFactory.CreateHashAlgorithm(DigestAlgorithm);
             try
             {
-                return TransformChain.TransformToDigest(tokenStream, hashAlg);
+                // apply identity transform, just get the hash without any transforms
+                if (Transforms.Count == 0)
+                    return ProcessAndDigest(tokenStream, hashAlg);
+
+                // specification requires last transform to be a canonicalizing transform
+                // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
+                for (int i = 0;  i < Transforms.Count-1; i++)
+                    TransformFactory.Default.GetTransform(Transforms[i]).Process(tokenStream);
+
+                return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(tokenStream, hashAlg);
             }
             finally
             {
                 if (hashAlg != null)
-                    providerFactory.ReleaseHashAlgorithm(hashAlg);
-            }
-        }
-
-        public void ReadFrom(XmlDictionaryReader reader)
-        {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
-
-            reader.MoveToStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
-            _prefix = reader.Prefix;
-            Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
-            Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
-            Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
-
-            reader.Read();
-
-            if (reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
-                TransformChain.ReadFrom(reader, ShouldPreserveComments(Uri));
-            else
-                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Transforms, reader.NamespaceURI, reader.LocalName);
-
-
-            // <DigestMethod>
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
-            reader.MoveToStartElement(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
-            bool isEmptyElement = reader.IsEmptyElement;
-            DigestAlgorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-            if (string.IsNullOrEmpty(DigestAlgorithm))
-                throw XmlUtil.OnRequiredAttributeMissing(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Attributes.Algorithm);
-
-            reader.Read();
-            reader.MoveToContent();
-            if (!isEmptyElement)
-            {
-                reader.MoveToContent();
-                reader.ReadEndElement();
-            }
-
-            // <DigestValue>
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
-            DigestText = reader.ReadElementContentAsString().Trim();
-            DigestBytes = System.Convert.FromBase64String(DigestText);
-
-            // </Reference>
-            reader.MoveToContent();
-            reader.ReadEndElement();
-            reader.MoveToContent();
-        }
-
-        public void WriteTo(XmlDictionaryWriter writer)
-        {
-            writer.WriteStartElement(_prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
-            if (Id != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
-
-            if (Uri != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, Uri);
-
-            if (Type != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, Type);
-
-            if (TransformChain.Count > 0)
-                TransformChain.WriteTo(writer);
-
-            _digestMethodElement.WriteTo(writer);
-            _digestValueElement.WriteTo(writer);
-
-            writer.WriteEndElement();
-        }
-
-        struct DigestValueElement
-        {
-            byte[] _digestValue;
-            string _digestText;
-
-            internal byte[] Value
-            {
-                get { return _digestValue; }
-                set
-                {
-                    _digestValue = value;
-                    _digestText = null;
-                }
-            }
-
-            public void WriteTo(XmlDictionaryWriter writer)
-            {
-                writer.WriteStartElement(XmlSignatureConstants.Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
-                if (_digestText != null)
-                    writer.WriteString(_digestText);
-                else
-                    writer.WriteBase64(_digestValue, 0, _digestValue.Length);
-
-                writer.WriteEndElement();
+                    cryptoProviderFactory.ReleaseHashAlgorithm(hashAlg);
             }
         }
     }

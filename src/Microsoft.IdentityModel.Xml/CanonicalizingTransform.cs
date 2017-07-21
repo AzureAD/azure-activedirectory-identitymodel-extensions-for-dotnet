@@ -25,14 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Security.Cryptography;
+
 namespace Microsoft.IdentityModel.Xml
 {
-
-    public static class ExclusiveC14NConstants
+    /// <summary>
+    /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
+    /// </summary>
+    public abstract class CanonicalizingTransfrom
     {
-        public const string Namespace = "http://www.w3.org/2001/10/xml-exc-c14n#";
-        public const string PrefixList = "PrefixList";
-        public const string InclusiveNamespaces = "InclusiveNamespaces";
-        public const string Prefix = "ec";
+        /// <summary>
+        /// Gets or sets a value indicating if this transform should include comments.
+        /// </summary>
+        public bool IncludeComments
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Processes a set of XML nodes and returns the hash of the octets.
+        /// </summary>
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> that has the XML nodes to process.</param>
+        /// <param name="hashAlg">the <see cref="HashAlgorithm"/>to use</param>
+        /// <returns>the hash of the processed XML nodes.</returns>
+        public abstract byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hashAlg);
     }
 }

@@ -31,6 +31,9 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
+    /// <summary>
+    /// Utilities for working with XML
+    /// </summary>
     public static class XmlUtil
     {
         /// <summary>
@@ -47,24 +50,82 @@ namespace Microsoft.IdentityModel.Xml
             throw LogReadException(LogMessages.IDX21010, element);
         }
 
-        public static void CheckReaderOnEntry(XmlReader reader, string element, string ns)
+        /// <summary>
+        /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <param name="element">the expected element.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at at expected element.</exception>
+        public static void CheckReaderOnEntry(XmlReader reader, string element)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
-            // IsStartElement calls MoveToContent.
-            if (!reader.IsStartElement(element, ns))
-                throw LogReadException(LogMessages.IDX21011, ns, element, reader.NamespaceURI, reader.LocalName);
+            if (string.IsNullOrEmpty(element))
+                throw LogArgumentNullException(nameof(element));
+
+            // IsStartElement calls reader.MoveToContent().
+            if (!reader.IsStartElement())
+                throw LogReadException(LogMessages.IDX21022, reader.NodeType);
+
+            if (!string.Equals(reader.LocalName, element, StringComparison.OrdinalIgnoreCase))
+                throw LogReadException(LogMessages.IDX21024, element, reader.LocalName);
         }
 
+        /// <summary>
+        /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <param name="element">the expected element.</param>
+        /// <param name="namespace">the expected namespace.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at expected element.</exception>
+        public static void CheckReaderOnEntry(XmlReader reader, string element, string @namespace)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
 
-        public static bool EqualsQName(XmlQualifiedName qname, string localName, string namespaceUri)
+            // IsStartElement calls reader.MoveToContent().
+            if (!reader.IsStartElement())
+                throw LogReadException(LogMessages.IDX21022, reader.NodeType);
+
+            // IsStartElement calls reader.MoveToContent().
+            if (string.IsNullOrEmpty(@namespace))
+            {
+                if (!reader.IsStartElement(element))
+                    throw LogReadException(LogMessages.IDX21024, element, reader.LocalName);
+            }
+            else
+            {
+                if (!reader.IsStartElement(element, @namespace))
+                    throw LogReadException(LogMessages.IDX21011, @namespace, element, reader.NamespaceURI, reader.LocalName);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="qname"></param>
+        /// <param name="localName"></param>
+        /// <param name="namespace"></param>
+        /// <returns></returns>
+        public static bool EqualsQName(XmlQualifiedName qname, string localName, string @namespace)
         {
             return null != qname
                 && StringComparer.Ordinal.Equals(localName, qname.Name)
-                && StringComparer.Ordinal.Equals(namespaceUri, qname.Namespace);
+                && StringComparer.Ordinal.Equals(@namespace, qname.Namespace);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
         public static XmlQualifiedName GetXsiType(XmlReader reader)
         {
             string xsiType = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
@@ -76,57 +137,49 @@ namespace Microsoft.IdentityModel.Xml
             return ResolveQName(reader, xsiType);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
         public static bool IsNil(XmlReader reader)
         {
             string xsiNil = reader.GetAttribute(XmlSignatureConstants.Attributes.Nil, XmlSignatureConstants.XmlSchemaNamespace);
             return !string.IsNullOrEmpty(xsiNil) && XmlConvert.ToBoolean(xsiNil);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static string NormalizeEmptyString(string s)
         {
             return string.IsNullOrEmpty(s) ? null : s;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
         internal static Exception OnRequiredAttributeMissing(string element, string attribute)
         {
             return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21013, element, attribute)));
         }
 
-        internal static Exception OnRequiredElementMissing(XmlReader reader, string element, string ns)
-        {
-            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21011, element, ns, reader.LocalName, reader.NamespaceURI)));
-        }
-
-        internal static Exception OnUnexpectedChildNode(XmlReader reader, string reading)
-        {
-            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21012, reading, reader.LocalName)));
-        }
-
-        internal static string ReadEmptyElementAndRequiredAttribute(XmlDictionaryReader reader, string name, string namespaceUri, string attributeName,
-            out string prefix)
-        {
-            reader.MoveToStartElement(name, namespaceUri);
-            prefix = reader.Prefix;
-            bool isEmptyElement = reader.IsEmptyElement;
-            string value = reader.GetAttribute(attributeName, null);
-            if (value == null)
-            {
-                OnRequiredAttributeMissing(attributeName, null);
-            }
-            reader.Read();
-
-            if (!isEmptyElement)
-            {
-                reader.ReadEndElement();
-            }
-            return value;
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="qstring"></param>
+        /// <returns></returns>
         public static XmlQualifiedName ResolveQName(XmlReader reader, string qstring)
         {
             string name = qstring;
             string prefix = String.Empty;
-            string ns = null;
+            string @namespace = null;
 
             int colon = qstring.IndexOf(':'); // index of char is always ordinal
             if (colon > -1)
@@ -135,11 +188,17 @@ namespace Microsoft.IdentityModel.Xml
                 name = qstring.Substring(colon + 1, qstring.Length - (colon + 1));
             }
 
-            ns = reader.LookupNamespace(prefix);
+            @namespace = reader.LookupNamespace(prefix);
 
-            return new XmlQualifiedName(name, ns);
+            return new XmlQualifiedName(name, @namespace);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="offset"></param>
+        /// <param name="count"></param>
         internal static void ValidateBufferBounds(Array buffer, int offset, int count)
         {
             if (buffer == null)
@@ -152,12 +211,24 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), FormatInvariant(LogMessages.IDX20001, 0,  buffer.Length - count)));
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="expectedTypeName"></param>
+        /// <param name="expectedTypeNamespace"></param>
         public static void ValidateXsiType(XmlReader reader, string expectedTypeName, string expectedTypeNamespace)
         {
             ValidateXsiType(reader, expectedTypeName, expectedTypeNamespace, false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="expectedTypeName"></param>
+        /// <param name="expectedTypeNamespace"></param>
+        /// <param name="requireDeclaration"></param>
         public static void ValidateXsiType(XmlReader reader, string expectedTypeName, string expectedTypeNamespace, bool requireDeclaration)
         {
             XmlQualifiedName declaredType = GetXsiType(reader);
@@ -178,25 +249,50 @@ namespace Microsoft.IdentityModel.Xml
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static Exception LogReadException(string format, params object[] args)
         {
             return LogExceptionMessage(new XmlReadException(FormatInvariant(format, args)));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="inner"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static Exception LogReadException(string format, Exception inner, params object[] args)
         {
             return LogExceptionMessage(new XmlReadException(FormatInvariant(format, args), inner));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static Exception LogWriteException(string format, params object[] args)
         {
             return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args)));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="inner"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static Exception LogWriteException(string format, Exception inner, params object[] args)
         {
             return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args), inner));
         }
-
     }
 }

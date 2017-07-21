@@ -51,7 +51,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Id = new Saml2Id();
             IssueInstant = DateTime.UtcNow;
             Issuer = issuer;
-            ExternalEncryptedKeys = new List<SecurityKeyIdentifierClause>();
             Statements = new List<Saml2Statement>();
             Version = Saml2Constants.Version;
         }
@@ -88,15 +87,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public EncryptingCredentials EncryptingCredentials
         {
             get; set;
-        }
-
-        /// <summary>
-        /// Gets additional encrypted keys which will be specified external to the 
-        /// EncryptedData element, as children of the EncryptedAssertion element.
-        /// </summary>
-        public ICollection<SecurityKeyIdentifierClause> ExternalEncryptedKeys
-        {
-            get;
         }
 
         /// <summary>

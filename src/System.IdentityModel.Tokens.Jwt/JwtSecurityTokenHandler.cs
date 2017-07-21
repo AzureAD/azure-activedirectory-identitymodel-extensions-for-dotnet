@@ -118,7 +118,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
         /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap.</para>
         /// </summary>
-        /// <exception cref="ArgumentNullException">'value is null.</exception>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public IDictionary<string, string> InboundClaimTypeMap
         {
             get
@@ -128,10 +128,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
-
-                _inboundClaimTypeMap = value;
+                _inboundClaimTypeMap = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             }
         }
 

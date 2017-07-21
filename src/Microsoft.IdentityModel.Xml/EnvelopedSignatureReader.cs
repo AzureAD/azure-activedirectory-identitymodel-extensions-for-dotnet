@@ -25,62 +25,72 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Wraps a reader pointing to a root element of enveloped signed XML.
-    /// The signature and keyinfo will be read for signature validation.
+    /// Wraps a <see cref="XmlReader"/> pointing to a root element of XML that may contain a signature.
+    /// If a &lt; is found, <see cref="Signature"/> will be populated and <see cref="SignedInfo.References"/> will
+    /// have <see cref="XmlTokenStream"/> set for future validation.
     /// </summary>
     public class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
     {
-        private bool _disposed;
+        private DSigSerializer _dsigSerializer = new DSigSerializer();
         private int _elementCount;
-        private XmlTokenStreamReader _tokenStreamingReader;
+        private XmlTokenStreamReader _tokenStreamReader;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
         /// </summary>
-        /// <param name="reader">Reader pointing to the XML that contains an enveloped signature.</param>
+        /// <param name="reader">a <see cref="XmlReader"/> pointing to XML that may contain an enveloped signature.</param>
+        /// <remarks>If a &lt;Signature> element is found, a <see cref="Signature"/> will be populated.</remarks>
+        /// <exception cref="ArgumentNullException">'reader' is null.</exception>
         public EnvelopedSignatureReader(XmlReader reader)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
-            _tokenStreamingReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
-            InnerReader = _tokenStreamingReader;
-            _tokenStreamingReader.XmlTokens.SetElementExclusion(XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
+            _tokenStreamReader = new XmlTokenStreamReader(reader);
+            InnerReader = _tokenStreamReader;
         }
 
         /// <summary>
-        /// Called when the root element is read.
-        /// Attaches a <see cref="XmlTokenStreamReader"/> to the signature.
+        /// Gets or sets the <see cref="DSigSerializer"/> to use when reading XmlDSig elements.
+        /// </summary>
+        public DSigSerializer Serializer
+        {
+            get => _dsigSerializer;
+            set => _dsigSerializer = value ?? throw LogArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="XmlTokenStream"/> that contains the XML nodes that were read.
+        /// </summary>
+        public XmlTokenStream TokenStream
+        {
+            get => _tokenStreamReader.XmlTokens;
+        }
+
+        /// <summary>
+        /// Called after the root element has been completely read.
+        /// Attaches a <see cref="XmlTokenStreamReader"/> to the first Reference for future processing if
+        /// a signature was found.
         /// </summary>
         protected virtual void OnEndOfRootElement()
         {
             if (Signature != null)
-                Signature.TokenSource = _tokenStreamingReader;
+                Signature.SignedInfo.References[0].TokenStream = TokenStream;
         }
 
         /// <summary>
-        /// Gets the <see cref="Signature"/> associated with the XML.
+        /// Keeps track of the XML Element count. If a signature is detected it is read.
         /// </summary>
-        public Signature Signature { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="XmlTokenStream"/> that was collected during the read.
-        /// </summary>
-        public XmlTokenStream XmlTokens
-        {
-            get { return _tokenStreamingReader.XmlTokens; }
-        }
-
-        /// <summary>
-        /// If end of the envelope is reached, reads and validates the signature.
-        /// </summary>
-        /// <returns>true if the next node was read successfully; false if there are no more nodes</returns>
+        /// <returns>'true' if the next node was read successfully; 'false' if there are no more nodes.</returns>
+        /// <exception cref="XmlReadException">if more than one signature is found.</exception>
+        /// <exception cref="XmlReadException">if a &lt;Reference> element was not found in the &lt;SignedInfo>.</exception>
         public override bool Read()
         {
             if ((NodeType == XmlNodeType.Element) && (!base.IsEmptyElement))
@@ -93,66 +103,28 @@ namespace Microsoft.IdentityModel.Xml
                     OnEndOfRootElement();
             }
 
-            bool result = base.Read();
+            bool result = InnerReader.Read();
             if (result
-                && _tokenStreamingReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
-                && _tokenStreamingReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
+                && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
+                && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
                 if (Signature != null)
-                   throw XmlUtil.LogReadException(LogMessages.IDX21019);
+                    throw XmlUtil.LogReadException(LogMessages.IDX21019);
 
-                ReadSignature();
+                Signature = Serializer.ReadSignature(InnerReader);
             }
 
             return result;
         }
 
-        private void ReadSignature()
-        {
-            Signature = new Signature(new SignedInfo());
-            Signature.ReadFrom(_tokenStreamingReader);
-            if (Signature.SignedInfo.Reference == null)
-                throw XmlUtil.LogReadException(LogMessages.IDX21101);
-        }
-
-        #region IDisposable Members
-
         /// <summary>
-        /// Releases the unmanaged resources used by the System.IdentityModel.Protocols.XmlSignature.EnvelopedSignatureReader and optionally
-        /// releases the managed resources.
+        /// Gets the <see cref="Signature"/> that was found inside the XML.
         /// </summary>
-        /// <param name="disposing">
-        /// True to release both managed and unmanaged resources; false to release only unmanaged resources.
-        /// </param>
-        protected override void Dispose(bool disposing)
+        /// <remarks><see cref="Signature"/> may be null.</remarks>
+        public Signature Signature
         {
-            base.Dispose(disposing);
-
-            if (_disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                //
-                // Free all of our managed resources
-                //
-
-                if (_tokenStreamingReader != null)
-                {
-#if DESKTOPNET45
-                    // TODO - what to use for net 1.4
-                    _tokenStreamingReader.Close();
-#endif
-                    _tokenStreamingReader = null;
-                }
-            }
-
-            // Free native resources, if any.
-
-            _disposed = true;
+            get;
+            private set;
         }
-#endregion
     }
 }

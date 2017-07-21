@@ -26,56 +26,58 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
-
     /// <summary>
-    /// Represents a security token exception.
     /// </summary>
-    public class XmlSignedInfoException : XmlException
+    public class TransformFactory
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlSignedInfoException"/> class.
+        /// Static constructor that initializes the default <see cref="TransformFactory"/>.
         /// </summary>
-        public XmlSignedInfoException()
-            : base()
+        static TransformFactory()
         {
+            Default = new TransformFactory();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlSignedInfoException"/> class with a specified error message.
+        /// Gets the default instance of <see cref="TransformFactory"/>
         /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception.</param>
-        public XmlSignedInfoException(string message)
-            : base(message)
+        public static TransformFactory Default
         {
+            get;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlSignedInfoException"/> class with a specified error message
-        /// and a reference to the inner exception that is the cause of this exception.
+        /// Gets a XML transform.
         /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception.</param>
-        /// <param name="innerException">The <see cref="Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
-        public XmlSignedInfoException(string message, Exception innerException)
-            : base(message, innerException)
+        /// <param name="transform">the name of the transform.</param>
+        /// <returns><see cref="Transform"/></returns>
+        public virtual Transform GetTransform(string transform)
         {
+            if (transform == SecurityAlgorithms.EnvelopedSignature)
+                return new EnvelopedSignatureTransform();
+
+            throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
         }
 
-#if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="XmlSignedInfoException"/> class.
+        /// Gets a XML that is capable of Canonicalizing XML and returning the bytes.
         /// </summary>
-        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
-        /// <param name="context">The contextual information about the source or destination.</param>
-        protected XmlSignedInfoException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        /// <param name="transform">the name of the transform.</param>
+        /// <returns><see cref="CanonicalizingTransfrom"/></returns>
+        public virtual CanonicalizingTransfrom GetCanonicalizingTransform(string transform)
         {
+            if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
+                return new ExclusiveCanonicalizationTransform(true);
+
+            if (transform == SecurityAlgorithms.ExclusiveC14n)
+                return new ExclusiveCanonicalizationTransform(false);
+
+            throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
         }
-#endif
     }
 }

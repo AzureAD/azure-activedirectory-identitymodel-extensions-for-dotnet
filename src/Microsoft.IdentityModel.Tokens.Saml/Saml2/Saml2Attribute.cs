@@ -81,8 +81,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string FriendlyName
         {
-            get { return _friendlyName; }
-            set { _friendlyName = XmlUtil.NormalizeEmptyString(value); }
+            get => _friendlyName;
+            set => _friendlyName = XmlUtil.NormalizeEmptyString(value);
         }
 
         /// <summary>
@@ -90,14 +90,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public string Name
         {
-            get { return _name; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogExceptionMessage(new ArgumentNullException(nameof(value)));
-
-                _name = value;
-            }
+            get => _name;
+            set => _name = string.IsNullOrEmpty(value)
+                ? throw LogExceptionMessage(new ArgumentNullException(nameof(value))) : value;
         }
 
         /// <summary>
@@ -106,34 +101,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Uri NameFormat
         {
-            get { return _nameFormat; }
-            set
-            {
-                if (value != null && !value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
-
-                _nameFormat = value;
-            }
+            get => _nameFormat;
+            set => _nameFormat = (value != null && !value.IsAbsoluteUri)
+                ? throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)))
+                : value;
         }
 
         /// <summary>
         /// Gets or sets the string that represents the OriginalIssuer of the this SAML Attribute.
         /// </summary>
-        public string OriginalIssuer { get; set; }
+        public string OriginalIssuer
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets the xsi:type of the values contained in the SAML Attribute.
         /// </summary>
         public string AttributeValueXsiType
         {
-            get { return _attributeValueXsiType; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogArgumentNullException(nameof(value));
-
-                _attributeValueXsiType = value;
-            }
+            get => _attributeValueXsiType;
+            set => _attributeValueXsiType = string.IsNullOrEmpty(value)
+                ? throw LogArgumentNullException(nameof(value))
+                : value;
         }
 
         /// <summary>

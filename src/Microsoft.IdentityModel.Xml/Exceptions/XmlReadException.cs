@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Xml
         [Serializable]
 #endif
     /// <summary>
-    /// This exception is thrown when a problem is hit when reading xml.
+    /// This exception is thrown when a problem occurs reading XML.
     /// </summary>
     public class XmlReadException : XmlException
     {

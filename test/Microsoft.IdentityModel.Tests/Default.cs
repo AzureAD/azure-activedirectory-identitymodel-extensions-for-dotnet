@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Xml;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
@@ -46,6 +46,13 @@ namespace Microsoft.IdentityModel.Tests
     /// </summary>
     public static class Default
     {
+        private static string _referenceDigestValue;
+
+        static Default()
+        {
+            _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
+        }
+
         public static string ActorIssuer
         {
             get => "http://Default.ActorIssuer.com/Actor";
@@ -78,7 +85,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SigningCredentials AsymmetricSigningCredentials
         {
-            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm);
+            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
         }
 
         public static SignatureProvider AsymmetricSignatureProvider
@@ -211,6 +218,11 @@ namespace Microsoft.IdentityModel.Tests
             get => "corp.microsoft.com";
         }
 
+        public static HashAlgorithm HashAlgorithm
+        {
+            get => SHA256.Create();
+        }
+
         public static KeyInfo KeyInfo
         {
             get => new KeyInfo
@@ -295,35 +307,53 @@ namespace Microsoft.IdentityModel.Tests
             get => "http://Default.OriginalIssuer.com";
         }
 
+        public static string OuterXml
+        {
+            get => "<OuterXml></OuterXml>";
+        }
+
         public static Reference Reference
         {
-            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
             {
-                DigestAlgorithm = ReferenceDigestAlgorithm,
-                DigestBytes = ReferenceDigestBytes,
-                DigestText = ReferenceDigestText,
+                Id = ReferenceId,
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Prefix = ReferencePrefix,
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
                 Uri = ReferenceUri
             };
         }
 
-        public static string ReferenceDigestAlgorithm
+        public static string ReferenceDigestMethod
         {
             get => SecurityAlgorithms.Sha256Digest;
         }
 
-        public static byte[] ReferenceDigestBytes
+        public static string ReferenceDigestValue
         {
-            get => Convert.FromBase64String(ReferenceDigestText);
+            get => _referenceDigestValue;
         }
 
-        public static string ReferenceDigestText
+        public static string ReferenceId
         {
-            get => "Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=";
+            get => "#abcdef";
+        }
+
+        public static string ReferencePrefix
+        {
+            get => "ds";
+        }
+
+        public static string ReferenceType
+        {
+            get => "http://referenceType";
         }
 
         public static string ReferenceUri
         {
-            get => "#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2";
+            get => "http://referenceUri";
         }
 
         public static string RoleClaimType
@@ -428,33 +458,29 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Signature Signature
         {
-
-            get => new Signature(SignedInfo)
+            get
             {
-                KeyInfo = KeyInfo,
-                SignatureBytes = SignatureBytes,
-                SignatureValue = SignatureValue
-            };
+                var signature = new Signature()
+                {
+                    SignedInfo = SignedInfo
+                };
+                XmlGenerator.Generate(signature);
+                return signature;
+            }
         }
 
         public static SignedInfo SignedInfo
         {
-            get => new SignedInfo
+            get => new SignedInfo(Reference)
             {
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
-                Reference = Reference,
-                SignatureAlgorithm = SecurityAlgorithms.RsaSha256Signature
+                SignatureMethod = SecurityAlgorithms.RsaSha256Signature
             };
-        }
-
-        public static byte[] SignatureBytes
-        {
-            get => Convert.FromBase64String("NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==");
         }
 
         public static string SignatureValue
         {
-            get => "NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==";
+            get => Signature.SignatureValue;
         }
 
         public static string Subject
@@ -684,6 +710,11 @@ namespace Microsoft.IdentityModel.Tests
                 parameters.ValidateLifetime = false;
                 return parameters;
             }
+        }
+
+        public static XmlTokenStream TokenStream
+        {
+            get => XmlUtilities.CreateXmlTokenStream(OuterXml);
         }
 
         public static TokenValidationParameters TokenValidationParameters(SecurityKey encryptionKey, SecurityKey signingKey)

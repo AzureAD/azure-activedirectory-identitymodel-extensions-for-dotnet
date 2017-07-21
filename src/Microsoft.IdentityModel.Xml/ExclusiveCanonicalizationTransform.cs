@@ -34,214 +34,70 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Canonicalization algorithms are found in &lt;SignedInfo> and &lt;Transform>.
-    /// The elment name can be: CanonicalizationMethod or Transform the actions are the same.
+    /// Represents Canonicalization algorithms found in &lt;SignedInfo> and in &lt;Reference>.
     /// </summary>
-    public class ExclusiveCanonicalizationTransform : Transform
+    public sealed class ExclusiveCanonicalizationTransform : CanonicalizingTransfrom
     {
-        private string _elementName;
-        private string _inclusiveListElementPrefix = ExclusiveC14NConstants.Prefix;
-        private string _inclusiveNamespacesPrefixList;
-        private string[] _inclusivePrefixes;
-        private string _prefix = XmlSignatureConstants.Prefix;
-
-        public ExclusiveCanonicalizationTransform()
-            : this(false)
+        /// <summary>
+        /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
+        /// </summary>
+        /// <param name="includeComments">controls if the transform will include comments.</param>
+        public ExclusiveCanonicalizationTransform(bool includeComments)
         {
-        }
-
-        public ExclusiveCanonicalizationTransform(bool isCanonicalizationMethod)
-            : this(isCanonicalizationMethod, false)
-        {
-        }
-
-        public ExclusiveCanonicalizationTransform(bool isCanonicalizationMethod, bool includeComments)
-        {
-            _elementName = isCanonicalizationMethod ? XmlSignatureConstants.Elements.CanonicalizationMethod : XmlSignatureConstants.Elements.Transform;
             IncludeComments = includeComments;
-            Algorithm = includeComments ? XmlSignatureConstants.ExclusiveC14nWithComments : XmlSignatureConstants.ExclusiveC14n;
         }
 
-        public bool IncludeComments
+        /// <summary>
+        /// Applies a canonicalization transform over a set of XML nodes and computes the hash value.
+        /// </summary>
+        /// <param name="tokenStream">the set of XML nodes to transform.</param>
+        /// <param name="hash">the hash algorithm to apply.</param>
+        /// <returns>the hash of the transformed octets.</returns>
+        public override byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hash)
         {
-            get;
-            private set;
-        }
-
-        public string InclusiveNamespacesPrefixList
-        {
-            get
-            {
-                return _inclusiveNamespacesPrefixList;
-            }
-            set
-            {
-                _inclusiveNamespacesPrefixList = value;
-                _inclusivePrefixes = TokenizeInclusivePrefixList(value);
-            }
-        }
-
-        public override bool NeedsInclusiveContext
-        {
-            get { return GetInclusivePrefixes() != null; }
-        }
-
-        public string[] GetInclusivePrefixes()
-        {
-            return _inclusivePrefixes;
-        }
-
-        // multi-transform case, inefficient path
-        internal override object Process(XmlTokenStreamReader reader)
-        {
-            if (reader == null)
-                throw LogArgumentNullException(nameof(reader));
-
-            return CanonicalizationDriver.GetMemoryStream(reader, IncludeComments, _inclusivePrefixes);
-        }
-
-        internal override byte[] ProcessAndDigest(XmlTokenStreamReader reader, HashAlgorithm hash)
-        {
-            if (reader == null)
-                LogArgumentNullException(nameof(reader));
+            if (tokenStream == null)
+                throw LogArgumentNullException(nameof(tokenStream));
 
             if (hash == null)
-                LogArgumentNullException(nameof(hash));
+                throw LogArgumentNullException(nameof(hash));
 
-            var stream = new MemoryStream();
-            reader.MoveToContent();
-            WriteCanonicalStream(stream, reader, IncludeComments, _inclusivePrefixes);
-            stream.Flush();
-            stream.Position = 0;
-            return hash.ComputeHash(stream);
-        }
-
-        public static void WriteCanonicalStream(Stream canonicalStream, XmlTokenStreamReader reader, bool includeComments, string[] inclusivePrefixes)
-        {
-            XmlDictionaryWriter writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
-            if (inclusivePrefixes != null)
+            using (var stream = new MemoryStream())
             {
-                // Add a dummy element at the top and populate the namespace
-                // declaration of all the inclusive prefixes.
-                writer.WriteStartElement("a", reader.LookupNamespace(string.Empty));
-                for (int i = 0; i < inclusivePrefixes.Length; ++i)
-                {
-                    string ns = reader.LookupNamespace(inclusivePrefixes[i]);
-                    if (ns != null)
-                    {
-                        writer.WriteXmlnsAttribute(inclusivePrefixes[i], ns);
-                    }
-                }
-            }
-
-            writer.StartCanonicalization(canonicalStream, includeComments, inclusivePrefixes);
-            reader.XmlTokens.WriteTo(writer);
-
-            writer.Flush();
-            writer.EndCanonicalization();
-
-            if (inclusivePrefixes != null)
-                writer.WriteEndElement();
-#if DESKTOPNET45
-            // TODO - what to use for net 1.4
-            writer.Close();
-#endif
-        }
-
-        public override void ReadFrom(XmlDictionaryReader reader, bool preserveComments)
-        {
-            XmlUtil.CheckReaderOnEntry(reader, _elementName, XmlSignatureConstants.Namespace);
-
-            _prefix = reader.Prefix;
-            bool isEmptyElement = reader.IsEmptyElement;
-            Algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-            if (string.IsNullOrEmpty(Algorithm))
-                throw XmlUtil.LogReadException(LogMessages.IDX21013, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Attributes.Algorithm);
-
-            if (Algorithm == XmlSignatureConstants.ExclusiveC14nWithComments)
-            {
-                // to include comments in canonicalization, two conditions need to be met
-                // 1. the Reference must be an xpointer.
-                // 2. the transform must be #withComments
-                IncludeComments = preserveComments && true;
-            }
-            else if (Algorithm == XmlSignatureConstants.ExclusiveC14n)
-                IncludeComments = false;
-            else
-                XmlUtil.LogReadException(LogMessages.IDX21100, Algorithm, XmlSignatureConstants.ExclusiveC14nWithComments, XmlSignatureConstants.ExclusiveC14n);
-
-            reader.Read();
-            reader.MoveToContent();
-
-            if (!isEmptyElement)
-            {
-                if (reader.IsStartElement(ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace))
-                {
-                    reader.MoveToStartElement(ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
-                    _inclusiveListElementPrefix = reader.Prefix;
-                    bool emptyElement = reader.IsEmptyElement;
-
-                    // We treat PrefixList as optional Attribute.
-                    InclusiveNamespacesPrefixList = reader.GetAttribute(ExclusiveC14NConstants.PrefixList, null);
-                    reader.Read();
-                    if (!emptyElement)
-                        reader.ReadEndElement();
-                }
-
-                // </Transform>
-                reader.MoveToContent();
-                reader.ReadEndElement();
+                WriteCanonicalStream(stream, tokenStream, IncludeComments);
+                stream.Flush();
+                stream.Position = 0;
+                #if DEBUG
+                var xml = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+                var bytes = hash.ComputeHash(stream);
+                var byteValue = Convert.ToBase64String(bytes);
+                stream.Position = 0;
+                #endif
+                return hash.ComputeHash(stream);
             }
         }
 
-        public override void WriteTo(XmlDictionaryWriter writer)
+        /// <summary>
+        /// Writes the Canonicalized XML into the stream.
+        /// </summary>
+        /// <param name="stream"><see cref="Stream"/>that will receive the canonicalized XML.</param>
+        /// <param name="tokenStream"><see cref="XmlReader"/>that is positioned at the XML to canonicalized.</param>
+        /// <param name="includeComments">controls if comments are included in the canonicalized XML.</param>
+        /// <exception cref="ArgumentNullException">if 'stream' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
+        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments)
         {
-            writer.WriteStartElement(_prefix, _elementName, XmlSignatureConstants.Namespace);
-            writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, Algorithm);
-            if (InclusiveNamespacesPrefixList != null)
-            {
-                writer.WriteStartElement(_inclusiveListElementPrefix, ExclusiveC14NConstants.InclusiveNamespaces, ExclusiveC14NConstants.Namespace);
-                writer.WriteAttributeString(ExclusiveC14NConstants.PrefixList, null, InclusiveNamespacesPrefixList);
-                writer.WriteEndElement(); // InclusiveNamespaces
-            }
+            if (stream == null)
+                throw LogArgumentNullException(nameof(stream));
 
-            writer.WriteEndElement(); // Transform
-        }
+            if (tokenStream == null)
+                throw LogArgumentNullException(nameof(tokenStream));
 
-        static string[] TokenizeInclusivePrefixList(string prefixList)
-        {
-            if (prefixList == null)
+            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
             {
-                return null;
-            }
-            string[] prefixes = prefixList.Split(null);
-            int count = 0;
-            for (int i = 0; i < prefixes.Length; i++)
-            {
-                string prefix = prefixes[i];
-                if (prefix == "#default")
-                {
-                    prefixes[count++] = string.Empty;
-                }
-                else if (prefix.Length > 0)
-                {
-                    prefixes[count++] = prefix;
-                }
-            }
-
-            if (count == 0)
-            {
-                return null;
-            }
-            else if (count == prefixes.Length)
-            {
-                return prefixes;
-            }
-            else
-            {
-                string[] result = new string[count];
-                Array.Copy(prefixes, result, count);
-                return result;
+                writer.StartCanonicalization(stream, includeComments, null);
+                tokenStream.WriteTo(writer);
+                writer.EndCanonicalization();
+                writer.Flush();
             }
         }
     }

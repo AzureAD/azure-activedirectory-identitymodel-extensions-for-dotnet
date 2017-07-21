@@ -40,9 +40,9 @@ namespace Microsoft.IdentityModel.Tests
             get
             {
                 return new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
-                    {
-                        Signature = Default.Signature
-                    };
+                {
+                    Signature = Default.Signature
+                };
             }
         }
 

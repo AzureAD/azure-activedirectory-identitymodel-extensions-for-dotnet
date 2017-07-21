@@ -38,8 +38,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Serializer
     {
+        private DSigSerializer _dsigSerializer = new DSigSerializer();
+
         /// <summary>
-        /// Instaniates a new instance of <see cref="Saml2Serializer"/>.
+        /// Instantiates a new instance of <see cref="Saml2Serializer"/>.
         /// </summary>
         public Saml2Serializer() { }
 
@@ -153,16 +155,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
-        public virtual Saml2Assertion ReadAssertion(XmlDictionaryReader reader)
+        public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
-            var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
+            var envelopeReader = new EnvelopedSignatureReader(reader);
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
 
             // TODO - handle EncryptedAssertions
-            // If it's an EncryptedAssertion, we need to retrieve the plaintext
-            // and repoint our reader
+            // If it's an EncryptedAssertion, we need to retrieve the plain text
+            // and re-point our reader
             //if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
             //{
             //    EncryptingCredentials encryptingCredentials = null;
@@ -1335,19 +1337,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 reader.Read();
                 if (!isEmpty)
                 {
-                    // <ds:KeyInfo> 0-OO OR 1-OO
-                    if (requireKeyInfo)
-                    {
-                        var keyInfo = new KeyInfo();
-                        keyInfo.ReadFrom(reader);
-                        confirmationData.KeyInfos.Add(keyInfo);
-                    }
-
                     while (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {
-                        var keyInfo = new KeyInfo();
-                        keyInfo.ReadFrom(reader);
-                        confirmationData.KeyInfos.Add(keyInfo);
+                        confirmationData.KeyInfos.Add(_dsigSerializer.ReadKeyInfo(reader));
                     }
 
                     // If this isn't KeyInfo restricted, there might be open content here ...
@@ -1535,7 +1527,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // We do not dispose this writer, since as a delegating writer it would
             // dispose the inner writer, which we don't properly own.
             EnvelopedSignatureWriter signatureWriter = null;
-            if (null != assertion.SigningCredentials)
+            if (assertion.SigningCredentials != null)
                 writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value);
 
             if (assertion.Subject == null)
@@ -2202,7 +2194,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <ds:KeyInfo> 0-OO
             foreach (var keyInfo in subjectConfirmationData.KeyInfos)
-                keyInfo.WriteTo(writer);
+                _dsigSerializer.WriteKeyInfo(writer, keyInfo);
 
             // </SubjectConfirmationData>
             writer.WriteEndElement();

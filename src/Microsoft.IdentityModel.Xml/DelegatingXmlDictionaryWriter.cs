@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -34,12 +33,12 @@ namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Class wraps a given writer and delegates all XmlDictionaryWriter calls 
-    /// to the inner wrapped writer.
+    /// to the InnerWriter.
     /// </summary>
     public class DelegatingXmlDictionaryWriter : XmlDictionaryWriter
     {
         private XmlDictionaryWriter _innerWriter;
-        private XmlWriter _tracingWriter;
+        private XmlDictionaryWriter _tracingWriter;
 
         /// <summary>
         /// Initializes a new instance of <see cref="DelegatingXmlDictionaryWriter"/>
@@ -49,43 +48,34 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Initializes the inner writer that this instance wraps.
+        /// Gets or sets a writer that receive the XML for tracing.
         /// </summary>
-        /// <param name="innerWriter">XmlDictionaryWriter to wrap.</param>
-        protected void SetCanonicalizingWriter(XmlDictionaryWriter innerWriter)
+        /// <exception cref="ArgumentNullException"> if 'value' is null.</exception>
+        protected XmlDictionaryWriter TracingWriter
         {
-            _innerWriter = innerWriter ?? throw LogArgumentNullException(nameof(innerWriter));
+            get => _tracingWriter;
+            set => _tracingWriter = value ??  throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
-        /// Initializes a writer that will write the un-canonicalize xml.
-        /// If this agrument is not null, all calls will be echoed to this writer.
+        /// Gets or sets the InnerWriter.
         /// </summary>
-        /// <param name="tracingWriter">XmlTextWriter to echo .</param>
-        protected void InitializeTracingWriter(XmlWriter tracingWriter)
-        {
-            _tracingWriter = tracingWriter;
-        }
-
-        /// <summary>
-        /// Gets the wrapped writer.
-        /// </summary>
+        /// <exception cref="ArgumentNullException"> if 'value' is null.</exception>
         protected XmlDictionaryWriter InnerWriter
         {
-            get
-            {
-                return _innerWriter;
-            }
+            get => _innerWriter;
+            set => _innerWriter = value ??  throw LogArgumentNullException(nameof(value));
         }
 
     #if DESKTOPNET45
-        // TODO - replacement on CORE
         /// <summary>
         /// Closes the underlying stream.
         /// </summary>
         public override void Close()
         {
-            _innerWriter.Close();
+            if (_innerWriter != null)
+                _innerWriter.Close();
+
             if (_tracingWriter != null)
                 _tracingWriter.Close();
         }
@@ -96,7 +86,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void Flush()
         {
-            _innerWriter.Flush();
+            if (_innerWriter != null)
+                _innerWriter.Flush();
+
             if (_tracingWriter != null)
                 _tracingWriter.Flush();
         }
@@ -109,11 +101,11 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="count">The number of bytes to write.</param>
         public override void WriteBase64(byte[] buffer, int index, int count)
         {
-            _innerWriter.WriteBase64(buffer, index, count);
+            if (_innerWriter != null)
+                _innerWriter.WriteBase64(buffer, index, count);
+
             if (_tracingWriter != null)
-            {
                 _tracingWriter.WriteBase64(buffer, index, count);
-            }
         }
 
         /// <summary>
@@ -122,7 +114,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="text">The text to place inside the CDATA block.</param>
         public override void WriteCData(string text)
         {
-            _innerWriter.WriteCData(text);
+            if (_innerWriter != null)
+                _innerWriter.WriteCData(text);
+
             if (_tracingWriter != null)
                 _tracingWriter.WriteCData(text);
         }
@@ -272,12 +266,12 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="prefix">The namespace prefix of the attribute.</param>
         /// <param name="localName">The local name of the attribute.</param>
-        /// <param name="ns">The namespace URI for the attribute.</param>
-        public override void WriteStartAttribute(string prefix, string localName, string ns)
+        /// <param name="namespace">The namespace URI for the attribute.</param>
+        public override void WriteStartAttribute(string prefix, string localName, string @namespace)
         {
-            _innerWriter.WriteStartAttribute(prefix, localName, ns);
+            _innerWriter.WriteStartAttribute(prefix, localName, @namespace);
             if (_tracingWriter != null)
-                _tracingWriter.WriteStartAttribute(prefix, localName, ns);
+                _tracingWriter.WriteStartAttribute(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -308,12 +302,12 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         /// <param name="prefix">The namespace prefix of the element.</param>
         /// <param name="localName">The local name of the element.</param>
-        /// <param name="ns">The namespace URI to associate with the element.</param>
-        public override void WriteStartElement(string prefix, string localName, string ns)
+        /// <param name="namespace">The namespace URI to associate with the element.</param>
+        public override void WriteStartElement(string prefix, string localName, string @namespace)
         {
-            _innerWriter.WriteStartElement(prefix, localName, ns);
+            _innerWriter.WriteStartElement(prefix, localName, @namespace);
             if (_tracingWriter != null)
-                _tracingWriter.WriteStartElement(prefix, localName, ns);
+                _tracingWriter.WriteStartElement(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -374,56 +368,23 @@ namespace Microsoft.IdentityModel.Xml
         /// Writes an xmlns namespace declaration. 
         /// </summary>
         /// <param name="prefix">The prefix of the namespace declaration.</param>
-        /// <param name="namespaceUri">The namespace Uri itself.</param>
-        public override void WriteXmlnsAttribute(string prefix, string namespaceUri)
+        /// <param name="namespace">The namespace Uri itself.</param>
+        public override void WriteXmlnsAttribute(string prefix, string @namespace)
         {
-            _innerWriter.WriteXmlnsAttribute(prefix, namespaceUri);
+            _innerWriter.WriteXmlnsAttribute(prefix, @namespace);
             if (_tracingWriter != null)
-                _tracingWriter.WriteAttributeString(prefix, String.Empty, namespaceUri, String.Empty);
+                _tracingWriter.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
         }
 
         /// <summary>
         /// Returns the closest prefix defined in the current namespace scope for the namespace URI.
         /// </summary>
-        /// <param name="ns">The namespace URI whose prefix you want to find.</param>
+        /// <param name="namespace">The namespace URI whose prefix you want to find.</param>
         /// <returns>The matching prefix or null if no matching namespace URI is found in the
         /// current scope.</returns>
-        public override string LookupPrefix(string ns)
+        public override string LookupPrefix(string @namespace)
         {
-            return _innerWriter.LookupPrefix(ns);
-        }
-
-        /// <summary>
-        /// Returns a value indicating if the reader is capable of Canonicalization.
-        /// </summary>
-        public override bool CanCanonicalize
-        {
-            get
-            {
-                return _innerWriter.CanCanonicalize;
-            }
-        }
-
-        /// <summary>
-        /// Indicates the start of Canonicalization. Any write operatation following this will canonicalize the data 
-        /// and will wirte it to the given stream.
-        /// </summary>
-        /// <param name="stream">Stream to which the canonical stream should be written.</param>
-        /// <param name="includeComments">The value indicates if comments written should be canonicalized as well.</param>
-        /// <param name="inclusivePrefixes">Set of prefixes that needs to be included into the canonical stream. The prefixes are defined at 
-        /// the first element that is written to the canonical stream.</param>
-        public override void StartCanonicalization(Stream stream, bool includeComments, string[] inclusivePrefixes)
-        {
-            _innerWriter.StartCanonicalization(stream, includeComments, inclusivePrefixes);
-        }
-
-        /// <summary>
-        /// Closes a previous Start canonicalization operation. The stream given to the StartCanonicalization is flushed 
-        /// and any data written after this call will not be written to the canonical stream.
-        /// </summary>
-        public override void EndCanonicalization()
-        {
-            _innerWriter.EndCanonicalization();
+            return _innerWriter.LookupPrefix(@namespace);
         }
     }
 }

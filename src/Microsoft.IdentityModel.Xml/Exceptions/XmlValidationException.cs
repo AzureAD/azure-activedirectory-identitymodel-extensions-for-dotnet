@@ -29,12 +29,12 @@ using System;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    #if DESKTOPNET45
+#if DESKTOPNET45
         [Serializable]
-    #endif
+#endif
 
     /// <summary>
-    /// Represents an exception thrown when validating xml.
+    /// This exception is thrown when a problem occurs when validating the XML &lt;Signature>.
     /// </summary>
     public class XmlValidationException : XmlException
     {

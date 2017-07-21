@@ -29,12 +29,12 @@ using System.Xml;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class XmlTokenEntry
+    internal class XmlTokenEntry
     {
         internal XmlNodeType NodeType;
         internal string _prefix;
         internal string _localName;
-        internal string _namespaceUri;
+        internal string _namespace;
         private string _value;
 
         public bool IsEmptyElement
@@ -54,21 +54,21 @@ namespace Microsoft.IdentityModel.Xml
             Value = value;
         }
 
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string namespaceUri, string value)
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
         {
             NodeType = nodeType;
             _prefix = prefix;
             _localName = localName;
-            _namespaceUri = namespaceUri;
+            _namespace = @namespace;
             Value = value;
         }
 
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string namespaceUri, bool isEmptyElement)
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
         {
             NodeType = nodeType;
             _prefix = prefix;
             _localName = localName;
-            _namespaceUri = namespaceUri;
+            _namespace = @namespace;
             IsEmptyElement = isEmptyElement;
         }
     }

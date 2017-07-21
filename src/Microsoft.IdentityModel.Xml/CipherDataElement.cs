@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#if EncryptedTokens
+
 using System;
 using System.Xml;
 using static Microsoft.IdentityModel.Xml.XmlEncryptionConstants;
@@ -100,3 +102,5 @@ namespace Microsoft.IdentityModel.Xml
         }
     }
 }
+
+#endif

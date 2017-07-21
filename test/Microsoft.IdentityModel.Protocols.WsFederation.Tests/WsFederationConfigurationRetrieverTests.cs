@@ -58,13 +58,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 if (theoryData.SigingKey != null)
                     configuration.Signature.Verify(theoryData.SigingKey);
 
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
 
                 IdentityComparer.AreWsFederationConfigurationsEqual(theoryData.Configuration, configuration, context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -137,9 +137,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
-                        Metadata = ReferenceMetadata.MetadataNoKeyInfoInSignature,
-                        TestId = nameof(ReferenceMetadata.MetadataNoKeyInfoInSignature)
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21025:"),
+                        Metadata = ReferenceMetadata.MetadataUnknownElementBeforeSignatureEndElement,
+                        TestId = nameof(ReferenceMetadata.MetadataUnknownElementBeforeSignatureEndElement)
                     },
                     new WsFederationMetadataTheoryData
                     {

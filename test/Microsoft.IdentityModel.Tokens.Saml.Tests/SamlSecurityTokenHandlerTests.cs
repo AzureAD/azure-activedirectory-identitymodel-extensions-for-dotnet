@@ -323,16 +323,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IssuerInstantMissing),
-                        Token = RefrenceTokens.SamlToken_IssuerInstantMissing,
+                        TestId = nameof(RefrenceTokens.SamlToken_IssueInstantMissing),
+                        Token = RefrenceTokens.SamlToken_IssueInstantMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11122:", typeof(FormatException)),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IssuerInstantFormatError),
-                        Token = RefrenceTokens.SamlToken_IssuerInstantFormatError,
+                        TestId = nameof(RefrenceTokens.SamlToken_IssueInstantFormatError),
+                        Token = RefrenceTokens.SamlToken_IssueInstantFormatError,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData

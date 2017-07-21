@@ -4,11 +4,21 @@
 
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Xml</AssemblyName>
-    <Description>Includes types that provide support for Reading / Writing XML Enveloped Signatures.</Description>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Description>Includes types that provide support for Reading / Writing XML with Enveloped Signatures.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Xml</PackageId>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DocumentationFile>bin\Debug\net45\net45\.xml</DocumentationFile>
+    <OutputPath>bin\Debug\net45\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <DocumentationFile>bin\Release\net451\net45\.xml</DocumentationFile>
+    <OutputPath>bin\Release\net451\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

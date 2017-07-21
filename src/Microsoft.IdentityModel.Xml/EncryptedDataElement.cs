@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#if EncryptedTokens
+
 using System;
 using System.Security.Cryptography;
 using System.Xml;
@@ -185,3 +187,5 @@ namespace Microsoft.IdentityModel.Xml
         }
     }
 }
+
+#endif

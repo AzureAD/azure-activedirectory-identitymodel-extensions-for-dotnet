@@ -35,52 +35,5 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityKeyIdentifierClause
     {
-        readonly string _clauseType;
-        byte[] _derivationNonce;
-        int _derivationLength;
-
-        protected SecurityKeyIdentifierClause(string clauseType)
-            : this(clauseType, null, 0)
-        {
-        }
-
-        protected SecurityKeyIdentifierClause(string clauseType, byte[] nonce, int length)
-        {
-            _clauseType = clauseType;
-            _derivationNonce = nonce;
-            _derivationLength = length;
-        }
-
-        public virtual bool CanCreateKey
-        {
-            get { return false; }
-        }
-
-        public string ClauseType
-        {
-            get { return _clauseType; }
-        }
-
-        public string Id { get; set; }
-
-        public virtual SecurityKey CreateKey()
-        {
-            throw LogHelper.LogExceptionMessage(new NotSupportedException("KeyIdentifierClauseDoesNotSupportKeyCreation"));
-        }
-
-        public virtual bool Matches(SecurityKeyIdentifierClause keyIdentifierClause)
-        {
-            return ReferenceEquals(this, keyIdentifierClause);
-        }
-
-        public byte[] GetDerivationNonce()
-        {
-            return (_derivationNonce != null) ? (byte[])_derivationNonce.Clone() : null;
-        }
-
-        public int DerivationLength
-        {
-            get { return _derivationLength; }
-        }
     }
 }

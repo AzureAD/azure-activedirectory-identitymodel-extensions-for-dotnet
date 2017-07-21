@@ -28,234 +28,142 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    public class SignedInfo
+    /// <summary>
+    /// Represents a XmlDsig SignedInfo element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-SignedInfo
+    /// </summary>
+    public class SignedInfo : DSigElement
     {
-        readonly ExclusiveCanonicalizationTransform _exclusiveCanonicalizationTransform = new ExclusiveCanonicalizationTransform(true);
-        ElementWithAlgorithmAttribute _signatureMethodElement = new ElementWithAlgorithmAttribute(XmlSignatureConstants.Elements.SignatureMethod);
-        MemoryStream _bufferedStream;
-        string _defaultNamespace = string.Empty;
+        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private string _canonicalizationMethod = SecurityAlgorithms.ExclusiveC14n;
+        private string _signatureMethod = SecurityAlgorithms.RsaSha256Signature;
 
+        /// <summary>
+        /// Initializes a <see cref="SignedInfo"/> instance.
+        /// </summary>
         public SignedInfo()
         {
+            References = new List<Reference>();
         }
 
-        internal MemoryStream CanonicalStream { get; set; }
+        /// <summary>
+        /// Initializes a <see cref="SignedInfo"/> instance.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if <paramref name="reference"/> is null.</exception>
+        public SignedInfo(Reference reference)
+        {
+            if (reference == null)
+                throw LogArgumentNullException(nameof(reference));
 
-        protected Dictionary<string, string> Context { get; set; }
+            References = new List<Reference> { reference };
+        }
 
-        protected string Prefix { get; set; } = XmlSignatureConstants.Prefix;
+        internal MemoryStream CanonicalStream
+        {
+            get;
+            set;
+        }
 
-        public Reference Reference { get; set; }
-
+        /// <summary>
+        /// Gets or sets the CanonicalizationMethod
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="NotSupportedException">if 'value' is not one of:
+        /// "http://www.w3.org/2001/10/xml-exc-c14n#"
+        /// "http://www.w3.org/2001/10/xml-exc-c14n#WithComments"
+        /// </exception>
         public string CanonicalizationMethod
         {
-            get { return _exclusiveCanonicalizationTransform.Algorithm; }
+            get
+            {
+                return _canonicalizationMethod;
+            }
             set
             {
-                if (value != _exclusiveCanonicalizationTransform.Algorithm)
-                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21204, value)));
+                if (string.IsNullOrEmpty(value))
+                    throw LogArgumentNullException(nameof(value));
+
+                if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n, StringComparison.Ordinal) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal))
+                    throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX21204, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments)));
+
+                _canonicalizationMethod = value;
             }
         }
 
-        public bool HasId
+        /// <summary>
+        /// Gets or sets the Reference.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public IList<Reference> References
         {
-            get { return true; }
+            get;
         }
 
-        public string Id { get; set; }
-
-        public string SignatureAlgorithm { get; set; }
-
-        internal void ComputeHash(HashAlgorithm algorithm)
+        /// <summary>
+        /// Gets or sets the SignatureMethod.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public string SignatureMethod
         {
-            if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
-                throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
-
-            var stream = new MemoryStream();
-            GetCanonicalBytes(stream);
+            get
+            {
+                return _signatureMethod;
+            }
+            set
+            {
+                _signatureMethod = string.IsNullOrEmpty(value) ? throw LogArgumentNullException(value) : value;
+            }
         }
 
-        internal byte[] ComputeHashBytes(HashAlgorithm algorithm)
+        /// <summary>
+        /// Verifies the digest of all <see cref="References"/>.
+        /// </summary>
+        /// <param name="cryptoProviderFactory">supplies any required crypto operators.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
+        public void Verify(CryptoProviderFactory cryptoProviderFactory)
         {
-            if ((CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14n) && (CanonicalizationMethod != SecurityAlgorithms.ExclusiveC14nWithComments))
-                throw XmlUtil.LogReadException(LogMessages.IDX21100, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
+            if (cryptoProviderFactory == null)
+                throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
-            var stream = new MemoryStream();
-            GetCanonicalBytes(stream);
-
-            return algorithm.ComputeHash(stream);
+            foreach (var reference in References)
+                reference.Verify(cryptoProviderFactory);
         }
 
-        internal virtual void GetCanonicalBytes(Stream stream)
+        /// <summary>
+        /// Writes the Canonicalized bytes into a stream.
+        /// </summary>
+        /// <param name="stream">the <see cref="Stream"/> to receive the bytes.</param>
+        public void GetCanonicalBytes(Stream stream)
         {
+            if (stream == null)
+                throw LogArgumentNullException(nameof(stream));
+
+            // CanonicalStream will be non null if the SignedInfo was never read by DSigSerializer
             if (CanonicalStream != null)
             {
                 CanonicalStream.WriteTo(stream);
             }
             else
             {
-                _bufferedStream.Position = 0;
-                // We are creating a XmlDictionaryReader with a hard-coded Max XmlDictionaryReaderQuotas. This is a reader that we
-                // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
-                // with the correct quotas and hence we know the data is valid.
-                // Note: signedinfoReader will close _bufferedStream on Dispose.
-                using (var signedinfoReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
+                using (var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
                 {
-                    signedinfoReader.MoveToContent();
-                    using (var bufferingWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                    using (var c14nStream = new MemoryStream())
                     {
-                        bufferingWriter.WriteStartElement("a", _defaultNamespace);
-                        string[] inclusivePrefix = GetInclusivePrefixes();
-                        for (int i = 0; i < inclusivePrefix.Length; ++i)
-                        {
-                            string ns = GetNamespaceForInclusivePrefix(inclusivePrefix[i]);
-                            if (ns != null)
-                            {
-                                bufferingWriter.WriteXmlnsAttribute(inclusivePrefix[i], ns);
-                            }
-                        }
-
-                        bufferingWriter.StartCanonicalization(stream, false, inclusivePrefix);
-                        bufferingWriter.WriteNode(signedinfoReader, false);
-                        bufferingWriter.EndCanonicalization();
-                        bufferingWriter.WriteEndElement();
+                        signedInfoWriter.StartCanonicalization(c14nStream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal), null);
+                        _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
+                        signedInfoWriter.Flush();
+                        signedInfoWriter.EndCanonicalization();
+                        c14nStream.WriteTo(stream);
                     }
                 }
             }
-        }
-
-        internal virtual void ComputeReferenceDigests()
-        {
-            if (Reference == null)
-                throw LogExceptionMessage(new XmlSignedInfoException(LogMessages.IDX21205));
-
-            Reference.ComputeAndSetDigest();
-        }
-
-        internal virtual void EnsureReferenceVerified()
-        {
-            if (Reference == null)
-                throw LogArgumentNullException(nameof(Reference));
-
-            if (!Reference.Verified)
-                throw LogExceptionMessage(new XmlSignedInfoException(FormatInvariant(LogMessages.IDX21201, Reference.Uri)));
-        }
-
-        protected string[] GetInclusivePrefixes()
-        {
-            return _exclusiveCanonicalizationTransform.GetInclusivePrefixes();
-        }
-
-        protected virtual string GetNamespaceForInclusivePrefix(string prefix)
-        {
-            if (Context == null)
-                throw LogExceptionMessage(new InvalidOperationException());
-
-            if (prefix == null)
-                throw LogArgumentNullException(nameof(prefix));
-
-            return Context[prefix];
-        }
-
-        public virtual void ReadFrom(XmlDictionaryReader reader)
-        {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-
-            _defaultNamespace = reader.LookupNamespace(string.Empty);
-            _bufferedStream = new MemoryStream();
-            var settings = new XmlWriterSettings
-            {
-                Encoding = Encoding.UTF8,
-                NewLineHandling = NewLineHandling.None
-            };
-
-            using (XmlWriter bufferWriter = XmlDictionaryWriter.Create(_bufferedStream, settings))
-            {
-                bufferWriter.WriteNode(reader, true);
-                bufferWriter.Flush();
-            }
-
-            _bufferedStream.Position = 0;
-
-            //
-            // We are creating a XmlDictionaryReader with a hard-coded Max XmlDictionaryReaderQuotas. This is a reader that we
-            // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
-            // with the correct quotas and hence we know the data is valid.
-            // Note: effectiveReader will close _bufferedStream on Dispose.
-            //
-            using (var canonicalizingReader = XmlDictionaryReader.CreateTextReader(_bufferedStream, XmlDictionaryReaderQuotas.Max))
-            {
-                CanonicalStream = new MemoryStream();
-                canonicalizingReader.StartCanonicalization(CanonicalStream, false, null);
-                canonicalizingReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-                Prefix = canonicalizingReader.Prefix;
-                Id = canonicalizingReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
-                canonicalizingReader.Read();
-                _exclusiveCanonicalizationTransform.ReadFrom(canonicalizingReader, false);
-                _signatureMethodElement.ReadFrom(canonicalizingReader);
-                SignatureAlgorithm = _signatureMethodElement.Algorithm;
-
-                XmlUtil.CheckReaderOnEntry(canonicalizingReader, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
-                Reference = new Reference();
-                Reference.ReadFrom(canonicalizingReader);
-
-                if (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
-                    throw XmlUtil.LogReadException(LogMessages.IDX21020);
-
-                canonicalizingReader.ReadEndElement();
-                canonicalizingReader.EndCanonicalization();
-            }
-
-            string[] inclusivePrefixes = GetInclusivePrefixes();
-            if (inclusivePrefixes != null)
-            {
-                // We cannot use the canonicalized stream when inclusive prefixes are specified.
-                CanonicalStream = null;
-                Context = new Dictionary<string, string>(inclusivePrefixes.Length);
-                for (int i = 0; i < inclusivePrefixes.Length; i++)
-                {
-                    Context.Add(inclusivePrefixes[i], reader.LookupNamespace(inclusivePrefixes[i]));
-                }
-            }
-        }
-
-        public virtual void WriteTo(XmlDictionaryWriter writer)
-        {
-            if (writer == null)
-                LogArgumentNullException(nameof(writer));
-
-            // <SignedInfo>
-            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-
-            // @Id
-            if (Id != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, Id);
-
-            WriteCanonicalizationMethod(writer);
-            WriteSignatureMethod(writer);
-            if (Reference != null)
-                Reference.WriteTo(writer);
-
-            // </SignedInfo>
-            writer.WriteEndElement();
-        }
-
-        protected void WriteCanonicalizationMethod(XmlDictionaryWriter writer)
-        {
-            _exclusiveCanonicalizationTransform.WriteTo(writer);
-        }
-
-        protected void WriteSignatureMethod(XmlDictionaryWriter writer)
-        {
-            _signatureMethodElement.WriteTo(writer);
         }
     }
 }

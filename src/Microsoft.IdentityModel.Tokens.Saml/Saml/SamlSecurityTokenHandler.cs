@@ -638,11 +638,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             using (var sr = new StringReader(token))
             {
-                using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
-                {
-                    var assertion = Serializer.ReadAssertion(reader);
-                    return new SamlSecurityToken(assertion);
-                }
+                return new SamlSecurityToken(Serializer.ReadAssertion(XmlReader.Create(sr)));
             }
         }
 
