@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     using (CancellationTokenRegistration registration = cancel.Register(() => client.CancelAsync()))
                     {
-                        return await client.DownloadStringTaskAsync(address);
+                        return await client.DownloadStringTaskAsync(address).ConfigureAwait(false);
                     }
                 }
             }

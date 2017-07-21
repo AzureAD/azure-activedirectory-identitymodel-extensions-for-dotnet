@@ -107,11 +107,13 @@ namespace Microsoft.IdentityModel.Protocols
         public const string PostLogoutRedirectUri = "post_logout_redirect_uri";
         public const string Prompt = "prompt";
         public const string RedirectUri = "redirect_uri";
+        public const string RefreshToken = "refresh_token";
         public const string RequestUri = "request_uri";
         public const string Resource = "resource";
         public const string ResponseMode = "response_mode";
         public const string ResponseType = "response_type";
         public const string Scope = "scope";
+        public const string SkuTelemetry = "x-client-SKU";
         public const string SessionState = "session_state";
         public const string State = "state";
         public const string TargetLinkUri = "target_link_uri";
@@ -120,6 +122,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string UiLocales = "ui_locales";
         public const string UserId = "user_id";
         public const string Username = "username";
+        public const string VersionTelemetry = "x-client-ver";
         #pragma warning restore 1591
     }
 
@@ -182,6 +185,8 @@ namespace Microsoft.IdentityModel.Protocols
         public const string CheckSessionIframe = "check_session_iframe";
         public const string Discovery = ".well-known/openid-configuration";
         public const string EndSessionEndpoint = "end_session_endpoint";
+        public const string FrontchannelLogoutSessionSupported = "frontchannel_logout_session_supported";
+        public const string FrontchannelLogoutSupported = "frontchannel_logout_supported";
         public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
         public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
@@ -191,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols
         public const string SubjectTypesSupported = "subject_types_supported";
         public const string TokenEndpoint = "token_endpoint";
         public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
-        public const string UserInfoEndpoint = "user_info_endpoint";
+        public const string UserInfoEndpoint = "userinfo_endpoint";
         #pragma warning restore 1591
     }
 }

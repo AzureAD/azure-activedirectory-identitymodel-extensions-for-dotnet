@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols
         private T _configuration;
 
         /// <summary>
-        /// Initializes an new instance of <see cref="StaticConfigurationManager"/> with a Configuration instance.
+        /// Initializes an new instance of <see cref="StaticConfigurationManager{T}"/> with a Configuration instance.
         /// </summary>
         /// <param name="configuration">Configuration of type <see cref="OpenIdConnectConfiguration"/> or <see cref="WsFederationConfiguration"/>.</param>
         public StaticConfigurationManager(T configuration)

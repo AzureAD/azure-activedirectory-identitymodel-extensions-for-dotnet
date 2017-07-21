@@ -359,12 +359,12 @@ namespace System.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Decodes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
+        /// Serializes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
         /// </summary>
         /// <returns>A string containing the header and payload in JSON format</returns>
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}\nRawData: {2}", this.header.SerializeToJson(), this.payload.SerializeToJson(), rawData ?? "Empty");
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", this.header.SerializeToJson(), this.payload.SerializeToJson());
         }
 
         /// <summary>
@@ -415,6 +415,24 @@ namespace System.IdentityModel.Tokens
                 }
 
                 throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "payload", tokenParts[1], jwtEncodedString), ex);
+            }
+
+            // ensure signature is well-formed, GitIssue 103
+            if (!string.IsNullOrEmpty(tokenParts[2]))
+            {
+                try
+                {
+                    Base64UrlEncoder.Decode(tokenParts[2]);
+                }
+                catch (Exception ex)
+                {
+                    if (DiagnosticUtility.IsFatal(ex))
+                    {
+                        throw;
+                    }
+
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.IDX10703, "signature", tokenParts[1], jwtEncodedString), ex);
+                }
             }
 
             this.rawData = jwtEncodedString;

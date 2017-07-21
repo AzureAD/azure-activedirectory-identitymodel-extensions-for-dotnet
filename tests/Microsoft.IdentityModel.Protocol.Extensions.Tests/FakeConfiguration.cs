@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // Copyright (c) Microsoft Open Technologies, Inc.
 // All Rights Reserved
 // Apache License 2.0
@@ -16,22 +16,15 @@
 // limitations under the License.
 //-----------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Test
 {
     /// <summary>
-    /// Constants related to SAML Tokens.
+    /// Test class to imitate OpenIdConnectConfiguration/WsFederationConfiguration's behavior. Contains "Title" metadata that can be populated from a xml string.
     /// </summary>
-    public static class SamlConstants
+    public class FakeConfiguration
     {
-        #pragma warning disable 1591
-        public const string KeyInfo = "KeyInfo";
-        public const string Assertion = "Assertion";
-        public const string EncryptedAssertion = "EncryptedAssertion";
-        public const int MajorVersionValue = 1;
-        public const int MinorVersionValue = 1;
-        public const string Prefix = "saml";
-        public const string Saml11Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
-        public const string Saml2Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
-        #pragma warning restore 1591
+        public string Author { get; set; }
+
+        public string Title { get; set; }
     }
 }

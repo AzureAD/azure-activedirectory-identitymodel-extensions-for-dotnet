@@ -231,6 +231,11 @@ namespace Microsoft.IdentityModel.Test
             get { return DefaultTokenValidationParameters(DefaultAsymmetricSigningToken); }
         }
 
+        public static TokenValidationParameters NullLifetimeAsymmetricTokenValidationParameters
+        {
+            get { return NullLifetimeTokenValidationParameters(DefaultAsymmetricSigningToken); }
+        }
+
         public static TokenValidationParameters DefaultSymmetricTokenValidationParameters
         {
             get { return DefaultTokenValidationParameters(DefaultSymmetricSigningToken); }
@@ -244,6 +249,18 @@ namespace Microsoft.IdentityModel.Test
                 IssuerSigningToken = securityToken,
                 ValidAudience = DefaultAudience,
                 ValidIssuer = DefaultIssuer,
+            };
+        }
+
+        public static TokenValidationParameters NullLifetimeTokenValidationParameters(SecurityToken securityToken)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                IssuerSigningToken = securityToken,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = DefaultIssuer,
+                RequireExpirationTime = false,
             };
         }
 
@@ -305,5 +322,59 @@ namespace Microsoft.IdentityModel.Test
         {
             throw new SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows");
         }
+
+        public const string NullIssuer = null;
+
+        public static TokenValidationParameters GetNullIssuerAsymmetricTokenValidationParameters(bool isValidIssuer)
+        {
+            return NullIssuerTokenValidationParameters(DefaultAsymmetricSigningToken, isValidIssuer);
+        }
+
+        public static TokenValidationParameters NullIssuerTokenValidationParameters(SecurityToken securityToken, bool isValidIssuer)
+        {
+            return new TokenValidationParameters
+            {
+                AuthenticationType = DefaultAuthenticationType,
+                IssuerSigningToken = securityToken,
+                ValidAudience = DefaultAudience,
+                ValidIssuer = NullIssuer,
+                ValidateIssuer = isValidIssuer,
+            };
+        }
+
+        public static SecurityTokenDescriptor NullLifetimeAsymmetricSecurityTokenDescriptor
+        {
+            get { return NullLifetimeSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials); }
+        }
+
+        public static SecurityTokenDescriptor NullIssuerAsymmetricSecurityTokenDescriptor
+        {
+            get { return NullIssuerSecurityTokenDescriptor(DefaultAsymmetricSigningCredentials); }
+        }
+
+        public static SecurityTokenDescriptor NullIssuerSecurityTokenDescriptor(SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                AppliesToAddress = DefaultAudience,
+                SigningCredentials = signingCredentials,
+                Subject = DefaultClaimsIdentity,
+                TokenIssuerName = NullIssuer,
+                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
+            };
+        }
+
+        public static SecurityTokenDescriptor NullLifetimeSecurityTokenDescriptor(SigningCredentials signingCredentials)
+        {
+            return new SecurityTokenDescriptor
+            {
+                AppliesToAddress = DefaultAudience,
+                SigningCredentials = signingCredentials,
+                Subject = DefaultClaimsIdentity,
+                TokenIssuerName = DefaultIssuer,
+                Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(null, null),
+            };
+        }
+
     }
 }

@@ -105,6 +105,32 @@ namespace Microsoft.IdentityModel.Protocols
                 }
             }
 
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.FrontchannelLogoutSessionSupported, out obj))
+            {
+                str = dictionary[OpenIdProviderMetadataNames.FrontchannelLogoutSessionSupported] as string;
+                if (str != null)
+                {
+                    bool frontchannelLogoutSessionSupported = false;
+                    if (Boolean.TryParse(str, out frontchannelLogoutSessionSupported))
+                    {
+                        FrontchannelLogoutSessionSupported = frontchannelLogoutSessionSupported;
+                    }
+                }
+            }
+
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.FrontchannelLogoutSupported, out obj))
+            {
+                str = dictionary[OpenIdProviderMetadataNames.FrontchannelLogoutSupported] as string;
+                if (str != null)
+                {
+                    bool frontchannelLogoutSupported = false;
+                    if (Boolean.TryParse(str, out frontchannelLogoutSupported))
+                    {
+                        FrontchannelLogoutSupported = frontchannelLogoutSupported;
+                    }
+                }
+            }
+
             if (dictionary.TryGetValue(OpenIdProviderMetadataNames.EndSessionEndpoint, out obj))
             {
                 str = obj as string;
@@ -140,6 +166,15 @@ namespace Microsoft.IdentityModel.Protocols
                     TokenEndpoint = str;
                 }
             }
+
+            if (dictionary.TryGetValue(OpenIdProviderMetadataNames.UserInfoEndpoint, out obj))
+            {
+                str = obj as string;
+                if (str != null)
+                {
+                    UserInfoEndpoint = str;
+                }
+            }
         }
 
         /// <summary>
@@ -151,6 +186,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the check_session_iframe.
         /// </summary>
         public string CheckSessionIframe { get; set; }
+
+        /// <summary>
+        /// Gets or sets the frontchannel_logout_session_supported.
+        /// </summary>
+        public bool FrontchannelLogoutSessionSupported { get; set; }
+
+        /// <summary>
+        /// Gets or sets the frontchannel_logout_supported.
+        /// </summary>
+        public bool FrontchannelLogoutSupported { get; set; }
 
         /// <summary>
         /// Gets or sets the end session endpoint.

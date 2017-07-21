@@ -50,9 +50,9 @@ namespace Microsoft.IdentityModel.Protocols
             }
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync(address, cancel);
+                HttpResponseMessage response = await _httpClient.GetAsync(address, cancel).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
+                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {

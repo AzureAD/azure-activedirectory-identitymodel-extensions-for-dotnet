@@ -112,6 +112,31 @@ namespace System.IdentityModel.Test
             }
         }
 
+        public static IEnumerable<Claim> RoleClaimsShortType(string issuer, string originalIssuer)
+        {
+            return new List<Claim>()
+            {
+                new Claim( "role", "role1", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim( "roles", "roles1", ClaimValueTypes.String, issuer, originalIssuer),
+            };
+        }
+
+        public static List<Claim> RoleClaimsLongType(string issuer, string originalIssuer)
+        {
+            var claims = new List<Claim>();
+
+            var claim = new Claim(ClaimTypes.Role, "role1", ClaimValueTypes.String, issuer, originalIssuer);
+            claim.Properties.Add(JwtSecurityTokenHandler.ShortClaimTypeProperty, "role");
+            claims.Add(claim);
+
+            claim = new Claim(ClaimTypes.Role, "roles1", ClaimValueTypes.String, issuer, originalIssuer);
+            claim.Properties.Add(JwtSecurityTokenHandler.ShortClaimTypeProperty, "roles");
+            claims.Add(claim);
+
+            return claims;
+        }
+
+
         public static IEnumerable<Claim> Simple( string issuer, string originalIssuer )
         {
             return new List<Claim>()
@@ -122,6 +147,8 @@ namespace System.IdentityModel.Test
                 new Claim( ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer, originalIssuer),
                 new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer, originalIssuer ),
                 new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer, originalIssuer ),
+                new Claim( "role", "role1", ClaimValueTypes.String, issuer, originalIssuer),
+                new Claim( "roles", "roles1", ClaimValueTypes.String, issuer, originalIssuer),
             };
         }
 
