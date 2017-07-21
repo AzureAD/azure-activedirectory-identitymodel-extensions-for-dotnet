@@ -1044,6 +1044,9 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
