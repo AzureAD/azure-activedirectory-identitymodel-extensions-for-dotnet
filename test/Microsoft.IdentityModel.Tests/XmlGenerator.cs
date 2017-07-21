@@ -149,12 +149,6 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAttributeXml(string name, string attributeNs, IEnumerable<string> attributes)
         {
-            if (string.IsNullOrEmpty(name))
-                name = string.Empty;
-
-            if (string.IsNullOrEmpty(attributeNs))
-                attributeNs = string.Empty;
-
             return string.Format(SamlAttributeTemplate, name, attributeNs, (attributes == null) ? string.Empty : string.Concat(attributes));
         }
 
@@ -299,7 +293,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlSubjectConfirmationTemplate
         {
-            get => "<SubjectConfirmation xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}<SubjectConfirmationData>\"{1}\"</SubjectConfirmationData></SubjectConfirmation>";
+            get => "<SubjectConfirmation xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}<SubjectConfirmationData>{1}</SubjectConfirmationData></SubjectConfirmation>";
         }
 
         public static string SamlSubjectConfirmationXml(List<string> confirmations, string confirmationData)

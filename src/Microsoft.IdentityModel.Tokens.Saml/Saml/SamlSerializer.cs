@@ -332,11 +332,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
                         ReadStatement(envelopeReader, assertion.Statements);
-                       // var statement = ReadStatement(envelopeReader);
-                        //if (statement == null)
-                        //    throw LogReadException(LogMessages.IDX11129);
-
-                       // assertion.Statements.Add(statement);
                     }
                 }
 
@@ -459,8 +454,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 reader.MoveToContent();
                 reader.ReadEndElement();
-
-              //  return statement;
             }
             catch (Exception ex)
             {
@@ -541,8 +534,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AuthnContextType, SamlConstants.Namespace);
-
-               // var authenticationStatement = new SamlAuthenticationStatement();
 
                 var authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
                 if (string.IsNullOrEmpty(authInstance))
@@ -929,8 +920,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     // @xsi:type
                     XmlUtil.ValidateXsiType(reader, SamlConstants.Types.NameIDType, SamlConstants.Namespace);
 
-                    subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
-                    subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                    if (!string.IsNullOrEmpty(nameFormat))
+                        subject.NameFormat = nameFormat;
+
+                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    if (!string.IsNullOrEmpty(nameQualifier))
+                        subject.NameQualifier = nameQualifier;
 
                     // TODO - check for empty element
                     reader.MoveToContent();
@@ -963,8 +959,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     // An Authentication protocol specified in the confirmation method might need this
                     // data. Just store this content value as string.
-                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))                        
-                        subject.ConfirmationData = reader.ReadElementContentAsString();
+                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
+                    {
+                        var confirmationData = reader.ReadElementContentAsString();
+                        if (!string.IsNullOrEmpty(confirmationData))
+                            subject.ConfirmationData = confirmationData;
+                    }
 
                     if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {

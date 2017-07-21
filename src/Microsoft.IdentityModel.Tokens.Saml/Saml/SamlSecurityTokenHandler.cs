@@ -420,7 +420,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
 
             var subjects = new Collection<ClaimsIdentity>();
-          //  var identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
             ProcessStatements(samlToken, subjects, actualIssuer, validationParameters);
 
             return subjects;
@@ -614,28 +613,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        //private ClaimsIdentity FindIdentity(SamlSecurityToken samlToken, SamlSubject samlSubject, ICollection<ClaimsIdentity> subjects, string issuer, TokenValidationParameters validationParameters)
-        //{
-        //    // TODO : find, return
-        //    foreach (var sub in subjects)
-        //    {
-        //        IEnumerable<KeyValuePair<string, Claim>> nameIdentifiers = sub.Claims.ToDictionary(x => x.Type).Where(x => x.Key.Equals(ClaimTypes.NameIdentifier)).Select(x => x);
-
-        //    }
-
-        //    // Not find, create new one, and return
-        //    var actualIssuer = issuer;
-        //    if (string.IsNullOrWhiteSpace(issuer))
-        //    {
-        //        IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
-        //        actualIssuer = ClaimsIdentity.DefaultIssuer;
-        //    }
-
-        //    var subject = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
-        //    subjects.Add(subject);
-        //    return subject;
-        //}
-
         private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
         {
             IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
@@ -651,7 +628,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Creates claims from a <see cref="SamlAttributeStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="SamlAttributeStatement"/>.</param>
-        /// <param name="subject">The subjects.</param>
+        /// <param name="subject">A <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
         protected virtual void ProcessAttributeStatement(SamlAttributeStatement statement, ClaimsIdentity subject, string issuer)
         {
@@ -660,8 +637,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (subject == null)
                 throw LogArgumentNullException(nameof(subject));
-
-           // ProcessSubjectClaim(statement.Subject, subject, issuer);
 
             foreach (var attribute in statement.Attributes)
             {
@@ -699,7 +674,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Creates claims from a <see cref="SamlAuthenticationStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="SamlAuthenticationStatement"/>.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="subject">A <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
         protected virtual void processAuthenticationStatement(SamlAuthenticationStatement statement, ClaimsIdentity subject, string issuer)
         {
@@ -751,7 +726,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Creates claims from a <see cref="SamlAuthorizationDecisionStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="SamlAuthorizationDecisionStatement"/>.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="subject">A <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
         /// <remarks>Provided for extensibility. By default no claims are created.</remarks>
         protected virtual void ProcessAuthorizationDecisionStatement(SamlAuthorizationDecisionStatement statement, ClaimsIdentity subject, string issuer)
@@ -769,6 +744,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (samlSubject == null)
                 throw LogArgumentNullException(nameof(samlSubject));
 
+            if (subject == null)
+                throw LogArgumentNullException(nameof(subject));
+
             if (string.IsNullOrEmpty(samlSubject.Name) && (samlSubject.ConfirmationMethods == null || samlSubject.ConfirmationMethods.Count < 1))
                 throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10513));
 
@@ -780,31 +758,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!string.IsNullOrEmpty(samlSubject.NameQualifier))
                     claim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier] = samlSubject.NameQualifier;
-
-                subject.AddClaim(claim);
-            }
-
-            if (samlSubject.ConfirmationMethods != null || samlSubject.ConfirmationMethods.Count > 0)
-            {
-                var claim = new Claim(ClaimTypes.AuthenticationMethod, string.Concat(samlSubject.ConfirmationMethods), ClaimValueTypes.String, issuer);
-                for (int i = 0; i < samlSubject.ConfirmationMethods.Count; ++i)
-                {
-                    claim.Properties.Add(ClaimProperties.SamlSubjectConfirmationMethod + Convert.ToString(i), samlSubject.ConfirmationMethods.ElementAt(i));
-                }
-
-                if (!string.IsNullOrEmpty(samlSubject.ConfirmationData))
-                    claim.Properties[ClaimProperties.SamlSubjectConfirmationData] = samlSubject.ConfirmationData;
-
-                if (samlSubject.KeyInfo != null)
-                {
-                    var keyInfo = samlSubject.KeyInfo;
-                    var infos = new List<string>
-                    {
-                        keyInfo.CertificateData, keyInfo.IssuerName, keyInfo.Kid, keyInfo.RetrievalMethodUri, keyInfo.SerialNumber, keyInfo.SKI, keyInfo.SubjectName
-                    };
-
-                    claim.Properties[ClaimProperties.SamlSubjectKeyInfo] = string.Concat(infos);
-                }
 
                 subject.AddClaim(claim);
             }
