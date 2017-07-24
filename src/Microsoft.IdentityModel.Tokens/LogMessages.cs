@@ -74,6 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10243 = "IDX10243: Reading issuer signing keys from validation parameters.";
         public const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
         public const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
+        public const string IDX10246 = "IDX10246: ValidateTokenReplay property on ValidationParameters is set to false. Exiting without validating the token replay.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";

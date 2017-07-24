@@ -228,13 +228,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var dataset = new TheoryData<string, DateTime?, TokenValidationParameters, ExpectedException>();
 
-                dataset.Add(null, null, new TokenValidationParameters(), ExpectedException.ArgumentNullException());
-                dataset.Add(string.Empty, null, new TokenValidationParameters(), ExpectedException.ArgumentNullException());
+                dataset.Add(null, null, new TokenValidationParameters { ValidateTokenReplay = true }, ExpectedException.ArgumentNullException());
+                dataset.Add(string.Empty, null, new TokenValidationParameters { ValidateTokenReplay = true }, ExpectedException.ArgumentNullException());
                 dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), null, ExpectedException.ArgumentNullException());
-                dataset.Add("token", null, new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenNoExpirationException());
-                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenReplayDetected("IDX10228:"));
-                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = false, FindRetVal = false } }, ExpectedException.SecurityTokenReplayAddFailed("IDX10229:"));
-                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = false } }, ExpectedException.NoExceptionExpected);
+                dataset.Add("token", null, new TokenValidationParameters { ValidateTokenReplay = true, TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenNoExpirationException());
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { ValidateTokenReplay = true, TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = true } }, ExpectedException.SecurityTokenReplayDetected("IDX10228:"));
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { ValidateTokenReplay = true, TokenReplayCache = new TokenReplayCache { AddRetVal = false, FindRetVal = false } }, ExpectedException.SecurityTokenReplayAddFailed("IDX10229:"));
+                dataset.Add("token", DateTime.UtcNow + TimeSpan.FromDays(1), new TokenValidationParameters { ValidateTokenReplay = true, TokenReplayCache = new TokenReplayCache { AddRetVal = true, FindRetVal = false } }, ExpectedException.NoExceptionExpected);
 
                 return dataset;
             }

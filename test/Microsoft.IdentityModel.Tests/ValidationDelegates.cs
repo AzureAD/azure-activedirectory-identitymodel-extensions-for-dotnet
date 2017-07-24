@@ -112,5 +112,19 @@ namespace Microsoft.IdentityModel.Tests
             throw new SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
         }
 
+        public static bool TokenReplayValidatorReturnsTrue(string token, DateTime? exipres, TokenValidationParameters validationParameters)
+        {
+            return true;
+        }
+
+        public static bool TokenReplayValidatorReturnsFalse(string token, DateTime? exipres, TokenValidationParameters validationParameters)
+        {
+            return false;
+        }
+
+        public static bool TokenReplayValidatorThrows(string token, DateTime? exipres, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenReplayDetectedException("TokenReplayValidatorThrows");
+        }
     }
 }

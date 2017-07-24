@@ -367,6 +367,9 @@ namespace Microsoft.IdentityModel.Tests
 
         public static void ValidateTokenReplay(string securityToken, ISecurityTokenValidator tokenValidator, TokenValidationParameters validationParameters)
         {
+            if (!validationParameters.ValidateTokenReplay)
+                return;
+
             TokenValidationParameters tvp = validationParameters.Clone();
             TokenReplayCache replayCache =
                new TokenReplayCache()
