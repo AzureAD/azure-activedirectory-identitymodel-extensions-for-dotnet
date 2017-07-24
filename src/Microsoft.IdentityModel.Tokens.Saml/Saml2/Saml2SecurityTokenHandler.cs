@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            Validators.ValidateTokenReplay(token, samlToken.Assertion.Conditions.NotBefore, validationParameters);
+            ValidateTokenReplay(token, samlToken.Assertion.Conditions.NotBefore, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
@@ -242,6 +242,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (subjectConfirmation != null && subjectConfirmation.SubjectConfirmationData != null)
                     ValidateConfirmationData(samlToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
             }
+        }
+
+        /// <summary>
+        /// Validate token replay
+        /// </summary>
+        /// <param name="securityToken">the Saml2 token that is being validated.</param>
+        /// <param name="expirationTime">expiration time.</param>
+        /// <param name="validationParameters">validation parameters.</param>
+        protected virtual void ValidateTokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateTokenReplay(securityToken, expirationTime, validationParameters);
         }
 
         /// <summary>

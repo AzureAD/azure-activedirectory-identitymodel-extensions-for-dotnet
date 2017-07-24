@@ -279,6 +279,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            if (!validationParameters.ValidateTokenReplay)
+            {
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10246);
+                return;
+            }
+
+            if (validationParameters.TokenReplayValidator != null)
+            {
+                if (!validationParameters.TokenReplayValidator(securityToken, expirationTime, validationParameters))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken)));
+                return;
+            }
+
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {

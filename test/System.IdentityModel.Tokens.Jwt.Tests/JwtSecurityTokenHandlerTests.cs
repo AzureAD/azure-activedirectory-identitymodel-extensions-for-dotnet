@@ -787,10 +787,49 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Fact]
-        public void ValidateTokenReplay()
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("TokenReplayValidationTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void TokenReplayValidation(TokenReplayTheoryData theoryData)
         {
-            TestUtilities.ValidateTokenReplay(Default.AsymmetricJwt, new JwtSecurityTokenHandler(), Default.AsymmetricSignTokenValidationParameters);
+            TestUtilities.WriteHeader($"{this}.TokenReplayValidation", theoryData);
+            var context = new CompareContext($"{this}.ReadKeyInfo, {theoryData.TestId}");
+            var tvp = Default.AsymmetricEncryptSignTokenValidationParameters.Clone();
+            tvp.TokenReplayValidator = theoryData.TokenReplayValidator;
+            tvp.ValidateTokenReplay = theoryData.ValidateTokenReplay;
+            var token = Default.AsymmetricJwt;
+            var tokenValidator = new JwtSecurityTokenHandler();
+
+            try
+            {
+                if (theoryData.TokenReplayValidator == null)
+                {
+                    // TokenReplayCache is used since TokenReplayValidator is not provided.
+                    // This test tests TokenReplayCache.
+                    TestUtilities.ValidateTokenReplay(token, tokenValidator, tvp);
+                }
+                else
+                {
+                    // TokenReplayValidator is provided.
+                    // This test tests TokenReplayValidator.
+                    tokenValidator.ValidateToken(token, tvp, out SecurityToken validatedToken);
+                    theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<TokenReplayTheoryData> TokenReplayValidationTheoryData
+        {
+            get
+            {
+                return ReferenceTheoryData.TokenReplayValidationTheoryData;
+            }
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -850,6 +889,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = validateLifetime
             };
         }
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SegmentTheoryData))]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

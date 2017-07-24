@@ -42,8 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 32)
-                Assert.True(false, "Number of properties has changed from 32 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 34)
+                Assert.True(false, "Number of properties has changed from 34 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
@@ -136,8 +136,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 32)
-                Assert.True(false, "Number of public fields has changed from 32 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 34)
+                Assert.True(false, "Number of public fields has changed from 34 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -159,6 +159,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     },
                     Object = validationParameters,
