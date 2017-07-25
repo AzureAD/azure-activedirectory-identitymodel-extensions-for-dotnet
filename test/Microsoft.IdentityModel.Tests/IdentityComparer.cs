@@ -303,6 +303,88 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
+        public static bool AreClaimsIdentitiesEnumsEqual(IEnumerable<ClaimsIdentity> t1, IEnumerable<ClaimsIdentity> t2, CompareContext context)
+        {
+            if (t1 == null && t2 == null)
+                return true;
+
+            if (t1 == null)
+            {
+                context.Diffs.Add("t1 == null, t2 != null");
+                return false;
+            }
+
+            if (t2 == null)
+            {
+                context.Diffs.Add("t1 != null, t2 == null");
+                return false;
+            }
+
+            if (ReferenceEquals(t1, t2))
+                return true;
+
+            var claimsIdentity1 = new List<ClaimsIdentity>(t1);
+            var claimsIdentity2 = new List<ClaimsIdentity>(t2);
+            if (claimsIdentity1.Count != claimsIdentity2.Count)
+            {
+                context.Diffs.Add($"claimsIdentity1.Count != claimsIdentity2.Count: {claimsIdentity1.Count}, {claimsIdentity2.Count}");
+                context.Diffs.Add("claimsIdentity1:");
+                foreach (var identity in claimsIdentity1)
+                    context.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+
+                context.Diffs.Add("claimsIdentity2:");
+                foreach (var identity in claimsIdentity2)
+                    context.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+            }
+
+            int numMatched = 0;
+            int numToMatch = claimsIdentity1.Count;
+            var localContext = new CompareContext(context);
+            var matchedClaimsIdentities = new List<ClaimsIdentity>();
+            var notMatched = new List<ClaimsIdentity>();
+            foreach (var t in t1)
+            {
+                var perClaimContext = new CompareContext(localContext);
+                bool matched = false;
+                for (int i = 0; i < claimsIdentity2.Count; i++)
+                {
+                    if (AreClaimsIdentitiesEqual(t, claimsIdentity2[i], perClaimContext))
+                    {
+                        numMatched++;
+                        matchedClaimsIdentities.Add(t);
+                        matched = true;
+                        claimsIdentity2.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                if (!matched)
+                {
+                    notMatched.Add(t);
+                }
+            }
+
+            if (numMatched != numToMatch)
+            {
+                localContext.Diffs.Add(Environment.NewLine + "numMatched != numToMatch: " + numMatched + ", " + numToMatch);
+                localContext.Diffs.Add(Environment.NewLine + "claimsIdentity1 NOT Matched:" + Environment.NewLine);
+                foreach (var identity in notMatched)
+                    localContext.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+
+                localContext.Diffs.Add(Environment.NewLine + "claimsIdentity2 NOT Matched:" + Environment.NewLine);
+                foreach (var identity in claimsIdentity2)
+                    localContext.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+
+                localContext.Diffs.Add(Environment.NewLine + "claimsIdentity Matched:" + Environment.NewLine);
+                foreach (var identity in matchedClaimsIdentities)
+                    localContext.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+
+                localContext.Diffs.Add(Environment.NewLine);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreEqual(object t1, object t2)
         {
             return AreEqual(t1, t2, CompareContext.Default);
@@ -350,6 +432,8 @@ namespace Microsoft.IdentityModel.Tests
                 return AreJwtSecurityTokensEqual(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context);
             else if (t1 is IEnumerable<Claim>)
                 return AreClaimsEnumsEqual(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context);
+            else if (t1 is IEnumerable<ClaimsIdentity>)
+                return AreClaimsIdentitiesEnumsEqual(t1 as IEnumerable<ClaimsIdentity>, t2 as IEnumerable<ClaimsIdentity>, context);
             else if (t1 is IEnumerable<SecurityKey>)
                 return AreEnumsEqual<SecurityKey>(t1 as IEnumerable<SecurityKey>, t2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
             else if (t1 is IEnumerable<string>)
@@ -413,7 +497,9 @@ namespace Microsoft.IdentityModel.Tests
             else if (t1 is SamlEvidence)
                 return AreSamlEvidencesEqual(t1 as SamlEvidence, t2 as SamlEvidence, context);
             else if (t1 is SamlStatement)
-                return AreSamlStatementEqual(t1 as SamlStatement, t2 as SamlStatement, context);
+                return AreSamlStatementsEqual(t1 as SamlStatement, t2 as SamlStatement, context);
+            else if (t1 is SamlSubject)
+                return AreSamlSubjectsEqual(t1 as SamlSubject, t2 as SamlSubject, context);
             else if (t1 is Transform)
                 return AreTransformsEqual(t1 as Transform, t2 as Transform, context);
             else
@@ -514,11 +600,20 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreSamlStatementEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
+        public static bool AreSamlStatementsEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(statement1, statement2, context))
                 CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlSubjectsEqual(SamlSubject subject1, SamlSubject subject2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(subject1, subject2, context))
+                CompareAllPublicProperties(subject1, subject2, localContext);
 
             return context.Merge(localContext);
         }

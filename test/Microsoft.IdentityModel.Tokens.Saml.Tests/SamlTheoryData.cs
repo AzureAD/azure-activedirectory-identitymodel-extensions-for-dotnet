@@ -56,6 +56,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public bool CanRead { get; set; }
 
+        public SamlTokenTestSet TokenClaimsIdentitiesTestSet { get; set; }
+
         public SamlConditionsTestSet ConditionsTestSet { get; set; }
 
         public SamlEvidenceTestSet EvidenceTestSet { get; set; }
