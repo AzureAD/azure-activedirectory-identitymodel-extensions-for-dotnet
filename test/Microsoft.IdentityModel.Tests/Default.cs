@@ -371,11 +371,6 @@ namespace Microsoft.IdentityModel.Tests
             get => new SamlAction("Action", new Uri(SamlConstants.DefaultActionNamespace));
         }
 
-        //public static SamlAssertion SamlAssertion
-        //{
-        //    get => new SamlAssertion(SamlAssertionID, Issuer, IssueInstant, null, null, new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(null, null, Subject), SamlAttributeSingleValue)});
-        //}
-
         public static string SamlAssertionID
         {
             get => "_b95759d0-73ae-4072-a140-567ade10a7ad";

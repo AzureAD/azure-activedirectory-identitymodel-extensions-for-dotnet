@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
@@ -116,7 +117,8 @@ namespace Microsoft.IdentityModel.Tests
         public SamlSubject Subject { get; set; }
         public string Xml { get; set; }
     }
-#endregion
+
+    #endregion
 
     public class TransformTestSet : XmlTestSet
     {
@@ -549,6 +551,12 @@ namespace Microsoft.IdentityModel.Tests
         }
     }
 
+    public class SamlTokenTestSet
+    {
+        public SamlSecurityToken SecurityToken { get; set; }
+        public IEnumerable<ClaimsIdentity> Identities { get; set; }
+    }
+
     public class SamlSecurityTokenTestSet : XmlTestSet
     {
         public SamlSecurityToken SamlSecurityToken
@@ -815,8 +823,6 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
-
-
     }  
 
     public class WsFederationMessageTestSet : XmlTestSet

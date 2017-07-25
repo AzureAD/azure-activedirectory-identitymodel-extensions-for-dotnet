@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -298,9 +299,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements,
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_SameSubject,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements)
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_SameSubject)
+                    },
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentSubject,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentSubject)
+                    },
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType)
                     }
                 };
             }
@@ -897,26 +910,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameQualifierNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameQualifierNull)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoNameQualifier,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoNameQualifier)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameQualifierEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameQualifierEmptyString)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectFormatNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectFormatNull)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectFormatEmptystring,
-                        TestId = nameof(ReferenceXml.SamlSubjectFormatEmptystring)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoFormat,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoFormat)
                     },
                     new SamlTheoryData
                     {
@@ -935,14 +936,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationDataNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationDataNull)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationDataEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationDataEmptyString)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoConfirmationData,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoConfirmationData)
                     },
                     new SamlTheoryData
                     {

@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+        private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
 
         /// <summary>
@@ -87,6 +88,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public override bool CanWriteToken
         {
             get { return true; }
+        }
+
+        /// <summary>
+        /// Gets or sets the SamlSubject comparer.
+        /// </summary>
+        public IEqualityComparer<SamlSubject> SamlSubjectEqualityComparer
+        {
+            get
+            {
+                return _samlSubjectEqualityComparer;
+            }
+            set
+            {
+                _samlSubjectEqualityComparer = value ?? throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11514));
+            }
         }
 
         /// <summary>
@@ -150,6 +166,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="subject"><see cref="ICollection{SamlAttribute}"/>.</param>
         /// <param name="attributes">Attribute collection to which the Actor added.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="attributes"/> is null.</exception>
         protected virtual void AddActorToAttributes(ICollection<SamlAttribute> attributes, ClaimsIdentity subject)
         {
             if (attributes == null)
@@ -253,11 +270,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="claim">Claim from which to generate a SamlAttribute.</param>
         /// <returns><see cref="SamlAttribute"/></returns>
-        /// <exception cref="ArgumentNullException">The parameter 'claim' is null.</exception>
+        /// <exception cref="ArgumentNullException">if the <paramref name="claim"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenException">if the type of <paramref name="claim"/> doesn't have "/" or only has "/" at the beginning or doesn't have any character(s) after the last "/".</exception>
         protected virtual SamlAttribute CreateAttribute(Claim claim)
         {
             if (claim == null)
-                LogArgumentNullException(nameof(claim));
+                throw LogArgumentNullException(nameof(claim));
 
             // A SamlAttribute 1.0 is required to have the attributeNamespace and attributeName be non-null and non-empty.
             string claimType = claim.Type;
@@ -290,7 +308,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="subject">The SamlSubject to use in the SamlAttributeStatement that are created.</param>
         /// <param name="tokenDescriptor">Contains all the other information that is used in token issuance.</param>
         /// <returns>SamlAttributeStatement</returns>
-        /// <exception cref="ArgumentNullException">Thrown when 'samlSubject' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="subject"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual SamlAttributeStatement CreateAttributeStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
         {
 
@@ -342,7 +361,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="subject">The SamlSubject of the Statement.</param>
         /// <param name="tokenDescriptor">Contains all the other information that is used in token issuance.</param>
         /// <returns>SamlAuthenticationStatement</returns>
-        /// <exception cref="ArgumentNullException">Thrown when 'samlSubject' or 'authInfo' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="subject"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenException">if Assertion has one or more AuthenticationStatement, and one of AuthenticationMethod and authenticationInstant is null.</exception>
         protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
         {
             if (subject == null)
@@ -403,8 +424,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
         /// <param name="issuer">The value to set <see cref="Claim.Issuer"/></param>
         /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
-        /// <returns>A <see cref="ClaimsIdentity"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
-        protected virtual ClaimsIdentity CreateClaimsIdentity(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
+        /// <returns>A <see cref="IEnumerable{ClaimsIdentity}"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="samlToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
+        protected virtual IEnumerable<ClaimsIdentity> CreateClaimsIdentities(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
             if (samlToken == null)
                 throw LogArgumentNullException(nameof(samlToken));
@@ -419,7 +442,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
-            return validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
+            var subjects = ProcessStatements(samlToken, actualIssuer, validationParameters);
+            return subjects;
         }
 
         /// <summary>
@@ -427,6 +451,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="tokenDescriptor">information that is used in token issuance.</param>
         /// <returns>SamlConditions</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual SamlConditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
@@ -458,6 +483,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="tokenDescriptor">The SecurityTokenDescriptor to use to build the statements.</param>
         /// <returns>An enumeration of SamlStatement.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual ICollection<SamlStatement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
@@ -488,7 +514,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// 3. If a null tokenDescriptor.proof is found then SamlSubject.ConfirmationMethod is set to 'BearerKey'.
         /// </para>
         /// </returns>
-        /// <exception cref="ArgumentNullException">Thrown when 'tokenDescriptor' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenException">if the tokenDescriptor has more than one name identifier claim.</exception>
         protected virtual SamlSubject CreateSubject(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
@@ -551,7 +578,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
         /// <returns>A <see cref="SecurityToken"/> instance.</returns>
-        /// <exception cref="ArgumentNullException">If 'tokenDescriptor' is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="tokenDescriptor"/> is null.</exception>
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (null == tokenDescriptor)
@@ -622,12 +649,166 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
+        /// Creates claims from a <see cref="SamlAttributeStatement"/>.
+        /// </summary>
+        /// <param name="statement">The <see cref="SamlAttributeStatement"/>.</param>
+        /// <param name="identity">A <see cref="ClaimsIdentity"/>.</param>
+        /// <param name="issuer">The issuer.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="identity"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenException">if Actor existing in both identity and attributes of statement.</exception>
+        protected virtual void ProcessAttributeStatement(SamlAttributeStatement statement, ClaimsIdentity identity, string issuer)
+        {
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
+
+            foreach (var attribute in statement.Attributes)
+            {
+                if (StringComparer.Ordinal.Equals(attribute.Name, ClaimTypes.Actor))
+                {
+                    if (identity.Actor != null)
+                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10512));
+
+                    SetDelegateFromAttribute(attribute, identity, issuer);
+                }
+                else
+                {
+                    // each value has same issuer
+                    string originalIssuer = attribute.OriginalIssuer ?? issuer;
+                    foreach (var value in attribute.Values)
+                    {
+                        if (value != null)
+                        {
+                            var claim = new Claim(attribute.Name, value, attribute.AttributeValueXsiType, issuer, originalIssuer);
+                            identity.AddClaim(claim);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates claims from a <see cref="SamlAuthenticationStatement"/>.
+        /// </summary>
+        /// <param name="statement">The <see cref="SamlAuthenticationStatement"/>.</param>
+        /// <param name="identity">A <see cref="ClaimsIdentity"/>.</param>
+        /// <param name="issuer">The issuer.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="identity"/> is null.</exception>
+        protected virtual void ProcessAuthenticationStatement(SamlAuthenticationStatement statement, ClaimsIdentity identity, string issuer)
+        {
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
+
+            identity.AddClaim(new Claim(ClaimTypes.AuthenticationMethod, statement.AuthenticationMethod, ClaimValueTypes.String, issuer));
+            identity.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), SamlConstants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
+        }
+
+        /// <summary>
+        /// Creates claims from a <see cref="SamlAuthorizationDecisionStatement"/>.
+        /// </summary>
+        /// <param name="statement">The <see cref="SamlAuthorizationDecisionStatement"/>.</param>
+        /// <param name="identity">A <see cref="ClaimsIdentity"/>.</param>
+        /// <param name="issuer">The issuer.</param>
+        /// <remarks>Provided for extensibility. By default no claims are created.</remarks>
+        protected virtual void ProcessAuthorizationDecisionStatement(SamlAuthorizationDecisionStatement statement, ClaimsIdentity identity, string issuer)
+        {
+        }
+
+        /// <summary>
+        /// Creates claims from a unknow statements.
+        /// </summary>
+        /// <param name="statement">The <see cref="SamlStatement"/>.</param>
+        /// <param name="identity">A <see cref="ClaimsIdentity"/></param>
+        /// <param name="issuer">The issuer.</param>
+        protected virtual void ProcessCustomSubjectStatement(SamlStatement statement, ClaimsIdentity identity, string issuer)
+        {
+            IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX11516, statement.GetType());
+        }
+
+        /// <summary>
+        /// Processes all statements to generate claims.
+        /// </summary>
+        /// <param name="samlToken">A <see cref="SamlSecurityToken"/> that will be used to create the claims.</param>
+        /// <param name="issuer">The issuer.</param>
+        /// <param name="validationParameters"> Contains parameters for validating the securityToken.</param>
+        /// <returns>A <see cref="IEnumerable{ClaimsIdentity}"/> containing the claims from the <see cref="SamlSecurityToken"/>.</returns>
+        /// <exception cref="SamlSecurityTokenException">if the statement is not a <see cref="SamlSubjectStatement"/>.</exception>
+        protected virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
+        {
+            var identityDict = new Dictionary<SamlSubject, ClaimsIdentity>(SamlSubjectEqualityComparer);
+            foreach (var item in samlToken.Assertion.Statements)
+            {
+                var statement = item as SamlSubjectStatement;
+                if (statement == null)
+                    throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11515));
+
+                if (!identityDict.TryGetValue(statement.Subject, out ClaimsIdentity identity))
+                {
+                    identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
+                    ProcessSubject(statement.Subject, identity, issuer);
+                    identityDict.Add(statement.Subject, identity);
+                }
+
+                if (statement is SamlAttributeStatement attrStatement)
+                    ProcessAttributeStatement(attrStatement, identity, issuer);
+                else if (statement is SamlAuthenticationStatement authnStatement)
+                    ProcessAuthenticationStatement(authnStatement, identity, issuer);
+                else if (statement is SamlAuthorizationDecisionStatement authzStatement)
+                    ProcessAuthorizationDecisionStatement(authzStatement, identity, issuer);
+                else
+                    ProcessCustomSubjectStatement(statement, identity, issuer);
+            }
+
+            return identityDict.Values;
+        }
+
+        /// <summary>
+        /// Creates subject claims from the <see cref="SamlSubject"/>.
+        /// </summary>
+        /// <param name="subject">The <see cref="SamlSubject"/>.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/> subject.</param>
+        /// <param name="issuer">The issuer.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="subject"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="identity"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenException">if the <see cref="SamlSubject"/> doesn't have the name or confirmation methonds.</exception>
+        protected virtual void ProcessSubject(SamlSubject subject, ClaimsIdentity identity, string issuer)
+        {
+            if (subject == null)
+                throw LogArgumentNullException(nameof(subject));
+
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
+
+            if (string.IsNullOrEmpty(subject.Name) && subject.ConfirmationMethods.Count == 0)
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10513));
+
+            if (!string.IsNullOrEmpty(subject.Name))
+            {
+                var claim = new Claim(ClaimTypes.NameIdentifier, subject.Name, ClaimValueTypes.String, issuer);
+                if (!string.IsNullOrEmpty(subject.NameFormat))
+                    claim.Properties[ClaimProperties.SamlNameIdentifierFormat] = subject.NameFormat;
+
+                if (!string.IsNullOrEmpty(subject.NameQualifier))
+                    claim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier] = subject.NameQualifier;
+
+                identity.AddClaim(claim);
+            }
+        }
+
+        /// <summary>
         /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
         /// </summary>
         /// <param name="token">a Saml token as a string.</param>
-        /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
         public virtual SamlSecurityToken ReadSamlToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -646,9 +827,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Converts a string into an instance of <see cref="SamlSecurityToken"/>.
         /// </summary>
         /// <param name="token">a Saml token as a string.</param>
-        /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException"> If <paramref name="token"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
         public override SecurityToken ReadToken(string token)
         {
             return ReadSamlToken(token);
@@ -673,9 +854,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <exception cref="ArgumentNullException">If 'securityToken' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'securityToken.Assertion' is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">If <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
@@ -714,7 +895,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="attribute">The SamlAttribute to be processed.</param>
         /// <param name="subject">The identity that should be modified to reflect the SamlAttribute.</param>
         /// <param name="issuer">Issuer Identity.</param>
-        /// <exception cref="InvalidOperationException">Will be thrown if the SamlAttribute does not contain any valid SamlAttributeValues.</exception>
+        /// <exception cref="SamlSecurityTokenException">if we have two delegates acting as an identity, we do not allow this.</exception>
         protected virtual void SetDelegateFromAttribute(SamlAttribute attribute, ClaimsIdentity subject, string issuer)
         {
             // bail here nothing to add.
@@ -797,9 +978,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="securityToken">a <see cref="SamlSecurityToken"/> that contains the <see cref="SamlConditions"/>.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException">If 'securityToken' is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'securityToken.Assertion' is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">If <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
         /// <exception cref="SecurityTokenValidationException">if the Condition 'OneTimeUse' is specified. Requires overriding.</exception>
         /// <exception cref="SecurityTokenValidationException">if the Condition 'ProxyRestriction' is specified. Requires overriding.</exception>
         protected virtual void ValidateConditions(SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
@@ -880,8 +1061,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="token">A Saml token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
-        /// <exception cref="ArgumentNullException">If 'token' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="SamlSecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
@@ -994,10 +1175,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="token">A string containing a well formed securityToken.</param>
         /// <param name="validationParameters">Contains data and information needed for validation.</param>
         /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentNullException">'securityToken' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenException">'securityToken.Length' > <see cref="MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt <see cref="MaximumTokenSizeInBytes"/>.</exception>
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -1014,19 +1195,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
             validatedToken = samlToken;
-            var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
+            var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
-                identity.BootstrapContext = token;
+            {
+                foreach (var identity in identities)
+                {
+                    identity.BootstrapContext = token;
+                }
+            }
 
             IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);
 
-            return new ClaimsPrincipal(identity);
+            return new ClaimsPrincipal(identities);
         }
 
         /// <summary>
         /// Serializes a <see cref="SamlSecurityToken"/> to a string.
         /// </summary>
         /// <param name="token">A <see cref="SamlSecurityToken"/>.</param>
+        /// <exception cref="ArgumentNullException">if the <paramref name="token"/> is null.</exception>
+        /// <exception cref="ArgumentException">if the token is not a <see cref="SamlSecurityToken"/>.</exception>
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
@@ -1050,6 +1238,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="writer">The XML writer.</param>
         /// <param name="token">A securityToken of type <see cref="TokenType"/>.</param>
+        /// <exception cref="ArgumentNullException">if the <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if the <paramref name="token"/> is null.</exception>
+        /// <exception cref="ArgumentException">if the token is not a <see cref="SamlSecurityToken"/>.</exception>
+        /// <exception cref="ArgumentNullException">if <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
