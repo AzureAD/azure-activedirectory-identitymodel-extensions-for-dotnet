@@ -62,7 +62,15 @@ namespace Microsoft.IdentityModel.Tests
 
     public class TokenReplayTheoryData : TheoryDataBase
     {
-        public TokenReplayValidator TokenReplayValidator { get; set; } = null;
-        public bool ValidateTokenReplay { get; set; } = false;
+        public TokenReplayValidator TokenReplayValidator
+        {
+            get;
+            set;
+        } = null;
+        public bool ValidateTokenReplay
+        {
+            get;
+            set;
+        } = false;
     }
 }

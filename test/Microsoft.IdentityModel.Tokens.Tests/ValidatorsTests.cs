@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             try
             {
-                Validators.ValidateTokenReplay(securityToken, expirationTime, validationParameters);
+                Validators.ValidateTokenReplay(expirationTime, securityToken, validationParameters);
                 ee.ProcessNoException();
             }
             catch (Exception ex)

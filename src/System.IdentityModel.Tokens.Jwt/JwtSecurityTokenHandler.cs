@@ -764,8 +764,8 @@ namespace System.IdentityModel.Tokens.Jwt
 
             ValidateLifetime(notBefore, expires, jwtToken, validationParameters);
             ValidateAudience(jwtToken.Audiences, jwtToken, validationParameters);
-            ValidateTokenReplay(jwtToken.RawData, expires, validationParameters);
             string issuer = ValidateIssuer(jwtToken.Issuer, jwtToken, validationParameters);
+            ValidateTokenReplay(expires, jwtToken.RawData, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwtToken.Actor))
             {
                 SecurityToken actor = null;
@@ -1189,12 +1189,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Determines if a <see cref="JwtSecurityToken"/> is already validated.
         /// </summary>
-        /// <param name="securityToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
         /// <param name="expires">The <see cref="DateTime"/> value of the 'exp' claim if it exists in the <see cref="JwtSecurityToken"/>'.</param>
+        /// <param name="securityToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        protected virtual void ValidateTokenReplay(string securityToken, DateTime? expires, TokenValidationParameters validationParameters)
+        protected virtual void ValidateTokenReplay(DateTime? expires, string securityToken, TokenValidationParameters validationParameters)
         {
-            Validators.ValidateTokenReplay(securityToken, expires, validationParameters);
+            Validators.ValidateTokenReplay(expires, securityToken, validationParameters);
         }
 
         /// <summary>

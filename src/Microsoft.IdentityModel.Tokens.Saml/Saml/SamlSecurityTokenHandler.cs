@@ -981,6 +981,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
 
+        /// <summary>
+        /// Validates the token replay.
+        /// </summary>
+        /// <param name="expiration">expiration time of the <see cref="SamlSecurityToken"/></param>
+        /// <param name="token"><see cref="SamlSecurityToken"/> to validate</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation</param>
+        protected virtual void ValidateTokenReplay(DateTime? expiration, string token, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateTokenReplay(expiration, token, validationParameters);
+        }
 
         /// <summary>
         /// Reads and validates a well formed <see cref="SamlSecurityToken"/>.
@@ -1006,7 +1016,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            Validators.ValidateTokenReplay(token, samlToken.Assertion.Conditions.NotBefore, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
