@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -46,6 +47,48 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
         }
 
+        internal static bool AreSubjectsEqual(SamlSubject subject1, SamlSubject subject2)
+        {
+            if (subject1 == null && subject2 == null)
+                return true;
+
+            if (subject1 == null || subject2 == null)
+                return false;
+
+            if (ReferenceEquals(subject1, subject2))
+                return true;
+
+            if (string.Compare(subject1.Name, subject2.Name, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.NameFormat, subject2.NameFormat, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.NameQualifier, subject2.NameQualifier, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.ConfirmationData, subject2.ConfirmationData, StringComparison.OrdinalIgnoreCase) != 0)
+                return false;
+
+            if (subject1.KeyInfo != null && subject2.KeyInfo != null)
+                if (string.Compare(subject1.KeyInfo.CertificateData, subject2.KeyInfo.CertificateData) != 0 ||
+                string.Compare(subject1.KeyInfo.IssuerName, subject2.KeyInfo.IssuerName) != 0 ||
+                string.Compare(subject1.KeyInfo.Kid, subject2.KeyInfo.Kid) != 0 ||
+                string.Compare(subject1.KeyInfo.RetrievalMethodUri, subject2.KeyInfo.RetrievalMethodUri) != 0 ||
+                string.Compare(subject1.KeyInfo.SerialNumber, subject2.KeyInfo.SerialNumber) != 0 ||
+                string.Compare(subject1.KeyInfo.SKI, subject2.KeyInfo.SKI) != 0 ||
+                string.Compare(subject1.KeyInfo.SubjectName, subject2.KeyInfo.SubjectName) != 0)
+                    return false;
+            else if ((subject1.KeyInfo == null && subject2.KeyInfo != null) || (subject1.KeyInfo != null && subject2.KeyInfo == null))
+                return false;
+
+            if (subject1.ConfirmationMethods.Count != subject2.ConfirmationMethods.Count)
+                return false;
+
+            Dictionary<string, string> methods = subject1.ConfirmationMethods.ToDictionary(x => x);
+            foreach (var method in subject2.ConfirmationMethods)
+            {
+                if (!methods.ContainsKey(method))
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Determines whether a URI is valid and can be created using the specified UriKind.
         /// Uri.TryCreate is used here, which is more lax than Uri.IsWellFormedUriString.
@@ -58,6 +101,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             Uri tempUri;
             return Uri.TryCreate(uriString, uriKind, out tempUri);
+        }
+
+        internal static SamlStatement FindStatement(ICollection<SamlStatement> statements, SamlSubject subject, Type statementType)
+        {
+            foreach (var statement in statements)
+            {
+                if (statementType == statement.GetType() && AreSubjectsEqual((statement as SamlSubjectStatement).Subject, subject))
+                    return statement;
+            }
+
+            if (statementType == typeof(SamlAuthenticationStatement))
+            {
+                var statement = new SamlAuthenticationStatement() { Subject = subject };
+                statements.Add(statement);
+                return statement;
+            }
+
+            if (statementType == typeof(SamlAttributeStatement))
+            {
+                var statement = new SamlAttributeStatement() { Subject = subject };
+                statements.Add(statement);
+                return statement;
+            }
+
+            if (statementType == typeof(SamlAuthorizationDecisionStatement))
+            {
+                var statement = new SamlAuthorizationDecisionStatement() { Subject = subject };
+                statements.Add(statement);
+                return statement;
+            }
+            else
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10514));
         }
 
         internal static bool IsAssertionIdValid(string assertionId)
@@ -256,11 +331,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     else
                     {
                         // <Statement|AuthnStatement|AuthzDecisionStatement|AttributeStatement>, 0-OO
-                        var statement = ReadStatement(envelopeReader);
-                        if (statement == null)
-                            throw LogReadException(LogMessages.IDX11129);
-
-                        assertion.Statements.Add(statement);
+                        ReadStatement(envelopeReader, assertion.Statements);
                     }
                 }
 
@@ -349,8 +420,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// saml:AttributeStatementType.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAttributeStatement"/> element.</param>
+        /// <param name="statements">A <see cref="ICollection{SamlStatement}"/>(s) regarding the subject.</param>
         /// <returns>A <see cref="SamlAttributeStatement"/> instance.</returns>
-        protected virtual SamlAttributeStatement ReadAttributeStatement(XmlDictionaryReader reader)
+        protected virtual void ReadAttributeStatement(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace);
 
@@ -360,7 +432,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AttributeStatementType, SamlConstants.Namespace);
 
                 reader.ReadStartElement();
-                var statement = new SamlAttributeStatement() { Subject = ReadSubject(reader) };
+                var subject = ReadSubject(reader);
+                var statement = FindStatement(statements, subject, typeof(SamlAttributeStatement)) as SamlAttributeStatement;
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(SamlConstants.Elements.Attribute, SamlConstants.Namespace))
@@ -381,8 +454,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 reader.MoveToContent();
                 reader.ReadEndElement();
-
-                return statement;
             }
             catch (Exception ex)
             {
@@ -451,10 +522,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Read the saml:AuthenticationStatement.
         /// </summary>
         /// <param name="reader">XmlReader positioned at a saml:AuthenticationStatement.</param>
+        /// <param name="statements">A <see cref="ICollection{SamlStatement}"/>(s) regarding the subject.</param>
         /// <returns>SamlAuthenticationStatement</returns>
         /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.
         /// or the statement contains a unknown child element.</exception>
-        protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader)
+        protected virtual SamlAuthenticationStatement ReadAuthenticationStatement(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace);
 
@@ -463,27 +535,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AuthnContextType, SamlConstants.Namespace);
 
-                var authenticationStatement = new SamlAuthenticationStatement();
-
                 var authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
                 if (string.IsNullOrEmpty(authInstance))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationInstant);
-
-                authenticationStatement.AuthenticationInstant = DateTime.ParseExact(
-                    authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
                 var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
                 if (string.IsNullOrEmpty(authenticationMethod))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationMethod);
 
-                authenticationStatement.AuthenticationMethod = authenticationMethod;
-
                 reader.ReadStartElement();
-                authenticationStatement.Subject = ReadSubject(reader);
+                var subject = ReadSubject(reader);
+                var statement = FindStatement(statements, subject, typeof(SamlAuthenticationStatement)) as SamlAuthenticationStatement;
+                statement.AuthenticationInstant = DateTime.ParseExact(
+                    authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+
+                statement.AuthenticationMethod = authenticationMethod;
                 if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
                 {
-                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
-                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
+                    statement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
+                    statement.IPAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
 
                     bool isEmptyElement = reader.IsEmptyElement;
                     reader.MoveToContent();
@@ -495,13 +565,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 while (reader.IsStartElement())
                 {
-                    authenticationStatement.AuthorityBindings.Add(ReadAuthorityBinding(reader));
+                    statement.AuthorityBindings.Add(ReadAuthorityBinding(reader));
                 }
 
                 reader.MoveToContent();
                 reader.ReadEndElement();
 
-                return authenticationStatement;
+                return statement;
             }
             catch (Exception ex)
             {
@@ -583,8 +653,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// saml:AuthzDecisionStatementType.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAuthorizationDecisionStatement"/> element.</param>
+        /// <param name="statements">A <see cref="ICollection{SamlStatement}"/>(s) regarding the subject.</param>
         /// <returns>A <see cref="SamlAuthorizationDecisionStatement"/> instance.</returns>
-        protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
+        protected virtual SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace);
 
@@ -593,18 +664,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AuthzDecisionStatementType, SamlConstants.Namespace, false);
 
-                var statement = new SamlAuthorizationDecisionStatement();
-
                 var resource = reader.GetAttribute(SamlConstants.Attributes.Resource, null);
                 if (string.IsNullOrEmpty(resource))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Resource);
-
-                statement.Resource = resource;
 
                 var decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
                 if (string.IsNullOrEmpty(decisionString))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
 
+                reader.ReadStartElement();
+                var subject = ReadSubject(reader);
+                var statement = FindStatement(statements, subject, typeof(SamlAuthorizationDecisionStatement)) as SamlAuthorizationDecisionStatement;
+
+                statement.Resource = resource;
                 if (decisionString.Equals(SamlAccessDecision.Deny.ToString(), StringComparison.OrdinalIgnoreCase))
                     statement.AccessDecision = SamlAccessDecision.Deny;
                 else if (decisionString.Equals(SamlAccessDecision.Permit.ToString(), StringComparison.OrdinalIgnoreCase))
@@ -612,8 +684,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 else
                     statement.AccessDecision = SamlAccessDecision.Indeterminate;
 
-                reader.ReadStartElement();
-                statement.Subject = ReadSubject(reader);
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(SamlConstants.Elements.Action, SamlConstants.Namespace))
@@ -807,6 +877,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Reads the &lt;saml:Statement> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlStatement"/> element.</param>
+        /// <param name="statements">A <see cref="ICollection{SamlStatement}"/>(s) regarding the subject.</param>
         /// <returns>An instance of <see cref="SamlStatement"/> derived type.</returns>
         /// <remarks>
         /// The default implementation only handles Statement elements which
@@ -814,17 +885,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// saml:AuthnStatementType, and saml:AuthzDecisionStatementType. To
         /// handle custom statements, override this method.
         /// </remarks>
-        protected virtual SamlStatement ReadStatement(XmlDictionaryReader reader)
+        protected virtual void ReadStatement(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
             if (reader.IsStartElement(SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace))
-                return ReadAuthenticationStatement(reader);
+                ReadAuthenticationStatement(reader, statements);
             else if (reader.IsStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace))
-                return ReadAttributeStatement(reader);
+                ReadAttributeStatement(reader, statements);
             else if (reader.IsStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace))
-                return ReadAuthorizationDecisionStatement(reader);
+                ReadAuthorizationDecisionStatement(reader, statements);
             else
                 throw LogReadException(LogMessages.IDX11126, SamlConstants.Elements.Assertion, reader.Name);
         }
@@ -849,8 +920,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     // @xsi:type
                     XmlUtil.ValidateXsiType(reader, SamlConstants.Types.NameIDType, SamlConstants.Namespace);
 
-                    subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
-                    subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                    if (!string.IsNullOrEmpty(nameFormat))
+                        subject.NameFormat = nameFormat;
+
+                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    if (!string.IsNullOrEmpty(nameQualifier))
+                        subject.NameQualifier = nameQualifier;
 
                     // TODO - check for empty element
                     reader.MoveToContent();
@@ -883,8 +959,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     // An Authentication protocol specified in the confirmation method might need this
                     // data. Just store this content value as string.
-                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))                        
-                        subject.ConfirmationData = reader.ReadElementContentAsString();
+                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
+                    {
+                        var confirmationData = reader.ReadElementContentAsString();
+                        if (!string.IsNullOrEmpty(confirmationData))
+                            subject.ConfirmationData = confirmationData;
+                    }
 
                     if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {

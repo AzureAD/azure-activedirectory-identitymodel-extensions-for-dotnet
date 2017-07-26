@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -298,9 +299,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements,
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_SameSubject,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements)
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_SameSubject)
+                    },
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentSubject,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentSubject)
+                    },
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType)
                     }
                 };
             }
@@ -407,10 +420,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AttributeStatementTestSet.Xml);
-                var attributeStatement = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAttributeStatementPublic(reader);
+                var attributeStatements = new List<SamlStatement>();
+                (theoryData.SamlSerializer as SamlSerializerPublic).ReadAttributeStatementPublic(reader, attributeStatements);
                 theoryData.ExpectedException.ProcessNoException();
 
-                IdentityComparer.AreEqual(attributeStatement, theoryData.AttributeStatementTestSet.AttributeStatement, context);
+                IdentityComparer.AreEqual(attributeStatements[0], theoryData.AttributeStatementTestSet.AttributeStatement, context);
             }
             catch (Exception ex)
             {
@@ -538,10 +552,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AuthenticationStatementTestSet.Xml);
-                var authenticationStatement = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthenticationStatementPublic(reader);
+                var authenticationStatements = new List<SamlStatement>();
+                (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthenticationStatementPublic(reader, authenticationStatements);
                 theoryData.ExpectedException.ProcessNoException();
 
-                IdentityComparer.AreEqual(authenticationStatement, theoryData.AuthenticationStatementTestSet.AuthenticationStatement, context);
+                IdentityComparer.AreEqual(authenticationStatements[0], theoryData.AuthenticationStatementTestSet.AuthenticationStatement, context);
             }
             catch (Exception ex)
             {
@@ -652,10 +667,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AuthorizationDecisionTestSet.Xml);
-                var statement = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthorizationDecisionStatementPublic(reader);
+                var statements = new List<SamlStatement>();
+                (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthorizationDecisionStatementPublic(reader, statements);
                 theoryData.ExpectedException.ProcessNoException();
 
-                IdentityComparer.AreEqual(statement, theoryData.AuthorizationDecisionTestSet.AuthorizationDecision, context);
+                IdentityComparer.AreEqual(statements[0], theoryData.AuthorizationDecisionTestSet.AuthorizationDecision, context);
             }
             catch (Exception ex)
             {
@@ -897,26 +913,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameQualifierNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameQualifierNull)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoNameQualifier,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoNameQualifier)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameQualifierEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameQualifierEmptyString)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectFormatNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectFormatNull)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectFormatEmptystring,
-                        TestId = nameof(ReferenceXml.SamlSubjectFormatEmptystring)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoFormat,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoFormat)
                     },
                     new SamlTheoryData
                     {
@@ -935,14 +939,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationDataNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationDataNull)
-                    },
-                    new SamlTheoryData
-                    {
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationDataEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationDataEmptyString)
+                        SubjectTestSet = ReferenceXml.SamlSubjectNoConfirmationData,
+                        TestId = nameof(ReferenceXml.SamlSubjectNoConfirmationData)
                     },
                     new SamlTheoryData
                     {
@@ -997,9 +995,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 return base.ReadAttribute(reader);
             }
 
-            public SamlAttributeStatement ReadAttributeStatementPublic(XmlDictionaryReader reader)
+            public void ReadAttributeStatementPublic(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
             {
-                return base.ReadAttributeStatement(reader);
+                base.ReadAttributeStatement(reader, statements);
             }
 
             public SamlAudienceRestrictionCondition ReadAudienceRestrictionConditionPublic(XmlDictionaryReader reader)
@@ -1007,14 +1005,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 return base.ReadAudienceRestrictionCondition(reader);
             }
 
-            public SamlAuthenticationStatement ReadAuthenticationStatementPublic(XmlDictionaryReader reader)
+            public void ReadAuthenticationStatementPublic(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
             {
-                return base.ReadAuthenticationStatement(reader);
+                base.ReadAuthenticationStatement(reader, statements);
             }
 
-            public SamlAuthorizationDecisionStatement ReadAuthorizationDecisionStatementPublic(XmlDictionaryReader reader)
+            public void ReadAuthorizationDecisionStatementPublic(XmlDictionaryReader reader, ICollection<SamlStatement> statements)
             {
-                return base.ReadAuthorizationDecisionStatement(reader);
+                base.ReadAuthorizationDecisionStatement(reader, statements);
             }
 
             public SamlConditions ReadConditionsPublic(XmlDictionaryReader reader)

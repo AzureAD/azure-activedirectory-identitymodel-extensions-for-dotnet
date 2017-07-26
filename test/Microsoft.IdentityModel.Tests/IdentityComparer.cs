@@ -413,7 +413,9 @@ namespace Microsoft.IdentityModel.Tests
             else if (t1 is SamlEvidence)
                 return AreSamlEvidencesEqual(t1 as SamlEvidence, t2 as SamlEvidence, context);
             else if (t1 is SamlStatement)
-                return AreSamlStatementEqual(t1 as SamlStatement, t2 as SamlStatement, context);
+                return AreSamlStatementsEqual(t1 as SamlStatement, t2 as SamlStatement, context);
+            else if (t1 is SamlSubject)
+                return AreSamlSubjectsEqual(t1 as SamlSubject, t2 as SamlSubject, context);
             else
             {
                 var localContext = new CompareContext(context);
@@ -512,11 +514,20 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreSamlStatementEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
+        public static bool AreSamlStatementsEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(statement1, statement2, context))
                 CompareAllPublicProperties(statement1, statement2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreSamlSubjectsEqual(SamlSubject subject1, SamlSubject subject2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(subject1, subject2, context))
+                CompareAllPublicProperties(subject1, subject2, localContext);
 
             return context.Merge(localContext);
         }

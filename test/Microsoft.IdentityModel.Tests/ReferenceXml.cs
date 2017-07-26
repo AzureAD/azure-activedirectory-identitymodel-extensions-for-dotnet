@@ -844,14 +844,42 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlAssertionTestSet SamlAssertionMultiStatements
+        public static SamlAssertionTestSet SamlAssertionMultiStatements_SameSubject
         {
             get
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementMultiAttributes.AttributeStatement }),
                     Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAttributeStatementSingleAttribute.Xml), null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMultiStatements_DifferentSubject
+        {
+            get
+            {
+                SamlSubject subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject);
+                SamlAttributeStatement statement = new SamlAttributeStatement(subject, SamlAttributeSingleValue.Attribute);
+
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, statement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, 
+                        string.Concat(SamlAttributeStatementSingleAttribute.Xml, XmlGenerator.SamlAttributeStatementXml(XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject), null), SamlAttributeSingleValue.Xml)),  null)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionMultiStatements_DifferentStatementType
+        {
+            get
+            {
+                return new SamlAssertionTestSet
+                {
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAuthenticationStatementValid.AuthenticationStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(SamlConstants.MajorVersionValue), Convert.ToString(SamlConstants.MinorVersionValue), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAuthenticationStatementValid.Xml), null)
                 };
             }
         }
@@ -1020,7 +1048,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(null, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(null, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                         XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1032,7 +1060,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, null, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, null, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                         XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1044,9 +1072,9 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), null, null,
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), null, null,
                                         new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, null,
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, null,
                                         XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1058,9 +1086,9 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, string.Empty,
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, string.Empty,
                                         new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(null, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(null, Default.DNSAddress),
                                 XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1072,9 +1100,9 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), string.Empty, Default.IPAddress,
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), string.Empty, Default.IPAddress,
                                         new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, null),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, null),
                                 XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1086,8 +1114,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress, null),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress), null)
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress, null),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress), null)
                 };
             }
         }
@@ -1098,7 +1126,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                 XmlGenerator.SamlAuthorityBindingXml(null, Default.Location, Default.Binding))
                 };
             }
@@ -1110,7 +1138,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                 XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, null, Default.Binding))
                 };
             }
@@ -1122,7 +1150,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                 XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, null))
                 };
             }
@@ -1134,9 +1162,9 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
                                         new List<SamlAuthorityBinding> { new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding) }),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                 XmlGenerator.SamlAuthorityBindingXml(Default.AuthorityKind, Default.Location, Default.Binding))
                 };
             }
@@ -1150,9 +1178,9 @@ namespace Microsoft.IdentityModel.Tests
                 SamlAuthorityBinding binding = new SamlAuthorityBinding(new System.Xml.XmlQualifiedName(Default.AuthorityKind), Default.Location, Default.Binding);
                 return new SamlAuthenticationStatementTestSet
                 {
-                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNameQualifierNull.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
+                    AuthenticationStatement = new SamlAuthenticationStatement(SamlSubjectNoNameQualifier.Subject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), Default.DNSAddress, Default.IPAddress,
                                         new List<SamlAuthorityBinding> { binding, binding }),
-                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNameQualifierNull.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
+                    Xml = XmlGenerator.SamlAuthenticationStatementXml(Default.AuthenticationMethod, Default.AuthenticationInstant, SamlSubjectNoNameQualifier.Xml, XmlGenerator.SamlSubjectLocalityXml(Default.IPAddress, Default.DNSAddress),
                                 string.Concat(authorityBinding, authorityBinding))
                 };
             }
@@ -1446,7 +1474,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlSubjectTestSet SamlSubjectNameQualifierNull
+        public static SamlSubjectTestSet SamlSubjectNoNameQualifier
         {
             get
             {
@@ -1459,20 +1487,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlSubjectTestSet SamlSubjectNameQualifierEmptyString
-        {
-            get
-            {
-                return new SamlSubjectTestSet
-                {
-                    Subject = new SamlSubject(Default.NameIdentifierFormat, string.Empty, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
-                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(string.Empty, Default.NameIdentifierFormat, Default.Subject),
-                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
-                };
-            }
-        }
-
-        public static SamlSubjectTestSet SamlSubjectFormatNull
+        public static SamlSubjectTestSet SamlSubjectNoFormat
         {
             get
             {
@@ -1480,19 +1495,6 @@ namespace Microsoft.IdentityModel.Tests
                 {
                     Subject = new SamlSubject(null, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
                     Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, null, Default.Subject),
-                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
-                };
-            }
-        }
-
-        public static SamlSubjectTestSet SamlSubjectFormatEmptystring
-        {
-            get
-            {
-                return new SamlSubjectTestSet
-                {
-                    Subject = new SamlSubject(string.Empty, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
-                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, string.Empty, Default.Subject),
                                 XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
                 };
             }
@@ -1522,7 +1524,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static SamlSubjectTestSet SamlSubjectConfirmationDataNull
+        public static SamlSubjectTestSet SamlSubjectNoConfirmationData
         {
             get
             {
@@ -1531,19 +1533,6 @@ namespace Microsoft.IdentityModel.Tests
                     Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, null),
                     Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
                                 XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, null))
-                };
-            }
-        }
-
-        public static SamlSubjectTestSet SamlSubjectConfirmationDataEmptyString
-        {
-            get
-            {
-                return new SamlSubjectTestSet
-                {
-                    Subject = new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject, new List<string> { Default.SamlConfirmationMethod }, string.Empty),
-                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject),
-                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, string.Empty))
                 };
             }
         }
