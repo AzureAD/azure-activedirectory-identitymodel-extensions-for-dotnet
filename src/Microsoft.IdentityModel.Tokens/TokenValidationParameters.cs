@@ -82,11 +82,11 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Definition for TokenReplayValidator.
     /// </summary>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="expirationTime">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns></returns>
-    public delegate bool TokenReplayValidator(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters);
+    public delegate bool TokenReplayValidator(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for SignatureValidator.
