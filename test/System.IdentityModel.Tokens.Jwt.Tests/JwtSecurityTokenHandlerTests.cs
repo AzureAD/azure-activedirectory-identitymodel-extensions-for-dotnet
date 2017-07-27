@@ -900,6 +900,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 return ReferenceTheoryData.TokenReplayValidationTheoryData;
             }
+        }
 
         private static TokenValidationParameters ValidateIssuerValidationParameters(string validIssuer, IEnumerable<string> validIssuers, IssuerValidator issuerValidator, bool validateIssuer)
         {
@@ -971,22 +972,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateIssuer = false,
                 ValidateLifetime = validateLifetime
             };
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(SegmentTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void SegmentRead(JwtTheoryData theoryData)
-        {
-            try
-            {
-                theoryData.TokenHandler.ReadJwtToken(theoryData.Token);
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
