@@ -133,14 +133,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     },
                     new EnvelopedSignatureTheoryData
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException)),
                         SecurityKey = ReferenceXml.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_SignatureNOTFormated),
                         Xml = ReferenceXml.Saml2Token_Valid_SignatureNOTFormated
                     },
                     new EnvelopedSignatureTheoryData
                     {
-                        ExpectedException = ExpectedException.CryptographicException(),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException)),
                         SecurityKey = ReferenceXml.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_Formated),
                         Xml = ReferenceXml.Saml2Token_Valid_Formated

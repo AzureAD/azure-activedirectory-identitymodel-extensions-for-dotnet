@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//----------7--------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -32,14 +32,17 @@ using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
+using static Microsoft.IdentityModel.Xml.XmlUtil;
 
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Represents a XmlDsig Reference element as per: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Reference
     /// </summary>
-    public class Reference
+    public class Reference : DSigElement
     {
+        private string _digestMethod;
+        private string _digestValue;
         private XmlTokenStream _tokenStream;
 
         /// <summary>
@@ -64,41 +67,25 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Gets or sets the DigestMethod to use when creating the hash.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
         public string DigestMethod
         {
-            get;
-            set;
+            get => _digestMethod;
+            set => _digestMethod = (string.IsNullOrEmpty(value)) ? throw LogArgumentNullException(nameof(value)) : value;
         }
 
         /// <summary>
-        /// Gets or set the Base64 encoding of the hashed octets.
+        /// Gets or sets the Base64 encoding of the hashed octets.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
         public string DigestValue
         {
-            get;
-            set;
+            get => _digestValue;
+            set => _digestValue = (string.IsNullOrEmpty(value)) ? throw LogArgumentNullException(nameof(value)) : value;
         }
 
         /// <summary>
-        /// Gets or sets the id of this Reference.
-        /// </summary>
-        public string Id
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the prefix to use when writing the &lt;Reference> element.
-        /// </summary>
-        public string Prefix
-        {
-            get;
-            set;
-        } = XmlSignatureConstants.Prefix;
-
-        /// <summary>
-        /// Gets or set the <see cref="XmlTokenStream"/> that is associated with the <see cref="DigestValue"/>.
+        /// Gets or sets the <see cref="XmlTokenStream"/> that is associated with the <see cref="DigestValue"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public XmlTokenStream TokenStream
@@ -138,10 +125,14 @@ namespace Microsoft.IdentityModel.Xml
         /// <see cref="Transforms"/> have been applied.
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
         public void Verify(CryptoProviderFactory cryptoProviderFactory)
         {
-            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory, TokenStream), Convert.FromBase64String(DigestValue)))
-                throw LogExceptionMessage(new CryptographicException(FormatInvariant(LogMessages.IDX21201, Id)));
+            if (cryptoProviderFactory == null)
+                throw LogArgumentNullException(nameof(cryptoProviderFactory));
+
+            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
+                throw LogValidationException(LogMessages.IDX21201, Id);
         }
 
         /// <summary>
@@ -170,32 +161,38 @@ namespace Microsoft.IdentityModel.Xml
         /// Computes the digest of this reference by applying the transforms over the tokenStream.
         /// </summary>
         /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> that will supply the <see cref="HashAlgorithm"/>.</param>
-        /// <param name="tokenStream">the <see cref="XmlTokenStream"/>that contains the XML nodes to hash.</param>
-        /// <returns></returns>
-        protected byte[] ComputeDigest(CryptoProviderFactory cryptoProviderFactory, XmlTokenStream tokenStream)
+        /// <returns>The digest over the <see cref="TokenStream"/> after all transforms have been applied.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
+        /// <exception cref="XmlValidationException">if <see cref="TokenStream"/> is null.</exception>
+        /// <exception cref="XmlValidationException">if <see cref="DigestMethod"/> is not supported.</exception>
+        /// <exception cref="XmlValidationException">if <paramref name="cryptoProviderFactory"/>.CreateHashAlgorithm returns null.</exception>
+        protected byte[] ComputeDigest(CryptoProviderFactory cryptoProviderFactory)
         {
             if (cryptoProviderFactory == null)
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
-            if (tokenStream == null)
-                throw LogArgumentNullException(nameof(tokenStream));
+            if (TokenStream == null)
+                throw LogValidationException(LogMessages.IDX21202, Id);
+
+            if (!cryptoProviderFactory.IsSupportedAlgorithm(DigestMethod))
+                throw LogValidationException(LogMessages.IDX21208, cryptoProviderFactory.GetType(), DigestMethod);
 
             var hashAlg = cryptoProviderFactory.CreateHashAlgorithm(DigestMethod);
             if (hashAlg == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(Tokens.LogMessages.IDX10673, DigestMethod)));
+                throw LogValidationException(LogMessages.IDX21209, cryptoProviderFactory.GetType(), DigestMethod);
 
             try
             {
                 // apply identity transform, just get the hash without any transforms
                 if (Transforms.Count == 0)
-                    return ProcessAndDigest(tokenStream, hashAlg);
+                    return ProcessAndDigest(TokenStream, hashAlg);
 
                 // specification requires last transform to be a canonicalizing transform
                 // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
                 for (int i = 0;  i < Transforms.Count-1; i++)
-                    TransformFactory.Default.GetTransform(Transforms[i]).Process(tokenStream);
+                    TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
 
-                return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(tokenStream, hashAlg);
+                return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
             }
             finally
             {

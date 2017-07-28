@@ -278,6 +278,29 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="format"></param>
         /// <param name="args"></param>
         /// <returns></returns>
+        public static Exception LogValidationException(string format, params object[] args)
+        {
+            return LogExceptionMessage(new XmlValidationException(FormatInvariant(format, args)));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="inner"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static Exception LogValidationException(string format, Exception inner, params object[] args)
+        {
+            return LogExceptionMessage(new XmlValidationException(FormatInvariant(format, args), inner));
+        }
+
+                /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static Exception LogWriteException(string format, params object[] args)
         {
             return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args)));
@@ -294,5 +317,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args), inner));
         }
+
     }
 }

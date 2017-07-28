@@ -460,13 +460,15 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signature = new Signature()
-                {
-                    SignedInfo = SignedInfo
-                };
+                var signature = new Signature(Default.SignedInfo);
                 XmlGenerator.Generate(signature);
                 return signature;
             }
+        }
+
+        public static string SignatureMethod
+        {
+            get => SecurityAlgorithms.RsaSha256Signature;
         }
 
         public static SignedInfo SignedInfo

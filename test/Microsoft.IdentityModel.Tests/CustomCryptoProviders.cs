@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tests
             SupportedAlgorithms.AddRange(supportedAlgorithms);
         }
 
-        public List<string> SupportedAlgorithms { get; private set; } = new List<string>();
+        public List<string> SupportedAlgorithms { get; set; } = new List<string>();
 
         public SignatureProvider SignatureProvider { get; set; }
 
@@ -118,6 +118,16 @@ namespace Microsoft.IdentityModel.Tests
                 return CustomCryptoProvider.Create(algorithm) as HashAlgorithm;
 
             return HashAlgorithm;
+        }
+
+        public override bool IsSupportedAlgorithm(string algorithm)
+        {
+            IsSupportedAlgorithmCalled = true;
+            foreach (var alg in SupportedAlgorithms)
+                if (alg.Equals(algorithm, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+            return false;
         }
 
         public override bool IsSupportedAlgorithm(string algorithm, SecurityKey key)
@@ -236,6 +246,25 @@ namespace Microsoft.IdentityModel.Tests
         protected override byte[] HashFinal()
         {
             throw new NotImplementedException();
+        }
+    }
+
+    public class CustomSecurityKey : SecurityKey
+    {
+        public CustomSecurityKey(CryptoProviderFactory factory)
+        {
+            CryptoProviderFactory = factory;
+        }
+
+        public int KeySizeSetter
+        {
+            get;
+            set;
+        } = 0;
+
+        public override int KeySize
+        {
+            get => KeySizeSetter;
         }
     }
 

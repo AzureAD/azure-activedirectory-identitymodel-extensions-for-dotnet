@@ -898,7 +898,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             get
             {
-                return ReferenceTheoryData.TokenReplayValidationTheoryData;
+                return TestTheoryData.TokenReplayValidationTheoryData;
             }
         }
 

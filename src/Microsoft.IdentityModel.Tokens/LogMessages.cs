@@ -135,12 +135,12 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
         public const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
         public const string IDX10653 = "IDX10653: The encryption algorithm '{0}' requires a key size of at least '{1}' bits. Key '{2}', is of size: '{3}'.";
-        public const string IDX10654 = "IDX10654: Decryption failed. Crypto operation exception: '{0}'.";
+        public const string IDX10654 = "IDX10654: Decryption failed. Cryptographic operation exception: '{0}'.";
         public const string IDX10655 = "IDX10655: 'length' must be greater than 1: '{0}'";
         public const string IDX10656 = "IDX10656: 'length' cannot be greater than signature.Length. length: '{0}', signature.Length: '{1}'.";
         public const string IDX10657 = "IDX10657: The SecurityKey provided for the symmetric key wrap algorithm cannot be converted to byte array. Type is: '{0}'.";
-        public const string IDX10658 = "IDX10658: WrapKey failed, exception from crypto operation: '{0}'";
-        public const string IDX10659 = "IDX10659: UnwrapKey failed, exception from crypto operation: '{0}'";
+        public const string IDX10658 = "IDX10658: WrapKey failed, exception from cryptographic operation: '{0}'";
+        public const string IDX10659 = "IDX10659: UnwrapKey failed, exception from cryptographic operation: '{0}'";
         public const string IDX10660 = "IDX10660: The Key: '{0}' and algorithm: '{1}' pair are not supported.";
         public const string IDX10661 = "IDX10661: Unable to create the KeyWrapProvider.\nKeyWrapAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         public const string IDX10662 = "IDX10662: The KeyWrap algorithm '{0}' requires a key size of '{1}' bits. Key '{2}', is of size:'{3}'.";
@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
         public const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
         public const string IDX10672 = "IDX10672: GetKeyedHashAlgorithm returned null, key: {0}, algorithm {1}.";
-        public const string IDX10673 = "IDX10673: GetHashAlgorithm returned null, algorithm {0}.";
+        public const string IDX10673 = "IDX10673: CryptoProviderFactory.GetHashAlgorithm returned null, factory: {0}, algorithm: {1}.";
 
 
         // security keys

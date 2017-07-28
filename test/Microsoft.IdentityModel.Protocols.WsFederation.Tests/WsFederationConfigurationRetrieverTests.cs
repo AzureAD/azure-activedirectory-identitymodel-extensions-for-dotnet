@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(CryptographicException), "IDX21200:"),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21200:"),
                         Configuration = ReferenceMetadata.AADCommonFormated,
                         Metadata = ReferenceMetadata.AADCommonMetadataFormated,
                         SigingKey = ReferenceMetadata.MetadataSigningKey,

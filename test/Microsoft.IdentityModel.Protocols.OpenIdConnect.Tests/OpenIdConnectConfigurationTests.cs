@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 44)
-                Assert.True(false, "Number of properties has changed from 42 to: " + properties.Length + ", adjust tests");
+                Assert.True(false, "Number of properties has changed from 44 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 

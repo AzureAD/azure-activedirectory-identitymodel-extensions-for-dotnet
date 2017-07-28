@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets a XML transform.
+        /// Gets a XML transform that modifies a XmlTokenStream.
         /// </summary>
         /// <param name="transform">the name of the transform.</param>
         /// <returns><see cref="Transform"/></returns>
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets a XML that is capable of Canonicalizing XML and returning the bytes.
+        /// Gets a XML transform that is capable of Canonicalizing XML and returning bytes.
         /// </summary>
         /// <param name="transform">the name of the transform.</param>
         /// <returns><see cref="CanonicalizingTransfrom"/></returns>

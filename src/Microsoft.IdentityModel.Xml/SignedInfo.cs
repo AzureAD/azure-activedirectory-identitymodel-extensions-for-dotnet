@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Verifies the digest of all <see cref="References"/>.
         /// </summary>
-        /// <param name="cryptoProviderFactory">supplies any required crypto operators.</param>
+        /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
         public void Verify(CryptoProviderFactory cryptoProviderFactory)
         {
@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Xml
             if (stream == null)
                 throw LogArgumentNullException(nameof(stream));
 
-            // CanonicalStream will be non null if the SignedInfo was never read by DSigSerializer
+            // CanonicalStream is set by reading with the DSigSerializer
             if (CanonicalStream != null)
             {
                 CanonicalStream.WriteTo(stream);

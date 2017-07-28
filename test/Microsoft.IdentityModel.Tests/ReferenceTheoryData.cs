@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tests
 {
-    public class ReferenceTheoryData
+    public class TestTheoryData
     {
         public static TheoryData<TokenReplayTheoryData> TokenReplayValidationTheoryData
         {

@@ -38,6 +38,7 @@ namespace Microsoft.IdentityModel.Tests
     public class GetSetContext
     {
         private List<string> _errors = new List<string>();
+
         private List<KeyValuePair<string, List<object>>> _propertyNamesAndSetGetValues;
 
         public List<string> Errors { get { return _errors; } }

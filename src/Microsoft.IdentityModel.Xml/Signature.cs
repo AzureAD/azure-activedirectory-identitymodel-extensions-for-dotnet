@@ -30,6 +30,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
+using static Microsoft.IdentityModel.Xml.XmlUtil;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -46,6 +47,16 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public Signature()
         {
+        }
+
+        /// <summary>
+        /// Initializes a <see cref="Signature"/> instance.
+        /// </summary>
+        /// <param name="signedInfo">associated with this Signature.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="signedInfo"/> if null.</exception>
+        public Signature(SignedInfo signedInfo)
+        {
+            SignedInfo = signedInfo;
         }
 
         /// <summary>
@@ -78,26 +89,32 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// 
+        /// Verifies the signature over the SignedInfo.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
+        /// <exception cref="ArgumentNullException"> if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"> if <paramref name="key"/>.CryptoProviderFactory is null.</exception>
+        /// <exception cref="XmlValidationException"> if <see cref="SignedInfo.SignatureMethod"/> is not supported.</exception>
+        /// <exception cref="XmlValidationException"> if signature does not validate.</exception>
         public void Verify(SecurityKey key)
         {
             if (key == null)
                 throw LogArgumentNullException(nameof(key));
 
+            if (!key.CryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
+                throw LogValidationException(LogMessages.IDX21207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());
+
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureMethod)));
+                throw LogValidationException(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureMethod);
 
             try
             {
                 using (var memoryStream = new MemoryStream())
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);
-
-                    if (!signatureProvider.Verify(SignedInfo.CanonicalStream.ToArray(), Convert.FromBase64String(SignatureValue)))
-                        throw LogExceptionMessage(new CryptographicException(LogMessages.IDX21200));
+                    if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
+                        throw LogValidationException(LogMessages.IDX21200, key.CryptoProviderFactory, key);
                 }
             }
             finally

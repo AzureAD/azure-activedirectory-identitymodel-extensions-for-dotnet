@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -35,18 +37,37 @@ namespace Microsoft.IdentityModel.Xml.Tests
     public class SignatureTests
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("SignatureConstructorTheoryData")]
-        public void SignatureConstructor(SignatureTheoryData theoryData)
+        [Fact]
+        public void GetSets()
         {
-            TestUtilities.WriteHeader($"{this}.SignatureConstructor", theoryData);
-            var context = new CompareContext($"{this}.SignatureConstructor, {theoryData.TestId}");
+            var type = typeof(Signature);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 5, $"Number of properties has changed from 5 to: {properties.Length}, adjust tests");
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("KeyInfo", new List<object>{(KeyInfo)null, new KeyInfo(), new KeyInfo()}),
+                    new KeyValuePair<string, List<object>>("SignatureValue", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SignedInfo", new List<object>{(SignedInfo)null, new SignedInfo(), new SignedInfo()}),
+                },
+                Object = new Signature(),
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
+
+        [Theory, MemberData("ConstructorTheoryData")]
+        public void Constructor(SignatureTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
+            var context = new CompareContext($"{this}.Constructor, {theoryData.TestId}");
             try
             {
-                var signature = new Signature()
-                {
-                    SignedInfo = theoryData.SignedInfo
-                };
-
+                var signature = new Signature(theoryData.SignedInfo);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -57,7 +78,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SignatureTheoryData> SignatureConstructorTheoryData
+        public static TheoryData<SignatureTheoryData> ConstructorTheoryData
         {
             get
             {
@@ -69,16 +90,21 @@ namespace Microsoft.IdentityModel.Xml.Tests
                         First = true,
                         SignedInfo = null,
                         TestId = "SignedInfo NULL"
+                    },
+                    new SignatureTheoryData
+                    {
+                        SignedInfo = new SignedInfo(),
+                        TestId = "SignedInfo"
                     }
                 };
             }
         }
 
-        [Theory, MemberData("SignatureVerifyTheoryData")]
-        public void SignatureVerify(SignatureTheoryData theoryData)
+        [Theory, MemberData("VerifyTheoryData")]
+        public void Verify(SignatureTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignatureVerify", theoryData);
-            var context = new CompareContext($"{this}.SignatureVerify, {theoryData.TestId}");
+            TestUtilities.WriteHeader($"{this}.Verify", theoryData);
+            var context = new CompareContext($"{this}.Verify, {theoryData.TestId}");
             try
             {
                 var signature = theoryData.Serializer.ReadSignature(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
@@ -95,7 +121,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SignatureTheoryData> SignatureVerifyTheoryData
+        public static TheoryData<SignatureTheoryData> VerifyTheoryData
         {
             get
             {
@@ -103,53 +129,59 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // ExpectedException.DefaultVerbose = true;
 
                 var theoryData = new TheoryData<SignatureTheoryData>();
-
                 theoryData.Add(new SignatureTheoryData
                 {
-                    SecurityKey = Default.AsymmetricSigningKey,
+                    First = true,
                     Signature = SignatureTestSet.DefaultSignature.Signature,
                     TestId = nameof(SignatureTestSet.DefaultSignature),
-                    TokenStream = Default.TokenStream,
                     Xml = SignatureTestSet.DefaultSignature.Xml
                 });
 
-                // use SecurityKey that will validate the SignedInfo
-                var key  = ReferenceXml.DefaultAADSigningKey;
-                key.CryptoProviderFactory = new DSigCryptoProviderFactory();
-
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21203:"),
+                    ExpectedException = ExpectedException.ArgumentNullException(),
+                    SecurityKey = null,
+                    Signature = SignatureTestSet.DefaultSignature.Signature,
+                    TestId = "SecurityKey is null",
+                    Xml = SignatureTestSet.DefaultSignature.Xml
+                });
+
+                var key = ReferenceXml.DefaultAADSigningKey;
+                key.CryptoProviderFactory = new CustomCryptoProviderFactory();
+                theoryData.Add(new SignatureTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21207:"),
                     SecurityKey = key,
                     Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
                     TestId = "Signature_CryptoProvider returns a null SignatureProvider",
-                    TokenStream = Default.TokenStream,
                     Xml = SignatureTestSet.UnknownDigestAlgorithm.Xml
                 });
 
                 key = ReferenceXml.DefaultAADSigningKey;
-                key.CryptoProviderFactory = new DSigCryptoProviderFactory
+                key.CryptoProviderFactory = new CustomCryptoProviderFactory
                 {
-                    SignatureProvider = new DSigSignatureProvider(ReferenceXml.DefaultAADSigningKey, SecurityAlgorithms.RsaSha256)
+                    SignatureProvider = new CustomSignatureProvider(ReferenceXml.DefaultAADSigningKey, SecurityAlgorithms.RsaSha256)
+                    {
+                        VerifyResult = true,
+                    },
+                    SupportedAlgorithms = new List<string> { Default.SignatureMethod },
+                    HashAlgorithm = SHA256.Create()
                 };
 
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10640:"),
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21208:"),
                     SecurityKey = key,
                     Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
                     TestId = nameof(SignatureTestSet.UnknownDigestAlgorithm),
-                    TokenStream = Default.TokenStream,
                     Xml = SignatureTestSet.UnknownDigestAlgorithm.Xml
                 });
 
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-                    SecurityKey = ReferenceXml.DefaultAADSigningKey,
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21207:"),
                     Signature = SignatureTestSet.UnknownSignatureAlgorithm.Signature,
                     TestId = nameof(SignatureTestSet.UnknownSignatureAlgorithm),
-                    TokenStream = Default.TokenStream,
                     Xml = SignatureTestSet.UnknownSignatureAlgorithm.Xml
                 });
 
@@ -157,15 +189,40 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
+       //public static DSigSerializerTheoryData KeyInfoTest(KeyInfoTestSet keyInfo, ExpectedException expectedException = null, bool first = false)
+       // {
+       //     return new DSigSerializerTheoryData
+       //     {
+       //         ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+       //         First = first,
+       //         KeyInfo = keyInfo.KeyInfo,
+       //         TestId = keyInfo.TestId ?? nameof(keyInfo),
+       //         Xml = keyInfo.Xml,
+       //     };
+       // }
+
+        private static SignatureTheoryData SignatureTest(SignatureTestSet testSet, SecurityKey key, XmlTokenStream tokenStream, ExpectedException expectedException = null, bool first = false)
+        {
+            return new SignatureTheoryData
+            {
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+                SecurityKey = key,
+                Signature = testSet.Signature,
+                TestId = testSet.TestId ?? nameof(testSet),
+                TokenStream = tokenStream,
+                Xml = testSet.Xml
+            };
+        }
         #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
+
     public class SignatureTheoryData : TheoryDataBase
     {
         public SecurityKey SecurityKey
         {
             get;
             set;
-        }
+        } = Default.AsymmetricSigningKey;
 
         public DSigSerializer Serializer
         {
@@ -189,7 +246,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get;
             set;
-        }
+        } = Default.TokenStream;
 
         public string Xml
         {

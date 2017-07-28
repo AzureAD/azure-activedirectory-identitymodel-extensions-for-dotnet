@@ -61,16 +61,22 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21103 = "IDX21103: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
         internal const string IDX21105 = "IDX21105: Transform must specify an algorithm none was found.";
         internal const string IDX21106 = "IDX21106: ExclusiveCanonicalizationTransform must be the last transform.";
-        internal const string IDX21107 = "IDX21107: Inclusive namespaces is not supported.";
+        internal const string IDX21107 = "IDX21107: 'InclusiveNamespaces' is not supported.";
 
         // signature validation
-        internal const string IDX21200 = "IDX21200: The 'Signature' did not validate.";
+        internal const string IDX21200 = "IDX21200: The 'Signature' did not validate. CryptoProviderFactory: '{0}', SecurityKey: '{1}'.";
         internal const string IDX21201 = "IDX21201: The 'Reference' did not validate: '{0}'.";
-        internal const string IDX21202 = "IDX21202: A reference was included: '{0}'.";
-        internal const string IDX21203 = "IDX21203: '{0}.CreateForVerifying' returned null for key: '{1}', signatureAlgorithm: '{2}'.";
-        internal const string IDX21204 = "IDX21204: 'Canonicalization algorithm is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
-        internal const string IDX21205 = "IDX21205: 'At least one reference is required.";
-        internal const string IDX21206 = "IDX21206: 'The reference '{0}' did not contain a digest.";
+        internal const string IDX21202 = "IDX21202: The Reference does not have a XmlTokenStream set: '{0}'.";
+        internal const string IDX21203 = "IDX21203: The CryptoProviderFactory: '{0}', CreateForVerifying returned null for key: '{1}', SignatureMethod: '{2}'.";
+        internal const string IDX21204 = "IDX21204: Canonicalization algorithm is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
+        internal const string IDX21205 = "IDX21205: At least one reference is required.";
+        internal const string IDX21206 = "IDX21206: The reference '{0}' did not contain a digest.";
+        internal const string IDX21207 = "IDX21207: SignatureMethod is not supported: '{0}'. CryptoProviderFactory: '{1}'.";
+        internal const string IDX21208 = "IDX21208: DigestMethod is not supported: '{0}'. CryptoProviderFactory: '{1}'.";
+        internal const string IDX21209 = "IDX21209: The CryptoProviderFactory: '{0}', CreateHashAlgorithm, returned null for DigestMethod: '{1}'.";
+        internal const string IDX21210 = "IDX21210: The TransformFactory: '{0}', does not support the transform: '{1}'.";
+        internal const string IDX21211 = "IDX21211: The TransfromFactory: '{0}', GetTransform, returned null for Transform: '{1}'.";
+        internal const string IDX21212 = "IDX21212: The TransfromFactory: '{0}', GetCanonicalizingTransform, returned null for Transform: '{1}'.";
 
         // logging messages
         internal const string IDX21300 = "IDX21300: KeyInfo skipped unknown element: '{0}'.";

@@ -694,21 +694,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <remarks>This method may return null if the token descriptor does not contain any subject or the subject does not have any claims.
         /// </remarks>
-        /// <param name="subject">The <see cref="ClaimsIdentity"/> that contains claims which will be converted to SAML Attributes.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/> that contains claims which will be converted to SAML Attributes.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that contains information on building the <see cref="Saml2AttributeStatement"/>.</param>
         /// <returns>A Saml2AttributeStatement.</returns>
-        protected virtual Saml2AttributeStatement CreateAttributeStatement(ClaimsIdentity subject, SecurityTokenDescriptor tokenDescriptor)
+        protected virtual Saml2AttributeStatement CreateAttributeStatement(ClaimsIdentity identity, SecurityTokenDescriptor tokenDescriptor)
         {
-            if (subject == null)
+            if (identity == null)
                 return null;
 
             // We treat everything else as an Attribute except the nameId claim, which is already processed
             // for saml2subject
             // AuthenticationInstant and AuthenticationType are not converted to Claims
-            if (subject.Claims != null)
+            if (identity.Claims != null)
             {
                 var attributes = new List<Saml2Attribute>();
-                foreach (Claim claim in subject.Claims)
+                foreach (Claim claim in identity.Claims)
                 {
                     if (claim != null && claim.Type != ClaimTypes.NameIdentifier)
                     {
@@ -724,7 +724,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                 }
 
-                AddDelegateToAttributes(subject, attributes, tokenDescriptor);
+                AddDelegateToAttributes(identity, attributes, tokenDescriptor);
                 return new Saml2AttributeStatement(CollectAttributeValues(attributes));
             }
 
@@ -765,28 +765,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Adds all the delegates associated with the subject into the attribute collection.
         /// </summary>
-        /// <param name="subject">The delegate of this <see cref="ClaimsIdentity"/> will be serialized into a <see cref="Saml2Attribute"/>.</param>
+        /// <param name="identity">The delegate of this <see cref="ClaimsIdentity"/> will be serialized into a <see cref="Saml2Attribute"/>.</param>
         /// <param name="attributes">A <see cref="ICollection{T}"/> of <see cref="Saml2Attribute"/>.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that contains information on building the delegate.</param>
-        protected virtual void AddDelegateToAttributes(ClaimsIdentity subject, ICollection<Saml2Attribute> attributes, SecurityTokenDescriptor tokenDescriptor)
+        protected virtual void AddDelegateToAttributes(ClaimsIdentity identity, ICollection<Saml2Attribute> attributes, SecurityTokenDescriptor tokenDescriptor)
         {
-            if (subject == null)
-                throw LogArgumentNullException(nameof(subject));
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
 
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
-            if (subject.Actor == null)
+            if (identity.Actor == null)
                 return;
 
             var actingAsAttributes = new List<Saml2Attribute>();
-            foreach (Claim claim in subject.Actor.Claims)
+            foreach (Claim claim in identity.Actor.Claims)
             {
                 if (claim != null)
                     actingAsAttributes.Add(CreateAttribute(claim, tokenDescriptor));
             }
 
-            AddDelegateToAttributes(subject.Actor, actingAsAttributes, tokenDescriptor);
+            AddDelegateToAttributes(identity.Actor, actingAsAttributes, tokenDescriptor);
 
             ICollection<Saml2Attribute> collectedAttributes = CollectAttributeValues(actingAsAttributes);
             attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateXmlStringFromAttributes(collectedAttributes), ClaimValueTypes.String), tokenDescriptor));
@@ -1118,15 +1118,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// claim.  All of the claims will be returned in an ClaimsIdentity with the specified issuer.
         /// </summary>
         /// <param name="attribute">The <see cref="Saml2Attribute"/> to use.</param>
-        /// <param name="subject">The <see cref="ClaimsIdentity"/> that is the subject of this token.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/> that is the subject of this token.</param>
         /// <param name="issuer">The issuer of the claim.</param>
         /// <exception cref="InvalidOperationException">Will be thrown if the Saml2Attribute does not contain any 
         /// valid Saml2AttributeValues.
         /// </exception>
-        protected virtual void SetDelegateFromAttribute(Saml2Attribute attribute, ClaimsIdentity subject, string issuer)
+        protected virtual void SetDelegateFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)
         {
             // bail here; nothing to add.
-            if (subject == null || attribute == null || attribute.Values == null || attribute.Values.Count < 1)
+            if (identity == null || attribute == null || attribute.Values == null || attribute.Values.Count < 1)
                 return;
 
             Saml2Attribute actingAsAttribute = null;
@@ -1182,27 +1182,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             // TODO - what should the authenticationType be, call tokenvalidationParameters.CreateClaimsIdentity
-            subject.Actor = new ClaimsIdentity(claims);
-            SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
+            identity.Actor = new ClaimsIdentity(claims);
+            SetDelegateFromAttribute(actingAsAttribute, identity.Actor, issuer);
         }
 
         /// <summary>
-        /// Processes all statements to generate claims.
+        /// Processes all statements and adds claims to the identity.
         /// </summary>
         /// <param name="statements">A collection of Saml2Statement.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
-        protected virtual void ProcessStatements(ICollection<Saml2Statement> statements, ClaimsIdentity subject, string issuer)
+        protected virtual void ProcessStatements(ICollection<Saml2Statement> statements, ClaimsIdentity identity, string issuer)
         {
             var authnStatements = new Collection<Saml2AuthenticationStatement>();
             foreach (var statement in statements)
             {
                 if (statement is Saml2AttributeStatement attrStatement)
-                    ProcessAttributeStatement(attrStatement, subject, issuer);
+                    ProcessAttributeStatement(attrStatement, identity, issuer);
                 else if (statement is Saml2AuthenticationStatement authnStatement)
                     authnStatements.Add(authnStatement);
                 else if (statement is Saml2AuthorizationDecisionStatement authzStatement)
-                    ProcessAuthorizationDecisionStatement(authzStatement, subject, issuer);
+                    ProcessAuthorizationDecisionStatement(authzStatement, identity, issuer);
 
                 // We don't process custom statements. Just fall through.
             }
@@ -1210,25 +1210,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             foreach (var authStatement in authnStatements)
             {
                 if (authStatement != null)
-                    ProcessAuthenticationStatement(authStatement, subject, issuer);
+                    ProcessAuthenticationStatement(authStatement, identity, issuer);
             }
         }
 
         /// <summary>
-        /// Creates claims from the <see cref="Saml2Subject"/>.
+        /// Adds claims from the <see cref="Saml2Subject"/> into the <see cref="ClaimsIdentity"/>.
         /// </summary>
-        /// <param name="assertionSubject">The <see cref="Saml2Subject"/>.</param>
-        /// <param name="subject">The <see cref="ClaimsIdentity"/> subject.</param>
+        /// <param name="subject">The <see cref="Saml2Subject"/>.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
-        protected virtual void ProcessSamlSubject(Saml2Subject assertionSubject, ClaimsIdentity subject, string issuer)
+        protected virtual void ProcessSubject(Saml2Subject subject, ClaimsIdentity identity, string issuer)
         {
-            if (assertionSubject == null)
-                throw LogArgumentNullException(nameof(assertionSubject));
-
             if (subject == null)
                 throw LogArgumentNullException(nameof(subject));
 
-            var nameId = assertionSubject.NameId;
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
+
+            var nameId = subject.NameId;
             if (nameId != null)
             {
                 var claim = new Claim(ClaimTypes.NameIdentifier, nameId.Value, ClaimValueTypes.String, issuer);
@@ -1244,7 +1244,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (nameId.SPProvidedId != null)
                     claim.Properties[ClaimProperties.SamlNameIdentifierSPProvidedId] = nameId.SPProvidedId;
 
-                subject.AddClaim(claim);
+                identity.AddClaim(claim);
             }
         }
 
@@ -1252,25 +1252,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates claims from a <see cref="Saml2AttributeStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="Saml2AttributeStatement"/>.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="identity">The subject.</param>
         /// <param name="issuer">The issuer.</param>
-        protected virtual void ProcessAttributeStatement(Saml2AttributeStatement statement, ClaimsIdentity subject, string issuer)
+        protected virtual void ProcessAttributeStatement(Saml2AttributeStatement statement, ClaimsIdentity identity, string issuer)
         {
             if (statement == null)
                 throw LogArgumentNullException(nameof(statement));
 
-            if (subject == null)
-                throw LogArgumentNullException(nameof(subject));
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
 
             foreach (var attribute in statement.Attributes)
             {
                 if (StringComparer.Ordinal.Equals(attribute.Name, ClaimTypes.Actor))
                 {
                     // TODO - should we support nested Actors?
-                    if (subject.Actor != null)
+                    if (identity.Actor != null)
                         throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
 
-                    SetDelegateFromAttribute(attribute, subject, issuer);
+                    SetDelegateFromAttribute(attribute, identity, issuer);
                 }
                 else
                 {
@@ -1287,7 +1287,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             if (attribute.FriendlyName != null)
                                 claim.Properties[ClaimProperties.SamlAttributeDisplayName] = attribute.FriendlyName;
 
-                            subject.AddClaim(claim);
+                            identity.AddClaim(claim);
                         }
                     }
                 }
@@ -1298,39 +1298,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates claims from a <see cref="Saml2AuthenticationStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="Saml2AuthenticationStatement"/>.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="identity">The subject.</param>
         /// <param name="issuer">The issuer.</param>
-        protected virtual void ProcessAuthenticationStatement(Saml2AuthenticationStatement statement, ClaimsIdentity subject, string issuer)
+        protected virtual void ProcessAuthenticationStatement(Saml2AuthenticationStatement statement, ClaimsIdentity identity, string issuer)
         {
-            if (subject == null)
-                throw LogArgumentNullException(nameof(subject));
+            if (identity == null)
+                throw LogArgumentNullException(nameof(identity));
 
             if (statement.AuthenticationContext.DeclarationReference != null)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX14001));
 
             if (statement.AuthenticationContext.ClassReference != null)
             {
-                subject.AddClaim(
+                identity.AddClaim(
                     new Claim(ClaimTypes.AuthenticationMethod,
                               statement.AuthenticationContext.ClassReference.OriginalString,
                               ClaimValueTypes.String,
                               issuer));
             }
 
-            subject.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
+            identity.AddClaim(new Claim(ClaimTypes.AuthenticationInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat), ClaimValueTypes.DateTime, issuer));
         }
 
         /// <summary>
         /// Creates claims from a <see cref="Saml2AuthorizationDecisionStatement"/>.
         /// </summary>
         /// <param name="statement">The <see cref="Saml2AuthorizationDecisionStatement"/>.</param>
-        /// <param name="subject">The subject.</param>
+        /// <param name="identity">The <see cref="ClaimsIdentity"/>.</param>
         /// <param name="issuer">The issuer.</param>
-        /// <remarks>Provided for extensibility. By default no claims are created.</remarks>
-        protected virtual void ProcessAuthorizationDecisionStatement(Saml2AuthorizationDecisionStatement statement, ClaimsIdentity subject, string issuer)
+        /// <remarks>Provided for extensibility. By default no claims are added.</remarks>
+        protected virtual void ProcessAuthorizationDecisionStatement(Saml2AuthorizationDecisionStatement statement, ClaimsIdentity identity, string issuer)
         {
         }
-
 
         /// <summary>
         /// Creates claims from a Saml2 token.
@@ -1356,7 +1355,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             var identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
-            ProcessSamlSubject(assertion.Subject, identity, actualIssuer);
+            ProcessSubject(assertion.Subject, identity, actualIssuer);
             ProcessStatements(assertion.Statements, identity, actualIssuer);
 
             return identity;
