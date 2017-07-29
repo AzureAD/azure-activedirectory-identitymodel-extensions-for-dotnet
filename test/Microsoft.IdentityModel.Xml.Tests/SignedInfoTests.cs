@@ -29,12 +29,37 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class SignedInfoTests
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        [Fact]
+        public void GetSets()
+        {
+            var type = typeof(SignedInfo);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 5, $"Number of properties has changed from 5 to: {properties.Length}, adjust tests");
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("CanonicalizationMethod", new List<object>{SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments}),
+                    new KeyValuePair<string, List<object>>("SignatureMethod", new List<object>{SecurityAlgorithms.RsaSha256Signature, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                },
+                Object = new SignedInfo(),
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
+
         [Theory, MemberData("SignedInfoConstructorTheoryData")]
         public void SignedInfoConstructor(SignedInfoTheoryData theoryData)
         {
