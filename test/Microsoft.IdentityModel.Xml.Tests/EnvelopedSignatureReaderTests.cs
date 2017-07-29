@@ -28,12 +28,37 @@
 using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
     public class EnvelopedSignatureReaderTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        [Fact]
+        public void GetSets()
+        {
+            var type = typeof(EnvelopedSignatureReader);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 35, $"Number of properties has changed from 35 to: {properties.Length}, adjust tests");
+
+            EnvelopedSignatureReader reader = XmlUtilities.CreateEnvelopedSignatureReader(Default.OuterXml);
+            DSigSerializer defaultSerializer = reader.Serializer;
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("Serializer", new List<object>{ defaultSerializer, new DSigSerializer()}),
+                },
+                Object = reader,
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
+
         [Theory, MemberData("ConstructorTheoryData")]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {

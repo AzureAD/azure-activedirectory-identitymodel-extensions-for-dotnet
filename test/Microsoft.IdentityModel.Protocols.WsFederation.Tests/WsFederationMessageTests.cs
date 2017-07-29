@@ -42,7 +42,47 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     public class WsFederationMessageTests
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("MessageTheoryData")]
+
+        [Fact]
+        public void GetSets()
+        {
+            var type = typeof(WsFederationMessage);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 27, $"Number of properties has changed from 27 to: {properties.Length}, adjust tests");
+
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("Wa", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wattr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wattrptr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wct", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wctx", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wencoding", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wfed", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wfresh", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Whr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wp", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wpseudo", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wpseudoptr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wreply", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wreq", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wreqptr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wres", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wresult", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wresultptr", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Wtrealm", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+
+                },
+                Object = new WsFederationMessage(),
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
+
+    [Theory, MemberData("MessageTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
