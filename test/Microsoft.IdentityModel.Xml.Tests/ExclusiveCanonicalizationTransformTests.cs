@@ -31,12 +31,34 @@ using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class ExclusiveCanonicalizationTransformTests
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        [Fact]
+        public void GetSets()
+        {
+            var type = typeof(ExclusiveCanonicalizationTransform);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 1, $"Number of properties has changed from 1 to: {properties.Length}, adjust tests");
+
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("IncludeComments", new List<object>{false, true}),
+                },
+                Object = new ExclusiveCanonicalizationTransform(false),
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
+
         [Theory, MemberData("ConstructorTheoryData")]
         public void Constructor(ExclusiveCanonicalizationTransformTheoryData theoryData)
         {
