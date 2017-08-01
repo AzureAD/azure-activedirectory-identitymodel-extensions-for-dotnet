@@ -1382,6 +1382,44 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             return theoryData;
         }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ParametersCheckTheoryData))]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ParametersCheckTest(ParametersCheckTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ParametersCheckTest", theoryData);
+
+            var handler = new JwtSecurityTokenHandlerCustom();
+            try
+            {
+                handler.CreateClaimsIdentityCustom(theoryData.token, "issuer", theoryData.validationParameters);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch(Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<ParametersCheckTheoryData> ParametersCheckTheoryData()
+        {
+            return new TheoryData<ParametersCheckTheoryData>()
+            {
+                new ParametersCheckTheoryData
+                {
+                    TestId = "Missing token",
+                    token = null,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000")
+                },
+                new ParametersCheckTheoryData
+                {
+                    TestId = "Missing validationParameters",
+                    validationParameters = null,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000")
+                }
+            };
+        }
     }
 
     public class KeyWrapTokenTheoryData : TheoryDataBase
@@ -1394,5 +1432,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     {
         JWE,
         JWS
+    }
+
+    public class JwtSecurityTokenHandlerCustom : JwtSecurityTokenHandler
+    {
+        public void CreateClaimsIdentityCustom(JwtSecurityToken jwtToken, string issuer, TokenValidationParameters validationParameters)
+        {
+            CreateClaimsIdentity(jwtToken, issuer, validationParameters);
+        }
+    }
+
+    public class ParametersCheckTheoryData : TheoryDataBase
+    {
+        public JwtSecurityToken token { get; set; } = new JwtSecurityToken();
+        public TokenValidationParameters validationParameters { get; set; } = new TokenValidationParameters();
     }
 }
