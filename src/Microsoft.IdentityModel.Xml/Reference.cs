@@ -190,7 +190,15 @@ namespace Microsoft.IdentityModel.Xml
                 // specification requires last transform to be a canonicalizing transform
                 // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
                 for (int i = 0;  i < Transforms.Count-1; i++)
+                {
+                    if (!TransformFactory.Default.IsSupportedTransform(Transforms[i]))
+                        throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{Transforms[i]}'."));
+
                     TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
+                }
+
+                if (!TransformFactory.Default.IsSupportedCanonicalizingTransfrom(Transforms[Transforms.Count - 1]))
+                    throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{Transforms[Transforms.Count - 1]}'."));
 
                 return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
             }
