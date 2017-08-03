@@ -26,11 +26,39 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Tests;
+using System;
+using System.Collections.Generic;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class KeyInfoTests
     {
+        [Fact]
+        public void GetSets()
+        {
+            var type = typeof(KeyInfo);
+            var properties = type.GetProperties();
+            Assert.True(properties.Length == 7, $"Number of properties has changed from 7 to: {properties.Length}, adjust tests");
+
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("CertificateData", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("IssuerName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Kid", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("RetrievalMethodUri", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SerialNumber", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SKI", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SubjectName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                },
+                Object = new KeyInfo(),
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
+        }
     }
 
     public class KeyInfoTheoryData : TheoryDataBase
