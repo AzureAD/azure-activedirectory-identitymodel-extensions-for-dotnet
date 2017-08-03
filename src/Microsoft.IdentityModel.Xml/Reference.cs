@@ -125,13 +125,18 @@ namespace Microsoft.IdentityModel.Xml
         /// <see cref="Transforms"/> have been applied.
         /// </summary>
         /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
+        /// <param name="transformFactory">supplies the <see cref="TransformFactory"/>.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
-        public void Verify(CryptoProviderFactory cryptoProviderFactory)
+        /// <exception cref="ArgumentNullException">if <paramref name="transformFactory"/> is null.</exception>
+        public void Verify(CryptoProviderFactory cryptoProviderFactory, TransformFactory transformFactory)
         {
             if (cryptoProviderFactory == null)
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
-            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
+            if (transformFactory == null)
+                throw LogArgumentNullException(nameof(transformFactory));
+
+            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory, transformFactory), Convert.FromBase64String(DigestValue)))
                 throw LogValidationException(LogMessages.IDX21201, Id);
         }
 
@@ -161,15 +166,20 @@ namespace Microsoft.IdentityModel.Xml
         /// Computes the digest of this reference by applying the transforms over the tokenStream.
         /// </summary>
         /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> that will supply the <see cref="HashAlgorithm"/>.</param>
+        /// <param name="transformFactory">the <see cref="TransformFactory"/> that will used.</param>
         /// <returns>The digest over the <see cref="TokenStream"/> after all transforms have been applied.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="transformFactory"/> is null.</exception>
         /// <exception cref="XmlValidationException">if <see cref="TokenStream"/> is null.</exception>
         /// <exception cref="XmlValidationException">if <see cref="DigestMethod"/> is not supported.</exception>
         /// <exception cref="XmlValidationException">if <paramref name="cryptoProviderFactory"/>.CreateHashAlgorithm returns null.</exception>
-        protected byte[] ComputeDigest(CryptoProviderFactory cryptoProviderFactory)
+        protected byte[] ComputeDigest(CryptoProviderFactory cryptoProviderFactory, TransformFactory transformFactory)
         {
             if (cryptoProviderFactory == null)
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
+
+            if (transformFactory == null)
+                throw LogArgumentNullException(nameof(transformFactory));
 
             if (TokenStream == null)
                 throw LogValidationException(LogMessages.IDX21202, Id);
@@ -194,13 +204,13 @@ namespace Microsoft.IdentityModel.Xml
                     if (!TransformFactory.Default.IsSupportedTransform(Transforms[i]))
                         throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[i])));
 
-                    TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
+                    TokenStream = transformFactory.GetTransform(Transforms[i]).Process(TokenStream);
                 }
 
                 if (!TransformFactory.Default.IsSupportedCanonicalizingTransfrom(Transforms[Transforms.Count - 1]))
-                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[Transforms.Count - 1])));
+                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21211, Transforms[Transforms.Count - 1])));
 
-                return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
+                return transformFactory.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
             }
             finally
             {

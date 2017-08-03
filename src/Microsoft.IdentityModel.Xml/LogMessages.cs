@@ -76,6 +76,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21209 = "IDX21209: The CryptoProviderFactory: '{0}', CreateHashAlgorithm, returned null for DigestMethod: '{1}'.";
         internal const string IDX21210 = "IDX21210: The TransformFactory does not support the transform: '{0}'.";
         internal const string IDX21211 = "IDX21211: The TransfromFactory does not support the canonicalizing transform: '{0}'.";
+        internal const string IDX21212 = "IDX21212: Cannot validate the signature since SignedInfo is null.";
 
         // logging messages
         internal const string IDX21300 = "IDX21300: KeyInfo skipped unknown element: '{0}'.";

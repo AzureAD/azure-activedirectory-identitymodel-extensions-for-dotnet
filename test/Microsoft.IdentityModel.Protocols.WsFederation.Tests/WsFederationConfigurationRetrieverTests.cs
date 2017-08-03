@@ -54,6 +54,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
                 var configuration = theoryData.Serializer.ReadMetadata(reader);
 
+                if (theoryData.UseNullSignedInfo)
+                {
+                    // Signature.SignedInfo will be null if we use the default constructor
+                    configuration.Signature = new Signature();
+                }
+                else if (theoryData.CustomTransformFactory != null)
+                {
+                    configuration.Signature.SignedInfo.TransformFactory = theoryData.CustomTransformFactory;
+                }
+                    
                 if (theoryData.SigingKey != null)
                     configuration.Signature.Verify(theoryData.SigingKey);
 
@@ -183,6 +193,42 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
                         Metadata = ReferenceMetadata.MetadataNoAddressInEndpointReference,
                         TestId = nameof(ReferenceMetadata.MetadataNoAddressInEndpointReference)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21212:"),
+                        Configuration = ReferenceMetadata.AADCommonEndpoint,
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
+                        UseNullSignedInfo = true,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
+                        TestId = "null signed info in signature"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(NotSupportedException), "IDX21210:"),
+                        Configuration = ReferenceMetadata.AADCommonEndpoint,
+                        CustomTransformFactory = ReferenceTransformFactory.TransformFactoryAlwaysUnsupported,
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryAlwaysUnsupported)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(NotSupportedException), "IDX21210:"),
+                        Configuration = ReferenceMetadata.AADCommonEndpoint,
+                        CustomTransformFactory = ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported,
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(NotSupportedException), "IDX21211:"),
+                        Configuration = ReferenceMetadata.AADCommonEndpoint,
+                        CustomTransformFactory = ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported,
+                        Metadata = ReferenceMetadata.AADCommonMetadata,
+                        SigingKey = ReferenceMetadata.MetadataSigningKey,
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported)
                     }
                 };
             }
@@ -402,13 +448,41 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
         public class WsFederationMetadataTheoryData : TheoryDataBase
         {
-            public WsFederationConfiguration Configuration { get; set; }
+            public WsFederationConfiguration Configuration
+            {
+                get;
+                set;
+            }
 
-            public string Metadata { get; set; }
+            public string Metadata
+            {
+                get;
+                set;
+            }
 
-            public WsFederationMetadataSerializer Serializer { get; set; } = new WsFederationMetadataSerializer();
+            public WsFederationMetadataSerializer Serializer
+            {
+                get;
+                set;
+            } = new WsFederationMetadataSerializer();
 
-            public SecurityKey SigingKey { get; set; }
+            public SecurityKey SigingKey
+            {
+                get;
+                set;
+            }
+
+            public bool UseNullSignedInfo
+            {
+                get;
+                set;
+            } = false;
+
+            public TransformFactory CustomTransformFactory
+            {
+                get;
+                set;
+            } = null;
 
             public override string ToString()
             {

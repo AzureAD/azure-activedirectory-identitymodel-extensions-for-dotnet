@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Xml
         private DSigSerializer _dsigSerializer = new DSigSerializer();
         private string _canonicalizationMethod = SecurityAlgorithms.ExclusiveC14n;
         private string _signatureMethod = SecurityAlgorithms.RsaSha256Signature;
+        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Initializes a <see cref="SignedInfo"/> instance.
@@ -107,6 +108,22 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
+        /// Gets or sets the TransformFactory.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public TransformFactory TransformFactory
+        {
+            get
+            {
+                return _transformFactory;
+            }
+            set
+            {
+                _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the SignatureMethod.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
@@ -133,7 +150,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
             foreach (var reference in References)
-                reference.Verify(cryptoProviderFactory);
+                reference.Verify(cryptoProviderFactory, TransformFactory);
         }
 
         /// <summary>

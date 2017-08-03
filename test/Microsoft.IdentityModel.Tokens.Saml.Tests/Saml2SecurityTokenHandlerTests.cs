@@ -62,8 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("CanReadTokenTheoryData")]
         public void CanReadToken(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
-            var context = new CompareContext($"{this}.CanReadToken, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
             try
             {
                 // TODO - need to pass actual Saml2Token
@@ -120,8 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ConsolidateAttributesTheoryData")]
         public void ConsolidateAttributes(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ConsolidateAttributes", theoryData);
-            var context = new CompareContext($"{this}.ConsolidateAttributes, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.ConsolidateAttributes", theoryData);
             var handler = theoryData.Handler as Saml2SecurityTokenHandlerPublic;
             try
             {
@@ -242,8 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ReadTokenTheoryData")]
         public void ReadToken(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
-            var context = new CompareContext($"{this}.ReadToken, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
             try
             {
                 theoryData.Handler.ReadToken(theoryData.Token);
@@ -279,9 +276,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("RoundTripActorTheoryData")]
         public void RoundTripActor(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.RoundTripActor", theoryData);
-            CompareContext context = new CompareContext($"{this}.RoundTripActor, {theoryData}");
-
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripActor", theoryData);
             var handler = theoryData.Handler as Saml2SecurityTokenHandlerPublic;
             var actor = handler.CreateActorStringPublic(theoryData.TokenDescriptor.Subject);
         }
@@ -306,8 +301,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateAudienceTheoryData")]
         public void ValidateAudience(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
-            var context = new CompareContext($"{this}.ValidateAudience, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
             {
                 (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
@@ -342,8 +336,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateIssuerTheoryData")]
         public void ValidateIssuer(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
-            var context = new CompareContext($"{this}.ValidateAudience, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
             {
                 (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
@@ -378,12 +371,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateTokenTheoryData")]
         public void ValidateToken(Saml2TheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
-            var context = new CompareContext($"{this}.ValidateToken, {theoryData}");
+            var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
             ClaimsPrincipal retVal = null;
             try
             {
-                retVal = theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                var handler = theoryData.Handler as Saml2SecurityTokenHandler;
+                if (theoryData.TransformFactory != null)
+                    handler.TransformFactory = theoryData.TransformFactory;
+                retVal = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -584,6 +579,51 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX21210"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryAlwaysUnsupported),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        TransformFactory = ReferenceTransformFactory.TransformFactoryAlwaysUnsupported,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX21210"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        TransformFactory = ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX21211"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        TransformFactory = ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
                         }
                     }
                 };

@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     new SignatureTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'value' cannot be a 'null' or an empty object."),
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000"),
                         First = true,
                         SignedInfo = null,
                         TestId = "SignedInfo NULL"

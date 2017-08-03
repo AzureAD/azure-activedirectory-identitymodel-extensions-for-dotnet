@@ -113,7 +113,7 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
             var context = new CompareContext($"{this}.Verify, {theoryData.TestId}");
             try
             {
-                theoryData.Reference.Verify(theoryData.ProviderFactory);
+                theoryData.Reference.Verify(theoryData.ProviderFactory, TransformFactory.Default);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)

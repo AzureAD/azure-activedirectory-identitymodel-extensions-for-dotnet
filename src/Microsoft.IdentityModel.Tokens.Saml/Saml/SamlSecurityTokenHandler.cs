@@ -36,6 +36,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -55,6 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
+        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -147,6 +149,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10104, value)));
 
                 _defaultTokenLifetimeInMinutes = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets and sets TransformFactory
+        /// </summary>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
+        public TransformFactory TransformFactory
+        {
+            get
+            {
+                return _transformFactory;
+            }
+            set
+            {
+                _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
             }
         }
 
@@ -1093,6 +1111,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return validatedSaml;
             }
 
+            if (!validationParameters.RequireSignedTokens)
+                return samlToken;
+
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
 
@@ -1126,6 +1147,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
+
+            // use the provided transformFactory
+            samlToken.Assertion.Signature.SignedInfo.TransformFactory = TransformFactory;
+
             foreach (var securityKey in securityKeys)
             {
                 try
