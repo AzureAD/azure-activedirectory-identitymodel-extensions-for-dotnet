@@ -44,8 +44,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
             var properties = type.GetProperties();
             Assert.True(properties.Length == 35, $"Number of properties has changed from 35 to: {properties.Length}, adjust tests");
 
-            EnvelopedSignatureReader reader = XmlUtilities.CreateEnvelopedSignatureReader(Default.OuterXml);
-            DSigSerializer defaultSerializer = reader.Serializer;
+            var reader = XmlUtilities.CreateEnvelopedSignatureReader(Default.OuterXml);
+            var defaultSerializer = reader.Serializer;
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
