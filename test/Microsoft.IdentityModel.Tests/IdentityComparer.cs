@@ -37,109 +37,52 @@ using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Microsoft.IdentityModel.Tests
 {
-    public class CompareContext
-    {       
-        List<string> _diffs = new List<string>();
-
-        public static CompareContext Default = new CompareContext();
-
-        public CompareContext()
-        {
-        }
-
-        public CompareContext(string title)
-        {
-            Title = title;
-        }
-
-        public CompareContext(CompareContext other)
-        {
-            if (other == null)
-                return;
-
-            ExpectRawData = other.ExpectRawData;
-            IgnoreClaimsIdentityType = other.IgnoreClaimsIdentityType;
-            IgnoreClaimsPrincipalType = other.IgnoreClaimsPrincipalType;
-            IgnoreClaimType = other.IgnoreClaimType;
-            IgnoreProperties = other.IgnoreProperties;
-            IgnoreSubject = other.IgnoreSubject;
-            IgnoreTokenStreamReader = other.IgnoreTokenStreamReader;
-            IgnoreType = other.IgnoreType;
-            StringComparison = other.StringComparison;
-        }
-
-        public List<string> Diffs { get { return _diffs; } }
-
-        public bool ExpectRawData { get; set; }
-
-        /// <summary>
-        /// Adds diffs and returns if any diffs were added.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>true if any diffs were added.</returns>
-        public bool Merge(CompareContext context)
-        {
-            return Merge(null, context);
-        }
-
-        public bool Merge(string title, CompareContext context)
-        {
-            if (context == null)
-                return false;
-
-            if (context.Diffs.Count > 0)
-            {
-                _diffs.Add(title ?? string.Empty);
-                _diffs.AddRange(context.Diffs);
-            }
-
-            return (context.Diffs.Count == 0);
-        }
-
-        public bool IgnoreClaimsIdentityType { get; set; }
-
-        public bool IgnoreClaimsPrincipalType { get; set; }
-
-        public bool IgnoreClaimType { get; set; }
-
-        public bool IgnoreProperties { get; set; }
-
-        public bool IgnoreSubject { get; set; } = true;
-
-        public bool IgnoreTokenStreamReader { get; set; } = true;
-
-        public bool IgnoreType { get; set; }
-
-        public StringComparison StringComparison { get; set; } = System.StringComparison.Ordinal;
-
-        public string Title { get; set; }
-    }
-
     public class IdentityComparer
     {
+        private static readonly Dictionary<string, Func<Object, object, CompareContext, bool>> _equalityDict =
+            new Dictionary<string, Func<Object, object, CompareContext, bool>>()
+        {
+            { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
+            { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
+            { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
+            { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
+            { typeof(Newtonsoft.Json.Linq.JArray).ToString(), AreJArraysEqual },
+            { typeof(string).ToString(), AreStringsEqual },
+            { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
+            { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
+            { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
+            { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
+            { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
+        };
+
+        public static bool AreStringEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            IEnumerable<string> stringEnum1 = (IEnumerable<string>)object1;
+            IEnumerable<string> stringEnum2 = (IEnumerable<string>)object2;
+            return AreEnumsEqual<string>(stringEnum1, stringEnum2, context, AreStringsEqual);
+        }
+
+        public static bool AreSecurityKeyEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            IEnumerable<SecurityKey> securityKeyEnum1 = (IEnumerable<SecurityKey>)object1;
+            IEnumerable<SecurityKey> securityKeyEnum2 = (IEnumerable<SecurityKey>)object2;
+            return AreEnumsEqual<SecurityKey>(securityKeyEnum1, securityKeyEnum2, context, AreSecurityKeysEqual);
+        }
+
+        public static bool AreObjectEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            IEnumerable<object> objectEnum1 = (IEnumerable<object>)object1;
+            IEnumerable<object> objectEnum2 = (IEnumerable<object>)object2;
+            return AreEnumsEqual<object>(objectEnum1, objectEnum2, context, AreObjectsEqual);
+        }
+
         public static bool AreEnumsEqual<T>(IEnumerable<T> t1, IEnumerable<T> t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
         {
-            if (t1 == null && t2 == null)
-                return true;
-
-            if (t1 == null)
-            {
-                context.Diffs.Add($"t1 == null, t2 != null, (type: {t2.GetType()}, value: {t2.ToString()}).");
-                return false;
-            }
-
-            if (t2 == null)
-            {
-                context.Diffs.Add($"t1 != null, t2 == null, (type: {t1.GetType()}), value: {t1.ToString()}).");
-                return false;
-            }
-
-            if (ReferenceEquals(t1, t2))
-                return true;
-
             List<T> toMatch = new List<T>(t1);
             List<T> expectedValues = new List<T>(t2);
             if (toMatch.Count != expectedValues.Count)
@@ -218,25 +161,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreClaimsEnumsEqual(IEnumerable<Claim> t1, IEnumerable<Claim> t2, CompareContext context)
+        public static bool AreClaimsEnumsEqual(object object1, object object2, CompareContext context)
         {
-            if (t1 == null && t2 == null)
-                return true;
 
-            if (t1 == null)
-            {
-                context.Diffs.Add($"t1 == null, t2 != null, (type: {t2.GetType()}, value: {t2.ToString()}).");
-                return false;
-            }
-
-            if (t2 == null)
-            {
-                context.Diffs.Add($"t1 != null, t2 == null, (type: {t1.GetType()}), value: {t1.ToString()}).");
-                return false;
-            }
-
-            if (ReferenceEquals(t1, t2))
-                return true;
+            IEnumerable<Claim> t1 = (IEnumerable<Claim>)object1;
+            IEnumerable<Claim> t2 = (IEnumerable<Claim>)object2;
 
             var claims1 = new List<Claim>(t1);
             var claims2 = new List<Claim>(t2);
@@ -303,8 +232,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreClaimsIdentitiesEnumsEqual(IEnumerable<ClaimsIdentity> t1, IEnumerable<ClaimsIdentity> t2, CompareContext context)
+        public static bool AreClaimsIdentitiesEnumsEqual(Object object1, Object object2, CompareContext context)
         {
+            IEnumerable<ClaimsIdentity> t1 = (IEnumerable<ClaimsIdentity>)object1;
+            IEnumerable<ClaimsIdentity> t2 = (IEnumerable<ClaimsIdentity>)object2;
+
             if (t1 == null && t2 == null)
                 return true;
 
@@ -392,234 +324,40 @@ namespace Microsoft.IdentityModel.Tests
 
         public static bool AreEqual(object t1, object t2, CompareContext context)
         {
-            if (t1 == null && t2 == null)
-                return true;
+            var localContext = new CompareContext(context);
+          
+            // Check if either t1 or t2 are null or references of each other to see if we can terminate early.
+            if (!ContinueCheckingEquality(t1, t2, localContext))
+                return context.Merge(localContext);
 
-            if (t1 == null)
+            string inter;
+            // Use a special function for comparison if required by the specific class of the object.
+            if (_equalityDict.TryGetValue(t1.GetType().ToString(), out Func<Object, object, CompareContext, bool> areEqual))
             {
-                context.Diffs.Add($"t1 == null, t2 != null, (type: {t2.GetType()}, value: {t2.ToString()}).");
-                return false;
-            }
-
-            if (t2 == null)
+                return areEqual(t1, t2, localContext);
+            } 
+            // Check if any of the interfaces that the class uses require a special function.
+            else if ((inter = t1.GetType().GetInterfaces().Select(t => t.ToString()).Intersect(_equalityDict.Keys).FirstOrDefault()) != null)
             {
-                context.Diffs.Add($"t1 != null, t2 == null, (type: {t1.GetType()}), value: {t1.ToString()}).");
-                return false;
+                return _equalityDict[inter](t1, t2, localContext);
             }
-
-            if (ReferenceEquals(t1, t2))
-                return true;
-
-            if (t1 is TokenValidationParameters)
-                return AreTokenValidationParametersEqual(t1 as TokenValidationParameters, t2 as TokenValidationParameters, context);
-            else if (t1 is Claim)
-                return AreClaimsEqual(t1 as Claim, t2 as Claim, context);
-            else if (t1 is ClaimsIdentity)
-                return AreClaimsIdentitiesEqual(t1 as ClaimsIdentity, t2 as ClaimsIdentity, context);
-            else if (t1 is ClaimsPrincipal)
-                return AreClaimsPrincipalsEqual(t1 as ClaimsPrincipal, t2 as ClaimsPrincipal, context);
-            else if (t1 is IDictionary<string, string>)
-                return AreDictionariesEqual(t1 as Dictionary<string, string>, t2 as Dictionary<string, string>, context);
-            else if (t1 is JsonWebKey)
-                return AreJsonWebKeysEqual(t1 as JsonWebKey, t2 as JsonWebKey, context);
-            else if (t1 is JsonWebKeySet)
-                return AreJsonWebKeySetsEqual(t1 as JsonWebKeySet, t2 as JsonWebKeySet, context);
-            else if (t1 is JwtHeader)
-                return AreJwtHeadersEqual(t1 as JwtHeader, t2 as JwtHeader, context);
-            else if (t1 is JwtPayload)
-                return AreJwtPayloadsEqual(t1 as JwtPayload, t2 as JwtPayload, context);
-            else if (t1 is JwtSecurityToken)
-                return AreJwtSecurityTokensEqual(t1 as JwtSecurityToken, t2 as JwtSecurityToken, context);
-            else if (t1 is IEnumerable<Claim>)
-                return AreClaimsEnumsEqual(t1 as IEnumerable<Claim>, t2 as IEnumerable<Claim>, context);
-            else if (t1 is IEnumerable<ClaimsIdentity>)
-                return AreClaimsIdentitiesEnumsEqual(t1 as IEnumerable<ClaimsIdentity>, t2 as IEnumerable<ClaimsIdentity>, context);
-            else if (t1 is IEnumerable<SecurityKey>)
-                return AreEnumsEqual<SecurityKey>(t1 as IEnumerable<SecurityKey>, t2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
-            else if (t1 is IEnumerable<string>)
-                return AreEnumsEqual<string>(t1 as IEnumerable<string>, t2 as IEnumerable<string>, context, AreStringsEqual);
-            else if (t1 is string)
-                return AreStringsEqual(t1 as string, t2 as string, context);
-            else if (t1 is Dictionary<string, object>)
-                return AreDictionariesEqual(t1 as Dictionary<string, object>, t2 as Dictionary<string, object>, context);
-            else if (t1 is Dictionary<string, object>.ValueCollection)
-                return AreValueCollectionsEqual(t1 as Dictionary<string, object>.ValueCollection, t2 as Dictionary<string, object>.ValueCollection, context);
-            else if (t1 is Newtonsoft.Json.Linq.JArray)
-                return AreJArraysEqual(t1 as Newtonsoft.Json.Linq.JArray, t2 as Newtonsoft.Json.Linq.JArray, context);
-            else if (t1 is IEnumerable<object>)
-                return AreEnumsEqual<object>(t1 as IEnumerable<object>, t2 as IEnumerable<object>, context, AreObjectsEqual);
-            else if (t1 is AudienceValidator)
-                return AreAudienceValidatorsEqual(t1 as AudienceValidator, t1 as AudienceValidator, context);
-            else if (t1 is LifetimeValidator)
-                return AreLifetimeValidatorsEqual(t1 as LifetimeValidator, t1 as LifetimeValidator, context);
-            else if (t1 is IssuerSigningKeyResolver)
-                return AreIssuerSigningKeyResolversEqual(t1 as IssuerSigningKeyResolver, t1 as IssuerSigningKeyResolver, context);
-            else if (t1 is IssuerSigningKeyValidator)
-                return AreIssuerSigningKeyValidatorsEqual(t1 as IssuerSigningKeyValidator, t1 as IssuerSigningKeyValidator, context);
-            else if (t1 is IssuerValidator)
-                return AreIssuerValidatorsEqual(t1 as IssuerValidator, t1 as IssuerValidator, context);
-            else if (t1 is KeyInfo)
-                return AreKeyInfosEqual(t1 as KeyInfo, t2 as KeyInfo, context);
-            else if (t1 is OpenIdConnectConfiguration)
-                return AreOpenIdConnectConfigurationsEqual(t1 as OpenIdConnectConfiguration, t2 as OpenIdConnectConfiguration, context);
-            else if (t1 is OpenIdConnectMessage)
-                return AreOpenIdConnectMessagesEqual(t1 as OpenIdConnectMessage, t2 as OpenIdConnectMessage, context);
-            else if (t1 is Reference)
-                return AreReferencesEqual(t1 as Reference, t2 as Reference, context);
-            else if (t1 is Signature)
-                return AreSignaturesEqual(t1 as Signature, t2 as Signature, context);
-            else if (t1 is SignedInfo)
-                return AreSignedInfosEqual(t1 as SignedInfo, t2 as SignedInfo, context);
-            else if (t1 is SignatureValidator)
-                return AreSignatureValidatorsEqual(t1 as SignatureValidator, t2 as SignatureValidator, context);
-            else if (t1 is WsFederationConfiguration)
-                return AreWsFederationConfigurationsEqual(t1 as WsFederationConfiguration, t2 as WsFederationConfiguration, context);
-            else if (t1 is WsFederationMessage)
-                return AreWsFederationMessagesEqual(t1 as WsFederationMessage, t2 as WsFederationMessage, context);
-            else if (t1 is SamlAction)
-                return AreSamlActionsEqual(t1 as SamlAction, t2 as SamlAction, context);
-            else if (t1 is SamlAssertion)
-                return AreSamlAssertionsEqual(t1 as SamlAssertion, t2 as SamlAssertion, context);
-            else if (t1 is SamlAdvice)
-                return AreSamlAdvicesEqual(t1 as SamlAdvice, t2 as SamlAdvice, context);
-            else if (t1 is SamlAttribute)
-                return AreSamlAttributesEqual(t1 as SamlAttribute, t2 as SamlAttribute, context);
-            else if (t1 is SamlAttributeStatement)
-                return AreSamlAttributeStatementsEqual(t1 as SamlAttributeStatement, t2 as SamlAttributeStatement, context);
-            else if (t1 is SamlAudienceRestrictionCondition)
-                return AreSamlAudienceRestrictionConditionsEqual(t1 as SamlAudienceRestrictionCondition, t2 as SamlAudienceRestrictionCondition, context);
-            else if (t1 is SamlAuthenticationStatement)
-                return AreSamlAuthenticationStatementsEqual(t1 as SamlAuthenticationStatement, t2 as SamlAuthenticationStatement, context);
-            else if (t1 is SamlAuthorizationDecisionStatement)
-                return AreSamlAuthorizationDecisionStatementsEqual(t1 as SamlAuthorizationDecisionStatement, t2 as SamlAuthorizationDecisionStatement, context);
-            else if (t1 is SamlConditions)
-                return AreSamlConditionsEqual(t1 as SamlConditions, t2 as SamlConditions, context);
-            else if (t1 is SamlEvidence)
-                return AreSamlEvidencesEqual(t1 as SamlEvidence, t2 as SamlEvidence, context);
-            else if (t1 is SamlStatement)
-                return AreSamlStatementsEqual(t1 as SamlStatement, t2 as SamlStatement, context);
-            else if (t1 is SamlSubject)
-                return AreSamlSubjectsEqual(t1 as SamlSubject, t2 as SamlSubject, context);
-            else if (t1 is Transform)
-                return AreTransformsEqual(t1 as Transform, t2 as Transform, context);
+            // Use default comparison for any other types.
             else
             {
-                var localContext = new CompareContext(context);
-                ContinueCheckingEquality(t1, t2, localContext);
+                if (ContinueCheckingEquality(t1, t2, localContext))
+                    CompareAllPublicProperties(t1, t2, localContext);
+
                 return context.Merge(localContext);
             }
+            
         }
 
-        public static bool AreSamlActionsEqual(SamlAction action1, SamlAction action2, CompareContext context)
+        public static bool AreJArraysEqual(Object object1, Object object2, CompareContext context)
         {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(action1, action2, context))
-                CompareAllPublicProperties(action1, action2, localContext);
 
-            return context.Merge(localContext);
-        }
+            Newtonsoft.Json.Linq.JArray a1 = (Newtonsoft.Json.Linq.JArray)object1;
+            Newtonsoft.Json.Linq.JArray a2 = (Newtonsoft.Json.Linq.JArray)object2;
 
-        public static bool AreSamlAssertionsEqual(SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(assertion1, assertion2, context))
-                CompareAllPublicProperties(assertion1, assertion2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAdvicesEqual(SamlAdvice advice1, SamlAdvice advice2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(advice1, advice2, context))
-                CompareAllPublicProperties(advice1, advice2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAttributesEqual(SamlAttribute attribute1, SamlAttribute attribute2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(attribute1, attribute2, context))
-                CompareAllPublicProperties(attribute1, attribute2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAttributeStatementsEqual(SamlAttributeStatement statement1, SamlAttributeStatement statement2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(statement1, statement2, context))
-                CompareAllPublicProperties(statement1, statement2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAudienceRestrictionConditionsEqual(SamlAudienceRestrictionCondition condition1, SamlAudienceRestrictionCondition condition2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(condition1, condition2, context))
-                CompareAllPublicProperties(condition1, condition2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAuthenticationStatementsEqual(SamlAuthenticationStatement statement1, SamlAuthenticationStatement statement2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(statement1, statement2, context))
-                CompareAllPublicProperties(statement1, statement2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlAuthorizationDecisionStatementsEqual(SamlAuthorizationDecisionStatement statement1, SamlAuthorizationDecisionStatement statement2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(statement1, statement2, context))
-                CompareAllPublicProperties(statement1, statement2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlConditionsEqual(SamlConditions conditions1, SamlConditions conditions2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(conditions1, conditions2, context))
-                CompareAllPublicProperties(conditions1, conditions2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlEvidencesEqual(SamlEvidence evidence1, SamlEvidence evidence2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(evidence1, evidence2, context))
-                CompareAllPublicProperties(evidence1, evidence2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlStatementsEqual(SamlStatement statement1, SamlStatement statement2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(statement1, statement2, context))
-                CompareAllPublicProperties(statement1, statement2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSamlSubjectsEqual(SamlSubject subject1, SamlSubject subject2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(subject1, subject2, context))
-                CompareAllPublicProperties(subject1, subject2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        public static bool AreJArraysEqual(Newtonsoft.Json.Linq.JArray a1, Newtonsoft.Json.Linq.JArray a2, CompareContext context)
-        {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(a1, a2, localContext))
                 return context.Merge(localContext);
@@ -630,19 +368,21 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreObjectsEqual(object obj1, object obj2, CompareContext context)
+        private static bool AreObjectsEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(obj1, obj2, localContext))
+            if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
 
-            AreEqual(obj1, obj2, localContext);
+            AreEqual(object1, object2, localContext);
 
             return context.Merge(localContext);
         }
 
-        private static bool AreValueCollectionsEqual(Dictionary<string, object>.ValueCollection vc1, Dictionary<string, object>.ValueCollection vc2, CompareContext context)
+        private static bool AreValueCollectionsEqual(Object object1, Object object2, CompareContext context)
         {
+            Dictionary<string, object>.ValueCollection vc1 = (Dictionary<string, object>.ValueCollection)object1;
+            Dictionary<string, object>.ValueCollection vc2 = (Dictionary<string, object>.ValueCollection)object2;
             return true;
         }
 
@@ -704,8 +444,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreDictionariesEqual(IDictionary<string, object> dictionary1, IDictionary<string, object> dictionary2, CompareContext context)
+        public static bool AreObjectDictionariesEqual(Object object1, Object object2, CompareContext context)
         {
+            IDictionary<string, object> dictionary1 = (IDictionary<string, object>)object1;
+            IDictionary<string, object> dictionary2 = (IDictionary<string, object>)object2;
+
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(dictionary1, dictionary2, localContext))
                 return context.Merge(localContext);
@@ -747,8 +490,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreDictionariesEqual(IDictionary<string, string> dictionary1, IDictionary<string, string> dictionary2, CompareContext context)
+        public static bool AreStringDictionariesEqual(Object object1, Object object2, CompareContext context)
         {
+            IDictionary<string, string> dictionary1 = (IDictionary<string, string>)object1;
+            IDictionary<string, string> dictionary2 = (IDictionary<string, string>)object2;
+
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(dictionary1, dictionary2, localContext))
                 return context.Merge(localContext);
@@ -780,46 +526,6 @@ namespace Microsoft.IdentityModel.Tests
             return localContext.Diffs.Count == 0;
         }
 
-        public static bool AreJsonWebKeysEqual(JsonWebKey jsonWebkey1, JsonWebKey jsonWebkey2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(jsonWebkey1, jsonWebkey2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(jsonWebkey1, jsonWebkey2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreJsonWebKeySetsEqual(JsonWebKeySet jsonWebKeySet1, JsonWebKeySet jsonWebKeySet2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(jsonWebKeySet1, jsonWebKeySet2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(jsonWebKeySet1, jsonWebKeySet2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreJwtHeadersEqual(JwtHeader header1, JwtHeader header2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(header1, header2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(header1, header2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreJwtPayloadsEqual(JwtPayload payload1, JwtPayload payload2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(payload1, payload2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(payload1, payload2, localContext);
-            return context.Merge(localContext);
-        }
-
         public static bool AreJwtSecurityTokensEqual(JwtSecurityToken jwt1, JwtSecurityToken jwt2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -827,16 +533,6 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             CompareAllPublicProperties(jwt1, jwt2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreOpenIdConnectConfigurationsEqual(OpenIdConnectConfiguration configuration1, OpenIdConnectConfiguration configuration2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(configuration1, configuration2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(configuration1, configuration2, localContext);
             return context.Merge(localContext);
         }
 
@@ -878,15 +574,6 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreReferencesEqual(Reference reference1, Reference reference2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(reference1, reference2, localContext))
-                CompareAllPublicProperties(reference1, reference2, localContext);
-
-            return context.Merge(localContext);
-        }
-
         public static bool AreRsaParametersEqual(RSAParameters rsaParameters1, RSAParameters rsaParameters2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -920,42 +607,11 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreSecurityTokensEqual(SecurityToken token1, SecurityToken token2, CompareContext context)
+        public static bool AreStringsEqual(object object1, object object2, CompareContext context)
         {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(token1, token2, localContext))
-                return context.Merge(localContext);
+            string str1 = (string)object1;
+            string str2 = (string)object2;
 
-            CompareAllPublicProperties(token1, token2, localContext);
-            return context.Merge(localContext);
-        }
-
-        private static bool AreSigningCredentialsEqual(SigningCredentials signingCredentials1, SigningCredentials signingCredentials2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(signingCredentials1, signingCredentials2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(signingCredentials1, signingCredentials2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreStringsEqual(string str1, string str2)
-        {
-            if (string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2))
-                return true;
-
-            if (ReferenceEquals(str1, str2))
-                return true;
-
-            if (str1 == null || str2 == null)
-                return false;
-
-            return string.Equals(str1, str2, StringComparison.Ordinal);
-        }
-
-        public static bool AreStringsEqual(string str1, string str2, CompareContext context)
-        {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(str1, str2, localContext))
                 return context.Merge(localContext);
@@ -975,83 +631,12 @@ namespace Microsoft.IdentityModel.Tests
             return context.Merge(localContext);
         }
 
-        public static bool AreTokenValidationParametersEqual(TokenValidationParameters validationParameters1, TokenValidationParameters validationParameters2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(validationParameters1, validationParameters2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(validationParameters1, validationParameters2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreTransformsEqual(Transform transform1, Transform transform2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(transform1, transform2, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(transform1, transform2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreAudienceValidatorsEqual(AudienceValidator validator1, AudienceValidator validator2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(validator1, validator2, context);
-            return context.Merge(localContext);
-        }
-
         public static bool AreKeyInfosEqual(KeyInfo keyInfo1, KeyInfo keyInfo2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(keyInfo1, keyInfo2, context))
                 CompareAllPublicProperties(keyInfo1, keyInfo2, localContext);
 
-            return context.Merge(localContext);
-        }
-
-        private static bool AreLifetimeValidatorsEqual(LifetimeValidator validator1, LifetimeValidator validator2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(validator1, validator2, context);
-            return context.Merge(localContext);
-        }
-
-        private static bool AreIssuerSigningKeyResolversEqual(IssuerSigningKeyResolver keyResolver1, IssuerSigningKeyResolver keyResolver2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(keyResolver1, keyResolver2, context);
-            return context.Merge(localContext);
-        }
-
-        private static bool AreIssuerSigningKeyValidatorsEqual(IssuerSigningKeyValidator validator1, IssuerSigningKeyValidator validator2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(validator1, validator2, context);
-            return context.Merge(localContext);
-        }
-
-        private static bool AreIssuerValidatorsEqual(IssuerValidator validator1, IssuerValidator validator2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(validator1, validator2, context);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreSignaturesEqual(Signature signature1, Signature signature2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (ContinueCheckingEquality(signature1, signature2, localContext))
-                CompareAllPublicProperties(signature1, signature2, localContext);
-
-            return context.Merge(localContext);
-        }
-
-        private static bool AreSignatureValidatorsEqual(SignatureValidator validator1, SignatureValidator validator2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            ContinueCheckingEquality(validator1, validator2, context);
             return context.Merge(localContext);
         }
 

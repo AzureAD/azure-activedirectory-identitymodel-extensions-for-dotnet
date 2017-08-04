@@ -34,6 +34,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -196,7 +197,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.TokenEndpoint != token_Endpoint. '{0}', '{1}'.", configuration.TokenEndpoint, token_Endpoint));
 
             CompareContext compareContext = new CompareContext();
-            if (!IdentityComparer.AreEqual(configuration.SigningKeys, securityKeys, compareContext))
+            if (!IdentityComparer.AreEqual(configuration.SigningKeys, new Collection<SecurityKey>(securityKeys), compareContext))
                 errors.AddRange(compareContext.Diffs);
 
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
