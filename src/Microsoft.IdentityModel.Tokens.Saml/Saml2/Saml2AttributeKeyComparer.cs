@@ -32,7 +32,7 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
-    /// Comparison class supporting multi-part keys for a dicitionary
+    /// Comparison class supporting multi-part keys for a dictionary
     /// </summary>
     internal class Saml2AttributeKeyComparer : IEqualityComparer<Saml2AttributeKeyComparer.AttributeKey>
     {
@@ -56,32 +56,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (attribute == null)
                     throw LogArgumentNullException(nameof(attribute));
 
-                _friendlyName = String.Empty;
+                _friendlyName = attribute.FriendlyName ?? String.Empty;
                 _name = attribute.Name;
-                _nameFormat = String.Empty;
+                _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.OriginalString;
                 _valueType = attribute.AttributeValueXsiType ?? String.Empty;
                 _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
 
                 ComputeHashCode();
             }
-
-            // TODO - see if needed for SAML2
-            //public AttributeKey( Saml2Attribute attribute )
-            //{
-            //    if ( attribute == null )
-            //    {
-            //        throw LogHelper.ExceptionUtility.ThrowHelperArgumentNull( "attribute" );
-            //    }
-
-            //    _friendlyName = attribute.FriendlyName ?? String.Empty;
-            //    _name = attribute.Name;
-            //    _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.OriginalString;
-            //    _namespace = String.Empty;
-            //    _valueType = attribute.AttributeValueXsiType ?? String.Empty;
-            //    _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
-
-            //    ComputeHashCode();
-            //}
 
             public override int GetHashCode()
             {

@@ -52,71 +52,76 @@ namespace Microsoft.IdentityModel.Tests
     }
 
 #region Saml
-    public class SamlActionTestSet
+    public class SamlActionTestSet : XmlTestSet
     {
         public SamlAction Action { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAdviceTestSet
+    public class SamlAdviceTestSet : XmlTestSet
     {
         public SamlAdvice Advice { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAssertionTestSet
+    public class SamlAssertionTestSet : XmlTestSet
     {
         public SamlAssertion Assertion { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAudienceRestrictionConditionTestSet
+    public class SamlAudienceRestrictionConditionTestSet : XmlTestSet
     {
         public SamlAudienceRestrictionCondition AudienceRestrictionCondition { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAttributeTestSet
+    public class SamlAttributeTestSet : XmlTestSet
     {
         public SamlAttribute Attribute { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAttributeStatementTestSet
+    public class SamlAttributeStatementTestSet : XmlTestSet
     {
         public SamlAttributeStatement AttributeStatement { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAuthenticationStatementTestSet
+    public class SamlAuthenticationStatementTestSet : XmlTestSet
     {
         public SamlAuthenticationStatement AuthenticationStatement { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlAuthorizationDecisionStatementTestSet
+    public class SamlAuthorizationDecisionStatementTestSet : XmlTestSet
     {
         public SamlAuthorizationDecisionStatement AuthorizationDecision { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlConditionsTestSet
+    public class SamlConditionsTestSet : XmlTestSet
     {
         public SamlConditions Conditions { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlEvidenceTestSet
+    public class SamlEvidenceTestSet : XmlTestSet
     {
         public SamlEvidence Evidence { get; set; }
-        public string Xml { get; set; }
     }
 
-    public class SamlSubjectTestSet
+    public class SamlSubjectTestSet : XmlTestSet
     {
         public SamlSubject Subject { get; set; }
-        public string Xml { get; set; }
     }
+
+    public class SamlTokenTestSet : XmlTestSet
+    {
+        public SecurityToken SecurityToken { get; set; }
+
+        public IEnumerable<ClaimsIdentity> Identities { get; set; }
+    }
+
+    //public class SamlSecurityTokenTestSet : XmlTestSet
+    //{
+    //    public SamlSecurityToken SamlSecurityToken
+    //    {
+    //        get;
+    //        set;
+    //    }
+    //}
 
     #endregion
 
@@ -548,21 +553,6 @@ namespace Microsoft.IdentityModel.Tests
                     Xml = XmlGenerator.Generate(Default.KeyInfo).Replace(XmlSignatureConstants.Namespace, $"_{XmlSignatureConstants.Namespace}_")
                 };
             }
-        }
-    }
-
-    public class SamlTokenTestSet
-    {
-        public SamlSecurityToken SecurityToken { get; set; }
-        public IEnumerable<ClaimsIdentity> Identities { get; set; }
-    }
-
-    public class SamlSecurityTokenTestSet : XmlTestSet
-    {
-        public SamlSecurityToken SamlSecurityToken
-        {
-            get;
-            set;
         }
     }
 

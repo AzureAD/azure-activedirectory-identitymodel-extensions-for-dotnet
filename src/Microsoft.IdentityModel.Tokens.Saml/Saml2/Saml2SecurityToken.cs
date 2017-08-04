@@ -30,6 +30,7 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
+    // TODO review
     /// <summary>
     /// A security token backed by a SAML2 assertion.
     /// </summary>
@@ -39,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes an instance of <see cref="Saml2SecurityToken"/> from a <see cref="Saml2Assertion"/>.
         /// </summary>
         /// <param name="assertion">A <see cref="Saml2Assertion"/> to initialize from.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="assertion"/> is null.</exception>
         public Saml2SecurityToken(Saml2Assertion assertion)
         {
             Assertion = assertion ?? throw LogArgumentNullException(nameof(assertion));
@@ -65,7 +67,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public SecurityToken IssuerToken
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -118,7 +121,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public override SecurityKey SigningKey
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

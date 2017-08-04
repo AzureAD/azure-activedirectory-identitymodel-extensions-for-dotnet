@@ -11,14 +11,8 @@
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
-    <DocumentationFile>bin\Debug\net45\net45\.xml</DocumentationFile>
-    <OutputPath>bin\Debug\net45\</OutputPath>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
-    <DocumentationFile>bin\Release\net451\net45\.xml</DocumentationFile>
-    <OutputPath>bin\Release\net451\</OutputPath>
+    <DocumentationFile>bin\Release\net45\Microsoft.IdentityModel.Xml.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
+using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
@@ -62,7 +64,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("CanReadTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CanReadToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
@@ -108,26 +109,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         CanRead = true,
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_Valid),
-                        Token = RefrenceTokens.SamlToken_Valid
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
+                        Token = ReferenceTokens.SamlToken_Valid
                     }
                 };
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("CreateClaimsIdentitiesTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}");
+            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}") { IgnoreType = true };
             try
             {
-                var identities = ((theoryData.Handler) as DerivedSamlSecurityTokenHandler).CreateClaimsIdentitiesPublic(theoryData.TokenClaimsIdentitiesTestSet.SecurityToken, theoryData.Issuer, theoryData.ValidationParameters);
+                var identities = ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).CreateClaimsIdentitiesPublic(theoryData.TokenTestSet.SecurityToken as SamlSecurityToken, theoryData.Issuer, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
 
-                IdentityComparer.AreEqual(identities, theoryData.TokenClaimsIdentitiesTestSet.Identities, context);
+                IdentityComparer.AreEqual(identities, theoryData.TokenTestSet.Identities, context);
             }
             catch (Exception ex)
             {
@@ -147,35 +146,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenException), "IDX10513:"),
                         First = true,
-                        Handler = new DerivedSamlSecurityTokenHandler(),
+                        Handler = new SamlSecurityTokenHandlerPublic(),
                         Issuer = Default.Issuer,
-                        TestId = nameof(RefrenceTokens.TokenClaimsIdentitiesSubjectEmptyString),
-                        TokenClaimsIdentitiesTestSet = RefrenceTokens.TokenClaimsIdentitiesSubjectEmptyString,
+                        TestId = nameof(ReferenceSaml.TokenClaimsIdentitiesSubjectEmptyString),
+                        TokenTestSet = ReferenceSaml.TokenClaimsIdentitiesSubjectEmptyString,
                         ValidationParameters = new TokenValidationParameters()
                     },
                     new SamlTheoryData
                     {
-                        Handler = new DerivedSamlSecurityTokenHandler(),
+                        Handler = new SamlSecurityTokenHandlerPublic(),
                         Issuer = Default.Issuer,
-                        TestId = nameof(RefrenceTokens.TokenClaimsIdentitiesSameSubject),
-                        TokenClaimsIdentitiesTestSet = RefrenceTokens.TokenClaimsIdentitiesSameSubject,
+                        TestId = nameof(ReferenceSaml.TokenClaimsIdentitiesSameSubject),
+                        TokenTestSet = ReferenceSaml.TokenClaimsIdentitiesSameSubject,
                         ValidationParameters = new TokenValidationParameters()
                     },
                     new SamlTheoryData
                     {
-                        Handler = new DerivedSamlSecurityTokenHandler(),
+                        Handler = new SamlSecurityTokenHandlerPublic(),
                         Issuer = Default.Issuer,
-                        TestId = nameof(RefrenceTokens.TokenClaimsIdentitiesDifferentSubjects),
-                        TokenClaimsIdentitiesTestSet = RefrenceTokens.TokenClaimsIdentitiesDifferentSubjects,
+                        TestId = nameof(ReferenceSaml.TokenClaimsIdentitiesDifferentSubjects),
+                        TokenTestSet = ReferenceSaml.TokenClaimsIdentitiesDifferentSubjects,
                         ValidationParameters = new TokenValidationParameters()
                     }
                 };
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
@@ -201,22 +198,56 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         First = true,
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_Valid),
-                        Token = RefrenceTokens.SamlToken_Valid
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
+                        Token = ReferenceTokens.SamlToken_Valid
                     }
                 };
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("RoundTripTokenTheoryData")]
+        public void RoundTripToken(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
+            try
+            {
+                var samlToken = theoryData.Handler.ReadToken(theoryData.Token);
+                var memoryStream = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex,context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SamlTheoryData> RoundTripTokenTheoryData
+        {
+            get
+            {
+                return new TheoryData<SamlTheoryData>
+                {
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        First = true,
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
+                        Token = ReferenceTokens.SamlToken_Valid
+                    }
+                };
+            }
+        }
+
         [Theory, MemberData("ValidateAudienceTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
             {
-                ((theoryData.Handler) as DerivedSamlSecurityTokenHandler).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
+                ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -229,24 +260,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<SamlTheoryData>();
-                var handler = new DerivedSamlSecurityTokenHandler();
+                var tokenTheoryData = new List<TokenTheoryData>();
+                ValidateTheoryData.AddValidateAudienceTheoryData(tokenTheoryData);
 
-                ValidateTheoryData.AddValidateAudienceTheoryData(theoryData, handler);
+                var theoryData = new TheoryData<SamlTheoryData>();
+                foreach (var item in tokenTheoryData)
+                    theoryData.Add(new SamlTheoryData(item)
+                    {
+                        Handler = new SamlSecurityTokenHandlerPublic()
+                    });
 
                 return theoryData;
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateIssuerTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
             {
-                ((theoryData.Handler) as DerivedSamlSecurityTokenHandler).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
+                ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -259,18 +293,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<SamlTheoryData>();
-                var handler = new DerivedSamlSecurityTokenHandler();
+                var tokenTheoryData = new List<TokenTheoryData>();
+                ValidateTheoryData.AddValidateIssuerTheoryData(tokenTheoryData);
 
-                ValidateTheoryData.AddValidateIssuerTheoryData(theoryData, handler);
+                var theoryData = new TheoryData<SamlTheoryData>();
+                foreach (var item in tokenTheoryData)
+                    theoryData.Add(new SamlTheoryData(item)
+                    {
+                        Handler = new SamlSecurityTokenHandlerPublic()
+                    });
 
                 return theoryData;
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateToken(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -325,125 +362,225 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_MissingMajorVersion),
-                        Token = RefrenceTokens.SamlToken_MissingMajorVersion,
+                        TestId = nameof(ReferenceTokens.SamlToken_MissingMajorVersion),
+                        Token = ReferenceTokens.SamlToken_MissingMajorVersion,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_MissingMinorVersion),
-                        Token = RefrenceTokens.SamlToken_MissingMinorVersion,
+                        TestId = nameof(ReferenceTokens.SamlToken_MissingMinorVersion),
+                        Token = ReferenceTokens.SamlToken_MissingMinorVersion,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11116:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_MajorVersionNotV1),
-                        Token = RefrenceTokens.SamlToken_MajorVersionNotV1,
+                        TestId = nameof(ReferenceTokens.SamlToken_MajorVersionNotV1),
+                        Token = ReferenceTokens.SamlToken_MajorVersionNotV1,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11117:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_MinorVersionNotV1),
-                        Token = RefrenceTokens.SamlToken_MinorVersionNotV1,
+                        TestId = nameof(ReferenceTokens.SamlToken_MinorVersionNotV1),
+                        Token = ReferenceTokens.SamlToken_MinorVersionNotV1,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IdMissing),
-                        Token = RefrenceTokens.SamlToken_IdMissing,
+                        TestId = nameof(ReferenceTokens.SamlToken_IdMissing),
+                        Token = ReferenceTokens.SamlToken_IdMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11121:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IdFormatError),
-                        Token = RefrenceTokens.SamlToken_IdFormatError,
+                        TestId = nameof(ReferenceTokens.SamlToken_IdFormatError),
+                        Token = ReferenceTokens.SamlToken_IdFormatError,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IssuerMissing),
-                        Token = RefrenceTokens.SamlToken_IssuerMissing,
+                        TestId = nameof(ReferenceTokens.SamlToken_IssuerMissing),
+                        Token = ReferenceTokens.SamlToken_IssuerMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IssueInstantMissing),
-                        Token = RefrenceTokens.SamlToken_IssueInstantMissing,
+                        TestId = nameof(ReferenceTokens.SamlToken_IssueInstantMissing),
+                        Token = ReferenceTokens.SamlToken_IssueInstantMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11122:", typeof(FormatException)),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_IssueInstantFormatError),
-                        Token = RefrenceTokens.SamlToken_IssueInstantFormatError,
+                        TestId = nameof(ReferenceTokens.SamlToken_IssueInstantFormatError),
+                        Token = ReferenceTokens.SamlToken_IssueInstantFormatError,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11120:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_AudienceMissing),
-                        Token = RefrenceTokens.SamlToken_AudienceMissing,
+                        TestId = nameof(ReferenceTokens.SamlToken_AudienceMissing),
+                        Token = ReferenceTokens.SamlToken_AudienceMissing,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11130:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_NoStatements),
-                        Token = RefrenceTokens.SamlToken_NoStatements,
+                        TestId = nameof(ReferenceTokens.SamlToken_NoStatements),
+                        Token = ReferenceTokens.SamlToken_NoStatements,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX21011:", typeof(XmlReadException)),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_NoSubject),
-                        Token = RefrenceTokens.SamlToken_NoSubject,
+                        TestId = nameof(ReferenceTokens.SamlToken_NoSubject),
+                        Token = ReferenceTokens.SamlToken_NoSubject,
                         ValidationParameters = new TokenValidationParameters(),
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11131:"),
                         Handler = new SamlSecurityTokenHandler(),
-                        TestId = nameof(RefrenceTokens.SamlToken_NoAttributes),
-                        Token = RefrenceTokens.SamlToken_NoAttributes,
+                        TestId = nameof(ReferenceTokens.SamlToken_NoAttributes),
+                        Token = ReferenceTokens.SamlToken_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
                     }
                 };
             }
         }
 
-        private class DerivedSamlSecurityTokenHandler : SamlSecurityTokenHandler
+        [Theory, MemberData("WriteTokenTheoryData")]
+        public void WriteToken(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
+            try
+            {
+                var xml = (theoryData.Handler as SamlSecurityTokenHandler).WriteToken(theoryData.TokenTestSet.SecurityToken);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SamlTheoryData> WriteTokenTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+                return new TheoryData<SamlTheoryData>
+                {
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("token"),
+                        First = true,
+                        TestId = nameof(ReferenceSaml.NullToken),
+                        TokenTestSet = ReferenceSaml.NullToken
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentException("IDX10400:"),
+                        TestId = nameof(ReferenceSaml.JwtToken),
+                        TokenTestSet = ReferenceSaml.JwtToken
+                    }
+                };
+            }
+        }
+
+        [Theory, MemberData("WriteTokenXmlTheoryData")]
+        public void WriteTokenXml(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WriteTokenXml", theoryData);
+            try
+            {
+                (theoryData.Handler as SamlSecurityTokenHandler).WriteToken(theoryData.XmlWriter, theoryData.TokenTestSet.SecurityToken);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SamlTheoryData> WriteTokenXmlTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                var theoryData = new TheoryData<SamlTheoryData>();
+                var memoryStream = new MemoryStream();
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("token"),
+                    First = true,
+                    TestId = nameof(ReferenceSaml.NullToken),
+                    TokenTestSet = ReferenceSaml.NullToken,
+                    XmlWriter = XmlDictionaryWriter.CreateTextWriter(memoryStream)
+                });
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("writer"),
+                    TestId = "Null XmlWriter",
+                    TokenTestSet = ReferenceSaml.SamlSecurityTokenValid
+                });
+
+                memoryStream = new MemoryStream();
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX10400:"),
+                    MemoryStream = memoryStream,
+                    TestId = nameof(ReferenceSaml.JwtToken),
+                    TokenTestSet = ReferenceSaml.JwtToken,
+                    XmlWriter = XmlDictionaryWriter.CreateTextWriter(memoryStream)
+                });
+
+                return theoryData;
+            }
+        }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        private class SamlSecurityTokenHandlerPublic : SamlSecurityTokenHandler
         {
             public IEnumerable<ClaimsIdentity> CreateClaimsIdentitiesPublic(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
             {
                 return base.CreateClaimsIdentities(samlToken, issuer, validationParameters);
             }
 
-            public string ValidateIssuerPublic(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
-            {
-                return base.ValidateIssuer(issuer, token, validationParameters);
-            }
-
             public void ValidateAudiencePublic(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
             {
                 base.ValidateAudience(audiences, token, validationParameters);
+            }
+
+            public string ValidateIssuerPublic(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+            {
+                return base.ValidateIssuer(issuer, token, validationParameters);
             }
         }
     }

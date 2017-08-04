@@ -25,20 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
-
-namespace Microsoft.IdentityModel.Tokens.Saml
+namespace Microsoft.IdentityModel.Tests
 {
-#pragma warning disable 1591
-    public enum SamlAccessDecision
+    /// <summary>
+    /// Set defaults for TheoryData
+    /// </summary>
+    public class TheoryDataBase
     {
-        // TODO can we get rid of this enum
-        [EnumMember]
-        Permit,
-        [EnumMember]
-        Deny,
-        [EnumMember]
-        Indeterminate
+        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
+
+        public bool First { get; set; } = false;
+
+        public string TestId { get; set; }
+
+        public override string ToString()
+        {
+            return $"{TestId}, {ExpectedException}";
+        }
     }
-#pragma warning restore 1591
 }

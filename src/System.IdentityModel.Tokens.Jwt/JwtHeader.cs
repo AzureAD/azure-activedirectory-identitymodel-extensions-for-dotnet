@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Jwt
 {

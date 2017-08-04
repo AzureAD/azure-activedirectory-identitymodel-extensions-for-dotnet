@@ -29,7 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tests
@@ -123,6 +125,31 @@ namespace Microsoft.IdentityModel.Tests
 
             // Make sure that the properties don't match for all 5 of the claims in the list above.
             Assert.True(context.Diffs.Count(s => s == "Properties:") == 5);
+        }
+
+        [Fact]
+        public void CompareKeyInfoTest()
+        {
+            TestUtilities.WriteHeader($"{this}.CompareKeyInfoTest", true);
+            var context = new CompareContext($"{this}.CompareKeyInfoTest");
+            var keyInfo1 = new KeyInfo(KeyingMaterial.CertSelfSigned2048_SHA256);
+            var keyInfo2 = new KeyInfo(KeyingMaterial.Cert_LocalSts);
+            IdentityComparer.AreEqual(keyInfo1, keyInfo2, context);
+
+            Assert.True(context.Diffs.Count(s => s == "Kid:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "CertificateData:") == 1);
+        }
+
+        [Fact]
+        public void CompareWsFederationConfigurationTest()
+        {
+            TestUtilities.WriteHeader($"{this}.CompareKeyInfoTest", true);
+            var context = new CompareContext($"{this}.CompareKeyInfoTest");
+            var config1 = new WsFederationConfiguration { TokenEndpoint = Guid.NewGuid().ToString() };
+            var config2 = new WsFederationConfiguration { TokenEndpoint = Guid.NewGuid().ToString() };
+            IdentityComparer.AreEqual(config1, config2, context);
+
+            Assert.True(context.Diffs.Count(s => s == "TokenEndpoint:") == 1);
         }
     }
 }

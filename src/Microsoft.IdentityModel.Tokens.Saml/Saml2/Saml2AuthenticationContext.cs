@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the AuthnContext element specified in [Saml2Core, 2.7.2.2].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     /// <remarks>
     /// <para>
@@ -93,6 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// describes the authentication context declaration that follows.
         /// [Saml2Core, 2.7.2.2]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
         public Uri ClassReference
         {
             get { return _classReference; }
@@ -112,6 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets a URI reference that identifies an authentication context 
         /// declaration. [Saml2Core, 2.7.2.2]
         /// </summary>
+        /// <exception cref="ArgumentException">if 'value' is not null and is not an absolute Uri.</exception>
         public Uri DeclarationReference
         {
             get { return _declarationReference; }

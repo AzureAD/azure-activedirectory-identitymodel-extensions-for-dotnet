@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Tests
 
             if (!string.IsNullOrWhiteSpace(SubstringExpected) && !exception.Message.Contains(SubstringExpected))
             {
-                HandleError("!exception.Message.Contains(SubstringExpected).\nexception.Message: " + exception.Message + "\nexpectedException.SubstringExpected: " + SubstringExpected, errors);
+                HandleError($"!exception.Message.Contains('{SubstringExpected}').\nexception.Message: {exception.Message} \nexpectedException.SubstringExpected: {SubstringExpected}", errors);
                 return;
             }
 

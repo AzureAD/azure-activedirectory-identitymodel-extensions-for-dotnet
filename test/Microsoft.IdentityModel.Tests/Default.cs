@@ -32,6 +32,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -374,9 +375,19 @@ namespace Microsoft.IdentityModel.Tests
             get => "Default.RoleClaimType";
         }
 
-        public static SamlAccessDecision SamlAccessDecision
+        public static Saml2Attribute Saml2AttributeMultiValue
         {
-            get => SamlAccessDecision.Permit;
+            get => new Saml2Attribute(Default.AttributeName, new List<string> { Default.Country, Default.Country });
+        }
+
+        public static Saml2Attribute Saml2AttributeSingleValue
+        {
+            get => new Saml2Attribute(Default.AttributeName, Default.Country);
+        }
+
+        public static string SamlAccessDecision
+        {
+            get => "Permit";
         }
 
         public static SamlAction SamlAction
@@ -468,7 +479,12 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signature = new Signature(Default.SignedInfo);
+                var signature = new Signature
+                {
+                    KeyInfo = Default.KeyInfo,
+                    SignedInfo = Default.SignedInfo
+                };
+
                 XmlGenerator.Generate(signature);
                 return signature;
             }

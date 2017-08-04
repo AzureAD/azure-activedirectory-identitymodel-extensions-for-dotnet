@@ -70,9 +70,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="ns">The namespace of the attribute.</param>
         /// <param name="name">The name of the attribute.</param>
         /// <param name="values"><see cref="IEnumerable{String}"/>.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="values"/> is null.</exception>
         public SamlAttribute(string ns, string name, IEnumerable<string> values)
         {
-            Values = (values == null) ? throw LogArgumentNullException(LogMessages.IDX11504) : new List<string>(values);
+            Values = (values == null) ? throw LogArgumentNullException(nameof(values)) : new List<string>(values);
 
             Name = name;
             Namespace = ns;
@@ -114,22 +115,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public string ClaimType
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the name of the attribute.
         /// </summary>
+        /// <exception cref="ArgumentNullException"> if 'value' is null or empty.</exception>
         public string Name
         {
-            get { return _name; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogArgumentNullException(nameof(value));
-
-                _name = value;
-            }
+            get => _name;
+            set => _name = string.IsNullOrEmpty(value) ? throw LogArgumentNullException(nameof(value)) : value;
         }
 
         /// <summary>
@@ -174,12 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 List<Claim> tempClaims = new List<Claim>(Values.Count);
                 foreach (var value in Values)
-                {
-                    if (value == null)
-                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11504));
-
-                    tempClaims.Add(new Claim(ClaimType, value));
-                }
+                    tempClaims.Add(new Claim(ClaimType, value ?? "nil"));
 
                 _claims = tempClaims;
             }

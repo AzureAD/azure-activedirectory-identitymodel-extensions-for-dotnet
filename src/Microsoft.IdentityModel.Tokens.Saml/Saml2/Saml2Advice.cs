@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the Advice element specified in [Saml2Core, 2.6.1].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     /// <remarks>
     /// This information MAY be ignored by applications without affecting either
@@ -51,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets a collection of <see cref="Saml2Id"/> representating the assertions in the <see cref="Saml2Advice"/>.
+        /// Gets a collection of <see cref="Saml2Id"/> representing the assertions in the <see cref="Saml2Advice"/>.
         /// </summary>
         public ICollection<Saml2Id> AssertionIdReferences
         {
@@ -59,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets a collection of <see cref="Saml2Assertion"/> representating the assertions in the <see cref="Saml2Advice"/>.
+        /// Gets a collection of <see cref="Saml2Assertion"/> representing the assertions in the <see cref="Saml2Advice"/>.
         /// </summary>
         public ICollection<Saml2Assertion> Assertions
         {

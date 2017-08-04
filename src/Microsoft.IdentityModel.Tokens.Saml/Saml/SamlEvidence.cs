@@ -42,16 +42,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // TODO - remove this internal
         internal SamlEvidence()
         {
-            AssertionIdReferences = new List<string>();
+            AssertionIDReferences = new List<string>();
             Assertions = new List<SamlAssertion>();
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SamlEvidence"/> class from a <see cref="SamlAssertion"/>.
         /// </summary>
-        /// <param name="assertionIdReferences"><see cref="IEnumerable{String}"/>.</param>
-        public SamlEvidence(IEnumerable<string> assertionIdReferences)
-            : this(assertionIdReferences, null)
+        /// <param name="assertionIDReferences"><see cref="IEnumerable{String}"/>.</param>
+        public SamlEvidence(IEnumerable<string> assertionIDReferences)
+            : this(assertionIDReferences, null)
         {
         }
 
@@ -67,22 +67,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Initializes a new instance of <see cref="SamlEvidence"/> class from a <see cref="SamlAssertion"/>.
         /// </summary>
-        /// <param name="assertionIdReferences"><see cref="IEnumerable{String}"/>.</param>
+        /// <param name="assertionIDReferences"><see cref="IEnumerable{String}"/>.</param>
         /// <param name="assertions"><see cref="IEnumerable{SamlAssertion}"/>.</param>
-        public SamlEvidence(IEnumerable<string> assertionIdReferences, IEnumerable<SamlAssertion> assertions)
+        public SamlEvidence(IEnumerable<string> assertionIDReferences, IEnumerable<SamlAssertion> assertions)
         {
-            if (assertionIdReferences == null && assertions == null)
+            if (assertionIDReferences == null && assertions == null)
                 throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11509));
 
-            AssertionIdReferences = (assertionIdReferences == null) ? new List<string>() : new List<string>(assertionIdReferences);
-
+            AssertionIDReferences = (assertionIDReferences == null) ? new List<string>() : new List<string>(assertionIDReferences);
             Assertions = (assertions == null) ? new List<SamlAssertion>() : new List<SamlAssertion>(assertions);
         }
 
         /// <summary>
         /// Gets a collection of <see cref="ICollection{String}"/>.
         /// </summary>
-        public ICollection<string> AssertionIdReferences
+        public ICollection<string> AssertionIDReferences
         {
             get;
         }

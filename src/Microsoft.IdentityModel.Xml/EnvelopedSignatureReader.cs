@@ -46,8 +46,8 @@ namespace Microsoft.IdentityModel.Xml
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
         /// </summary>
         /// <param name="reader">a <see cref="XmlReader"/> pointing to XML that may contain an enveloped signature.</param>
-        /// <remarks>If a &lt;Signature> element is found, a <see cref="Signature"/> will be populated.</remarks>
-        /// <exception cref="ArgumentNullException">'reader' is null.</exception>
+        /// <remarks>If a &lt;Signature> element is found, the <see cref="Signature"/> will be set.</remarks>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
         public EnvelopedSignatureReader(XmlReader reader)
         {
             if (reader == null)
@@ -118,9 +118,9 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets the <see cref="Signature"/> that was found inside the XML.
+        /// Gets the <see cref="Xml.Signature"/> that was found inside the XML.
         /// </summary>
-        /// <remarks><see cref="Signature"/> may be null.</remarks>
+        /// <remarks><see cref="Xml.Signature"/> may be null.</remarks>
         public Signature Signature
         {
             get;

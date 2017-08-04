@@ -26,7 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -42,19 +43,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadAction(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadAction", theoryData);
-            var context = new CompareContext($"{this}.ReadAction, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.ReadAction", theoryData);
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.ActionTestSet.Xml);
                 var action = (theoryData.SamlSerializer as SamlSerializerPublic).ReadActionPublic(reader);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
 
                 IdentityComparer.AreEqual(action, theoryData.ActionTestSet.Action, context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -68,43 +68,43 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionValueNull,
+                        ActionTestSet = ReferenceSaml.SamlActionValueNull,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionValueNull)
+                        TestId = nameof(ReferenceSaml.SamlActionValueNull)
                     },
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionValueEmptyString,
+                        ActionTestSet = ReferenceSaml.SamlActionValueEmptyString,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionValueEmptyString)
+                        TestId = nameof(ReferenceSaml.SamlActionValueEmptyString)
                     },
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionNamespaceNull,
+                        ActionTestSet = ReferenceSaml.SamlActionNamespaceNull,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionNamespaceNull)
+                        TestId = nameof(ReferenceSaml.SamlActionNamespaceNull)
                     },
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionNamespaceEmptyString,
+                        ActionTestSet = ReferenceSaml.SamlActionNamespaceEmptyString,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionNamespaceEmptyString)
+                        TestId = nameof(ReferenceSaml.SamlActionNamespaceEmptyString)
                     },
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionNamespaceNotAbsoluteUri,
+                        ActionTestSet = ReferenceSaml.SamlActionNamespaceNotAbsoluteUri,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11111:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionNamespaceNotAbsoluteUri)
+                        TestId = nameof(ReferenceSaml.SamlActionNamespaceNotAbsoluteUri)
                     },
                     new SamlTheoryData
                     {
-                        ActionTestSet = ReferenceXml.SamlActionValid,
+                        ActionTestSet = ReferenceSaml.SamlActionValid,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlActionValid)
+                        TestId = nameof(ReferenceSaml.SamlActionValid)
                     }
                 };
             }
@@ -143,35 +143,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        AdviceTestSet = ReferenceXml.AdviceNoAssertionIDRefAndAssertion,
+                        AdviceTestSet = ReferenceSaml.AdviceNoAssertionIDRefAndAssertion,
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.AdviceNoAssertionIDRefAndAssertion)
+                        TestId = nameof(ReferenceSaml.AdviceNoAssertionIDRefAndAssertion)
                     },
                     new SamlTheoryData
                     {
-                        AdviceTestSet = ReferenceXml.AdviceWithAssertionIDRef,
+                        AdviceTestSet = ReferenceSaml.AdviceWithAssertionIDRef,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.AdviceWithAssertionIDRef)
+                        TestId = nameof(ReferenceSaml.AdviceWithAssertionIDRef)
                     },
                     new SamlTheoryData
                     {
-                        AdviceTestSet = ReferenceXml.SamlAdviceWithAssertions,
+                        AdviceTestSet = ReferenceSaml.SamlAdviceWithAssertions,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAdviceWithAssertions)
+                        TestId = nameof(ReferenceSaml.SamlAdviceWithAssertions)
                     },
                     new SamlTheoryData
                     {
-                        AdviceTestSet = ReferenceXml.SamlAdviceWithWrongElement,
+                        AdviceTestSet = ReferenceSaml.SamlAdviceWithWrongElement,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11126"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAdviceWithWrongElement)
+                        TestId = nameof(ReferenceSaml.SamlAdviceWithWrongElement)
                     },
                     new SamlTheoryData
                     {
-                        AdviceTestSet = ReferenceXml.SamlAdviceWithAssertionIDRefAndAssertions,
+                        AdviceTestSet = ReferenceSaml.SamlAdviceWithAssertionIDRefAndAssertions,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAdviceWithAssertionIDRefAndAssertions)
+                        TestId = nameof(ReferenceSaml.SamlAdviceWithAssertionIDRefAndAssertions)
                     }
                 };
             }
@@ -181,22 +181,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #region SamlAssertion
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadAssertionTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadAssertion(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
-            var context = new CompareContext($"{this}.ReadAssertion, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AssertionTestSet.Xml);
                 var assertion = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAssertionPublic(reader);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
 
                 IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -210,110 +208,167 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissMajorVersion,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissMajorVersion,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissMajorVersion)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissMajorVersion)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionWrongMajorVersion,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWrongMajorVersion,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11116"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionWrongMajorVersion)
+                        TestId = nameof(ReferenceSaml.SamlAssertionWrongMajorVersion)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissMinorVersion,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissMinorVersion,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissMinorVersion)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissMinorVersion)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionWrongMinorVersion,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWrongMinorVersion,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11117"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionWrongMinorVersion)
+                        TestId = nameof(ReferenceSaml.SamlAssertionWrongMinorVersion)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissAssertionID,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissAssertionID,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissAssertionID)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissAssertionID)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionWrongAssertionID,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWrongAssertionID,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11121"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionWrongAssertionID)
+                        TestId = nameof(ReferenceSaml.SamlAssertionWrongAssertionID)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissIssuer,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissIssuer,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissIssuer)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissIssuer)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissIssuerInstant,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissIssuerInstant,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissIssuerInstant)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissIssuerInstant)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionNoCondition,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionNoCondition,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionNoCondition)
+                        TestId = nameof(ReferenceSaml.SamlAssertionNoCondition)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionNoAdvice,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionNoAdvice,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionNoAdvice)
+                        TestId = nameof(ReferenceSaml.SamlAssertionNoAdvice)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMissStatement,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMissStatement,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11130"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMissStatement)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMissStatement)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionWrongElementInStatementPlace,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWrongElementInStatementPlace,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11126"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionWrongElementInStatementPlace)
+                        TestId = nameof(ReferenceSaml.SamlAssertionWrongElementInStatementPlace)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionNoSignature,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionNoSignature,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionNoSignature)
+                        TestId = nameof(ReferenceSaml.SamlAssertionNoSignature)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_SameSubject,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMultiStatements_SameSubject,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_SameSubject)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMultiStatements_SameSubject)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentSubject,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMultiStatements_DifferentSubject,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentSubject)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMultiStatements_DifferentSubject)
                     },
                     new SamlTheoryData
                     {
-                        AssertionTestSet = ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType,
+                        AssertionTestSet = ReferenceSaml.SamlAssertionMultiStatements_DifferentStatementType,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAssertionMultiStatements_DifferentStatementType)
+                        TestId = nameof(ReferenceSaml.SamlAssertionMultiStatements_DifferentStatementType)
+                    }
+                };
+            }
+        }
+
+        [Theory, MemberData("WriteAssertionTheoryData")]
+        public void WriteAssertion(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
+            try
+            {
+                var memoryStream = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+                theoryData.SamlSerializer.WriteAssertion(writer, theoryData.AssertionTestSet.Assertion);
+                theoryData.ExpectedException.ProcessNoException(context);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(memoryStream.ToArray());
+                var assertion = theoryData.SamlSerializer.ReadAssertion(XmlUtilities.CreateDictionaryReader(xml));
+                if (theoryData.SigningCredentials != null)
+                {
+                    assertion.SigningCredentials = theoryData.SigningCredentials;
+                    assertion.Signature.Verify(theoryData.SigningCredentials.Key);
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        public static TheoryData<SamlTheoryData> WriteAssertionTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<SamlTheoryData>
+                {
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWithSignature,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        TestId = nameof(ReferenceSaml.SamlAssertionWithSignature)
+                    },
+                    new SamlTheoryData
+                    {
+                        AssertionTestSet = ReferenceSaml.SamlAssertionNoSignature,
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = nameof(ReferenceSaml.SamlAssertionNoSignature)
                     }
                 };
             }
@@ -326,8 +381,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadAttribute(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadAttribute", theoryData);
-            var context = new CompareContext($"{this}.ReadAttribute, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.ReadAttribute", theoryData);
             try
             {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AttributeTestSet.Xml);
@@ -352,57 +406,57 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNameNull,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeNameNull,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNameNull)
+                        TestId = nameof(ReferenceSaml.SamlAttributeNameNull)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNameEmptyString,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeNameEmptyString,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNameEmptyString)
+                        TestId = nameof(ReferenceSaml.SamlAttributeNameEmptyString)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNamespaceNull,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeNamespaceNull,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNamespaceNull)
+                        TestId = nameof(ReferenceSaml.SamlAttributeNamespaceNull)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeNamespaceEmptyString,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeNamespaceEmptyString,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeNamespaceEmptyString)
+                        TestId = nameof(ReferenceSaml.SamlAttributeNamespaceEmptyString)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeValueNull,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeValueNull,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11132:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeValueNull)
+                        TestId = nameof(ReferenceSaml.SamlAttributeValueNull)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeValueEmptyString,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeValueEmptyString,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeValueEmptyString)
+                        TestId = nameof(ReferenceSaml.SamlAttributeValueEmptyString)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeSingleValue,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeSingleValue,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeSingleValue)
+                        TestId = nameof(ReferenceSaml.SamlAttributeSingleValue)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeTestSet = ReferenceXml.SamlAttributeMultiValue,
+                        AttributeTestSet = ReferenceSaml.SamlAttributeMultiValue,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeMultiValue)
+                        TestId = nameof(ReferenceSaml.SamlAttributeMultiValue)
                     }
                 };
             }
@@ -441,30 +495,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData()
                     {
-                        AttributeStatementTestSet = ReferenceXml.SamlAttributeStatementMissSubject,
+                        AttributeStatementTestSet = ReferenceSaml.SamlAttributeStatementMissSubject,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(XmlReadException)),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeStatementMissSubject)
+                        TestId = nameof(ReferenceSaml.SamlAttributeStatementMissSubject)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeStatementTestSet = ReferenceXml.SamlAttributeStatementMissAttribute,
+                        AttributeStatementTestSet = ReferenceSaml.SamlAttributeStatementMissAttribute,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11131:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeStatementMissAttribute)
+                        TestId = nameof(ReferenceSaml.SamlAttributeStatementMissAttribute)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeStatementTestSet = ReferenceXml.SamlAttributeStatementSingleAttribute,
+                        AttributeStatementTestSet = ReferenceSaml.SamlAttributeStatementSingleAttribute,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeStatementSingleAttribute)
+                        TestId = nameof(ReferenceSaml.SamlAttributeStatementSingleAttribute)
                     },
                     new SamlTheoryData()
                     {
-                        AttributeStatementTestSet = ReferenceXml.SamlAttributeStatementMultiAttributes,
+                        AttributeStatementTestSet = ReferenceSaml.SamlAttributeStatementMultiAttributes,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAttributeStatementMultiAttributes)
+                        TestId = nameof(ReferenceSaml.SamlAttributeStatementMultiAttributes)
                     }
                 };
             }
@@ -503,37 +557,37 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        AudienceRestrictionConditionTestSet = ReferenceXml.SamlAudienceRestrictionConditionNoAudience,
+                        AudienceRestrictionConditionTestSet = ReferenceSaml.SamlAudienceRestrictionConditionNoAudience,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11120:"),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAudienceRestrictionConditionNoAudience)
+                        TestId = nameof(ReferenceSaml.SamlAudienceRestrictionConditionNoAudience)
                     },
                     new SamlTheoryData
                     {
-                        AudienceRestrictionConditionTestSet = ReferenceXml.SamlAudienceRestrictionConditionEmptyAudience,
+                        AudienceRestrictionConditionTestSet = ReferenceSaml.SamlAudienceRestrictionConditionEmptyAudience,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11125:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAudienceRestrictionConditionEmptyAudience)
+                        TestId = nameof(ReferenceSaml.SamlAudienceRestrictionConditionEmptyAudience)
                     },
                     new SamlTheoryData
                     {
-                        AudienceRestrictionConditionTestSet = ReferenceXml.SamlAudienceRestrictionConditionInvaidElement,
+                        AudienceRestrictionConditionTestSet = ReferenceSaml.SamlAudienceRestrictionConditionInvaidElement,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11134:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAudienceRestrictionConditionInvaidElement)
+                        TestId = nameof(ReferenceSaml.SamlAudienceRestrictionConditionInvaidElement)
                     },
                     new SamlTheoryData
                     {
-                        AudienceRestrictionConditionTestSet = ReferenceXml.SamlAudienceRestrictionConditionSingleAudience,
+                        AudienceRestrictionConditionTestSet = ReferenceSaml.SamlAudienceRestrictionConditionSingleAudience,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAudienceRestrictionConditionSingleAudience)
+                        TestId = nameof(ReferenceSaml.SamlAudienceRestrictionConditionSingleAudience)
                     },
                     new SamlTheoryData
                     {
-                        AudienceRestrictionConditionTestSet = ReferenceXml.SamlAudienceRestrictionConditionMultiAudience,
+                        AudienceRestrictionConditionTestSet = ReferenceSaml.SamlAudienceRestrictionConditionMultiAudience,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAudienceRestrictionConditionMultiAudience)
+                        TestId = nameof(ReferenceSaml.SamlAudienceRestrictionConditionMultiAudience)
                     }
                 };
             }
@@ -572,82 +626,82 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissSubject,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissSubject,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(XmlReadException)),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissSubject)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissSubject)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissMethod,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissMethod,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissMethod)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissMethod)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissInstant,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissInstant,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissInstant)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissInstant)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementNoSubjectLocality,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementNoSubjectLocality,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementNoSubjectLocality)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementNoSubjectLocality)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementNoIPAddress,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementNoIPAddress,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementNoIPAddress)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementNoIPAddress)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementNoDNSAddress,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementNoDNSAddress,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementNoDNSAddress)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementNoDNSAddress)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementNoAuthorityBinding,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementNoAuthorityBinding,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementNoAuthorityBinding)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementNoAuthorityBinding)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissAuthorityKind,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissAuthorityKind,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissAuthorityKind)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissAuthorityKind)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissLocation,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissLocation,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11513:", typeof(SamlSecurityTokenException)),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissLocation)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissLocation)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMissBinding,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMissBinding,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11512:", typeof(SamlSecurityTokenException)),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMissBinding)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMissBinding)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementValid,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementValid,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementValid)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementValid)
                     },
                     new SamlTheoryData
                     {
-                        AuthenticationStatementTestSet = ReferenceXml.SamlAuthenticationStatementMultiBinding,
+                        AuthenticationStatementTestSet = ReferenceSaml.SamlAuthenticationStatementMultiBinding,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthenticationStatementMultiBinding)
+                        TestId = nameof(ReferenceSaml.SamlAuthenticationStatementMultiBinding)
                     }
                 };
             }
@@ -686,50 +740,50 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionMissResource,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMissResource,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionMissResource)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMissResource)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionMissAccessDecision,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMissAccessDecision,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionMissAccessDecision)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMissAccessDecision)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionMissSubject,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMissSubject,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(XmlReadException)),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionMissSubject)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMissSubject)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionMissAction,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMissAction,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11102:"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionMissAction)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMissAction)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionNoEvidence,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionNoEvidence,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionNoEvidence)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionNoEvidence)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionSingleAction,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionSingleAction,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionSingleAction)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionSingleAction)
                     },
                     new SamlTheoryData
                     {
-                        AuthorizationDecisionTestSet = ReferenceXml.SamlAuthorizationDecisionMultiActions,
+                        AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMultiActions,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlAuthorizationDecisionMultiActions)
+                        TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMultiActions)
                     }
                 };
             }
@@ -768,34 +822,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        ConditionsTestSet = ReferenceXml.SamlConditionsNoNbf,
+                        ConditionsTestSet = ReferenceSaml.SamlConditionsNoNbf,
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlConditionsNoNbf)
+                        TestId = nameof(ReferenceSaml.SamlConditionsNoNbf)
                     },
                     new SamlTheoryData
                     {
-                        ConditionsTestSet = ReferenceXml.SamlConditionsNoNotOnOrAfter,
+                        ConditionsTestSet = ReferenceSaml.SamlConditionsNoNotOnOrAfter,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlConditionsNoNotOnOrAfter)
+                        TestId = nameof(ReferenceSaml.SamlConditionsNoNotOnOrAfter)
                     },
                     new SamlTheoryData
                     {
-                        ConditionsTestSet = ReferenceXml.SamlConditionsNoCondition,
+                        ConditionsTestSet = ReferenceSaml.SamlConditionsNoCondition,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlConditionsNoCondition)
+                        TestId = nameof(ReferenceSaml.SamlConditionsNoCondition)
                     },
                     new SamlTheoryData
                     {
-                        ConditionsTestSet = ReferenceXml.SamlConditionsSingleCondition,
+                        ConditionsTestSet = ReferenceSaml.SamlConditionsSingleCondition,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlConditionsSingleCondition)
+                        TestId = nameof(ReferenceSaml.SamlConditionsSingleCondition)
                     },
                     new SamlTheoryData
                     {
-                        ConditionsTestSet = ReferenceXml.SamlConditionsMultiCondition,
+                        ConditionsTestSet = ReferenceSaml.SamlConditionsMultiCondition,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlConditionsMultiCondition)
+                        TestId = nameof(ReferenceSaml.SamlConditionsMultiCondition)
                     }
                 };
             }
@@ -834,36 +888,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        EvidenceTestSet = ReferenceXml.SamlEvidenceMissAssertionIDRefAndAssertion,
+                        EvidenceTestSet = ReferenceSaml.SamlEvidenceMissAssertionIDRefAndAssertion,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11133"),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlEvidenceMissAssertionIDRefAndAssertion)
+                        TestId = nameof(ReferenceSaml.SamlEvidenceMissAssertionIDRefAndAssertion)
                     },
                     new SamlTheoryData
                     {
-                        EvidenceTestSet = ReferenceXml.SamlEvidenceWithAssertionIDRef,
+                        EvidenceTestSet = ReferenceSaml.SamlEvidenceWithAssertionIDRef,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlEvidenceWithAssertionIDRef)
+                        TestId = nameof(ReferenceSaml.SamlEvidenceWithAssertionIDRef)
                     },
                     new SamlTheoryData
                     {
-                        EvidenceTestSet = ReferenceXml.SamlEvidenceWithAssertions,
+                        EvidenceTestSet = ReferenceSaml.SamlEvidenceWithAssertions,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlEvidenceWithAssertions)
+                        TestId = nameof(ReferenceSaml.SamlEvidenceWithAssertions)
                     },
                     new SamlTheoryData
                     {
-                        EvidenceTestSet = ReferenceXml.SamlEvidenceWithWrongElement,
+                        EvidenceTestSet = ReferenceSaml.SamlEvidenceWithWrongElement,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11120"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlEvidenceWithWrongElement)
+                        TestId = nameof(ReferenceSaml.SamlEvidenceWithWrongElement)
                     },
                     new SamlTheoryData
                     {
-                        EvidenceTestSet = ReferenceXml.SamlEvidenceWithAssertionIDRefAndAssertions,
+                        EvidenceTestSet = ReferenceSaml.SamlEvidenceWithAssertionIDRefAndAssertions,
                         SamlSerializer = new SamlSerializerPublic(),
-                        TestId = nameof(ReferenceXml.SamlEvidenceWithAssertionIDRefAndAssertions)
+                        TestId = nameof(ReferenceSaml.SamlEvidenceWithAssertionIDRefAndAssertions)
                     }
                 };
             }
@@ -904,66 +958,66 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameIdentifierNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameIdentifierNull)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNameIdentifierNull,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNameIdentifierNull)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNoNameQualifier,
-                        TestId = nameof(ReferenceXml.SamlSubjectNoNameQualifier)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNoNameQualifier,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNoNameQualifier)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNoFormat,
-                        TestId = nameof(ReferenceXml.SamlSubjectNoFormat)
-                    },
-                    new SamlTheoryData
-                    {
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11104"),
-                        SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameNull)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNoFormat,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNoFormat)
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11104"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNameEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectNameEmptyString)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNameNull,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNameNull)
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11104"),
+                        SamlSerializer = new SamlSerializerPublic(),
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNameEmptyString,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNameEmptyString)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectNoConfirmationData,
-                        TestId = nameof(ReferenceXml.SamlSubjectNoConfirmationData)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNoConfirmationData,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNoConfirmationData)
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11114"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationMethodNull,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationMethodNull)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectConfirmationMethodNull,
+                        TestId = nameof(ReferenceSaml.SamlSubjectConfirmationMethodNull)
                     },
                     new SamlTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11135"),
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectConfirmationMethodEmptyString,
-                        TestId = nameof(ReferenceXml.SamlSubjectConfirmationMethodEmptyString)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectConfirmationMethodEmptyString,
+                        TestId = nameof(ReferenceSaml.SamlSubjectConfirmationMethodEmptyString)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectWithNameIdentifierAndConfirmation,
-                        TestId = nameof(ReferenceXml.SamlSubjectWithNameIdentifierAndConfirmation)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectWithNameIdentifierAndConfirmation,
+                        TestId = nameof(ReferenceSaml.SamlSubjectWithNameIdentifierAndConfirmation)
                     },
                     new SamlTheoryData
                     {
                         SamlSerializer = new SamlSerializerPublic(),
-                        SubjectTestSet = ReferenceXml.SamlSubjectWithMultiConfirmationMethods,
-                        TestId = nameof(ReferenceXml.SamlSubjectWithMultiConfirmationMethods)
+                        SubjectTestSet = ReferenceSaml.SamlSubjectWithMultiConfirmationMethods,
+                        TestId = nameof(ReferenceSaml.SamlSubjectWithMultiConfirmationMethods)
                     }
                 };
             }

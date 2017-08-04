@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
     /// Represents the Action element specified in [Saml, 2.4.5.1].
+    /// see: https://www.oasis-open.org/committees/download.php/3406/oasis-sstc-saml-core-1.1.pdf
     /// </summary>
     public class SamlAction
     {
@@ -41,12 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Constructs an instance of <see cref="SamlAction"/> class.
         /// </summary>
-        internal SamlAction() { }
-
-        /// <summary>
-        /// Constructs an instance of <see cref="SamlAction"/> class.
-        /// </summary>
         /// <param name="value">Action value represented by this class.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null or empty.</exception>
         public SamlAction(string value)
             : this(value, null)
         {
@@ -57,6 +54,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="value">Value represented by this class.</param>
         /// <param name="namespace">Namespace in which the action is interpreted.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="namespace"/> is not an absolute Uri.</exception>
         public SamlAction(string value, Uri @namespace)
         {
             Value = value;
@@ -67,12 +66,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets or sets a URI reference representing the namespace in which the name of the
         /// specified action is to be interpreted. [Saml, 2.4.5.1]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is not an absolute Uri.</exception>
         public Uri Namespace
         {
-            get
-            {
-                return _namespace;
-            }
+            get => _namespace;
             set
             {
                 // optional, use default if not set.
@@ -84,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
 
                     if (!value.IsAbsoluteUri)
-                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11502));
+                        throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11502, value)));
 
                     _namespace = value;
                 }
@@ -95,19 +92,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets or sets the label for an action sought to be performed on the
         /// specified resource. [Saml, 2.4.5.1]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null or empty.</exception>
         public string Value
         {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogArgumentNullException(nameof(value));
-
-                _value = value;
-            }
+            get => _value;
+            set => _value = (string.IsNullOrEmpty(value)) ? throw LogArgumentNullException(nameof(value)) : value;
         }
     }
 }

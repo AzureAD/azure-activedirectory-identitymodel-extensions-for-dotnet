@@ -25,18 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
-    public class SamlTheoryData : TheoryDataBase
+    public class SamlTheoryData : TokenTheoryData
     {
+        public SamlTheoryData()
+        {
+        }
+
+        public SamlTheoryData(TokenTheoryData tokenTheoryData)
+            : base(tokenTheoryData)
+        {
+        }
+
         public SamlActionTestSet ActionTestSet { get; set; }
-
-        public string Actor { get; set; }
-
-        public TokenValidationParameters ActorTokenValidationParameters { get; set; }
 
         public SamlAdviceTestSet AdviceTestSet { get; set; }
 
@@ -50,33 +54,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public SamlAuthenticationStatementTestSet AuthenticationStatementTestSet { get; set; }
 
-        public IEnumerable<string> Audiences { get; set; }
-
         public SamlAuthorizationDecisionStatementTestSet AuthorizationDecisionTestSet { get; set; }
-
-        public bool CanRead { get; set; }
-
-        public SamlTokenTestSet TokenClaimsIdentitiesTestSet { get; set; }
 
         public SamlConditionsTestSet ConditionsTestSet { get; set; }
 
         public SamlEvidenceTestSet EvidenceTestSet { get; set; }
 
-        public SecurityTokenHandler Handler { get; set; }
+        public SamlSecurityTokenHandler Handler { get; set; } = new SamlSecurityTokenHandler();
 
-        public string Issuer { get; set; }
+        public SamlSerializer SamlSerializer { get; set; } = new SamlSerializer();
 
-        public SamlSerializer SamlSerializer { get; set; }
-
-        public SamlSecurityTokenTestSet SamlSecurityTokenTestSet { get; set; }
+        public SamlTokenTestSet SamlTokenTestSet { get; set; }
 
         public SamlSubjectTestSet SubjectTestSet { get; set; }
 
-        public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-        public string Token { get; set; }
-
-        public TokenValidationParameters ValidationParameters { get; set; }
+        public SamlTokenTestSet TokenTestSet { get; set; }
 
         public override string ToString()
         {

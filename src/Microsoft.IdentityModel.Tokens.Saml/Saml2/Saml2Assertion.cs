@@ -34,6 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the Assertion element specified in [Saml2Core, 2.3.3].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2Assertion
     {
@@ -47,18 +48,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="issuer">Issuer of the assertion.</param>
         public Saml2Assertion(Saml2NameIdentifier issuer)
         {
-            // TODO do we need issuer?
             Id = new Saml2Id();
             IssueInstant = DateTime.UtcNow;
             Issuer = issuer;
             Statements = new List<Saml2Statement>();
-            Version = Saml2Constants.Version;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Signature"/> on the Assertion.
         /// </summary>
-        public Signature Signature { get; set; }
+        public Signature Signature
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets additional information related to the assertion that assists processing in certain
@@ -67,7 +70,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2Advice Advice
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -76,7 +80,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2Conditions Conditions
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -86,19 +91,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public EncryptingCredentials EncryptingCredentials
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Saml2Id"/> identifier for this assertion. [Saml2Core, 2.3.3]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' if null.</exception>
         public Saml2Id Id
         {
-            get { return _id; }
-            set
-            {
-                _id = value ?? throw LogArgumentNullException(nameof(value));
-            }
+            get => _id;
+            set => _id = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -106,20 +110,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public DateTime IssueInstant
         {
-            get { return _issueInstant; }
-            set { _issueInstant = DateTimeUtil.ToUniversalTime(value); }
+            get => _issueInstant;
+            set => _issueInstant = DateTimeUtil.ToUniversalTime(value);
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Saml2NameIdentifier"/> as the authority that is making the claim(s) in the assertion. [Saml2Core, 2.3.3]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public Saml2NameIdentifier Issuer
         {
-            get { return _issuer; }
-            set
-            {
-                _issuer = value ?? throw LogArgumentNullException(nameof(value));
-            }
+            get => _issuer;
+            set => _issuer = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -127,7 +129,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -135,7 +138,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2Subject Subject
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -149,12 +153,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets the version of this assertion. [Saml2Core, 2.3.3]
         /// </summary>
-        /// <remarks>
-        /// In this version of the Windows Identity Foundation, only version "2.0" is supported.
-        /// </remarks>
         public string Version
         {
-            get;
+            get => Saml2Constants.Version;
         }
     }
 }

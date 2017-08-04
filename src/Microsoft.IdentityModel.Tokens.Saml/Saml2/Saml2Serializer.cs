@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+// TODO review
 using System;
 using System.Security.Claims;
 using System.Xml;
@@ -1477,6 +1478,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Advice"/>.</param>
         /// <param name="advice">The <see cref="Saml2Advice"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="advice"/> is null.</exception>
         protected virtual void WriteAdvice(XmlWriter writer, Saml2Advice advice)
         {
             if (writer == null)
@@ -1505,11 +1508,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Serializes the provided SamlAssertion to the XmlWriter.
+        /// Writes the &lt;Assertion> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Assertion"/>.</param>
         /// <param name="assertion">The <see cref="Saml2Assertion"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">The <paramref name="writer"/> or <paramref name="assertion"/> parameters are null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="assertion"/> is null.</exception>
+        /// <exception cref="NotSupportedException">if <paramref name="assertion"/>.EncryptingCredentials != null.</exception>
         /// <exception cref="InvalidOperationException">The <paramref name="assertion"/> must have a <see cref="Saml2Subject"/> if no <see cref="Saml2Statement"/> are present.</exception>
         /// <exception cref="InvalidOperationException">The SAML2 authentication, attribute, and authorization decision <see cref="Saml2Statement"/> require a <see cref="Saml2Subject"/>.</exception>
         public virtual void WriteAssertion(XmlWriter writer, Saml2Assertion assertion)
@@ -1533,10 +1538,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (assertion.Subject == null)
             {
                 // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
-                if (assertion.Statements == null || 0 == assertion.Statements.Count)
-                {
+                if (assertion.Statements.Count == 0)
                     throw LogExceptionMessage(new Saml2SecurityTokenException("no subject and no statements, not allowed"));
-                }
 
                 // Furthermore, the built-in statement types all require the presence of a subject.
                 // [Saml2Core, lines 1050, 1168, 1280]
@@ -1567,8 +1570,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             WriteIssuer(writer, assertion.Issuer);
 
             // <ds:Signature> 0-1
-            if (null != signatureWriter)
-                signatureWriter.WriteSignature();
+            //if (null != signatureWriter)
+            //    signatureWriter.WriteSignature();
 
             // <Subject> 0-1
             if (null != assertion.Subject)
@@ -1594,9 +1597,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Attribute"/>.</param>
         /// <param name="attribute">The <see cref="Saml2Attribute"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="attribute"/> is null.</exception>
         public virtual void WriteAttribute(XmlWriter writer, Saml2Attribute attribute)
         {
-            // TODO = temporarily public until actor is processing is complete
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
@@ -1610,15 +1614,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             writer.WriteAttributeString(Saml2Constants.Attributes.Name, attribute.Name);
 
             // @NameFormat - optional
-            if (null != attribute.NameFormat)
+            if (attribute.NameFormat != null)
                 writer.WriteAttributeString(Saml2Constants.Attributes.NameFormat, attribute.NameFormat.OriginalString);
 
             // @FriendlyName - optional
-            if (null != attribute.FriendlyName)
+            if (attribute.FriendlyName != null)
                 writer.WriteAttributeString(Saml2Constants.Attributes.FriendlyName, attribute.FriendlyName);
 
             // @OriginalIssuer - optional
-            if (null != attribute.OriginalIssuer)
+            if (attribute.OriginalIssuer != null )
                 writer.WriteAttributeString(Saml2Constants.Attributes.OriginalIssuer, attribute.OriginalIssuer);
 
             string xsiTypePrefix = null;
@@ -1649,7 +1653,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, string.Concat(Saml2Constants.ClaimValueTypeSerializationPrefixWithColon, xsiTypeSuffix));
                     }
 
-                    WriteAttributeValue(writer, value, attribute);
+                    writer.WriteString(value);
                 }
 
                 writer.WriteEndElement();
@@ -1663,24 +1667,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:AttributeStatement> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AttributeStatement"/>.</param>
-        /// <param name="attributeStatement">The <see cref="Saml2AttributeStatement"/> to serialize.</param>
-        protected virtual void WriteAttributeStatement(XmlWriter writer, Saml2AttributeStatement attributeStatement)
+        /// <param name="statement">The <see cref="Saml2AttributeStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2AttributeStatement.Attributes"/>.Count == 0.</exception>
+        protected virtual void WriteAttributeStatement(XmlWriter writer, Saml2AttributeStatement statement)
         {
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
 
-            if (attributeStatement == null)
-                throw LogArgumentNullException(nameof(attributeStatement));
-
-            if (attributeStatement.Attributes == null || 0 == attributeStatement.Attributes.Count)
+            if (statement.Attributes.Count == 0)
                 throw LogWriteException(LogMessages.IDX11129);
 
             // <AttributeStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
 
             // <Attribute> 1-OO
-            foreach (Saml2Attribute attribute in attributeStatement.Attributes)
+            foreach (Saml2Attribute attribute in statement.Attributes)
                 WriteAttribute(writer, attribute);
 
             // </AttributeStatement>
@@ -1688,26 +1694,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Writes the saml:Attribute value.
-        /// </summary>
-        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Attribute"/>.</param>
-        /// <param name="value">The value of the attribute being serialized.</param>
-        /// <param name="attribute">The <see cref="Saml2Attribute"/> to serialize.</param>
-        /// <remarks>By default the method writes the value as a string.</remarks>
-        /// <exception cref="ArgumentNullException">The input parameter 'writer' is null.</exception>
-        protected virtual void WriteAttributeValue(XmlWriter writer, string value, Saml2Attribute attribute)
-        {
-            if (writer == null)
-                throw LogArgumentNullException(nameof(writer));
-
-            writer.WriteString(value);
-        }
-
-        /// <summary>
         /// Writes the &lt;saml:AudienceRestriction> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AudienceRestriction"/>.</param>
         /// <param name="audienceRestriction">The <see cref="Saml2AudienceRestriction"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="audienceRestriction"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2AudienceRestriction.Audiences"/> is empty.</exception>
         protected virtual void WriteAudienceRestriction(XmlWriter writer, Saml2AudienceRestriction audienceRestriction)
         {
             if (writer == null)
@@ -1717,7 +1710,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(audienceRestriction));
 
             // Schema requires at least one audience.
-            if (audienceRestriction.Audiences == null || 0 == audienceRestriction.Audiences.Count)
+            if (audienceRestriction.Audiences.Count == 0)
                 throw LogReadException(LogMessages.IDX11130);
 
             // <AudienceRestriction>
@@ -1771,37 +1764,39 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:AuthnStatement> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AuthenticationStatement"/>.</param>
-        /// <param name="authenticationStatement">The <see cref="Saml2AuthenticationStatement"/> to serialize.</param>
-        protected virtual void WriteAuthenticationStatement(XmlWriter writer, Saml2AuthenticationStatement authenticationStatement)
+        /// <param name="statement">The <see cref="Saml2AuthenticationStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        protected virtual void WriteAuthenticationStatement(XmlWriter writer, Saml2AuthenticationStatement statement)
         {
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
-            if (authenticationStatement == null)
-                throw LogArgumentNullException(nameof(authenticationStatement));
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
 
             // <AuthnStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AuthnStatement, Saml2Constants.Namespace);
 
             // @AuthnInstant - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.AuthnInstant, XmlConvert.ToString(authenticationStatement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            writer.WriteAttributeString(Saml2Constants.Attributes.AuthnInstant, XmlConvert.ToString(statement.AuthenticationInstant.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // @SessionIndex - optional
-            if (null != authenticationStatement.SessionIndex)
+            if (null != statement.SessionIndex)
             {
-                writer.WriteAttributeString(Saml2Constants.Attributes.SessionIndex, authenticationStatement.SessionIndex);
+                writer.WriteAttributeString(Saml2Constants.Attributes.SessionIndex, statement.SessionIndex);
             }
 
             // @SessionNotOnOrAfter - optional
-            if (null != authenticationStatement.SessionNotOnOrAfter)
-                writer.WriteAttributeString(Saml2Constants.Attributes.SessionNotOnOrAfter, XmlConvert.ToString(authenticationStatement.SessionNotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
+            if (null != statement.SessionNotOnOrAfter)
+                writer.WriteAttributeString(Saml2Constants.Attributes.SessionNotOnOrAfter, XmlConvert.ToString(statement.SessionNotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // <SubjectLocality> 0-1
-            if (null != authenticationStatement.SubjectLocality)
-                WriteSubjectLocality(writer, authenticationStatement.SubjectLocality);
+            if (null != statement.SubjectLocality)
+                WriteSubjectLocality(writer, statement.SubjectLocality);
 
             // <AuthnContext> 1
-            WriteAuthenticationContext(writer, authenticationStatement.AuthenticationContext);
+            WriteAuthenticationContext(writer, statement.AuthenticationContext);
 
             // </AuthnStatement>
             writer.WriteEndElement();
@@ -1811,37 +1806,45 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Writes the &lt;saml:AuthzDecisionStatement> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2AuthorizationDecisionStatement"/>.</param>
-        /// <param name="authorizationDecisionStatement">The <see cref="Saml2AuthorizationDecisionStatement"/> to serialize.</param>
-        protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, Saml2AuthorizationDecisionStatement authorizationDecisionStatement)
+        /// <param name="statement">The <see cref="Saml2AuthorizationDecisionStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2AuthorizationDecisionStatement.Actions"/> is empty.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2AuthorizationDecisionStatement.Decision"/> is null or empty.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2AuthorizationDecisionStatement.Resource"/> is null or empty.</exception>
+        protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, Saml2AuthorizationDecisionStatement statement)
         {
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
-            if (authorizationDecisionStatement == null)
-                throw LogArgumentNullException(nameof(authorizationDecisionStatement));
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
 
-            if (0 == authorizationDecisionStatement.Actions.Count)
-            {
-                throw LogExceptionMessage(
-                    new Saml2SecurityTokenException("no actions specified ID4122"));
-            }
+            if (statement.Actions.Count == 0)
+                throw LogWriteException(LogMessages.IDX11901, statement.GetType(), "Actions" );
+
+            if (string.IsNullOrEmpty(statement.Decision))
+                throw LogWriteException(LogMessages.IDX11900, Saml2Constants.Attributes.Decision, nameof(statement.Decision));
+
+            if (statement.Resource == null)
+                throw LogWriteException(LogMessages.IDX11900, Saml2Constants.Attributes.Resource, nameof(statement.Resource));
 
             // <AuthzDecisionStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
 
             // @Decision - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Decision, authorizationDecisionStatement.Decision.ToString());
+            writer.WriteAttributeString(Saml2Constants.Attributes.Decision, statement.Decision.ToString());
 
             // @Resource - required
-            writer.WriteAttributeString(Saml2Constants.Attributes.Resource, authorizationDecisionStatement.Resource.Equals(Saml2AuthorizationDecisionStatement.EmptyResource) ? authorizationDecisionStatement.Resource.ToString() : authorizationDecisionStatement.Resource.OriginalString);
+            writer.WriteAttributeString(Saml2Constants.Attributes.Resource, statement.Resource.Equals(Saml2AuthorizationDecisionStatement.EmptyResource) ? statement.Resource.ToString() : statement.Resource.OriginalString);
 
             // @Action 1-OO
-            foreach (Saml2Action action in authorizationDecisionStatement.Actions)
+            foreach (Saml2Action action in statement.Actions)
                 WriteAction(writer, action);
 
             // Evidence 0-1
-            if (null != authorizationDecisionStatement.Evidence)
-                WriteEvidence(writer, authorizationDecisionStatement.Evidence);
+            if (null != statement.Evidence)
+                WriteEvidence(writer, statement.Evidence);
 
             // </AuthzDecisionStatement>
             writer.WriteEndElement();
@@ -1852,6 +1855,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Conditions"/>.</param>
         /// <param name="conditions">The <see cref="Saml2Conditions"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="conditions"/> is null.</exception>
         protected virtual void WriteConditions(XmlWriter writer, Saml2Conditions conditions)
         {
             if (writer == null)
@@ -1864,12 +1869,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             writer.WriteStartElement(Saml2Constants.Elements.Conditions, Saml2Constants.Namespace);
 
             // @NotBefore - optional
-            if (null != conditions.NotBefore)
+            if (conditions.NotBefore.HasValue)
                 writer.WriteAttributeString(Saml2Constants.Attributes.NotBefore, XmlConvert.ToString(conditions.NotBefore.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
-
             // @NotOnOrAfter - optional
-            if (null != conditions.NotOnOrAfter)
+            if (conditions.NotOnOrAfter.HasValue)
                 writer.WriteAttributeString(Saml2Constants.Attributes.NotOnOrAfter, XmlConvert.ToString(conditions.NotOnOrAfter.Value.ToUniversalTime(), Saml2Constants.GeneratedDateTimeFormat));
 
             // <AudienceRestriction> 0-OO
@@ -1884,7 +1888,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             // <ProxyRestriction> - limited to one in SAML spec
-            if (null != conditions.ProxyRestriction)
+            if (conditions.ProxyRestriction != null)
                 WriteProxyRestriction(writer, conditions.ProxyRestriction);
 
             // </Conditions>
@@ -1896,6 +1900,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Evidence"/>.</param>
         /// <param name="evidence">The <see cref="Saml2Evidence"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="evidence"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <see cref="Saml2Evidence"/> does not contain any assertions or assertions references.</exception>
         protected virtual void WriteEvidence(XmlWriter writer, Saml2Evidence evidence)
         {
             if (writer == null)
@@ -1904,10 +1911,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (evidence == null)
                 throw LogArgumentNullException(nameof(evidence));
 
-            if ((evidence.AssertionIdReferences == null || 0 == evidence.AssertionIdReferences.Count)
-               && (evidence.Assertions == null || 0 == evidence.Assertions.Count)
-               && (evidence.AssertionUriReferences == null || 0 == evidence.AssertionUriReferences.Count))
-                throw LogWriteException(LogMessages.IDX11122);
+            if (evidence.AssertionIdReferences.Count == 0
+            &&  evidence.Assertions.Count == 0
+            &&  evidence.AssertionUriReferences.Count == 0 )
+                throw LogWriteException(LogMessages.IDX11902);
 
             // <Evidence>
             writer.WriteStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
@@ -1933,6 +1940,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2NameIdentifier"/>.</param>
         /// <param name="nameIdentifier">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="nameIdentifier"/> is null.</exception>
         protected virtual void WriteIssuer(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
             if (writer == null)
@@ -1941,8 +1950,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (nameIdentifier == null)
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
+            // <Issuer>
             writer.WriteStartElement(Saml2Constants.Elements.Issuer, Saml2Constants.Namespace);
+
             WriteNameIdType(writer, nameIdentifier);
+
+            // </Issuer>
             writer.WriteEndElement();
         }
 
@@ -1951,8 +1964,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2NameIdentifier"/>.</param>
         /// <param name="nameIdentifier">The <see cref="Saml2NameIdentifier"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">If 'writer' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'nameIdentifier' null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="nameIdentifier"/> null.</exception>
         protected virtual void WriteNameId(XmlWriter writer, Saml2NameIdentifier nameIdentifier)
         {
             if (writer == null)

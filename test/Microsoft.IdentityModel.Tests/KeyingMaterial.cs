@@ -107,8 +107,7 @@ namespace Microsoft.IdentityModel.Tests
         public static SigningCredentials DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature);
 
         // RSA securityKey
-        public static RSAParameters RsaParameters1;
-        public static RSAParameters RsaParameters2;
+
         public static RSAParameters RsaParametersFromPing1;
         public static RSAParameters RsaParametersFromPing2;
         public static RSAParameters RsaParametersFromPing3;
@@ -121,8 +120,40 @@ namespace Microsoft.IdentityModel.Tests
         public static RSAParameters RsaParameters_2048_MissingModulus;
         public static RSAParameters RsaParameters_2048_MissingExponent;
 
-        public static RsaSecurityKey RsaSecurityKey1;
-        public static RsaSecurityKey RsaSecurityKey2;
+        public static RSAParameters RsaParameters1
+        {
+            get => new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw==")
+            };
+        }
+
+        public static RsaSecurityKey RsaSecurityKey1
+        {
+            get => new RsaSecurityKey(RsaParameters1)
+            {
+                KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
+            };
+        }
+
+        public static RSAParameters RsaParameters2
+        {
+            get => new RSAParameters
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
+                Modulus = Base64UrlEncoder.DecodeBytes("kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==")
+            };
+        }
+
+        public static RsaSecurityKey RsaSecurityKey2
+        {
+            get => new RsaSecurityKey(RsaParameters2)
+            {
+                KeyId = "kriMPdmBvx68skT8-mPAB3BseeA"
+            };
+        }
+
         public static RsaSecurityKey RsaSecurityKeyFromPing1;
         public static RsaSecurityKey RsaSecurityKeyFromPing2;
         public static RsaSecurityKey RsaSecurityKeyFromPing3;
@@ -237,28 +268,6 @@ namespace Microsoft.IdentityModel.Tests
 
             byte[] cspbytes_1024 = Base64UrlEncoder.DecodeBytes("BwIAAACkAABSU0EyAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K099x6CCApMROhY261NbN-d5uDE33bypd8tfLCWj2jlSZUNX__O7OUCVqegyI3rAPCpbtB5V7jw7uKD2lR6OeZfN7fPlPPtQEXyaIzYQHo8td6ASYcIFAUjxkBhN8lMUG2FXe-jH3tYYf3FMywf6GA6bo1LfVMW1Sb935YrGAt_fd-8YFoKDUoZgMTjcEiM0Koq80DM8Hy0rb1F4KnzKpXPy2XeGAxIEM-6MMINuh2aY-gZ6oMUomEcw9uSW1hBNk5mtPAdUqHfud8RBYvTH5yx-Cipu6wDLoQl4UTZcop-tVLpJGWJpDYkeLsda2pKJpJcITs3_gRq-QjUIG7-M2OMEvKwBd3tMfIHNkVA-RBk6v_dEHH8cRHvPZC2wna7FQztJqN5ybOSWcpqCX5RvbMkfK38hdGo6oPUkQ3YmtFLFOialpsJo-c_HDOlI32fCnjTLRsR9B-JbSDRLEHg0bVmgVyL1oZaLPYAMyUH6grtel2enOiUODgX9YZbynGtHjvGMn0-3nbz2TRUlchl5b-mQqPbM673WnddAUeaaqNc7gopo5Zofsd6-YV1Z0nL-XzLad2Ax9aAHpVoejevXGz1w");
             byte[] cspbytes_1024_Public = Base64UrlEncoder.DecodeBytes("BgIAAACkAABSU0ExAAQAAAEAAQAlur35vBYFooH0yfB3G919joyz-7xD8LcoQLRIqV7DdEicgTkJWD8sfDvxHRf18w2bA2kx_Bg89855uR3yDvIqtcZ-vq6Gv6yvx7iSjuXW_SNV4gVSjShBuCMelyU-dsHK-IuLcyMcms93fQ3Gh13_AFeyGuT2P0g7LUEEdz8K0w");
-
-            RsaParameters1 = new RSAParameters
-            {
-                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                Modulus = Base64UrlEncoder.DecodeBytes("ns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9w==")
-            };
-
-            RsaParameters2 = new RSAParameters
-            {
-                Exponent = Base64UrlEncoder.DecodeBytes("AQAB"),
-                Modulus = Base64UrlEncoder.DecodeBytes("kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw==")
-            };
-
-            RsaSecurityKey1 = new RsaSecurityKey(RsaParameters1)
-            {
-                KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A"
-            };
-
-            RsaSecurityKey2 = new RsaSecurityKey(RsaParameters2)
-            {
-                KeyId = "kriMPdmBvx68skT8-mPAB3BseeA"
-            };
 
             RsaParametersFromPing1 = new RSAParameters
             {

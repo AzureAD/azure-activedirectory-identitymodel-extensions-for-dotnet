@@ -78,27 +78,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public DateTime AuthenticationInstant
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets the method of authentication.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
         public string AuthenticationMethod
         {
-            get { return _authenticationMethod; }
-            set
-            {
-                // TODO - why are we guessing what the user set??? throw????
-                if (string.IsNullOrEmpty(value))
-                    _authenticationMethod = SamlConstants.UnspecifiedAuthenticationMethod;
-                else
-                    _authenticationMethod = value;
-            }
+            get => _authenticationMethod;
+            set => _authenticationMethod = (string.IsNullOrEmpty(value)) ? throw LogArgumentNullException(nameof(value)) : value;
         }
 
         /// <summary>
-        /// Gets a collection of <see cref="ICollection{SamlAuthorityBinding}"/>.
+        /// Gets the collection of <see cref="ICollection{SamlAuthorityBinding}"/>.
         /// </summary>
         public ICollection<SamlAuthorityBinding> AuthorityBindings
         {
@@ -111,20 +106,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // TODO what is this for?
         public static string ClaimType
         {
-            get {return System.Security.Claims.ClaimTypes.Authentication; }
+            get => System.Security.Claims.ClaimTypes.Authentication;
         }
 
-        // TODO - allow null?
         /// <summary>
-        /// Gets or sets Domain Name Service.
+        /// Gets or sets Domain Name Service address.
         /// </summary>
-        public string DnsAddress { get; set; }
+        public string DnsAddress
+        {
+            get;
+            set;
+        }
 
-        // TODO - allow null?
         /// <summary>
-        /// Gets or sets Internet Protocol.
+        /// Gets or sets Internet Protocol address.
         /// </summary>
-        public string IPAddress { get; set; }
+        public string IPAddress
+        {
+            get;
+            set;
+        }
 
         // TODO - how to service claims
         //protected override void AddClaimsToList(IList<Claim> claims)

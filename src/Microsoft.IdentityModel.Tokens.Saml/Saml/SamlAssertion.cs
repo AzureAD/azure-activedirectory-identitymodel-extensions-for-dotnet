@@ -40,13 +40,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
         private string _issuer;
 
-        /// <summary>
-        /// Creates an instance of <see cref="SamlAssertion"/>.
-        /// </summary>
-        public SamlAssertion()
-        {
-            Statements = new List<SamlStatement>();
-        }
+        ///// <summary>
+        ///// Creates an instance of <see cref="SamlAssertion"/>.
+        ///// </summary>
+        //public SamlAssertion()
+        //{
+        //    Statements = new List<SamlStatement>();
+        //}
 
         /// <summary>
         /// Creates an instance of <see cref="SamlAssertion"/>.

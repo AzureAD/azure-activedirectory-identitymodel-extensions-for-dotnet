@@ -38,7 +38,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void Variations()
         {
-            var context = new CompareContext();
+            var context = new CompareContext { IgnoreType = true };
             RunAudienceVariation(ClaimSets.MultipleAudiences(), Default.Audiences, context);
             RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { Default.Audience }, context);
 
@@ -60,7 +60,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             IdentityComparer.AreEqual(audiences, expectedAudiences as IEnumerable<string>, context);
 
             ClaimsIdentity identity = claimsPrincipal.Identity as ClaimsIdentity;
-            IdentityComparer.AreEqual(identity.FindAll(JwtRegisteredClaimNames.Aud), audienceClaims, context);
+            IdentityComparer.AreEqual(identity.FindAll(JwtRegisteredClaimNames.Aud), audienceClaims.AsReadOnly(), context);
         }
     }
 }

@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the Action element specified in [Saml2Core, 2.7.4.2].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2Action
     {
@@ -43,13 +44,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="value">Value represented by this class.</param>
         /// <param name="namespace">Namespace in which the action is interpreted.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="namespace"/> is null.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="namespace"/> is not an absolute Uri.</exception>
         public Saml2Action(string value, Uri @namespace)
         {
-            if (string.IsNullOrEmpty(value))
-                throw LogArgumentNullException(nameof(value));
-
             // ==
-            // There is a discrepency between the schema and the text of the 
+            // There is a discrepancy between the schema and the text of the
             // specification as to whether the Namespace attribute is optional
             // or required. The schema specifies required.
             // ==
@@ -59,27 +60,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // SAML 2.0 errata at the time of this implementation:
             // http://docs.oasis-open.org/security/saml/v2.0/sstc-saml-approved-errata-2.0-cd-02.pdf
             // ==
-            if (@namespace == null)
-                throw LogArgumentNullException(nameof(@namespace));
 
-            if (!@namespace.IsAbsoluteUri)
-                throw LogExceptionMessage(new ArgumentException(nameof(@namespace), FormatInvariant(LogMessages.IDX11300, @namespace)));
-
-            _namespace = @namespace;
-            _value = value;
+            Namespace = @namespace;
+            Value = value;
         }
 
         /// <summary>
         /// Gets or sets a URI reference representing the namespace in which the name of the
         /// specified action is to be interpreted. [Saml2Core, 2.7.4.2]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
         public Uri Namespace
         {
-            get
-            {
-                return _namespace;
-            }
-
+            get => _namespace;
             set
             {
                 // See note in constructor about why this is required.
@@ -97,20 +91,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets the label for an action sought to be performed on the 
         /// specified resource. [Saml2Core, 2.7.4.2]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
         public string Value
         {
-            get
-            {
-                return _value;
-            }
-
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogArgumentNullException(nameof(value));
-
-                _value = value;
-            }
+            get => _value;
+            set => _value = (string.IsNullOrEmpty(value)) ? throw LogArgumentNullException(nameof(value)) : value;
         }
     }
 }

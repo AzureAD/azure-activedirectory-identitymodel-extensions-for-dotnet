@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the AuthnStatement element specified in [Saml2Core, 2.7.2]. 
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2AuthenticationStatement : Saml2Statement
     {
@@ -54,6 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="authenticationContext">The authentication context of this statement.</param>
         /// <param name="authenticationInstant">The time of the authentication.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="authenticationContext"/> is null.</exception>
         public Saml2AuthenticationStatement(Saml2AuthenticationContext authenticationContext, DateTime authenticationInstant)
         {
             AuthenticationContext = authenticationContext;
@@ -66,6 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2AuthenticationContext AuthenticationContext
         {
+            // TODO review should allow null.
             get { return _authnContext; }
             set { _authnContext = value ?? throw LogArgumentNullException(nameof(value)); }
         }
@@ -73,6 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or sets the time at which the authentication took place. [Saml2Core, 2.7.2]
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public DateTime AuthenticationInstant
         {
             get { return _authnInstant; }

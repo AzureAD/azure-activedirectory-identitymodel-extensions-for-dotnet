@@ -41,6 +41,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
+    // TODO review
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml2 Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
@@ -58,7 +59,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or set the <see cref="Saml2Serializer"/> that will be used to read and write a <see cref="Saml2SecurityToken"/>.
         /// </summary>
-        public Saml2Serializer Serializer { get; set; } = new Saml2Serializer();
+        public Saml2Serializer Serializer
+        {
+            get;
+            set;
+        } = new Saml2Serializer();
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
@@ -158,8 +163,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // Assertion/issuer
             var assertion = new Saml2Assertion(CreateIssuerNameIdentifier(tokenDescriptor))
             {
-                Subject = CreateSamlSubject(tokenDescriptor),
-                SigningCredentials = GetSigningCredentials(tokenDescriptor),
+                Subject = CreateSubject(tokenDescriptor),
+                SigningCredentials = tokenDescriptor.SigningCredentials,
                 Conditions = CreateConditions(tokenDescriptor),
                 Advice = CreateAdvice(tokenDescriptor)
             };
@@ -657,14 +662,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Generates a Saml2Attribute from a claim.
+        /// Creates a Saml2Attribute from a claim.
         /// </summary>
         /// <param name="claim">The <see cref="Claim"/> from which to generate a <see cref="Saml2Attribute"/>.</param>
-        /// <param name="tokenDescriptor">Contains all the information that is used in token issuance.</param>
-        /// <returns>A <see cref="Saml2Attribute"/> based on the claim.</returns>
-        /// <exception cref="ArgumentNullException">The parameter 'claim' is null.</exception>
-        /// <exception cref="Saml2SecurityTokenException">If the 'claim' has a property "ClaimsProperties.SamlAttributeNameFormat" and the value is not a valid absolute URI.</exception>
-        protected virtual Saml2Attribute CreateAttribute(Claim claim, SecurityTokenDescriptor tokenDescriptor)
+        /// <returns>A <see cref="Saml2Attribute"/>created from the <paramref name="claim"/>.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="claim"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenException">if the <paramref name="claim"/> has a property "ClaimsProperties.SamlAttributeNameFormat" and the value is not a valid absolute URI.</exception>
+        protected virtual Saml2Attribute CreateAttribute(Claim claim)
         {
             if (claim == null)
                 throw LogArgumentNullException(nameof(claim));
@@ -674,17 +678,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 attribute.OriginalIssuer = claim.OriginalIssuer;
 
             attribute.AttributeValueXsiType = claim.ValueType;
-            if (claim.Properties.ContainsKey(ClaimProperties.SamlAttributeNameFormat))
+            if (claim.Properties.TryGetValue(ClaimProperties.SamlAttributeNameFormat, out string nameFormat))
             {
-                string nameFormat = claim.Properties[ClaimProperties.SamlAttributeNameFormat];
                 if (!Saml2Serializer.CanCreateValidUri(nameFormat, UriKind.Absolute))
                     throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX11300, ClaimProperties.SamlAttributeNameFormat)));
 
                 attribute.NameFormat = new Uri(nameFormat);
             }
 
-            if (claim.Properties.ContainsKey(ClaimProperties.SamlAttributeDisplayName))
-                attribute.FriendlyName = claim.Properties[ClaimProperties.SamlAttributeDisplayName];
+            if (claim.Properties.TryGetValue(ClaimProperties.SamlAttributeFriendlyName, out string displayName))
+                attribute.FriendlyName = claim.Properties[ClaimProperties.SamlAttributeFriendlyName];
 
             return attribute;
         }
@@ -694,67 +697,63 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <remarks>This method may return null if the token descriptor does not contain any subject or the subject does not have any claims.
         /// </remarks>
-        /// <param name="identity">The <see cref="ClaimsIdentity"/> that contains claims which will be converted to SAML Attributes.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that contains information on building the <see cref="Saml2AttributeStatement"/>.</param>
         /// <returns>A Saml2AttributeStatement.</returns>
-        protected virtual Saml2AttributeStatement CreateAttributeStatement(ClaimsIdentity identity, SecurityTokenDescriptor tokenDescriptor)
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
+        protected virtual Saml2AttributeStatement CreateAttributeStatement(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (identity == null)
-                return null;
+            if (tokenDescriptor == null)
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
-            // We treat everything else as an Attribute except the nameId claim, which is already processed
-            // for saml2subject
-            // AuthenticationInstant and AuthenticationType are not converted to Claims
-            if (identity.Claims != null)
+            var attributes = new List<Saml2Attribute>();
+            foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
-                var attributes = new List<Saml2Attribute>();
-                foreach (Claim claim in identity.Claims)
+                if (claim != null)
                 {
-                    if (claim != null && claim.Type != ClaimTypes.NameIdentifier)
+                    switch (claim.Type)
                     {
-                        switch (claim.Type)
-                        {
-                            case ClaimTypes.AuthenticationInstant:
-                            case ClaimTypes.AuthenticationMethod:
-                                break;
-                            default:
-                                attributes.Add(CreateAttribute(claim, tokenDescriptor));
-                                break;
-                        }
+                        // TODO - where are these claims added?
+                        case ClaimTypes.AuthenticationInstant:
+                        case ClaimTypes.AuthenticationMethod:
+                        case ClaimTypes.NameIdentifier:
+                            break;
+                        default:
+                            attributes.Add(CreateAttribute(claim));
+                            break;
                     }
                 }
-
-                AddDelegateToAttributes(identity, attributes, tokenDescriptor);
-                return new Saml2AttributeStatement(CollectAttributeValues(attributes));
             }
 
-            return null;
+            if (tokenDescriptor.Subject.Actor != null)
+                attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateActorString(tokenDescriptor.Subject.Actor), ClaimValueTypes.String)));
+
+            return new Saml2AttributeStatement(ConsolidateAttributes(attributes));
         }
 
         /// <summary>
-        /// Collects attributes with a common claim type, claim value type, and original issuer into a
-        /// single attribute with multiple values.
+        /// Consolidates attributes into a single attribute with multiple values.
         /// </summary>
-        /// <param name="attributes">List of attributes generated from claims.</param>
-        /// <returns>A <see cref="ICollection{T}"/> of <see cref="Saml2Attribute"/> with common attributes collected into value lists.</returns>
-        protected virtual ICollection<Saml2Attribute> CollectAttributeValues(ICollection<Saml2Attribute> attributes)
+        /// <param name="attributes">A <see cref="ICollection{T}"/> of <see cref="Saml2Attribute"/>.</param>
+        /// <returns>A <see cref="ICollection{T}"/> of <see cref="Saml2Attribute"/> with common attributes consolidated into unique attributes with multiple values.</returns>
+        protected virtual ICollection<Saml2Attribute> ConsolidateAttributes(ICollection<Saml2Attribute> attributes)
         {
-            var distinctAttributes = new Dictionary<Saml2AttributeKeyComparer.AttributeKey, Saml2Attribute>(attributes.Count, new Saml2AttributeKeyComparer());
+            if (attributes == null)
+                throw LogArgumentNullException(nameof(attributes));
 
-            // Use unique attribute if name, value type, or issuer differ
-            foreach (var saml2Attribute in attributes)
+            var distinctAttributes = new Dictionary<Saml2AttributeKeyComparer.AttributeKey, Saml2Attribute>(attributes.Count, new Saml2AttributeKeyComparer());
+            foreach (var attribute in attributes)
             {
-                if (saml2Attribute != null)
+                if (attribute != null)
                 {
-                    var attributeKey = new Saml2AttributeKeyComparer.AttributeKey(saml2Attribute);
+                    var attributeKey = new Saml2AttributeKeyComparer.AttributeKey(attribute);
                     if (distinctAttributes.ContainsKey(attributeKey))
                     {
-                        foreach (string attributeValue in saml2Attribute.Values)
-                            distinctAttributes[attributeKey].Values.Add(attributeValue);
+                        foreach (string value in attribute.Values)
+                            distinctAttributes[attributeKey].Values.Add(value);
                     }
                     else
                     {
-                        distinctAttributes.Add(attributeKey, saml2Attribute);
+                        distinctAttributes.Add(attributeKey, attribute);
                     }
                 }
             }
@@ -763,33 +762,27 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Adds all the delegates associated with the subject into the attribute collection.
+        /// Transforms a ClaimsIdentity into a string.
         /// </summary>
-        /// <param name="identity">The delegate of this <see cref="ClaimsIdentity"/> will be serialized into a <see cref="Saml2Attribute"/>.</param>
-        /// <param name="attributes">A <see cref="ICollection{T}"/> of <see cref="Saml2Attribute"/>.</param>
-        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that contains information on building the delegate.</param>
-        protected virtual void AddDelegateToAttributes(ClaimsIdentity identity, ICollection<Saml2Attribute> attributes, SecurityTokenDescriptor tokenDescriptor)
+        /// <param name="actor">A <see cref="ClaimsIdentity"/> to be transformed.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="actor"/> is null.</exception>
+        /// <returns>A well-formed XML string.</returns>
+        /// <remarks>Normally this is called when creating a <see cref="Saml2Assertion"/> from a <see cref="ClaimsIdentity"/>. When <see cref="ClaimsIdentity.Actor"/> is not null, 
+        /// this method is called to create an string representation to add as an attribute.
+        /// <para>The string is formed: "&lt;Actor&gt;&lt;Attribute name, namespace&gt;&lt;AttributeValue&gt;...&lt;/AttributeValue&gt;, ...&lt;/Attribute&gt;...&lt;/Actor&gt;</para></remarks>
+        protected string CreateActorString(ClaimsIdentity actor)
         {
-            if (identity == null)
-                throw LogArgumentNullException(nameof(identity));
+            if (actor == null)
+                throw LogArgumentNullException(nameof(actor));
 
-            if (tokenDescriptor == null)
-                throw LogArgumentNullException(nameof(tokenDescriptor));
-
-            if (identity.Actor == null)
-                return;
-
-            var actingAsAttributes = new List<Saml2Attribute>();
-            foreach (Claim claim in identity.Actor.Claims)
+            var attributes = new List<Saml2Attribute>();
+            foreach (Claim claim in actor.Claims)
             {
                 if (claim != null)
-                    actingAsAttributes.Add(CreateAttribute(claim, tokenDescriptor));
+                    attributes.Add(CreateAttribute(claim));
             }
 
-            AddDelegateToAttributes(identity.Actor, actingAsAttributes, tokenDescriptor);
-
-            ICollection<Saml2Attribute> collectedAttributes = CollectAttributeValues(actingAsAttributes);
-            attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateXmlStringFromAttributes(collectedAttributes), ClaimValueTypes.String), tokenDescriptor));
+            return CreateXmlStringFromAttributes(ConsolidateAttributes(attributes));
         }
 
         /// <summary>
@@ -797,38 +790,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="attributes">An enumeration of Saml2Attributes.</param>
         /// <returns>A well-formed XML string.</returns>
-        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;Attribute name, ns&gt;&lt;AttributeValue&gt;...&lt;/AttributeValue&gt;, ...&lt;/Attribute&gt;...&lt;/Actor&gt;"</remarks>
-        protected virtual string CreateXmlStringFromAttributes(IEnumerable<Saml2Attribute> attributes)
+        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;Attribute name, namespace&gt;&lt;AttributeValue&gt;...&lt;/AttributeValue&gt;, ...&lt;/Attribute&gt;...&lt;/Actor&gt;"</remarks>
+        private string CreateXmlStringFromAttributes(IEnumerable<Saml2Attribute> attributes)
         {
-            if (attributes == null)
-                throw LogArgumentNullException(nameof(attributes));
-
-            bool actorElementWritten = false;
-            using (var ms = new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
-                using (var dictionaryWriter = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                using (var dictionaryWriter = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
                 {
-                    foreach (var samlAttribute in attributes)
+                    dictionaryWriter.WriteStartElement(Actor);
+                    foreach (var attribute in attributes)
                     {
-                        if (samlAttribute != null)
-                        {
-                            if (!actorElementWritten)
-                            {
-                                dictionaryWriter.WriteStartElement(Actor);
-                                actorElementWritten = true;
-                            }
-
-                            Serializer.WriteAttribute(dictionaryWriter, samlAttribute);
-                        }
+                        if (attribute != null)
+                            Serializer.WriteAttribute(dictionaryWriter, attribute);
                     }
 
-                    if (actorElementWritten)
-                        dictionaryWriter.WriteEndElement();
-
+                    dictionaryWriter.WriteEndElement();
                     dictionaryWriter.Flush();
                 }
 
-                return Encoding.UTF8.GetString(ms.ToArray());
+                return Encoding.UTF8.GetString(memoryStream.ToArray());
             }
         }
 
@@ -843,13 +823,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </remarks>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that contains information on creating the <see cref="Saml2Statement"/>.</param>
         /// <returns>An enumeration of Saml2Statements.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual IEnumerable<Saml2Statement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var statements = new Collection<Saml2Statement>();
-            var attributeStatement = CreateAttributeStatement(tokenDescriptor.Subject, tokenDescriptor);
+            var attributeStatement = CreateAttributeStatement(tokenDescriptor);
             if (attributeStatement != null)
                 statements.Add(attributeStatement);
 
@@ -933,7 +914,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="tokenDescriptor">The security token descriptor to create the subject.</param>
         /// <exception cref="ArgumentNullException">Thrown when 'tokenDescriptor' is null.</exception>
         /// <returns>A <see cref="Saml2Subject"/>.</returns>
-        protected virtual Saml2Subject CreateSamlSubject(SecurityTokenDescriptor tokenDescriptor)
+        protected virtual Saml2Subject CreateSubject(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
@@ -1025,28 +1006,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets the credentials for the signing the assertion.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// SAML2 assertions used as security tokens should be signed.
-        /// </para>
-        /// <para>
-        /// The default implementation uses the 
-        /// tokenDescriptor.Scope.SigningCredentials.
-        /// </para>
-        /// </remarks>
-        /// <param name="tokenDescriptor">The token descriptor.</param>
-        /// <returns>The signing credential.</returns>
-        protected virtual SigningCredentials GetSigningCredentials(SecurityTokenDescriptor tokenDescriptor)
-        {
-            if (tokenDescriptor == null)
-                throw LogArgumentNullException(nameof(tokenDescriptor));
-
-            return tokenDescriptor.SigningCredentials;
-        }
-
-        /// <summary>
         /// Validates the Lifetime and Audience conditions.
         /// </summary>
         /// <param name="samlToken">a <see cref="Saml2SecurityToken"/> that contains the <see cref="Saml2Conditions"/>.</param>
@@ -1089,29 +1048,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
-        // TODO - not sure what this is about
-        ///// <summary>
-        ///// Returns the Saml2 AuthenticationContext matching a normalized value.
-        ///// </summary>
-        ///// <param name="normalizedAuthenticationType">Normalized value.</param>
-        ///// <returns>A string that represents the denormalized authentication type used to obtain the token.</returns>
-        //protected virtual string DenormalizeAuthenticationType(string normalizedAuthenticationType)
-        //{
-        //    return AuthenticationTypeMaps.Denormalize(normalizedAuthenticationType, AuthenticationTypeMaps.Saml2);
-        //}
-
-        // TODO - do we need to normalize ?
-        ///// <summary>
-        ///// Returns the normalized value matching a SAML2 AuthenticationContext class reference.
-        ///// </summary>
-        ///// <param name="saml2AuthenticationContextClassReference">A string representing the <see cref="Saml2Constants.AuthenticationContextClasses"/></param>
-        ///// <returns>Normalized value.</returns>
-        //protected virtual string NormalizeAuthenticationContextClassReference(string saml2AuthenticationContextClassReference)
-        //{
-        //    return AuthenticationTypeMaps.Normalize(saml2AuthenticationContextClassReference, AuthenticationTypeMaps.Saml2);
-        //}
-
-
         /// <summary>
         /// This method gets called when a special type of Saml2Attribute is detected. The Saml2Attribute passed in 
         /// wraps a Saml2Attribute that contains a collection of AttributeValues, each of which will get mapped to a 
@@ -1123,23 +1059,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="InvalidOperationException">Will be thrown if the Saml2Attribute does not contain any 
         /// valid Saml2AttributeValues.
         /// </exception>
-        protected virtual void SetDelegateFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)
+        protected virtual void SetClaimsIdentityActorFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)
         {
             // bail here; nothing to add.
-            if (identity == null || attribute == null || attribute.Values == null || attribute.Values.Count < 1)
+            if (identity == null || attribute == null || attribute.Name != Actor || attribute.Values == null || attribute.Values.Count < 1)
                 return;
 
-            Saml2Attribute actingAsAttribute = null;
+            Saml2Attribute actorAttribute = null;
             var claims = new Collection<Claim>();
-            foreach (string attributeValue in attribute.Values)
+            
+            // search through attribute values to see if the there is an embedded actor.
+            foreach (string value in attribute.Values)
             {
-                if (attributeValue != null)
+                if (value != null)
                 {
-                    using (var dictionaryReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(attributeValue), XmlDictionaryReaderQuotas.Max))
+                    using (var dictionaryReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(value), XmlDictionaryReaderQuotas.Max))
                     {
                         dictionaryReader.MoveToContent();
                         dictionaryReader.ReadStartElement(Actor);
-
                         while (dictionaryReader.IsStartElement(Saml2Constants.Elements.Attribute))
                         {
                             var innerAttribute = Serializer.ReadAttribute(dictionaryReader);
@@ -1147,11 +1084,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             {
                                 if (innerAttribute.Name == ClaimTypes.Actor)
                                 {
-                                    // In this case, we have two delegates acting as an identity: we do not allow this.
-                                    if (actingAsAttribute != null)
+                                    // multiple actors at the same level is not supported
+                                    if (actorAttribute != null)
                                         throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11142));
 
-                                    actingAsAttribute = innerAttribute;
+                                    actorAttribute = innerAttribute;
                                 }
                                 else
                                 {
@@ -1168,7 +1105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                                             claim.Properties[ClaimProperties.SamlAttributeNameFormat] = innerAttribute.NameFormat.OriginalString;
 
                                         if (innerAttribute.FriendlyName != null)
-                                            claim.Properties[ClaimProperties.SamlAttributeDisplayName] = innerAttribute.FriendlyName;
+                                            claim.Properties[ClaimProperties.SamlAttributeFriendlyName] = innerAttribute.FriendlyName;
 
                                         claims.Add(claim);
                                     }
@@ -1183,7 +1120,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // TODO - what should the authenticationType be, call tokenvalidationParameters.CreateClaimsIdentity
             identity.Actor = new ClaimsIdentity(claims);
-            SetDelegateFromAttribute(actingAsAttribute, identity.Actor, issuer);
+            SetClaimsIdentityActorFromAttribute(actorAttribute, identity.Actor, issuer);
         }
 
         /// <summary>
@@ -1266,11 +1203,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 if (StringComparer.Ordinal.Equals(attribute.Name, ClaimTypes.Actor))
                 {
-                    // TODO - should we support nested Actors?
+                    // multiple actors at same level is not supported
                     if (identity.Actor != null)
                         throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
 
-                    SetDelegateFromAttribute(attribute, identity, issuer);
+                    SetClaimsIdentityActorFromAttribute(attribute, identity, issuer);
                 }
                 else
                 {
@@ -1285,7 +1222,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                                 claim.Properties[ClaimProperties.SamlAttributeNameFormat] = attribute.NameFormat.OriginalString;
 
                             if (attribute.FriendlyName != null)
-                                claim.Properties[ClaimProperties.SamlAttributeDisplayName] = attribute.FriendlyName;
+                                claim.Properties[ClaimProperties.SamlAttributeFriendlyName] = attribute.FriendlyName;
 
                             identity.AddClaim(claim);
                         }
@@ -1387,13 +1324,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Writes a Saml2 Token using the XmlWriter.
+        /// Serializes a <see cref="Saml2SecurityToken"/> to a string.
+        /// </summary>
+        /// <param name="token">A <see cref="Saml2SecurityToken"/>.</param>
+        /// <exception cref="ArgumentNullException">if the <paramref name="token"/> is null.</exception>
+        /// <exception cref="ArgumentException">if the token is not a <see cref="Saml2SecurityToken"/>.</exception>
+        public override string WriteToken(SecurityToken token)
+        {
+            if (token == null)
+                throw LogArgumentNullException(nameof(token));
+
+            var samlToken = token as Saml2SecurityToken;
+            if (samlToken == null)
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(Saml2SecurityToken), token.GetType())));
+
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = XmlWriter.Create(memoryStream))
+                {
+                    WriteToken(writer, samlToken);
+                    writer.Flush();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes a <see cref="Saml2SecurityToken"/> using the XmlWriter.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SecurityToken"/>.</param>
         /// <param name="token">The <see cref="SecurityToken"/> to serialize.</param>
-        /// <exception cref="ArgumentNullException">If 'writer' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'token' is null.</exception>
-        /// <exception cref="Saml2SecurityTokenWriteException">If 'token' is not a <see cref="Saml2SecurityToken"/>.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null.</exception>
+        /// <exception cref="Saml2SecurityTokenWriteException">if <paramref name="token"/> is not a <see cref="Saml2SecurityToken"/>.</exception>
+        /// <exception cref="ArgumentNullException">if <see cref="Saml2SecurityToken.Assertion"/> is null.</exception>
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             if (writer == null)
@@ -1405,6 +1369,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             var samlToken = token as Saml2SecurityToken;
             if (samlToken == null)
                 throw Saml2Serializer.LogWriteException(LogMessages.IDX11150, token.GetType());
+
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(nameof(samlToken.Assertion));
 
             Serializer.WriteAssertion(writer, samlToken.Assertion);
         }

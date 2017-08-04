@@ -742,7 +742,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             SecurityToken validatedToken;
             ClaimsPrincipal claimsPrincipal = handler.ValidateToken(encodedJwt, Default.AsymmetricSignTokenValidationParameters, out validatedToken);
-            var context = new CompareContext();
+            var context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(claimsPrincipal.Claims, claims, context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -821,7 +821,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
             expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
 
-            CompareContext context = new CompareContext();
+            CompareContext context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);
             TestUtilities.AssertFailIfErrors(GetType().ToString()+".RoleClaims", context.Diffs);
         }

@@ -38,7 +38,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     public class OpenIdConfigData
     {
         public static OpenIdConnectConfiguration FullyPopulated = new OpenIdConnectConfiguration();
-        public static OpenIdConnectConfiguration FullyPopulatedWithKeys = new OpenIdConnectConfiguration();
+
+        public static OpenIdConnectConfiguration FullyPopulatedWithKeys
+        {
+            get
+            {
+                var config = Default;
+                config.JsonWebKeySet = DataSets.JsonWebKeySet1;
+                config.AdditionalData["microsoft_multi_refresh_token"] = true;
+                config.SigningKeys.Add(KeyingMaterial.RsaSecurityKey1);
+                config.SigningKeys.Add(KeyingMaterial.RsaSecurityKey2);
+                config.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
+                config.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+                return config;
+            }
+        }
+
         public static OpenIdConnectConfiguration PingLabs = new OpenIdConnectConfiguration();
         public static OpenIdConnectConfiguration SingleX509Data = new OpenIdConnectConfiguration();
         public static string AADCommonUrl = "https://login.windows.net/common/.well-known/openid-configuration";
@@ -155,13 +170,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // matches with OpenIdConnectMetadataString
             SetDefaultConfiguration(FullyPopulated);
             FullyPopulated.AdditionalData["microsoft_multi_refresh_token"] = true;
-            SetDefaultConfiguration(FullyPopulatedWithKeys);
-            FullyPopulatedWithKeys.JsonWebKeySet = DataSets.JsonWebKeySet1;
-            FullyPopulatedWithKeys.AdditionalData["microsoft_multi_refresh_token"] = true;
-            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.RsaSecurityKey1);
-            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.RsaSecurityKey2);
-            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
-            FullyPopulatedWithKeys.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
             // Config with X509Data
             SingleX509Data.AdditionalData["microsoft_multi_refresh_token"] = true;
@@ -181,7 +189,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(SingleX509Data.TokenEndpointAuthMethodsSupported, new string[] { "client_secret_post", "private_key_jwt" });
         }
 
-        private static void SetDefaultConfiguration(OpenIdConnectConfiguration config)
+        public static OpenIdConnectConfiguration Default
+        {
+            get => SetDefaultConfiguration(new OpenIdConnectConfiguration());
+        }
+
+        private static OpenIdConnectConfiguration SetDefaultConfiguration(OpenIdConnectConfiguration config)
         {
             AddToCollection(config.AcrValuesSupported, "acr_value1", "acr_value2", "acr_value3");
             config.AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize";
@@ -223,6 +236,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW","ECDH-ES+A192KW");
             AddToCollection(config.UserInfoEndpointEncryptionEncValuesSupported, "A256CBC-HS512", "A128CBC-HS256");
             AddToCollection(config.UserInfoEndpointSigningAlgValuesSupported, "ES384", "ES512");
+
+            return config;
         }
 
         private static void AddToCollection(ICollection<string> collection, params string[] strings)

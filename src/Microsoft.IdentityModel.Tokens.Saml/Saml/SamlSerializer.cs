@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
@@ -34,7 +35,7 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
-    /// Reads and writes Saml Assertions and tokens
+    /// Reads and writes SamlAssertions
     /// </summary>
     public class SamlSerializer
     {
@@ -79,6 +80,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal static Exception LogReadException(string format, Exception inner, params object[] args)
         {
             return LogExceptionMessage(new SamlSecurityTokenReadException(FormatInvariant(format, args), inner));
+        }
+
+        internal static Exception LogWriteException(string format, params object[] args)
+        {
+            return LogExceptionMessage(new SamlSecurityTokenWriteException(FormatInvariant(format, args)));
+        }
+
+        internal static Exception LogWriteException(string format, Exception inner, params object[] args)
+        {
+            return LogExceptionMessage(new SamlSecurityTokenWriteException(FormatInvariant(format, args), inner));
         }
 
         /// <summary>
@@ -155,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 reader.Read();
                 while (reader.IsStartElement())
                 {
-                    if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
+                    if (reader.IsStartElement(SamlConstants.Elements.AssertionIDReference, SamlConstants.Namespace))
                         advice.AssertionIdReferences.Add(reader.ReadElementContentAsString());
                     else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
                         advice.Assertions.Add(ReadAssertion(reader));
@@ -188,7 +199,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             try
             {
                 var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
-                var assertion = new SamlAssertion();
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(envelopeReader, SamlConstants.Types.AssertionType, SamlConstants.Namespace);
@@ -210,41 +220,44 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw LogReadException(LogMessages.IDX11117, minorVersion);
 
                 // @AssertionId - required
-                var attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionId, null);
-                if (string.IsNullOrEmpty(attributeValue))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.AssertionId);
+                var assertionId = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionID, null);
+                if (string.IsNullOrEmpty(assertionId))
+                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.AssertionID);
 
-                if (!IsAssertionIdValid(attributeValue))
-                    throw LogReadException(LogMessages.IDX11121, attributeValue);
+                if (!IsAssertionIdValid(assertionId))
+                    throw LogReadException(LogMessages.IDX11121, assertionId);
 
-                assertion.AssertionId = attributeValue;
+                //assertion.AssertionId = assertionId;
 
                 // @Issuer - required
-                attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.Issuer, null);
-                if (string.IsNullOrEmpty(attributeValue))
+                var issuer = envelopeReader.GetAttribute(SamlConstants.Attributes.Issuer, null);
+                if (string.IsNullOrEmpty(issuer))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.Issuer);
 
-                assertion.Issuer = attributeValue;
+                //assertion.Issuer = issuer;
 
                 // @IssueInstant - required
-                attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.IssueInstant, null);
-                if (string.IsNullOrEmpty(attributeValue))
+                var issueInstantAttribute = envelopeReader.GetAttribute(SamlConstants.Attributes.IssueInstant, null);
+                if (string.IsNullOrEmpty(issueInstantAttribute))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.IssueInstant);
 
-                assertion.IssueInstant = DateTime.ParseExact(
-                        attributeValue, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
+                var issueInstant = DateTime.ParseExact(
+                        issueInstantAttribute, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
                 envelopeReader.MoveToContent();
                 envelopeReader.Read();
 
+                SamlConditions conditions = null;
                 // <Conditions> 0-1
                 if (envelopeReader.IsStartElement(SamlConstants.Elements.Conditions, SamlConstants.Namespace))
-                    assertion.Conditions = ReadConditions(envelopeReader) ?? throw LogReadException(LogMessages.IDX11127);
+                    conditions = ReadConditions(envelopeReader) ?? throw LogReadException(LogMessages.IDX11127);
 
+                SamlAdvice advice = null;
                 // <Advice> 0-1
                 if (envelopeReader.IsStartElement(SamlConstants.Elements.Advice, SamlConstants.Namespace))
-                    assertion.Advice = ReadAdvice(envelopeReader) ?? throw LogReadException(LogMessages.IDX11128);
+                    advice = ReadAdvice(envelopeReader) ?? throw LogReadException(LogMessages.IDX11128);
 
+                List<SamlStatement> statements = new List<SamlStatement>();
                 while (envelopeReader.IsStartElement())
                 {
                     // <ds:Signature> 0-1 read by EnvelopedSignatureReader
@@ -258,19 +271,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         if (statement == null)
                             throw LogReadException(LogMessages.IDX11129);
 
-                        assertion.Statements.Add(statement);
+                        statements.Add(statement);
                     }
                 }
 
-                if (assertion.Statements.Count == 0)
+                if (statements.Count == 0)
                     throw LogReadException(LogMessages.IDX11130, SamlConstants.Elements.Assertion);
 
                 envelopeReader.MoveToContent();
                 envelopeReader.ReadEndElement();
 
-                // attach signedXml for validation of signature
-                assertion.Signature = envelopeReader.Signature;
-                return assertion;
+                return new SamlAssertion(assertionId, issuer, issueInstant, conditions, advice, statements)
+                {
+                    // attach signedXml for validation of signature
+                    Signature = envelopeReader.Signature
+                };
             }
             catch (Exception ex)
             {
@@ -480,8 +495,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 authenticationStatement.Subject = ReadSubject(reader);
                 if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
                 {
-                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityDNSAddress, null);
-                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.SubjectLocalityIPAddress, null);
+                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.DNSAddress, null);
+                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.IPAddress, null);
 
                     bool isEmptyElement = reader.IsEmptyElement;
                     reader.MoveToContent();
@@ -547,7 +562,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
 
                 nameSpace = reader.LookupNamespace(prefix);
-                var authorityKind = new XmlQualifiedName(localName, nameSpace);
+                XmlQualifiedName authorityKind;
+
+                if (string.IsNullOrEmpty(nameSpace))
+                    authorityKind = new XmlQualifiedName(authKind, nameSpace);
+                else
+                    authorityKind = new XmlQualifiedName(localName, nameSpace);
 
                 var binding = reader.GetAttribute(SamlConstants.Attributes.Binding, null);
                 if (string.IsNullOrEmpty(binding))
@@ -599,16 +619,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 statement.Resource = resource;
 
-                var decisionString = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
-                if (string.IsNullOrEmpty(decisionString))
+                var decision = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
+                if (string.IsNullOrEmpty(decision))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
 
-                if (decisionString.Equals(SamlAccessDecision.Deny.ToString(), StringComparison.OrdinalIgnoreCase))
-                    statement.AccessDecision = SamlAccessDecision.Deny;
-                else if (decisionString.Equals(SamlAccessDecision.Permit.ToString(), StringComparison.OrdinalIgnoreCase))
-                    statement.AccessDecision = SamlAccessDecision.Permit;
-                else
-                    statement.AccessDecision = SamlAccessDecision.Indeterminate;
+                statement.Decision = decision;
 
                 reader.ReadStartElement();
                 statement.Subject = ReadSubject(reader);
@@ -776,15 +791,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 reader.Read();
                 while (reader.IsStartElement())
                 {
-                    if (reader.IsStartElement(SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace))
-                        evidence.AssertionIdReferences.Add(reader.ReadElementContentAsString());
+                    if (reader.IsStartElement(SamlConstants.Elements.AssertionIDReference, SamlConstants.Namespace))
+                        evidence.AssertionIDReferences.Add(reader.ReadElementContentAsString());
                     else if (reader.IsStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace))
                         evidence.Assertions.Add(ReadAssertion(reader));
                     else
                         throw LogReadException(LogMessages.IDX11120, SamlConstants.Elements.Evidence, reader.Name);
                 }
 
-                if ((evidence.AssertionIdReferences.Count == 0) && (evidence.Assertions.Count == 0))
+                if (evidence.AssertionIDReferences.Count == 0 && evidence.Assertions.Count == 0)
                     throw LogReadException(LogMessages.IDX11133);
 
                 reader.MoveToContent();
@@ -847,11 +862,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     // @xsi:type
                     XmlUtil.ValidateXsiType(reader, SamlConstants.Types.NameIDType, SamlConstants.Namespace);
 
-                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.Format, null);
                     if (!string.IsNullOrEmpty(nameFormat))
                         subject.NameFormat = nameFormat;
 
-                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameQualifier, null);
                     if (!string.IsNullOrEmpty(nameQualifier))
                         subject.NameQualifier = nameQualifier;
 
@@ -871,18 +886,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     reader.MoveToContent();
                     reader.Read();
 
-                    while (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace))
+                    while (reader.IsStartElement(SamlConstants.Elements.ConfirmationMethod, SamlConstants.Namespace))
                     {
                         string method = reader.ReadElementContentAsString();
                         if (string.IsNullOrEmpty(method))
-                            throw LogReadException(LogMessages.IDX11135, SamlConstants.Elements.SubjectConfirmationMethod);
+                            throw LogReadException(LogMessages.IDX11135, SamlConstants.Elements.ConfirmationMethod);
 
                         subject.ConfirmationMethods.Add(method);
                     }
 
                     // A SubjectConfirmaton clause should specify at least one ConfirmationMethod.
                     if (subject.ConfirmationMethods.Count == 0)
-                        throw LogReadException(LogMessages.IDX11114, SamlConstants.Elements.SubjectConfirmationMethod);
+                        throw LogReadException(LogMessages.IDX11114, SamlConstants.Elements.ConfirmationMethod);
 
                     // An Authentication protocol specified in the confirmation method might need this
                     // data. Just store this content value as string.
@@ -919,487 +934,598 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        //protected virtual void WriteAction(XmlWriter writer, SamlAction action)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (action == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(action));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Action, SamlConstants.Namespace);
-        //    if (!string.IsNullOrEmpty(action.Namespace))
-        //    {
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.ActionNamespaceAttribute, null);
-        //        writer.WriteString(action.Namespace);
-        //        writer.WriteEndAttribute();
-        //    }
-
-        //    writer.WriteString(action.Action);
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAdvice(XmlWriter writer, SamlAdvice advice)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (advice == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(advice));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Advice, SamlConstants.Namespace);
-
-        //    foreach (var reference in advice.AssertionIdReferences)
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace);
-        //        writer.WriteString(reference);
-        //        writer.WriteEndElement();
-        //    }
-
-        //    foreach (var assertion in advice.Assertions)
-        //        WriteAssertion(writer, assertion);
-
-        //    writer.WriteEndElement();
-        //}
-
-        //public virtual void WriteAssertion(XmlWriter writer, SamlAssertion assertion)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (assertion == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(assertion));
-
-        //    if (string.IsNullOrEmpty(assertion.AssertionId))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAssertionIdRequired"));
-
-        //    if (!IsAssertionIdValid(assertion.AssertionId))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAssertionIDIsInvalid"));
-
-        //    if (string.IsNullOrEmpty(assertion.Issuer))
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAssertionIssuerRequired"));
-
-        //    if (assertion.Statements.Count == 0)
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SAMLAssertionRequireOneStatement"));
-
-        //    try
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.MajorVersion, null);
-        //        writer.WriteValue(SamlConstants.MajorVersionValue);
-        //        writer.WriteEndAttribute();
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.MinorVersion, null);
-        //        writer.WriteValue(SamlConstants.MinorVersionValue);
-        //        writer.WriteEndAttribute();
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.AssertionId, null);
-        //        writer.WriteString(assertion.AssertionId);
-        //        writer.WriteEndAttribute();
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.Issuer, null);
-        //        writer.WriteString(assertion.Issuer);
-        //        writer.WriteEndAttribute();
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.IssueInstant, null);
-        //        writer.WriteString(assertion.IssueInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
-        //        writer.WriteEndAttribute();
-
-        //        // Write out conditions
-        //        if (assertion.Conditions != null)
-        //            WriteConditions(writer, assertion.Conditions);
-
-        //        // Write out advice if there is one
-        //        if (assertion.Advice != null)
-        //            WriteAdvice(writer, assertion.Advice);
-
-        //        foreach (var statement in assertion.Statements)
-        //            WriteStatement(writer, statement);
-
-        //        writer.WriteEndElement();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw LogHelper.LogExceptionMessage(new SecurityTokenException($"SAMLTokenNotSerialized, {ex}"));
-        //    }
-        //}
-
-        //public virtual void WriteAttribute(XmlWriter writer, SamlAttribute attribute)
-
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (attribute == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(attribute));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Attribute, SamlConstants.Namespace);
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.AttributeName, null);
-        //    writer.WriteString(attribute.Name);
-        //    writer.WriteEndAttribute();
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.AttributeNamespace, null);
-        //    writer.WriteString(attribute.Namespace);
-        //    writer.WriteEndAttribute();
-
-        //    foreach (var attributeValue in attribute.AttributeValues)
-        //    {
-        //        if (string.IsNullOrEmpty(attributeValue))
-        //            throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("SamlAttributeValueCannotBeNull"));
-
-        //        writer.WriteElementString(SamlConstants.PreferredPrefix, SamlConstants.Elements.AttributeValue, SamlConstants.Namespace, attributeValue);
-        //    }
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAttributeStatement(XmlWriter writer, SamlAttributeStatement statement)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (statement == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(statement));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace);
-
-        //    WriteSubject(writer, statement.Subject);
-        //    foreach (var attribute in statement.Attributes)
-        //        WriteAttribute(writer, attribute);
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAudienceRestrictionCondition(XmlWriter writer, SamlAudienceRestrictionCondition condition)
-        //{
-        //    if (condition == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(condition));
-
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
-
-        //    foreach (var audience in condition.Audiences)
-        //    {
-        //        // TODO - should we throw ?
-        //        if (audience != null)
-        //            writer.WriteElementString(SamlConstants.Elements.Audience, SamlConstants.Namespace, audience.AbsoluteUri);
-        //    }
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAuthenticationStatement(XmlWriter writer, SamlAuthenticationStatement statement)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (statement == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(statement));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace);
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
-        //    writer.WriteString(statement.AuthenticationMethod);
-        //    writer.WriteEndAttribute();
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
-        //    writer.WriteString(statement.AuthenticationInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
-        //    writer.WriteEndAttribute();
-
-        //    WriteSubject(writer, statement.Subject);
-
-        //    if ((!string.IsNullOrEmpty(statement.IPAddress)) || (!string.IsNullOrEmpty(statement.DnsAddress)))
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace);
-
-        //        if (!string.IsNullOrEmpty(statement.IPAddress))
-        //        {
-        //            writer.WriteStartAttribute(SamlConstants.Attributes.SubjectLocalityIPAddress, null);
-        //            writer.WriteString(statement.IPAddress);
-        //            writer.WriteEndAttribute();
-        //        }
-
-        //        if (!string.IsNullOrEmpty(statement.DnsAddress))
-        //        {
-        //            writer.WriteStartAttribute(SamlConstants.Attributes.SubjectLocalityDNSAddress, null);
-        //            writer.WriteString(statement.DnsAddress);
-        //            writer.WriteEndAttribute();
-        //        }
-
-        //        writer.WriteEndElement();
-        //    }
-
-        //    foreach (var binding in statement.AuthorityBindings)
-        //    {
-        //        WriteAuthorityBinding(writer, binding);
-        //    }
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAuthorityBinding(XmlWriter writer, SamlAuthorityBinding authorityBinding)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (authorityBinding == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(authorityBinding));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
-
-        //    string prefix = null;
-        //    if (!string.IsNullOrEmpty(authorityBinding.AuthorityKind.Namespace))
-        //    {
-        //        writer.WriteAttributeString(string.Empty, SamlConstants.NamespaceAttributePrefix, null, authorityBinding.AuthorityKind.Namespace);
-        //        prefix = writer.LookupPrefix(authorityBinding.AuthorityKind.Namespace);
-        //    }
-
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.AuthorityKind, null);
-        //    if (string.IsNullOrEmpty(prefix))
-        //        writer.WriteString(authorityBinding.AuthorityKind.Name);
-        //    else
-        //        writer.WriteString(prefix + ":" + authorityBinding.AuthorityKind.Name);
-        //    writer.WriteEndAttribute();
-
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.Location, null);
-        //    writer.WriteString(authorityBinding.Location);
-        //    writer.WriteEndAttribute();
-
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.Binding, null);
-        //    writer.WriteString(authorityBinding.Binding);
-        //    writer.WriteEndAttribute();
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, SamlAuthorizationDecisionStatement statement)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (statement == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(statement));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace);
-
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.Decision, null);
-        //    writer.WriteString(statement.AccessDecision.ToString());
-        //    writer.WriteEndAttribute();
-
-        //    writer.WriteStartAttribute(SamlConstants.Attributes.Resource, null);
-        //    writer.WriteString(statement.Resource);
-        //    writer.WriteEndAttribute();
-
-        //    WriteSubject(writer, statement.Subject);
-
-        //    foreach (var action in statement.Actions)
-        //        WriteAction(writer, action);
-
-        //    if (statement.Evidence != null)
-        //        WriteEvidence(writer, statement.Evidence);
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteCondition(XmlWriter writer, SamlCondition condition)
-        //{
-        //    var audienceRestrictionCondition = condition as SamlAudienceRestrictionCondition;
-        //    if (audienceRestrictionCondition != null)
-        //        WriteAudienceRestrictionCondition(writer, audienceRestrictionCondition);
-
-        //    var donotCacheCondition = condition as SamlDoNotCacheCondition;
-        //    if (donotCacheCondition != null)
-        //        WriteDoNotCacheCondition(writer, donotCacheCondition);
-        //}
-
-        //protected virtual void WriteConditions(XmlWriter writer, SamlConditions conditions)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (conditions == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(conditions));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Conditions, SamlConstants.Namespace);
-        //    if (conditions.NotBefore != DateTimeUtil.GetMinValue(DateTimeKind.Utc))
-        //    {
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.NotBefore, null);
-        //        writer.WriteString(conditions.NotBefore.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
-        //        writer.WriteEndAttribute();
-        //    }
-
-        //    if (conditions.NotOnOrAfter != DateTimeUtil.GetMaxValue(DateTimeKind.Utc))
-        //    {
-        //        writer.WriteStartAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
-        //        writer.WriteString(conditions.NotOnOrAfter.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
-        //        writer.WriteEndAttribute();
-        //    }
-
-        //    foreach (var condition in conditions.Conditions)
-        //        WriteCondition(writer, condition);
-
-        //    writer.WriteEndElement();
-        //}
-
-        //internal void WriteTo(XmlWriter writer, SamlSerializer samlSerializer)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    XmlDictionaryWriter dictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-
-        //    if (this.signingCredentials != null)
-        //    {
-        //        using (HashAlgorithm hash = CryptoProviderFactory.Default.CreateHashAlgorithm(this.signingCredentials.Algorithm))
-        //        {
-        //            this.hashStream = new HashStream(hash);
-        //            this.dictionaryManager = samlSerializer.DictionaryManager;
-        //            SamlDelegatingWriter delegatingWriter = new SamlDelegatingWriter(dictionaryWriter, this.hashStream, this, samlSerializer.DictionaryManager.ParentDictionary);
-        //            this.WriteXml(delegatingWriter, samlSerializer);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        this.tokenStream.SetElementExclusion(null, null);
-        //        this.tokenStream.WriteTo(dictionaryWriter, samlSerializer.DictionaryManager);
-        //    }
-        //}
-
-        //protected virtual void WriteDoNotCacheCondition(XmlWriter writer, SamlDoNotCacheCondition condition)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace);
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteEvidence(XmlWriter writer, SamlEvidence evidence)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (evidence == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(evidence));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Evidence, SamlConstants.Namespace);
-
-        //    foreach (var assertionId in evidence.AssertionIdReferences)
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AssertionIdReference, SamlConstants.Namespace);
-        //        writer.WriteString(assertionId);
-        //        writer.WriteEndElement();
-        //    }
-
-        //    foreach (var assertion in evidence.Assertions)
-        //        WriteAssertion(writer, assertion);
-
-        //    writer.WriteEndElement();
-        //}
-
-        //protected virtual void WriteStatement(XmlWriter writer, SamlStatement statement)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (statement == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(statement));
-
-        //    var attributeStatement = statement as SamlAttributeStatement;
-        //    if (attributeStatement != null)
-        //    {
-        //        WriteAttributeStatement(writer, attributeStatement);
-        //        return;
-        //    }
-
-        //    var authenticationStatement = statement as SamlAuthenticationStatement;
-        //    if (authenticationStatement != null)
-        //    {
-        //        WriteAuthenticationStatement(writer, authenticationStatement);
-        //        return;
-        //    }
-
-        //    var authorizationStatement = statement as SamlAuthorizationDecisionStatement;
-        //    if (authorizationStatement != null)
-        //    {
-        //        WriteAuthorizationDecisionStatement(writer, authorizationStatement);
-        //        return;
-        //    }
-
-        //    throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException($"unknown statement type: {statement.GetType()}."));
-        //}
-
-        //protected virtual void WriteSubject(XmlWriter writer, SamlSubject subject)
-        //{
-
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (subject == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(subject));
-
-        //    if (string.IsNullOrEmpty(subject.Name) && subject.ConfirmationMethods.Count == 0)
-        //        throw LogHelper.LogExceptionMessage(new SamlSecurityTokenException("both name and confirmation methods can not be null"));
-
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Subject, SamlConstants.Namespace);
-
-        //    if (!string.IsNullOrEmpty(subject.Name))
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace);
-        //        if (!string.IsNullOrEmpty(subject.NameFormat))
-        //        {
-        //            writer.WriteStartAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
-        //            writer.WriteString(subject.NameFormat);
-        //            writer.WriteEndAttribute();
-        //        }
-
-        //        if (!string.IsNullOrEmpty(subject.NameQualifier))
-        //        {
-        //            writer.WriteStartAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
-        //            writer.WriteString(subject.NameQualifier);
-        //            writer.WriteEndAttribute();
-        //        }
-
-        //        writer.WriteString(subject.Name);
-        //        writer.WriteEndElement();
-        //    }
-
-        //    if (subject.ConfirmationMethods.Count > 0)
-        //    {
-        //        writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace);
-        //        foreach (string method in subject.ConfirmationMethods)
-        //            writer.WriteElementString(SamlConstants.Elements.SubjectConfirmationMethod, SamlConstants.Namespace, method);
-
-        //        if (!string.IsNullOrEmpty(subject.ConfirmationData))
-        //            writer.WriteElementString(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace, subject.ConfirmationData);
-
-        //        if (subject.KeyIdentifier != null)
-        //        {
-        //            XmlDictionaryWriter dictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer);
-        //            // TODO - write keyinfo
-        //            //SamlSerializer.WriteSecurityKeyIdentifier(dictionaryWriter, this.securityKeyIdentifier, keyInfoSerializer);
-        //        }
-        //        writer.WriteEndElement();
-        //    }
-
-        //    writer.WriteEndElement();
-        //}
-
-        //public virtual void WriteToken(XmlDictionaryWriter writer, SamlSecurityToken token)
-        //{
-        //    if (writer == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(writer));
-
-        //    if (token == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(token));
-
-        //    WriteAssertion(writer, token.Assertion);
-        //}
-
-        //// Helper metods to read and write SecurityKeyIdentifiers.
-        //internal static SecurityKey ReadSecurityKey(XmlDictionaryReader reader)
-        //{
-        //    throw LogHelper.LogExceptionMessage(new InvalidOperationException("SamlSerializerUnableToReadSecurityKeyIdentifier"));
-        //}
-
-        //internal static void WriteStartElementWithPreferredcPrefix(XmlWriter writer, string name, string ns)
-        //{
-        //    writer.WriteStartElement(SamlConstants.PreferredPrefix, name, ns);            
-        //}
+        /// <summary>
+        /// Writes the &lt;saml:Action> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAction"/>.</param>
+        /// <param name="action">The <see cref="SamlAction"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="action"/> is null.</exception>
+        protected virtual void WriteAction(XmlWriter writer, SamlAction action)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (action == null)
+                throw LogArgumentNullException(nameof(action));
+
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.Action, SamlConstants.Namespace);
+            if (!string.IsNullOrEmpty(action.Namespace.OriginalString))
+            {
+                writer.WriteStartAttribute(SamlConstants.Attributes.ActionNamespaceAttribute, null);
+                writer.WriteString(action.Namespace.OriginalString);
+                writer.WriteEndAttribute();
+            }
+
+            writer.WriteString(action.Value);
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Advice> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAdvice"/>.</param>
+        /// <param name="advice">The <see cref="SamlAdvice"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="advice"/> is null.</exception>
+        protected virtual void WriteAdvice(XmlWriter writer, SamlAdvice advice)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (advice == null)
+                throw LogArgumentNullException(nameof(advice));
+
+            // <Advice>
+            writer.WriteStartElement(SamlConstants.Elements.Advice, SamlConstants.Namespace);
+
+            // <AssertionIdReferences> 0-OO
+            foreach (var reference in advice.AssertionIdReferences)
+                writer.WriteElementString(SamlConstants.Elements.AssertionIDReference, SamlConstants.Namespace, reference);
+
+            // <Assertion> 0-OO
+            foreach (var assertion in advice.Assertions)
+                WriteAssertion(writer, assertion);
+
+            // </Advice>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;Assertion> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAssertion"/>.</param>
+        /// <param name="assertion">The <see cref="SamlAssertion"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="assertion"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAssertion.AssertionId"/> is null or empty.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAssertion.AssertionId"/> is not well formed. See <see cref="SamlSerializer.IsAssertionIdValid(string)"/>.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAssertion.Issuer"/> is null or empty.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAssertion.Statements"/>.Count == 0.</exception>
+        public virtual void WriteAssertion(XmlWriter writer, SamlAssertion assertion)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (assertion == null)
+                throw LogArgumentNullException(nameof(assertion));
+
+            if (string.IsNullOrEmpty(assertion.AssertionId))
+                throw LogWriteException(LogMessages.IDX11501);
+
+            if (!IsAssertionIdValid(assertion.AssertionId))
+                throw LogWriteException(LogMessages.IDX11503, assertion.AssertionId);
+
+            if (string.IsNullOrEmpty(assertion.Issuer))
+                throw LogWriteException(LogMessages.IDX11504);
+
+            if (assertion.Statements.Count == 0)
+                throw LogWriteException(LogMessages.IDX11505);
+
+            // Wrap the writer if necessary for a signature
+            // We do not dispose this writer, since as a delegating writer it would
+            // dispose the inner writer, which we don't properly own.
+            EnvelopedSignatureWriter signatureWriter = null;
+            if (assertion.SigningCredentials != null)
+                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.AssertionId);
+
+            try
+            {
+                // <Assertion>
+                writer.WriteStartElement(SamlConstants.Elements.Assertion, SamlConstants.Namespace);
+
+                // @AssertionID
+                writer.WriteAttributeString(SamlConstants.Attributes.AssertionID, assertion.AssertionId);
+
+                // @MajorVersion
+                writer.WriteAttributeString(SamlConstants.Attributes.MajorVersion, SamlConstants.MajorVersionValue);
+
+                // @MinorVersion
+                writer.WriteAttributeString(SamlConstants.Attributes.MinorVersion, SamlConstants.MinorVersionValue);
+
+                // @Issuer
+                writer.WriteAttributeString(SamlConstants.Attributes.Issuer, assertion.Issuer);
+
+                // @IssuerInstance
+                writer.WriteAttributeString(SamlConstants.Attributes.IssueInstant, assertion.IssueInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
+
+                // Write out conditions
+                if (assertion.Conditions != null)
+                    WriteConditions(writer, assertion.Conditions);
+
+                // Write out advice if there is one
+                if (assertion.Advice != null)
+                    WriteAdvice(writer, assertion.Advice);
+
+                foreach (var statement in assertion.Statements)
+                    WriteStatement(writer, statement);
+
+                // </Assertion>
+                writer.WriteEndElement();
+            }
+            catch (Exception ex)
+            {
+                if (ex is SamlSecurityTokenWriteException)
+                    throw;
+
+                throw LogWriteException(LogMessages.IDX11517, ex, SamlConstants.Elements.Assertion, ex);
+            }
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Attribute> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAttribute"/>.</param>
+        /// <param name="attribute">The <see cref="SamlAttribute"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="attribute"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if any attibute values are null or emtpy.</exception>
+        public virtual void WriteAttribute(XmlWriter writer, SamlAttribute attribute)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (attribute == null)
+                throw LogArgumentNullException(nameof(attribute));
+
+            // <Attribute>
+            writer.WriteStartElement(SamlConstants.Elements.Attribute, SamlConstants.Namespace);
+
+            // @AttributeName
+            writer.WriteAttributeString(SamlConstants.Attributes.AttributeName, attribute.Name);
+            writer.WriteAttributeString(SamlConstants.Attributes.AttributeNamespace, attribute.Namespace);
+
+            // @OriginalIssuer - optional
+            if (attribute.OriginalIssuer != null)
+                writer.WriteAttributeString(SamlConstants.Attributes.OriginalIssuer, attribute.OriginalIssuer);
+
+            foreach (var value in attribute.Values)
+            {
+                // TODO - review SAML2 for handling of null values.
+                if (string.IsNullOrEmpty(value))
+                    throw LogWriteException(LogMessages.IDX11506);
+
+                writer.WriteElementString(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace, value);
+            }
+
+            // </Attribute>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:AttributeStatement> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAttributeStatement"/>.</param>
+        /// <param name="statement">The <see cref="SamlAttributeStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAttributeStatement.Attributes"/>.Count == 0.</exception>
+        protected virtual void WriteAttributeStatement(XmlWriter writer, SamlAttributeStatement statement)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            // <AttributeStatement>
+            writer.WriteStartElement(SamlConstants.Elements.AttributeStatement, SamlConstants.Namespace);
+
+            // <Subject>
+            WriteSubject(writer, statement.Subject);
+
+            // <Attribute> 1-OO
+            foreach (var attribute in statement.Attributes)
+                WriteAttribute(writer, attribute);
+
+            // </AttributeStatement>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:AudienceRestriction> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAudienceRestrictionCondition"/>.</param>
+        /// <param name="audienceRestriction">The <see cref="SamlAudienceRestrictionCondition"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="audienceRestriction"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAudienceRestrictionCondition.Audiences"/> is empty.</exception>
+        protected virtual void WriteAudienceRestrictionCondition(XmlWriter writer, SamlAudienceRestrictionCondition audienceRestriction)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (audienceRestriction == null)
+                throw LogArgumentNullException(nameof(audienceRestriction));
+            
+            // <AudienceRestrictionCondition>
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
+
+            // <Audience> - 1-OO
+            foreach (var audience in audienceRestriction.Audiences)
+            {
+                if (audience != null)
+                    writer.WriteElementString(SamlConstants.Elements.Audience, SamlConstants.Namespace, audience);
+            }
+
+            // </AudienceRestrictionCondition>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;AuthenticationStatement> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAuthenticationStatement"/>.</param>
+        /// <param name="statement">The <see cref="SamlAuthenticationStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        protected virtual void WriteAuthenticationStatement(XmlWriter writer, SamlAuthenticationStatement statement)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            if (string.IsNullOrEmpty(statement.AuthenticationMethod))
+                throw LogWriteException(LogMessages.IDX11800, SamlConstants.Elements.AuthenticationStatement, statement.GetType(), SamlConstants.Attributes.AuthenticationMethod);
+
+            // <AuthnStatement>
+            writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Namespace);
+
+            // @AuthenticationMethod - required
+            writer.WriteAttributeString(SamlConstants.Attributes.AuthenticationMethod, statement.AuthenticationMethod);
+
+            // @AuthnInstant - required
+            writer.WriteAttributeString(SamlConstants.Attributes.AuthenticationInstant, statement.AuthenticationInstant.ToString(SamlConstants.GeneratedDateTimeFormat, CultureInfo.InvariantCulture));
+
+            // <Subject> - required
+            WriteSubject(writer, statement.Subject);
+
+            if ((!string.IsNullOrEmpty(statement.IPAddress)) || (!string.IsNullOrEmpty(statement.DnsAddress)))
+            {
+                // <SubjectLocality>
+                writer.WriteStartElement(SamlConstants.PreferredPrefix, SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace);
+
+                // @IPAddress - optional
+                if (!string.IsNullOrEmpty(statement.IPAddress))
+                    writer.WriteAttributeString(SamlConstants.Attributes.IPAddress, statement.IPAddress);
+
+                // @DNSAddress - optional
+                if (!string.IsNullOrEmpty(statement.DnsAddress))
+                    writer.WriteAttributeString(SamlConstants.Attributes.DNSAddress, statement.DnsAddress);
+
+                // </SubjectLocality>
+                writer.WriteEndElement();
+            }
+
+            foreach (var binding in statement.AuthorityBindings)
+                WriteAuthorityBinding(writer, binding);
+
+            // <AuthnStatement>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;AuthorityBinding> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAuthenticationStatement"/>.</param>
+        /// <param name="authorityBinding">The <see cref="SamlAuthorityBinding"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="authorityBinding"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorityBinding.AuthorityKind"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorityBinding.Binding"/> is null or empty.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorityBinding.Location"/> is null or empty.</exception>
+        protected virtual void WriteAuthorityBinding(XmlWriter writer, SamlAuthorityBinding authorityBinding)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (authorityBinding == null)
+                throw LogArgumentNullException(nameof(authorityBinding));
+
+            if (authorityBinding.AuthorityKind == null)
+                throw LogWriteException(LogMessages.IDX11800, SamlConstants.Elements.AuthorityBinding, authorityBinding.GetType(), "AuthorityKind");
+
+            if (string.IsNullOrEmpty(authorityBinding.Binding))
+                throw LogWriteException(LogMessages.IDX11800, SamlConstants.Elements.AuthorityBinding, authorityBinding.GetType(), "Binding");
+
+            if (string.IsNullOrEmpty(authorityBinding.Location))
+                throw LogWriteException(LogMessages.IDX11800, SamlConstants.Elements.AuthorityBinding, authorityBinding.GetType(), "Location");
+
+            // <AuthorityBinding>
+            writer.WriteStartElement(SamlConstants.Elements.AuthorityBinding, SamlConstants.Namespace);
+
+            // @AuthorityKind
+            string prefix = null;
+            if (!string.IsNullOrEmpty(authorityBinding.AuthorityKind.Namespace))
+            {
+                writer.WriteAttributeString(string.Empty, SamlConstants.NamespaceAttributePrefix, null, authorityBinding.AuthorityKind.Namespace);
+                prefix = writer.LookupPrefix(authorityBinding.AuthorityKind.Namespace);
+            }
+
+            writer.WriteStartAttribute(SamlConstants.Attributes.AuthorityKind, null);
+            if (string.IsNullOrEmpty(prefix))
+                writer.WriteString(authorityBinding.AuthorityKind.Name);
+            else
+                writer.WriteString(prefix + ":" + authorityBinding.AuthorityKind.Name);
+            writer.WriteEndAttribute();
+
+            // @Location
+            writer.WriteAttributeString(SamlConstants.Attributes.Location, authorityBinding.Location);
+
+            // Binding
+            writer.WriteAttributeString(SamlConstants.Attributes.Binding, authorityBinding.Binding);
+
+            // </AuthorityBinding>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:AuthzDecisionStatement> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlAuthorizationDecisionStatement"/>.</param>
+        /// <param name="statement">The <see cref="SamlAuthorizationDecisionStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorizationDecisionStatement.Actions"/> is empty.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorizationDecisionStatement.Decision"/> is null or empty.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlAuthorizationDecisionStatement.Resource"/> is null.</exception>
+        protected virtual void WriteAuthorizationDecisionStatement(XmlWriter writer, SamlAuthorizationDecisionStatement statement)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            if (statement.Actions.Count == 0)
+                throw LogWriteException(LogMessages.IDX11901, statement.GetType(), "Actions");
+
+            if (string.IsNullOrEmpty(statement.Decision))
+                throw LogWriteException(LogMessages.IDX11900, SamlConstants.Attributes.Decision, statement.GetType(), nameof(statement.Decision));
+
+            if (string.IsNullOrEmpty(statement.Resource))
+                throw LogWriteException(LogMessages.IDX11900, SamlConstants.Attributes.Resource, statement.GetType(), nameof(statement.Resource));
+
+            // <AuthorizationDecisionStatement>
+            writer.WriteStartElement(SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Namespace);
+
+            // @Decision - required
+            writer.WriteAttributeString(SamlConstants.Attributes.Decision, statement.Decision);
+
+            // @Resource - required
+            writer.WriteAttributeString(SamlConstants.Attributes.Resource, statement.Resource);
+
+            // <Subject>
+            WriteSubject(writer, statement.Subject);
+
+            foreach (var action in statement.Actions)
+                WriteAction(writer, action);
+
+            //<Evidence> - optional
+            if (statement.Evidence != null)
+                WriteEvidence(writer, statement.Evidence);
+
+            // </AuthorizationDecisionStatement>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Condition> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlCondition"/>.</param>
+        /// <param name="condition">The <see cref="SamlCondition"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="condition"/> is null.</exception>
+        /// <remarks>Writes a <see cref="SamlAudienceRestrictionCondition"/> or a <see cref="SamlDoNotCacheCondition"/> all others are skipped.</remarks>
+        protected virtual void WriteCondition(XmlWriter writer, SamlCondition condition)
+        {
+            if (condition is SamlAudienceRestrictionCondition audienceRestrictionCondition)
+                WriteAudienceRestrictionCondition(writer, audienceRestrictionCondition);
+
+            if (condition is SamlDoNotCacheCondition donotCacheCondition)
+                WriteDoNotCacheCondition(writer, donotCacheCondition);
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Conditions> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlConditions"/>.</param>
+        /// <param name="conditions">The <see cref="SamlConditions"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="conditions"/> is null.</exception>
+        protected virtual void WriteConditions(XmlWriter writer, SamlConditions conditions)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (conditions == null)
+                throw LogArgumentNullException(nameof(conditions));
+
+            // <Conditions>
+            writer.WriteStartElement(SamlConstants.Elements.Conditions, SamlConstants.Namespace);
+
+            // @NotBefore
+            if (conditions.NotBefore != DateTimeUtil.GetMinValue(DateTimeKind.Utc))
+                writer.WriteAttributeString(SamlConstants.Attributes.NotBefore, conditions.NotBefore.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+
+            // @NotOnOrAfter
+            if (conditions.NotOnOrAfter != DateTimeUtil.GetMaxValue(DateTimeKind.Utc))
+                writer.WriteAttributeString(SamlConstants.Attributes.NotOnOrAfter, conditions.NotOnOrAfter.ToString(SamlConstants.GeneratedDateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+
+            // <Condition>
+            foreach (var condition in conditions.Conditions)
+                WriteCondition(writer, condition);
+
+            // <Conditions>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:DoNotCacheCondition> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlDoNotCacheCondition"/>.</param>
+        /// <param name="condition">The <see cref="SamlDoNotCacheCondition"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="condition"/> is null.</exception>
+        protected virtual void WriteDoNotCacheCondition(XmlWriter writer, SamlDoNotCacheCondition condition)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (condition == null)
+                throw LogArgumentNullException(nameof(condition));
+
+            // <DoNotCacheCondition>
+            writer.WriteStartElement(SamlConstants.Elements.DoNotCacheCondition, SamlConstants.Namespace);
+
+            // </DoNotCacheCondition>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Evidence> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlEvidence"/>.</param>
+        /// <param name="evidence">The <see cref="SamlEvidence"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="evidence"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlEvidence"/> does not contain any assertions or assertions references.</exception>
+        protected virtual void WriteEvidence(XmlWriter writer, SamlEvidence evidence)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (evidence == null)
+                throw LogArgumentNullException(nameof(evidence));
+
+            if (evidence.AssertionIDReferences.Count == 0 && evidence.Assertions.Count == 0)
+                throw LogWriteException(LogMessages.IDX11902);
+
+            // <Evidence>
+            writer.WriteStartElement(SamlConstants.Elements.Evidence, SamlConstants.Namespace);
+
+            // <AssertionIDReference> 0-OO
+            foreach (var assertionId in evidence.AssertionIDReferences)
+                writer.WriteElementString(SamlConstants.Elements.AssertionIDReference, SamlConstants.Namespace, assertionId);
+
+            // <Assertion> 0-OO
+            foreach (var assertion in evidence.Assertions)
+                WriteAssertion(writer, assertion);
+
+            // </Evidence>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes one of the suppported Statements.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlStatement"/>.</param>
+        /// <param name="statement">The <see cref="SamlStatement"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="statement"/> is null.</exception>
+        protected virtual void WriteStatement(XmlWriter writer, SamlStatement statement)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
+            if (statement is SamlAttributeStatement attributeStatement)
+                WriteAttributeStatement(writer, attributeStatement);
+            else if (statement is SamlAuthenticationStatement authenticationStatement)
+                WriteAuthenticationStatement(writer, authenticationStatement);
+            else if (statement is SamlAuthorizationDecisionStatement authorizationStatement)
+                WriteAuthorizationDecisionStatement(writer, authorizationStatement);
+            else
+                throw LogWriteException(LogMessages.IDX11516, statement.GetType());
+        }
+
+        /// <summary>
+        /// Writes the &lt;saml:Subject> element.
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="SamlSubject"/>.</param>
+        /// <param name="subject">The <see cref="SamlSubject"/> to serialize.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="subject"/> is null.</exception>
+        /// <exception cref="SamlSecurityTokenWriteException">if <see cref="SamlEvidence"/> does not contain any assertions or assertions references.</exception>
+        protected virtual void WriteSubject(XmlWriter writer, SamlSubject subject)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (subject == null)
+                throw LogArgumentNullException(nameof(subject));
+
+            if (string.IsNullOrEmpty(subject.Name) && subject.ConfirmationMethods.Count == 0)
+                throw LogWriteException(LogMessages.IDX11518);
+
+            // <Subject>
+            writer.WriteStartElement(SamlConstants.Elements.Subject, SamlConstants.Namespace);
+
+            if (!string.IsNullOrEmpty(subject.Name))
+            {
+                // <NameIdentifier>
+                writer.WriteStartElement(SamlConstants.Elements.NameIdentifier, SamlConstants.Namespace);
+
+                // @Format
+                if (!string.IsNullOrEmpty(subject.NameFormat))
+                    writer.WriteAttributeString(SamlConstants.Attributes.Format, subject.NameFormat);
+
+                // @NameQualifier
+                if (!string.IsNullOrEmpty(subject.NameQualifier))
+                    writer.WriteAttributeString(SamlConstants.Attributes.NameQualifier, null);
+
+                // name
+                writer.WriteString(subject.Name);
+
+                // </NameIdentifier>
+                writer.WriteEndElement();
+            }
+
+            if (subject.ConfirmationMethods.Count > 0)
+            {
+                // <SubjectConfirmation>
+                writer.WriteStartElement(SamlConstants.Elements.SubjectConfirmation, SamlConstants.Namespace);
+
+                // <ConfirmationMethod> 1-OO
+                foreach (string method in subject.ConfirmationMethods)
+                    writer.WriteElementString(SamlConstants.Elements.ConfirmationMethod, SamlConstants.Namespace, method);
+
+                if (!string.IsNullOrEmpty(subject.ConfirmationData))
+                    writer.WriteElementString(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace, subject.ConfirmationData);
+
+                // TODO - proof key
+                // if (subject.Key != null)
+
+                // </SubjectConfirmation>
+                writer.WriteEndElement();
+            }
+
+            // <Subject>
+            writer.WriteEndElement();
+        }
     }
 }

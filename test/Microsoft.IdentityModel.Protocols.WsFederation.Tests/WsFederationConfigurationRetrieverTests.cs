@@ -38,7 +38,7 @@ using Xunit;
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
     /// <summary>
-    /// Ws-Fed metadata reading tests.
+    /// WsFed metadata reading tests.
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
@@ -48,8 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
-            var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
+            var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
             try
             {
                 var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
@@ -59,8 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     configuration.Signature.Verify(theoryData.SigingKey);
 
                 theoryData.ExpectedException.ProcessNoException(context);
-
-                IdentityComparer.AreWsFederationConfigurationsEqual(theoryData.Configuration, configuration, context);
+                IdentityComparer.AreWsFederationConfigurationsEqual(configuration, theoryData.Configuration, context);
             }
             catch (Exception ex)
             {

@@ -27,18 +27,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
-using System.Collections.ObjectModel;
-using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -47,27 +49,74 @@ namespace Microsoft.IdentityModel.Tests
         private static readonly Dictionary<string, Func<object, object, CompareContext, bool>> _equalityDict =
             new Dictionary<string, Func<object, object, CompareContext, bool>>
             {
-                { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
-                { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
-                { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
-                { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
-                { typeof(Newtonsoft.Json.Linq.JArray).ToString(), AreJArraysEqual },
-                { typeof(string).ToString(), AreStringsEqual },
-                { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
+                { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
                 { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
+                { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
+                { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
                 { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
-                { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
+                { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
+                { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
+                { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
                 { typeof(List<JsonWebKey>).ToString(), AreJsonWebKeyEnumsEqual },
-                { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
+                { typeof(List<KeyInfo>).ToString(), AreKeyInfoEnumsEqual },
                 { typeof(List<SamlAssertion>).ToString(), AreSamlAssertionEnumsEqual},
+                { typeof(List<SamlAttribute>).ToString(), AreSamlAttributeEnumsEqual },
                 { typeof(List<SamlAuthorityBinding>).ToString(), AreSamlAuthorityBindingEnumsEqual },
                 { typeof(List<SamlAction>).ToString(), AreSamlActionEnumsEqual },
                 { typeof(List<SamlStatement>).ToString(), AreSamlStatementEnumsEqual },
                 { typeof(List<SamlCondition>).ToString(), AreSamlConditionEnumsEqual },
-                { typeof(List<SamlAttribute>).ToString(), AreSamlAttributeEnumsEqual },
+                { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(List<Reference>).ToString(), AreReferenceEnumsEqual },
+                { typeof(AuthenticationProtocolMessage).ToString(), CompareAllPublicProperties },
+                { typeof(Claim).ToString(), CompareAllPublicProperties },
+                { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
+                { typeof(JArray).ToString(), AreJArraysEqual },
+                { typeof(JsonWebKey).ToString(), CompareAllPublicProperties },
+                { typeof(JsonWebKeySet).ToString(), CompareAllPublicProperties },
+                { typeof(JwtHeader).ToString(), CompareAllPublicProperties },
+                { typeof(JwtPayload).ToString(), CompareAllPublicProperties },
+                { typeof(JwtSecurityToken).ToString(), CompareAllPublicProperties },
+                { typeof(JwtSecurityTokenHandler).ToString(), CompareAllPublicProperties },
+                { typeof(KeyInfo).ToString(), CompareAllPublicProperties },
+                { typeof(OpenIdConnectConfiguration).ToString(), CompareAllPublicProperties },
+                { typeof(OpenIdConnectMessage).ToString(), CompareAllPublicProperties },
+                { typeof(Reference).ToString(), CompareAllPublicProperties },
+                { typeof(RsaSecurityKey).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAction).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAssertion).ToString(), CompareAllPublicProperties},
+                { typeof(SamlAttribute).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAuthorityBinding).ToString(), CompareAllPublicProperties },
+                { typeof(SamlCondition).ToString(), CompareAllPublicProperties },
+                { typeof(SamlStatement).ToString(), CompareAllPublicProperties },
+                { typeof(SecurityKey).ToString(), CompareAllPublicProperties },
+                { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenHandler).ToString(), CompareAllPublicProperties},
+                { typeof(Signature).ToString(), CompareAllPublicProperties },
+                { typeof(SignedInfo).ToString(), CompareAllPublicProperties },
+                { typeof(SigningCredentials).ToString(), CompareAllPublicProperties },
+                { typeof(string).ToString(), AreStringsEqual },
+                { typeof(SymmetricSecurityKey).ToString(), CompareAllPublicProperties },
+                { typeof(TokenValidationParameters).ToString(), CompareAllPublicProperties },
+                { typeof(WsFederationConfiguration).ToString(), CompareAllPublicProperties },
+                { typeof(WsFederationMessage).ToString(), CompareAllPublicProperties },
             };
+
+        public static bool AreJsonWebKeyEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<JsonWebKey>(object1 as IEnumerable<JsonWebKey>, object2 as IEnumerable<JsonWebKey>, context, AreEqual);
+        }
+
+        public static bool AreKeyInfoEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<KeyInfo>(object1 as IEnumerable<KeyInfo>, object2 as IEnumerable<KeyInfo>, context, AreEqual);
+        }
+
+        public static bool AreObjectEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<object>(object1 as IEnumerable<object>, object2 as IEnumerable<object>, context, AreObjectsEqual);
+        }
 
         public static bool AreReferenceEnumsEqual(object object1, object object2, CompareContext context)
         {
@@ -114,16 +163,6 @@ namespace Microsoft.IdentityModel.Tests
             return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
         }
 
-        public static bool AreJsonWebKeyEnumsEqual(object object1, object object2, CompareContext context)
-        {
-            return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<JsonWebKey>, object2 as IEnumerable<JsonWebKey>, context, AreEqual);
-        }
-
-        public static bool AreObjectEnumsEqual(object object1, object object2, CompareContext context)
-        {
-            return AreEnumsEqual<object>(object1 as IEnumerable<object>, object2 as IEnumerable<object>, context, AreObjectsEqual);
-        }
-
         public static bool AreEnumsEqual<T>(IEnumerable<T> t1, IEnumerable<T> t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
         {
             List<T> toMatch = new List<T>(t1);
@@ -143,7 +182,7 @@ namespace Microsoft.IdentityModel.Tests
             List<T> notMatched = new List<T>();
             foreach (var t in t1)
             {
-                CompareContext perItemContext = new CompareContext(localContext);
+                var perItemContext = new CompareContext(localContext);
                 bool matched = false;
                 for (int i = 0; i < expectedValues.Count; i++)
                 {
@@ -153,8 +192,11 @@ namespace Microsoft.IdentityModel.Tests
                         matchedTs.Add(new KeyValuePair<T, T>(expectedValues[i], t));
                         matched = true;
                         expectedValues.RemoveAt(i);
+                        perItemContext.Diffs.Clear();
                         break;
                     }
+
+                    perItemContext.Diffs.Add("===========================\n\r");
                 }
 
                 if (!matched)
@@ -222,8 +264,6 @@ namespace Microsoft.IdentityModel.Tests
                 context.Diffs.Add("claims2:");
                 foreach (var claim in claims2)
                     context.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
-
-//                return false;
             }
 
             int numMatched = 0;
@@ -248,10 +288,7 @@ namespace Microsoft.IdentityModel.Tests
                 }
 
                 if (!matched)
-                {
                     notMatched.Add(t);
-                    //localContext.Diffs.AddRange(perClaimContext.Diffs);
-                }
             }
 
             if (numMatched != numToMatch)
@@ -334,9 +371,7 @@ namespace Microsoft.IdentityModel.Tests
                 }
 
                 if (!matched)
-                {
                     notMatched.Add(t);
-                }
             }
 
             if (numMatched != numToMatch)
@@ -384,21 +419,14 @@ namespace Microsoft.IdentityModel.Tests
             {
                 _equalityDict[inter](t1, t2, localContext);
             }
-            // Use default comparison for any other types.
-            else
-            {
-                CompareAllPublicProperties(t1, t2, localContext);
-            }
 
             return context.Merge(localContext);
         }
 
         public static bool AreJArraysEqual(Object object1, Object object2, CompareContext context)
         {
-
-            Newtonsoft.Json.Linq.JArray a1 = (Newtonsoft.Json.Linq.JArray)object1;
-            Newtonsoft.Json.Linq.JArray a2 = (Newtonsoft.Json.Linq.JArray)object2;
-
+            var a1 = (JArray)object1;
+            var a2 = (JArray)object2;
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(a1, a2, localContext))
                 return context.Merge(localContext);
@@ -508,7 +536,6 @@ namespace Microsoft.IdentityModel.Tests
                         continue;
                     }
 
-                    // for now just typing strings, should expand types.
                     var obj1 = dictionary1[key];
                     var obj2 = dictionary2[key];
                     if (obj1.GetType().BaseType == typeof(System.ValueType))
@@ -701,26 +728,6 @@ namespace Microsoft.IdentityModel.Tests
                 CompareAllPublicProperties(message1, message2, localContext);
 
             return context.Merge(localContext);
-
-            //if (message1.Parameters.Count != message2.Parameters.Count)
-            //    localContext.Diffs.Add($" message1.Parameters.Count != message2.Parameters.Count: {message1.Parameters.Count}, {message2.Parameters.Count}");
-
-            //var stringComparer = StringComparer.Ordinal;
-            //foreach (var param in message1.Parameters)
-            //{
-            //    if (!message2.Parameters.TryGetValue(param.Key, out string value2))
-            //        localContext.Diffs.Add($" WsFederationMessage.message1.Parameters.param.Key missing in message2: {param.Key}");
-            //    else if (param.Value != value2)
-            //        localContext.Diffs.Add($" WsFederationMessage.message1.Parameters.param.Value !=  message2.Parameters.param.Value: {param.Key}, {param.Value}, {value2}");
-            //}
-
-            //foreach (var param in message2.Parameters)
-            //{
-            //    if (!message1.Parameters.TryGetValue(param.Key, out string value1))
-            //        localContext.Diffs.Add($" WsFederationMessage.message2.Parameters.param.Key missing in message1: {param.Key}");
-            //    else if (param.Value != value1)
-            //        localContext.Diffs.Add($" WsFederationMessage.message2.Parameters.param.Value !=  message1.Parameters.param.Value: {param.Key}, {param.Value}, {value1}");
-            //}
         }
 
         public static string BuildStringDiff(string label, object str1, object str2)
@@ -734,10 +741,10 @@ namespace Microsoft.IdentityModel.Tests
             var localContext = new CompareContext(context);
 
             // public instance properties
-            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
             // Touch each public property
-            foreach (PropertyInfo propertyInfo in propertyInfos)
+            foreach (var propertyInfo in propertyInfos)
             {
                 var propertyContext = new CompareContext(context);
                 try

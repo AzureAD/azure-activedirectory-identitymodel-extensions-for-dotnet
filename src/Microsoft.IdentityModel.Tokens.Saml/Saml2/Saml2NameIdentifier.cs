@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -34,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the NameID element as specified in [Saml2Core, 2.2.3].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2NameIdentifier
     {
@@ -56,6 +56,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="name">Name string to initialize with.</param>
         /// <param name="format"><see cref="Uri"/> specifying the identifier format.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="name"/> is null of empty.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="format"/> is not an absolute Uri.</exception>
         public Saml2NameIdentifier(string name, Uri format)
         {
             Value = name;
@@ -67,13 +69,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public EncryptingCredentials EncryptingCredentials
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets a URI reference representing the classification of string-based identifier 
         /// information. [Saml2Core, 2.2.2]
         /// </summary>
+        /// <exception cref="ArgumentException">if 'value' is not an absolute Uri.</exception>
         public Uri Format
         {
             get { return _format; }
@@ -118,6 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or sets the value of the name identifier.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
         public string Value
         {
             get { return _value; }

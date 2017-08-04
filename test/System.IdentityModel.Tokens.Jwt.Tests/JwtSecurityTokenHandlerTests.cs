@@ -469,7 +469,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ClaimsPrincipal cp = tokenHandler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             ClaimsIdentity identity = cp.Identity as ClaimsIdentity;
 
-            Assert.True(IdentityComparer.AreEqual(identity.Claims, expectedClaims), "identity.Claims != expectedClaims");
+            Assert.True(IdentityComparer.AreEqual(identity.Claims, expectedClaims, new CompareContext { IgnoreType = true }), "identity.Claims != expectedClaims");
             Assert.Equal(identity.Name, identityName);
 
             // This checks that all claims that should have been mapped.

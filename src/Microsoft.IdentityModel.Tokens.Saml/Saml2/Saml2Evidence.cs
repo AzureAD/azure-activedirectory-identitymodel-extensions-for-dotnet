@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the Evidence element specified in [Saml2Core, 2.7.4.3].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     /// <remarks>
     /// Contains one or more assertions or assertion references that the SAML
@@ -49,12 +50,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class.
         /// </summary>
         public Saml2Evidence()
-        { }
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class from a <see cref="Saml2Assertion"/>.
         /// </summary>
         /// <param name="assertion"><see cref="Saml2Assertion"/> containing the evidence.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="assertion"/> is null.</exception>
         public Saml2Evidence(Saml2Assertion assertion)
         {
             if (assertion == null)
@@ -67,6 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class from a <see cref="Saml2Id"/>.
         /// </summary>
         /// <param name="idReference"><see cref="Saml2Id"/> containing the evidence.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="idReference"/> is null.</exception>
         public Saml2Evidence(Saml2Id idReference)
         {
             if (idReference == null)
@@ -79,6 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of <see cref="Saml2Evidence"/> class from a <see cref="Uri"/>.
         /// </summary>
         /// <param name="uriReference"><see cref="Uri"/> containing the evidence.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="uriReference"/> is null.</exception>
         public Saml2Evidence(Uri uriReference)
         {
             if (uriReference == null)

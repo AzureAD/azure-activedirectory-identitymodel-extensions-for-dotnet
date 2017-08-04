@@ -81,13 +81,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11134 = "IDX11134: Unable to read SamlSecurityToken. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX11135 = "IDX11135: Unable to read SamlSecurityToken. Saml element '{0}' must have value.";
 
+        // Saml writting
         internal const string IDX11500 = "IDX11500: SAML entity cannot be Null or empty.";
-        internal const string IDX11501 = "IDX11501: SAML Assertion cannot be Null or empty.";
-        internal const string IDX11502 = "IDX11502: Value is not an AbsoluteUri.";
-        internal const string IDX11503 = "IDX11503: SAML Assertion requires at least one Statement.";
-        internal const string IDX11504 = "IDX11504: SAML AttributeValue cannot be Null.";
-        internal const string IDX11505 = "IDX11505: SAML Attribute should have one value.";
-        internal const string IDX11506 = "IDX11506: SAML AudienceRestriction should have one Audience.";
+        internal const string IDX11501 = "IDX11501: SamlAssertion Id cannot be null or empty.";
+        internal const string IDX11502 = "IDX11502: Value is not an AbsoluteUri: '{0}'.";
+        internal const string IDX11503 = "IDX11503: SamlAssertion Id is not well formed: '{0}'.";
+        internal const string IDX11504 = "IDX11504: Issuer cannot be null or empty.";
+        internal const string IDX11505 = "IDX11505: A SamlAssertion must have at least one statement.";
+        internal const string IDX11506 = "IDX11506: A SamlAttribute Value cannot be null or empty.";
         internal const string IDX11507 = "IDX11507: SAML AuthorityKind missing name.";
         internal const string IDX11508 = "IDX11508: SAML AuthorizationDecision should have one Action.";
         internal const string IDX11509 = "IDX11509: SAML Evidence should have one Assertion.";
@@ -95,10 +96,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11511 = "IDX11511: SAML unable to read Attribute.";
         internal const string IDX11512 = "IDX11512: SAML AuthorityBinding missing Binding on read.";
         internal const string IDX11513 = "IDX11513: SAML AuthorityBinding missing Location on read.";
-
         internal const string IDX11514 = "IDX11514: SamlSubjectEqualityComparer cannot be null.";
         internal const string IDX11515 = "IDX11515: Each statement in Assertion.Statements has to be a SamlSubjectStatement";
-        internal const string IDX11516 = "IDX11516: We could not process the SamlStatement of type:'{0}'.";
+        internal const string IDX11516 = "IDX11516: We could not write the SamlStatement of type:'{0}'. You will need to override this method to write this statement.";
+        internal const string IDX11517 = "IDX11517: Exception thrown while writing '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
+        internal const string IDX11518 = "IDX11518: Unable to writen SamlAssertion: SamlSubject.Name and SamlSubject.ConfirmationMethods.Count == 0.";
+
+        // IDX11700 - AttributeStatement
+        internal const string IDX11700 = "IDX11700: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
+
+        // IDX11800 - AuthenticationStatement
+        internal const string IDX11800 = "IDX11800: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
+
+        // IDX11900 - AuthorizationDecisionStatement
+        internal const string IDX11900 = "IDX11900: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
+        internal const string IDX11901 = "IDX11901: Unable to write SamlAssertion: {0}.{1} is empty. This statement must contain at least one Action.";
+        internal const string IDX11902 = "IDX11902: Unable to write SamlAssertion: SamlEvidence must have at least one assertion or assertion reference.";
 
 #pragma warning restore 1591
     }

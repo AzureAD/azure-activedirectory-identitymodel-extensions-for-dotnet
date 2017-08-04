@@ -33,22 +33,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     public class ValidateTheoryData
     {
-        public static void AddValidateAudienceTheoryData(TheoryData<SamlTheoryData> theoryData, SecurityTokenHandler handler)
+        public static void AddValidateAudienceTheoryData(List<TokenTheoryData> theoryData)
         {
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string>(),
                 First = true,
                 ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                Handler = handler,
                 TestId = "TokenValidationParameters null",
                 ValidationParameters = null,
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string>(),
-                Handler = handler,
                 TestId = "ValidateAudience = false",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -56,11 +54,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string>(),
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                Handler = handler,
                 TestId = "no audiences in validationParameters",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -68,11 +65,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                Handler = handler,
                 TestId = "audience has value, tvp has no values",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -80,11 +76,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                Handler = handler,
                 TestId = "audience not matched",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -93,10 +88,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
-                Handler = handler,
                 TestId = "AudienceValidator returns true",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -109,10 +103,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
-                Handler = handler,
                 TestId = "AudienceValidator throws, validateAudience false",
                 ValidationParameters = new TokenValidationParameters
                 {
@@ -123,37 +116,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             });
         }
 
-        public static void AddValidateIssuerTheoryData(TheoryData<SamlTheoryData> theoryData, SecurityTokenHandler handler)
+        public static void AddValidateIssuerTheoryData(List<TokenTheoryData> theoryData)
         {
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                 First = true,
-                Handler = handler,
                 Issuer = "bob",
                 TestId = "ValidationParameters null",
                 ValidationParameters = null,
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
-                Handler = handler,
                 TestId = "ValidateIssuer == false",
                 ValidationParameters = new TokenValidationParameters { ValidateIssuer = false },
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
-                Handler = handler,
                 Issuer = "bob",
                 TestId = "Issuer not matched",
                 ValidationParameters = new TokenValidationParameters { ValidIssuer = "frank" }
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
-                Handler = handler,
                 Issuer = "bob",
                 TestId = "Issuer matched",
                 ValidationParameters = new TokenValidationParameters
@@ -163,10 +152,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 }
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"),
-                Handler = handler,
                 Issuer = "bob",
                 TestId = "ValidIssuers set but not matched",
                 ValidationParameters = new TokenValidationParameters
@@ -176,9 +164,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 }
             });
 
-            theoryData.Add(new SamlTheoryData
+            theoryData.Add(new TokenTheoryData
             {
-                Handler = handler,
                 Issuer = "bob",
                 TestId = "IssuerValidator - echo",
                 ValidationParameters = new TokenValidationParameters

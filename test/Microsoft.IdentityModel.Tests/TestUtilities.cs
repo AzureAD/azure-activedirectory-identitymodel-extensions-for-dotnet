@@ -65,23 +65,6 @@ namespace Microsoft.IdentityModel.Tests
         }
     }
 
-    /// <summary>
-    /// Set defaults for TheoryData
-    /// </summary>
-    public class TheoryDataBase
-    {
-        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
-        public bool First { get; set; } = false;
-
-        public string TestId { get; set; }
-
-        public override string ToString()
-        {
-            return $"{TestId}, {ExpectedException}";
-        }
-    }
-
     public static class TestUtilities
     {
         /// <summary>
@@ -458,9 +441,10 @@ namespace Microsoft.IdentityModel.Tests
             WriteHeader($"{testcase} : {variation}", first);
         }
 
-        public static void WriteHeader(string testcase, TheoryDataBase theoryData)
+        public static CompareContext WriteHeader(string testcase, TheoryDataBase theoryData)
         {
             WriteHeader($"{testcase} : {theoryData.TestId}", theoryData.First);
+            return new CompareContext($"{testcase} : {theoryData.TestId}");
         }
 
         public static void WriteHeader(string testcase, bool first)

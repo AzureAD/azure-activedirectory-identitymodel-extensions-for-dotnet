@@ -1222,14 +1222,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
-            var stringBuilder = new StringBuilder();
-            using (var writer = XmlWriter.Create(stringBuilder))
+            using (var memoryStream = new MemoryStream())
             {
-                WriteToken(writer, samlToken);
-                writer.Flush();
-                return stringBuilder.ToString();
+                using (var writer = XmlWriter.Create(memoryStream))
+                {
+                    WriteToken(writer, samlToken);
+                    writer.Flush();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
             }
         }
 
@@ -1250,15 +1252,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (token == null)
                 throw LogArgumentNullException(nameof(token));
 
-            var samlSecurityToken = token as SamlSecurityToken;
-            if (samlSecurityToken == null)
+            var samlToken = token as SamlSecurityToken;
+            if (samlToken == null)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
-            if (samlSecurityToken.Assertion == null)
-                throw LogArgumentNullException(nameof(samlSecurityToken.Assertion));
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(nameof(samlToken.Assertion));
 
-           // var envelopedWriter = new EnvelopedSignatureWriter(writer, samlSecurityToken.Assertion.SigningCredentials, Guid.NewGuid().ToString());
-            // Serializer.WriteToken(envelopedWriter, samlSecurityToken);
+            Serializer.WriteAssertion(writer, samlToken.Assertion);
         }
 
 #endregion methods

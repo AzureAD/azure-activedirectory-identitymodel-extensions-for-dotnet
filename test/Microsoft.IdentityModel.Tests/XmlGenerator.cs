@@ -257,9 +257,9 @@ namespace Microsoft.IdentityModel.Tests
             get => "<Assertion MajorVersion=\"{0}\" MinorVersion=\"{1}\" AssertionID=\"{2}\" Issuer=\"{3}\" IssueInstant=\"{4}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{5}{6}{7}{8}</Assertion>";
         }
 
-        public static string SamlAssertionXml(string majorVersion, string minorVersion, string assertionId, string issuer, string issueInstant, string conditions, string advices, string statements, string signatures)
+        public static string SamlAssertionXml(string majorVersion, string minorVersion, string assertionId, string issuer, string issueInstant, string conditions, string advices, string statements, string signature)
         {
-            return string.Format(SamlAssertionTemplate, majorVersion, minorVersion, assertionId, issuer, issueInstant, conditions, advices, statements, signatures);
+            return string.Format(SamlAssertionTemplate, majorVersion, minorVersion, assertionId, issuer, issueInstant, conditions, advices, statements, signature);
         }
 
         public static string SamlAssertionIDRefTemplate

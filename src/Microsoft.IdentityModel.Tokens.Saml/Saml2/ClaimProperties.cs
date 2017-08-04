@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 #pragma warning disable 1591
         public const string Namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
 
-        public const string SamlAttributeDisplayName = Namespace + "/displayname";
+        public const string SamlAttributeFriendlyName = Namespace + "/friendlyname";
         public const string SamlAttributeNameFormat = Namespace + "/attributename";
         public const string SamlNameIdentifierFormat = Namespace + "/format";
         public const string SamlNameIdentifierNameQualifier = Namespace + "/namequalifier";

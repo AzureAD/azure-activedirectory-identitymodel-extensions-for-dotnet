@@ -30,6 +30,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests
@@ -57,50 +58,26 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
-
-                theoryData.Add(new EnvelopedSignatureTheoryData
+                return new TheoryData<EnvelopedSignatureTheoryData>
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    First = true,
-                    ReferenceId = null,
-                    SigningCredentials = null,
-                    TestId = "Null XmlWriter",
-                    XmlWriter = null
-                });
-
-
-                var ms = new MemoryStream();
-                var xmlWriter = XmlWriter.Create(ms);
-
-                theoryData.Add(new EnvelopedSignatureTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    ReferenceId = null,
-                    SigningCredentials = KeyingMaterial.RSASigningCreds_2048,
-                    TestId = "Null ReferenceId",
-                    XmlWriter = xmlWriter
-                });
-
-                theoryData.Add(new EnvelopedSignatureTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    ReferenceId = string.Empty,
-                    SigningCredentials = KeyingMaterial.RSASigningCreds_2048,
-                    TestId = "Empty ReferenceId",
-                    XmlWriter = xmlWriter
-                });
-
-                theoryData.Add(new EnvelopedSignatureTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    ReferenceId = Guid.NewGuid().ToString(),
-                    SigningCredentials = null,
-                    TestId = "Null SigningCredentials",
-                    XmlWriter = null
-                });
-
-                return theoryData;
+                    new EnvelopedSignatureTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        First = true,
+                        ReferenceId = null,
+                        SigningCredentials = null,
+                        TestId = "Null XmlWriter",
+                        XmlWriter = null
+                    },
+                    new EnvelopedSignatureTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ReferenceId = Guid.NewGuid().ToString(),
+                        SigningCredentials = null,
+                        TestId = "Null SigningCredentials",
+                        XmlWriter = null
+                    }
+                };
             }
         }
 
@@ -111,20 +88,16 @@ namespace Microsoft.IdentityModel.Xml.Tests
             var context = new CompareContext($"{this}.WriteXml, {theoryData.TestId}");
             try
             {
+                var saml2Serializer = new Saml2Serializer();
+                var samlAssertion = saml2Serializer.ReadAssertion(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
                 var stream = new MemoryStream();
                 var writer = XmlDictionaryWriter.CreateTextWriter(stream);
-                var envelopedWriter = new EnvelopedSignatureWriter(writer, theoryData.SigningCredentials, theoryData.ReferenceId);
-                envelopedWriter.WriteStartElement("OuterXml");
-                envelopedWriter.WriteAttributeString(XmlSignatureConstants.Attributes.Id, Default.ReferenceUri);
-                envelopedWriter.WriteStartElement("InnerXml");
-                envelopedWriter.WriteAttributeString("innerAttribute", "innerValue");
-                envelopedWriter.WriteEndElement();
-                envelopedWriter.WriteEndElement();
+                samlAssertion.SigningCredentials = theoryData.SigningCredentials;
+                saml2Serializer.WriteAssertion(writer, samlAssertion);
+                writer.Flush();
                 var xml = Encoding.UTF8.GetString(stream.ToArray());
-                theoryData.ExpectedException.ProcessNoException(context);
-                var envelopedReader = new EnvelopedSignatureReader(XmlUtilities.CreateDictionaryReader(xml));
-                while (envelopedReader.Read());
-                envelopedReader.Signature.Verify(theoryData.SigningCredentials.Key);
+                var samlAssertion2 = saml2Serializer.ReadAssertion(XmlUtilities.CreateDictionaryReader(xml));
+                samlAssertion2.Signature.Verify(theoryData.SigningCredentials.Key);
             }
             catch (Exception ex)
             {
@@ -144,7 +117,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     {
                         ReferenceId = Default.ReferenceUri,
                         SigningCredentials = Default.AsymmetricSigningCredentials,
-                        Xml = Default.OuterXml
+                        Xml =  ReferenceTokens.Saml2Token_Valid
                     }
                 };
             }

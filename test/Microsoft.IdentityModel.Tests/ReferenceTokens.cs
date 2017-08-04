@@ -25,15 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml;
-
 namespace Microsoft.IdentityModel.Tests
 {
-    public class RefrenceTokens
+    public class ReferenceTokens
     {
 #region Saml2 Token
         public static string AADJWKS = @"{""keys"":[{""kty"":""RSA"",""use"":""sig"",""kid"":""a3QN0BZS7s4nN-BdrjbF0Y_LdMM"",""x5t"":""a3QN0BZS7s4nN-BdrjbF0Y_LdMM"",""n"":""wESLNTU4mazfVL-vLuJq_8ggJhW1DYxE-EeFiSccia1TTeyBWTVfG5vgYPtHXmL1RYgZvNhIYppS0ZT2U_nnCt8ukONCMSBpeLh8TqZxkHBr2pzbaKzbcHpHrsoxxXLHINZ6L4g_ewqYJwxfshuyD65tlSm8obFdnbtiCoVM-oJPbOcPsrzVgp_L5JWDe5bp6lbXXjJnMKVNCVqum1i4Taa6PGNm3HtlSXBz0CFWLwJ6IvAY7XDNOal3-5y2md6vqhzffmu90mKQ2ZzVwUoIr7aKt7DVuBQke434skDTLmJVcq-iOIpnYiLtApefX1KyDUWgnfHY1YDTrBzQKeu4uw"",""e"":""AQAB"",""x5c"":[""MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD""]},{""kty"":""RSA"",""use"":""sig"",""kid"":""2S4SCVGs8Sg9LS6AqLIq6DpW-g8"",""x5t"":""2S4SCVGs8Sg9LS6AqLIq6DpW-g8"",""n"":""oZ-QQrNuB4ei9ATYrT61ebPtvwwYWnsrTpp4ISSp6niZYb92XM0oUTNgqd_C1vGN8J-y9wCbaJWkpBf46CjdZehrqczPhzhHau8WcRXocSB1u_tuZhv1ooAZ4bAcy79UkeLiG60HkuTNJJC8CfaTp1R97szBhuk0Vz5yt4r5SpfewIlBCnZUYwkDS172H9WapQu-3P2Qjh0l-JLyCkdrhvizZUk0atq5_AIDKRU-A0pRGc-EZhUL0LqUMz6c6M2s_4GnQaScv44A5iZUDD15B6e8Apb2yARohkWmOnmRcTVfes8EkfxjzZEzm3cNkvP0ogILyISHKlkzy2OmlU6iXw"",""e"":""AQAB"",""x5c"":[""MIIDKDCCAhCgAwIBAgIQBHJvVNxP1oZO4HYKh+rypDANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwHhcNMTYxMTE2MDgwMDAwWhcNMTgxMTE2MDgwMDAwWjAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChn5BCs24Hh6L0BNitPrV5s+2/DBhaeytOmnghJKnqeJlhv3ZczShRM2Cp38LW8Y3wn7L3AJtolaSkF/joKN1l6GupzM+HOEdq7xZxFehxIHW7+25mG/WigBnhsBzLv1SR4uIbrQeS5M0kkLwJ9pOnVH3uzMGG6TRXPnK3ivlKl97AiUEKdlRjCQNLXvYf1ZqlC77c/ZCOHSX4kvIKR2uG+LNlSTRq2rn8AgMpFT4DSlEZz4RmFQvQupQzPpzozaz/gadBpJy/jgDmJlQMPXkHp7wClvbIBGiGRaY6eZFxNV96zwSR/GPNkTObdw2S8/SiAgvIhIcqWTPLY6aVTqJfAgMBAAGjWDBWMFQGA1UdAQRNMEuAEDUj0BrjP0RTbmoRPTRMY3WhJTAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXOCEARyb1TcT9aGTuB2Cofq8qQwDQYJKoZIhvcNAQELBQADggEBAGnLhDHVz2gLDiu9L34V3ro/6xZDiSWhGyHcGqky7UlzQH3pT5so8iF5P0WzYqVtogPsyC2LPJYSTt2vmQugD4xlu/wbvMFLcV0hmNoTKCF1QTVtEQiAiy0Aq+eoF7Al5fV1S3Sune0uQHimuUFHCmUuF190MLcHcdWnPAmzIc8fv7quRUUsExXmxSX2ktUYQXzqFyIOSnDCuWFm6tpfK5JXS8fW5bpqTlrysXXz/OW/8NFGq/alfjrya4ojrOYLpunGriEtNPwK7hxj1AlCYEWaRHRXaUIW1ByoSff/6Y6+ZhXPUe0cDlNRt/qIz5aflwO7+W8baTS4O8m/icu7ItE=""]}]}";
@@ -194,18 +188,6 @@ namespace Microsoft.IdentityModel.Tests
         public static string SamlToken_Valid =
             @"<Assertion MajorVersion=""1"" MinorVersion=""1"" AssertionID = ""_b95759d0-73ae-4072-a140-567ade10a7ad"" Issuer=""http://Default.Issuer.com"" IssueInstant=""2017-03-17T18:33:37.095Z"" xmlns=""urn:oasis:names:tc:SAML:1.0:assertion""><Conditions NotBefore=""2017-03-17T18:33:37.080Z"" NotOnOrAfter=""2017-03-18T18:33:37.080Z""><AudienceRestrictionCondition><Audience>http://Default.Audience.coms</Audience></AudienceRestrictionCondition></Conditions><AttributeStatement><Subject><SubjectConfirmation><ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</ConfirmationMethod></SubjectConfirmation></Subject><Attribute AttributeName = ""Country"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims""><AttributeValue>USA</AttributeValue></Attribute></AttributeStatement><Signature xmlns=""http://www.w3.org/2000/09/xmldsig#""><SignedInfo><CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /><SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" /><Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2""><Transforms><Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" /><Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /></Transforms><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" /><DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue></Reference></SignedInfo><SignatureValue>NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate></X509Data></KeyInfo></Signature></Assertion>";
 
-        public static SamlSecurityTokenTestSet SamlSecurityTokenValid
-        {
-            get
-            {
-                return new SamlSecurityTokenTestSet
-                {
-                    SamlSecurityToken = new SamlSecurityToken(ReferenceSaml.SamlAssertion),
-                    Xml = RefrenceTokens.SamlToken_Formated
-                };
-            }
-        }
-
         public static string SamlToken_Formated
         {
             get
@@ -275,71 +257,6 @@ namespace Microsoft.IdentityModel.Tests
                             </KeyInfo>
                           </Signature>
                         </saml:Assertion>";
-            }
-        }
-
-        public static SamlTokenTestSet TokenClaimsIdentitiesSubjectEmptyString
-        {
-            get
-            {
-                return new SamlTokenTestSet
-                {
-                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { ReferenceSaml.GetAttributeStatement(new SamlSubject(), Default.Claims) }))
-                };
-            }
-        }
-
-        public static SamlTokenTestSet TokenClaimsIdentitiesSameSubject
-        {
-            get
-            {
-                var claim = new Claim(ClaimTypes.Country, Default.Country, ClaimValueTypes.String, Default.Issuer);
-                var statement = new SamlAttributeStatement(ReferenceSaml.SamlSubject, new SamlAttribute(ClaimTypes.Country, ClaimTypes.Country, Default.Country));
-
-                var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                identity.AddClaim(claim);
-                identity.AddClaim(claim);
-                return new SamlTokenTestSet
-                {
-                    Identities = new List<ClaimsIdentity> { identity },
-                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { statement, statement })),
-                };
-            }
-        }
-
-        public static SamlTokenTestSet TokenClaimsIdentitiesDifferentSubjects
-        {
-            get
-            {
-                var claim1 = new Claim(ClaimTypes.Country, Default.Country, ClaimValueTypes.String, Default.Issuer);
-                var attrStatement1 = new SamlAttribute(ClaimTypes.Country, ClaimTypes.Country, Default.Country);
-                var statement1 = new SamlAttributeStatement(ReferenceSaml.SamlSubject, attrStatement1);
-                var identity1 = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                identity1.AddClaim(claim1);
-
-                // statement2 has different subject with statement1
-                var statement2 = new SamlAttributeStatement(new SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.AttributeName), attrStatement1);
-                var identity2 = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                identity2.AddClaim(claim1);
-
-                var claim2 = new Claim(ClaimTypes.NameIdentifier, Default.AttributeName, ClaimValueTypes.String, Default.Issuer);
-                claim2.Properties[ClaimProperties.SamlNameIdentifierFormat] = Default.NameIdentifierFormat;
-                claim2.Properties[ClaimProperties.SamlNameIdentifierNameQualifier] = Default.NameQualifier;
-                identity2.AddClaim(claim2);
-
-                var claim3 = new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer);
-                var claim4 = new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer);
-
-                // statement3 has same subject with statement1
-                var statement3 = new SamlAuthenticationStatement(ReferenceSaml.SamlSubject, Default.AuthenticationMethod, DateTime.Parse(Default.AuthenticationInstant), null, null, null);
-                identity1.AddClaim(claim3);
-                identity1.AddClaim(claim4);
-
-                return new SamlTokenTestSet
-                {
-                    Identities = new List<ClaimsIdentity> { identity1, identity2 },
-                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { statement1, statement2, statement3 }))
-                };
             }
         }
 

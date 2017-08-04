@@ -31,8 +31,10 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
+    //TODO - review
     /// <summary>
     /// Represents the Subject element specified in [Saml2Core, 2.4.1].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     /// <remarks>
     /// If the NameId is null and the SubjectConfirmations collection is empty,

@@ -25,17 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Saml2
+using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Tokens.Saml2;
+
+namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
-    /// <summary>
-    /// Represents the StatementAbstractType specified in [Saml2Core, 2.7.1].
-    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
-    /// </summary>
-    /// <remarks>
-    /// This abstract class provides no operations; however, this type is used
-    /// to declare collections of statements, for example Saml2Assertion.Statements.
-    /// </remarks>
-    public abstract class Saml2Statement
+    public class Saml2TheoryData : TokenTheoryData
     {
+        public Saml2TheoryData()
+        {
+
+        }
+
+        public Saml2TheoryData(TokenTheoryData tokenTheoryData)
+            : base(tokenTheoryData)
+        {
+
+        }
+
+        public List<Saml2Attribute> Attributes { get; set; }
+
+        public List<Saml2Attribute> ConsolidatedAttributes { get; set; }
+
+        public Saml2SecurityTokenHandler Handler { get; set; } = new Saml2SecurityTokenHandlerPublic();
+
+        public Saml2Serializer SamlSerializer { get; set; }
     }
 }

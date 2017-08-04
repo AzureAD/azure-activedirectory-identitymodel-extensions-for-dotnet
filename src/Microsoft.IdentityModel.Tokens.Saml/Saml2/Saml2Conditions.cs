@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the Conditions element specified in [Saml2Core, 2.5.1].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2Conditions
     {
@@ -48,6 +49,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="Saml2Conditions"/>. class.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if <paramref name="audienceRestrictions"/> is null.</exception>
+        public Saml2Conditions(IEnumerable<Saml2AudienceRestriction> audienceRestrictions)
+        {
+            if (audienceRestrictions == null)
+                throw LogArgumentNullException(nameof(audienceRestrictions));
+
+            AudienceRestrictions = new List<Saml2AudienceRestriction>(audienceRestrictions);
+        }
+
+        /// <summary>
         /// Gets a collection of <see cref="Saml2AudienceRestriction"/> that the assertion is addressed to.
         /// [Saml2Core, 2.5.1]
         /// </summary>
@@ -60,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets the earliest time instant at which the assertion is valid.
         /// [Saml2Core, 2.5.1]
         /// </summary>
+        /// <exception cref="ArgumentException">if 'value' is greater or equal to <see cref="NotOnOrAfter"/>.</exception>
         public DateTime? NotBefore
         {
             get { return _notBefore; }
@@ -68,10 +82,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = DateTimeUtil.ToUniversalTime(value);
 
                 // NotBefore must be earlier than NotOnOrAfter
-                if (null != value && null != _notOnOrAfter)
+                if (value != null && NotOnOrAfter.HasValue)
                 {
-                    if (value.Value >= _notOnOrAfter.Value)
-                        throw LogArgumentNullException(FormatInvariant(LogMessages.IDX10513, value, NotOnOrAfter));
+                    if (value.Value >= NotOnOrAfter.Value)
+                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10513, value, NotOnOrAfter)));
                 }
 
                 _notBefore = value;
@@ -82,6 +96,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets the time instant at which the assertion has expired.
         /// [Saml2Core, 2.5.1]
         /// </summary>
+        /// <exception cref="ArgumentException">if 'value' is less than or equal to <see cref="NotBefore"/>.</exception>
         public DateTime? NotOnOrAfter
         {
             get { return _notOnOrAfter; }
@@ -90,10 +105,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = DateTimeUtil.ToUniversalTime(value);
 
                 // NotBefore must be earlier than NotOnOrAfter
-                if (null != value && null != _notBefore)
+                if (value != null && NotBefore.HasValue)
                 {
-                    if (value.Value <= _notBefore.Value)
-                        throw LogArgumentNullException(FormatInvariant(LogMessages.IDX10514, value, NotBefore));
+                    if (value.Value <= NotBefore.Value)
+                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10514, value, NotBefore)));
                 }
 
                 _notOnOrAfter = value;
@@ -106,7 +121,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public bool OneTimeUse
         {
-            get; set;
+            get;
+            set;
         }
 
         /// <summary>
@@ -116,7 +132,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2ProxyRestriction ProxyRestriction
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

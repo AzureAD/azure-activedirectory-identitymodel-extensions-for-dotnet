@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal static class Attributes
         {
             public const string ActionNamespaceAttribute = "Namespace";
-            public const string AssertionId = "AssertionID";
+            public const string AssertionID = "AssertionID";
             public const string AttributeName = "AttributeName";
             public const string AttributeNamespace = "AttributeNamespace";
             public const string AuthenticationInstant = "AuthenticationInstant";
@@ -89,14 +89,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             public const string MinorVersion = "MinorVersion";
             public const string OriginalIssuer = "OriginalIssuer";
             public const string NamespaceAttributePrefix = "xmlns";
-            public const string NameIdentifierFormat = "Format";
-            public const string NameIdentifierNameQualifier = "NameQualifier";
+            public const string Format = "Format";
+            public const string NameQualifier = "NameQualifier";
             public const string Namespace = "Namespace";
             public const string NotBefore = "NotBefore";
             public const string NotOnOrAfter = "NotOnOrAfter";
             public const string Resource = "Resource";
-            public const string SubjectLocalityDNSAddress = "DNSAddress";
-            public const string SubjectLocalityIPAddress = "IPAddress";
+            public const string DNSAddress = "DNSAddress";
+            public const string IPAddress = "IPAddress";
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             public const string Action = "Action";
             public const string Advice = "Advice";
             public const string Assertion = "Assertion";
-            public const string AssertionIdReference = "AssertionIDReference";
+            public const string AssertionIDReference = "AssertionIDReference";
             public const string Attribute = "Attribute";
             public const string AttributeStatement = "AttributeStatement";
             public const string AttributeValue = "AttributeValue";
@@ -139,10 +139,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             public const string SubjectConfirmation = "SubjectConfirmation";
             public const string Subject = "Subject";
             public const string SubjectConfirmationData = "SubjectConfirmationData";
-            public const string SubjectConfirmationMethod = "ConfirmationMethod";
+            public const string ConfirmationMethod = "ConfirmationMethod";
             public const string SubjectLocality = "SubjectLocality";
-            public const string SubjectLocalityDNSAddress = "DNSAddress";
-            public const string SubjectLocalityIPAddress = "IPAddress";
+            public const string DNSAddress = "DNSAddress";
+            public const string IPAddress = "IPAddress";
 
         }
 

@@ -34,6 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>
     /// Represents the AuthzDecisionStatement specified in [Saml2Core, 2.7.4].
+    /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
     public class Saml2AuthorizationDecisionStatement : Saml2Statement
     {
@@ -52,6 +53,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="resource">The <see cref="Uri"/> of the resource to be authorized.</param>
         /// <param name="decision">The AccessDecision in use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="resource"/> is null.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="resource"/> is not an absolute Uri.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="decision"/> is null or empty.</exception>
         public Saml2AuthorizationDecisionStatement(Uri resource, string decision)
             : this(resource, decision, null)
         { }

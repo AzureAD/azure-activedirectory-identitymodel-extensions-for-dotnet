@@ -25,10 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {

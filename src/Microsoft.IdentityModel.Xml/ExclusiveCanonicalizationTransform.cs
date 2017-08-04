@@ -65,14 +65,17 @@ namespace Microsoft.IdentityModel.Xml
             {
                 WriteCanonicalStream(stream, tokenStream, IncludeComments);
                 stream.Flush();
-                stream.Position = 0;
-                #if DEBUG
+#if DEBUG
+                var hex = XmlUtil.GenerateHexString(stream.ToArray());
+                var streambytes = stream.ToArray();
                 var xml = System.Text.Encoding.UTF8.GetString(stream.ToArray());
-                var bytes = hash.ComputeHash(stream);
-                var byteValue = Convert.ToBase64String(bytes);
-                stream.Position = 0;
-                #endif
-                return hash.ComputeHash(stream);
+                var streamBytes = hash.ComputeHash(stream);
+                var hashBytes = hash.ComputeHash(streamBytes);
+                var hashByteValue = Convert.ToBase64String(hashBytes);
+                var hexBytes = XmlUtil.GenerateHexString(hashBytes);
+                var byteValue = Convert.ToBase64String(streamBytes);
+#endif
+                return hash.ComputeHash(stream.ToArray());
             }
         }
 
