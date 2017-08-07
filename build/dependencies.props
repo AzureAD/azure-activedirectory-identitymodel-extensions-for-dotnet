@@ -5,5 +5,6 @@
     <RuntimeFrameworkVersion>2.0.0-*</RuntimeFrameworkVersion>
     <TestSdkVersion>15.0.0</TestSdkVersion>
     <XunitVersion>2.2.0</XunitVersion>
+    <NetStandardVersion>1.6.0</NetStandardVersion>
   </PropertyGroup>
 </Project>
