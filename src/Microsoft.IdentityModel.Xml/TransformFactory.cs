@@ -85,12 +85,12 @@ namespace Microsoft.IdentityModel.Xml
         public virtual Transform GetTransform(string transform)
         {
             if (!IsSupportedTransform(transform))
-                throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
+                throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, transform)));
 
             if (transform == SecurityAlgorithms.EnvelopedSignature)
                 return new EnvelopedSignatureTransform();
 
-            throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
+            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, transform)));
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Xml
         public virtual CanonicalizingTransfrom GetCanonicalizingTransform(string transform)
         {
             if (!IsSupportedCanonicalizingTransfrom(transform))
-                throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
+                throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21211, transform)));
 
             if (transform == SecurityAlgorithms.ExclusiveC14nWithComments)
                 return new ExclusiveCanonicalizationTransform(true);
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Xml
             if (transform == SecurityAlgorithms.ExclusiveC14n)
                 return new ExclusiveCanonicalizationTransform(false);
 
-            throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{transform}'."));
+            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21211, transform)));
         }
     }
 }

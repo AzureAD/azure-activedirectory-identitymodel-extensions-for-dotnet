@@ -192,13 +192,13 @@ namespace Microsoft.IdentityModel.Xml
                 for (int i = 0;  i < Transforms.Count-1; i++)
                 {
                     if (!TransformFactory.Default.IsSupportedTransform(Transforms[i]))
-                        throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{Transforms[i]}'."));
+                        throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[i])));
 
                     TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
                 }
 
                 if (!TransformFactory.Default.IsSupportedCanonicalizingTransfrom(Transforms[Transforms.Count - 1]))
-                    throw LogExceptionMessage(new NotSupportedException($"transform not supported: '{Transforms[Transforms.Count - 1]}'."));
+                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[Transforms.Count - 1])));
 
                 return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
             }

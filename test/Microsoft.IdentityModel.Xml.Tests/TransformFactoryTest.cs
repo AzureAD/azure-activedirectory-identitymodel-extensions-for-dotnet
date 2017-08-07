@@ -40,17 +40,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void GetTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetTransformTest", theoryData);
+            var context = new CompareContext($"{this}.GetTransformTest, {theoryData.TestId}");
 
             var transformFactory = new TransformFactory();
             try
             {
                 transformFactory.GetTransform(theoryData.Algorithm);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<TransformTheoryData> GetTransformTestTheoryData()
@@ -61,7 +64,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     TestId = "Unsupported transform",
                     Algorithm = "Unsupported",
-                    ExpectedException = ExpectedException.NotSupportedException()
+                    ExpectedException = ExpectedException.NotSupportedException("IDX21210")
                 },
                 new TransformTheoryData
                 {
@@ -77,17 +80,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
         public void GetCanonicalizingTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetCanonicalizingTransformTest", theoryData);
+            var context = new CompareContext($"{this}.GetCanonicalizingTransformTest, {theoryData.TestId}");
 
             var transformFactory = new TransformFactory();
             try
             {
                 transformFactory.GetCanonicalizingTransform(theoryData.Algorithm);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<TransformTheoryData> GetCanonicalizingTransformTestTheoryData()
@@ -98,7 +104,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     TestId = "Unsupported transform",
                     Algorithm = "Unsupported",
-                    ExpectedException = ExpectedException.NotSupportedException()
+                    ExpectedException = ExpectedException.NotSupportedException("IDX21211")
                 },
                 new TransformTheoryData
                 {
