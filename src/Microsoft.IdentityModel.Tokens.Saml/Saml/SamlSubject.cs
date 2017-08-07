@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -222,5 +224,82 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         //    return this.subjectKeyClaimset;
         //}
+    }
+
+    internal class SamlSubjectEqualityComparer : EqualityComparer<SamlSubject>
+    {
+        public override bool Equals(SamlSubject subject1, SamlSubject subject2)
+        {
+            if (subject1 == null && subject2 == null)
+                return true;
+
+            if (subject1 == null | subject2 == null)
+                return false;
+
+            if (ReferenceEquals(subject1, subject2))
+                return true;
+
+            if (string.Compare(subject1.Name, subject2.Name, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.NameFormat, subject2.NameFormat, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.NameQualifier, subject2.NameQualifier, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.ConfirmationData, subject2.ConfirmationData, StringComparison.OrdinalIgnoreCase) != 0)
+                return false;
+
+            if (subject1.KeyInfo != null && subject2.KeyInfo != null)
+                if (string.Compare(subject1.KeyInfo.CertificateData, subject2.KeyInfo.CertificateData, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.IssuerName, subject2.KeyInfo.IssuerName, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.Kid, subject2.KeyInfo.Kid, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.RetrievalMethodUri, subject2.KeyInfo.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.SerialNumber, subject2.KeyInfo.SerialNumber, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.SKI, subject2.KeyInfo.SKI, StringComparison.OrdinalIgnoreCase) != 0 ||
+                string.Compare(subject1.KeyInfo.SubjectName, subject2.KeyInfo.SubjectName, StringComparison.OrdinalIgnoreCase) != 0)
+                    return false;
+                else if (subject1.KeyInfo == null | subject2.KeyInfo == null)
+                    return false;
+
+            if (subject1.ConfirmationMethods.Count != subject2.ConfirmationMethods.Count)
+                return false;
+
+            var query1 = subject1.ConfirmationMethods.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            var query2 = subject2.ConfirmationMethods.GroupBy(x => x).ToDictionary(x => x.Key, x => x.Count());
+            if (query1.Count != query2.Count)
+                return false;
+
+            foreach (var query in query1)
+            {
+                if (!query2.Contains(query))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode(SamlSubject subject)
+        {
+            int defaultHash = string.Empty.GetHashCode();
+            int hashCode = defaultHash;
+            hashCode ^= (subject.Name == null) ? defaultHash : subject.Name.GetHashCode();
+            hashCode ^= (subject.NameFormat == null) ? defaultHash : subject.NameFormat.GetHashCode();
+            hashCode ^= (subject.NameQualifier == null) ? defaultHash : subject.NameQualifier.GetHashCode();
+            hashCode ^= (subject.ConfirmationData == null) ? defaultHash : subject.ConfirmationData.GetHashCode();
+
+            if (subject.KeyInfo != null)
+            {
+                hashCode ^= (subject.KeyInfo.CertificateData == null) ? defaultHash : subject.KeyInfo.CertificateData.GetHashCode();
+                hashCode ^= (subject.KeyInfo.IssuerName == null) ? defaultHash : subject.KeyInfo.IssuerName.GetHashCode();
+                hashCode ^= (subject.KeyInfo.Kid == null) ? defaultHash : subject.KeyInfo.Kid.GetHashCode();
+                hashCode ^= (subject.KeyInfo.RetrievalMethodUri == null) ? defaultHash : subject.KeyInfo.RetrievalMethodUri.GetHashCode();
+                hashCode ^= (subject.KeyInfo.SerialNumber == null) ? defaultHash : subject.KeyInfo.SerialNumber.GetHashCode();
+                hashCode ^= (subject.KeyInfo.SKI == null) ? defaultHash : subject.KeyInfo.SKI.GetHashCode();
+                hashCode ^= (subject.KeyInfo.SubjectName == null) ? defaultHash : subject.KeyInfo.SubjectName.GetHashCode();
+            }
+
+            foreach (var method in subject.ConfirmationMethods)
+            {
+                hashCode ^= method.GetHashCode();
+            }
+
+            return hashCode.GetHashCode();
+        }
     }
 }

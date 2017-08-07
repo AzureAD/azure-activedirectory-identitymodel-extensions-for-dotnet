@@ -34,8 +34,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     {
 #pragma warning disable 1591
         public const string DefaultActionNamespace = "urn:oasis:names:tc:SAML:1.0:action:rwedc-negation";
-        public const int MajorVersionValue = 1;
-        public const int MinorVersionValue = 1;
+        public const string MajorVersionValue = "1";
+        public const string MinorVersionValue = "1";
         public const string Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
         public const string NamespaceAttributePrefix = "NamespaceAttributePrefix";
         public const string PreferredPrefix = "saml";

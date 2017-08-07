@@ -63,10 +63,10 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlAttributeStatement SamlAttributeStatement
         {
-            get { return GetAttributeStatement(ClaimSets.DefaultClaims); }
+            get { return GetAttributeStatement(SamlSubject, ClaimSets.DefaultClaims); }
         }
 
-        public static SamlAttributeStatement GetAttributeStatement(IEnumerable<Claim> claims)
+        public static SamlAttributeStatement GetAttributeStatement(SamlSubject subject, IEnumerable<Claim> claims)
         {
             string defaultNamespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims";
             Collection<SamlAttribute> attributes = new Collection<SamlAttribute>();
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tests
                 attributes.Add(attribute);
             }
 
-            return new SamlAttributeStatement(SamlSubject, attributes);
+            return new SamlAttributeStatement(subject, attributes);
         }
     }
 }
