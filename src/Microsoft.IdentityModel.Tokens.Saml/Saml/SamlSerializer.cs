@@ -194,25 +194,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 XmlUtil.ValidateXsiType(envelopeReader, SamlConstants.Types.AssertionType, SamlConstants.Namespace);
 
                 // @MajorVersion - required - must be "1"
-                var attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.MajorVersion, null);
-                if (string.IsNullOrEmpty(attributeValue))
+                var majorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MajorVersion, null);
+                if (string.IsNullOrEmpty(majorVersion))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MajorVersion);
 
-                int majorVersion = int.Parse(attributeValue, CultureInfo.InvariantCulture);
-                if (majorVersion != SamlConstants.MajorVersionValue)
+                if (!majorVersion.Equals(SamlConstants.MajorVersionValue, StringComparison.Ordinal))
                     throw LogReadException(LogMessages.IDX11116, majorVersion);
 
                 // @MinorVersion - required - must be "1"
-                attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.MinorVersion, null);
-                if (string.IsNullOrEmpty(attributeValue))
+                var minorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MinorVersion, null);
+                if (string.IsNullOrEmpty(minorVersion))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MinorVersion);
 
-                int minorVersion = int.Parse(attributeValue, CultureInfo.InvariantCulture);
-                if (minorVersion != SamlConstants.MinorVersionValue)
+                if (!minorVersion.Equals(SamlConstants.MinorVersionValue, StringComparison.Ordinal))
                     throw LogReadException(LogMessages.IDX11117, minorVersion);
 
                 // @AssertionId - required
-                attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionId, null);
+                var attributeValue = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionId, null);
                 if (string.IsNullOrEmpty(attributeValue))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.AssertionId);
 
@@ -849,8 +847,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     // @xsi:type
                     XmlUtil.ValidateXsiType(reader, SamlConstants.Types.NameIDType, SamlConstants.Namespace);
 
-                    subject.NameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
-                    subject.NameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierFormat, null);
+                    if (!string.IsNullOrEmpty(nameFormat))
+                        subject.NameFormat = nameFormat;
+
+                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameIdentifierNameQualifier, null);
+                    if (!string.IsNullOrEmpty(nameQualifier))
+                        subject.NameQualifier = nameQualifier;
 
                     // TODO - check for empty element
                     reader.MoveToContent();
@@ -883,8 +886,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     // An Authentication protocol specified in the confirmation method might need this
                     // data. Just store this content value as string.
-                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))                        
-                        subject.ConfirmationData = reader.ReadElementContentAsString();
+                    if (reader.IsStartElement(SamlConstants.Elements.SubjectConfirmationData, SamlConstants.Namespace))
+                    {
+                        var confirmationData = reader.ReadElementContentAsString();
+                        if (!string.IsNullOrEmpty(confirmationData))
+                            subject.ConfirmationData = confirmationData;
+                    }
 
                     if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     {

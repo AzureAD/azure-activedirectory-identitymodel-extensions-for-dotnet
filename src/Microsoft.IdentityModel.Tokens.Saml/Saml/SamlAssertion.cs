@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// The identifier for the version of SAML defined in this specification is 1.
         /// </remarks>
         /// </summary>
-        public int MajorVersion
+        public string MajorVersion
         {
             get { return SamlConstants.MajorVersionValue; }
         }
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// The identifier for the version of SAML defined in this specification is 1.
         /// </remarks>
         /// </summary>
-        public int MinorVersion
+        public string MinorVersion
         {
             get { return SamlConstants.MinorVersionValue; }
         }
