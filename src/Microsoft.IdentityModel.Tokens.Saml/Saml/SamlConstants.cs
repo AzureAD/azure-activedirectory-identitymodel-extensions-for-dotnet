@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const string NamespaceAttributePrefix = "NamespaceAttributePrefix";
         public const string PreferredPrefix = "saml";
         public const string Saml11Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
-        public const string Saml2Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
+        public const string BearerConfirmationMethod = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
         public const string SenderVouches = "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches";
         public const string Statement = "Statement";
         public const string SubjectStatement = "SubjectStatement";

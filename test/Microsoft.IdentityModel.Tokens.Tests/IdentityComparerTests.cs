@@ -398,8 +398,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             TestUtilities.WriteHeader($"{this}.CompareSamlAudienceRestrictionConditions", true);
             var context = new CompareContext($"{this}.CompareSamlAudienceRestrictionConditions");
-            var samlCondition1 = new SamlAudienceRestrictionCondition(Guid.NewGuid().ToString());
-            var samlCondition2 = new SamlAudienceRestrictionCondition(Guid.NewGuid().ToString());
+            var samlCondition1 = new SamlAudienceRestrictionCondition(new Uri(Default.Audiences.ElementAt(0)));
+            var samlCondition2 = new SamlAudienceRestrictionCondition(new Uri(Default.Audiences.ElementAt(1)));
             IdentityComparer.AreEqual(samlCondition1, samlCondition2, context);
 
             Assert.True(context.Diffs.Count(s => s == "Audiences:") == 1);

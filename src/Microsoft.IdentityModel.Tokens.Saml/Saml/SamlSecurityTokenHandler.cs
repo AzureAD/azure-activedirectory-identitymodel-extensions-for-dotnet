@@ -458,14 +458,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var conditions = new SamlConditions();
-            if (tokenDescriptor.IssuedAt.HasValue)
-                conditions.NotBefore = tokenDescriptor.IssuedAt.Value;
+            if (tokenDescriptor.NotBefore.HasValue)
+                conditions.NotBefore = tokenDescriptor.NotBefore.Value;
 
             if (tokenDescriptor.Expires.HasValue)
                 conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new string[] { tokenDescriptor.Audience }));
+                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
 
             return conditions;
         }
@@ -542,33 +542,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (identityClaim != null)
             {
                 samlSubject.Name = identityClaim.Value;
-                //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
-                //    {
-                //        samlSubject.NameFormat = identityClaim.Properties[ClaimProperties.SamlNameIdentifierFormat];
-                //    }
-
-                //    if (identityClaim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierNameQualifier))
-                //    {
-                //        samlSubject.NameQualifier = identityClaim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier];
-                //    }
             }
 
-            //if (tokenDescriptor.Proof != null)
-            //{
-            //    //
-            //    // Add the key and the Holder-Of-Key confirmation method
-            //    // for both symmetric and asymmetric key case
-            //    //
-            //    samlSubject.KeyIdentifier = tokenDescriptor.Proof.KeyIdentifier;
-            //    samlSubject.ConfirmationMethods.Add(SamlConstants.HolderOfKey);
-            //}
-            //else
-            //{
-            //    //
-            //    // This is a bearer token
-            //    //
-            //    samlSubject.ConfirmationMethods.Add(BearerConfirmationMethod);
-            //}
+            samlSubject.ConfirmationMethods.Add(SamlConstants.BearerConfirmationMethod);
 
             return samlSubject;
         }
@@ -1006,9 +982,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
                     SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
                     if (validationParameters.AudienceValidator != null)
-                        validationParameters.AudienceValidator(audienceRestriction.Audiences, securityToken, validationParameters);
+                        validationParameters.AudienceValidator(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
                     else
-                        Validators.ValidateAudience(audienceRestriction.Audiences, securityToken, validationParameters);
+                        Validators.ValidateAudience(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
                 }
             }            
         }
