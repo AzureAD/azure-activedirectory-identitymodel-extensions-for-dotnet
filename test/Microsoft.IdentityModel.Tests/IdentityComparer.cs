@@ -698,7 +698,7 @@ namespace Microsoft.IdentityModel.Tests
             var localContext = new CompareContext(context);
 
             // public instance properties
-            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
             // Touch each public property
             foreach (PropertyInfo propertyInfo in propertyInfos)
