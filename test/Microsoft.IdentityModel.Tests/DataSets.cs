@@ -288,6 +288,7 @@ namespace Microsoft.IdentityModel.Tests
                 Use = "sig",
             };
 
+            JsonWebKeyAdditionalData1.AdditionalData["additionalProperty"] = "additionalValue";
             JsonWebKeyAdditionalData1.X5c.Add(JsonWebKey_X5c_2);
             JsonWebKeySetAdditionalData1 = new JsonWebKeySet();
             JsonWebKeySetAdditionalData1.Keys.Add(JsonWebKeyAdditionalData1);

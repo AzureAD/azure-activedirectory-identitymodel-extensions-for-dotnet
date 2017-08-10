@@ -29,7 +29,6 @@ namespace Microsoft.IdentityModel.Tests
             IgnoreClaimType = other.IgnoreClaimType;
             IgnoreProperties = other.IgnoreProperties;
             IgnoreSubject = other.IgnoreSubject;
-            IgnoreTokenStreamReader = other.IgnoreTokenStreamReader;
             IgnoreType = other.IgnoreType;
             StringComparison = other.StringComparison;
         }
@@ -55,7 +54,8 @@ namespace Microsoft.IdentityModel.Tests
 
             if (context.Diffs.Count > 0)
             {
-                _diffs.Add(title ?? string.Empty);
+                if (!string.IsNullOrEmpty(title))
+                    _diffs.Add(title);
                 _diffs.AddRange(context.Diffs);
             }
 
@@ -72,9 +72,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public bool IgnoreSubject { get; set; } = true;
 
-        public bool IgnoreTokenStreamReader { get; set; } = true;
-
-        public bool IgnoreType { get; set; }
+        public bool IgnoreType { get; set; } = true;
 
         public StringComparison StringComparison { get; set; } = System.StringComparison.Ordinal;
 

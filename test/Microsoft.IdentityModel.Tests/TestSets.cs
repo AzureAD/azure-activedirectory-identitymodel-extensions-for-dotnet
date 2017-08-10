@@ -597,9 +597,12 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
+                var signature = Default.Signature;
+                signature.SignedInfo.References[0].DigestMethod = $"_{SecurityAlgorithms.Sha256Digest}";
+
                 return new SignatureTestSet
                 {
-                    Signature = Default.Signature,
+                    Signature = signature,
                     TestId = nameof(UnknownDigestAlgorithm),
                     Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.Sha256Digest, $"_{SecurityAlgorithms.Sha256Digest}" )
                 };
@@ -610,9 +613,12 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
+                var signature = Default.Signature;
+                signature.SignedInfo.SignatureMethod = $"_{SecurityAlgorithms.RsaSha256Signature}";
+
                 return new SignatureTestSet
                 {
-                    Signature = Default.Signature,
+                    Signature = signature,
                     TestId = nameof(UnknownSignatureAlgorithm),
                     Xml = XmlGenerator.Generate(Default.Signature).Replace(SecurityAlgorithms.RsaSha256Signature, $"_{SecurityAlgorithms.RsaSha256Signature}" )
                 };
@@ -661,9 +667,10 @@ namespace Microsoft.IdentityModel.Tests
                 if (_signedInfo_ReferenceDigestValueNotBase64 == null)
                 {
                     var digestValue = Guid.NewGuid().ToString();
-                    var reference = Default.Reference;
+                    var reference = Default.ReferenceWithNullTokenStream;
                     reference.DigestValue = digestValue;
                     var signedInfo = Default.SignedInfo;
+                    signedInfo.References.Clear();
                     signedInfo.References.Add(reference);
                     _signedInfo_ReferenceDigestValueNotBase64 = new SignedInfoTestSet
                     {
@@ -763,11 +770,12 @@ namespace Microsoft.IdentityModel.Tests
             get
             {
                 var signedInfo = Default.SignedInfo;
-                var reference = Default.Reference;
+                var reference = Default.ReferenceWithNullTokenStream;
                 var unknownTransform = "_http://www.w3.org/2000/09/xmldsig#enveloped-signature";
                 reference.Transforms.Clear();
                 reference.Transforms.Add(unknownTransform);
-                reference.Transforms.Add(SecurityAlgorithms.Sha256Digest);
+                reference.Transforms.Add(SecurityAlgorithms.ExclusiveC14n);
+                signedInfo.References.Clear();
                 signedInfo.References.Add(reference);
                 return new SignedInfoTestSet
                 {

@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
 
         [Theory, MemberData("VerifyTheoryData")]
-        public void Verify(ReferenceTheroryData theoryData)
+        public void Verify(ReferenceTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Verify", theoryData);
             var context = new CompareContext($"{this}.Verify, {theoryData.TestId}");
@@ -81,34 +81,35 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<ReferenceTheroryData> VerifyTheoryData
+        public static TheoryData<ReferenceTheoryData> VerifyTheoryData
         {
             get
             {
                 // uncomment to view exception displayed to user
                 ExpectedException.DefaultVerbose = true;
 
-                return new TheoryData<ReferenceTheroryData>()
+                return new TheoryData<ReferenceTheoryData>()
                 {
-                    new ReferenceTheroryData
+                    new ReferenceTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "CryptoProviderFactory == null"
                     },
-                    new ReferenceTheroryData
+                    new ReferenceTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21202"),
                         ProviderFactory = CryptoProviderFactory.Default,
+                        Reference = Default.ReferenceWithNullTokenStream,
                         TestId = "XmlTokenStream == null"
                     },
-                    new ReferenceTheroryData
+                    new ReferenceTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21208"),
                         ProviderFactory = new CustomCryptoProviderFactory(),
                         Reference = Default.Reference,
                         TestId = "DigestMethod Not Supported"
                     },
-                    new ReferenceTheroryData
+                    new ReferenceTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21209"),
                         ProviderFactory = new CustomCryptoProviderFactory
@@ -124,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
-    public class ReferenceTheroryData : TheoryDataBase
+    public class ReferenceTheoryData : TheoryDataBase
     {
         public CryptoProviderFactory ProviderFactory
         {

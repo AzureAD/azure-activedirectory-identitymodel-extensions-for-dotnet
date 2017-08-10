@@ -55,8 +55,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
                 messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
-                IdentityComparer.AreOpenIdConnectMessagesEqual(messageFromJson, messageFromJsonObj, context);
-                IdentityComparer.AreOpenIdConnectMessagesEqual(messageFromJson, theoryData.Message, context);
+                IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
+                IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception exception)
