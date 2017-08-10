@@ -334,22 +334,21 @@ namespace Microsoft.IdentityModel.Tests
             // Use a special function for comparison if required by the specific class of the object.
             if (_equalityDict.TryGetValue(t1.GetType().ToString(), out Func<Object, object, CompareContext, bool> areEqual))
             {
-                return areEqual(t1, t2, localContext);
+                areEqual(t1, t2, localContext);
             } 
             // Check if any of the interfaces that the class uses require a special function.
             else if ((inter = t1.GetType().GetInterfaces().Select(t => t.ToString()).Intersect(_equalityDict.Keys).FirstOrDefault()) != null)
             {
-                return _equalityDict[inter](t1, t2, localContext);
+                _equalityDict[inter](t1, t2, localContext);
             }
             // Use default comparison for any other types.
             else
             {
                 if (ContinueCheckingEquality(t1, t2, localContext))
-                    CompareAllPublicProperties(t1, t2, localContext);
-
-                return context.Merge(localContext);
+                    CompareAllPublicProperties(t1, t2, localContext);   
             }
-            
+
+            return context.Merge(localContext);
         }
 
         public static bool AreJArraysEqual(Object object1, Object object2, CompareContext context)
