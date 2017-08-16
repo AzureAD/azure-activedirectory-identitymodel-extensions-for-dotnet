@@ -44,41 +44,84 @@ namespace Microsoft.IdentityModel.Tests
 {
     public class IdentityComparer
     {
-        private static readonly Dictionary<string, Func<Object, object, CompareContext, bool>> _equalityDict =
-            new Dictionary<string, Func<Object, object, CompareContext, bool>>()
+        private static readonly Dictionary<string, Func<object, object, CompareContext, bool>> _equalityDict =
+            new Dictionary<string, Func<object, object, CompareContext, bool>>
+            {
+                { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
+                { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
+                { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
+                { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
+                { typeof(Newtonsoft.Json.Linq.JArray).ToString(), AreJArraysEqual },
+                { typeof(string).ToString(), AreStringsEqual },
+                { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
+                { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
+                { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
+                { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
+                { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
+                { typeof(List<JsonWebKey>).ToString(), AreJsonWebKeyEnumsEqual },
+                { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
+                { typeof(List<SamlAssertion>).ToString(), AreSamlAssertionEnumsEqual},
+                { typeof(List<SamlAuthorityBinding>).ToString(), AreSamlAuthorityBindingEnumsEqual },
+                { typeof(List<SamlAction>).ToString(), AreSamlActionEnumsEqual },
+                { typeof(List<SamlStatement>).ToString(), AreSamlStatementEnumsEqual },
+                { typeof(List<SamlCondition>).ToString(), AreSamlConditionEnumsEqual },
+                { typeof(List<SamlAttribute>).ToString(), AreSamlAttributeEnumsEqual },
+                { typeof(List<Reference>).ToString(), AreReferenceEnumsEqual },
+            };
+
+        public static bool AreReferenceEnumsEqual(object object1, object object2, CompareContext context)
         {
-            { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
-            { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
-            { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
-            { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
-            { typeof(Newtonsoft.Json.Linq.JArray).ToString(), AreJArraysEqual },
-            { typeof(string).ToString(), AreStringsEqual },
-            { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
-            { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
-            { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
-            { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
-            { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
-        };
+            return AreEnumsEqual<Reference>(object1 as IEnumerable<Reference>, object2 as IEnumerable<Reference>, context, AreEqual);
+        }
+
+        public static bool AreSamlAttributeEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlAttribute>(object1 as IEnumerable<SamlAttribute>, object2 as IEnumerable<SamlAttribute>, context, AreEqual);
+        }
+
+        public static bool AreSamlConditionEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlCondition>(object1 as IEnumerable<SamlCondition>, object2 as IEnumerable<SamlCondition>, context, AreEqual);
+        }
+
+        public static bool AreSamlStatementEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlStatement>(object1 as IEnumerable<SamlStatement>, object2 as IEnumerable<SamlStatement>, context, AreEqual);
+        }
+
+        public static bool AreSamlActionEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlAction>(object1 as IEnumerable<SamlAction>, object2 as IEnumerable<SamlAction>, context, AreEqual);
+        }
+
+        public static bool AreSamlAuthorityBindingEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlAuthorityBinding>(object1 as IEnumerable<SamlAuthorityBinding>, object2 as IEnumerable<SamlAuthorityBinding>, context, AreEqual);
+        }
+
+        public static bool AreSamlAssertionEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SamlAssertion>(object1 as IEnumerable<SamlAssertion>, object2 as IEnumerable<SamlAssertion>, context, AreEqual);
+        }
 
         public static bool AreStringEnumsEqual(object object1, object object2, CompareContext context)
         {
-            IEnumerable<string> stringEnum1 = (IEnumerable<string>)object1;
-            IEnumerable<string> stringEnum2 = (IEnumerable<string>)object2;
-            return AreEnumsEqual<string>(stringEnum1, stringEnum2, context, AreStringsEqual);
+            return AreEnumsEqual<string>(object1 as IEnumerable<string>, object2 as IEnumerable<string>, context, AreStringsEqual);
         }
 
         public static bool AreSecurityKeyEnumsEqual(object object1, object object2, CompareContext context)
         {
-            IEnumerable<SecurityKey> securityKeyEnum1 = (IEnumerable<SecurityKey>)object1;
-            IEnumerable<SecurityKey> securityKeyEnum2 = (IEnumerable<SecurityKey>)object2;
-            return AreEnumsEqual<SecurityKey>(securityKeyEnum1, securityKeyEnum2, context, AreSecurityKeysEqual);
+            return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
+        }
+
+        public static bool AreJsonWebKeyEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<JsonWebKey>, object2 as IEnumerable<JsonWebKey>, context, AreEqual);
         }
 
         public static bool AreObjectEnumsEqual(object object1, object object2, CompareContext context)
         {
-            IEnumerable<object> objectEnum1 = (IEnumerable<object>)object1;
-            IEnumerable<object> objectEnum2 = (IEnumerable<object>)object2;
-            return AreEnumsEqual<object>(objectEnum1, objectEnum2, context, AreObjectsEqual);
+            return AreEnumsEqual<object>(object1 as IEnumerable<object>, object2 as IEnumerable<object>, context, AreObjectsEqual);
         }
 
         public static bool AreEnumsEqual<T>(IEnumerable<T> t1, IEnumerable<T> t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
@@ -344,8 +387,7 @@ namespace Microsoft.IdentityModel.Tests
             // Use default comparison for any other types.
             else
             {
-                if (ContinueCheckingEquality(t1, t2, localContext))
-                    CompareAllPublicProperties(t1, t2, localContext);   
+                CompareAllPublicProperties(t1, t2, localContext);
             }
 
             return context.Merge(localContext);
@@ -469,10 +511,10 @@ namespace Microsoft.IdentityModel.Tests
                     // for now just typing strings, should expand types.
                     var obj1 = dictionary1[key];
                     var obj2 = dictionary2[key];
-                    if (obj1 is int || obj1 is long || obj1 is DateTime || obj1 is bool || obj1 is double || obj1 is System.TimeSpan)
+                    if (obj1.GetType().BaseType == typeof(System.ValueType))
                     {
                         if (!obj1.Equals(obj2))
-                            localContext.Diffs.Add(BuildStringDiff(key + ": ", obj1, obj2));
+                            localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
                     }
                     else
                     {
@@ -532,16 +574,6 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             CompareAllPublicProperties(jwt1, jwt2, localContext);
-            return context.Merge(localContext);
-        }
-
-        public static bool AreOpenIdConnectMessagesEqual(OpenIdConnectMessage message1, OpenIdConnectMessage message2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(message1, message1, localContext))
-                return context.Merge(localContext);
-
-            CompareAllPublicProperties(message1, message1, localContext);
             return context.Merge(localContext);
         }
 
@@ -625,7 +657,12 @@ namespace Microsoft.IdentityModel.Tests
                 localContext.Diffs.Add("(str1 == null || str2 == null)");
 
             if (!string.Equals(str1, str2, context.StringComparison))
-                localContext.Diffs.Add($"'{str1}' != '{str2}' --- StringComparison: '{context.StringComparison}'");
+            {
+                localContext.Diffs.Add($"'{str1}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{str2}'");
+                localContext.Diffs.Add($"'{context.StringComparison}'");
+            }
 
             return context.Merge(localContext);
         }
@@ -705,14 +742,7 @@ namespace Microsoft.IdentityModel.Tests
                 var propertyContext = new CompareContext(context);
                 try
                 {
-                    // this is true if type is System.Object, no reason to go lower.
-                    if (propertyInfo.PropertyType.BaseType == null)
-                        continue;
-
                     if (type == typeof(Claim) && context.IgnoreSubject && propertyInfo.Name == "Subject")
-                        continue;
-
-                    if (type == typeof(Signature) && context.IgnoreTokenStreamReader)
                         continue;
 
                     if (propertyInfo.GetMethod != null)
@@ -724,17 +754,17 @@ namespace Microsoft.IdentityModel.Tests
 
                         if ((val1 == null) || (val2 == null))
                         {
-                            localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
+                            localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
-                        else if (val1 is int || val1 is long || val1 is DateTime || val1 is bool || val1 is double || val1 is System.TimeSpan)
+                        else if (val1.GetType().BaseType == typeof(System.ValueType))
                         {
                             if (!val1.Equals(val2))
-                                localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name + ": ", val1, val2));
+                                localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
                         else
                         {
                             AreEqual(val1, val2, propertyContext);
-                            localContext.Merge("propertyInfo.Name: " + propertyInfo.Name, propertyContext);
+                            localContext.Merge($"{propertyInfo.Name}:", propertyContext);
                         }
                     }
                 }
@@ -744,7 +774,7 @@ namespace Microsoft.IdentityModel.Tests
                 }
             }
 
-            return context.Merge($"CompareAllPublicProperties for: {type}", localContext);
+            return context.Merge($"CompareAllPublicProperties: {type}", localContext);
         }
 
         public static bool ContinueCheckingEquality(object obj1, object obj2, CompareContext context)
@@ -754,13 +784,13 @@ namespace Microsoft.IdentityModel.Tests
 
             if (obj1 == null)
             {
-                context.Diffs.Add(BuildStringDiff(obj2.GetType().ToString() + ": ", obj1, obj2));
+                context.Diffs.Add(BuildStringDiff(obj2.GetType().ToString(), obj1, obj2));
                 return false;
             }
 
             if (obj2 == null)
             {
-                context.Diffs.Add(BuildStringDiff(obj1.GetType().ToString() + ": ", obj1, obj2));
+                context.Diffs.Add(BuildStringDiff(obj1.GetType().ToString(), obj1, obj2));
                 return false;
             }
 

@@ -128,11 +128,16 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
 
+                // Create a signature that doesn't have a null TokenStream
+                var signature = SignatureTestSet.DefaultSignature.Signature;
+                signature.SignedInfo.References.Clear();
+                signature.SignedInfo.References.Add(Default.Reference);
+
                 var theoryData = new TheoryData<SignatureTheoryData>();
                 theoryData.Add(new SignatureTheoryData
                 {
                     First = true,
-                    Signature = SignatureTestSet.DefaultSignature.Signature,
+                    Signature = signature,
                     TestId = nameof(SignatureTestSet.DefaultSignature),
                     Xml = SignatureTestSet.DefaultSignature.Xml
                 });

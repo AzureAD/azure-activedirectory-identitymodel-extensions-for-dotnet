@@ -312,6 +312,19 @@ namespace Microsoft.IdentityModel.Tests
             get => "<OuterXml></OuterXml>";
         }
 
+        public static Reference ReferenceWithNullTokenStream
+        {
+            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
+            {
+                Id = ReferenceId,
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Prefix = ReferencePrefix,
+                Type = ReferenceType,
+                Uri = ReferenceUri
+            };
+        }
+
         public static Reference Reference
         {
             get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
@@ -468,7 +481,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SignedInfo SignedInfo
         {
-            get => new SignedInfo(Reference)
+            get => new SignedInfo(ReferenceWithNullTokenStream)
             {
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
                 SignatureMethod = SecurityAlgorithms.RsaSha256Signature
