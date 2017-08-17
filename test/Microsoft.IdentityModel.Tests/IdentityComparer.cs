@@ -39,6 +39,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Newtonsoft.Json.Linq;
 
@@ -69,6 +70,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(List<Reference>).ToString(), AreReferenceEnumsEqual },
                 { typeof(AuthenticationProtocolMessage).ToString(), CompareAllPublicProperties },
+                { typeof(byte[]).ToString(), AreBytesEqual },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
@@ -85,10 +87,19 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(Reference).ToString(), CompareAllPublicProperties },
                 { typeof(RsaSecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(SamlAction).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAudienceRestrictionCondition).ToString(), CompareAllPublicProperties },
                 { typeof(SamlAssertion).ToString(), CompareAllPublicProperties},
                 { typeof(SamlAttribute).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAttributeStatement).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAuthenticationStatement).ToString(), CompareAllPublicProperties },
                 { typeof(SamlAuthorityBinding).ToString(), CompareAllPublicProperties },
+                { typeof(SamlAuthorizationDecisionStatement).ToString(), CompareAllPublicProperties },
                 { typeof(SamlCondition).ToString(), CompareAllPublicProperties },
+                { typeof(SamlDoNotCacheCondition).ToString(), CompareAllPublicProperties },
+                { typeof(SamlSecurityToken).ToString(), CompareAllPublicProperties },
+                { typeof(SamlSecurityTokenHandler).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2SecurityToken).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2SecurityTokenHandler).ToString(), CompareAllPublicProperties },
                 { typeof(SamlStatement).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
@@ -432,7 +443,10 @@ namespace Microsoft.IdentityModel.Tests
                 return context.Merge(localContext);
 
             if (a1.Count != a2.Count)
+            {
+                localContext.Diffs.Add("Count:");
                 localContext.Diffs.Add($"a1.Count != a2.Count. '{a1.Count}' : '{a2.Count}'");
+            }
 
             return context.Merge(localContext);
         }
@@ -455,8 +469,12 @@ namespace Microsoft.IdentityModel.Tests
             return true;
         }
 
-        public static bool AreBytesEqual(byte[] bytes1, byte[] bytes2)
+        public static bool AreBytesEqual(object object1, object object2, CompareContext context)
         {
+            var bytes1 = (byte[]) object1;
+            var bytes2 = (byte[]) object2;
+
+            var localContext = new CompareContext(context);
             if (bytes1 == null && bytes2 == null)
             {
                 return true;
@@ -464,23 +482,27 @@ namespace Microsoft.IdentityModel.Tests
 
             if (bytes1 == null || bytes2 == null)
             {
-                return false;
+                localContext.Diffs.Add("(bytes1 == null || bytes2 == null)");
             }
 
             if (bytes1.Length != bytes2.Length)
             {
-                return false;
+                localContext.Diffs.Add("(bytes1.Length != bytes2.Length)");
             }
-
-            for (int i = 0; i < bytes1.Length; i++)
+            else
             {
-                if (bytes1[i] != bytes2[i])
+                for (int i = 0; i < bytes1.Length; i++)
                 {
-                    return false;
+                    if (bytes1[i] != bytes2[i])
+                    {
+                        localContext.Diffs.Add($"'{bytes1}'");
+                        localContext.Diffs.Add("!=");
+                        localContext.Diffs.Add($"'{bytes2}'");
+                    }
                 }
             }
-
-            return true;
+           
+            return context.Merge(localContext);
         }
 
         public static bool AreClaimsEqual(Claim claim1, Claim claim2, CompareContext context)
@@ -638,28 +660,28 @@ namespace Microsoft.IdentityModel.Tests
             if (!ContinueCheckingEquality(rsaParameters1, rsaParameters2, localContext))
                 return context.Merge(localContext);
 
-            if (!AreBytesEqual(rsaParameters1.D, rsaParameters2.D))
+            if (!AreBytesEqual(rsaParameters1.D, rsaParameters2.D, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.D, rsaParameters2.D)");
 
-            if (!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP))
+            if (!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP)");
 
-            if (!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ))
+            if (!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ)");
 
-            if (!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent))
+            if (!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent)");
 
-            if (!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ))
+            if (!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ)");
 
-            if (!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus))
+            if (!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus)");
 
-            if (!AreBytesEqual(rsaParameters1.P, rsaParameters2.P))
+            if (!AreBytesEqual(rsaParameters1.P, rsaParameters2.P, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.P, rsaParameters2.P)");
 
-            if (!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q))
+            if (!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q, context))
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q)");
 
             return context.Merge(localContext);
@@ -761,12 +783,16 @@ namespace Microsoft.IdentityModel.Tests
 
                         if ((val1 == null) || (val2 == null))
                         {
+                            localContext.Diffs.Add($"{propertyInfo.Name}:");
                             localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
                         else if (val1.GetType().BaseType == typeof(System.ValueType))
                         {
                             if (!val1.Equals(val2))
+                            {
+                                localContext.Diffs.Add($"{propertyInfo.Name}:");
                                 localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
+                            }
                         }
                         else
                         {
