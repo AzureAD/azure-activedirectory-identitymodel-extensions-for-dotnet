@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX13007 = "IDX13007: Token endpoint is missing in security token service type RoleDescriptor.";
         internal const string IDX13008 = "IDX13008: 'Use' attribute is missing in KeyDescriptor.";
         internal const string IDX13009 = "IDX13009: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
+        internal const string IDX13010 = "IDX13010: 'keyInfo' is null.";
 
 #pragma warning restore 1591
 

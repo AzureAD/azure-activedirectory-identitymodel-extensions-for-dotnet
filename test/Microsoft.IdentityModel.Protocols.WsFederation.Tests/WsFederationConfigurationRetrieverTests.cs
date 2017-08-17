@@ -193,129 +193,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadEntityDescriptor(WsFederationMetadataTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadEntityDescriptor", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ReadEntityDescriptor", theoryData);
             var serializer = new WsFederationMetadataSerializerPublic();
             try
             {
-                serializer.ReadEntityDescriptorPublic(null, XmlReader.Create(new StringReader("some string")));
-                theoryData.ExpectedException.ProcessNoException();
+                serializer.ReadEntityDescriptorPublic(null);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
-
-            try
-            {
-                serializer.ReadEntityDescriptorPublic(new WsFederationConfiguration(), null);
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadKeyDescriptorForSigningTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadKeyDescriptorForSigning(WsFederationMetadataTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigning", theoryData);
-            var serializer = new WsFederationMetadataSerializerPublic();
-            try
-            {
-                serializer.ReadKeyDescriptorForSigningPublic(null, XmlReader.Create(new StringReader("some string")));
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            try
-            {
-                serializer.ReadKeyDescriptorForSigningPublic(new WsFederationConfiguration(), null);
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadKeyDescriptorForSigningKeyUseTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadKeyDescriptorForSigningKeyUse(WsFederationMetadataTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningKeyUse", theoryData);
-            var serializer = new WsFederationMetadataSerializerPublic();
-            try
-            {
-                serializer.ReadKeyDescriptorForSigningPublic(new WsFederationConfiguration(), XmlReader.Create(new StringReader(theoryData.Metadata)));
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadSecurityTokenServiceTypeRoleDescriptorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationMetadataTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.ReadSecurityTokenServiceTypeRoleDescriptor", theoryData);
-            var serializer = new WsFederationMetadataSerializerPublic();
-            try
-            { 
-                serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(null, XmlReader.Create(new StringReader("some string")));
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            try
-            {
-                serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(new WsFederationConfiguration(), null);
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadSecurityTokenEndpointTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ReadSecurityTokenEndpoint(WsFederationMetadataTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
-            var serializer = new WsFederationMetadataSerializerPublic();
-            try
-            {
-                serializer.ReadSecurityTokenEndpointPublic(null, XmlReader.Create(new StringReader("some string")));
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            try
-            { 
-                serializer.ReadSecurityTokenEndpointPublic(new WsFederationConfiguration(), null);
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMetadataTheoryData> ReadEntityDescriptorTheoryData
@@ -333,6 +222,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadKeyDescriptorForSigningTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadKeyDescriptorForSigning(WsFederationMetadataTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigning", theoryData);
+            var serializer = new WsFederationMetadataSerializerPublic();
+            try
+            {
+                serializer.ReadKeyDescriptorForSigningPublic(null);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<WsFederationMetadataTheoryData> ReadKeyDescriptorForSigningTheoryData
         {
             get
@@ -346,6 +254,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     }
                 };
             }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadKeyDescriptorForSigningKeyUseTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadKeyDescriptorForSigningKeyUse(WsFederationMetadataTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningKeyUse", theoryData);
+            var serializer = new WsFederationMetadataSerializerPublic();
+            try
+            {
+                serializer.ReadKeyDescriptorForSigningPublic(XmlReader.Create(new StringReader(theoryData.Metadata)));
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMetadataTheoryData> ReadKeyDescriptorForSigningKeyUseTheoryData
@@ -370,6 +297,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadSecurityTokenServiceTypeRoleDescriptorTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationMetadataTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenServiceTypeRoleDescriptor", theoryData);
+            var serializer = new WsFederationMetadataSerializerPublic();
+            try
+            {
+                serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(null);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<WsFederationMetadataTheoryData> ReadSecurityTokenServiceTypeRoleDescriptorTheoryData
         {
             get
@@ -383,6 +329,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     }
                 };
             }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadSecurityTokenEndpointTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadSecurityTokenEndpoint(WsFederationMetadataTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
+            var serializer = new WsFederationMetadataSerializerPublic();
+            try
+            { 
+                serializer.ReadSecurityTokenEndpointPublic(null);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMetadataTheoryData> ReadSecurityTokenEndpointTheoryData
@@ -418,24 +383,24 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
         private class WsFederationMetadataSerializerPublic : WsFederationMetadataSerializer
         {
-            public void ReadEntityDescriptorPublic(WsFederationConfiguration configuration, XmlReader reader)
+            public WsFederationConfiguration ReadEntityDescriptorPublic(XmlReader reader)
             {
-                base.ReadEntityDescriptor(configuration, reader);
+                return base.ReadEntityDescriptor(reader);
             }
 
-            public void ReadKeyDescriptorForSigningPublic(WsFederationConfiguration configuration, XmlReader reader)
+            public KeyInfo ReadKeyDescriptorForSigningPublic(XmlReader reader)
             {
-                base.ReadKeyDescriptorForSigning(configuration, reader);
+                return base.ReadKeyDescriptorForSigning(reader);
             }
 
-            public void ReadSecurityTokenServiceTypeRoleDescriptorPublic(WsFederationConfiguration configuration, XmlReader reader)
+            public SecurityTokenServiceTypeRoleDescriptor ReadSecurityTokenServiceTypeRoleDescriptorPublic(XmlReader reader)
             {
-                base.ReadSecurityTokenServiceTypeRoleDescriptor(configuration, reader);
+                return base.ReadSecurityTokenServiceTypeRoleDescriptor(reader);
             }
 
-            public void ReadSecurityTokenEndpointPublic(WsFederationConfiguration configuration, XmlReader reader)
+            public string ReadSecurityTokenEndpointPublic(XmlReader reader)
             {
-                base.ReadSecurityTokenEndpoint(configuration, reader);
+                return base.ReadSecurityTokenEndpoint(reader);
             }
         }
     }
