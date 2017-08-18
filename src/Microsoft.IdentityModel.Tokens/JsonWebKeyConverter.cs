@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -94,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
             jsonWebKey.Kid = key.KeyId;
             jsonWebKey.X5t = key.X5t;
             if (key.Certificate.RawData != null)
-                jsonWebKey.X5c.Add(Base64UrlEncoder.Encode(key.Certificate.RawData));
+                jsonWebKey.X5c.Add(Convert.ToBase64String(key.Certificate.RawData));
             return jsonWebKey;
         }
 

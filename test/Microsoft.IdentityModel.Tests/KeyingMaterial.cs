@@ -628,7 +628,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new JsonWebKey
                 {
-                    K = "bd0Q+Z6Yd34=",
+                    K = "bd0Q-Z6Yd34",
                     Kid = "DefaultSymmetricSecurityKey_64",
                     Kty = JsonWebAlgorithmsKeyTypes.Octet
                 };

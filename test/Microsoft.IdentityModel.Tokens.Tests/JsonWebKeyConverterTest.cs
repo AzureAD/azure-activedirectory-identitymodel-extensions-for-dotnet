@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
@@ -44,8 +45,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(theoryData.SecurityKey);
-                theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(jsonWebKey, theoryData.ComparisonJsonWebKey, context);
+                if (theoryData.SecurityKey.GetType() == typeof(X509SecurityKey))
+                {
+                    theoryData.ExpectedException.ProcessNoException(context);
+                    IdentityComparer.AreEqual(jsonWebKey.Kty, theoryData.ComparisonJsonWebKey.Kty, context);
+                    IdentityComparer.AreEqual(jsonWebKey.Kid, theoryData.ComparisonJsonWebKey.Kid, context);
+                    var certificateExpected = (theoryData.SecurityKey as X509SecurityKey).Certificate;
+                    var certificateNew = new X509Certificate2(Convert.FromBase64String(jsonWebKey.X5c[0]));
+                    IdentityComparer.AreEqual(certificateNew.Equals(certificateExpected), true, context);
+                }
+                else
+                {
+                    theoryData.ExpectedException.ProcessNoException(context);
+                    IdentityComparer.AreEqual(jsonWebKey, theoryData.ComparisonJsonWebKey, context);
+                }
             }
             catch(Exception ex)
             {
@@ -63,6 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     new ConverterTheoryData
                     {
+                        First = true,
                         SecurityKey = KeyingMaterial.RsaSecurityKey_2048,
                         ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyRsa256,
                         TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
@@ -83,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
                         ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyDefaultX509Key_2048,
-                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048)
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId)
                     },
                     new ConverterTheoryData
                     {
