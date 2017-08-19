@@ -33,7 +33,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     internal static class LogMessages
     {
 #pragma warning disable 1591
-
         // SecurityTokenHandler messages
         internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX10721 = "IDX10721: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'.";
@@ -112,7 +111,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11900 = "IDX11900: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
         internal const string IDX11901 = "IDX11901: Unable to write SamlAssertion: {0}.{1} is empty. This statement must contain at least one Action.";
         internal const string IDX11902 = "IDX11902: Unable to write SamlAssertion: SamlEvidence must have at least one assertion or assertion reference.";
-
 #pragma warning restore 1591
     }
 }

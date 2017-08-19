@@ -25,18 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Xml
+using static Microsoft.IdentityModel.Logging.LogHelper;
+
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
     /// <summary>
-    /// Defines a XMLTransform
+    /// Defines a XML transform that removes the XML nodes associated with the Signature.
     /// </summary>
-    public abstract class Transform
+    public sealed class EnvelopedSignatureTransform : Transform
     {
         /// <summary>
-        /// Called to transform a <see cref="XmlTokenStream"/>
+        /// Creates an EnvelopedSignatureTransform
         /// </summary>
-        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> to process.</param>
-        /// <returns></returns>
-        public abstract XmlTokenStream Process(XmlTokenStream tokenStream);
+        public EnvelopedSignatureTransform()
+        {
+        }
+
+        /// <summary>
+        /// Sets the reader to exclude the &lt;Signature> element
+        /// </summary>
+        /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
+        /// <returns><see cref="XmlTokenStream"/>with exclusion set.</returns>
+        public override XmlTokenStream Process(XmlTokenStream tokenStream)
+        {
+            if (tokenStream == null)
+                LogArgumentNullException(nameof(tokenStream));
+
+            tokenStream.SetElementExclusion("Signature", "http://www.w3.org/2000/09/xmldsig#");
+            return tokenStream;
+        }
     }
 }

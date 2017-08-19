@@ -28,6 +28,7 @@
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Xml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -49,9 +50,9 @@ namespace Microsoft.IdentityModel.Tests
 
         public static XmlTokenStream CreateXmlTokenStream(string xml)
         {
-            var envelopedSignatureReader = CreateEnvelopedSignatureReader(xml);
-            while (envelopedSignatureReader.Read());
-            return envelopedSignatureReader.TokenStream;
+            var xmlTokenStreamReader = new XmlTokenStreamReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            while (xmlTokenStreamReader.Read());
+            return xmlTokenStreamReader.TokenStream;
         }
 
         public static byte[] CreateDigestBytes(string xml, bool includeComments)

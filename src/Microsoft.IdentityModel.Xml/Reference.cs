@@ -31,6 +31,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Xml.XmlUtil;
 

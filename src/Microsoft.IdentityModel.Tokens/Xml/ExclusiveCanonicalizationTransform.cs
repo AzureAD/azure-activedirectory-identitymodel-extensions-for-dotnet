@@ -31,7 +31,7 @@ using System.Security.Cryptography;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
     /// <summary>
     /// Represents Canonicalization algorithms found in &lt;SignedInfo> and in &lt;Reference>.
@@ -65,16 +65,6 @@ namespace Microsoft.IdentityModel.Xml
             {
                 WriteCanonicalStream(stream, tokenStream, IncludeComments);
                 stream.Flush();
-#if DEBUG
-                var hex = XmlUtil.GenerateHexString(stream.ToArray());
-                var streambytes = stream.ToArray();
-                var xml = System.Text.Encoding.UTF8.GetString(stream.ToArray());
-                var streamBytes = hash.ComputeHash(stream);
-                var hashBytes = hash.ComputeHash(streamBytes);
-                var hashByteValue = Convert.ToBase64String(hashBytes);
-                var hexBytes = XmlUtil.GenerateHexString(hashBytes);
-                var byteValue = Convert.ToBase64String(streamBytes);
-#endif
                 return hash.ComputeHash(stream.ToArray());
             }
         }

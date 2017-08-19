@@ -29,11 +29,10 @@ using System;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
     /// <summary>
-    /// Class wraps a given writer and delegates all XmlDictionaryWriter calls 
-    /// to the InnerWriter.
+    /// Wraps a <see cref="XmlDictionaryWriter"/> and delegates to InnerWriter.
     /// </summary>
     public class DelegatingXmlDictionaryWriter : XmlDictionaryWriter
     {
@@ -48,13 +47,13 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets or sets a writer that receive the XML for tracing.
+        /// Gets or sets a <see cref="XmlDictionaryWriter"/> for tracing.
         /// </summary>
         /// <exception cref="ArgumentNullException"> if 'value' is null.</exception>
         protected XmlDictionaryWriter TracingWriter
         {
             get => _tracingWriter;
-            set => _tracingWriter = value ??  throw LogArgumentNullException(nameof(value));
+            set => _tracingWriter = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -64,33 +63,29 @@ namespace Microsoft.IdentityModel.Xml
         protected XmlDictionaryWriter InnerWriter
         {
             get => _innerWriter;
-            set => _innerWriter = value ??  throw LogArgumentNullException(nameof(value));
+            set => _innerWriter = value ?? throw LogArgumentNullException(nameof(value));
         }
 
-    #if DESKTOPNET45
+#if NET45 || NET451
         /// <summary>
         /// Closes the underlying stream.
         /// </summary>
         public override void Close()
         {
-            if (_innerWriter != null)
-                _innerWriter.Close();
-
-            if (_tracingWriter != null)
-                _tracingWriter.Close();
+            UseInnerWriter.Close();
+            if (TracingWriter != null)
+                TracingWriter.Close();
         }
-    #endif
+#endif
 
         /// <summary>
         /// Flushes the underlying stream.
         /// </summary>
         public override void Flush()
         {
-            if (_innerWriter != null)
-                _innerWriter.Flush();
-
-            if (_tracingWriter != null)
-                _tracingWriter.Flush();
+            UseInnerWriter.Flush();
+            if (TracingWriter != null)
+                TracingWriter.Flush();
         }
 
         /// <summary>
@@ -101,11 +96,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="count">The number of bytes to write.</param>
         public override void WriteBase64(byte[] buffer, int index, int count)
         {
-            if (_innerWriter != null)
-                _innerWriter.WriteBase64(buffer, index, count);
-
-            if (_tracingWriter != null)
-                _tracingWriter.WriteBase64(buffer, index, count);
+            UseInnerWriter.WriteBase64(buffer, index, count);
+            if (TracingWriter != null)
+                TracingWriter.WriteBase64(buffer, index, count);
         }
 
         /// <summary>
@@ -114,11 +107,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="text">The text to place inside the CDATA block.</param>
         public override void WriteCData(string text)
         {
-            if (_innerWriter != null)
-                _innerWriter.WriteCData(text);
-
-            if (_tracingWriter != null)
-                _tracingWriter.WriteCData(text);
+            UseInnerWriter.WriteCData(text);
+            if (TracingWriter != null)
+                TracingWriter.WriteCData(text);
         }
 
         /// <summary>
@@ -127,9 +118,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="ch">The Unicode character for which to generate a character entity.</param>
         public override void WriteCharEntity(char ch)
         {
-            _innerWriter.WriteCharEntity(ch);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteCharEntity(ch);
+            UseInnerWriter.WriteCharEntity(ch);
+            if (TracingWriter != null)
+                TracingWriter.WriteCharEntity(ch);
         }
 
         /// <summary>
@@ -140,9 +131,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="count">The number of characters to write.</param>
         public override void WriteChars(char[] buffer, int index, int count)
         {
-            _innerWriter.WriteChars(buffer, index, count);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteChars(buffer, index, count);
+            UseInnerWriter.WriteChars(buffer, index, count);
+            if (TracingWriter != null)
+                TracingWriter.WriteChars(buffer, index, count);
         }
 
         /// <summary>
@@ -151,9 +142,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="text">Text to place inside the comment.</param>
         public override void WriteComment(string text)
         {
-            _innerWriter.WriteComment(text);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteComment(text);
+            UseInnerWriter.WriteComment(text);
+            if (TracingWriter != null)
+                TracingWriter.WriteComment(text);
         }
 
         /// <summary>
@@ -168,9 +159,9 @@ namespace Microsoft.IdentityModel.Xml
         /// this argument.</param>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
-            _innerWriter.WriteDocType(name, pubid, sysid, subset);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteDocType(name, pubid, sysid, subset);
+            UseInnerWriter.WriteDocType(name, pubid, sysid, subset);
+            if (TracingWriter != null)
+                TracingWriter.WriteDocType(name, pubid, sysid, subset);
         }
 
         /// <summary>
@@ -178,9 +169,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void WriteEndAttribute()
         {
-            _innerWriter.WriteEndAttribute();
-            if (_tracingWriter != null)
-                _tracingWriter.WriteEndAttribute();
+            UseInnerWriter.WriteEndAttribute();
+            if (TracingWriter != null)
+                TracingWriter.WriteEndAttribute();
         }
 
         /// <summary>
@@ -188,9 +179,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void WriteEndDocument()
         {
-            _innerWriter.WriteEndDocument();
-            if (_tracingWriter != null)
-                _tracingWriter.WriteEndDocument();
+            UseInnerWriter.WriteEndDocument();
+            if (TracingWriter != null)
+                TracingWriter.WriteEndDocument();
         }
 
         /// <summary>
@@ -198,9 +189,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void WriteEndElement()
         {
-            _innerWriter.WriteEndElement();
-            if (_tracingWriter != null)
-                _tracingWriter.WriteEndElement();
+            UseInnerWriter.WriteEndElement();
+            if (TracingWriter != null)
+                TracingWriter.WriteEndElement();
         }
 
         /// <summary>
@@ -209,10 +200,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="name">The name of the entity reference.</param>
         public override void WriteEntityRef(string name)
         {
-            _innerWriter.WriteEntityRef(name);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteEntityRef(name);
-
+            UseInnerWriter.WriteEntityRef(name);
+            if (TracingWriter != null)
+                TracingWriter.WriteEntityRef(name);
         }
 
         /// <summary>
@@ -220,9 +210,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void WriteFullEndElement()
         {
-            _innerWriter.WriteFullEndElement();
-            if (_tracingWriter != null)
-                _tracingWriter.WriteFullEndElement();
+            UseInnerWriter.WriteFullEndElement();
+            if (TracingWriter != null)
+                TracingWriter.WriteFullEndElement();
         }
 
         /// <summary>
@@ -232,9 +222,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="text">The text to include in the processing instruction.</param>
         public override void WriteProcessingInstruction(string name, string text)
         {
-            _innerWriter.WriteProcessingInstruction(name, text);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteProcessingInstruction(name, text);
+            UseInnerWriter.WriteProcessingInstruction(name, text);
+            if (TracingWriter != null)
+                TracingWriter.WriteProcessingInstruction(name, text);
         }
 
         /// <summary>
@@ -245,9 +235,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="count">The number of characters to write.</param>
         public override void WriteRaw(char[] buffer, int index, int count)
         {
-            _innerWriter.WriteRaw(buffer, index, count);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteRaw(buffer, index, count);
+            UseInnerWriter.WriteRaw(buffer, index, count);
+            if (TracingWriter != null)
+                TracingWriter.WriteRaw(buffer, index, count);
         }
 
         /// <summary>
@@ -256,9 +246,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="data">String containing the text to write.</param>
         public override void WriteRaw(string data)
         {
-            _innerWriter.WriteRaw(data);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteRaw(data);
+            UseInnerWriter.WriteRaw(data);
+            if (TracingWriter != null)
+                TracingWriter.WriteRaw(data);
         }
 
         /// <summary>
@@ -269,9 +259,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="namespace">The namespace URI for the attribute.</param>
         public override void WriteStartAttribute(string prefix, string localName, string @namespace)
         {
-            _innerWriter.WriteStartAttribute(prefix, localName, @namespace);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteStartAttribute(prefix, localName, @namespace);
+            UseInnerWriter.WriteStartAttribute(prefix, localName, @namespace);
+            if (TracingWriter != null)
+                TracingWriter.WriteStartAttribute(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -279,9 +269,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override void WriteStartDocument()
         {
-            _innerWriter.WriteStartDocument();
-            if (_tracingWriter != null)
-                _tracingWriter.WriteStartDocument();
+            UseInnerWriter.WriteStartDocument();
+            if (TracingWriter != null)
+                TracingWriter.WriteStartDocument();
         }
 
         /// <summary>
@@ -291,9 +281,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="standalone">If true, it writes "standalone=yes"; if false, it writes "standalone=no".</param>
         public override void WriteStartDocument(bool standalone)
         {
-            _innerWriter.WriteStartDocument(standalone);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteStartDocument(standalone);
+            UseInnerWriter.WriteStartDocument(standalone);
+            if (TracingWriter != null)
+                TracingWriter.WriteStartDocument(standalone);
         }
 
         /// <summary>
@@ -305,9 +295,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="namespace">The namespace URI to associate with the element.</param>
         public override void WriteStartElement(string prefix, string localName, string @namespace)
         {
-            _innerWriter.WriteStartElement(prefix, localName, @namespace);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteStartElement(prefix, localName, @namespace);
+            UseInnerWriter.WriteStartElement(prefix, localName, @namespace);
+            if (TracingWriter != null)
+                TracingWriter.WriteStartElement(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -315,7 +305,7 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override WriteState WriteState
         {
-            get { return _innerWriter.WriteState; }
+            get { return UseInnerWriter.WriteState; }
         }
 
         /// <summary>
@@ -324,9 +314,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="text">The text to write.</param>
         public override void WriteString(string text)
         {
-            _innerWriter.WriteString(text);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteString(text);
+            UseInnerWriter.WriteString(text);
+            if (TracingWriter != null)
+                TracingWriter.WriteString(text);
         }
 
         /// <summary>
@@ -336,9 +326,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="highChar">The high surrogate. This must be a value between 0xD800 and 0xDBFF.</param>
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
-            _innerWriter.WriteSurrogateCharEntity(lowChar, highChar);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteSurrogateCharEntity(lowChar, highChar);
+            UseInnerWriter.WriteSurrogateCharEntity(lowChar, highChar);
+            if (TracingWriter != null)
+                TracingWriter.WriteSurrogateCharEntity(lowChar, highChar);
         }
 
         /// <summary>
@@ -347,9 +337,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="ws">The string of white space characters.</param>
         public override void WriteWhitespace(string ws)
         {
-            _innerWriter.WriteWhitespace(ws);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteWhitespace(ws);
+            UseInnerWriter.WriteWhitespace(ws);
+            if (TracingWriter != null)
+                TracingWriter.WriteWhitespace(ws);
         }
 
         /// <summary>
@@ -359,9 +349,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="value">Attribute value.</param>
         public override void WriteXmlAttribute(string localName, string value)
         {
-            _innerWriter.WriteXmlAttribute(localName, value);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteAttributeString(localName, value);
+            UseInnerWriter.WriteXmlAttribute(localName, value);
+            if (TracingWriter != null)
+                TracingWriter.WriteAttributeString(localName, value);
         }
 
         /// <summary>
@@ -371,20 +361,29 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="namespace">The namespace Uri itself.</param>
         public override void WriteXmlnsAttribute(string prefix, string @namespace)
         {
-            _innerWriter.WriteXmlnsAttribute(prefix, @namespace);
-            if (_tracingWriter != null)
-                _tracingWriter.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
+            UseInnerWriter.WriteXmlnsAttribute(prefix, @namespace);
+            if (TracingWriter != null)
+                TracingWriter.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
         }
 
         /// <summary>
         /// Returns the closest prefix defined in the current namespace scope for the namespace URI.
         /// </summary>
-        /// <param name="namespace">The namespace URI whose prefix you want to find.</param>
+        /// <param name="namespace">The namespace URI whose prefix to find.</param>
         /// <returns>The matching prefix or null if no matching namespace URI is found in the
         /// current scope.</returns>
         public override string LookupPrefix(string @namespace)
         {
-            return _innerWriter.LookupPrefix(@namespace);
+            return UseInnerWriter.LookupPrefix(@namespace);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="UseInnerWriter"/>
+        /// </summary>
+        /// <exception cref="InvalidOperationException"> if <see cref="InnerWriter"/> is null.</exception>
+        protected XmlDictionaryWriter UseInnerWriter
+        {
+            get => InnerWriter ?? throw LogExceptionMessage(new InvalidOperationException(LogMessages.IDX21209));
         }
     }
 }

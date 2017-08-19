@@ -25,51 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-#if EncryptedTokens
+using System.Security.Cryptography;
 
-using System.Xml;
-
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
-    internal class EncryptionMethodElement
+    /// <summary>
+    /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
+    /// </summary>
+    public abstract class CanonicalizingTransfrom
     {
-        public string Algorithm { get; set; }
-
-        public string Parameters { get; set; }
-
-        public void ReadXml(XmlDictionaryReader reader)
+        /// <summary>
+        /// Gets or sets a value indicating if this transform should include comments.
+        /// </summary>
+        public bool IncludeComments
         {
-            XmlUtil.CheckReaderOnEntry(reader, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
-
-            Algorithm = reader.GetAttribute(XmlEncryptionConstants.Attributes.Algorithm, null);
-            if (!reader.IsEmptyElement)
-            {
-                //
-                // Trace unread missing element
-                //
-
-                string xml = reader.ReadOuterXml();
-            }
-            else
-            {
-                //
-                // Read to the next element
-                //
-                reader.Read();
-            }
+            get;
+            set;
         }
 
-        public void WriteXml(XmlWriter writer)
-        {
-            // <EncryptionMethod>
-            writer.WriteStartElement(XmlEncryptionConstants.Prefix, XmlEncryptionConstants.Elements.EncryptionMethod, XmlEncryptionConstants.Namespace);
-
-            writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Algorithm, null, Algorithm);
-
-            // </EncryptionMethod>
-            writer.WriteEndElement();
-        }
-
+        /// <summary>
+        /// Processes a set of XML nodes and returns the hash of the octets.
+        /// </summary>
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> that has the XML nodes to process.</param>
+        /// <param name="hashAlg">the <see cref="HashAlgorithm"/>to use</param>
+        /// <returns>the hash of the processed XML nodes.</returns>
+        public abstract byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hashAlg);
     }
 }
-#endif

@@ -155,27 +155,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Reads a &lt;saml:Assertion> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="NotSupportedException">if assertion is encrypted.</exception>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
+            if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11141));
+
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
             var envelopeReader = new EnvelopedSignatureReader(reader);
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
-
-            // TODO - handle EncryptedAssertions
-            // If it's an EncryptedAssertion, we need to retrieve the plain text
-            // and re-point our reader
-            //if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-            //{
-            //    EncryptingCredentials encryptingCredentials = null;
-            //    //plaintextReader = CreatePlaintextReaderFromEncryptedData(
-            //    //                    plaintextReader,
-            //    //                    out encryptingCredentials);
-
-            //    assertion.EncryptingCredentials = encryptingCredentials;
-            //}
-
             try
             {
                 // @xsi:type
@@ -287,7 +278,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Attribute"/> instance.</returns>
         public virtual Saml2Attribute ReadAttribute(XmlDictionaryReader reader)
         {
-            // TODO this is public temporarily until 'actor' processing
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Attribute, Saml2Constants.Namespace);
             try
             {
@@ -813,7 +803,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         if (reader.IsStartElement(Saml2Constants.Elements.Condition, Saml2Constants.Namespace))
                         {
                             // Since Condition is abstract, must process based on xsi:type
-                            XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
+                            var declaredType = XmlUtil.GetXsiTypeAsQualifiedName(reader);
 
                             // No type, throw
                             if (declaredType == null
@@ -892,49 +882,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader"><see cref="XmlReader"/> pointing at the XML EncryptedId element</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/> representing the EncryptedId that was read</returns>
-        /// <exception cref="ArgumentNullException">The input parameter 'reader' is null.</exception>
-        /// <exception cref="NotImplementedException">Not implemented right now.</exception>
+        /// <exception cref="NotSupportedException">Not implemented right now.</exception>
         protected virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
         {
-            throw new NotImplementedException("not implemented yet");
-            //if (reader == null)
-            //{
-            //    throw LogArgumentNullException(nameof(reader));
-            //}
-
-            //reader.MoveToContent();
-
-            //if (!reader.IsStartElement(Saml2Constants.Elements.EncryptedID, Saml2Constants.Namespace))
-            //{
-            //    // throw if wrong element
-            //    reader.ReadStartElement(Saml2Constants.Elements.EncryptedID, Saml2Constants.Namespace);
-            //}
-
-            //Collection<EncryptedKeyIdentifierClause> clauses = new Collection<EncryptedKeyIdentifierClause>();
-            //EncryptingCredentials encryptingCredentials = null;
-            //Saml2NameIdentifier saml2NameIdentifier = null;
-
-            //using (StringReader sr = new StringReader(reader.ReadOuterXml()))
-            //{
-            //    using (XmlDictionaryReader wrappedReader = new WrappedXmlDictionaryReader(XmlReader.Create(sr), XmlDictionaryReaderQuotas.Max))
-            //    {
-            //        XmlReader plaintextReader = CreatePlaintextReaderFromEncryptedData(
-            //                    wrappedReader,
-            //                    Configuration.ServiceTokenResolver,
-            //                    this.KeyInfoSerializer,
-            //                    clauses,
-            //                    out encryptingCredentials);
-
-            //        saml2NameIdentifier = this.ReadNameIdType(plaintextReader);
-            //        saml2NameIdentifier.EncryptingCredentials = encryptingCredentials;
-            //        foreach (EncryptedKeyIdentifierClause clause in clauses)
-            //        {
-            //            saml2NameIdentifier.ExternalEncryptedKeys.Add(clause);
-            //        }
-            //    }
-            //}
-
-            //return saml2NameIdentifier;
+            throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11140));
         }
 
         /// <summary>
@@ -1151,7 +1102,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Statement, Saml2Constants.Namespace);
 
             // Since Statement is an abstract type, we have to switch off the xsi:type declaration
-            XmlQualifiedName declaredType = XmlUtil.GetXsiType(reader);
+            var declaredType = XmlUtil.GetXsiTypeAsQualifiedName(reader);
 
             // No declaration, or declaring that this is just a "Statement", is invalid since
             // statement is abstract
@@ -1285,12 +1236,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Namespace);
             try
             {
-                Saml2SubjectConfirmationData confirmationData = new Saml2SubjectConfirmationData();
+                var confirmationData = new Saml2SubjectConfirmationData();
                 bool isEmpty = reader.IsEmptyElement;
 
                 // @xsi:type
                 bool requireKeyInfo = false;
-                XmlQualifiedName type = XmlUtil.GetXsiType(reader);
+                var type = XmlUtil.GetXsiTypeAsQualifiedName(reader);
 
                 if (null != type)
                 {
@@ -1385,7 +1336,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             else if (reader.IsStartElement(Saml2Constants.Elements.BaseID, Saml2Constants.Namespace))
             {
                 // Since BaseID is an abstract type, we have to switch off the xsi:type declaration
-                var declaredType = XmlUtil.GetXsiType(reader);
+                var declaredType = XmlUtil.GetXsiTypeAsQualifiedName(reader);
 
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
                 if (declaredType == null
@@ -1569,9 +1520,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // <Issuer> 1
             WriteIssuer(writer, assertion.Issuer);
 
-            // <ds:Signature> 0-1
-            //if (null != signatureWriter)
-            //    signatureWriter.WriteSignature();
+            // <Signature> 0-1
+            if (null != signatureWriter)
+                signatureWriter.WriteSignature();
 
             // <Subject> 0-1
             if (null != assertion.Subject)

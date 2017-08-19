@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 

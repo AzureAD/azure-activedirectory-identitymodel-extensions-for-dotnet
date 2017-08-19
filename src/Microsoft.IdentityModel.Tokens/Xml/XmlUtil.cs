@@ -25,33 +25,52 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Xml;
-using Microsoft.IdentityModel.Tests;
-using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Microsoft.IdentityModel.Xml.Tests
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
-    public class EnvelopedSignatureTheoryData : TheoryDataBase
+    /// <summary>
+    /// Utilities for working with XML
+    /// </summary>
+    internal static class XmlUtil
     {
-        public bool ExpectSignature { get; set; } = true;
-
-        public string ReferenceId { get; set; }
-
-        public SecurityKey SecurityKey { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public Signature Signature { get; set; }
-
-        public string Xml { get; set; }
-
-        public XmlReader XmlReader { get; set; }
-
-        public XmlWriter XmlWriter { get; set; }
-
-        public override string ToString()
+        private static Dictionary<byte, string> _hexDictionary = new Dictionary<byte, string>
         {
-            return TestId + ", ExpectSignature: " + ExpectSignature;
+            { 0, "0" },
+            { 1, "1" },
+            { 2, "2" },
+            { 3, "3" },
+            { 4, "4" },
+            { 5, "5" },
+            { 6, "6" },
+            { 7, "7" },
+            { 8, "8" },
+            { 9, "9" },
+            { 10, "A" },
+            { 11, "B" },
+            { 12, "C" },
+            { 13, "D" },
+            { 14, "E" },
+            { 15, "F" }
+        };
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns>Hex representation of bytes</returns>
+        internal static string GenerateHexString(byte[] bytes)
+        {
+            var stringBuilder = new StringBuilder();
+
+            foreach (var b in bytes)
+            {
+                stringBuilder.Append(_hexDictionary[(byte)(b >> 4)]);
+                stringBuilder.Append(_hexDictionary[(byte)(b & (byte)0x0F)]);
+            }
+
+            return stringBuilder.ToString();
         }
     }
 }

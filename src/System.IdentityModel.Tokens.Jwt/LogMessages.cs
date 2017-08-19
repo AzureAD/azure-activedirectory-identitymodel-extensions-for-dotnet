@@ -33,14 +33,11 @@ namespace System.IdentityModel.Tokens.Jwt
     internal static class LogMessages
     {
         #pragma warning disable 1591
-
         // token creation
         internal const string IDX10401 = "IDX10401: Expires: '{0}' must be after NotBefore: '{1}'.";
 
         // signature creation / validation
         internal const string IDX10508 = "IDX10508: Signing JWT is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
-
-        // crypto errors
 
         // JWT messages
         internal const string IDX10700 = "IDX10700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
@@ -79,7 +76,6 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
         internal const string IDX10646 = "IDX10646: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
-
-        #pragma warning restore 1591
+#pragma warning restore 1591
     }
 }

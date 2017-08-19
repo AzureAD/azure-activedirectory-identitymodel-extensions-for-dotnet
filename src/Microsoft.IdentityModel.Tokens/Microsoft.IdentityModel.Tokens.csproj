@@ -55,4 +55,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Xml\" />
+  </ItemGroup>
+
 </Project>

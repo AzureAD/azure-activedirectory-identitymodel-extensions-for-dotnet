@@ -27,16 +27,14 @@
 
 using System;
 using Microsoft.IdentityModel.Tests;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Xml.Tests
+namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class TransformFactoryTest
     {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("GetTransformTestTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void GetTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetTransformTest", theoryData);
@@ -74,9 +72,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("GetCanonicalizingTransformTestTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void GetCanonicalizingTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetCanonicalizingTransformTest", theoryData);
@@ -104,7 +100,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     TestId = "Unsupported transform",
                     Algorithm = "Unsupported",
-                    ExpectedException = ExpectedException.NotSupportedException("IDX21211")
+                    ExpectedException = ExpectedException.NotSupportedException("IDX21211:")
                 },
                 new TransformTheoryData
                 {
@@ -118,6 +114,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 }
             };
         }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class TransformTheoryData : TheoryDataBase

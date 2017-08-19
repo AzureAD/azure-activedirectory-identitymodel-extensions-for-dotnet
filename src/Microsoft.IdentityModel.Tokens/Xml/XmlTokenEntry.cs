@@ -25,30 +25,51 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Cryptography;
+using System.Xml;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
-    /// <summary>
-    /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
-    /// </summary>
-    public abstract class CanonicalizingTransfrom
+    internal class XmlTokenEntry
     {
-        /// <summary>
-        /// Gets or sets a value indicating if this transform should include comments.
-        /// </summary>
-        public bool IncludeComments
+        internal XmlNodeType NodeType;
+        internal string _prefix;
+        internal string _localName;
+        internal string _namespace;
+        private string _value;
+
+        public bool IsEmptyElement
         {
-            get;
-            set;
+            get { return _value == null; }
+            set { _value = value ? null : ""; }
         }
 
-        /// <summary>
-        /// Processes a set of XML nodes and returns the hash of the octets.
-        /// </summary>
-        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> that has the XML nodes to process.</param>
-        /// <param name="hashAlg">the <see cref="HashAlgorithm"/>to use</param>
-        /// <returns>the hash of the processed XML nodes.</returns>
-        public abstract byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hashAlg);
+        public string Value
+        {
+            get; private set;
+        }
+
+        public XmlTokenEntry(XmlNodeType nodeType, string value)
+        {
+            NodeType = nodeType;
+            Value = value;
+        }
+
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
+        {
+            NodeType = nodeType;
+            _prefix = prefix;
+            _localName = localName;
+            _namespace = @namespace;
+            Value = value;
+        }
+
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
+        {
+            NodeType = nodeType;
+            _prefix = prefix;
+            _localName = localName;
+            _namespace = @namespace;
+            IsEmptyElement = isEmptyElement;
+        }
     }
 }

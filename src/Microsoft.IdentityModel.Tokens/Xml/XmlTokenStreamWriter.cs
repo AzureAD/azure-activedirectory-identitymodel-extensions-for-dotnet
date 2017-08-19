@@ -30,21 +30,19 @@ using System.Collections.Generic;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
     internal class XmlTokenStreamWriter
     {
         IList<XmlTokenEntry> _entries;
         int _position;
 
-        public XmlTokenStreamWriter(IList<XmlTokenEntry> entries,
-                                     string excludedElement,
-                                     string excludedElementNamespace)
+        public XmlTokenStreamWriter(IList<XmlTokenEntry> entries, string excludedElement, string excludedNamespace)
         {
             _entries = entries ?? throw LogArgumentNullException(nameof(entries));
             Count = entries.Count;
             ExcludedElement = excludedElement;
-            ExcludedElementNamespace = excludedElementNamespace;
+            ExcludedNamespace = excludedNamespace;
         }
 
         public int Count
@@ -92,7 +90,7 @@ namespace Microsoft.IdentityModel.Xml
             get;
         }
 
-        public string ExcludedElementNamespace
+        public string ExcludedNamespace
         {
             get;
         }
@@ -145,7 +143,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogExceptionMessage(new ArgumentNullException(nameof(writer)));
 
             if (!MoveToFirst())
-                XmlUtil.LogWriteException("XmlTokenBufferIsEmpty");
+                throw LogExceptionMessage(new ArgumentException("XmlTokenBufferIsEmpty"));
 
             int depth = 0;
             int recordedDepth = -1;
@@ -159,7 +157,7 @@ namespace Microsoft.IdentityModel.Xml
                         depth++;
                         if (include
                             && LocalName == ExcludedElement
-                            && Namespace == ExcludedElementNamespace)
+                            && Namespace == ExcludedNamespace)
                         {
                             include = false;
                             recordedDepth = depth;

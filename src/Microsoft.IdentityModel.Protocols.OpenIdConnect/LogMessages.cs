@@ -109,9 +109,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10813 = "IDX10813: Deserializing json web keys: '{0}'.";
         internal const string IDX10814 = "IDX10814: Cannot read file from the address: '{0}'. File does not exist.";
         internal const string IDX10815 = "IDX10815: Error deserializing json: '{0}' into '{1}'.";
-
 #pragma warning restore 1591
-
-
     }
 }

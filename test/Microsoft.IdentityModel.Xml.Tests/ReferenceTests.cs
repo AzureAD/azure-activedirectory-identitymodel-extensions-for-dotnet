@@ -27,11 +27,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests

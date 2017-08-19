@@ -25,18 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Xml;
 using Microsoft.IdentityModel.Tests;
-using Xunit;
+using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Xml.Tests
+namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
-    public class EnvelopedSignatureTransformTests
+    public class EnvelopedSignatureTheoryData : TheoryDataBase
     {
-        [Fact]
-        public void Constructor()
+        public bool ExpectSignature { get; set; } = true;
+
+        public string ReferenceId { get; set; }
+
+        public SecurityKey SecurityKey { get; set; }
+
+        public SigningCredentials SigningCredentials { get; set; }
+
+        public Signature Signature { get; set; }
+
+        public string Xml { get; set; }
+
+        public XmlReader XmlReader { get; set; }
+
+        public XmlWriter XmlWriter { get; set; }
+
+        public override string ToString()
         {
-            TestUtilities.WriteHeader($"{this}", "Constructor", true);
-            var transform = new EnvelopedSignatureTransform();
+            return TestId + ", ExpectSignature: " + ExpectSignature;
         }
     }
 }

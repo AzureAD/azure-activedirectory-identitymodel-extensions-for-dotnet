@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     internal static class LogMessages
     {
-        #pragma warning disable 1591
+#pragma warning disable 1591
         // general
         internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
@@ -52,9 +52,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX13007 = "IDX13007: Token endpoint is missing in security token service type RoleDescriptor.";
         internal const string IDX13008 = "IDX13008: 'Use' attribute is missing in KeyDescriptor.";
         internal const string IDX13009 = "IDX13009: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
-
 #pragma warning restore 1591
-
-
     }
 }

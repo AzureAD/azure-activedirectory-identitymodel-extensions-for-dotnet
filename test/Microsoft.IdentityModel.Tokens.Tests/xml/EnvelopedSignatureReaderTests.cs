@@ -29,20 +29,20 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Xml.Tests
+namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
     public class EnvelopedSignatureReaderTests
     {
-
         [Fact]
         public void GetSets()
         {
             var type = typeof(EnvelopedSignatureReader);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 35, $"Number of properties has changed from 35 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 34, $"Number of properties has changed from 34 to: {properties.Length}, adjust tests");
 
             var reader = XmlUtilities.CreateEnvelopedSignatureReader(Default.OuterXml);
             var defaultSerializer = reader.Serializer;

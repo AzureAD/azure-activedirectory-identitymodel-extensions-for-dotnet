@@ -27,13 +27,14 @@
 
 using System;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Wraps a <see cref="XmlReader"/> pointing to a root element of XML that may contain a signature.
-    /// If a &lt; is found, <see cref="Signature"/> will be populated and <see cref="SignedInfo.References"/> will
+    /// If a Signature element is found, a <see cref="Signature"/> will be populated and <see cref="SignedInfo.References"/> will
     /// have <see cref="XmlTokenStream"/> set for future validation.
     /// </summary>
     public class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
@@ -53,8 +54,8 @@ namespace Microsoft.IdentityModel.Xml
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
-            _tokenStreamReader = new XmlTokenStreamReader(reader);
-            InnerReader = _tokenStreamReader;
+            _tokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
+            InnerReader  = _tokenStreamReader;
         }
 
         /// <summary>
@@ -67,22 +68,14 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets the <see cref="XmlTokenStream"/> that contains the XML nodes that were read.
-        /// </summary>
-        public XmlTokenStream TokenStream
-        {
-            get => _tokenStreamReader.XmlTokens;
-        }
-
-        /// <summary>
         /// Called after the root element has been completely read.
-        /// Attaches a <see cref="XmlTokenStreamReader"/> to the first Reference for future processing if
+        /// Attaches a <see cref="XmlTokenStream"/> to the first Reference for future processing if
         /// a signature was found.
         /// </summary>
         protected virtual void OnEndOfRootElement()
         {
             if (Signature != null)
-                Signature.SignedInfo.References[0].TokenStream = TokenStream;
+                Signature.SignedInfo.References[0].TokenStream = _tokenStreamReader.TokenStream;
         }
 
         /// <summary>
@@ -124,7 +117,7 @@ namespace Microsoft.IdentityModel.Xml
         public Signature Signature
         {
             get;
-            private set;
+            protected set;
         }
     }
 }

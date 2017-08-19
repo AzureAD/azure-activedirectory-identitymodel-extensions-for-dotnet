@@ -34,9 +34,7 @@ namespace Microsoft.IdentityModel.Xml
     internal static class LogMessages
     {
 #pragma warning disable 1591
-
         // XML reading
-        internal const string IDX20001 = "IDX10001: The value of this argument must fall within the range {0} to {1}.";
         internal const string IDX21010 = "IDX21010: Unable to read XML. Expecting XmlReader to be at element: '{0}', found 'Empty Element'";
         internal const string IDX21011 = "IDX21011: Unable to read XML. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
         internal const string IDX21012 = "IDX21012: Unable to read XML. While reading '{0}', This node was not expected: '{1}'.";
@@ -58,7 +56,6 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21100 = "IDX21100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";
         internal const string IDX21101 = "IDX21101: An EnvelopedSignature must have a <Reference> element. None were found.";
         internal const string IDX21102 = "IDX21102: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
-        internal const string IDX21103 = "IDX21103: EnvelopedSignature must have exactly 1 reference. Found: '{0}'.";
         internal const string IDX21105 = "IDX21105: Transform must specify an algorithm none was found.";
         internal const string IDX21106 = "IDX21106: ExclusiveCanonicalizationTransform must be the last transform.";
         internal const string IDX21107 = "IDX21107: 'InclusiveNamespaces' is not supported.";
@@ -86,6 +83,10 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21403 = "IDX21402: Unable to write XML. One of the values in Reference.Transforms is null or empty.";
         internal const string IDX21404 = "IDX21401: Unable to write XML. Signature.SignedInfo is null.";
         internal const string IDX21405 = "IDX21405: Unable to write XML. SignedInfo.Reference is null.";
+
+        // XML validation
+        internal const string IDX21500 = "IDX21500: xsi:type attribute was not found. Expected: '{0}':'{1}'.";
+        internal const string IDX21501 = "IDX21501: xsi:type attribute was did not match. Expected: '{0}':'{1}', Found: '{2}':'{3}'.";
 #pragma warning restore 1591
     }
 }

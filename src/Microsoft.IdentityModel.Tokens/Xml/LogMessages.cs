@@ -25,35 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using static Microsoft.IdentityModel.Logging.LogHelper;
-using static Microsoft.IdentityModel.Xml.XmlSignatureConstants;
-
-namespace Microsoft.IdentityModel.Xml
+namespace Microsoft.IdentityModel.Tokens.Xml
 {
     /// <summary>
-    /// Defines a XML transform that removes the XML nodes associated with the Signature.
+    /// Log messages and codes for XmlProcessing
+    /// Range: IDX21010 - IDX21200
     /// </summary>
-    public sealed class EnvelopedSignatureTransform : Transform
+    internal static class LogMessages
     {
-        /// <summary>
-        /// Creates an EnvelopedSignatureTransform
-        /// </summary>
-        public EnvelopedSignatureTransform()
-        {
-        }
-
-        /// <summary>
-        /// Sets the reader to exclude the &lt;Signature> element
-        /// </summary>
-        /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
-        /// <returns><see cref="XmlTokenStreamReader"/>with exclusion set.</returns>
-        public override XmlTokenStream Process(XmlTokenStream tokenStream)
-        {
-            if (tokenStream == null)
-                LogArgumentNullException(nameof(tokenStream));
-
-            tokenStream.SetElementExclusion(Elements.Signature, Namespace);
-            return tokenStream;
-        }
+#pragma warning disable 1591
+        internal const string IDX21023 = "IDX21023: Unsupported NodeType: {0}.";
+        internal const string IDX21204 = "IDX21204: Canonicalization algorithm is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
+        internal const string IDX21210 = "IDX21210: The TransformFactory does not support the transform: '{0}'.";
+        internal const string IDX21211 = "IDX21211: The TransfromFactory does not support the canonicalizing transform: '{0}'.";
+        internal const string IDX21102 = "IDX21102: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
+        internal const string IDX21207 = "IDX21207: SignatureMethod is not supported: '{0}'. CryptoProviderFactory: '{1}'.";
+        internal const string IDX21208 = "IDX21208: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
+        internal const string IDX21209 = "IDX21209: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
+#pragma warning restore 1591
     }
 }

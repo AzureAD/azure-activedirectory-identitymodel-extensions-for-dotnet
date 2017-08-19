@@ -47,7 +47,5 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX10805 = "IDX10805: Obtaining information from metadata endpoint: '{0}'.";
         internal const string IDX10814 = "IDX10814: Cannot read file from the address: '{0}'. File does not exist.";
 #pragma warning restore 1591
-
-
     }
 }

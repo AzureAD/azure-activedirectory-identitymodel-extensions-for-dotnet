@@ -26,11 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Microsoft.IdentityModel.Xml.Tests
 {

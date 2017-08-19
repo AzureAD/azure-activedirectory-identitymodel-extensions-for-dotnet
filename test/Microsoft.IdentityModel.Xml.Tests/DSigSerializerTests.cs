@@ -30,6 +30,7 @@ using System.Security.Cryptography;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Xml;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Xml.Tests

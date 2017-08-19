@@ -31,9 +31,10 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens.Saml2;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Xml.Tests
+namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class EnvelopedSignatureWriterTests
     {
