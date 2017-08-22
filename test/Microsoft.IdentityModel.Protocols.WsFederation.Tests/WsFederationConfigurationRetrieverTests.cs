@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
@@ -363,6 +364,101 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("WriteMetadataTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void WriteMetadata(WsFederationMetadataTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteMetadata", theoryData);
+            var context = new CompareContext($"{this}.WriteMetadata, {theoryData.TestId}");
+            try
+            {
+                var settings = new XmlWriterSettings();
+                var builder = new StringBuilder();
+
+                if (theoryData.UseNullWriter)
+                {
+                    theoryData.Serializer.WriteMetadata(null, theoryData.Configuration);
+                    theoryData.ExpectedException.ProcessNoException(context);
+                }
+                else
+                {
+                    using (var writer = XmlWriter.Create(builder, settings))
+                    {
+                        // add signingCredentials so we can created signed metadata.
+                        if (theoryData.Configuration != null)
+                            theoryData.Configuration.SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2;
+
+                        // write configuration content into metadata and sign the metadata
+                        var serializer = new WsFederationMetadataSerializer();
+                        serializer.WriteMetadata(writer, theoryData.Configuration);
+                        writer.Flush();
+                        var metadata = builder.ToString();
+
+                        // read the created metadata into a new configuration
+                        var reader = XmlReader.Create(new StringReader(metadata));
+                        var configuration = theoryData.Serializer.ReadMetadata(reader);
+
+                        // assign signingcredentials and verify the signature of created metadata
+                        configuration.SigningCredentials = theoryData.Configuration.SigningCredentials;
+                        if (configuration.SigningCredentials != null)
+                            configuration.Signature.Verify(configuration.SigningCredentials.Key);
+
+                        // remove the signature and do the comparison
+                        configuration.Signature = null;
+                        theoryData.ExpectedException.ProcessNoException(context);
+                        IdentityComparer.AreWsFederationConfigurationsEqual(configuration, theoryData.Configuration, context);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsFederationMetadataTheoryData> WriteMetadataTheoryData
+        {
+            get
+            {
+                return new TheoryData<WsFederationMetadataTheoryData>
+                {
+                    new WsFederationMetadataTheoryData
+                    {
+                        First = true,
+                        Configuration = ReferenceMetadata.AADCommonFormatedNoSignature,
+                        TestId = nameof(ReferenceMetadata.AADCommonFormatedNoSignature)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        UseNullWriter = true,
+                        Configuration = ReferenceMetadata.AADCommonFormatedNoSignature,
+                        TestId = "Use null writer"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        TestId = "Use null configuration"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlWriteException), "IDX13010:"),
+                        Configuration = ReferenceMetadata.AADCommonFormatedNoIssuer,
+                        TestId = nameof(ReferenceMetadata.AADCommonFormatedNoIssuer)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlWriteException), "IDX13011:"),
+                        Configuration = ReferenceMetadata.AADCommonFormatedNoTokenEndpoint,
+                        TestId = nameof(ReferenceMetadata.AADCommonFormatedNoTokenEndpoint)
+                    }
+                };
+            }
+        }
+
         public class WsFederationMetadataTheoryData : TheoryDataBase
         {
             public WsFederationConfiguration Configuration { get; set; }
@@ -377,6 +473,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 return $"TestId: {TestId}, {ExpectedException}";
             }
+
+            public bool UseNullWriter { get; set; } = false;
         }
 
         private class WsFederationMetadataSerializerPublic : WsFederationMetadataSerializer

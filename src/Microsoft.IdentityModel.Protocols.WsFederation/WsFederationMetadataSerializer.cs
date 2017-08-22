@@ -32,6 +32,7 @@ using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
@@ -48,6 +49,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Metadata serializer for WsFed.
         /// </summary>
         public WsFederationMetadataSerializer() { }
+
+#region Read Metadata
 
         /// <summary>
         /// Read metadata and create the corresponding <see cref="WsFederationConfiguration"/>.
@@ -271,5 +274,93 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             char[] charsToTrim = { ' ', '\n' };
             return stringToTrim.Trim(charsToTrim);
         }
+
+#endregion
+
+#region Write Metadata
+
+        /// <summary>
+        /// Write the content in configuration into writer.
+        /// </summary>
+        /// <param name="writer">The <see cref="XmlWriter"/> used to write the configuration content.</param>
+        /// <param name="configuration">The <see cref="WsFederationConfiguration"/> provided.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> or <paramref name="configuration"/> parameter is missing.</exception>
+        /// <exception cref="XmlWriteException">if error occurs when writing metadata.</exception>
+        public void WriteMetadata(XmlWriter writer, WsFederationConfiguration configuration)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (configuration == null)
+                throw LogArgumentNullException(nameof(configuration));
+
+            if (configuration.SigningCredentials != null)
+                writer = new EnvelopedSignatureWriter(writer, configuration.SigningCredentials, "id");
+
+            if (string.IsNullOrEmpty(configuration.Issuer))
+                throw XmlUtil.LogWriteException(LogMessages.IDX13010);
+
+            if (string.IsNullOrEmpty(configuration.TokenEndpoint))
+                throw XmlUtil.LogWriteException(LogMessages.IDX13011);
+
+            writer.WriteStartDocument();
+
+            // <EntityDescriptor>
+            writer.WriteStartElement(Elements.EntityDescriptor, Namespaces.MetadataNamespace);
+
+            // @entityID
+            writer.WriteAttributeString(Attributes.EntityId, configuration.Issuer);
+
+            // <RoleDescriptor>
+            writer.WriteStartElement(Elements.RoleDescriptor);
+            writer.WriteAttributeString(Xmlns, Prefixes.Xsi, null, XmlSignatureConstants.XmlSchemaNamespace);
+            writer.WriteAttributeString(Xmlns, Prefixes.Fed, null, Namespaces.FederationNamespace);
+            writer.WriteAttributeString(Prefixes.Xsi, Attributes.Type, null, Prefixes.Fed + ":" + Types.SecurityTokenServiceType);
+
+            // write the key infos
+            if (configuration.KeyInfos != null)
+            {
+                foreach (var keyInfo in configuration.KeyInfos)
+                {
+                    // <KeyDescriptor>
+                    writer.WriteStartElement(Elements.KeyDescriptor);
+                    writer.WriteAttributeString(Attributes.Use, keyUse.Signing);
+                    _dsigSerializer.WriteKeyInfo(writer, keyInfo);
+                    // </KeyDescriptor>
+                    writer.WriteEndElement();
+                }
+            }
+
+            // <fed:SecurityTokenServiceEndpoint>
+            writer.WriteStartElement(Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace);
+
+            // <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+            writer.WriteStartElement(Prefixes.Wsa, Elements.EndpointReference, Namespaces.AddressingNamspace);
+
+            // <wsa:Address>
+            writer.WriteStartElement(Elements.Address, Namespaces.AddressingNamspace);
+
+            // write TokenEndpoint
+            writer.WriteString(configuration.TokenEndpoint);
+
+            // </wsa:Address>
+            writer.WriteEndElement();
+
+            // </wsa:EndpointReference>
+            writer.WriteEndElement();
+
+            // </fed:SecurityTokenServiceEndpoint>
+            writer.WriteEndElement();
+
+            // </RoleDescriptor>
+            writer.WriteEndElement();
+
+            // </EntityDescriptor>
+            writer.WriteEndElement();
+
+            writer.WriteEndDocument();
+        }
+
+#endregion
     }
 }

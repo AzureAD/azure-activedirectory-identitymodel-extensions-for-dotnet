@@ -154,8 +154,38 @@ namespace Microsoft.IdentityModel.Tests
                 });
 
                 foreach (var key in MetadataSigningKeys)
-                    configuration.SigningKeys.Add(key);
+                    configuration.SigningKeys.Add(key);             
 
+                return configuration;
+            }
+        }
+
+        public static WsFederationConfiguration AADCommonFormatedNoSignature
+        {
+            get
+            {
+                var configuration = AADCommonFormated;
+                configuration.Signature = null;
+                return configuration;
+            }
+        }
+
+        public static WsFederationConfiguration AADCommonFormatedNoIssuer
+        {
+            get
+            {
+                var configuration = AADCommonFormated;
+                configuration.Issuer = null;
+                return configuration;
+            }
+        }
+
+        public static WsFederationConfiguration AADCommonFormatedNoTokenEndpoint
+        {
+            get
+            {
+                var configuration = AADCommonFormated;
+                configuration.TokenEndpoint = null;
                 return configuration;
             }
         }
