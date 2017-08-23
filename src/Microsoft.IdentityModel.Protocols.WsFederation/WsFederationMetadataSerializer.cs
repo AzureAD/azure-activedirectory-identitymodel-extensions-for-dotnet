@@ -26,12 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
-using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
@@ -50,20 +50,22 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public WsFederationMetadataSerializer() { }
 
         /// <summary>
-        /// Read metadata and create the corresponding WsFed configuration.
+        /// Read metadata and create the corresponding <see cref="WsFederationConfiguration"/>.
         /// </summary>
-        /// <param name="reader">xml reader</param>
-        /// <returns>WsFed configuration</returns>
+        /// <param name="reader"><see cref="XmlReader"/> used to read metadata</param>
+        /// <returns><see cref="WsFederationConfiguration"/></returns>
+        /// <exception cref="XmlReadException">if error occurs when reading metadata</exception>
         public WsFederationConfiguration ReadMetadata(XmlReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
 
-            var configuration = new WsFederationConfiguration();
-            var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
+            var envelopeReader = new EnvelopedSignatureReader(reader);
 
             try
             {
-                ReadEntityDescriptor(configuration, envelopeReader);
+                var configuration = ReadEntityDescriptor(envelopeReader);
+                configuration.Signature = envelopeReader.Signature;
+                return configuration;
             }
             catch (Exception ex)
             {
@@ -72,28 +74,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
                 throw XmlUtil.LogReadException(LogMessages.IDX13000, ex, Elements.EntityDescriptor, ex);
             }
-
-            configuration.Signature = envelopeReader.Signature;
-            return configuration;
         }
 
         /// <summary>
         /// Read EntityDescriptor element in xml.
         /// </summary>
-        /// <param name="configuration">WsFed configuration</param>
-        /// <param name="reader">xmlreader</param>
-        protected virtual void ReadEntityDescriptor(WsFederationConfiguration configuration, XmlReader reader)
+        /// <param name="reader"><see cref="XmlReader"/> used to read entity descriptor</param>
+        /// <returns><see cref="WsFederationConfiguration"/></returns>
+        /// <exception cref="XmlReadException">if error occurs when reading entity descriptor</exception>
+        protected virtual WsFederationConfiguration ReadEntityDescriptor(XmlReader reader)
         {
-            if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
-
             XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
 
-            // get entityID for issuer
-            configuration.Issuer = reader.GetAttribute(Attributes.EntityId);
+            var configuration = new WsFederationConfiguration();
 
-            if (string.IsNullOrEmpty(configuration.Issuer))
+            // get entityID for issuer
+            var issuer = reader.GetAttribute(Attributes.EntityId);
+            if (string.IsNullOrEmpty(issuer))
                 throw XmlUtil.LogReadException(LogMessages.IDX13001);
+            configuration.Issuer = issuer;
 
             // <EntityDescriptor>
             reader.ReadStartElement();
@@ -106,7 +105,17 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 {
                     hasSecurityTokenServiceTypeRoleDescriptor = true;
-                    ReadSecurityTokenServiceTypeRoleDescriptor(configuration, reader);
+                    var roleDescriptor = ReadSecurityTokenServiceTypeRoleDescriptor(reader);
+                    foreach(var keyInfo in roleDescriptor.KeyInfos)
+                    {
+                        configuration.KeyInfos.Add(keyInfo);
+                        if (!string.IsNullOrEmpty(keyInfo.CertificateData))
+                        {
+                            var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
+                            configuration.SigningKeys.Add(new X509SecurityKey(cert));
+                        }
+                    }
+                    configuration.TokenEndpoint = roleDescriptor.TokenEndpoint;
                 }
                 else
                 {
@@ -120,18 +129,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             // The metadata xml should contain a SecurityTokenServiceType RoleDescriptor
             if (!hasSecurityTokenServiceTypeRoleDescriptor)
                 throw XmlUtil.LogReadException(LogMessages.IDX13004);
+
+            return configuration;
         }
 
         /// <summary>
         /// Read KeyDescriptor element in xml.
         /// </summary>
-        /// <param name="configuration">WsFed configuration</param>
-        /// <param name="reader">xmlreader</param>
-        protected virtual void ReadKeyDescriptorForSigning(WsFederationConfiguration configuration, XmlReader reader)
+        /// <param name="reader"><see cref="XmlReader"/> used to read key descriptor</param>
+        /// <returns><see cref="KeyInfo"/></returns>
+        /// <exception cref="XmlReadException">if error occurs when reading key descriptor</exception>
+        protected virtual KeyInfo ReadKeyDescriptorForSigning(XmlReader reader)
         {
-            if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
-
             XmlUtil.CheckReaderOnEntry(reader, Elements.KeyDescriptor, Namespaces.MetadataNamespace);
 
             var use = reader.GetAttribute(Attributes.Use);
@@ -141,76 +150,68 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 throw XmlUtil.LogReadException(LogMessages.IDX13009, Attributes.Use, keyUse.Signing, use);
 
             // <KeyDescriptor>
-            reader.ReadStartElement();  
+            reader.ReadStartElement();
 
             if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
             {
                 var keyInfo = _dsigSerializer.ReadKeyInfo(reader);
-                configuration.KeyInfos.Add(keyInfo);
-                if (!string.IsNullOrEmpty(keyInfo.CertificateData))
-                {
-                    var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
-                    configuration.SigningKeys.Add(new X509SecurityKey(cert));
-                }
+                // </KeyDescriptor>
+                reader.ReadEndElement();
+                return keyInfo;
             }
             else
             {
                 throw XmlUtil.LogReadException(LogMessages.IDX13002, reader.LocalName, reader.NamespaceURI, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
             }
-
-            // </KeyDescriptor>
-            reader.ReadEndElement();
         }
 
         /// <summary>
         /// Read RoleDescriptor element in xml.
         /// </summary>
-        /// <param name="configuration">WsFed configuration</param>
-        /// <param name="reader">xmlreader</param>
-        protected virtual void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationConfiguration configuration, XmlReader reader)
+        /// <param name="reader"><see cref="XmlReader"/> used to read security token service type role descriptor</param>
+        /// <returns><see cref="SecurityTokenServiceTypeRoleDescriptor"/></returns>
+        /// <exception cref="XmlReadException">if error occurs when reading role descriptor</exception>
+        protected virtual SecurityTokenServiceTypeRoleDescriptor ReadSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
         {
-            if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
-
             XmlUtil.CheckReaderOnEntry(reader, Elements.RoleDescriptor, Namespaces.MetadataNamespace);
 
             if (!IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 throw XmlUtil.LogReadException(LogMessages.IDX13004);
+
+            var roleDescriptor = new SecurityTokenServiceTypeRoleDescriptor();
 
             // <RoleDescriptorr>
             reader.ReadStartElement();
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace) && reader.GetAttribute(Attributes.Use).Equals(keyUse.Signing))
-                    ReadKeyDescriptorForSigning(configuration, reader);
+                    roleDescriptor.KeyInfos.Add(ReadKeyDescriptorForSigning(reader));
                 else if (reader.IsStartElement(Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace))
-                    ReadSecurityTokenEndpoint(configuration, reader);
-                else if (reader.IsStartElement())
-                    reader.ReadOuterXml();
+                    roleDescriptor.TokenEndpoint = ReadSecurityTokenEndpoint(reader);
                 else
-                    throw XmlUtil.LogReadException(LogMessages.IDX13003, reader.Name);
+                    reader.ReadOuterXml();
             }
 
             // </RoleDescriptorr>
             reader.ReadEndElement();
 
-            if (configuration.KeyInfos.Count == 0)
+            if (roleDescriptor.KeyInfos.Count == 0)
                 Logger.WriteWarning(LogMessages.IDX13006);
 
-            if (string.IsNullOrEmpty(configuration.TokenEndpoint))
+            if (string.IsNullOrEmpty(roleDescriptor.TokenEndpoint))
                 Logger.WriteWarning(LogMessages.IDX13007);
+
+            return roleDescriptor;
         }
 
         /// <summary>
         /// Read fed:SecurityTokenServiceEndpoint element in xml.
         /// </summary>
-        /// <param name="configuration">WsFed configuration</param>
-        /// <param name="reader">xmlreader</param>
-        protected virtual void ReadSecurityTokenEndpoint(WsFederationConfiguration configuration, XmlReader reader)
+        /// <param name="reader"><see cref="XmlReader"/> used to read security token endpoint</param>
+        /// <returns>token endpoint string</returns>
+        /// <exception cref="XmlReadException">if error occurs when reading security token endpoint</exception>
+        protected virtual string ReadSecurityTokenEndpoint(XmlReader reader)
         {
-            if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
-
             XmlUtil.CheckReaderOnEntry(reader, Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace);
 
             // <SecurityTokenServiceEndpoint>
@@ -225,9 +226,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             reader.ReadStartElement(Elements.Address, Namespaces.AddressingNamspace);  // Address
             reader.MoveToContent();
 
-            configuration.TokenEndpoint = Trim(reader.ReadContentAsString());
+            var tokenEndpoint = Trim(reader.ReadContentAsString());
 
-            if (string.IsNullOrEmpty(configuration.TokenEndpoint))
+            if (string.IsNullOrEmpty(tokenEndpoint))
                 throw XmlUtil.LogReadException(LogMessages.IDX13003);
 
             // </Address>
@@ -241,6 +242,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             // </SecurityTokenServiceEndpoint>
             reader.MoveToContent();
             reader.ReadEndElement();
+
+            return tokenEndpoint;
         }
 
         private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
