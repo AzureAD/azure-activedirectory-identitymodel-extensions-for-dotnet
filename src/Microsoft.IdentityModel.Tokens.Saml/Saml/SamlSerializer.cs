@@ -437,7 +437,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         if (string.IsNullOrEmpty(audience))
                             throw LogReadException(LogMessages.IDX11125, SamlConstants.Elements.Audience);
 
-                        audienceRestrictionCondition.Audiences.Add(audience);
+                        audienceRestrictionCondition.Audiences.Add(new Uri(audience));
                     }
                     else
                         throw LogReadException(LogMessages.IDX11134, SamlConstants.Elements.Audience, reader.Name);
@@ -1165,7 +1165,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             foreach (var audience in audienceRestriction.Audiences)
             {
                 if (audience != null)
-                    writer.WriteElementString(SamlConstants.Elements.Audience, SamlConstants.Namespace, audience);
+                    writer.WriteElementString(SamlConstants.Elements.Audience, SamlConstants.Namespace, audience.OriginalString);
             }
 
             // </AudienceRestrictionCondition>

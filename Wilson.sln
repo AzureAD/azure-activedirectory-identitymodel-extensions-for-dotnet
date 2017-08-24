@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
@@ -52,6 +52,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Logging", "src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj", "{E4E6D0ED-12CB-4C01-A4C1-4F60D10E2304}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Net45.Tests", "test\Microsoft.IdentityModel.Net45.Tests\Microsoft.IdentityModel.Net45.Tests.csproj", "{CBBB1441-1704-4B2E-93BC-A163DD2CD222}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrossVersionTokenValidation.Test", "CrossVersionTokenValidation.Test", "{310A34D3-8685-4355-8590-84351B5223BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossVersionTokenValidation.Tests", "test\CrossVersionTokenValidation.Tests\CrossVersionTokenValidation.Tests.csproj", "{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocol.Extensions.OldVersion", "test\Microsoft.IdentityModel.Protocol.Extensions.4x\Microsoft.IdentityModel.Protocol.Extensions.OldVersion.csproj", "{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +137,14 @@ Global
 		{CBBB1441-1704-4B2E-93BC-A163DD2CD222}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBBB1441-1704-4B2E-93BC-A163DD2CD222}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBBB1441-1704-4B2E-93BC-A163DD2CD222}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,5 +168,8 @@ Global
 		{3C338E2D-C1D8-4517-8C52-A86A9F0C8281} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{E4E6D0ED-12CB-4C01-A4C1-4F60D10E2304} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{CBBB1441-1704-4B2E-93BC-A163DD2CD222} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{310A34D3-8685-4355-8590-84351B5223BC} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1} = {310A34D3-8685-4355-8590-84351B5223BC}
+		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47} = {310A34D3-8685-4355-8590-84351B5223BC}
 	EndGlobalSection
 EndGlobal

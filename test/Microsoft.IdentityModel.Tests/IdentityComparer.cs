@@ -69,6 +69,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(List<SamlCondition>).ToString(), AreSamlConditionEnumsEqual },
                 { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(List<Reference>).ToString(), AreReferenceEnumsEqual },
+                { typeof(List<Uri>).ToString(), AreUriEnumsEqual },
                 { typeof(AuthenticationProtocolMessage).ToString(), CompareAllPublicProperties },
                 { typeof(byte[]).ToString(), AreBytesEqual },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
@@ -112,6 +113,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(TokenValidationParameters).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationConfiguration).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationMessage).ToString(), CompareAllPublicProperties },
+                { typeof(Uri).ToString(), AreUrisEqual },
             };
 
         public static bool AreJsonWebKeyEnumsEqual(object object1, object object2, CompareContext context)
@@ -132,6 +134,11 @@ namespace Microsoft.IdentityModel.Tests
         public static bool AreReferenceEnumsEqual(object object1, object object2, CompareContext context)
         {
             return AreEnumsEqual<Reference>(object1 as IEnumerable<Reference>, object2 as IEnumerable<Reference>, context, AreEqual);
+        }
+
+        public static bool AreUriEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<Uri>(object1 as IEnumerable<Uri>, object2 as IEnumerable<Uri>, context, AreEqual);
         }
 
         public static bool AreSamlAttributeEnumsEqual(object object1, object object2, CompareContext context)
@@ -710,6 +717,26 @@ namespace Microsoft.IdentityModel.Tests
                 localContext.Diffs.Add($"'{str1}'");
                 localContext.Diffs.Add($"!=");
                 localContext.Diffs.Add($"'{str2}'");
+                localContext.Diffs.Add($"'{context.StringComparison}'");
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreUrisEqual(object object1, object object2, CompareContext context)
+        {
+            Uri uri1 = (Uri)object1;
+            Uri uri2 = (Uri)object2;
+
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(uri1, uri2, localContext))
+                return context.Merge(localContext);
+
+            if (!string.Equals(uri1.OriginalString, uri2.OriginalString, context.StringComparison))
+            {
+                localContext.Diffs.Add($"'{uri1.OriginalString}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{uri2.OriginalString}'");
                 localContext.Diffs.Add($"'{context.StringComparison}'");
             }
 

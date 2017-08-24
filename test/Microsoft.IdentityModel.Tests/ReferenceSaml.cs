@@ -71,10 +71,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlConditions SamlConditions
         {
-            get => new SamlConditions(
-                       Default.NotBefore,
-                       Default.NotOnOrAfter,
-                       new Collection<SamlCondition> { new SamlAudienceRestrictionCondition(new Collection<string> { Default.Audience }) });
+            get
+            {
+                var audiences = new Uri(Default.Audience);
+                var conditions = new Collection<SamlCondition> { new SamlAudienceRestrictionCondition(audiences) };
+                return new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, conditions);
+            }
         }
 
         public static SamlSubject SamlSubject
