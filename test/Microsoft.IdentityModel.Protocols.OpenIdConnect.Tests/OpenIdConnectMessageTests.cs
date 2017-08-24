@@ -239,7 +239,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OidcCreateAuthenticationRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
-            Assert.Equal(message.CreateAuthenticationRequestUrl(), expectedMessage);
+            var context = new CompareContext();
+#if NET452
+            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NETCOREAPP2_0
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+#endif
+            IdentityComparer.AreEqual(message.CreateAuthenticationRequestUrl(), expectedMessage, context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<string, OpenIdConnectMessage, string> CreateAuthenticationRequestUrlTheoryData()
@@ -447,10 +456,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             );
 
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            message = new OpenIdConnectMessage();
             theoryData.Add(
                 "Telemetry",
-                new OpenIdConnectMessage(),
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                message,
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off
@@ -460,7 +470,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             theoryData.Add(
                 "TelemetryStaticFalseInstanceTrue",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off using static switch
@@ -492,7 +502,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OidcCreateLogoutRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
-            Assert.Equal(message.CreateLogoutRequestUrl(), expectedMessage);
+            var context = new CompareContext();     
+#if NET452
+            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NETCOREAPP2_0
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+#endif
+            IdentityComparer.AreEqual(message.CreateLogoutRequestUrl(), expectedMessage, context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<string, OpenIdConnectMessage, string> CreateLogoutRequestUrlTheoryData()
@@ -506,7 +525,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             theoryData.Add(
                 "Telemetry",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off using static switch
@@ -525,7 +544,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             theoryData.Add(
                 "TelemetryStaticFalseInstanceTrue",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = defaultValue;
