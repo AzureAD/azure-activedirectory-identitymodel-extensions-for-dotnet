@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     IdentityComparer.AreEqual(jsonWebKey.Kid, theoryData.ComparisonJsonWebKey.Kid, context);
                     var certificateExpected = (theoryData.SecurityKey as X509SecurityKey).Certificate;
                     var certificateNew = new X509Certificate2(Convert.FromBase64String(jsonWebKey.X5c[0]));
-                    IdentityComparer.AreEqual(certificateNew.Equals(certificateExpected), true, context);
+                    IdentityComparer.AreEqual(certificateNew, certificateExpected, context);
                 }
                 else
                 {
