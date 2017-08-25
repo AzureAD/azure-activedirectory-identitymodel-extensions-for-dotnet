@@ -119,8 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("CreateClaimsIdentitiesTheoryData")]
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}") { IgnoreType = true };
+            var context = TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
             try
             {
                 var identities = ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).CreateClaimsIdentitiesPublic(theoryData.TokenTestSet.SecurityToken as SamlSecurityToken, theoryData.Issuer, theoryData.ValidationParameters);
@@ -310,18 +309,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateTokenTheoryData")]
         public void ValidateToken(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
 
             ClaimsPrincipal retVal = null;
             try
             {
                 retVal = (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> ValidateTokenTheoryData
@@ -461,6 +462,48 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(ReferenceTokens.SamlToken_NoAttributes),
                         Token = ReferenceTokens.SamlToken_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "IDX21210:"),
+                        Handler = new SamlSecurityTokenHandler()
+                        {
+                            TransformFactory = ReferenceTransformFactory.TransformFactoryAlwaysUnsupported
+                        },
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryAlwaysUnsupported),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "IDX21210:"),
+                        Handler = new SamlSecurityTokenHandler()
+                        {
+                            TransformFactory = ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported
+                        },
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryTransformAlwaysUnsupported),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException), "IDX21211:"),
+                        Handler = new SamlSecurityTokenHandler()
+                        {
+                            TransformFactory = ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported
+                        },
+                        TestId = nameof(ReferenceTransformFactory.TransformFactoryCanonicalizingTransformAlwaysUnsupported),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey
+                        }
                     }
                 };
             }

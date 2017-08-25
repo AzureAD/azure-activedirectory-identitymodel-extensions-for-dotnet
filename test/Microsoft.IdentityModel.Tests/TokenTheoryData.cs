@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -77,6 +78,8 @@ namespace Microsoft.IdentityModel.Tests
         public string Token { get; set; }
 
         public SecurityTokenDescriptor TokenDescriptor { get; set; }
+
+        public TransformFactory TransformFactory { get; set; }
 
         public TokenValidationParameters ValidationParameters { get; set; }
 

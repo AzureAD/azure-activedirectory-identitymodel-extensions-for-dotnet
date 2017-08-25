@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="signedInfo"/> if null.</exception>
         public Signature(SignedInfo signedInfo)
         {
-            SignedInfo = signedInfo;
+            SignedInfo = signedInfo ?? throw LogArgumentNullException(nameof(signedInfo));
         }
 
         /// <summary>
@@ -99,6 +99,9 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (key == null)
                 throw LogArgumentNullException(nameof(key));
+
+            if (SignedInfo == null)
+                throw LogValidationException(LogMessages.IDX21212);
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 throw LogValidationException(LogMessages.IDX21207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());

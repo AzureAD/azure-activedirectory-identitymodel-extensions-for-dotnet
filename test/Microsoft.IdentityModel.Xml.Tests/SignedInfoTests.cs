@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             var type = typeof(SignedInfo);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 5, $"Number of properties has changed from 5 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 6, $"Number of properties has changed from 6 to: {properties.Length}, adjust tests");
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
