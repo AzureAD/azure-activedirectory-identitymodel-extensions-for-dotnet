@@ -89,6 +89,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(OpenIdConnectMessage).ToString(), CompareAllPublicProperties },
                 { typeof(Reference).ToString(), CompareAllPublicProperties },
                 { typeof(RsaSecurityKey).ToString(), CompareAllPublicProperties },
+                { typeof(RSAParameters).ToString(), AreRsaParametersEqual },
                 { typeof(SamlAction).ToString(), CompareAllPublicProperties },
                 { typeof(SamlAudienceRestrictionCondition).ToString(), CompareAllPublicProperties },
                 { typeof(SamlAssertion).ToString(), CompareAllPublicProperties},
@@ -657,41 +658,67 @@ namespace Microsoft.IdentityModel.Tests
             if (rsaKey1 != null && rsaKey2 != null)
             {
                 CompareAllPublicProperties(rsaKey1, rsaKey2, localContext);
-                AreRsaParametersEqual(rsaKey1.Parameters, rsaKey2.Parameters, localContext);
             }
 
             return context.Merge(localContext);
         }
 
-        public static bool AreRsaParametersEqual(RSAParameters rsaParameters1, RSAParameters rsaParameters2, CompareContext context)
+        public static bool AreRsaParametersEqual(object object1, object object2, CompareContext context)
         {
+            RSAParameters rsaParameters1 = (RSAParameters) object1;
+            RSAParameters rsaParameters2 = (RSAParameters) object2;
+
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(rsaParameters1, rsaParameters2, localContext))
                 return context.Merge(localContext);
 
             if (!AreBytesEqual(rsaParameters1.D, rsaParameters2.D, context))
+            {
+                localContext.Diffs.Add("D:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.D, rsaParameters2.D)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP, context))
+            {
+                localContext.Diffs.Add("DP:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.DP, rsaParameters2.DP)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ, context))
+            {
+                localContext.Diffs.Add("DQ:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.DQ, rsaParameters2.DQ)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent, context))
+            {
+                localContext.Diffs.Add("Exponent:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Exponent, rsaParameters2.Exponent)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ, context))
+            {
+                localContext.Diffs.Add("InverseQ:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.InverseQ, rsaParameters2.InverseQ)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus, context))
+            {
+                localContext.Diffs.Add("Modulus:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Modulus, rsaParameters2.Modulus)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.P, rsaParameters2.P, context))
+            {
+                localContext.Diffs.Add("P:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.P, rsaParameters2.P)");
+            }
 
             if (!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q, context))
+            {
+                localContext.Diffs.Add("Q:");
                 localContext.Diffs.Add("!AreBytesEqual(rsaParameters1.Q, rsaParameters2.Q)");
+            }
 
             return context.Merge(localContext);
         }
@@ -842,7 +869,7 @@ namespace Microsoft.IdentityModel.Tests
                             localContext.Diffs.Add($"{propertyInfo.Name}:");
                             localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
-                        else if (val1.GetType().BaseType == typeof(System.ValueType))
+                        else if (val1.GetType().BaseType == typeof(System.ValueType) && !_equalityDict.Keys.Contains(val1.GetType().ToString()))
                         {
                             if (!val1.Equals(val2))
                             {

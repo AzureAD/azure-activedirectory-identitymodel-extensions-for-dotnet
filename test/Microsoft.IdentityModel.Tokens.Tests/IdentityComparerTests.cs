@@ -379,7 +379,18 @@ namespace Microsoft.IdentityModel.Tests
             IdentityComparer.AreEqual(rsaSecurityKey1, rsaSecurityKey2, context);
 
             Assert.True(context.Diffs.Count(s => s == "HasPrivateKey:") == 1);
-            Assert.True(context.Diffs.Count(s => s == "Parameters:") == 1);
+        }
+
+        [Fact]
+        public void CompareRsaParameters()
+        {
+            TestUtilities.WriteHeader($"{this}.CompareRSAParameters", true);
+            var context = new CompareContext($"{this}.CompareRSAParameters");
+            var rsaParameters1 = KeyingMaterial.RsaParametersFromPing1;
+            var rsaParameters2 = KeyingMaterial.RsaParametersFromPing2;
+            IdentityComparer.AreEqual(rsaParameters1, rsaParameters2, context);
+
+            Assert.True(context.Diffs.Count(s => s == "Modulus:") == 1);
         }
 
         [Fact]
