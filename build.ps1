@@ -8,7 +8,7 @@ param(
     [string]$runTests="YES",
     [string]$failBuildOnTestFailure="YES",
     [string]$pack="YES",
-    [string]$addAdditionalFileInfo="NO")
+    [string]$addAdditionalFileInfo="YES")
 
 Write-Host ""
 Write-Host "============================"
@@ -108,11 +108,11 @@ if ($build -eq "YES")
     }
 
     $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmm")
-    $postfix = "." + $dateTimeStamp;
+    $postfix = "-" + $dateTimeStamp;
     $versionPropsFile = $PSScriptRoot + "/build/version.props";
     $versionProps = Get-Content $versionPropsFile
-    $newVersion = "5.2.0" + $postfix;
-    $newVersionProps = $versionProps -replace "5.2.0", $newVersion;
+    $newVersion = "preview1" + $postfix;
+    $newVersionProps = $versionProps -replace "preview1", $newVersion;
     Set-Content "build\dynamicVersion.props" $newVersionProps;
     $rootNode = $buildConfiguration.projects
     $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
