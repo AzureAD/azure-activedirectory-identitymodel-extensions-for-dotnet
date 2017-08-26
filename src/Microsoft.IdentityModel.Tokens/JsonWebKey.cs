@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -248,6 +249,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the key size of <see cref="JsonWebKey"/>.
         /// </summary>
+        [JsonIgnore]
         public override int KeySize
         {
             get
@@ -267,6 +269,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
+        [JsonIgnore]
         public bool HasPrivateKey
         {
             get
@@ -278,6 +281,26 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'key_ops' (Key Operations) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'key_ops' (Key Operations) is not empty; otherwise, false.</return>
+        public bool ShouldSerializeKeyOps()
+        {
+            return KeyOps.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'x5c' collection (X.509 Certificate Chain) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        ///</summary>
+        /// <return>true if 'x5c' collection (X.509 Certificate Chain) is not empty; otherwise, false.</return>
+        public bool ShouldSerializeX5c()
+        {
+            return X5c.Count > 0;
         }
 
         internal ECDsaCng CreateECDsa(string algorithm, bool usePrivateKey)

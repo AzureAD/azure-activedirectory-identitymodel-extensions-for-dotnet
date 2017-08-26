@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -44,11 +45,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the key id of this <see cref="SecurityKey"/>.
         /// </summary>
+        [JsonIgnore]
         public string KeyId { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
         /// </summary>
+        [JsonIgnore]
         public CryptoProviderFactory CryptoProviderFactory
         {
             get
