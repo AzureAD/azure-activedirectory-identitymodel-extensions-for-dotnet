@@ -155,6 +155,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 foreach (string str in validationParameters.ValidIssuers)
                 {
+                    if (string.IsNullOrEmpty(str))
+                    {
+                        IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10235);
+                        continue;
+                    }
+                        
                     if (string.Equals(str, issuer, StringComparison.Ordinal))
                     {
                         IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10236, issuer);
