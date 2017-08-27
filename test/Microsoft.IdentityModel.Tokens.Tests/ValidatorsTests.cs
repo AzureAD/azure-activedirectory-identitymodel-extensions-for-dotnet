@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                List<string> issuers = new List<string> { "", Default.Issuer };
+                List<string> issuers = new List<string> { null, "", Default.Issuer };
                 List<string> invalidIssuers = new List<string> { "", NotDefault.Issuer };
                 Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidIssuer", Default.Issuer } };
 
