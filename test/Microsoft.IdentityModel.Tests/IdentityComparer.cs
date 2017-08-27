@@ -34,6 +34,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
@@ -70,6 +71,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(List<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(List<Reference>).ToString(), AreReferenceEnumsEqual },
                 { typeof(List<Uri>).ToString(), AreUriEnumsEqual },
+                { typeof(X509Certificate2).ToString(), AreX509Certificate2Equal },
                 { typeof(AuthenticationProtocolMessage).ToString(), CompareAllPublicProperties },
                 { typeof(byte[]).ToString(), AreBytesEqual },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
@@ -775,6 +777,33 @@ namespace Microsoft.IdentityModel.Tests
             var localContext = new CompareContext(context);
             if (ContinueCheckingEquality(message1, message2, localContext))
                 CompareAllPublicProperties(message1, message2, localContext);
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreX509Certificate2Equal(object object1, object object2, CompareContext context)
+        {
+            var certificate1 = (X509Certificate2)object1;
+            var certificate2 = (X509Certificate2)object2;
+
+            var localContext = new CompareContext(context);
+
+            if (certificate1 == null && certificate2 == null)
+                return true;
+
+            if (certificate1 == null || certificate2 == null || !certificate1.Equals(certificate2))
+            {
+                localContext.Diffs.Add("X509Certificate2:");
+                if (certificate1 == null)
+                    localContext.Diffs.Add($"certificate: null");
+                else
+                    localContext.Diffs.Add($"certificate: {certificate1}");
+                localContext.Diffs.Add("!=");
+                if (certificate2 == null)
+                    localContext.Diffs.Add($"certificate: null");
+                else
+                    localContext.Diffs.Add($"certificate: {certificate2}");
+            }
 
             return context.Merge(localContext);
         }

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
@@ -665,6 +666,31 @@ namespace Microsoft.IdentityModel.Tests
             IdentityComparer.AreEqual(message1, message2, context);
 
             Assert.True(context.Diffs.Count(s => s == "Wa:") == 1);
+        }
+
+        [Fact]
+        public void CompareX509Certificate2()
+        {
+            TestUtilities.WriteHeader($"{this}.CompareX509Certificate2", true);
+
+            var context = new CompareContext($"{this}.CompareX509Certificate2");
+            var certificate = new X509Certificate2(Convert.FromBase64String(KeyingMaterial.DefaultX509Data_Public_2048));
+            var certificateSame = new X509Certificate2(Convert.FromBase64String(KeyingMaterial.DefaultX509Data_Public_2048));
+            var certificateDifferent = KeyingMaterial.CertSelfSigned1024_SHA256;
+
+            IdentityComparer.AreEqual(certificate, certificateSame, context);
+            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 0);
+
+            IdentityComparer.AreEqual(certificate, certificateDifferent, context);
+            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 1);
+
+            context.Diffs.Clear();
+            IdentityComparer.AreX509Certificate2Equal(certificate, null, context);
+            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 1);
+
+            context.Diffs.Clear();
+            IdentityComparer.AreX509Certificate2Equal(null, certificate, context);
+            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 1);
         }
     }
 }
