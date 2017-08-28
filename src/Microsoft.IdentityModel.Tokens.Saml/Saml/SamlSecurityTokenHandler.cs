@@ -1174,10 +1174,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
             {
-                foreach (var identity in identities)
-                {
-                    identity.BootstrapContext = token;
-                }
+                identities.ElementAt(0).BootstrapContext = token;
             }
 
             IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);

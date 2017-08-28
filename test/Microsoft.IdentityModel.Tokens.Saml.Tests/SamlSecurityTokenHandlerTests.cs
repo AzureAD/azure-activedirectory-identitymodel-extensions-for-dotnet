@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -66,20 +67,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("CanReadTokenTheoryData")]
         public void CanReadToken(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
             try
             {
-                // TODO - need to pass actual SamlToken
-
                 if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
                     Assert.False(true, $"Expected CanRead != CanRead, token: {theoryData.Token}");
 
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> CanReadTokenTheoryData
@@ -175,16 +176,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ReadTokenTheoryData")]
         public void ReadToken(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
             try
             {
                 theoryData.Handler.ReadToken(theoryData.Token);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> ReadTokenTheoryData
@@ -218,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex,context);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -244,16 +247,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateAudienceTheoryData")]
         public void ValidateAudience(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
             try
             {
                 ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> ValidateAudienceTheoryData
@@ -277,16 +282,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateIssuerTheoryData")]
         public void ValidateIssuer(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
             try
             {
                 ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> ValidateIssuerTheoryData
@@ -310,18 +317,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData("ValidateTokenTheoryData")]
         public void ValidateToken(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
 
             ClaimsPrincipal retVal = null;
             try
             {
                 retVal = (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<SamlTheoryData> ValidateTokenTheoryData
@@ -461,6 +470,76 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = nameof(ReferenceTokens.SamlToken_NoAttributes),
                         Token = ReferenceTokens.SamlToken_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)} IssuerSigningKey set",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid_Spaces_Added),
+                        Token = ReferenceTokens.SamlToken_Valid_Spaces_Added,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_AttributeTampered),
+                        Token = ReferenceTokens.SamlToken_AttributeTampered,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_DigestTampered),
+                        Token = ReferenceTokens.SamlToken_DigestTampered,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_SignatureTampered),
+                        Token = ReferenceTokens.SamlToken_SignatureTampered,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        }
                     }
                 };
             }
