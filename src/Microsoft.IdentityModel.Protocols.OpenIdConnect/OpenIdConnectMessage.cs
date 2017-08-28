@@ -39,8 +39,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
-        private const string _skuTelemetryValue = "ID_NET";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
@@ -194,7 +192,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (this.EnableTelemetryParameters)
             {
-                clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, _skuTelemetryValue);
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, SkuTelemetryValue);
                 clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString());
             }
         }
@@ -533,6 +531,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             get { return GetParameter(OpenIdConnectParameterNames.Sid); }
             set { SetParameter(OpenIdConnectParameterNames.Sid, value); }
         }
+
+        /// <summary>
+        /// Gets the string that is sent as telemetry data in an OpenIdConnectMessage.
+        /// </summary>
+        public string SkuTelemetryValue { get; set; } =
+#if NET45
+            "ID_NET45";
+#elif NET451
+            "ID_NET451";
+#elif NETSTANDARD1_4
+            "ID_NETSTANDARD1_4";
+#endif
 
         /// <summary>
         /// Gets or sets 'state'.
