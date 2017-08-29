@@ -125,9 +125,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             try
             {
                 var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
-                Assert.Equal(ReferenceXml.Token_Saml2_Valid, token);
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
+                Assert.Equal(theoryData.Token, token);
+                if (theoryData.TokenValidationParameters != null)
+                {
+                    var tokenHandler = new Saml2SecurityTokenHandler();
+                    tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
+                }
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -259,6 +262,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Valid
                             }
                         },
+                        Token = ReferenceXml.Token_Saml2_Valid,
                         TestId = "WsFederationMessage getToken test"
                     },
                     new WsFederationMessageTheoryData
@@ -279,7 +283,32 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Valid_With_Spaces
                             }
                         },
+                        Token = ReferenceXml.Token_Saml2_Valid,
                         TestId = "WsFederationMessage getToken test with white spaces"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_3
+                            }
+                        },
+                        Token = ReferenceXml.Token_Dummy,
+                        TestId = "WsFederationMessage getToken test with WsTrust 1.3"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_4
+                            }
+                        },
+                        Token = ReferenceXml.Token_Dummy,
+                        TestId = "WsFederationMessage getToken test with WsTrust 1.4"
                     }
                 };
             }
@@ -315,6 +344,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityToken element"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Dummy_Invalid_Namespace
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        TestId = "WsFederationMessage getToken negative test: unsupported namespace"
                     }
                 };
             }

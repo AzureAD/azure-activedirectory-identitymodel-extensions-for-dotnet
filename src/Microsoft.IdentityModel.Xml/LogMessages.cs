@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX21023 = "IDX21023: Unsupported NodeType: {0}.";
         internal const string IDX21024 = "IDX21024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX21025 = "IDX21025: Unable to read XML. Expecting XmlReader to be at EndElement: '{0}'. Found XmlNode 'type.name': '{1}.{2}'.";
+        internal const string IDX21026 = "IDX21011: Unable to read XML. Expecting XmlReader to be at element: '{0}' in one of the following namespaces: '{1}', found: '{2}.{3}'.";
 
         // XML structure, supported exceptions
         internal const string IDX21100 = "IDX21100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";

@@ -181,13 +181,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 XmlReader xmlReader = XmlReader.Create(sr);
                 xmlReader.MoveToContent();
 
-                XmlUtil.CheckReaderOnEntry(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustConstants.Namespaces.WsTrust2005);
+                var namespaceList = new List<string>()
+                {
+                    WsTrustConstants.Namespaces.WsTrust2005,
+                    WsTrustConstants.Namespaces.WsTrust1_3,
+                    WsTrustConstants.Namespaces.WsTrust1_4
+                };
+
+                XmlUtil.CheckReaderOnEntry(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, namespaceList);
 
                 xmlReader.ReadStartElement();
 
                 while (xmlReader.IsStartElement())
                 {
-                    if (!xmlReader.IsStartElement(WsTrustConstants.Elements.RequestedSecurityToken, WsTrustConstants.Namespaces.WsTrust2005))
+                    if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestedSecurityToken, namespaceList))
                     {
                         xmlReader.Skip();
                     }
