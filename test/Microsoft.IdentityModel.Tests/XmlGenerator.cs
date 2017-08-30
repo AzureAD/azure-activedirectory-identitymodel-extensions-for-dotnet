@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Tests
             signature.SignatureValue = Convert.ToBase64String(signatureBytes);
             var memoryStream = new MemoryStream();
             var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
-            var serializer = new DSigSerializer();
+            var serializer = DSigSerializer.Default;
             serializer.WriteSignature(writer, signature);
             writer.Flush();
 
@@ -355,7 +355,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             var memoryStream = new MemoryStream();
             var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
-            var serializer = new DSigSerializer();
+            var serializer = DSigSerializer.Default;
             serializer.WriteSignedInfo(writer, signedInfo);
             writer.Flush();
 
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             var memoryStream = new MemoryStream();
             var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
-            var serializer = new DSigSerializer();
+            var serializer = DSigSerializer.Default;
             serializer.WriteReference(writer, reference);
             writer.Flush();
 

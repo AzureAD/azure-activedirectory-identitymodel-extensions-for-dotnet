@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get;
             set;
-        } = new DSigSerializer();
+        } = DSigSerializer.Default;
 
         public KeyInfo KeyInfo
         {

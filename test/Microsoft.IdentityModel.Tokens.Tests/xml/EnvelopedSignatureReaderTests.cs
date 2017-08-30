@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("Serializer", new List<object>{ defaultSerializer, new DSigSerializer()}),
+                    new KeyValuePair<string, List<object>>("Serializer", new List<object>{ defaultSerializer, DSigSerializer.Default}),
                 },
                 Object = reader,
             };

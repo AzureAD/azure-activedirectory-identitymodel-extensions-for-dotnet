@@ -42,6 +42,34 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class DSigSerializer
     {
+        private static DSigSerializer _default;
+
+        /// <summary>
+        /// Returns the default <see cref="DSigSerializer"/> instance.
+        /// </summary>
+        public static DSigSerializer Default
+        {
+            get
+            {
+                return _default;
+            }
+            set
+            {
+                if (value == null)
+                    throw LogArgumentNullException("value");
+
+                _default = value;
+            }
+        }
+
+        /// <summary>
+        /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
+        /// </summary>
+        static DSigSerializer()
+        {
+            Default = new DSigSerializer();
+        }
+
         /// <summary>
         /// Initializes an instance of <see cref="DSigSerializer"/>
         /// </summary>

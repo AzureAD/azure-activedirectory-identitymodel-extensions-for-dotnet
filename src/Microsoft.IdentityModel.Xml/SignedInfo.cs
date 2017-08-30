@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class SignedInfo : DSigElement
     {
-        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private string _canonicalizationMethod = SecurityAlgorithms.ExclusiveC14n;
         private string _signatureMethod = SecurityAlgorithms.RsaSha256Signature;
 

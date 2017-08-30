@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     public class WsFederationMetadataSerializer
     {
 
-        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private DSigSerializer _dsigSerializer = DSigSerializer.Default;
 
         /// <summary>
         /// Metadata serializer for WsFed.
