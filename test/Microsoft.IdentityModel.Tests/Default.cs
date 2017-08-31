@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !CrossVersionTokenValidation
 using System.IdentityModel.Tokens.Jwt;
+#endif
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -49,12 +51,14 @@ namespace Microsoft.IdentityModel.Tests
     /// </summary>
     public static class Default
     {
+#if !CrossVersionTokenValidation
         private static string _referenceDigestValue;
 
         static Default()
         {
             _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
         }
+#endif
 
         public static string ActorIssuer
         {
@@ -76,11 +80,12 @@ namespace Microsoft.IdentityModel.Tests
             get => new List<string> { "Default.Amr1", "Default.Amr2", "Default.Amr3", "Default.Amr4" };
         }
 
+#if !CrossVersionTokenValidation
         public static string AsymmetricJwt
         {
             get => Jwt(SecurityTokenDescriptor(AsymmetricSigningCredentials));
         }
-
+#endif
         public static SecurityTokenDescriptor AsymmetricSignSecurityTokenDescriptor(List<Claim> claims)
         {
             return SecurityTokenDescriptor(null, AsymmetricSigningCredentials, claims);
@@ -101,6 +106,7 @@ namespace Microsoft.IdentityModel.Tests
             get => new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
         }
 
+#if !CrossVersionTokenValidation
         public static TokenValidationParameters AsymmetricEncryptSignTokenValidationParameters
         {
             get => TokenValidationParameters(SymmetricEncryptionKey256, AsymmetricSigningKey);
@@ -110,6 +116,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => TokenValidationParameters(null, AsymmetricSigningKey);
         }
+#endif
 
         public static string AttributeName
         {
@@ -255,10 +262,12 @@ namespace Microsoft.IdentityModel.Tests
             get => new List<string> { Guid.NewGuid().ToString(), "http://Default.Issuer.com", "http://Default.Issuer2.com", "http://Default.Issuer3.com" };
         }
 
+#if !CrossVersionTokenValidation
         public static string Jwt(SecurityTokenDescriptor tokenDescriptor)
         {
             return (new JwtSecurityTokenHandler()).CreateEncodedJwt(tokenDescriptor);
         }
+#endif
 
         public static string Location
         {
@@ -315,6 +324,7 @@ namespace Microsoft.IdentityModel.Tests
             get => "<OuterXml></OuterXml>";
         }
 
+#if !CrossVersionTokenValidation
         public static Reference ReferenceWithNullTokenStream
         {
             get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
@@ -351,6 +361,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => _referenceDigestValue;
         }
+#endif
 
         public static string ReferenceId
         {
@@ -392,10 +403,12 @@ namespace Microsoft.IdentityModel.Tests
             get => "Permit";
         }
 
+#if !CrossVersionTokenValidation
         public static SamlAction SamlAction
         {
             get => new SamlAction("Action", new Uri(SamlConstants.DefaultActionNamespace));
         }
+#endif
 
         public static string SamlAssertionID
         {
@@ -477,6 +490,7 @@ namespace Microsoft.IdentityModel.Tests
             return SecurityTokenDescriptor(null, signingCredentials, null);
         }
 
+#if !CrossVersionTokenValidation
         public static Signature Signature
         {
             get
@@ -510,6 +524,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => Signature.SignatureValue;
         }
+#endif
 
         public static string Subject
         {
@@ -614,6 +629,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+#if !CrossVersionTokenValidation
         public static string SymmetricJwe
         {
             get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2));
@@ -623,6 +639,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2));
         }
+#endif
 
         public static SecurityTokenDescriptor SymmetricEncryptSignSecurityTokenDescriptor()
         {
@@ -725,6 +742,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+#if !CrossVersionTokenValidation
         public static TokenValidationParameters SymmetricEncryptSignTokenValidationParameters
         {
             get => TokenValidationParameters(SymmetricEncryptionKey256, SymmetricSigningKey256);
@@ -757,10 +775,10 @@ namespace Microsoft.IdentityModel.Tests
             };
         }
 
-
         public static string UnsignedJwt
         {
             get => (new JwtSecurityTokenHandler()).CreateEncodedJwt(Issuer, Audience, ClaimsIdentity, null, null, null, null);
         }
+#endif
     }
 }

@@ -24,17 +24,18 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using System.Xml;
+using Xunit;
 using Microsoft.IdentityModel.Protocols.Extensions.OldVersion;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tests;
-using Xunit;
-using System.Reflection;
 
 namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 {
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CreateTokenCrossVerstionTest(TokenCrossTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ReadActCreateTokenCrossVerstionTeston", theoryData);
+            TestUtilities.WriteHeader($"{this}.CreateTokenCrossVerstionTest", theoryData);
             var context = new CompareContext($"{this}.CreateTokenCrossVerstionTest, {theoryData.TestId}");
 
             var token4x = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(theoryData.TokenDescriptor4x);
@@ -67,14 +68,14 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 {
                     new TokenCrossTheoryData
                     {
-                        TokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor()
+                        TokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
                         {
                             AppliesToAddress = Default.Audience,
                             Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
                             Subject = defaultClaimsIdentity,
                             TokenIssuerName = Default.Issuer,
                         },
-                        TokenDescriptor5x = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor()
+                        TokenDescriptor5x = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
                             NotBefore = notBefore,
@@ -83,6 +84,75 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             Subject = defaultClaimsIdentity
                         }
                     },
+                };
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("CreateClaimsPrincipalCrossVersionTestTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void CreateClaimsPrincipalCrossVersionTest(ClaimsPrincipalTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.CreateClaimsPrincipalCrossVersionTest", theoryData);
+            var context = new CompareContext($"{this}.CreateClaimsPrincipalCrossVersionTest, {theoryData.TestId}");
+
+            var tvp5x = new Microsoft.IdentityModel.Tokens.TokenValidationParameters();
+
+            PropertyInfo[] propertyInfos = typeof(SharedTokenValidationParameters).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                if (propertyInfo.GetMethod != null)
+                {
+                    object val = propertyInfo.GetValue(theoryData.TokenValidationParameters, null);
+                    PropertyInfo tvp5xPropertyInfo = typeof(Microsoft.IdentityModel.Tokens.TokenValidationParameters).GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    tvp5xPropertyInfo.SetValue(tvp5x, val);
+                }
+            }
+
+            if (theoryData.X509Certificate != null)
+                tvp5x.IssuerSigningKey = new Microsoft.IdentityModel.Tokens.X509SecurityKey(theoryData.X509Certificate);
+
+            var claimsPrincipal4x = CrossVersionTokenValidationTestsData.GetSamlClaimsPrincipal4x(theoryData.Token, theoryData.TokenValidationParameters, theoryData.X509Certificate, out System.IdentityModel.Tokens.SecurityToken validateToken4x);
+            var claimsPrincipal5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.Token, tvp5x, out Microsoft.IdentityModel.Tokens.SecurityToken validateToken5x);
+
+            AreSamlTokensEqual(validateToken4x, validateToken5x, context);
+            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ClaimsPrincipalTheoryData> CreateClaimsPrincipalCrossVersionTestTheoryData
+        {
+            get
+            {
+                var defaultClaimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaims.GetRange(0, 8));
+                var notBefore = DateTime.UtcNow;
+                var expires = notBefore + TimeSpan.FromDays(1);
+                var tokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
+                {
+                    AppliesToAddress = Default.Audience,
+                    Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
+                    SigningCredentials = new System.IdentityModel.Tokens.X509SigningCredentials(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                    Subject = defaultClaimsIdentity,
+                    TokenIssuerName = Default.Issuer,
+                };
+
+                var token4x = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
+
+                return new TheoryData<ClaimsPrincipalTheoryData>
+                {
+                    new ClaimsPrincipalTheoryData
+                    {
+                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x),
+                        TokenValidationParameters = new SharedTokenValidationParameters
+                        {
+                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
+                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                    }
                 };
             }
         }
@@ -109,7 +179,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAssertionsEqual(System.IdentityModel.Tokens.SamlAssertion assertion1, Microsoft.IdentityModel.Tokens.Saml.SamlAssertion assertion2, CompareContext context)
+        private static bool AreSamlAssertionsEqual(System.IdentityModel.Tokens.SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(assertion1, assertion2, localContext))
@@ -138,7 +208,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAdvicesEqual(System.IdentityModel.Tokens.SamlAdvice advice1, SamlAdvice advice2, CompareContext context)
+        private static bool AreSamlAdvicesEqual(System.IdentityModel.Tokens.SamlAdvice advice1, Microsoft.IdentityModel.Tokens.Saml.SamlAdvice advice2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(advice1, advice2, localContext))
@@ -459,7 +529,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                                 localContext.Diffs.Add(Environment.NewLine + $"{propertyInfo.Name}: {val}");
                         }
                     }
-                }                    
+                }
 
                 localContext.Diffs.Add(Environment.NewLine + $"objs2 NOT Matched: Type {expectedValues.GetType()}:****************");
                 foreach (var obj in expectedValues)
@@ -658,5 +728,12 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
     {
         public System.IdentityModel.Tokens.SecurityTokenDescriptor TokenDescriptor4x { get; set; }
         public Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor TokenDescriptor5x { get; set; }
+    }
+
+    public class ClaimsPrincipalTheoryData : TheoryDataBase
+    {
+        public string Token { get; set; }
+        public SharedTokenValidationParameters TokenValidationParameters { get; set; }
+        public X509Certificate2 X509Certificate { get; set; }
     }
 }

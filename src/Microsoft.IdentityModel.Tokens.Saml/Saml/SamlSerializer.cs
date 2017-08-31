@@ -318,20 +318,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AttributeType, SamlConstants.Namespace);
 
-                var name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
-                if (string.IsNullOrEmpty(name))
+                attribute.Name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
+                if (string.IsNullOrEmpty(attribute.Name))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Attribute, SamlConstants.Attributes.AttributeName);
 
-                attribute.Name = name;
-
-                var nameSpace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
-                if (string.IsNullOrEmpty(nameSpace))
+                attribute.Namespace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
+                if (string.IsNullOrEmpty(attribute.Namespace))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Attribute, SamlConstants.Attributes.AttributeNamespace);
 
-                attribute.Namespace = nameSpace;
+                attribute.ClaimType = attribute.Namespace + "/" + attribute.Name;
 
-                // TODO is this the right thing?
-                attribute.ClaimType = string.IsNullOrEmpty(nameSpace) ? name : nameSpace + "/" + name;
+                // The following code is for aligning to the old version.
+                string originalIssuer = reader.GetAttribute(SamlConstants.Attributes.OriginalIssuer, SamlConstants.ClaimType2009Namespace);
+                if (originalIssuer == null)
+                    originalIssuer = reader.GetAttribute(SamlConstants.Attributes.OriginalIssuer, SamlConstants.MsIdentityNamespaceUri);
+
+                if (originalIssuer != null)
+                    attribute.OriginalIssuer = originalIssuer;
 
                 reader.MoveToContent();
                 reader.Read();

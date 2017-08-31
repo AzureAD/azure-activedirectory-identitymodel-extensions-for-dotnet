@@ -1185,7 +1185,10 @@ namespace Microsoft.IdentityModel.Tests
             get
             {
                 var claim = new Claim(ClaimTypes.Country, Default.Country, ClaimValueTypes.String, Default.Issuer);
-                var statement = new SamlAttributeStatement(ReferenceSaml.SamlSubject, new SamlAttribute(ClaimTypes.Country, ClaimTypes.Country, Default.Country));
+                int index = ClaimTypes.Country.LastIndexOf('/');
+                string ns = ClaimTypes.Country.Substring(0, index);
+                string name = ClaimTypes.Country.Substring(index + 1);
+                var statement = new SamlAttributeStatement(ReferenceSaml.SamlSubject, new SamlAttribute(ns, name, Default.Country));
 
                 var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 identity.AddClaim(claim);
@@ -1203,7 +1206,10 @@ namespace Microsoft.IdentityModel.Tests
             get
             {
                 var claim1 = new Claim(ClaimTypes.Country, Default.Country, ClaimValueTypes.String, Default.Issuer);
-                var attrStatement1 = new SamlAttribute(ClaimTypes.Country, ClaimTypes.Country, Default.Country);
+                int index = ClaimTypes.Country.LastIndexOf('/');
+                string ns = ClaimTypes.Country.Substring(0, index);
+                string name = ClaimTypes.Country.Substring(index + 1);
+                var attrStatement1 = new SamlAttribute(ns, name, Default.Country);
                 var statement1 = new SamlAttributeStatement(ReferenceSaml.SamlSubject, attrStatement1);
                 var identity1 = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 identity1.AddClaim(claim1);
