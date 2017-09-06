@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-    [Theory, MemberData("MessageTheoryData")]
+        [Theory, MemberData("MessageTheoryData")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
@@ -137,104 +137,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("GetTokenNegativeTestTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
-            try
-            {
-                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("MessageTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ParametersTest(WsFederationMessageTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
-            try
-            {
-                var wsFederationMessage = new WsFederationMessage
-                {
-                    IssuerAddress = theoryData.IssuerAddress,
-                    Wreply = theoryData.Wreply,
-                    Wct = theoryData.Wct
-                };
-
-                Assert.Equal(theoryData.IssuerAddress, wsFederationMessage.IssuerAddress);
-                Assert.Equal(theoryData.Wreply, wsFederationMessage.Wreply);
-                Assert.Equal(theoryData.Wct, wsFederationMessage.Wct);
-
-                // add parameter
-                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, theoryData.Parameter1.Value);
-
-                // add parameters
-                var nameValueCollection = new NameValueCollection
-                {
-                    { theoryData.Parameter2.Key, theoryData.Parameter2.Value },
-                    { theoryData.Parameter3.Key, theoryData.Parameter3.Value }
-                };
-                wsFederationMessage.SetParameters(nameValueCollection);
-
-                // validate the parameters are added
-                Assert.Equal(theoryData.Parameter1.Value, wsFederationMessage.Parameters[theoryData.Parameter1.Key]);
-                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessage.Parameters[theoryData.Parameter2.Key]);
-                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessage.Parameters[theoryData.Parameter3.Key]);
-
-                // remove parameter
-                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, null);
-
-                // validate the parameter is removed
-                Assert.Equal(false, wsFederationMessage.Parameters.ContainsKey(theoryData.Parameter1.Key));
-
-                // create redirectUri
-                var uriString = wsFederationMessage.BuildRedirectUrl();
-                Uri uri = new Uri(uriString);
-
-                // convert query back to WsFederationMessage
-                var wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
-
-                // validate the parameters in the returned wsFederationMessage
-                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter2.Key]);
-                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter3.Key]);
-
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("QueryStringTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void QueryStringTest(WsFederationMessageTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
-            var context = new CompareContext($"{this}.QueryStringTest, {theoryData.TestId}");
-            try
-            {
-                var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
-                theoryData.ExpectedException.ProcessNoException();
-                IdentityComparer.AreWsFederationMessagesEqual(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMessageTheoryData> GetTokenTheoryData
@@ -314,6 +216,23 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("GetTokenNegativeTestTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
+            try
+            {
+                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
         public static TheoryData<WsFederationMessageTheoryData> GetTokenNegativeTestTheoryData
         {
             get
@@ -330,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityTokenResponse
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityTokenResponse element"
                     },
                     new WsFederationMessageTheoryData
@@ -354,10 +273,94 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Dummy_Invalid_Namespace
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX21011:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
                         TestId = "WsFederationMessage getToken negative test: unsupported namespace"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_3_multiple_tokens
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10903:"),
+                        TestId = "WsFederationMessage getToken negative test: wstrust 1.3, more than one token"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_4_multiple_tokens
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10903:"),
+                        TestId = "WsFederationMessage getToken negative test: wstrust 1.4, more than one token"
                     }
                 };
+            }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("MessageTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ParametersTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
+            try
+            {
+                var wsFederationMessage = new WsFederationMessage
+                {
+                    IssuerAddress = theoryData.IssuerAddress,
+                    Wreply = theoryData.Wreply,
+                    Wct = theoryData.Wct
+                };
+
+                Assert.Equal(theoryData.IssuerAddress, wsFederationMessage.IssuerAddress);
+                Assert.Equal(theoryData.Wreply, wsFederationMessage.Wreply);
+                Assert.Equal(theoryData.Wct, wsFederationMessage.Wct);
+
+                // add parameter
+                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, theoryData.Parameter1.Value);
+
+                // add parameters
+                var nameValueCollection = new NameValueCollection
+                {
+                    { theoryData.Parameter2.Key, theoryData.Parameter2.Value },
+                    { theoryData.Parameter3.Key, theoryData.Parameter3.Value }
+                };
+                wsFederationMessage.SetParameters(nameValueCollection);
+
+                // validate the parameters are added
+                Assert.Equal(theoryData.Parameter1.Value, wsFederationMessage.Parameters[theoryData.Parameter1.Key]);
+                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessage.Parameters[theoryData.Parameter2.Key]);
+                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessage.Parameters[theoryData.Parameter3.Key]);
+
+                // remove parameter
+                wsFederationMessage.SetParameter(theoryData.Parameter1.Key, null);
+
+                // validate the parameter is removed
+                Assert.Equal(false, wsFederationMessage.Parameters.ContainsKey(theoryData.Parameter1.Key));
+
+                // create redirectUri
+                var uriString = wsFederationMessage.BuildRedirectUrl();
+                Uri uri = new Uri(uriString);
+
+                // convert query back to WsFederationMessage
+                var wsFederationMessageReturned = WsFederationMessage.FromQueryString(uri.Query);
+
+                // validate the parameters in the returned wsFederationMessage
+                Assert.Equal(theoryData.Parameter2.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter2.Key]);
+                Assert.Equal(theoryData.Parameter3.Value, wsFederationMessageReturned.Parameters[theoryData.Parameter3.Key]);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 
@@ -380,6 +383,27 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     }
                 };
             }
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("QueryStringTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void QueryStringTest(WsFederationMessageTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
+            var context = new CompareContext($"{this}.QueryStringTest, {theoryData.TestId}");
+            try
+            {
+                var wsFederationMessage = WsFederationMessage.FromQueryString(theoryData.WsFederationMessageTestSet.Xml);
+                theoryData.ExpectedException.ProcessNoException();
+                IdentityComparer.AreWsFederationMessagesEqual(wsFederationMessage, theoryData.WsFederationMessageTestSet.WsFederationMessage, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<WsFederationMessageTheoryData> QueryStringTheoryData

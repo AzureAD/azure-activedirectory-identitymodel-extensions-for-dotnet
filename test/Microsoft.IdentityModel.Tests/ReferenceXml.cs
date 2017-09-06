@@ -393,7 +393,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return @"<t:RequestSecurityTokenResponse xmlns:t=""http://docs.oasis-open.org/ws-sx/ws-trust/200512""><t:RequestedSecurityToken>dummy</t:RequestedSecurityToken></t:RequestSecurityTokenResponse>";
+                return @"<trust:RequestSecurityTokenResponseCollection xmlns:trust = ""http://docs.oasis-open.org/ws-sx/ws-trust/200512""><trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse></trust:RequestSecurityTokenResponseCollection>";
             }
         }
 
@@ -401,7 +401,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return @"<t:RequestSecurityTokenResponse xmlns:t=""http://docs.oasis-open.org/ws-sx/ws-trust/200802""><t:RequestedSecurityToken>dummy</t:RequestedSecurityToken></t:RequestSecurityTokenResponse>";
+                return @"<trust:RequestSecurityTokenResponseCollection xmlns:trust = ""http://docs.oasis-open.org/ws-sx/ws-trust/200802""><trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse></trust:RequestSecurityTokenResponseCollection>";
             }
         }
 
@@ -409,7 +409,29 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return @"<t:RequestSecurityTokenResponse xmlns:t=""unsupported""><t:RequestedSecurityToken>dummy</t:RequestedSecurityToken></t:RequestSecurityTokenResponse>";
+                return @"<trust:RequestSecurityTokenResponseCollection xmlns:trust=""unsupported""><trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse></trust:RequestSecurityTokenResponseCollection>";
+            }
+        }
+
+        public static string WResult_Dummy_WsTrust1_3_multiple_tokens
+        {
+            get
+            {
+                return @"<trust:RequestSecurityTokenResponseCollection xmlns:trust = ""http://docs.oasis-open.org/ws-sx/ws-trust/200512"">
+                            <trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse>
+                            <trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse>
+                         </trust:RequestSecurityTokenResponseCollection>";
+            }
+        }
+
+        public static string WResult_Dummy_WsTrust1_4_multiple_tokens
+        {
+            get
+            {
+                return @"<trust:RequestSecurityTokenResponseCollection xmlns:trust = ""http://docs.oasis-open.org/ws-sx/ws-trust/200802"">
+                            <trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse>
+                            <trust:RequestSecurityTokenResponse><trust:RequestedSecurityToken>dummy</trust:RequestedSecurityToken></trust:RequestSecurityTokenResponse>
+                         </trust:RequestSecurityTokenResponseCollection>";
             }
         }
 

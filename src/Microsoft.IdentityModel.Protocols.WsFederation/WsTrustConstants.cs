@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             public const string RequestedAttachedReference = "RequestedAttachedReference";
             public const string RequestedSecurityToken = "RequestedSecurityToken";
             public const string RequestSecurityTokenResponse = "RequestSecurityTokenResponse";
+            public const string RequestSecurityTokenResponseCollection = "RequestSecurityTokenResponseCollection";
             public const string RequestType = "RequestType";
             public const string SecurityTokenReference = "SecurityTokenReference";
             public const string RequestedUnattachedReference = "RequestedUnattachedReference";

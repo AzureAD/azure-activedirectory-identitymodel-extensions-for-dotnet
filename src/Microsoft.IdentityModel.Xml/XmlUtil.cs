@@ -94,42 +94,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
-        /// </summary>
-        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
-        /// <param name="element">the expected element.</param>
-        /// <param name="namespaceList">the expected namespace list.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
-        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
-        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at expected element.</exception>
-        public static void CheckReaderOnEntry(XmlReader reader, string element, ICollection<string> namespaceList)
-        {
-            if (reader == null)
-                throw LogArgumentNullException(nameof(reader));
-
-            // IsStartElement calls reader.MoveToContent().
-            if (!reader.IsStartElement())
-                throw LogReadException(LogMessages.IDX21022, reader.NodeType);
-
-            if (namespaceList == null || namespaceList.Count == 0)
-            {
-                if (!reader.IsStartElement(element))
-                    throw LogReadException(LogMessages.IDX21024, element, reader.LocalName);
-            }
-            else
-            {
-                foreach (var @namespace in namespaceList)
-                {
-                    if (!string.IsNullOrEmpty(@namespace) && reader.IsStartElement(element, @namespace))
-                        return;
-                }
-
-                throw LogReadException(LogMessages.IDX21026, element, string.Join(", ", namespaceList), reader.NamespaceURI, reader.LocalName);
-            }
-        }
-
-        /// <summary>
         /// Determine if reader is at expected element in one of the listed namespace in namespaceList. 
         /// </summary>
         /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
@@ -149,14 +113,14 @@ namespace Microsoft.IdentityModel.Xml
             if (namespaceList == null)
                 return reader.IsStartElement(element);
 
-            foreach(var @namespace in namespaceList)
+            foreach (var @namespace in namespaceList)
             {
                 if (!string.IsNullOrEmpty(@namespace) && reader.IsStartElement(element, @namespace))
                     return true;
             }
 
             return false;
-        } 
+        }
 
         /// <summary>
         /// Determines if a Qualified names equals a name / namespace pair.
