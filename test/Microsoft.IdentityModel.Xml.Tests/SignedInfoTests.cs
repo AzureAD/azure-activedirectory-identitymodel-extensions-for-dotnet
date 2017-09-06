@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
     public class SignedInfoTheoryData : TheoryDataBase
     {
-        public DSigSerializer Serializer { get; set; } = new DSigSerializer();
+        public DSigSerializer Serializer { get; set; } = DSigSerializer.Default;
 
         public SignedInfo SignedInfo { get; set; }
 

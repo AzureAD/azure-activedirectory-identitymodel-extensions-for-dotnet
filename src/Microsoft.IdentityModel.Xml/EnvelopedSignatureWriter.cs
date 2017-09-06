@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private MemoryStream _canonicalStream;
         private bool _disposed;
-        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
         private string _referenceId;
         private XmlWriter _originalWriter;

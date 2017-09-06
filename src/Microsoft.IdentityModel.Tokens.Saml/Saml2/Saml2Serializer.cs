@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Serializer
     {
-        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private DSigSerializer _dsigSerializer = DSigSerializer.Default;
 
         /// <summary>
         /// Instantiates a new instance of <see cref="Saml2Serializer"/>.

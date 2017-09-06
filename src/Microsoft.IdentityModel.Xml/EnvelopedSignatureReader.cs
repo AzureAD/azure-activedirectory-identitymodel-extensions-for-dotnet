@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class EnvelopedSignatureReader : DelegatingXmlDictionaryReader
     {
-        private DSigSerializer _dsigSerializer = new DSigSerializer();
+        private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
         private XmlTokenStreamReader _tokenStreamReader;
 
