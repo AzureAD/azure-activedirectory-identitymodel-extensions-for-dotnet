@@ -205,6 +205,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                         }
                         else
                         {
+                            // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
                             if (token != null)
                                 throw new WsFederationException(LogMessages.IDX10903);
 

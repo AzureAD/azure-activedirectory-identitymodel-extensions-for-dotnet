@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX10900 = "IDX10900: Building wsfederation message from query string: '{0}'.";
         internal const string IDX10901 = "IDX10901: Building wsfederation message from uri: '{0}'.";
         internal const string IDX10902 = "IDX10902: Token is not found in wresult";
-        internal const string IDX10903 = "IDX10903: More than one token are found in wresult";
+        internal const string IDX10903 = "IDX10903: Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.";
 
         // xml metadata messages
         internal const string IDX13000 = "IDX13000: Exception thrown while reading WsFedereationMetadata. Element '{0}'. Caught exception: '{1}'.";

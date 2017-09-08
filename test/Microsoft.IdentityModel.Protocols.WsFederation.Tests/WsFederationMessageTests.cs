@@ -36,13 +36,13 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
     /// <summary>
     /// 
     /// </summary>
     public class WsFederationMessageTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
         [Fact]
         public void GetSets()
         {
@@ -83,7 +83,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
 
         [Theory, MemberData("MessageTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ConstructorTest", theoryData);
@@ -116,9 +115,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("GetTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
         public void GetTokenTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetTokenTest", theoryData);
@@ -216,9 +214,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("GetTokenNegativeTestTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
         public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
@@ -304,9 +301,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("MessageTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
         public void ParametersTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
@@ -385,9 +381,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("QueryStringTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
         public void QueryStringTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
@@ -475,4 +470,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             public string Wtrealm { get; set; }
         }
     }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
