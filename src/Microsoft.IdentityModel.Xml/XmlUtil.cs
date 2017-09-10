@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -90,6 +91,35 @@ namespace Microsoft.IdentityModel.Xml
                 if (!reader.IsStartElement(element, @namespace))
                     throw LogReadException(LogMessages.IDX21011, @namespace, element, reader.NamespaceURI, reader.LocalName);
             }
+        }
+
+        /// <summary>
+        /// Determine if reader is at expected element in one of the listed namespace in namespaceList. 
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <param name="element">the expected element.</param>
+        /// <param name="namespaceList">the expected namespace list.</param>
+        /// <returns>if <paramref name="reader"/> is at expected element.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        public static bool IsStartElement(XmlReader reader, string element, ICollection<string> namespaceList)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            if (string.IsNullOrEmpty(element))
+                throw LogArgumentNullException(nameof(element));
+
+            if (namespaceList == null)
+                return reader.IsStartElement(element);
+
+            foreach (var @namespace in namespaceList)
+            {
+                if (!string.IsNullOrEmpty(@namespace) && reader.IsStartElement(element, @namespace))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>

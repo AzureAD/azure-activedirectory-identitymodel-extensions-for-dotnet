@@ -161,11 +161,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             return wsFederationMessage.BuildRedirectUrl();
         }
-        
+
         /// <summary>
         /// Reads the 'wresult' and returns the embeded security token.
         /// </summary>
         /// <returns>the 'SecurityToken'.</returns>
+        /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
         public virtual string GetToken()
         {
             if (Wresult == null)
@@ -181,37 +182,56 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 XmlReader xmlReader = XmlReader.Create(sr);
                 xmlReader.MoveToContent();
 
-                XmlUtil.CheckReaderOnEntry(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustConstants.Namespaces.WsTrust2005);
-
-                xmlReader.ReadStartElement();
+                // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
+                if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))
+                    xmlReader.ReadStartElement();
 
                 while (xmlReader.IsStartElement())
                 {
-                    if (!xmlReader.IsStartElement(WsTrustConstants.Elements.RequestedSecurityToken, WsTrustConstants.Namespaces.WsTrust2005))
+                    // Read <RequestSecurityTokenResponse>
+                    if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustNamespaceList))
                     {
                         xmlReader.Skip();
+                        continue;
                     }
-                    else
+
+                    xmlReader.ReadStartElement();
+
+                    while (xmlReader.IsStartElement())
                     {
-                        using (var ms = new MemoryStream())
+                        if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestedSecurityToken, WsTrustNamespaceList))
                         {
-                            using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                            xmlReader.Skip();
+                        }
+                        else
+                        {
+                            // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
+                            if (token != null)
+                                throw new WsFederationException(LogMessages.IDX10903);
+
+                            using (var ms = new MemoryStream())
                             {
-                                writer.WriteNode(xmlReader, true);
-                                writer.Flush();
+                                using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                                {
+                                    writer.WriteNode(xmlReader, true);
+                                    writer.Flush();
+                                }
+
+                                ms.Seek(0, SeekOrigin.Begin);
+
+                                var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
+                                var dom = new XmlDocument()
+                                {
+                                    PreserveWhitespace = true
+                                };
+                                dom.Load(memoryReader);
+                                token = dom.DocumentElement.InnerXml;
                             }
-
-                            ms.Seek(0, SeekOrigin.Begin);
-
-                            var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
-                            var dom = new XmlDocument()
-                            {
-                                PreserveWhitespace = true
-                            };
-                            dom.Load(memoryReader);
-                            token = dom.DocumentElement.InnerXml;
                         }
                     }
+
+                    // Read </RequestSecurityTokenResponse>
+                    xmlReader.ReadEndElement();
                 }
             }
 
@@ -443,5 +463,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm, value); }
         }
+
+        private static List<string> WsTrustNamespaceList = new List<string>() { WsTrustConstants.Namespaces.WsTrust2005, WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
+
+        private static List<string> WsTrustNamespaceNon2005List = new List<string>() { WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
     }
 }
