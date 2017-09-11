@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
         /// </summary>
-        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation";
+        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
         /// <summary>
         /// Default for the clock skew.

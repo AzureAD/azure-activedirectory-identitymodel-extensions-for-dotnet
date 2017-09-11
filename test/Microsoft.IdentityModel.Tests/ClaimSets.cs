@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !CrossVersionTokenValidation
 using System.IdentityModel.Tokens.Jwt;
+#endif
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,6 +50,7 @@ namespace Microsoft.IdentityModel.Tests
     {
         static ClaimSets()
         {
+#if !CrossVersionTokenValidation
             AllReserved = new List<Claim>()
             {
                 new Claim(JwtRegisteredClaimNames.Actort, "TOKEN"),
@@ -64,6 +67,7 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim(JwtRegisteredClaimNames.Sub, "Subject.Value"),
                 new Claim(JwtRegisteredClaimNames.Typ, "Type.Value"),
             };
+#endif
 
             DefaultClaims = new List<Claim>
             {
@@ -233,11 +237,11 @@ namespace Microsoft.IdentityModel.Tests
             get { return new List<Claim>(); }
         }
 
+#if !CrossVersionTokenValidation
         public static List<Claim> MultipleAudiences()
         {
             return MultipleAudiences(Default.Issuer, Default.Issuer);
         }
-
         public static List<Claim> MultipleAudiences(string issuer, string orignalIssuer)
         {
             var claims = new List<Claim>();
@@ -416,6 +420,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             return new List<Claim> { new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, issuer ?? Default.Issuer, orginalIssuer) };
         }
+#endif
     }
 
     /// <summary>

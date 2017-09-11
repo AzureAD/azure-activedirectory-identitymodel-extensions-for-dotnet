@@ -658,7 +658,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         if (value != null)
                         {
-                            var claim = new Claim(attribute.Name, value, attribute.AttributeValueXsiType, issuer, originalIssuer);
+                            var claim = new Claim(attribute.ClaimType, value, attribute.AttributeValueXsiType, issuer, originalIssuer);
                             identity.AddClaim(claim);
                         }
                     }

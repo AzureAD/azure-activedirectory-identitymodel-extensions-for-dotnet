@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData()
                     {
                         AttributeTestSet = ReferenceSaml.SamlAttributeNameNull,
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         First = true,
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAttributeNameNull)
@@ -415,21 +415,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData()
                     {
                         AttributeTestSet = ReferenceSaml.SamlAttributeNameEmptyString,
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAttributeNameEmptyString)
                     },
                     new SamlTheoryData()
                     {
                         AttributeTestSet = ReferenceSaml.SamlAttributeNamespaceNull,
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAttributeNamespaceNull)
                     },
                     new SamlTheoryData()
                     {
                         AttributeTestSet = ReferenceSaml.SamlAttributeNamespaceEmptyString,
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11115:"),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(ArgumentNullException)),
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAttributeNamespaceEmptyString)
                     },

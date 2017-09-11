@@ -5,7 +5,19 @@
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation />
+    <DefineConstants>CrossVersionTokenValidation</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Microsoft.IdentityModel.Tests\ClaimSets.cs" Link="ClaimSets.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\CompareContext.cs" Link="CompareContext.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\Default.cs" Link="Default.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\ExpectedException.cs" Link="ExpectedException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\IdentityComparer.cs" Link="IdentityComparer.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\KeyingMaterial.cs" Link="KeyingMaterial.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TestException.cs" Link="TestException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TestUtilities.cs" Link="TestUtilities.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TheoryDataBase.cs" Link="TheoryDataBase.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
@@ -25,14 +37,8 @@
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Protocol.Extensions.4x\Microsoft.IdentityModel.Protocol.Extensions.OldVersion.csproj" />
-    <ProjectReference Include="..\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="Microsoft.IdentityModel.Protocol.Extensions">
-      <HintPath>..\Microsoft.IdentityModel.Protocol.Extensions.4x\References\Microsoft.IdentityModel.Protocol.Extensions.dll</HintPath>
-    </Reference>
   </ItemGroup>
   
   <ItemGroup>

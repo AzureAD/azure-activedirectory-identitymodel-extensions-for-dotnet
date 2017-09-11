@@ -48,6 +48,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const string UserName = "UserName";
         public const string UserNameNamespace = "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName";
         public const string UnspecifiedAuthenticationMethod = "urn:oasis:names:tc:SAML:1.0:am:unspecified";
+        internal const string ClaimType2009Namespace = "http://schemas.xmlsoap.org/ws/2009/09/identity/claims";
+        internal const string MsIdentityNamespaceUri = "http://schemas.microsoft.com/ws/2008/06/identity";
 
         public static string[] AcceptedDateTimeFormats = new string[] {
                 "yyyy-MM-ddTHH:mm:ss.fffffffZ",
