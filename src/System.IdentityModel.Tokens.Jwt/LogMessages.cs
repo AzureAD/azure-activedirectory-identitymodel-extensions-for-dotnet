@@ -51,31 +51,20 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX10714 = "IDX10714: Creating actor value using actor.BootstrapContext.rawData";
         internal const string IDX10715 = "IDX10715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
         internal const string IDX10716 = "IDX10716: Decoding token: '{0}' into header, payload and signature.";
-        internal const string IDX10717 = "IDX10717: Deserializing header: '{0}' from the token.";
-        internal const string IDX10718 = "IDX10718: Deserializing payload: '{0}' from the token.";
         internal const string IDX10720 = "IDX10720: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
         internal const string IDX10721 = "IDX10721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX10722 = "IDX10722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
         internal const string IDX10723 = "IDX10723: Unable to decode the payload '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
-        internal const string IDX10724 = "IDX10724: Unable to decode the signature '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
-        internal const string IDX10725 = "IDX10725: Unable to decode the encrypted key '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
-        internal const string IDX10726 = "IDX10726: Unable to decode the initial vector '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
-        internal const string IDX10727 = "IDX10727: Unable to decode the cyphertext '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
-        internal const string IDX10728 = "IDX10728: Unable to decode the authentication tag '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX10729 = "IDX10729: Unable to decode the header '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX10730 = "IDX10730: Failed to create the token encryption provider.";
-        internal const string IDX10731 = "IDX10731: The resolved key for direct use is not a symmetric key.";
         internal const string IDX10733 = "IDX10733: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are both null.";
-        internal const string IDX10734 = "IDX10734: Only 'dir' is supported.";
         internal const string IDX10735 = "IDX10735: If JwtSecurityToken.InnerToken != null, then JwtSecurityToken.Header.EncryptingCredentials must be set.";
         internal const string IDX10736 = "IDX10736: JwtSecurityToken.SigningCredentials is not supported when JwtSecurityToken.InnerToken is set.";
         internal const string IDX10737 = "IDX10737: EncryptingCredentials set on JwtSecurityToken.InnerToken is not supported.";
         internal const string IDX10738 = "IDX10738: Header.Cty != null, assuming JWS. Cty: '{0}'.";
 
         // logging
-        internal const string IDX10644 = "IDX10644: Creating raw signature using the signature provider.";
         internal const string IDX10645 = "IDX10645: Creating raw signature using the signature credentials.";
-        internal const string IDX10646 = "IDX10646: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
 #pragma warning restore 1591
     }
 }

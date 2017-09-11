@@ -35,24 +35,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 #pragma warning disable 1591
         // SecurityTokenHandler messages
         internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
-        internal const string IDX10721 = "IDX10721: Creating SamlSecurityToken: Issuer: '{0}', Audience: '{1}'.";
 
         // signature creation / validation
         internal const string IDX10512 = "IDX10512: Unable to validate token. A SamlSamlAttributeStatement can only have one SamlAttribute of type 'Actor'. This special SamlAttribute is used in delegation scenarios.";
         internal const string IDX10513 = "IDX10513: Unable to process Saml attribute. A SamlSubject must contain either or both of Name and ConfirmationMethod.";
-        internal const string IDX10514 = "IDX10514: Unable to create SamlStatement. A SamlStatement must be one of SamlAuthenticationStatement, SamlAttributeStatement or SamlAuthorizationDecisionStatement.";
 
         // SamlSerializer reading
         internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";
-        internal const string IDX11101 = "IDX11101: Saml Unexpected element found '{0}' while reading.";
         internal const string IDX11102 = "IDX11102: Saml An AuthorizationDecisionStatement must have at least one Action.";
-        internal const string IDX11103 = "IDX11103: Saml Evidence must have at least one assertion.";
         internal const string IDX11104 = "IDX11104: Saml Name cannot be null or empty.";
-        internal const string IDX11105 = "IDX11105: Saml SubjectConformation Name cannot be null or empty.";
-        internal const string IDX11106 = "IDX11106: Saml No SubjectConfirmation clauses were specified.";
         internal const string IDX11107 = "IDX11107: Saml A Subject requires a NameIdentifier or ConfirmationMethod.";
         internal const string IDX11108 = "IDX11108: Saml AuthorityBinding.AuthorityKind is not well formed. Is should be of the form str:str, it is '{0}'.";
-        internal const string IDX11109 = "IDX11109: SamlAssertion.Issuer cannont be null or empty when creating claims.";
         internal const string IDX11110 = "IDX11110: The SamlSecurityToken must have a value for its Assertion property.";
 
         internal const string IDX11111 = "IDX11111: When reading '{0}', '{1}' was not a Absolute Uri, was: '{2}'.";
@@ -62,7 +55,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11116 = "IDX11116: Unable to read SamlSecurityToken. MajorVersion must be '1' was: '{0}'.";
         internal const string IDX11117 = "IDX11117: Unable to read SamlSecurityToken. MinorVersion must be '1' was: '{0}'.";
         internal const string IDX11118 = "IDX11118: Unable to read condition : '{0}'. SamlSecurityToken only support AudienceRestrictionCondition and DoNotCacheCondition.";
-        internal const string IDX11119 = "IDX11119: Unable to read SamlSecurityToken. Element: '{0}' was missing element: '{1}' when reading element: '{2}'.";
         internal const string IDX11120 = "IDX11120: Unable to read SamlSecurityToken. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX11121 = "IDX11121: Invalid SAML AssertionID: '{0}'.";
         internal const string IDX11122 = "IDX11122: Exception thrown while reading '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
@@ -81,7 +73,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11135 = "IDX11135: Unable to read SamlSecurityToken. Saml element '{0}' must have value.";
 
         // Saml writting
-        internal const string IDX11500 = "IDX11500: SAML entity cannot be Null or empty.";
         internal const string IDX11501 = "IDX11501: SamlAssertion Id cannot be null or empty.";
         internal const string IDX11502 = "IDX11502: Value is not an AbsoluteUri: '{0}'.";
         internal const string IDX11503 = "IDX11503: SamlAssertion Id is not well formed: '{0}'.";
@@ -100,9 +91,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11516 = "IDX11516: We could not write the SamlStatement of type:'{0}'. You will need to override this method to write this statement.";
         internal const string IDX11517 = "IDX11517: Exception thrown while writing '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
         internal const string IDX11518 = "IDX11518: Unable to writen SamlAssertion: SamlSubject.Name and SamlSubject.ConfirmationMethods.Count == 0.";
-
-        // IDX11700 - AttributeStatement
-        internal const string IDX11700 = "IDX11700: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
 
         // IDX11800 - AuthenticationStatement
         internal const string IDX11800 = "IDX11800: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";

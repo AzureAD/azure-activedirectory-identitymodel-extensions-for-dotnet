@@ -33,9 +33,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     internal static class LogMessages
     {
 #pragma warning disable 1591
-        // general
-        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-
         // properties, configuration 
         internal const string IDX10105 = "IDX10105: NonceLifetime must be greater than zero. value: '{0}'";
         internal const string IDX10106 = "IDX10106: Error in deserializing to json: '{0}'";
@@ -85,7 +82,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10341 = "IDX10341: 'RequireState' = false, OpenIdConnectProtocolValidationContext.State is null and there is no 'state' in the OpenIdConnect response to validate.";
         internal const string IDX10342 = "IDX10342: 'RequireStateValidation' = false, not validating the state.";
         internal const string IDX10343 = "IDX10343: Unable to parse response from UserInfo endpoint: '{0}'";
-        internal const string IDX10344 = "IDX10344: OpenIdConnectProtocolValidationContext.ProtocolMessage.IdToken is null, no id_token present to validate userinfo response against.";
         internal const string IDX10345 = "IDX10345: OpenIdConnectProtocolValidationContext.UserInfoEndpointResponse does not contain a 'sub' claim, cannot validate.";
         internal const string IDX10346 = "IDX10346: OpenIdConnectProtocolValidationContext.ValidatedIdToken does not contain a 'sub' claim, cannot validate.";
         internal const string IDX10347 = "IDX10347: Validating the 'c_hash' failed, see inner exception.";
@@ -93,21 +89,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX10349 = "IDX10349: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was not null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was null or empty. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
 
         // configuration retrieval errors
-        internal const string IDX10800 = "IDX10800: JsonWebKeySet must have a 'Keys' element.";
-        internal const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
-        internal const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
-        internal const string IDX10803 = "IDX10803: Unable to obtain configuration from: '{0}'. Inner Exception: '{1}'.";
-        internal const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
-        internal const string IDX10805 = "IDX10805: Obtaining information from metadata endpoint: '{0}'";
         internal const string IDX10806 = "IDX10806: Deserializing json string into json web keys.";
-        internal const string IDX10807 = "IDX10807: Adding signing keys into the configuration object.";
         internal const string IDX10808 = "IDX10808: Deserializing json into OpenIdConnectConfiguration object: '{0}'.";
         internal const string IDX10809 = "IDX10809: Serializing OpenIdConfiguration object to json string.";
-        internal const string IDX10810 = "IDX10810: Initializing an instance of OpenIdConnectConfiguration from a dictionary.";
         internal const string IDX10811 = "IDX10811: Deserializing the string: '{0}' obtained from metadata endpoint into openIdConnectConfiguration object.";
         internal const string IDX10812 = "IDX10812: Retrieving json web keys from: '{0}'.";
         internal const string IDX10813 = "IDX10813: Deserializing json web keys: '{0}'.";
-        internal const string IDX10814 = "IDX10814: Cannot read file from the address: '{0}'. File does not exist.";
         internal const string IDX10815 = "IDX10815: Error deserializing json: '{0}' into '{1}'.";
 #pragma warning restore 1591
     }
