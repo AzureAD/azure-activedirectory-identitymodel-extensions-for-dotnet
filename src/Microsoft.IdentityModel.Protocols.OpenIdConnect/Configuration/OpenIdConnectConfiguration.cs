@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -360,5 +361,250 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.UserInfoSigningAlgValuesSupported, Required = Required.Default)]
         public ICollection<string> UserInfoEndpointSigningAlgValuesSupported { get; } = new Collection<string>();
+
+#region shouldserialize
+        /// <summary>
+        /// Gets a bool that determines if the 'acr_values_supported' (AcrValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'acr_values_supported' (AcrValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeAcrValuesSupported()
+        {
+            return AcrValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'claims_supported' (ClaimsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'claims_supported' (ClaimsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeClaimsSupported()
+        {
+            return ClaimsSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'claims_locales_supported' (ClaimsLocalesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'claims_locales_supported' (ClaimsLocalesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeClaimsLocalesSupported()
+        {
+            return ClaimsLocalesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'claim_types_supported' (ClaimTypesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'claim_types_supported' (ClaimTypesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeClaimTypesSupported()
+        {
+            return ClaimTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'display_values_supported' (DisplayValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'display_values_supported' (DisplayValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeDisplayValuesSupported()
+        {
+            return DisplayValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'grant_types_supported' (GrantTypesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'grant_types_supported' (GrantTypesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeGrantTypesSupported()
+        {
+            return GrantTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'id_token_encryption_alg_values_supported' (IdTokenEncryptionAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'id_token_encryption_alg_values_supported' (IdTokenEncryptionAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIdTokenEncryptionAlgValuesSupported()
+        {
+            return IdTokenEncryptionAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'id_token_encryption_enc_values_supported' (IdTokenEncryptionEncValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'id_token_encryption_enc_values_supported' (IdTokenEncryptionEncValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIdTokenEncryptionEncValuesSupported()
+        {
+            return IdTokenEncryptionEncValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'id_token_signing_alg_values_supported' (IdTokenSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'id_token_signing_alg_values_supported' (IdTokenSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIdTokenSigningAlgValuesSupported()
+        {
+            return IdTokenSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'request_object_encryption_alg_values_supported' (RequestObjectEncryptionAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'request_object_encryption_alg_values_supported' (RequestObjectEncryptionAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeRequestObjectEncryptionAlgValuesSupported()
+        {
+            return RequestObjectEncryptionAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'request_object_encryption_enc_values_supported' (RequestObjectEncryptionEncValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'request_object_encryption_enc_values_supported' (RequestObjectEncryptionEncValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeRequestObjectEncryptionEncValuesSupported()
+        {
+            return RequestObjectEncryptionEncValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'request_object_signing_alg_values_supported' (RequestObjectSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'request_object_signing_alg_values_supported' (RequestObjectSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeRequestObjectSigningAlgValuesSupported()
+        {
+            return RequestObjectSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'response_modes_supported' (ResponseModesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'response_modes_supported' (ResponseModesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeResponseModesSupported()
+        {
+            return ResponseModesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'response_types_supported' (ResponseTypesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'response_types_supported' (ResponseTypesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeResponseTypesSupported()
+        {
+            return ResponseTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'scopes_supported' (ScopesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'scopes_supported' (ScopesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeScopesSupported()
+        {
+            return ScopesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'subject_types_supported' (SubjectTypesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'subject_types_supported' (SubjectTypesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeSubjectTypesSupported()
+        {
+            return SubjectTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'token_endpoint_auth_methods_supported' (TokenEndpointAuthMethodsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'token_endpoint_auth_methods_supported' (TokenEndpointAuthMethodsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeTokenEndpointAuthMethodsSupported()
+        {
+            return TokenEndpointAuthMethodsSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'token_endpoint_auth_signing_alg_values_supported' (TokenEndpointAuthSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'token_endpoint_auth_signing_alg_values_supported' (TokenEndpointAuthSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeTokenEndpointAuthSigningAlgValuesSupported()
+        {
+            return TokenEndpointAuthSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'ui_locales_supported' (UILocalesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'ui_locales_supported' (UILocalesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeUILocalesSupported()
+        {
+            return UILocalesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'userinfo_encryption_alg_values_supported' (UserInfoEndpointEncryptionAlgValuesSupported ) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'userinfo_encryption_alg_values_supported' (UserInfoEndpointEncryptionAlgValuesSupported ) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeUserInfoEndpointEncryptionAlgValuesSupported()
+        {
+            return UserInfoEndpointEncryptionAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'userinfo_encryption_enc_values_supported' (UserInfoEndpointEncryptionEncValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'userinfo_encryption_enc_values_supported' (UserInfoEndpointEncryptionEncValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeUserInfoEndpointEncryptionEncValuesSupported()
+        {
+            return UserInfoEndpointEncryptionEncValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'userinfo_signing_alg_values_supported' (UserInfoEndpointSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'userinfo_signing_alg_values_supported' (UserInfoEndpointSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeUserInfoEndpointSigningAlgValuesSupported()
+        {
+            return UserInfoEndpointSigningAlgValuesSupported.Count > 0;
+        }
+
+#endregion shouldserialize
     }
 }

@@ -27,14 +27,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Xunit;
-using System.Collections.ObjectModel;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -219,6 +218,61 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             IdentityComparer.AreEqual(oidcConfig1, oidcConfig4, context);
             IdentityComparer.AreEqual(oidcJson1, oidcJson2, context);
 
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void EmptyCollectionSerialization()
+        {
+            var context = new CompareContext {Title = "EmptyCollectionSerialization"};
+            // Initialize an OpenIdConnectConfiguration object with all collections empty.
+            var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
+            var oidcWithEmptyCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithEmptyCollections);
+
+            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null,\"SigningKeys\":[]}", context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void NonemptyCollectionSerialization()
+        {
+            var context = new CompareContext { Title = "NonemptyCollectionSerialization" };
+            // Initialize an OpenIdConnectConfiguration object that has at least one element in each Collection.
+            var oidcWithAllCollections = OpenIdConnectConfiguration.Create(OpenIdConfigData.JsonAllValues);
+            var oidcWithAllCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithAllCollections);
+            // List of all collections that should be included in the serialized configuration.
+            var collectionNames = new List<string>
+            {
+                "acr_values_supported",
+                "claims_supported",
+                "claims_locales_supported",
+                "claim_types_supported",
+                "display_values_supported",
+                "grant_types_supported",
+                "id_token_encryption_alg_values_supported",
+                "id_token_encryption_enc_values_supported",
+                "id_token_signing_alg_values_supported",
+                "request_object_encryption_alg_values_supported",
+                "request_object_encryption_enc_values_supported",
+                "request_object_signing_alg_values_supported",
+                "response_modes_supported",
+                "response_types_supported",
+                "scopes_supported",
+                "subject_types_supported",
+                "token_endpoint_auth_methods_supported",
+                "token_endpoint_auth_signing_alg_values_supported",
+                "ui_locales_supported",
+                "userinfo_encryption_alg_values_supported",
+                "userinfo_encryption_enc_values_supported",
+                "userinfo_signing_alg_values_supported"
+            };
+
+            foreach (var collection in collectionNames)
+            {
+                if (!oidcWithAllCollectionsJson.Contains(collection))
+                    context.Diffs.Add(collection + " should be serialized.");
+            }
             TestUtilities.AssertFailIfErrors(context);
         }
     }
