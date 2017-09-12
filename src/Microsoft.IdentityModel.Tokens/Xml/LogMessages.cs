@@ -35,11 +35,9 @@ namespace Microsoft.IdentityModel.Tokens.Xml
     {
 #pragma warning disable 1591
         internal const string IDX21023 = "IDX21023: Unsupported NodeType: {0}.";
-        internal const string IDX21204 = "IDX21204: Canonicalization algorithm is not supported: '{0}'. Supported methods are: '{1}', '{2}'.";
         internal const string IDX21210 = "IDX21210: The TransformFactory does not support the transform: '{0}'.";
         internal const string IDX21211 = "IDX21211: The TransfromFactory does not support the canonicalizing transform: '{0}'.";
         internal const string IDX21102 = "IDX21102: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
-        internal const string IDX21207 = "IDX21207: SignatureMethod is not supported: '{0}'. CryptoProviderFactory: '{1}'.";
         internal const string IDX21208 = "IDX21208: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
         internal const string IDX21209 = "IDX21209: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
 #pragma warning restore 1591

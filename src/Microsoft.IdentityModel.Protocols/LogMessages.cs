@@ -45,7 +45,6 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX10803 = "IDX10803: Unable to obtain configuration from: '{0}'.";
         internal const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
         internal const string IDX10805 = "IDX10805: Obtaining information from metadata endpoint: '{0}'.";
-        internal const string IDX10814 = "IDX10814: Cannot read file from the address: '{0}'. File does not exist.";
 #pragma warning restore 1591
     }
 }
