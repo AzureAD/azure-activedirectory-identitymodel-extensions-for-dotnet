@@ -1351,7 +1351,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
             }
 
-            throw LogReadException(LogMessages.IDX13103, parentElement, reader.Name, GetType(), "ReadSubjectId");
+            return null;
         }
 
         /// <summary>

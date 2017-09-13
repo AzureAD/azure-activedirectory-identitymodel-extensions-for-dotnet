@@ -867,8 +867,14 @@ namespace Microsoft.IdentityModel.Tests
                 var propertyContext = new CompareContext(context);
                 try
                 {
-                    if (type == typeof(Claim) && context.IgnoreSubject && propertyInfo.Name == "Subject")
-                        continue;
+                    if (type == typeof(Claim))
+                    {
+                        if (context.IgnoreSubject && propertyInfo.Name == "Subject")
+                            continue;
+
+                        if (context.IgnoreProperties && propertyInfo.Name == "Properties")
+                            continue;
+                    }
 
                     if (propertyInfo.GetMethod != null)
                     {
