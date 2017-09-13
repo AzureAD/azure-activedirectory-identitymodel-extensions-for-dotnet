@@ -84,6 +84,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX11150 = "IDX11150: The Saml2SecurityTokenHandler can only write a token was of type: '{0}'.";
         internal const string IDX11151 = "IDX11151: Cannot write '{0}' because '{1}' is null or empty.";
         internal const string IDX11300 = "IDX11300: '{0}' must be an absolute Uri, was: '{1}'";
+        internal const string IDX11301 = "IDX11301: Encryption is not supported in writing saml2 assertion.";
+        internal const string IDX11302 = "IDX11302: An assertion with no statements must contain a 'Subject' element.";
+        internal const string IDX11303 = "IDX11303: 'Subject' is required in Saml2Assertion for built-in statement type.";
+        internal const string IDX11304 = "IDX11304: Encryption is not supported in writing saml2 nameIdentifier.";
+        internal const string IDX11305 = "IDX11305: Both id and subjectconfirmation are null in saml2 subject: '{0}'.";
 
         // IDX11900 - AuthorizationDecisionStatement
         internal const string IDX11900 = "IDX11900: Unable to write Saml2Assertion: {0} is required, {1} is null or empty.";
