@@ -149,7 +149,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _outboundClaimTypeMap = value;
             }
@@ -182,7 +182,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _inboundClaimFilter = value;
             }
@@ -203,7 +203,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _shortClaimTypeProperty = value;
             }
@@ -224,7 +224,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _jsonClaimTypeProperty = value;
             }
@@ -797,7 +797,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException("token");
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             JwtSecurityToken jwtToken = token as JwtSecurityToken;
             if (jwtToken == null)
@@ -1205,10 +1205,10 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException("securityToken");
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
             {
@@ -1433,7 +1433,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private byte[] GetSymmetricSecurityKey(SecurityKey key)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             // try to use the provided key directly.
             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
