@@ -1477,7 +1477,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(assertion));
 
             if (assertion.EncryptingCredentials != null)
-                throw LogExceptionMessage(new NotSupportedException("Encryption not supported."));
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11301));
 
             // Wrap the writer if necessary for a signature
             // We do not dispose this writer, since as a delegating writer it would
@@ -1490,7 +1490,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                 if (assertion.Statements.Count == 0)
-                    throw LogExceptionMessage(new Saml2SecurityTokenException("no subject and no statements, not allowed"));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11302));
 
                 // Furthermore, the built-in statement types all require the presence of a subject.
                 // [Saml2Core, lines 1050, 1168, 1280]
@@ -1500,7 +1500,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         || statement is Saml2AttributeStatement
                         || statement is Saml2AuthorizationDecisionStatement)
                     {
-                        throw LogExceptionMessage(new Saml2SecurityTokenException("unknown statement type"));
+                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11303));
                     }
                 }
             }
@@ -1926,7 +1926,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (nameIdentifier.EncryptingCredentials != null)
-                throw LogExceptionMessage(new NotSupportedException("Encryption not supported."));
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11304));
 
             writer.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
             this.WriteNameIdType(writer, nameIdentifier);
@@ -2052,7 +2052,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // If there's no ID, there has to be a SubjectConfirmation
             if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
-                throw LogExceptionMessage(new Saml2SecurityTokenException("both id and subjectconfirmation cannot be null"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX11305, subject)));
 
             // <Subject>
             writer.WriteStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
