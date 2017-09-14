@@ -176,10 +176,10 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
         {
             if (header == null)
-                throw LogHelper.LogArgumentNullException("header");
+                throw LogHelper.LogArgumentNullException(nameof(header));
 
             if (payload == null)
-                throw LogHelper.LogArgumentNullException("payload");
+                throw LogHelper.LogArgumentNullException(nameof(payload));
 
             Header = header;
             Payload = payload;
