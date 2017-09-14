@@ -379,9 +379,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string authenticationInstant = null;
 
             // Search for an Authentication Claim.
-            var claimCollection = (from c in tokenDescriptor.Subject.Claims
-                                   where c.Type == ClaimTypes.AuthenticationMethod
-                                   select c);
+            var claimCollection = (from claim in tokenDescriptor.Subject.Claims
+                                   where claim.Type == ClaimTypes.AuthenticationMethod
+                                   select claim);
             if (claimCollection.Count<Claim>() > 0)
             {
                 // We support only one authentication statement and hence we just pick the first authentication type
@@ -390,18 +390,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 authenticationMethod = claimCollection.First<Claim>().Value;
             }
 
-            claimCollection = (from c in tokenDescriptor.Subject.Claims
-                               where c.Type == ClaimTypes.AuthenticationInstant
-                               select c);
+            claimCollection = (from claim in tokenDescriptor.Subject.Claims
+                               where claim.Type == ClaimTypes.AuthenticationInstant
+                               select claim);
             if (claimCollection.Count<Claim>() > 0)
                 authenticationInstant = claimCollection.First<Claim>().Value;
 
             if (authenticationMethod == null && authenticationInstant == null)
                 return null;
             else if (authenticationMethod == null)
-                throw LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11519));
             else if (authenticationInstant == null)
-                throw LogExceptionMessage(new SamlSecurityTokenException("ID4270, AuthenticationMethod, SAML11"));
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11520));
 
             var authInstantTime = DateTime.ParseExact(authenticationInstant,
                                                       SamlConstants.AcceptedDateTimeFormats,
@@ -531,7 +531,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     {
                         // Do not allow multiple name identifier claim.
                         if (null != identityClaim)
-                            throw LogExceptionMessage(new SamlSecurityTokenException("ID4139:"));
+                            throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11521));
 
                         identityClaim = claim;
                     }
@@ -898,7 +898,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                                 {
                                     // In this case we have two delegates acting as an identity, we do not allow this
                                     if (actingAsAttribute != null)
-                                        throw LogExceptionMessage(new SamlSecurityTokenException("ID4034"));
+                                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11522));
 
                                     actingAsAttribute = innerAttribute;
                                 }

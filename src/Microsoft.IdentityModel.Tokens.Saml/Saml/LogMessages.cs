@@ -94,6 +94,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11516 = "IDX11516: We could not write the SamlStatement of type:'{0}'. You will need to override this method to write this statement.";
         internal const string IDX11517 = "IDX11517: Exception thrown while writing '{0}' for SamlSecurityToken. Inner exception: '{1}'.";
         internal const string IDX11518 = "IDX11518: Unable to writen SamlAssertion: SamlSubject.Name and SamlSubject.ConfirmationMethods.Count == 0.";
+        internal const string IDX11519 = "IDX11519: Authentication method is null when creating AuthenticationStatement for SamlSecurityToken.";
+        internal const string IDX11520 = "IDX11520: Authentication instant is null when creating AuthenticationInstant for SamlSecurityToken.";
+        internal const string IDX11521 = "IDX11521: Multiple name identifier claim is not allowed in tokenDescriptor.Subject.Claims.";
+        internal const string IDX11522 = "IDX11522: More than one delegates acting as an identity are found in Saml attribute.";
 
         // IDX11800 - AuthenticationStatement
         internal const string IDX11800 = "IDX11800: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";

@@ -50,12 +50,12 @@ namespace System.IdentityModel.Tokens.Jwt
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private ISet<string> _inboundClaimFilter;
         private IDictionary<string, string> _inboundClaimTypeMap;
-        private static string _jsonClaimTypeProperty = _namespace + "/json_type";
+        private static string _jsonClaimType = _namespace + "/json_type";
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
         private IDictionary<string, string> _outboundClaimTypeMap;
         private IDictionary<string, string> _outboundAlgorithmMap = null;
-        private static string _shortClaimTypeProperty = _namespace + "/ShortTypeName";
+        private static string _shortClaimType = _namespace + "/ShortTypeName";
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -149,7 +149,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _outboundClaimTypeMap = value;
             }
@@ -182,7 +182,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
                 _inboundClaimFilter = value;
             }
@@ -192,20 +192,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain the original JSON claim 'name' if a mapping occurred when the <see cref="Claim"/>(s) were created.
         /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
         /// </summary>
-        /// <exception cref="ArgumentException">If <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
+        /// <exception cref="ArgumentException">If <see cref="string"/>.IsNullOrWhiteSpace('value') is true.</exception>
         public static string ShortClaimTypeProperty
         {
             get
             {
-                return _shortClaimTypeProperty;
+                return _shortClaimType;
             }
 
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
-                _shortClaimTypeProperty = value;
+                _shortClaimType = value;
             }
         }
 
@@ -213,27 +213,27 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain .Net type that was recognized when JwtPayload.Claims serialized the value to JSON.
         /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
         /// </summary>
-        /// <exception cref="ArgumentException">If <see cref="string"/>.IsIsNullOrWhiteSpace('value') is true.</exception>
+        /// <exception cref="ArgumentException">If <see cref="string"/>.IsNullOrWhiteSpace('value') is true.</exception>
         public static string JsonClaimTypeProperty
         {
             get
             {
-                return _jsonClaimTypeProperty;
+                return _jsonClaimType;
             }
 
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(value));
 
-                _jsonClaimTypeProperty = value;
+                _jsonClaimType = value;
             }
         }
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <returns>'True', indicating this instance can validate a <see cref="JwtSecurityToken"/>.</returns>
+        /// <returns>'true', indicating this instance can validate a <see cref="JwtSecurityToken"/>.</returns>
         public override bool CanValidateToken
         {
             get { return true; }
@@ -355,15 +355,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            return CreateJwtSecurityTokenPrivate(
-                tokenDescriptor.Issuer,
-                tokenDescriptor.Audience,
-                tokenDescriptor.Subject,
-                tokenDescriptor.NotBefore,
-                tokenDescriptor.Expires,
-                tokenDescriptor.IssuedAt,
-                tokenDescriptor.SigningCredentials,
-                tokenDescriptor.EncryptingCredentials).RawData;
+            return CreateJwtSecurityToken(tokenDescriptor).RawData;
         }
 
         /// <summary>
@@ -797,7 +789,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public override string WriteToken(SecurityToken token)
         {
             if (token == null)
-                throw LogHelper.LogArgumentNullException("token");
+                throw LogHelper.LogArgumentNullException(nameof(token));
 
             JwtSecurityToken jwtToken = token as JwtSecurityToken;
             if (jwtToken == null)
@@ -875,7 +867,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="key"><See cref="SecurityKey"/> to use.</param>
         /// <param name="algorithm">Crypto algorithm to use.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
-        /// <returns>'True' if signature is valid.</returns>
+        /// <returns>'true' if signature is valid.</returns>
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
@@ -1205,10 +1197,10 @@ namespace System.IdentityModel.Tokens.Jwt
         protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException("validationParameters");
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException("securityToken");
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
             if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
             {
@@ -1433,7 +1425,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private byte[] GetSymmetricSecurityKey(SecurityKey key)
         {
             if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             // try to use the provided key directly.
             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
