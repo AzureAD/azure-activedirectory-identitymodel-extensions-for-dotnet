@@ -246,7 +246,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityTokenResponse
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityTokenResponse element"
                     },
                     new WsFederationMessageTheoryData
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityToken
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
                         TestId = "WsFederationMessage getToken negative test: missing RequesteSecurityToken element"
                     },
                     new WsFederationMessageTheoryData
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Dummy_Invalid_Namespace
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10902:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
                         TestId = "WsFederationMessage getToken negative test: unsupported namespace"
                     },
                     new WsFederationMessageTheoryData
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Dummy_WsTrust1_3_multiple_tokens
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10903:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22903:"),
                         TestId = "WsFederationMessage getToken negative test: wstrust 1.3, more than one token"
                     },
                     new WsFederationMessageTheoryData
@@ -294,7 +294,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                                 Wresult = ReferenceXml.WResult_Dummy_WsTrust1_4_multiple_tokens
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX10903:"),
+                        ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22903:"),
                         TestId = "WsFederationMessage getToken negative test: wstrust 1.4, more than one token"
                     }
                 };

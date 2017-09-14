@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
             if (samlToken.Assertion.Subject == null)
-                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10509));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13509));
 
             foreach (var subjectConfirmation in samlToken.Assertion.Subject.SubjectConfirmations)
             {
@@ -681,7 +681,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (claim.Properties.TryGetValue(ClaimProperties.SamlAttributeNameFormat, out string nameFormat))
             {
                 if (!Saml2Serializer.CanCreateValidUri(nameFormat, UriKind.Absolute))
-                    throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX11300, ClaimProperties.SamlAttributeNameFormat)));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13300, ClaimProperties.SamlAttributeNameFormat)));
 
                 attribute.NameFormat = new Uri(nameFormat);
             }
@@ -1032,10 +1032,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 Validators.ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
 
                 if (samlToken.Assertion.Conditions.OneTimeUse)
-                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10510));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13510));
 
                 if (samlToken.Assertion.Conditions.ProxyRestriction != null)
-                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX10511));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
             }
 
             // TODO - concat all the audiences together
@@ -1086,7 +1086,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                                 {
                                     // multiple actors at the same level is not supported
                                     if (actorAttribute != null)
-                                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11142));
+                                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13142));
 
                                     actorAttribute = innerAttribute;
                                 }
@@ -1205,7 +1205,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     // multiple actors at same level is not supported
                     if (identity.Actor != null)
-                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX10512));
+                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13512));
 
                     SetClaimsIdentityActorFromAttribute(attribute, identity, issuer);
                 }
@@ -1243,7 +1243,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(identity));
 
             if (statement.AuthenticationContext.DeclarationReference != null)
-                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX14001));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13001));
 
             if (statement.AuthenticationContext.ClassReference != null)
             {
@@ -1282,7 +1282,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var assertion = samlToken.Assertion;
             if (assertion == null)
-                throw LogArgumentNullException(LogMessages.IDX11110);
+                throw LogArgumentNullException(LogMessages.IDX13110);
 
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
@@ -1336,7 +1336,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var samlToken = token as Saml2SecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(Saml2SecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13400, GetType(), typeof(Saml2SecurityToken), token.GetType())));
 
             using (var memoryStream = new MemoryStream())
             {
@@ -1368,7 +1368,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var samlToken = token as Saml2SecurityToken;
             if (samlToken == null)
-                throw Saml2Serializer.LogWriteException(LogMessages.IDX11150, token.GetType());
+                throw Saml2Serializer.LogWriteException(LogMessages.IDX13150, token.GetType());
 
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));

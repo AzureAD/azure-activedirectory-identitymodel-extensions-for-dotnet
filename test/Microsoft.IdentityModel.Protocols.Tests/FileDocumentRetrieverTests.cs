@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "OpenIdConnectMetadata.json",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = ExpectedException.IOException("IDX10804:", typeof(FileNotFoundException), "IDX10814:"),
+                    ExpectedException = ExpectedException.IOException("IDX20804:", typeof(FileNotFoundException), "IDX20814:"),
                     TestId = "File not found: OpenIdConnectMetadata.json"
                 });
 

@@ -75,10 +75,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Namespace - required
                 string namespaceValue = reader.GetAttribute(Saml2Constants.Attributes.Namespace);
                 if (string.IsNullOrEmpty(namespaceValue))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace);
 
                 if (!CanCreateValidUri(namespaceValue, UriKind.Absolute))
-                    throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
+                    throw LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.Action, Saml2Constants.Attributes.Namespace, namespaceValue);
 
                 var action = reader.ReadElementContentAsString();
                 reader.MoveToContent();
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Action, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Action, ex);
             }
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Advice, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Advice, ex);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
             if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11141));
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13141));
 
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
@@ -175,22 +175,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Version - required - must be "2.0"
                 string version = envelopeReader.GetAttribute(Saml2Constants.Attributes.Version);
                 if (string.IsNullOrEmpty(version))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.Version);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.Version);
 
                 if (!StringComparer.Ordinal.Equals(Saml2Constants.Version, version))
-                    throw LogReadException(LogMessages.IDX11137, version);
+                    throw LogReadException(LogMessages.IDX13137, version);
 
                 // @ID - required
                 string value = envelopeReader.GetAttribute(Saml2Constants.Attributes.ID);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.ID);
 
                 assertion.Id = new Saml2Id(value);
 
                 // @IssueInstant - required
                 value = envelopeReader.GetAttribute(Saml2Constants.Attributes.IssueInstant);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.Assertion, Saml2Constants.Attributes.IssueInstant);
 
                 assertion.IssueInstant = XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.Utc);
 
@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                     if (0 == assertion.Statements.Count)
-                        throw LogReadException(LogMessages.IDX11108, Saml2Constants.Elements.Assertion);
+                        throw LogReadException(LogMessages.IDX13108, Saml2Constants.Elements.Assertion);
 
                     // Furthermore, the built-in statement types all require the presence of a subject.
                     // [Saml2Core, lines 1050, 1168, 1280]
@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             || statement is Saml2AttributeStatement
                             || statement is Saml2AuthorizationDecisionStatement)
                         {
-                            throw LogReadException(LogMessages.IDX11109, Saml2Constants.Elements.Assertion);
+                            throw LogReadException(LogMessages.IDX13109, Saml2Constants.Elements.Assertion);
                         }
                     }
                 }
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Assertion, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Assertion, ex);
             }
         }
 
@@ -290,7 +290,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Name - required
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Name);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.Name);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.Name);
 
                 attribute = new Saml2Attribute(value);
 
@@ -299,7 +299,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!CanCreateValidUri(value, UriKind.Absolute))
-                        LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.NameFormat, value);
+                        LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.Attribute, Saml2Constants.Attributes.NameFormat, value);
 
                     attribute.NameFormat = new Uri(value);
                 }
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Attribute, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Attribute, ex);
             }
         }
 
@@ -405,7 +405,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAttribute, Saml2Constants.Namespace))
-                        throw LogReadException(LogMessages.IDX11117);
+                        throw LogReadException(LogMessages.IDX13117);
                     else if (reader.IsStartElement(Saml2Constants.Elements.Attribute, Saml2Constants.Namespace))
                         statement.Attributes.Add(ReadAttribute(reader));
                     else
@@ -414,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // At least one attribute expected
                 if (statement.Attributes.Count == 0)
-                    throw LogReadException(LogMessages.IDX11138);
+                    throw LogReadException(LogMessages.IDX13138);
 
                 reader.ReadEndElement();
                 return statement;
@@ -424,7 +424,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeStatement, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.AttributeStatement, ex);
             }
         }
 
@@ -498,7 +498,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AttributeValue, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.AttributeValue, ex);
             }
         }
 
@@ -519,13 +519,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (reader.IsStartElement(Saml2Constants.Elements.Condition, Saml2Constants.Namespace))
                 isConditionElement = true;
             else if (!reader.IsStartElement(Saml2Constants.Elements.AudienceRestriction, Saml2Constants.Namespace))
-                throw LogReadException(LogMessages.IDX11105, Saml2Constants.Elements.AudienceRestriction, reader.Name);
+                throw LogReadException(LogMessages.IDX13105, Saml2Constants.Elements.AudienceRestriction, reader.Name);
 
             try
             {
                 // disallow empty
                 if (reader.IsEmptyElement)
-                    LogReadException(LogMessages.IDX11104, Saml2Constants.Elements.AudienceRestriction);
+                    LogReadException(LogMessages.IDX13104, Saml2Constants.Elements.AudienceRestriction);
 
                 Saml2AudienceRestriction audienceRestriction;
 
@@ -538,7 +538,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <Audience> - 1-OO
                 if (!reader.IsStartElement(Saml2Constants.Elements.Audience, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX11105, Saml2Constants.Elements.Audience, reader.Name);
+                    throw LogReadException(LogMessages.IDX13105, Saml2Constants.Elements.Audience, reader.Name);
 
                 // We are now laxing the uri check for audience restriction to support interop partners 
                 // This is a specific request from server : Bug 11850
@@ -557,7 +557,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Audience, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Audience, ex);
             }
         }
 
@@ -594,7 +594,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // <AuthnContextDecl> - see comment above
                 if (reader.IsStartElement(Saml2Constants.Elements.AuthnContextDecl, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX11118);
+                    throw LogReadException(LogMessages.IDX13118);
 
                 // <AuthnContextDeclRef> - see comment above
                 // If there was no ClassRef, there must be a DeclRef
@@ -618,7 +618,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnContext, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.AuthnContext, ex);
             }
         }
 
@@ -650,7 +650,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @AuthnInstant - required
                 string value = reader.GetAttribute(Saml2Constants.Attributes.AuthnInstant);
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Attributes.AuthnInstant);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.AuthnStatement, Saml2Constants.Attributes.AuthnInstant);
 
                 // TODO - net1.4 doesn't support array of formats.
                 // authnInstant = XmlConvert.ToDateTime(value, Saml2Constants.AcceptedDateTimeFormats);
@@ -689,7 +689,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.AuthnStatement, ex);
             }
         }
 
@@ -715,13 +715,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Decision - required
                 var decision = reader.GetAttribute(Saml2Constants.Attributes.Decision);
                 if (string.IsNullOrEmpty(decision))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Decision);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Decision);
 
                 // @Resource - required
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Resource);
                 if (value == null)
                 {
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource);
                 }
                 else if (0 == value.Length)
                 {
@@ -730,7 +730,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 else
                 {
                     if (!CanCreateValidUri(value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource, value);
+                        throw LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Attributes.Resource, value);
 
                     resource = new Uri(value);
                 }
@@ -758,7 +758,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.AuthnStatement, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.AuthnStatement, ex);
             }
         }
 
@@ -809,7 +809,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             if (declaredType == null
                                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.ConditionAbstractType, Saml2Constants.Namespace))
                             {
-                                throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
+                                throw LogReadException(LogMessages.IDX13119, reader.LocalName, reader.NamespaceURI);
                             }
                             else if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.AudienceRestrictionType, Saml2Constants.Namespace))
                             {
@@ -818,7 +818,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             else if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.OneTimeUseType, Saml2Constants.Namespace))
                             {
                                 if (conditions.OneTimeUse)
-                                    throw LogReadException(LogMessages.IDX11120, Saml2Constants.Elements.OneTimeUse);
+                                    throw LogReadException(LogMessages.IDX13120, Saml2Constants.Elements.OneTimeUse);
 
                                 ReadEmptyContentElement(reader);
                                 conditions.OneTimeUse = true;
@@ -826,14 +826,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             else if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.ProxyRestrictionType, Saml2Constants.Namespace))
                             {
                                 if (null != conditions.ProxyRestriction)
-                                    throw LogReadException(LogMessages.IDX11120, Saml2Constants.Elements.ProxyRestricton);
+                                    throw LogReadException(LogMessages.IDX13120, Saml2Constants.Elements.ProxyRestricton);
 
                                 conditions.ProxyRestriction = ReadProxyRestriction(reader);
                             }
                             else
                             {
                                 // Unknown type - Instruct the user to override to handle custom <Condition>
-                                throw LogReadException(LogMessages.IDX11121);
+                                throw LogReadException(LogMessages.IDX13121);
                             }
                         }
                         else if (reader.IsStartElement(Saml2Constants.Elements.AudienceRestriction, Saml2Constants.Namespace))
@@ -844,7 +844,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         {
                             if (conditions.OneTimeUse)
                             {
-                                throw LogReadException(LogMessages.IDX11120, Saml2Constants.Elements.OneTimeUse);
+                                throw LogReadException(LogMessages.IDX13120, Saml2Constants.Elements.OneTimeUse);
                             }
 
                             ReadEmptyContentElement(reader);
@@ -853,7 +853,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         else if (reader.IsStartElement(Saml2Constants.Elements.ProxyRestricton, Saml2Constants.Namespace))
                         {
                             if (null != conditions.ProxyRestriction)
-                                throw LogReadException(LogMessages.IDX11120, Saml2Constants.Elements.ProxyRestricton);
+                                throw LogReadException(LogMessages.IDX13120, Saml2Constants.Elements.ProxyRestricton);
 
                             conditions.ProxyRestriction = ReadProxyRestriction(reader);
                         }
@@ -873,7 +873,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Conditions, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Conditions, ex);
             }
         }
 
@@ -885,7 +885,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="NotSupportedException">Not implemented right now.</exception>
         protected virtual Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
         {
-            throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11140));
+            throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13140));
         }
 
         /// <summary>
@@ -920,7 +920,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (0 == evidence.AssertionIdReferences.Count
                  && 0 == evidence.Assertions.Count
                  && 0 == evidence.AssertionUriReferences.Count)
-                    throw LogReadException(LogMessages.IDX11122);
+                    throw LogReadException(LogMessages.IDX13122);
 
                 reader.ReadEndElement();
 
@@ -931,7 +931,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Evidence, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Evidence, ex);
             }
         }
 
@@ -978,7 +978,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!CanCreateValidUri(value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, value);
+                        throw LogReadException(LogMessages.IDX13107, Saml2Constants.Types.NameIDType, Saml2Constants.Attributes.Format, value);
 
                     nameIdentifier.Format = new Uri(value);
                 }
@@ -1007,12 +1007,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     StringComparer.Ordinal.Equals(nameIdentifier.Format.OriginalString, Saml2Constants.NameIdentifierFormats.Entity.OriginalString))
                 {
                     if (!CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
+                        throw LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
 
                     if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPNameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPProvidedId))
-                        throw LogReadException(LogMessages.IDX11124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.OriginalString);
+                        throw LogReadException(LogMessages.IDX13124, nameIdentifier.Value, Saml2Constants.NameIdentifierFormats.Entity.OriginalString);
                 }
 
                 return nameIdentifier;
@@ -1022,7 +1022,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Types.NameIDType, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Types.NameIDType, ex);
             }
         }
 
@@ -1082,7 +1082,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.ProxyRestricton, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.ProxyRestricton, ex);
             }
         }
 
@@ -1108,7 +1108,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // statement is abstract
             if (declaredType == null
                 || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.StatementAbstractType, Saml2Constants.Namespace))
-                throw LogReadException(LogMessages.IDX11119, reader.LocalName, reader.NamespaceURI);
+                throw LogReadException(LogMessages.IDX13119, reader.LocalName, reader.NamespaceURI);
 
             // Reroute to the known statement types if applicable
             if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.AttributeStatementType, Saml2Constants.Namespace))
@@ -1118,7 +1118,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             else if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.AuthzDecisionStatementType, Saml2Constants.Namespace))
                 return ReadAuthorizationDecisionStatement(reader);
             else
-                throw LogReadException(LogMessages.IDX11119, declaredType.Name, declaredType.Namespace);
+                throw LogReadException(LogMessages.IDX13119, declaredType.Name, declaredType.Namespace);
         }
 
         /// <summary>
@@ -1158,7 +1158,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 // Must have a NameID or a SubjectConfirmation
                 if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)
-                    throw LogReadException(LogMessages.IDX11125);
+                    throw LogReadException(LogMessages.IDX13125);
 
                 return subject;
             }
@@ -1167,7 +1167,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.Subject, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Subject, ex);
             }
         }
 
@@ -1189,10 +1189,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @Method - required
                 string method = reader.GetAttribute(Saml2Constants.Attributes.Method);
                 if (string.IsNullOrEmpty(method))
-                    throw LogReadException(LogMessages.IDX11106, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Attributes.Method);
+                    throw LogReadException(LogMessages.IDX13106, Saml2Constants.Elements.SubjectConfirmation, Saml2Constants.Attributes.Method);
 
                 if (!CanCreateValidUri(method, UriKind.Absolute))
-                    throw LogReadException(LogMessages.IDX11107, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Attributes.Method, reader.LocalName);
+                    throw LogReadException(LogMessages.IDX13107, Saml2Constants.Types.SubjectConfirmationType, Saml2Constants.Attributes.Method, reader.LocalName);
 
                 // Construct the appropriate SubjectConfirmation based on the method
                 var subjectConfirmation = new Saml2SubjectConfirmation(new Uri(method));
@@ -1218,7 +1218,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmation, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.SubjectConfirmation, ex);
             }
         }
 
@@ -1248,12 +1248,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     if (XmlUtil.EqualsQName(type, Saml2Constants.Types.KeyInfoConfirmationDataType, Saml2Constants.Namespace))
                         requireKeyInfo = true;
                     else if (!XmlUtil.EqualsQName(type, Saml2Constants.Types.SubjectConfirmationDataType, Saml2Constants.Namespace))
-                        throw LogReadException(LogMessages.IDX11126, type.Name, type.Namespace);
+                        throw LogReadException(LogMessages.IDX13126, type.Name, type.Namespace);
                 }
 
                 // KeyInfoConfirmationData cannot be empty
                 if (requireKeyInfo && isEmpty)
-                    throw LogReadException(LogMessages.IDX11127);
+                    throw LogReadException(LogMessages.IDX13127);
 
                 // @Address - optional
                 string value = reader.GetAttribute(Saml2Constants.Attributes.Address);
@@ -1280,7 +1280,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (!CanCreateValidUri(value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX11107, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Attributes.Recipient, reader.LocalName);
+                        throw LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.SubjectConfirmationData, Saml2Constants.Attributes.Recipient, reader.LocalName);
 
                     confirmationData.Recipient = new Uri(value);
                 }
@@ -1298,7 +1298,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     if (!requireKeyInfo && XmlNodeType.EndElement != reader.NodeType)
                     {
                         // So throw and tell the user how to handle the open content
-                        throw LogReadException(LogMessages.IDX11128, Saml2Constants.Elements.SubjectConfirmationData);
+                        throw LogReadException(LogMessages.IDX13128, Saml2Constants.Elements.SubjectConfirmationData);
                     }
 
                     reader.ReadEndElement();
@@ -1311,7 +1311,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectConfirmationData, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.SubjectConfirmationData, ex);
             }
         }
 
@@ -1341,17 +1341,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
                 if (declaredType == null
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
+                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
 
                 // If it's NameID we can handle it
                 if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace))
                     return ReadNameIdType(reader);
                 else
                     // Instruct the user to override to handle custom <BaseID>
-                    throw LogReadException(LogMessages.IDX11103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
+                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
             }
 
-            throw LogReadException(LogMessages.IDX11103, parentElement, reader.Name, GetType(), "ReadSubjectId");
+            throw LogReadException(LogMessages.IDX13103, parentElement, reader.Name, GetType(), "ReadSubjectId");
         }
 
         /// <summary>
@@ -1388,7 +1388,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (ex is Saml2SecurityTokenReadException)
                     throw;
 
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.SubjectLocality, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.SubjectLocality, ex);
             }
         }
 
@@ -1477,7 +1477,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(assertion));
 
             if (assertion.EncryptingCredentials != null)
-                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11301));
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13301));
 
             // Wrap the writer if necessary for a signature
             // We do not dispose this writer, since as a delegating writer it would
@@ -1490,7 +1490,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // An assertion with no statements MUST contain a <Subject> element. [Saml2Core, line 585]
                 if (assertion.Statements.Count == 0)
-                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11302));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13302));
 
                 // Furthermore, the built-in statement types all require the presence of a subject.
                 // [Saml2Core, lines 1050, 1168, 1280]
@@ -1500,7 +1500,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                         || statement is Saml2AttributeStatement
                         || statement is Saml2AuthorizationDecisionStatement)
                     {
-                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX11303));
+                        throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13303));
                     }
                 }
             }
@@ -1631,7 +1631,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(statement));
 
             if (statement.Attributes.Count == 0)
-                throw LogWriteException(LogMessages.IDX11129);
+                throw LogWriteException(LogMessages.IDX13129);
 
             // <AttributeStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AttributeStatement, Saml2Constants.Namespace);
@@ -1662,7 +1662,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // Schema requires at least one audience.
             if (audienceRestriction.Audiences.Count == 0)
-                throw LogReadException(LogMessages.IDX11130);
+                throw LogReadException(LogMessages.IDX13130);
 
             // <AudienceRestriction>
             writer.WriteStartElement(Saml2Constants.Elements.AudienceRestriction, Saml2Constants.Namespace);
@@ -1690,7 +1690,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // One of ClassRef and DeclRef must be present.
             if (authenticationContext.ClassReference == null && authenticationContext.DeclarationReference == null)
-                throw LogWriteException(LogMessages.IDX11149);
+                throw LogWriteException(LogMessages.IDX13149);
 
             // <AuthnContext>
             writer.WriteStartElement(Saml2Constants.Elements.AuthnContext, Saml2Constants.Namespace);
@@ -1772,13 +1772,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(statement));
 
             if (statement.Actions.Count == 0)
-                throw LogWriteException(LogMessages.IDX11901, statement.GetType(), "Actions" );
+                throw LogWriteException(LogMessages.IDX13901, statement.GetType(), "Actions" );
 
             if (string.IsNullOrEmpty(statement.Decision))
-                throw LogWriteException(LogMessages.IDX11900, Saml2Constants.Attributes.Decision, nameof(statement.Decision));
+                throw LogWriteException(LogMessages.IDX13900, Saml2Constants.Attributes.Decision, nameof(statement.Decision));
 
             if (statement.Resource == null)
-                throw LogWriteException(LogMessages.IDX11900, Saml2Constants.Attributes.Resource, nameof(statement.Resource));
+                throw LogWriteException(LogMessages.IDX13900, Saml2Constants.Attributes.Resource, nameof(statement.Resource));
 
             // <AuthzDecisionStatement>
             writer.WriteStartElement(Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
@@ -1865,7 +1865,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (evidence.AssertionIdReferences.Count == 0
             &&  evidence.Assertions.Count == 0
             &&  evidence.AssertionUriReferences.Count == 0 )
-                throw LogWriteException(LogMessages.IDX11902);
+                throw LogWriteException(LogMessages.IDX13902);
 
             // <Evidence>
             writer.WriteStartElement(Saml2Constants.Elements.Evidence, Saml2Constants.Namespace);
@@ -1926,7 +1926,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (nameIdentifier.EncryptingCredentials != null)
-                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX11304));
+                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13304));
 
             writer.WriteStartElement(Saml2Constants.Elements.NameID, Saml2Constants.Namespace);
             this.WriteNameIdType(writer, nameIdentifier);
@@ -1950,7 +1950,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (string.IsNullOrEmpty(nameIdentifier.Value))
-                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX11151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
+                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX13151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
 
             // @Format - optional
             if (null != nameIdentifier.Format)
@@ -2034,7 +2034,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return;
             }
 
-            throw LogWriteException(LogMessages.IDX11133);
+            throw LogWriteException(LogMessages.IDX13133);
         }
 
         /// <summary>
@@ -2052,7 +2052,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // If there's no ID, there has to be a SubjectConfirmation
             if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
-                throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX11305, subject)));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13305, subject)));
 
             // <Subject>
             writer.WriteStartElement(Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
@@ -2211,7 +2211,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             try
             {
                 if (reader.IsEmptyElement)
-                    throw LogReadException(LogMessages.IDX11104, name);
+                    throw LogReadException(LogMessages.IDX13104, name);
 
                 XmlUtil.ValidateXsiType(reader, XmlSignatureConstants.Attributes.NcName, XmlSignatureConstants.XmlSchemaNamespace);
 
@@ -2222,7 +2222,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, ex, Saml2Constants.Elements.NameID, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.NameID, ex);
             }
         }
 
@@ -2232,24 +2232,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             try
             {
                 if (reader.IsEmptyElement)
-                    throw LogReadException(LogMessages.IDX11104, "Uri");
+                    throw LogReadException(LogMessages.IDX13104, "Uri");
 
                 XmlUtil.ValidateXsiType(reader, XmlSignatureConstants.Attributes.AnyUri, XmlSignatureConstants.XmlSchemaNamespace);
                 reader.MoveToElement();
                 string value = reader.ReadElementContentAsString();
 
                 if (string.IsNullOrEmpty(value))
-                    throw LogReadException(LogMessages.IDX11136, element);
+                    throw LogReadException(LogMessages.IDX13136, element);
 
                 // TODO - kind can change.
                 if (requireUri && !CanCreateValidUri(value, kind))
-                    throw LogReadException(LogMessages.IDX11107, element, value);
+                    throw LogReadException(LogMessages.IDX13107, element, value);
 
                 return new Uri(value, kind);
             }
             catch (Exception ex)
             {
-                throw LogReadException(LogMessages.IDX11102, ex, element, ex);
+                throw LogReadException(LogMessages.IDX13102, ex, element, ex);
             }
         }
 

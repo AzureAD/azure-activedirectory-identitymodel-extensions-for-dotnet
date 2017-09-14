@@ -106,7 +106,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, .Net datetime",
                     NotBefore = DateTime.UtcNow + TimeSpan.FromHours(1),
                     Expires = DateTime.UtcNow,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -115,7 +115,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, UnixEpoch - 1 ms",
                     NotBefore = DateTime.UtcNow,
                     Expires = EpochTime.UnixEpoch - TimeSpan.FromMilliseconds(1),
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -124,7 +124,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, UnixEpoch - 1 s",
                     NotBefore = DateTime.UtcNow,
                     Expires = EpochTime.UnixEpoch - TimeSpan.FromSeconds(1),
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -279,12 +279,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
             // Hand in a valid variation. We should fail before the variation is used.
-            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
 
             return dataSet;
         }
@@ -416,8 +416,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 var theoryData = new TheoryData<JwtTheoryData>();
 
-                JwtTestData.InvalidRegExSegmentsData("IDX10709:", theoryData);
-                JwtTestData.InvalidNumberOfSegmentsData("IDX10709:", theoryData);
+                JwtTestData.InvalidRegExSegmentsData("IDX12709:", theoryData);
+                JwtTestData.InvalidNumberOfSegmentsData("IDX12709:", theoryData);
                 JwtTestData.InvalidEncodedSegmentsData("", theoryData);
                 JwtTestData.ValidEncodedSegmentsData(theoryData);
 

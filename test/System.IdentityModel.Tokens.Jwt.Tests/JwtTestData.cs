@@ -218,7 +218,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 CanRead = true,
                 TestId = nameof(EncodedJwts.InvalidPayload),
                 Token = EncodedJwts.InvalidPayload,
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10723:", inner: typeof(FormatException))
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(FormatException))
             });
 
             return theoryData;

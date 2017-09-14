@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, json)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21106, json)));
             }
 
         }

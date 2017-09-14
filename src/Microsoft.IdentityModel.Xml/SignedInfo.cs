@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Xml
                     throw LogArgumentNullException(nameof(value));
 
                 if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n, StringComparison.Ordinal) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal))
-                    throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX21204, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments)));
+                    throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX30204, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments)));
 
                 _canonicalizationMethod = value;
             }

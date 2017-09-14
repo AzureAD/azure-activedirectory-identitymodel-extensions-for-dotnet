@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+// Microsoft.IdentityModel.Tokens
+// Range: 10000 - 10999
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -106,8 +109,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
 
         // Formating
-        public const string IDX14700 = "IDX14700: Unable to decode: '{0}' as Base64url encoded string.";
-        public const string IDX14701 = "IDX14701: Invalid requested key size. Valid key sizes are: 256, 384, and 512.";
+        public const string IDX10400 = "IDX10400: Unable to decode: '{0}' as Base64url encoded string.";
+        public const string IDX10401 = "IDX10401: Invalid requested key size. Valid key sizes are: 256, 384, and 512.";
 
         // Crypto Errors
         public const string IDX10800 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";

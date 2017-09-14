@@ -646,7 +646,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (StringComparer.Ordinal.Equals(attribute.Name, ClaimTypes.Actor))
                 {
                     if (identity.Actor != null)
-                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10512));
+                        throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11312));
 
                     SetDelegateFromAttribute(attribute, identity, issuer);
                 }
@@ -763,7 +763,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(identity));
 
             if (string.IsNullOrEmpty(subject.Name) && subject.ConfirmationMethods.Count == 0)
-                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX10513));
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11313));
 
             if (!string.IsNullOrEmpty(subject.Name))
             {
@@ -1195,7 +1195,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             using (var memoryStream = new MemoryStream())
             {
@@ -1227,7 +1227,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, GetType(), typeof(SamlSecurityToken), token.GetType())));
 
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));

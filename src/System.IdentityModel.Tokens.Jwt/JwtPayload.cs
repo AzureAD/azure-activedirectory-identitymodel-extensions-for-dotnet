@@ -96,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (notBefore.Value >= expires.Value)
                     {
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10401, expires.Value, notBefore.Value)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
                     }
 
                     this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
@@ -736,12 +736,12 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX10700, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12700, key, (dateValue ?? "<null>")), ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX10701, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12701, key, (dateValue ?? "<null>")), ex));
                 }
 
                 throw;

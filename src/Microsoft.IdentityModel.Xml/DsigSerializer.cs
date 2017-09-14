@@ -106,35 +106,35 @@ namespace Microsoft.IdentityModel.Xml
                             {
                                 // multiple certs
                                 if (keyInfo.CertificateData != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509Certificate);
+                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509Certificate);
 
                                 ReadCertificate(reader, keyInfo);
                             }
                             else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace))
                             {
                                 if (keyInfo.SerialNumber != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509IssuerSerial);
+                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509IssuerSerial);
 
                                 ReadIssuerSerial(reader, keyInfo);
                             }
                             else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace))
                             {
                                 if (keyInfo.SKI != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509SKI);
+                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SKI);
 
                                 ReadSKI(reader, keyInfo);
                             }
                             else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace))
                             {
                                 if (keyInfo.SubjectName != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX21015, XmlSignatureConstants.Elements.X509SubjectName);
+                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SubjectName);
 
                                 ReadSubjectName(reader, keyInfo);
                             }
                             else
                             {
                                 // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>
-                                Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
+                                Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                             }
                         }
 
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Xml
                     else
                     {
                         // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>
-                        Logger.WriteWarning(LogMessages.IDX21300, reader.ReadOuterXml());
+                        Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                     }
                 }
 
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21017, ex, XmlSignatureConstants.Elements.KeyInfo, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX30017, ex, XmlSignatureConstants.Elements.KeyInfo, ex);
             }
 
             return keyInfo;
@@ -198,12 +198,12 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
 
             keyInfo.IssuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX21011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
 
             keyInfo.SerialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
             keyInfo.Kid = keyInfo.SerialNumber;
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 // throw if we are not on EndElement, something unexpected
                 if (reader.NodeType != XmlNodeType.EndElement)
-                    throw XmlUtil.LogReadException(LogMessages.IDX21025, XmlSignatureConstants.Elements.Signature, reader.NodeType, reader.LocalName);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30025, XmlSignatureConstants.Elements.Signature, reader.NodeType, reader.LocalName);
 
                 reader.ReadEndElement();
                 return new Signature
@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Signature);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Signature);
             }
         }
 
@@ -332,7 +332,7 @@ namespace Microsoft.IdentityModel.Xml
                     var reference = ReadReference(canonicalizingReader);
 
                     if (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
-                        throw XmlUtil.LogReadException(LogMessages.IDX21020);
+                        throw XmlUtil.LogReadException(LogMessages.IDX30020);
 
                     canonicalizingReader.ReadEndElement();
                     canonicalizingReader.EndCanonicalization();
@@ -352,7 +352,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.SignedInfo);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.SignedInfo);
             }
         }
 
@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.Xml
                 XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 var digestValue = reader.ReadElementContentAsString().Trim();
                 if (string.IsNullOrEmpty(digestValue))
-                    throw XmlUtil.LogReadException(LogMessages.IDX21206, id);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30206, id);
 
                 // </Reference>
                 reader.MoveToContent();
@@ -415,7 +415,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Reference);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Reference);
             }
         }
 
@@ -463,7 +463,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Transforms);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transforms);
             }
         }
 
@@ -483,14 +483,14 @@ namespace Microsoft.IdentityModel.Xml
                 var isEmptyElement = reader.IsEmptyElement;
                 var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 if (string.IsNullOrEmpty(algorithm))
-                    throw XmlUtil.LogReadException(LogMessages.IDX21105);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30105);
 
                 reader.Read();
                 reader.MoveToContent();
                 if (!isEmptyElement)
                 {
                     if (reader.IsStartElement(XmlSignatureConstants.ExclusiveC14nInclusiveNamespaces))
-                        throw XmlUtil.LogReadException(LogMessages.IDX21107);
+                        throw XmlUtil.LogReadException(LogMessages.IDX30107);
 
                     reader.MoveToContent();
                     reader.ReadEndElement();
@@ -503,7 +503,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Transform);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transform);
             }
         }
 
@@ -540,7 +540,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Transform);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transform);
             }
         }
 
@@ -561,17 +561,17 @@ namespace Microsoft.IdentityModel.Xml
                 bool isEmptyElement = reader.IsEmptyElement;
                 var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 if (string.IsNullOrEmpty(algorithm))
-                    throw XmlUtil.LogReadException(LogMessages.IDX21013, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Attributes.Algorithm);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30013, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Attributes.Algorithm);
 
                 if (algorithm != SecurityAlgorithms.ExclusiveC14nWithComments && algorithm != SecurityAlgorithms.ExclusiveC14n)
-                    throw XmlUtil.LogReadException(LogMessages.IDX21100, XmlSignatureConstants.Elements.Transform, algorithm, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30100, XmlSignatureConstants.Elements.Transform, algorithm, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments);
 
                 reader.Read();
                 reader.MoveToContent();
                 if (!isEmptyElement)
                 {
                     if (reader.IsStartElement(XmlSignatureConstants.ExclusiveC14nInclusiveNamespaces))
-                        throw XmlUtil.LogReadException(LogMessages.IDX21107);
+                        throw XmlUtil.LogReadException(LogMessages.IDX30107);
 
                     reader.MoveToContent();
                     reader.ReadEndElement();
@@ -584,7 +584,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX21016, ex, XmlSignatureConstants.Elements.Transform);
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transform);
             }
         }
 
@@ -644,10 +644,10 @@ namespace Microsoft.IdentityModel.Xml
                 LogArgumentNullException(nameof(reference));
 
             if (string.IsNullOrEmpty(reference.DigestMethod))
-                throw XmlUtil.LogWriteException(LogMessages.IDX21401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestMethod);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestMethod);
 
             if (string.IsNullOrEmpty(reference.DigestValue))
-                throw XmlUtil.LogWriteException(LogMessages.IDX21401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestValue);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestValue);
 
             // <Reference>
             writer.WriteStartElement(reference.Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
@@ -671,7 +671,7 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var transform in reference.Transforms)
             {
                 if (string.IsNullOrEmpty(transform))
-                    throw XmlUtil.LogWriteException(LogMessages.IDX21403);
+                    throw XmlUtil.LogWriteException(LogMessages.IDX30403);
 
                 // <Transform>
                 writer.WriteStartElement(reference.Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
@@ -722,10 +722,10 @@ namespace Microsoft.IdentityModel.Xml
                 LogArgumentNullException(nameof(signature));
 
             if (string.IsNullOrEmpty(signature.SignatureValue))
-                throw XmlUtil.LogWriteException(LogMessages.IDX21401, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Elements.SignatureValue);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Elements.SignatureValue);
 
             if (signature.SignedInfo == null)
-                throw XmlUtil.LogWriteException(LogMessages.IDX21404);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30404);
 
             // <Signature>
             writer.WriteStartElement(signature.Prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
@@ -778,13 +778,13 @@ namespace Microsoft.IdentityModel.Xml
                 LogArgumentNullException(nameof(signedInfo));
 
             if (string.IsNullOrEmpty(signedInfo.CanonicalizationMethod))
-                throw XmlUtil.LogWriteException(LogMessages.IDX21401, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Elements.CanonicalizationMethod);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Elements.CanonicalizationMethod);
 
             if (string.IsNullOrEmpty(signedInfo.SignatureMethod))
-                throw XmlUtil.LogWriteException(LogMessages.IDX21401, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Elements.SignatureMethod);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Elements.SignatureMethod);
 
             if (signedInfo.References == null)
-                throw XmlUtil.LogWriteException(LogMessages.IDX21405);
+                throw XmlUtil.LogWriteException(LogMessages.IDX30405);
 
             // <SignedInfo>
             writer.WriteStartElement(signedInfo.Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);

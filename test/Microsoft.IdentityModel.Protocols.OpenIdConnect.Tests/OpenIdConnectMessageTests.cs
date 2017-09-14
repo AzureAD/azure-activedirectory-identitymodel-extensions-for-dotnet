@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 },
                 new OpenIdConnectMessageTheoryData
                 {
-                    ExpectedException = ExpectedException.ArgumentException("IDX10106"),
+                    ExpectedException = ExpectedException.ArgumentException("IDX21106"),
                     Json =  @"{""response_mode"":""responseMode"";""respone_mode"":""duplicateResponeMode""}",
                     TestId = "ResponseMode duplicated"
                 },

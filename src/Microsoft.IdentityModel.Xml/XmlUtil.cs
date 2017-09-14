@@ -56,10 +56,10 @@ namespace Microsoft.IdentityModel.Xml
 
             // IsStartElement calls reader.MoveToContent().
             if (!reader.IsStartElement())
-                throw LogReadException(LogMessages.IDX21022, reader.NodeType);
+                throw LogReadException(LogMessages.IDX30022, reader.NodeType);
 
             if (!string.Equals(reader.LocalName, element, StringComparison.OrdinalIgnoreCase))
-                throw LogReadException(LogMessages.IDX21024, element, reader.LocalName);
+                throw LogReadException(LogMessages.IDX30024, element, reader.LocalName);
         }
 
         /// <summary>
@@ -79,17 +79,17 @@ namespace Microsoft.IdentityModel.Xml
 
             // IsStartElement calls reader.MoveToContent().
             if (!reader.IsStartElement())
-                throw LogReadException(LogMessages.IDX21022, reader.NodeType);
+                throw LogReadException(LogMessages.IDX30022, reader.NodeType);
 
             if (string.IsNullOrEmpty(@namespace))
             {
                 if (!reader.IsStartElement(element))
-                    throw LogReadException(LogMessages.IDX21024, element, reader.LocalName);
+                    throw LogReadException(LogMessages.IDX30024, element, reader.LocalName);
             }
             else
             {
                 if (!reader.IsStartElement(element, @namespace))
-                    throw LogReadException(LogMessages.IDX21011, @namespace, element, reader.NamespaceURI, reader.LocalName);
+                    throw LogReadException(LogMessages.IDX30011, @namespace, element, reader.NamespaceURI, reader.LocalName);
             }
         }
 
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <returns>a <see cref="XmlReadException"/>.</returns>
         internal static Exception OnRequiredAttributeMissing(string element, string attribute)
         {
-            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX21013, element, attribute)));
+            return LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX30013, element, attribute)));
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace Microsoft.IdentityModel.Xml
             if (declaredType == null)
             {
                 if (requireDeclaration)
-                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX21500, expectedTypeName, expectedTypeNamespace)));
+                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX30500, expectedTypeName, expectedTypeNamespace)));
                 else
                     return;
             }
@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Xml
             if (!(StringComparer.Ordinal.Equals(expectedTypeNamespace, declaredType.Namespace)
                && StringComparer.Ordinal.Equals(expectedTypeName, declaredType.Name)))
             {
-                throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX21501, expectedTypeName, expectedTypeNamespace, declaredType.Name, declaredType.Namespace)));
+                throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX30501, expectedTypeName, expectedTypeNamespace, declaredType.Name, declaredType.Namespace)));
             }
         }
 

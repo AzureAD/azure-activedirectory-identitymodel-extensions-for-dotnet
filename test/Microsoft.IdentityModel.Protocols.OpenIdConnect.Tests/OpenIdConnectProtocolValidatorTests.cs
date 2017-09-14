@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10333:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10334:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "'id_token' == null, 'code' == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10334:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "'id_token' == string.Empty, 'code' == string.Empty",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "'id_token' != null, validationContext.validatedIdToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10335:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21335:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "'refresh_token' should not be returned from AuthorizationEndpoint",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10334:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
                         RequireState = false
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10333:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -311,7 +311,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10336:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21336:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage.IdToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10336:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21336:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage.AccessToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ValidatedIdToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -403,7 +403,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10337:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21337:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.UserInfoEndpointResponse == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -411,7 +411,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10332:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.validatedIdToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { UserInfoEndpointResponse = "response" }
@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10343:", typeof(JsonReaderException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21343:", typeof(JsonReaderException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "UserInfoEndpointResponse is not valid JSON",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -431,7 +431,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10345:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21345:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "UserInfoEndpointResponse.sub == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -445,7 +445,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithoutSub.Payload.Remove(JwtRegisteredClaimNames.Sub);
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10346:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21346:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.sub == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10338:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21338:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "UserInfoEndpointResponse.sub != ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -530,7 +530,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 var jwt = new JwtSecurityToken();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     First = true,
                     JwtSecurityToken = new JwtSecurityToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
@@ -542,7 +542,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     JwtSecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "exp == null",
@@ -554,7 +554,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     JwtSecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "iat == null",
@@ -567,7 +567,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     JwtSecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "iss == null",
@@ -597,7 +597,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwt.Payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10314:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     JwtSecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "sub == null, RequireSub == true",
@@ -611,7 +611,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10315:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21315:"),
                     JwtSecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAcr = true },
                     TestId = "'acr' == null, RequireAcr == true",
@@ -620,7 +620,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10316:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21316:"),
                     JwtSecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAmr = true },
                     TestId = "amr == null, RequireAmr == true",
@@ -629,7 +629,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10317:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21317:"),
                     JwtSecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAuthTime = true },
                     TestId = "auth_time == null, RequireAuthTime == true",
@@ -646,7 +646,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10318:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21318:"),
                     JwtSecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "azp == null",
@@ -655,7 +655,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10308:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21308:"),
                     JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "'azp' != null, validationContext.ClientId == null",
@@ -664,7 +664,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10340:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21340:"),
                     JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "azp claim != validationContext.ClientId",
@@ -681,7 +681,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10313:", typeof(InvalidOperationException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
                     JwtSecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
@@ -704,7 +704,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10313:", typeof(InvalidOperationException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
                     JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Acr, Default.Acr),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
@@ -770,7 +770,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10333:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -792,7 +792,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10307:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.chash == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -806,7 +806,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithEmptyStringCHash.Header.Remove(JwtHeaderParameterNames.Alg);
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.chash == string.Empty",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -818,7 +818,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10306:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.chash is not a string, but array",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -832,7 +832,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.Header.alg == 'None'",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -846,7 +846,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithNoAlg.Header.Remove("alg");
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "ValidatedIdToken.chash != ProtocolMessage.Code",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -870,7 +870,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 var chash512 = IdentityUtilities.CreateHashClaim(code, "SHA512");
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10347:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId ="Jwt.c_hash != hash(code) - 256 - 512",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -893,7 +893,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX10306:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "Multiple chashes",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -950,7 +950,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 jwtWithoutNonce.Payload.Remove(JwtRegisteredClaimNames.Nonce);
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10320:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21320:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce == null, jwt.Nonce == null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -961,7 +961,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10323:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21323:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -972,7 +972,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10349:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21349:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce != null, jwt.Nonce == null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -994,7 +994,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10323:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21323:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1005,7 +1005,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10349:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21349:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
                     TestId = "validationContext.Nonce != null, jwt.Nonce == null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1032,7 +1032,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 var nonceWithoutTimestamp = protocolValidatorDoesNotRequireTimeStamp.GenerateNonce();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10325:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21325:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "nonce.timestamp == false, RequireTimeStampInNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1044,7 +1044,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10321:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21321:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "ValidationContext.Nonce != Jwt.Nonce",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1056,7 +1056,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10326:", typeof(FormatException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:", typeof(FormatException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce timestamp is not formated as a int",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1069,7 +1069,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string nonceExpired = (DateTime.UtcNow-TimeSpan.FromDays(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10324:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21324:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = true },
                     TestId = "Nonce is expired",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1082,7 +1082,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string nonceMaxTicks = Int64.MaxValue.ToString() + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10327:", typeof(ArgumentException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21327:", typeof(ArgumentException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == Int64.MaxValue",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1095,7 +1095,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string nonceMinTicks = Int64.MinValue.ToString() + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10326:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == Int64.MinValue",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1108,7 +1108,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string nonceTicksNegative = ((Int64)(-1)).ToString() + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10326:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == ((Int64)(-1))",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1121,7 +1121,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 string nonceTicksZero = ((Int64)(0)).ToString() + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX10326:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks ==  ((Int64)(0))",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1176,7 +1176,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10333:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ValidatedIdToken = CreateValidatedIdToken() }
@@ -1198,7 +1198,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 var hashClaimValue512 = IdentityUtilities.CreateHashClaim(token, "SHA512");
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21348:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId ="Jwt.at_hash != hash(access_token) - 256 - 512",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -1210,7 +1210,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10348:", typeof(OpenIdConnectProtocolException)),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21348:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "Jwt.at_hash != hash(access_token)",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1222,7 +1222,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10311:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "multiple at_hash claims",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -1234,7 +1234,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX10312:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21312:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "Jwt.at_hash == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1281,7 +1281,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10329:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21329:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
                     TestId = "validationContext.State == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
@@ -1296,7 +1296,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10330:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21330:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
                     TestId = "validationContext.state != null, protocolMessage.state == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
@@ -1320,7 +1320,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10331:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21331:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
                     TestId = "validationContext.state != protocolMessage.state, RequireState = true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
@@ -1353,7 +1353,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10330:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21330:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
                     TestId = "validationContext.state != null, protocolMessage.state == null, RequireState = false",
                     ValidationContext =  new OpenIdConnectProtocolValidationContext()
@@ -1365,7 +1365,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX10329:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21329:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
                     TestId = "validationContext.state == null, protocolMessage.state != null, RequireState = false",
                     ValidationContext =  new OpenIdConnectProtocolValidationContext()
@@ -1454,7 +1454,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     CryptoProviderFactory = new CryptoProviderFactory()
                 };
 
-                theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(NotSupportedException)));
+                theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21301:", typeof(NotSupportedException)));
 
                 // Adjust mapping table, and Default CryptoProviderFactory will find 'hash' algorithm
                 var sha2 = SHA256.Create();
@@ -1533,7 +1533,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {validator, SecurityAlgorithms.HmacSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
                     {validator, SecurityAlgorithms.RsaSha512, sha5.GetType(), ExpectedException.NoExceptionExpected},
 
-                    {validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha5.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX10301:", typeof(NotSupportedException))}
+                    {validator, SecurityAlgorithms.ExclusiveC14nWithComments, sha5.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21301:", typeof(NotSupportedException))}
                 };
             }
         }

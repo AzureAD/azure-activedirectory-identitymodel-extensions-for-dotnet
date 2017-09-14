@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Logging
             }
             catch (Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML11001, ex));
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML10001, ex));
                 throw;
             }
         }
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML11000);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML10000);
                 return;
             }
 

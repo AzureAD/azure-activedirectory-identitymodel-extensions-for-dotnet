@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks>If 'queryString' is null or whitespace, a default <see cref="WsFederationMessage"/> is returned. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromQueryString(string queryString)
         {
-            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX10900, queryString));
+            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX22900, queryString));
 
             var wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX10901, uri.ToString()));
+            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
 
             if (uri != null && uri.Query.Length > 1)
             {
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "wsfederationMessage"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "wsfederationMessage"));
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "parameters"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "parameters"));
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX10000, "wresult"));
+                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "wresult"));
                 return null;
             }
 
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                         {
                             // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
                             if (token != null)
-                                throw new WsFederationException(LogMessages.IDX10903);
+                                throw new WsFederationException(LogMessages.IDX22903);
 
                             using (var ms = new MemoryStream())
                             {
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             if (token == null)
-                throw new WsFederationException(LogMessages.IDX10902);
+                throw new WsFederationException(LogMessages.IDX22902);
 
             return token;
         }

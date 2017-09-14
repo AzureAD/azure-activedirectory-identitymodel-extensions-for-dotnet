@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(LogMessages.IDX13000, ex, Elements.EntityDescriptor, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX22800, ex, Elements.EntityDescriptor, ex);
             }
         }
 
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             // get entityID for issuer
             var issuer = reader.GetAttribute(Attributes.EntityId);
             if (string.IsNullOrEmpty(issuer))
-                throw XmlUtil.LogReadException(LogMessages.IDX13001);
+                throw XmlUtil.LogReadException(LogMessages.IDX22801);
             configuration.Issuer = issuer;
 
             // <EntityDescriptor>
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             // The metadata xml should contain a SecurityTokenServiceType RoleDescriptor
             if (!hasSecurityTokenServiceTypeRoleDescriptor)
-                throw XmlUtil.LogReadException(LogMessages.IDX13004);
+                throw XmlUtil.LogReadException(LogMessages.IDX22804);
 
             return configuration;
         }
@@ -147,9 +147,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             var use = reader.GetAttribute(Attributes.Use);
             if (string.IsNullOrEmpty(use))
-                Logger.WriteWarning(LogMessages.IDX13008);
+                Logger.WriteWarning(LogMessages.IDX22808);
             else if (!use.Equals(keyUse.Signing))
-                throw XmlUtil.LogReadException(LogMessages.IDX13009, Attributes.Use, keyUse.Signing, use);
+                throw XmlUtil.LogReadException(LogMessages.IDX22809, Attributes.Use, keyUse.Signing, use);
 
             // <KeyDescriptor>
             reader.ReadStartElement();
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
             else
             {
-                throw XmlUtil.LogReadException(LogMessages.IDX13002, reader.LocalName, reader.NamespaceURI, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
+                throw XmlUtil.LogReadException(LogMessages.IDX22802, reader.LocalName, reader.NamespaceURI, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
             }
         }
 
@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             XmlUtil.CheckReaderOnEntry(reader, Elements.RoleDescriptor, Namespaces.MetadataNamespace);
 
             if (!IsSecurityTokenServiceTypeRoleDescriptor(reader))
-                throw XmlUtil.LogReadException(LogMessages.IDX13004);
+                throw XmlUtil.LogReadException(LogMessages.IDX22804);
 
             var roleDescriptor = new SecurityTokenServiceTypeRoleDescriptor();
 
@@ -198,10 +198,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             reader.ReadEndElement();
 
             if (roleDescriptor.KeyInfos.Count == 0)
-                Logger.WriteWarning(LogMessages.IDX13006);
+                Logger.WriteWarning(LogMessages.IDX22806);
 
             if (string.IsNullOrEmpty(roleDescriptor.TokenEndpoint))
-                Logger.WriteWarning(LogMessages.IDX13007);
+                Logger.WriteWarning(LogMessages.IDX22807);
 
             return roleDescriptor;
         }
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             var tokenEndpoint = Trim(reader.ReadContentAsString());
 
             if (string.IsNullOrEmpty(tokenEndpoint))
-                throw XmlUtil.LogReadException(LogMessages.IDX13003);
+                throw XmlUtil.LogReadException(LogMessages.IDX22803);
 
             // </Address>
             reader.MoveToContent();
@@ -297,10 +297,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 writer = new EnvelopedSignatureWriter(writer, configuration.SigningCredentials, "id");
 
             if (string.IsNullOrEmpty(configuration.Issuer))
-                throw XmlUtil.LogWriteException(LogMessages.IDX13010);
+                throw XmlUtil.LogWriteException(LogMessages.IDX22810);
 
             if (string.IsNullOrEmpty(configuration.TokenEndpoint))
-                throw XmlUtil.LogWriteException(LogMessages.IDX13011);
+                throw XmlUtil.LogWriteException(LogMessages.IDX22811);
 
             writer.WriteStartDocument();
 

@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
                 throw LogArgumentNullException(nameof(reader));
 
             if (!reader.IsStartElement())
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX21102, reader.NodeType)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX14102, reader.NodeType)));
 
             TokenStream = new XmlTokenStream();
             InnerReader = reader;
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
                 }
                 default:
                 {
-                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX21023, InnerReader.NodeType)));
+                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX14023, InnerReader.NodeType)));
                 }
             }
         }

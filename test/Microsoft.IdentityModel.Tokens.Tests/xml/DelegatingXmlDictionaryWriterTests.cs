@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     new DelegatingXmlDictionaryWriterTheoryData
                     {
                         DelegatingWriter = new DelegatingXmlDictionaryWriterPublic(),
-                        ExpectedException = ExpectedException.InvalidOperationException("IDX21209:"),
+                        ExpectedException = ExpectedException.InvalidOperationException("IDX14209:"),
                         First = true,
                         TestId = "InnerWriter-Null"
                     },

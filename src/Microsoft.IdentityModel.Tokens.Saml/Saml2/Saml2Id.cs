@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
             catch (XmlException ex)
             {
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX10515, value), ex));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13515, value), ex));
             }
         }
 

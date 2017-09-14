@@ -66,11 +66,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // ExpectedException.DefaultVerbose = true;
                 return new TheoryData<DSigSerializerTheoryData>
                 {
-                    KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX21017:", typeof(FormatException)), true),
-                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates, new ExpectedException(typeof(XmlReadException), "IDX21015:")),
-                    KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX21015:")),
-                    KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX21015:")),
-                    KeyInfoTest(KeyInfoTestSet.MultipleSubjectName, new ExpectedException(typeof(XmlReadException), "IDX21015:")),
+                    KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
+                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
+                    KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
+                    KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
+                    KeyInfoTest(KeyInfoTestSet.MultipleSubjectName, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.SingleCertificate),
                     KeyInfoTest(KeyInfoTestSet.SingleIssuerSerial),
                     KeyInfoTest(KeyInfoTestSet.SingleSKI),
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     KeyInfoTest(KeyInfoTestSet.WithUnknownX509DataElements),
                     KeyInfoTest(KeyInfoTestSet.WithAllElements),
                     KeyInfoTest(KeyInfoTestSet.WithUnknownElements),
-                    KeyInfoTest(KeyInfoTestSet.WrongNamespace, new ExpectedException(typeof(XmlReadException), "IDX21011:")),
+                    KeyInfoTest(KeyInfoTestSet.WrongNamespace, new ExpectedException(typeof(XmlReadException), "IDX30011:")),
                 };
             }
         }
@@ -171,18 +171,18 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return new TheoryData<DSigSerializerTheoryData>
                 {
                     SignedInfoTest(SignedInfoTestSet.CanonicalizationMethodMissing,
-                        new ExpectedException(typeof(XmlReadException), "IDX21011:"), true),
+                        new ExpectedException(typeof(XmlReadException), "IDX30011:"), true),
                     SignedInfoTest(SignedInfoTestSet.MissingDigestMethod,
-                        new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestMethod'")),
+                        new ExpectedException(typeof(XmlReadException), "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestMethod'")),
                     SignedInfoTest(SignedInfoTestSet.MissingDigestValue,
-                        new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestValue'")),
+                        new ExpectedException(typeof(XmlReadException), "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.DigestValue'")),
                     SignedInfoTest(SignedInfoTestSet.NoTransforms),
                     SignedInfoTest(SignedInfoTestSet.StartsWithWhiteSpace),
                     SignedInfoTest(SignedInfoTestSet.TransformsMissing),
                     SignedInfoTest(SignedInfoTestSet.TwoReferences,
-                        new ExpectedException(typeof(XmlReadException), "IDX21020: Unable to read XML. A second <Reference> element was found")),
+                        new ExpectedException(typeof(XmlReadException), "IDX30020: Unable to read XML. A second <Reference> element was found")),
                     SignedInfoTest(SignedInfoTestSet.ReferenceMissing,
-                        new ExpectedException(typeof(XmlReadException), "IDX21011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'")),
+                        new ExpectedException(typeof(XmlReadException), "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'")),
                     SignedInfoTest(SignedInfoTestSet.ReferenceDigestValueNotBase64),
                     SignedInfoTest(SignedInfoTestSet.UnknownReferenceTransform),
                     SignedInfoTest(SignedInfoTestSet.Valid)
@@ -231,17 +231,17 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return new TheoryData<DSigSerializerTheoryData>
                 {
                     TransformTest(TransformTestSet.AlgorithmDefaultReferenceUri, null, true),
-                    TransformTest(TransformTestSet.Enveloped_AlgorithmMissing, new ExpectedException(typeof(XmlReadException), "IDX21105:")),
-                    TransformTest(TransformTestSet.AlgorithmNull, new ExpectedException(typeof(XmlReadException), "IDX21105:")),
+                    TransformTest(TransformTestSet.Enveloped_AlgorithmMissing, new ExpectedException(typeof(XmlReadException), "IDX30105:")),
+                    TransformTest(TransformTestSet.AlgorithmNull, new ExpectedException(typeof(XmlReadException), "IDX30105:")),
                     TransformTest(TransformTestSet.Enveloped_Valid_WithPrefix),
                     TransformTest(TransformTestSet.Enveloped_Valid_WithoutPrefix),
-                    TransformTest(TransformTestSet.C14n_CanonicalizationMethod_WithComments, new ExpectedException(typeof(XmlReadException), "IDX21024:")),
-                    TransformTest(TransformTestSet.C14n_ElementNotValid, new ExpectedException(typeof(XmlReadException), "IDX21024:")),
+                    TransformTest(TransformTestSet.C14n_CanonicalizationMethod_WithComments, new ExpectedException(typeof(XmlReadException), "IDX30024:")),
+                    TransformTest(TransformTestSet.C14n_ElementNotValid, new ExpectedException(typeof(XmlReadException), "IDX30024:")),
                     TransformTest(TransformTestSet.C14n_Transform_WithComments),
                     TransformTest(TransformTestSet.C14n_Transform_WithoutNS),
-                    TransformTest(TransformTestSet.C14n_CanonicalizationMethod_WithComments, new ExpectedException(typeof(XmlReadException), "IDX21024:")),
+                    TransformTest(TransformTestSet.C14n_CanonicalizationMethod_WithComments, new ExpectedException(typeof(XmlReadException), "IDX30024:")),
                     TransformTest(TransformTestSet.C14n_Transform_WithoutNS),
-                    TransformTest(TransformTestSet.TransformNull, new ExpectedException(typeof(XmlReadException), "IDX21105:")),
+                    TransformTest(TransformTestSet.TransformNull, new ExpectedException(typeof(XmlReadException), "IDX30105:")),
                 };
             }
         }

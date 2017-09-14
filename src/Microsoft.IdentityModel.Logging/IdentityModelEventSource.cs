@@ -285,7 +285,7 @@ namespace Microsoft.IdentityModel.Logging
                     WriteVerbose(message, args);
                     break;
                 default:
-                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11002, level));
+                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10002, level));
                     WriteError(message, args);
                     break;
             }
