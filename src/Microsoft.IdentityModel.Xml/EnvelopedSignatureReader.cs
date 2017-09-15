@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Xml
                 && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
                 if (Signature != null)
-                    throw XmlUtil.LogReadException(LogMessages.IDX21019);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30019);
 
                 Signature = Serializer.ReadSignature(InnerReader);
             }

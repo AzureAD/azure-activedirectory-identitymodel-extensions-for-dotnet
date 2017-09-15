@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 key.CryptoProviderFactory = new CustomCryptoProviderFactory();
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21207:"),
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30207:"),
                     SecurityKey = key,
                     Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
                     TestId = "Signature_CryptoProvider returns a null SignatureProvider",
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21208:"),
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30208:"),
                     SecurityKey = key,
                     Signature = SignatureTestSet.UnknownDigestAlgorithm.Signature,
                     TestId = nameof(SignatureTestSet.UnknownDigestAlgorithm),
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.Add(new SignatureTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21207:"),
+                    ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30207:"),
                     Signature = SignatureTestSet.UnknownSignatureAlgorithm.Signature,
                     TestId = nameof(SignatureTestSet.UnknownSignatureAlgorithm),
                     Xml = SignatureTestSet.UnknownSignatureAlgorithm.Xml

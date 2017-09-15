@@ -62,15 +62,15 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, jwtEncodedString)));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, jwtEncodedString)));
             }
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, jwtEncodedString)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, jwtEncodedString)));
 
             Decode(tokenParts, jwtEncodedString);
         }
@@ -201,7 +201,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10401, expires.Value, notBefore.Value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
             }
 
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
@@ -486,14 +486,14 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="rawData">the original token.</param>
         internal void Decode(string[] tokenParts, string rawData)
         {
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10716, rawData);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12716, rawData);
             try
             {
                 Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10729, tokenParts[0], rawData), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12729, tokenParts[0], rawData), ex));
             }
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
@@ -513,7 +513,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             // Log if CTY is set, assume compact JWS
             if (Header.Cty != null)
-                IdentityModelEventSource.Logger.WriteVerbose(LogHelper.FormatInvariant(LogMessages.IDX10738, Header.Cty));
+                IdentityModelEventSource.Logger.WriteVerbose(LogHelper.FormatInvariant(LogMessages.IDX12738, Header.Cty));
 
             try
             {
@@ -521,7 +521,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10723, tokenParts[1], RawData), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12723, tokenParts[1], RawData), ex));
             }
 
             RawHeader = tokenParts[0];

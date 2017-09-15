@@ -606,8 +606,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var theoryData = new TheoryData<JwtTheoryData>();
 
-            JwtTestData.InvalidRegExSegmentsData("IDX10709:", theoryData);
-            JwtTestData.InvalidNumberOfSegmentsData("IDX10709:", theoryData);
+            JwtTestData.InvalidRegExSegmentsData("IDX12709:", theoryData);
+            JwtTestData.InvalidNumberOfSegmentsData("IDX12709:", theoryData);
             JwtTestData.InvalidEncodedSegmentsData("", theoryData);
             JwtTestData.ValidEncodedSegmentsData(theoryData);
 
@@ -1184,7 +1184,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10709:"),
+                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12709:"),
                         TestId = "Token = Guid().NewGuid().ToString()",
                         Token = Guid.NewGuid().ToString(),
                         ValidationParameters = new TokenValidationParameters()
@@ -1268,21 +1268,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             theoryData.Add(new JwtTheoryData
             {
-                ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
+                ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test2",
                 SecurityToken = new CustomSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
-                ExpectedException = ExpectedException.ArgumentException("IDX10706:"),
+                ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test3",
                 SecurityToken = new CustomSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
-                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10736:"),
+                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX12736:"),
                 TestId = "Test4",
                 SecurityToken = new JwtSecurityToken(
                                 new JwtHeader(Default.SymmetricSigningCredentials),
@@ -1296,7 +1296,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             theoryData.Add(new JwtTheoryData
             {
-                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10735:"),
+                ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX12735:"),
                 TestId = "Test5",
                 SecurityToken = new JwtSecurityToken(
                                 new JwtHeader(),

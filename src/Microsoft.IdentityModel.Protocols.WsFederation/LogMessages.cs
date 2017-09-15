@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+// Microsoft.IdentityModel.Protocols.WsFederation
+// Range: 22000 - 22999
+
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
@@ -34,26 +37,26 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     {
 #pragma warning disable 1591
         // general
-        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        internal const string IDX22000 = "IDX22000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
         // wsfederation messages
-        internal const string IDX10900 = "IDX10900: Building wsfederation message from query string: '{0}'.";
-        internal const string IDX10901 = "IDX10901: Building wsfederation message from uri: '{0}'.";
-        internal const string IDX10902 = "IDX10902: Token is not found in wresult";
-        internal const string IDX10903 = "IDX10903: Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.";
+        internal const string IDX22900 = "IDX22900: Building wsfederation message from query string: '{0}'.";
+        internal const string IDX22901 = "IDX22901: Building wsfederation message from uri: '{0}'.";
+        internal const string IDX22902 = "IDX22902: Token is not found in wresult";
+        internal const string IDX22903 = "IDX22903: Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.";
 
         // xml metadata messages
-        internal const string IDX13000 = "IDX13000: Exception thrown while reading WsFedereationMetadata. Element '{0}'. Caught exception: '{1}'.";
-        internal const string IDX13001 = "IDX13001: entityID attribute is not found in EntityDescriptor element in metadata file.";
-        internal const string IDX13002 = "IDX13002: Current name '{0} and namespace '{1}' do not match the expected name '{2}' and namespace '{3}'.";
-        internal const string IDX13003 = "IDX13003: Token reference address is missing in SecurityTokenServiceEndpoint in metadata file.";
-        internal const string IDX13004 = "IDX13004: Security token type role descriptor is expected.";
-        internal const string IDX13006 = "IDX13006: Key descriptor for signing is missing in security token service type RoleDescriptor.";
-        internal const string IDX13007 = "IDX13007: Token endpoint is missing in security token service type RoleDescriptor.";
-        internal const string IDX13008 = "IDX13008: 'Use' attribute is missing in KeyDescriptor.";
-        internal const string IDX13009 = "IDX13009: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
-        internal const string IDX13010 = "IDX13010: 'Issuer' value is missing in wsfederationconfiguration.";
-        internal const string IDX13011 = "IDX13011: 'TokenEndpoint' value is missing in wsfederationconfiguration.";
+        internal const string IDX22800 = "IDX22800: Exception thrown while reading WsFedereationMetadata. Element '{0}'. Caught exception: '{1}'.";
+        internal const string IDX22801 = "IDX22801: entityID attribute is not found in EntityDescriptor element in metadata file.";
+        internal const string IDX22802 = "IDX22802: Current name '{0} and namespace '{1}' do not match the expected name '{2}' and namespace '{3}'.";
+        internal const string IDX22803 = "IDX22803: Token reference address is missing in SecurityTokenServiceEndpoint in metadata file.";
+        internal const string IDX22804 = "IDX22804: Security token type role descriptor is expected.";
+        internal const string IDX22806 = "IDX22806: Key descriptor for signing is missing in security token service type RoleDescriptor.";
+        internal const string IDX22807 = "IDX22807: Token endpoint is missing in security token service type RoleDescriptor.";
+        internal const string IDX22808 = "IDX22808: 'Use' attribute is missing in KeyDescriptor.";
+        internal const string IDX22809 = "IDX22809: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
+        internal const string IDX22810 = "IDX22810: 'Issuer' value is missing in wsfederationconfiguration.";
+        internal const string IDX22811 = "IDX22811: 'TokenEndpoint' value is missing in wsfederationconfiguration.";
 
 #pragma warning restore 1591
     }

@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10808, json);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21808, json);
             return new OpenIdConnectConfiguration(json);
         }
 
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (configuration == null)
                 throw LogHelper.LogArgumentNullException(nameof(configuration));
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10809);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21809);
             return JsonConvert.SerializeObject(configuration);
         }
 
@@ -91,12 +91,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806, json, this);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21806, json, this);
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10815, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, GetType()), ex));
             }
         }
 

@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
             if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
-                throw LogValidationException(LogMessages.IDX21201, Id);
+                throw LogValidationException(LogMessages.IDX30201, Id);
         }
 
         /// <summary>
@@ -173,14 +173,14 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
             if (TokenStream == null)
-                throw LogValidationException(LogMessages.IDX21202, Id);
+                throw LogValidationException(LogMessages.IDX30202, Id);
 
             if (!cryptoProviderFactory.IsSupportedAlgorithm(DigestMethod))
-                throw LogValidationException(LogMessages.IDX21208, cryptoProviderFactory.GetType(), DigestMethod);
+                throw LogValidationException(LogMessages.IDX30208, cryptoProviderFactory.GetType(), DigestMethod);
 
             var hashAlg = cryptoProviderFactory.CreateHashAlgorithm(DigestMethod);
             if (hashAlg == null)
-                throw LogValidationException(LogMessages.IDX21209, cryptoProviderFactory.GetType(), DigestMethod);
+                throw LogValidationException(LogMessages.IDX30209, cryptoProviderFactory.GetType(), DigestMethod);
 
             try
             {
@@ -193,13 +193,13 @@ namespace Microsoft.IdentityModel.Xml
                 for (int i = 0;  i < Transforms.Count-1; i++)
                 {
                     if (!TransformFactory.Default.IsSupportedTransform(Transforms[i]))
-                        throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[i])));
+                        throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30210, Transforms[i])));
 
                     TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
                 }
 
                 if (!TransformFactory.Default.IsSupportedCanonicalizingTransfrom(Transforms[Transforms.Count - 1]))
-                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX21210, Transforms[Transforms.Count - 1])));
+                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30210, Transforms[Transforms.Count - 1])));
 
                 return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
             }

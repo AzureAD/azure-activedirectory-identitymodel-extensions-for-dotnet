@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 {
                     TestId = "Unsupported transform",
                     Algorithm = "Unsupported",
-                    ExpectedException = ExpectedException.NotSupportedException("IDX21210")
+                    ExpectedException = ExpectedException.NotSupportedException("IDX14210")
                 },
                 new TransformTheoryData
                 {
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 {
                     TestId = "Unsupported transform",
                     Algorithm = "Unsupported",
-                    ExpectedException = ExpectedException.NotSupportedException("IDX21211:")
+                    ExpectedException = ExpectedException.NotSupportedException("IDX14211:")
                 },
                 new TransformTheoryData
                 {

@@ -101,11 +101,11 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(key));
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
-                throw LogValidationException(LogMessages.IDX21207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());
+                throw LogValidationException(LogMessages.IDX30207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());
 
             var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider == null)
-                throw LogValidationException(LogMessages.IDX21203, key.CryptoProviderFactory, key, SignedInfo.SignatureMethod);
+                throw LogValidationException(LogMessages.IDX30203, key.CryptoProviderFactory, key, SignedInfo.SignatureMethod);
 
             try
             {
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Xml
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
-                        throw LogValidationException(LogMessages.IDX21200, key.CryptoProviderFactory, key);
+                        throw LogValidationException(LogMessages.IDX30200, key.CryptoProviderFactory, key);
                 }
             }
             finally

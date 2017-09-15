@@ -383,7 +383,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
         /// <exception cref="InvalidOperationException"> if <see cref="InnerWriter"/> is null.</exception>
         protected XmlDictionaryWriter UseInnerWriter
         {
-            get => InnerWriter ?? throw LogExceptionMessage(new InvalidOperationException(LogMessages.IDX21209));
+            get => InnerWriter ?? throw LogExceptionMessage(new InvalidOperationException(LogMessages.IDX14209));
         }
     }
 }

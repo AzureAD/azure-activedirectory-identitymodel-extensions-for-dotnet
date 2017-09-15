@@ -337,7 +337,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 return Regex.IsMatch(token, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10720);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12720);
             return false;
         }
 
@@ -518,7 +518,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10721, (audience ?? "null"), (issuer ?? "null"));
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
             JwtHeader header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
@@ -529,7 +529,7 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = signingCredentials == null ? string.Empty : CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10722, rawHeader, rawPayload, rawSignature);
+            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
 
             if (encryptingCredentials != null)
                 return EncryptToken(new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature), encryptingCredentials);
@@ -542,7 +542,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
             if (cryptoProviderFactory == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10733));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX12733));
 
             // if direct algorithm, look for support
             if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
@@ -553,7 +553,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap);
                 var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc);
                 if (encryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12730));
 
                 try
                 {
@@ -594,7 +594,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 var wrappedKey = kwProvider.WrapKey(symmetricKey.Key);
                 var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc);
                 if (encryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10730));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12730));
 
                 try
                 {
@@ -620,7 +620,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             byte[] key = null;
             if (sizeInBits != 256 && sizeInBits != 384 && sizeInBits != 512)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX14701, nameof(sizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10401, nameof(sizeInBits)));
 
             var aes = Aes.Create();
             int halfSizeInBytes = sizeInBits >> 4;
@@ -670,7 +670,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             if (!CanReadToken(token))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, token)));
 
             var jwtToken = new JwtSecurityToken();
             jwtToken.Decode(token.Split('.'), token);
@@ -729,7 +729,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, token)));
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
@@ -801,7 +801,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtSecurityToken jwtToken = token as JwtSecurityToken;
             if (jwtToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
 
             var encodedPayload = jwtToken.EncodedPayload;
             var encodedSignature = string.Empty;
@@ -809,13 +809,13 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken.InnerToken != null)
             {
                 if (jwtToken.SigningCredentials != null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10736));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12736));
 
                 if (jwtToken.InnerToken.Header.EncryptingCredentials != null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10737));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12737));
 
                 if (jwtToken.Header.EncryptingCredentials == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX10735));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12735));
 
                 if (jwtToken.InnerToken.SigningCredentials != null)
                     encodedSignature = CreateEncodedSignature(string.Concat(jwtToken.InnerToken.EncodedHeader, ".", jwtToken.EncodedPayload), jwtToken.InnerToken.SigningCredentials);
@@ -858,7 +858,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10645);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12645);
                 return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
             }
             finally
@@ -881,7 +881,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10508, algorithm, key);
+                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12508, algorithm, key);
                 return false;
             }
 
@@ -1068,7 +1068,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
 
                     if (CanReadToken(jwtClaim.Value))
                     {
@@ -1119,7 +1119,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 string encodedJwt = actor.BootstrapContext as string;
                 if (encodedJwt != null)
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10713);
+                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12713);
                     return encodedJwt;
                 }
 
@@ -1128,20 +1128,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (jwtToken.RawData != null)
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10714);
+                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12714);
                         return jwtToken.RawData;
                     }
                     else
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10715);
+                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12715);
                         return this.WriteToken(jwtToken);
                     }
                 }
 
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10711);
+                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12711);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10712);
+            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12712);
             return WriteToken(new JwtSecurityToken(claims: actor.Claims));
         }
 

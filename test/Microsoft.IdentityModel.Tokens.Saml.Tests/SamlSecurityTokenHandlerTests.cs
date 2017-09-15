@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new SamlTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenException), "IDX10513:"),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenException), "IDX11313:"),
                         First = true,
                         Handler = new SamlSecurityTokenHandlerPublic(),
                         Issuer = Default.Issuer,
@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX21011:", typeof(XmlReadException)),
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11112:", typeof(XmlReadException)),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_NoSubject),
                         Token = ReferenceTokens.SamlToken_NoSubject,
@@ -579,7 +579,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentException("IDX10400:"),
+                        ExpectedException = ExpectedException.ArgumentException("IDX11400:"),
                         TestId = nameof(ReferenceSaml.JwtToken),
                         TokenTestSet = ReferenceSaml.JwtToken
                     }
@@ -632,7 +632,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 memoryStream = new MemoryStream();
                 theoryData.Add(new SamlTheoryData
                 {
-                    ExpectedException = ExpectedException.ArgumentException("IDX10400:"),
+                    ExpectedException = ExpectedException.ArgumentException("IDX11400:"),
                     MemoryStream = memoryStream,
                     TestId = nameof(ReferenceSaml.JwtToken),
                     TokenTestSet = ReferenceSaml.JwtToken,

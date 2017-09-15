@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "OpenIdConnectMetadata.json",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX10108:"),
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX20108:"),
                     TestId = "Require https, using file: 'OpenIdConnectMetadata.json'"
                 });
 
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "httpss://OpenIdConnectMetadata.json",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX10108:"),
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX20108:"),
                     TestId = "Require https, Address: 'httpss://OpenIdConnectMetadata.json'"
                 });
 
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "OpenIdConnectMetadata.json",
                     DocumentRetriever = documentRetriever,
-                    ExpectedException = new ExpectedException(typeof(IOException), "IDX10804:", typeof(InvalidOperationException)),
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20804:", typeof(InvalidOperationException)),
                     TestId = "RequireHttps == false, Address: 'OpenIdConnectMetadata.json'"
                 });
 

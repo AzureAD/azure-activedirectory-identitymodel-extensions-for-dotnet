@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (null != value && !value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX11300, value)));
+                    throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX13300, value)));
 
                 _format = value;
             }

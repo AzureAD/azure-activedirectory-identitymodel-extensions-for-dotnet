@@ -131,9 +131,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors("ConfigurationManager_GetSets", context.Errors);
-            TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"));
-            TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
-            TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10106:"));
+            TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX20107:"));
+            TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX20106:"));
+            TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX20106:"));
         }
 
         [Fact]
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // get configuration from http address, should throw
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever());
-            var ee = new ExpectedException(typeof(InvalidOperationException), "IDX10803:", typeof(ArgumentException));
+            var ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(ArgumentException));
             try
             {
                 configuration = configManager.GetConfigurationAsync().Result;

@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             // default log file cannot be accessed because it is in use. Should throw an IO exception.
             FileStream fileStream = File.Create(TextWriterEventListener.DefaultLogFileName);
             Assert.Throws<IOException>(() => { new TextWriterEventListener();  });
-            Assert.Contains("MIML11001: ", listener.TraceBuffer);
+            Assert.Contains("MIML10001: ", listener.TraceBuffer);
             fileStream.Dispose();
             File.Delete(TextWriterEventListener.DefaultLogFileName);
 

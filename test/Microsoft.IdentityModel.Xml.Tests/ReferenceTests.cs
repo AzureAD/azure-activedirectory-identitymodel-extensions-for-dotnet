@@ -140,21 +140,21 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
                     },
                     new ReferenceTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21202"),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30202"),
                         ProviderFactory = CryptoProviderFactory.Default,
                         Reference = Default.ReferenceWithNullTokenStream,
                         TestId = "XmlTokenStream == null"
                     },
                     new ReferenceTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21208"),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30208"),
                         ProviderFactory = new CustomCryptoProviderFactory(),
                         Reference = Default.Reference,
                         TestId = "DigestMethod Not Supported"
                     },
                     new ReferenceTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX21209"),
+                        ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30209"),
                         ProviderFactory = new CustomCryptoProviderFactory
                         {
                             SupportedAlgorithms = new List<string>{Default.ReferenceDigestMethod}

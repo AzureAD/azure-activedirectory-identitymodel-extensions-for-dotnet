@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX10804, address), ex));
+                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
             }
         }
     }

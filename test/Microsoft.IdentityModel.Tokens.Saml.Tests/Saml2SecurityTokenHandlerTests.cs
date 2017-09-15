@@ -443,7 +443,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13106:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_MissingVersion),
                         Token = ReferenceTokens.Saml2Token_MissingVersion,
@@ -451,7 +451,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11137:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13137:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_VersionNotV20),
                         Token = ReferenceTokens.Saml2Token_VersionNotV20,
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13106:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_IdMissing),
                         Token = ReferenceTokens.Saml2Token_IdMissing,
@@ -467,7 +467,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11106:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13106:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_IssueInstantMissing),
                         Token = ReferenceTokens.Saml2Token_IssueInstantMissing,
@@ -475,7 +475,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(FormatException)),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13102:", typeof(FormatException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_IssueInstantFormatError),
                         Token = ReferenceTokens.Saml2Token_IssueInstantFormatError,
@@ -483,7 +483,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11102:", typeof(XmlReadException)),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13102:", typeof(XmlReadException)),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_IssuerMissing),
                         Token = ReferenceTokens.Saml2Token_IssuerMissing,
@@ -491,7 +491,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11108:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13108:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_NoSubjectNoStatements),
                         Token = ReferenceTokens.Saml2Token_NoSubjectNoStatements,
@@ -499,7 +499,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX11138:"),
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13138:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_NoAttributes),
                         Token = ReferenceTokens.Saml2Token_NoAttributes,

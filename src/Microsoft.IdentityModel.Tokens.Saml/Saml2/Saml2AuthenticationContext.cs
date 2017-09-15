@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(value), value)));
 
                 _classReference = value;
             }
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value != null && !value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11300, nameof(value), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(value), value)));
 
                 _declarationReference = value;
             }

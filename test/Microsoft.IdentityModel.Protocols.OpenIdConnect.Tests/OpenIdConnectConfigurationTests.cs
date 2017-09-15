@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext { Title = "OpenIdConnectConfigurationTests.Constructors" };
             RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException(), context);
             RunOpenIdConnectConfigurationTest(OpenIdConfigData.JsonAllValues, OpenIdConfigData.FullyPopulated, ExpectedException.NoExceptionExpected, context);
-            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetatadataBadJson, null, ExpectedException.ArgumentException(substringExpected: "IDX10815:", inner: typeof(JsonReaderException)), context);
+            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetatadataBadJson, null, ExpectedException.ArgumentException(substringExpected: "IDX21815:", inner: typeof(JsonReaderException)), context);
             TestUtilities.AssertFailIfErrors(context);
         }
 

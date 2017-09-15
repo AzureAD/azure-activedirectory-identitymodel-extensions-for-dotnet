@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+// Microsoft.IdentityModel.Tokens.Saml
+// Range: 11000 - 11999
+
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
@@ -34,11 +37,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     {
 #pragma warning disable 1591
         // SecurityTokenHandler messages
-        internal const string IDX10400 = "IDX10400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
+        internal const string IDX11400 = "IDX11400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
 
         // signature creation / validation
-        internal const string IDX10512 = "IDX10512: Unable to validate token. A SamlSamlAttributeStatement can only have one SamlAttribute of type 'Actor'. This special SamlAttribute is used in delegation scenarios.";
-        internal const string IDX10513 = "IDX10513: Unable to process Saml attribute. A SamlSubject must contain either or both of Name and ConfirmationMethod.";
+        internal const string IDX11312 = "IDX11312: Unable to validate token. A SamlSamlAttributeStatement can only have one SamlAttribute of type 'Actor'. This special SamlAttribute is used in delegation scenarios.";
+        internal const string IDX11313 = "IDX11313: Unable to process Saml attribute. A SamlSubject must contain either or both of Name and ConfirmationMethod.";
 
         // SamlSerializer reading
         internal const string IDX11100 = "IDX11100: Saml Only one element of type '{0}' is supported.";

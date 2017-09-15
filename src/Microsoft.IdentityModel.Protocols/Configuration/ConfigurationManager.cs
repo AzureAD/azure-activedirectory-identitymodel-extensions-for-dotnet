@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20107, MinimumAutomaticRefreshInterval, value)));
 
                 _automaticRefreshInterval = value;
             }
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10106, MinimumRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20106, MinimumRefreshInterval, value)));
 
                 _refreshInterval = value;
             }
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10803, (_metadataAddress ?? "null")), ex));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null")), ex));
                     }
                 }
 
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 else
                 {
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10803, (_metadataAddress ?? "null"))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null"))));
                 }
             }
             finally
