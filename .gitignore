@@ -209,3 +209,5 @@ docs/*
 backup/*
 .testPublish/
 /.vs/
+test/ApiChangeTest/Resource/devAssemblies
+test/ApiChangeTest/Resource/reports
