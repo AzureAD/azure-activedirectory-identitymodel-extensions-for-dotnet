@@ -48,7 +48,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2SecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
         private const string Actor = "Actor";
+        private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+
+        /// <summary>
+        /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
+        /// </summary>
+        public static readonly int DefaultTokenLifetimeInMinutes = 60;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Saml2SecurityTokenHandler"/>.
@@ -867,7 +873,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             string authenticationInstant = null;
 
             // Search for an Authentication Claim.
-            IEnumerable<Claim> claimCollection = from c in tokenDescriptor.Subject.Claims where c.Type == ClaimTypes.AuthenticationMethod select c;
+            IEnumerable<Claim> claimCollection = from claim in tokenDescriptor.Subject.Claims where claim.Type == ClaimTypes.AuthenticationMethod select claim;
             if (claimCollection.Count<Claim>() > 0)
             {
                 // We support only one authentication statement and hence we just pick the first authentication type
@@ -876,7 +882,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 authenticationMethod = new Uri(claimCollection.First<Claim>().Value);
             }
 
-            claimCollection = from c in tokenDescriptor.Subject.Claims where c.Type == ClaimTypes.AuthenticationInstant select c;
+            claimCollection = from claim in tokenDescriptor.Subject.Claims where claim.Type == ClaimTypes.AuthenticationInstant select claim;
 
             if (claimCollection.Count<Claim>() > 0)
                 authenticationInstant = claimCollection.First<Claim>().Value;
@@ -894,10 +900,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (authInfo != null)
             {
-                if (!string.IsNullOrEmpty(authInfo.DnsName)
-                    || !string.IsNullOrEmpty(authInfo.Address))
-                    authnStatement.SubjectLocality
-                        = new Saml2SubjectLocality(authInfo.Address, authInfo.DnsName);
+                if (!string.IsNullOrEmpty(authInfo.DnsName) || !string.IsNullOrEmpty(authInfo.Address))
+                    authnStatement.SubjectLocality = new Saml2SubjectLocality(authInfo.Address, authInfo.DnsName);
 
                 if (!string.IsNullOrEmpty(authInfo.Session))
                     authnStatement.SessionIndex = authInfo.Session;
