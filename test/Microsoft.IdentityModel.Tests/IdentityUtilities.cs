@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
@@ -91,6 +92,21 @@ namespace Microsoft.IdentityModel.Tests
             JwtPayload payload = new JwtPayload(issuer, audience, claims, nbf, exp, iat);
             JwtHeader header = (signingCredentials != null) ? new JwtHeader(signingCredentials) : new JwtHeader();
             return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
+        }
+
+        public static string CreateEncodedSaml(SecurityTokenDescriptor tokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+        }
+
+        public static string CreateEncodedSaml2(SecurityTokenDescriptor tokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+             return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
+        }
+
+        public static string CreateEncodedJwt(SecurityTokenDescriptor tokenDescriptor, SecurityTokenHandler tokenHandler)
+        {
+            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
         }
 
 #if NET452
