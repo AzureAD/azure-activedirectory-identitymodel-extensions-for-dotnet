@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains information about the keys inside the tokens.
     /// </summary>
-    public abstract class SecurityKeyIdentifierClause
+    public class SecurityKeyIdentifierClause
     {
     }
 }

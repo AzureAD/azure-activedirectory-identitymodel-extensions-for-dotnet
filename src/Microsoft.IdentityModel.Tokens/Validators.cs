@@ -314,5 +314,21 @@ namespace Microsoft.IdentityModel.Tokens
             // if it reaches here, that means no token replay is detected.
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10240);
         }
+
+        /// <summary>
+        /// Validates if a token has been replayed.
+        /// </summary>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+        /// <param name="expirationTime">When does the security token expire.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <exception cref="ArgumentNullException">If 'securityToken' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null or whitespace.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
+        /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
+        /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
+        public static void ValidateTokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters)
+        {
+            ValidateTokenReplay(expirationTime, securityToken, validationParameters);
+        }
     }
 }
