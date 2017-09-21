@@ -214,9 +214,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
             try
             {
-                var samlToken = theoryData.Handler.ReadToken(theoryData.Token);
-                var memoryStream = new MemoryStream();
-                var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream);
+                var samlToken = theoryData.Handler.CreateToken(theoryData.TokenDescriptor);
+                var token = theoryData.Handler.WriteToken(samlToken);
+                var principal = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -229,19 +229,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public static TheoryData<SamlTheoryData> RoundTripTokenTheoryData
         {
-            get
+            get => new TheoryData<SamlTheoryData>
             {
-                return new TheoryData<SamlTheoryData>
+                new SamlTheoryData
                 {
-                    new SamlTheoryData
+                    First = true,
+                    TestId = nameof(Default.ClaimsIdentity),
+                    TokenDescriptor = new SecurityTokenDescriptor
                     {
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        First = true,
-                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
-                        Token = ReferenceTokens.SamlToken_Valid
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                        Subject = Default.SamlClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.AsymmetricSigningKey,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
                     }
-                };
-            }
+                }
+            };
         }
 
         [Theory, MemberData("ValidateAudienceTheoryData")]

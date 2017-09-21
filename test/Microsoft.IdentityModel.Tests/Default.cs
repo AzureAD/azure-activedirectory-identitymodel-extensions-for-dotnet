@@ -435,6 +435,29 @@ namespace Microsoft.IdentityModel.Tests
             get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { Default.Country, Default.Country });
         }
 
+        /// <summary>
+        /// SamlClaims require the ability to split into name / namespace
+        /// </summary>
+        public static List<Claim> SamlClaims
+        {
+            get => new List<Claim>
+            {
+                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Default.Issuer),
+            };
+        }
+
+        public static ClaimsIdentity SamlClaimsIdentity
+        {
+            get => new ClaimsIdentity(SamlClaims, AuthenticationType);
+        }
+
         public static SamlConditions SamlConditionsSingleCondition
         {
             get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionSingleAudience });
