@@ -1344,7 +1344,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             using (var memoryStream = new MemoryStream())
             {
-                using (var writer = XmlWriter.Create(memoryStream))
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
                 {
                     WriteToken(writer, samlToken);
                     writer.Flush();

@@ -276,6 +276,51 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
+        [Theory, MemberData("RoundTripTokenTheoryData")]
+        public void RoundTripToken(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
+            try
+            {
+                var samlToken = theoryData.Handler.CreateToken(theoryData.TokenDescriptor);
+                var token = theoryData.Handler.WriteToken(samlToken);
+                var principal = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> RoundTripTokenTheoryData
+        {
+            get =>  new TheoryData<Saml2TheoryData>
+            {
+                new Saml2TheoryData
+                {
+                    First = true,
+                    TestId = nameof(Default.ClaimsIdentity),
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                        Subject = Default.ClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.AsymmetricSigningKey,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
+                    }
+                }
+            };
+        }
+
         [Theory, MemberData("RoundTripActorTheoryData")]
         public void RoundTripActor(Saml2TheoryData theoryData)
         {
