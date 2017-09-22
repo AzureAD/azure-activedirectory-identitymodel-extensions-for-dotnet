@@ -9,6 +9,7 @@
     <PackageId>Microsoft.IdentityModel.Protocols.WsFederation</PackageId>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
+    <PackageTags>.NET;Windows;Authentication;Identity;WsFederation</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
