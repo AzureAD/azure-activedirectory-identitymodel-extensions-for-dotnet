@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             public const string IdpssoDescriptor = "IDPSSODescriptor";
             public const string KeyDescriptor = "KeyDescriptor";
             public const string RoleDescriptor = "RoleDescriptor";
-            public const string SecurityTokenEndpoint = "SecurityTokenServiceEndpoint";
+            public const string PassiveRequestorEndpoint = "PassiveRequestorEndpoint";
             public const string Signature = "Signature";
             public const string SpssoDescriptor = "SPSSODescriptor";
         }
