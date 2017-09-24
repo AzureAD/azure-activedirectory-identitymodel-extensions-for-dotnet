@@ -30,7 +30,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
-using System.Net;
 using static System.Net.WebUtility;
 
 namespace Microsoft.IdentityModel.Protocols
