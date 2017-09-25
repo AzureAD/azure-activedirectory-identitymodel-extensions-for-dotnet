@@ -9,7 +9,7 @@
     <OutputTypeEx>library</OutputTypeEx>
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
