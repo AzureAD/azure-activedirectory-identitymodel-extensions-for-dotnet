@@ -35,7 +35,7 @@ using Newtonsoft.Json;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
+    /// Represents a JSON Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
     [JsonObject]
     public class JsonWebKey : SecurityKey
