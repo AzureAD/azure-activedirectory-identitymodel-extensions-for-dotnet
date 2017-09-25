@@ -98,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11520 = "IDX11520: Authentication instant is null when creating AuthenticationInstant for SamlSecurityToken.";
         internal const string IDX11521 = "IDX11521: Multiple name identifier claim is not allowed in tokenDescriptor.Subject.Claims.";
         internal const string IDX11522 = "IDX11522: More than one delegates acting as an identity are found in Saml attribute.";
+        internal const string IDX11523 = "IDX11523: The claim type must have namespace and name which separated by slash. Input claim: '{0}'.";
 
         // IDX11800 - AuthenticationStatement
         internal const string IDX11800 = "IDX11800: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
@@ -106,6 +107,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11900 = "IDX11900: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";
         internal const string IDX11901 = "IDX11901: Unable to write SamlAssertion: {0}.{1} is empty. This statement must contain at least one Action.";
         internal const string IDX11902 = "IDX11902: Unable to write SamlAssertion: SamlEvidence must have at least one assertion or assertion reference.";
+
+        internal const string IDX11950 = "IDX11950: API is not supported";
 #pragma warning restore 1591
     }
 }

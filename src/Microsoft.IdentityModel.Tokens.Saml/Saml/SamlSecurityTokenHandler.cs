@@ -282,11 +282,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             int lastSlashIndex = claimType.LastIndexOf('/');
             if ((lastSlashIndex == 0) || (lastSlashIndex == -1))
-                throw LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4215, claim.Type: {claimType}"));
+                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, claimType)));
 
-            // TODO - see if there is another slash before this one.
             if (lastSlashIndex == claim.Type.Length - 1)
-                throw LogExceptionMessage(new SamlSecurityTokenException($"claimType, ID4216, claim.Type: {claimType}"));
+                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, claimType)));
 
             return new SamlAttribute(
                 claimType.Substring(0, lastSlashIndex),
@@ -820,7 +819,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            throw new NotSupportedException("API is not supported");
+            throw new NotSupportedException(LogMessages.IDX11950);
         }
 
         /// <summary>

@@ -91,12 +91,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13303 = "IDX13303: 'Subject' is required in Saml2Assertion for built-in statement type.";
         internal const string IDX13304 = "IDX13304: Encryption is not supported in writing saml2 nameIdentifier.";
         internal const string IDX13305 = "IDX13305: Both id and subjectconfirmation are null in saml2 subject: '{0}'.";
-
+        internal const string IDX13306 = "IDX13306: Multiple name identifier claim is not allowed in tokenDescriptor.Subject.Claims.";
+        internal const string IDX13307 = "IDX13307: Authentication method is null when creating AuthenticationStatement for SamlSecurityToken.";
+        internal const string IDX13308 = "IDX13308: Authentication instant is null when creating AuthenticationInstant for SamlSecurityToken.";
+        internal const string IDX13309 = "IDX13309: Encrypting key cannot be a AsymmetricSecurityKey.";
 
         // IDX11900 - AuthorizationDecisionStatement
         internal const string IDX13900 = "IDX13900: Unable to write Saml2Assertion: {0} is required, {1} is null or empty.";
         internal const string IDX13901 = "IDX13901: Unable to write Saml2Assertion: {0}.{1} is empty. This statement must contain at least one Action.";
         internal const string IDX13902 = "IDX13902: Unable to write Saml2Assertion: Saml2Evidence must have at least one assertion or assertion reference.";
+
+        internal const string IDX13950 = "IDX13950: API is not supported";
 #pragma warning restore 1591
     }
 }

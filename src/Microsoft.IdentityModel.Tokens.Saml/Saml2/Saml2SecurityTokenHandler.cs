@@ -478,7 +478,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2SecurityToken"/>.</returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            throw new NotSupportedException("API is not supported");
+            throw new NotSupportedException(LogMessages.IDX13950);
         }
 
 #if SAML2_Encryption
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             reader.MoveToContent();
             if (reader.IsEmptyElement)
-                throw LogExceptionMessage(new Saml2SecurityTokenException("ID3061"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13104, Saml2Constants.Types.EncryptedElementType)));
 
             encryptingCredentials = null;
 
@@ -659,10 +659,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
-
-            // Must have an issuer
-            if (string.IsNullOrEmpty(tokenDescriptor.Issuer))
-                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4138"));
 
             return new Saml2NameIdentifier(tokenDescriptor.Issuer);
         }
@@ -890,9 +886,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (authenticationMethod == null && authenticationInstant == null)
                 return null;
             else if (authenticationMethod == null)
-                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationMethod, SAML2"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13307));
             else if (authenticationInstant == null)
-                throw LogExceptionMessage(new Saml2SecurityTokenException("ID4270, AuthenticationInstant, SAML2"));
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13308));
 
             var authContext = new Saml2AuthenticationContext(authenticationMethod);
             var authInstantTime = DateTime.ParseExact(authenticationInstant, Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
@@ -940,7 +936,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     {
                         // Do not allow multiple name identifier claim.
                         if (nameIdentifierClaim != null)
-                            throw LogExceptionMessage(new Saml2SecurityTokenException("ID4139"));
+                            throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13306));
 
                         nameIdentifierClaim = claim.Value;
                         if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
@@ -1003,7 +999,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 encryptingCredentials = tokenDescriptor.EncryptingCredentials;
                 if (encryptingCredentials.Key is AsymmetricSecurityKey)
-                    throw LogExceptionMessage(new Saml2SecurityTokenException("ID4178"));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13309));
             }
 
             return encryptingCredentials;
