@@ -399,9 +399,18 @@ namespace Microsoft.IdentityModel.Tests
             _key = key;
         }
 
+        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
         public override bool HasPrivateKey
         {
             get { return _key.HasPrivateKey; }
+        }
+
+        public override PrivateKeyStatus PrivateKeyStatus
+        {
+            get
+            {
+                return _key.PrivateKeyStatus;
+            }
         }
 
         public override int KeySize { get { return _key.KeySize; } }
@@ -503,7 +512,13 @@ namespace Microsoft.IdentityModel.Tests
     {
         public ReturnNullAsymmetricSecurityKey() { }
 
+        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
         public override bool HasPrivateKey
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override PrivateKeyStatus PrivateKeyStatus
         {
             get { throw new NotImplementedException(); }
         }

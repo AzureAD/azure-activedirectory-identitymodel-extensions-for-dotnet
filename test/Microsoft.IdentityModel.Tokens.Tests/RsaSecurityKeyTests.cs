@@ -91,9 +91,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void HasPrivateKey(string testId, AsymmetricSecurityKey key, bool expected)
         {
             if (expected)
-                Assert.True(key.HasPrivateKey, testId);
+                Assert.True(key.PrivateKeyStatus == PrivateKeyStatus.Exists, testId);
             else
-                Assert.False(key.HasPrivateKey, testId);
+                Assert.True(key.PrivateKeyStatus != PrivateKeyStatus.Exists, testId);
         }
 
         public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
@@ -155,26 +155,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("IsSupportedAlgDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool isPrivateKey, bool expectedResult)
+        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
        }
 
-        public static TheoryData<RsaSecurityKey, string, bool, bool> IsSupportedAlgDataSet
+        public static TheoryData<RsaSecurityKey, string, bool> IsSupportedAlgDataSet
         {
             get
             {
-                var dataset = new TheoryData<RsaSecurityKey, string, bool, bool>();
+                var dataset = new TheoryData<RsaSecurityKey, string, bool>();
 #if NET452
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, false);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, false);
 #endif
-                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.RsaSecurityKey_2048.HasPrivateKey, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
                 RsaSecurityKey testKey = new RsaSecurityKey(KeyingMaterial.RsaParameters1);
                 testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.EcdsaSha256 });
-                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, testKey.HasPrivateKey, true);
+                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, true);
                 return dataset;
             }
         }
