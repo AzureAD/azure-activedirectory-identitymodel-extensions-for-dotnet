@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Xml
             public const string Object = "Object";
             public const string Reference = "Reference";
             public const string RetrievalMethod = "RetrievalMethod";
-            public const string RsaKeyValue = "RsaKeyValue";
+            public const string RSAKeyValue = "RSAKeyValue";
             public const string Signature = "Signature";
             public const string SignatureMethod = "SignatureMethod";
             public const string SignatureValue = "SignatureValue";

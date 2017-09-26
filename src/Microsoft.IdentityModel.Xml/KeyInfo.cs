@@ -26,11 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
+
     /// <summary>
     /// Represents a XmlDsig KeyInfo element as per:  https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-KeyInfo
     /// </summary>
@@ -66,6 +68,16 @@ namespace Microsoft.IdentityModel.Xml
                 CertificateData = Convert.ToBase64String(x509Key.Certificate.RawData);
                 Kid = x509Key.Certificate.Thumbprint;
             }
+            else if (key is RsaSecurityKey rsaKey)
+            {
+                var rsaParameters = rsaKey.Parameters;
+
+                // Obtain parameters from the RSA if the rsaKey does not contain a valid value for RSAParameters
+                if (rsaKey.Parameters.Equals(default(RSAParameters)))
+                    rsaParameters = rsaKey.Rsa.ExportParameters(false);
+        
+                RSAKeyValue = new RSAKeyValue(Base64UrlEncoder.Encode(rsaParameters.Modulus), Base64UrlEncoder.Encode(rsaParameters.Exponent));
+            }
         }
 
         /// <summary>
@@ -100,6 +112,15 @@ namespace Microsoft.IdentityModel.Xml
         /// Gets or sets the Uri associated with the RetrievalMethod
         /// </summary>
         public string RetrievalMethodUri
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the RSAKeyValue.
+        /// </summary>
+        public RSAKeyValue RSAKeyValue
         {
             get;
             set;

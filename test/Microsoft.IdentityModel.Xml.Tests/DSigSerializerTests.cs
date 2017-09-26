@@ -86,6 +86,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     KeyInfoTest(KeyInfoTestSet.SingleIssuerSerial),
                     KeyInfoTest(KeyInfoTestSet.SingleSKI),
                     KeyInfoTest(KeyInfoTestSet.SingleSubjectName),
+                    KeyInfoTest(KeyInfoTestSet.WithRSAKeyValue),
                     KeyInfoTest(KeyInfoTestSet.WithWhitespace),
                     KeyInfoTest(KeyInfoTestSet.WithUnknownX509DataElements),
                     KeyInfoTest(KeyInfoTestSet.WithAllElements),

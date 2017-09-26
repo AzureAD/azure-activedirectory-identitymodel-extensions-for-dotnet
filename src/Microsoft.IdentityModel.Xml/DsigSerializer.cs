@@ -153,13 +153,29 @@ namespace Microsoft.IdentityModel.Xml
                     //else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace))
                     //{
                     //}
-                    // TODO <KeyValue>
-                    //else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace))
-                    //{
-                    //}
+                    // <KeyValue>
+                    else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace))
+                    {
+                        reader.ReadStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+                            if (reader.IsStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace))
+                            {
+                                // Multiple RSAKeyValues were found
+                                if (keyInfo.RSAKeyValue != null)
+                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.RSAKeyValue);
+
+                                ReadRSAKeyValue(reader, keyInfo);
+                            }
+                            else
+                            {
+                                // Skip the element since it is not an <RSAKeyValue>
+                                Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                            }
+                        // </KeyValue>
+                        reader.ReadEndElement();
+                    }
                     else
                     {
-                        // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>
+                        // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>, <KeyValue>
                         Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                     }
                 }
@@ -215,6 +231,29 @@ namespace Microsoft.IdentityModel.Xml
          }
 
         /// <summary>
+        /// Reads the "RSAKeyValue" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-RSAKeyValue.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.RSAKeyValue"/> element.</param>
+        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the RSAKeyValue.</param>
+        private void ReadRSAKeyValue(XmlReader reader, KeyInfo keyInfo)
+        {
+            reader.ReadStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
+
+            if (!reader.IsStartElement(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace))
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.Modulus, reader.LocalName);
+
+            string modulus = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace);
+
+            if (!reader.IsStartElement(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace))
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.Exponent, reader.LocalName);
+
+            string exponent = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace);
+
+            keyInfo.RSAKeyValue = new RSAKeyValue(modulus, exponent);
+
+            reader.ReadEndElement();
+        }
+        /// <summary>
         /// Reads the "X509SKI" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
         /// </summary>
         /// <param name="reader">The <see cref="XmlReader"/> currently pointing at the <see cref="XmlSignatureConstants.Elements.X509SKI"/> element.</param>
@@ -258,7 +297,7 @@ namespace Microsoft.IdentityModel.Xml
                 reader.MoveToContent();
                 var signatureValue = reader.ReadElementContentAsString().Trim();
                 KeyInfo keyInfo = null;
-                if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo))
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
                     keyInfo = ReadKeyInfo(reader);
 
                 // </Signature>
