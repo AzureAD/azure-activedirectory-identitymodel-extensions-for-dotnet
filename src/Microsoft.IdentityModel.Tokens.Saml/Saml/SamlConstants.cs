@@ -72,6 +72,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public const string AssertionIdPrefix = "SamlSecurityToken-";
         public const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
+        public static class AccessDecision
+        {
+            public static string Deny { get { return "Deny"; } }
+
+            public static string Indeterminate { get { return "Indeterminate"; } }
+
+            public static string Permit { get { return "Permit"; } }
+        }
+
         internal static class Attributes
         {
             public const string ActionNamespaceAttribute = "Namespace";

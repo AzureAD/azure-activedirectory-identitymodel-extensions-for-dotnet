@@ -95,6 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13307 = "IDX13307: Authentication method is null when creating AuthenticationStatement for SamlSecurityToken.";
         internal const string IDX13308 = "IDX13308: Authentication instant is null when creating AuthenticationInstant for SamlSecurityToken.";
         internal const string IDX13309 = "IDX13309: Encrypting key cannot be a AsymmetricSecurityKey.";
+        internal const string IDX13310 = "IDX13310: SAML2 AuthorizationDecision DecisionType must be 'Permit', 'Deny' or 'Indeterminate'.";
 
         // IDX11900 - AuthorizationDecisionStatement
         internal const string IDX13900 = "IDX13900: Unable to write Saml2Assertion: {0} is required, {1} is null or empty.";

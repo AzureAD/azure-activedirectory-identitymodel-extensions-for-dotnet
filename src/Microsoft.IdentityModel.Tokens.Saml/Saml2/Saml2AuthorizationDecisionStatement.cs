@@ -94,7 +94,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                _decision = value;
+                if (Saml2Constants.AccessDecision.Deny.Equals(value, StringComparison.Ordinal)
+                    || Saml2Constants.AccessDecision.Permit.Equals(value, StringComparison.Ordinal)
+                    || Saml2Constants.AccessDecision.Indeterminate.Equals(value, StringComparison.Ordinal))
+                    _decision = value;
+                else
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13310));
             }
         }
 
