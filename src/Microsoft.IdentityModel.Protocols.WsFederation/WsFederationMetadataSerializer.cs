@@ -188,8 +188,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             {
                 if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace) && reader.GetAttribute(Attributes.Use).Equals(keyUse.Signing))
                     roleDescriptor.KeyInfos.Add(ReadKeyDescriptorForSigning(reader));
-                else if (reader.IsStartElement(Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace))
-                    roleDescriptor.TokenEndpoint = ReadSecurityTokenEndpoint(reader);
+                else if (reader.IsStartElement(Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace))
+                    roleDescriptor.TokenEndpoint = ReadPassiveRequestorEndpoint(reader);
                 else
                     reader.ReadOuterXml();
             }
@@ -207,16 +207,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         }
 
         /// <summary>
-        /// Read fed:SecurityTokenServiceEndpoint element in xml.
+        /// Read fed:PassiveRequestorEndpoint element in xml.
         /// </summary>
-        /// <param name="reader"><see cref="XmlReader"/> used to read security token endpoint</param>
+        /// <param name="reader"><see cref="XmlReader"/> used to read PassiveRequestorEndpoint</param>
         /// <returns>token endpoint string</returns>
-        /// <exception cref="XmlReadException">if error occurs when reading security token endpoint</exception>
-        protected virtual string ReadSecurityTokenEndpoint(XmlReader reader)
+        /// <exception cref="XmlReadException">if error occurs when reading PassiveRequestorEndpoint</exception>
+        protected virtual string ReadPassiveRequestorEndpoint(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
 
-            // <SecurityTokenServiceEndpoint>
+            // <PassiveRequestorEndpoint>
             reader.ReadStartElement();
             reader.MoveToContent();
 
@@ -241,7 +241,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             reader.MoveToContent();
             reader.ReadEndElement();
 
-            // </SecurityTokenServiceEndpoint>
+            // </PassiveRequestorEndpoint>
             reader.MoveToContent();
             reader.ReadEndElement();
 
@@ -330,8 +330,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
             }
 
-            // <fed:SecurityTokenServiceEndpoint>
-            writer.WriteStartElement(Elements.SecurityTokenEndpoint, Namespaces.FederationNamespace);
+            // <fed:PassiveRequestorEndpoint>
+            writer.WriteStartElement(Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
 
             // <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
             writer.WriteStartElement(Prefixes.Wsa, Elements.EndpointReference, Namespaces.AddressingNamspace);
@@ -348,7 +348,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             // </wsa:EndpointReference>
             writer.WriteEndElement();
 
-            // </fed:SecurityTokenServiceEndpoint>
+            // </fed:PassiveRequestorEndpoint>
             writer.WriteEndElement();
 
             // </RoleDescriptor>

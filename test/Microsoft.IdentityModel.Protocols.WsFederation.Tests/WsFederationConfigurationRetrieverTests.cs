@@ -50,8 +50,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
             try
             {
-                var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
-                var configuration = theoryData.Serializer.ReadMetadata(reader);
+                var configuration = new WsFederationConfiguration();
+
+                if (!string.IsNullOrEmpty(theoryData.Metadata))
+                {
+                    var reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                    configuration = theoryData.Serializer.ReadMetadata(reader);
+                }
+                else
+                {
+                    var reader = XmlReader.Create(theoryData.MetadataPath);
+                    configuration = theoryData.Serializer.ReadMetadata(reader);
+                }
 
                 if (theoryData.SigingKey != null)
                     configuration.Signature.Verify(theoryData.SigingKey);
@@ -168,8 +178,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             Issuer = ReferenceMetadata.Issuer
                         },
-                        Metadata = ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor,
-                        TestId = nameof(ReferenceMetadata.MetadataNoSecurityTokenSeviceEndpointInRoleDescriptor)
+                        Metadata = ReferenceMetadata.MetadataNoPassiveRequestorEndpointInRoleDescriptor,
+                        TestId = nameof(ReferenceMetadata.MetadataNoPassiveRequestorEndpointInRoleDescriptor)
                     },
                     new WsFederationMetadataTheoryData
                     {
@@ -182,6 +192,48 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
                         Metadata = ReferenceMetadata.MetadataNoAddressInEndpointReference,
                         TestId = nameof(ReferenceMetadata.MetadataNoAddressInEndpointReference)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        Metadata = ReferenceMetadata.AdfsV2Metadata,
+                        SigingKey = ReferenceMetadata.AdfsV2MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV2Endpoint,
+                        TestId = nameof(ReferenceMetadata.AdfsV2Metadata)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        Metadata = ReferenceMetadata.AdfsV3Metadata,
+                        SigingKey = ReferenceMetadata.AdfsV3MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV3Endpoint,
+                        TestId = nameof(ReferenceMetadata.AdfsV3Metadata)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        Metadata = ReferenceMetadata.AdfsV4Metadata,
+                        SigingKey = ReferenceMetadata.AdfsV4MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV4Endpoint,
+                        TestId = nameof(ReferenceMetadata.AdfsV4Metadata)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v2-metadata.xml"),
+                        SigingKey = ReferenceMetadata.AdfsV2MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV2Endpoint,
+                        TestId = "AdfsV2Metadata from xml file"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v3-metadata.xml"),
+                        SigingKey = ReferenceMetadata.AdfsV3MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV3Endpoint,
+                        TestId = "AdfsV3Metadata from xml file"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v4-metadata.xml"),
+                        SigingKey = ReferenceMetadata.AdfsV4MetadataSigningKey,
+                        Configuration = ReferenceMetadata.AdfsV4Endpoint,
+                        TestId = "AdfsV4Metadata from xml file"
                     }
                 };
             }
@@ -465,6 +517,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
             public string Metadata { get; set; }
 
+            public string MetadataPath { get; set; }
+
             public WsFederationMetadataSerializer Serializer { get; set; } = new WsFederationMetadataSerializer();
 
             public SecurityKey SigingKey { get; set; }
@@ -496,7 +550,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
             public string ReadSecurityTokenEndpointPublic(XmlReader reader)
             {
-                return base.ReadSecurityTokenEndpoint(reader);
+                return base.ReadPassiveRequestorEndpoint(reader);
             }
         }
     }
