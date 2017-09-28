@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
@@ -49,6 +51,15 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 var keyInfo = theoryData.Serializer.ReadKeyInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
                 theoryData.ExpectedException.ProcessNoException(context.Diffs);
                 IdentityComparer.AreKeyInfosEqual(keyInfo, theoryData.KeyInfo, context);
+
+                // make sure we write and then read
+                // as we only support partial elements, the KeyInfo's cannot be compared
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                theoryData.Serializer.ReadKeyInfo(XmlUtilities.CreateDictionaryReader(xml));
             }
             catch (Exception ex)
             {
