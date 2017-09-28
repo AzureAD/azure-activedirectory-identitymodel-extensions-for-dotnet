@@ -91,6 +91,8 @@ namespace Microsoft.IdentityModel.Xml
             var keyInfo = new KeyInfo();
             try
             {
+                bool isEmptyElement = reader.IsEmptyElement;
+
                 // <KeyInfo>
                 reader.ReadStartElement();
 
@@ -163,7 +165,8 @@ namespace Microsoft.IdentityModel.Xml
                 }
 
                 // </KeyInfo>
-                reader.ReadEndElement();
+                if (!isEmptyElement)
+                    reader.ReadEndElement();
             }
             catch(Exception ex)
             {
