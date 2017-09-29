@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             var type = typeof(KeyInfo);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 7, $"Number of properties has changed from 7 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 8, $"Number of properties has changed from 8 to: {properties.Length}, adjust tests");
 
             var context = new GetSetContext
             {
@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     new KeyValuePair<string, List<object>>("IssuerName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("Kid", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("RetrievalMethodUri", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("RSAKeyValue", new List<object>{(RSAKeyValue)null, new RSAKeyValue(Guid.NewGuid().ToString(), Guid.NewGuid().ToString())}),
                     new KeyValuePair<string, List<object>>("SerialNumber", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("SKI", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("SubjectName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
