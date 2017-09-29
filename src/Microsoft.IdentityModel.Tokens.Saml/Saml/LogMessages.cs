@@ -99,6 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11521 = "IDX11521: Multiple name identifier claim is not allowed in tokenDescriptor.Subject.Claims.";
         internal const string IDX11522 = "IDX11522: More than one delegates acting as an identity are found in Saml attribute.";
         internal const string IDX11523 = "IDX11523: The claim type must have namespace and name which separated by slash. Input claim: '{0}'.";
+        internal const string IDX11524 = "IDX11524: SAML AuthorizationDecision DecisionType must be 'Permit', 'Deny' or 'Indeterminate'.";
 
         // IDX11800 - AuthenticationStatement
         internal const string IDX11800 = "IDX11800: Unable to write SamlAssertion: {0} is required, {1}.{2} is null or empty.";

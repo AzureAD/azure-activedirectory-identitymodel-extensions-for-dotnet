@@ -32,6 +32,7 @@ using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
@@ -718,11 +719,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = new CompareContext($"{this}.ReadAuthorizationDecisionStatement, {theoryData.TestId}");
             try
             {
-                var reader = XmlUtilities.CreateDictionaryReader(theoryData.AuthorizationDecisionTestSet.Xml);
-                var statement = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthorizationDecisionStatementPublic(reader);
-                theoryData.ExpectedException.ProcessNoException();
+                if (theoryData.TestId.Equals("Invalid DecisionType", StringComparison.Ordinal))
+                {
+                    var authorizationDecision = new SamlAuthorizationDecisionStatement(null, null, "InvalidDecisionType", new List<SamlAction>());
+                }
+                else
+                {
+                    var reader = XmlUtilities.CreateDictionaryReader(theoryData.AuthorizationDecisionTestSet.Xml);
+                    var statement = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAuthorizationDecisionStatementPublic(reader);
+                    theoryData.ExpectedException.ProcessNoException();
 
-                IdentityComparer.AreEqual(statement, theoryData.AuthorizationDecisionTestSet.AuthorizationDecision, context);
+                    IdentityComparer.AreEqual(statement, theoryData.AuthorizationDecisionTestSet.AuthorizationDecision, context);
+                }
             }
             catch (Exception ex)
             {
@@ -784,6 +792,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         AuthorizationDecisionTestSet = ReferenceSaml.SamlAuthorizationDecisionMultiActions,
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAuthorizationDecisionMultiActions)
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenException), "IDX11508:"),
+                        SamlSerializer = new SamlSerializerPublic(),
+                        TestId = "Invalid DecisionType",
                     }
                 };
             }

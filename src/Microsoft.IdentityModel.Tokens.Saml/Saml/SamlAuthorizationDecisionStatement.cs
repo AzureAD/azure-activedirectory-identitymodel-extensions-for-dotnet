@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -97,7 +98,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                _decision = value;
+                if (SamlConstants.AccessDecision.Deny.Equals(value, StringComparison.Ordinal)
+                    || SamlConstants.AccessDecision.Permit.Equals(value, StringComparison.Ordinal)
+                    || SamlConstants.AccessDecision.Indeterminate.Equals(value, StringComparison.Ordinal))
+                    _decision = value;
+                else
+                    throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11508));
             }
         }
 
