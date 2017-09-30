@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ApiCheck" Version="1.1.82" />
+    <PackageReference Include="ApiCheck.Console" Version="1.1.82" />
+    <PackageReference Include="ApiCheck.NUnit" Version="1.1.82" />
+    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
+    <PackageReference Include="xunit.runner.console" Version="2.3.0-beta5-build3769" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resource\Microsoft.IdentityModel.Logging.114.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\Microsoft.IdentityModel.Protocols.214.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\Microsoft.IdentityModel.Protocols.OpenIdConnect.214.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\Microsoft.IdentityModel.Protocols.WsFederation.200.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\Microsoft.IdentityModel.Tokens.512.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Logging.112.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Logging.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.214.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.OpenIdConnect.214.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.WsFederation.200beta8.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Protocols.WsFederation.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Tokens.512.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Microsoft.IdentityModel.Tokens.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\Newtonsoft.Json.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\System.IdentityModel.Tokens.Jwt.512.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resource\refAssemblies\System.IdentityModel.Tokens.Jwt.dll">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj" />
+  </ItemGroup>
+
+</Project>
