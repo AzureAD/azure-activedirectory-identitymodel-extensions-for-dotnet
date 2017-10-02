@@ -69,6 +69,31 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData("FullyPopulatedKeyInfoTheoryData")]
+        public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
+            var context = new CompareContext($"{this}.WriteKeyInfo, {theoryData.TestId}");
+            try
+            {
+                var keyInfo = theoryData.Serializer.ReadKeyInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                IdentityComparer.AreKeyInfosEqual(keyInfo, theoryData.KeyInfo, context);
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(theoryData.Xml, xml);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<DSigSerializerTheoryData> ReadKeyInfoTheoryData
         {
             get
@@ -77,11 +102,13 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // ExpectedException.DefaultVerbose = true;
                 return new TheoryData<DSigSerializerTheoryData>
                 {
-                    KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
-                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
+                    //KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
+                    KeyInfoTest(KeyInfoTestSet.FullyPopulated),
+                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates), 
                     KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSubjectName, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
+                    KeyInfoTest(KeyInfoTestSet.MultipleX509Data),
                     KeyInfoTest(KeyInfoTestSet.SingleCertificate),
                     KeyInfoTest(KeyInfoTestSet.SingleIssuerSerial),
                     KeyInfoTest(KeyInfoTestSet.SingleSKI),
@@ -92,6 +119,17 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     KeyInfoTest(KeyInfoTestSet.WithAllElements),
                     KeyInfoTest(KeyInfoTestSet.WithUnknownElements),
                     KeyInfoTest(KeyInfoTestSet.WrongNamespace, new ExpectedException(typeof(XmlReadException), "IDX30011:")),
+                };
+            }
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> FullyPopulatedKeyInfoTheoryData
+        {
+            get
+            {
+                return new TheoryData<DSigSerializerTheoryData>
+                {
+                    KeyInfoTest(KeyInfoTestSet.FullyPopulated),
                 };
             }
         }

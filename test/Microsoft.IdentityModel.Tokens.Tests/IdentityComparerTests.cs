@@ -328,8 +328,8 @@ namespace Microsoft.IdentityModel.Tests
             var keyInfo2 = new KeyInfo(KeyingMaterial.Cert_LocalSts);
             IdentityComparer.AreEqual(keyInfo1, keyInfo2, context);
 
-            Assert.True(context.Diffs.Count(s => s == "Kid:") == 1);
-            Assert.True(context.Diffs.Count(s => s == "CertificateData:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "X509Data:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "Certificates:") == 1);
         }
 
         [Fact]

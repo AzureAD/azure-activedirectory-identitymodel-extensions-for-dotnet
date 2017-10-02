@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
@@ -53,8 +55,8 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="certificate">the <see cref="X509Certificate2"/>to populate the X509Data.</param>
         public KeyInfo(X509Certificate2 certificate)
         {
-            CertificateData = Convert.ToBase64String(certificate.RawData);
-            Kid = certificate.Thumbprint;
+            var data = new X509Data(certificate);
+            X509Data.Add(data);
         }
 
         /// <summary>
@@ -65,8 +67,9 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (key is X509SecurityKey x509Key)
             {
-                CertificateData = Convert.ToBase64String(x509Key.Certificate.RawData);
-                Kid = x509Key.Certificate.Thumbprint;
+                var data = new X509Data();
+                data.Certificates.Add(Convert.ToBase64String(x509Key.Certificate.RawData));
+                X509Data.Add(data);
             }
             else if (key is RsaSecurityKey rsaKey)
             {
@@ -81,28 +84,9 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Get or sets the 'X509CertificateData' value
+        /// Gets or sets the 'KeyName' that can be used as a key identifier.
         /// </summary>
-        public string CertificateData
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the IssuerName that is part of a 'X509IssuerSerial'
-        /// </summary>
-        public string IssuerName
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the a kid that reflects the type of 'X509Data'
-        /// For multiple X509Data the last one will be used
-        /// </summary>
-        public string Kid
+        public string KeyName
         {
             get;
             set;
@@ -127,30 +111,34 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Get or sets the SerialNumber that is part of a 'X509IssuerSerial'
+        /// Gets the 'X509Data' value.
         /// </summary>
-        public string SerialNumber
-        {
-            get;
-            set;
+        public ICollection<X509Data> X509Data { get; } = new Collection<X509Data>();
+
+        /// <summary>
+        /// Compares two KeyInfo objects.
+        /// </summary>
+        public override bool Equals(object obj)
+        {   
+            KeyInfo other = obj as KeyInfo;
+            if (other == null)
+                return false;
+            else if (string.Compare(KeyName, other.KeyName, StringComparison.OrdinalIgnoreCase) != 0
+                ||string.Compare(RetrievalMethodUri, other.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) != 0
+                || (RSAKeyValue != null && !RSAKeyValue.Equals(other.RSAKeyValue)
+                || !new HashSet<X509Data>(X509Data).SetEquals(other.X509Data)))
+                return false;
+
+            return true;
         }
 
         /// <summary>
-        /// Gets or sets the 'X509SKI' value
+        /// Serves as a hash function for KeyInfo.
         /// </summary>
-        public string SKI
+        public override int GetHashCode()
         {
-            get;
-            set;
+            return base.GetHashCode();
         }
 
-        /// <summary>
-        /// Get or sets the 'X509SubjectName' value
-        /// </summary>
-        public string SubjectName
-        {
-            get;
-            set;
-        }
     }
 }

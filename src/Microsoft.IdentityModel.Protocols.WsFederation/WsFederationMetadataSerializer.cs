@@ -111,10 +111,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     foreach(var keyInfo in roleDescriptor.KeyInfos)
                     {
                         configuration.KeyInfos.Add(keyInfo);
-                        if (!string.IsNullOrEmpty(keyInfo.CertificateData))
+                        if (keyInfo.X509Data != null)
                         {
-                            var cert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
-                            configuration.SigningKeys.Add(new X509SecurityKey(cert));
+                            foreach (var data in keyInfo.X509Data)
+                            {
+                                foreach (var certificate in data.Certificates)
+                                {
+                                    var cert = new X509Certificate2(Convert.FromBase64String(certificate));
+                                    configuration.SigningKeys.Add(new X509SecurityKey(cert));
+                                }
+                            }
                         }
                     }
                     configuration.TokenEndpoint = roleDescriptor.TokenEndpoint;

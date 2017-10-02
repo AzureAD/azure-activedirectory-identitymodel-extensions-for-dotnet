@@ -33,6 +33,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -235,11 +236,13 @@ namespace Microsoft.IdentityModel.Tests
 
         public static KeyInfo KeyInfo
         {
-            get => new KeyInfo
+            get
             {
-                CertificateData = CertificateData,
-                Kid = "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"
-            };
+                var data = new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData)));
+                var keyInfo = new KeyInfo();
+                keyInfo.X509Data.Add(data);
+                return keyInfo;
+            }
         }
 
         public static string IPAddress

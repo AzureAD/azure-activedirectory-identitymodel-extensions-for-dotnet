@@ -79,6 +79,7 @@ namespace Microsoft.IdentityModel.Xml
             public const string Transforms = "Transforms";
             public const string TransformationParameters = "TransformationParameters";
             public const string X509Certificate = "X509Certificate";
+            public const string X509CRL = "X509CRL";
             public const string X509Data = "X509Data";
             public const string X509IssuerName = "X509IssuerName";
             public const string X509IssuerSerial = "X509IssuerSerial";

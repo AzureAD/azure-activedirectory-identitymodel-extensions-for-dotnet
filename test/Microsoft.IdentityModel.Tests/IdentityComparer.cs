@@ -61,6 +61,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
                 { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
+                { typeof(IEnumerable<X509Data>).ToString(), AreX509DataEnumsEqual },
                 { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
 #if !CrossVersionTokenValidation
                 { typeof(List<JsonWebKey>).ToString(), AreJsonWebKeyEnumsEqual },
@@ -81,6 +82,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
+                { typeof(IssuerSerial).ToString(), CompareAllPublicProperties },
                 { typeof(JArray).ToString(), AreJArraysEqual },
 #if !CrossVersionTokenValidation
                 { typeof(JsonWebKey).ToString(), CompareAllPublicProperties },
@@ -94,6 +96,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(OpenIdConnectConfiguration).ToString(), CompareAllPublicProperties },
                 { typeof(OpenIdConnectMessage).ToString(), CompareAllPublicProperties },
                 { typeof(Reference).ToString(), CompareAllPublicProperties },
+                { typeof(RSAKeyValue).ToString(), CompareAllPublicProperties },
                 { typeof(RsaSecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(RSAParameters).ToString(), AreRsaParametersEqual },
                 { typeof(SamlAction).ToString(), CompareAllPublicProperties },
@@ -127,6 +130,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(WsFederationConfiguration).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationMessage).ToString(), CompareAllPublicProperties },
                 { typeof(Uri).ToString(), AreUrisEqual },
+                { typeof(X509Data).ToString(), CompareAllPublicProperties },
             };
 
 #if !CrossVersionTokenValidation
@@ -193,6 +197,11 @@ namespace Microsoft.IdentityModel.Tests
         public static bool AreSecurityKeyEnumsEqual(object object1, object object2, CompareContext context)
         {
             return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
+        }
+
+        public static bool AreX509DataEnumsEqual(object object1, object object2, CompareContext context)
+        {
+            return AreEnumsEqual<X509Data>(object1 as IEnumerable<X509Data>, object2 as IEnumerable<X509Data>, context, AreEqual);
         }
 
         public static bool AreEnumsEqual<T>(IEnumerable<T> t1, IEnumerable<T> t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)

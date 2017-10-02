@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
@@ -101,47 +100,7 @@ namespace Microsoft.IdentityModel.Xml
                     // <X509Data>
                     if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace))
                     {
-                        reader.ReadStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
-                        while (reader.IsStartElement())
-                        {
-                            if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace))
-                            {
-                                // multiple certs
-                                if (keyInfo.CertificateData != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509Certificate);
-
-                                ReadCertificate(reader, keyInfo);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace))
-                            {
-                                if (keyInfo.SerialNumber != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509IssuerSerial);
-
-                                ReadIssuerSerial(reader, keyInfo);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace))
-                            {
-                                if (keyInfo.SKI != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SKI);
-
-                                ReadSKI(reader, keyInfo);
-                            }
-                            else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace))
-                            {
-                                if (keyInfo.SubjectName != null)
-                                    throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SubjectName);
-
-                                ReadSubjectName(reader, keyInfo);
-                            }
-                            else
-                            {
-                                // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>
-                                Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
-                            }
-                        }
-
-                        // </X509Data>
-                        reader.ReadEndElement();
+                        keyInfo.X509Data.Add(ReadX509Data(reader));
                     }
                     // <RetrievalMethod>
                     else if (reader.IsStartElement(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace))
@@ -149,10 +108,11 @@ namespace Microsoft.IdentityModel.Xml
                         keyInfo.RetrievalMethodUri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI);
                         reader.ReadOuterXml();
                     }
-                    // TODO <KeyName>
-                    //else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace))
-                    //{
-                    //}
+                    // <KeyName>
+                    else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace))
+                    {
+                        keyInfo.KeyName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace);
+                    }
                     // <KeyValue>
                     else if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace))
                     {
@@ -163,13 +123,14 @@ namespace Microsoft.IdentityModel.Xml
                                 if (keyInfo.RSAKeyValue != null)
                                     throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.RSAKeyValue);
 
-                                ReadRSAKeyValue(reader, keyInfo);
+                                keyInfo.RSAKeyValue = ReadRSAKeyValue(reader);
                             }
                             else
                             {
                                 // Skip the element since it is not an <RSAKeyValue>
                                 Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                             }
+
                         // </KeyValue>
                         reader.ReadEndElement();
                     }
@@ -183,6 +144,7 @@ namespace Microsoft.IdentityModel.Xml
                 // </KeyInfo>
                 if (!isEmptyElement)
                     reader.ReadEndElement();
+
             }
             catch(Exception ex)
             {
@@ -196,46 +158,88 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Reads the "X509Certificate" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
+        /// Reads the "X509DataElement" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
         /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently positioning on the <see cref="XmlSignatureConstants.Elements.X509Certificate"/> element.</param>
-        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the certificate.</param>
-        private void ReadCertificate(XmlReader reader, KeyInfo keyInfo)
+        /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
+        private X509Data ReadX509Data(XmlReader reader)
         {
-            keyInfo.CertificateData = reader.ReadElementContentAsString();
-            var embededCert = new X509Certificate2(Convert.FromBase64String(keyInfo.CertificateData));
-            keyInfo.Kid = embededCert.Thumbprint;
+            var data = new X509Data();
+
+            if (reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX30108);
+
+            reader.ReadStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
+            while (reader.IsStartElement())
+            {
+                if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace))
+                {
+                    data.Certificates.Add(reader.ReadElementContentAsString());
+                }
+                else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace))
+                {
+                    if (data.IssuerSerial != null)
+                        throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509IssuerSerial);
+                    data.IssuerSerial = ReadIssuerSerial(reader);
+                }
+                else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace))
+                {
+                    if (data.SKI != null)
+                        throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SKI);
+                    data.SKI = reader.ReadElementContentAsString();
+                }
+                else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace))
+                {
+                    if (data.SubjectName != null)
+                        throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509SubjectName);
+                    data.SubjectName = reader.ReadElementContentAsString();
+                }
+                else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace))
+                {
+                    if (data.CRL != null)
+                        throw XmlUtil.LogReadException(LogMessages.IDX30015, XmlSignatureConstants.Elements.X509CRL);
+                    data.CRL = reader.ReadElementContentAsString();
+                }
+                else
+                {
+                    // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>, <X509CRL>
+                    Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                }
+            }
+
+            // </X509Data>
+            reader.ReadEndElement();
+
+            return data;
         }
 
         /// <summary>
         /// Reads the "X509IssuerSerial" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509IssuerSerial"/> element.</param>
-        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the IssuerSerial.</param>
-        private void ReadIssuerSerial(XmlReader reader, KeyInfo keyInfo)
+        private IssuerSerial ReadIssuerSerial(XmlReader reader)
         {
             reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace))
                 throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
 
-            keyInfo.IssuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
+            var issuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace))
                 throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
 
-            keyInfo.SerialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
-            keyInfo.Kid = keyInfo.SerialNumber;
+            var serialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
 
             reader.ReadEndElement();
+
+            return new IssuerSerial(issuerName, serialNumber);
          }
 
         /// <summary>
         /// Reads the "RSAKeyValue" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-RSAKeyValue.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.RSAKeyValue"/> element.</param>
-        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the RSAKeyValue.</param>
-        private void ReadRSAKeyValue(XmlReader reader, KeyInfo keyInfo)
+        private RSAKeyValue ReadRSAKeyValue(XmlReader reader)
         {
             reader.ReadStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
 
@@ -249,30 +253,9 @@ namespace Microsoft.IdentityModel.Xml
 
             string exponent = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace);
 
-            keyInfo.RSAKeyValue = new RSAKeyValue(modulus, exponent);
-
             reader.ReadEndElement();
-        }
-        /// <summary>
-        /// Reads the "X509SKI" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
-        /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently pointing at the <see cref="XmlSignatureConstants.Elements.X509SKI"/> element.</param>
-        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the SKI.</param>
-        private void ReadSKI(XmlReader reader, KeyInfo keyInfo)
-        {
-            keyInfo.SKI = reader.ReadElementContentAsString();
-            keyInfo.Kid = keyInfo.SKI;
-        }
 
-        /// <summary>
-        /// Reads the "X509SubjectName" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
-        /// </summary>
-        /// <param name="reader">The <see cref="XmlReader"/> currently pointing at the <see cref="XmlSignatureConstants.Elements.X509SubjectName"/> element.</param>
-        /// <param name="keyInfo">The <see cref="KeyInfo"/> to hold the SubjectName.</param>
-        private void ReadSubjectName(XmlReader reader, KeyInfo keyInfo)
-        {
-            keyInfo.SubjectName = reader.ReadElementContentAsString();
-            keyInfo.Kid = keyInfo.SubjectName;
+            return new RSAKeyValue(modulus, exponent);    
         }
 
         /// <summary>
@@ -649,14 +632,74 @@ namespace Microsoft.IdentityModel.Xml
             // <KeyInfo>
             writer.WriteStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
-            // TODO expand on Certs
-            if (!string.IsNullOrEmpty(keyInfo.CertificateData))
+            if (keyInfo.KeyName != null)
+            {
+                writer.WriteElementString(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace, keyInfo.KeyName);
+            }
+
+            if (keyInfo.RSAKeyValue != null)
+            {
+                // <KeyValue>
+                writer.WriteStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+
+                // <RSAKeyValue>
+                writer.WriteStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
+
+                // <Modulus>...</Modulus>
+                writer.WriteElementString(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
+
+                // <Exponent>...</Exponent>
+                writer.WriteElementString(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
+
+                // </RSAKeyValue>
+                writer.WriteEndElement();
+
+                // </KeyValue>
+                writer.WriteEndElement();
+            }
+
+            if (keyInfo.RetrievalMethodUri != null)
+            {
+                writer.WriteElementString(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace, keyInfo.RetrievalMethodUri);
+            }
+
+            foreach (var data in keyInfo.X509Data)
             {
                 // <X509Data>
                 writer.WriteStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
 
-                // <X509Certificate>...</X509Certificate>
-                writer.WriteElementString(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, keyInfo.CertificateData);
+                if (data.IssuerSerial != null)
+                {
+                    writer.WriteStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
+
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace, data.IssuerSerial.IssuerName);
+
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace, data.IssuerSerial.SerialNumber);
+
+                    writer.WriteEndElement();
+                }
+
+                if (data.SKI != null)
+                {
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace, data.SKI);
+
+                }
+
+                if (data.SubjectName != null)
+                {
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace, data.SubjectName);
+                }
+
+                foreach (var certificate in data.Certificates)
+                {
+                    // <X509Certificate>...</X509Certificate>
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, certificate);
+                }
+
+                if (data.CRL != null)
+                {
+                    writer.WriteElementString(XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace, data.CRL);
+                }
 
                 // </X509Data>
                 writer.WriteEndElement();
