@@ -618,7 +618,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         try
                         {
-                            retval = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
+                            retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(obj, CultureInfo.InvariantCulture)));
                         }
                         catch (System.FormatException)
                         {
@@ -643,7 +643,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        retval = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                        retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
                     }
                     catch (System.FormatException)
                     {
@@ -729,7 +729,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 // null converts to 0.
-                secondsAfterBaseTime = Convert.ToInt64(dateValue, CultureInfo.InvariantCulture);
+                secondsAfterBaseTime = Convert.ToInt64(Math.Truncate(Convert.ToDouble(dateValue, CultureInfo.InvariantCulture)));
                 return EpochTime.DateTime(secondsAfterBaseTime);
             }
             catch (Exception ex)
