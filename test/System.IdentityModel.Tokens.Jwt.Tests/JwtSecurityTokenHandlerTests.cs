@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
@@ -461,6 +462,90 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             expectedClaims.Add(claim);
 
             RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
+        }
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData("ReadTimesExpressedAsDoublesTheoryData")]
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        public void ReadTimesExpressedAsDoubles(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadTimesExpressedAsDoubles", theoryData);
+            try
+            {
+                var principal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validToken);
+
+                var jwtToken1 = validToken as JwtSecurityToken;
+                var jwtToken2 = theoryData.SecurityToken as JwtSecurityToken;
+
+                IdentityComparer.AreEqual(jwtToken1.Payload[JwtRegisteredClaimNames.Nbf], jwtToken2.Payload[JwtRegisteredClaimNames.Nbf], context);
+                IdentityComparer.AreEqual(jwtToken1.Payload[JwtRegisteredClaimNames.Exp], jwtToken2.Payload[JwtRegisteredClaimNames.Exp], context);
+                IdentityComparer.AreEqual(jwtToken1.Payload[JwtRegisteredClaimNames.Iat], jwtToken2.Payload[JwtRegisteredClaimNames.Iat], context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ReadTimesExpressedAsDoublesTheoryData
+        {
+            get
+            {
+                TimeSpan timeSpan = DateTime.UtcNow.ToUniversalTime().AddMinutes(10) - EpochTime.UnixEpoch;
+                JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+
+                JwtSecurityToken jwtToken1 = handler.CreateToken(new SecurityTokenDescriptor()) as JwtSecurityToken;
+                jwtToken1.Payload[JwtRegisteredClaimNames.Nbf] = 1471924298.67746;
+                jwtToken1.Payload[JwtRegisteredClaimNames.Iat] = jwtToken1.Payload[JwtRegisteredClaimNames.Nbf];
+                jwtToken1.Payload[JwtRegisteredClaimNames.Exp] = timeSpan.TotalSeconds;
+
+                var payload = new JwtPayload();
+                payload[JwtRegisteredClaimNames.Nbf] = "1472096544.75759";
+                payload[JwtRegisteredClaimNames.Iat] = "1472096557.74376";
+                payload[JwtRegisteredClaimNames.Exp] = "1472097744.75859";
+                JwtSecurityToken jwtToken2 = new JwtSecurityToken(new JwtHeader(), payload);
+
+                var token2 = @"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiIsImlzRW5jcnlwdGVkIjoiRmFsc2UiLCJ4NXQiOiI1M0VENjE1NTUwNTlBRDg3QUE4MkNBNTYwRTQ4QkIxMkM1MzdGOUY1IiwidmVyIjoiMi4xIn0.eyJhdWQiOiJIZWxpeC5TZWN1cml0eS5VdGlsIiwiaWF0IjoiMTQ3MjA5NjU1Ny43NDM3NiIsIm5iZiI6IjE0NzIwOTY1NDQuNzU3NTkiLCJDbGFpbVNldHMiOlt7IkNsYWltcyI6eyJzZXJ2ZXJJZCI6IkhlbGl4LkNvbnRhaW5lcnMuRGV2Iiwic2VydmVyVmVyc2lvbiI6ImRldiIsImlzc1g1dCI6IjUzRUQ2MTU1NTA1OUFEODdBQTgyQ0E1NjBFNDhCQjEyQzUzN0Y5RjUifSwiUHJvdmlkZXIiOiJIZWxpeC5Db250YWluZXJzLkRldi52ZGV2IiwiU2NoZW1hIjoiSGVsaXguQ29udGFpbmVyIiwiVmVyc2lvbiI6IlYxIn1dLCJpc3MiOiJIZWxpeC5Db250YWluZXJzLkRldi52ZGV2IiwiZXhwIjoiMTQ3MjA5Nzc0NC43NTg1OSIsInNzaWQiOiJjNmJkNzY3ZjE4YWU0ZTQyOTliMmY4YjJmNzhmODU1NSJ9.W8ARsO3IKMO_CBl5fMkgTEkPmoZZvjaX46-mmVHqT5hQAbQVBmnc18B9VxsSS34YKVE2dBQwZHjhu2ROSOCKeuHOqHjjS_HuSdDLOdi7rJUdpKw1GE-lBqxzUPojAlUvLRlq7KjbwipXd7bJyMk7chVU9r548pmljDAlm7SOqmM-qcZ8X0sgQcDxxZoacJiL9xQpbJPi9CVHC_ms2LJhm6AFcCNTlRZNgAmMvoIBWfjXVsVC92HFgqd_qTpMvudTs216LIfslpJC0WiU4SFWKV2Bt5rGGVVqSe4vXb4W1Si58t8ORcepRnkZ1jkEuKf2VpHTEw0ylwX_BLqnnKdavQ";
+                int index = token2.LastIndexOf('.');
+                token2 = token2.Substring(0, index + 1);
+
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        First = true,
+                        SecurityToken = jwtToken1,
+                        TestId = "CreateTokenFromTokenHandler",
+                        Token = handler.WriteToken(jwtToken1),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            RequireExpirationTime = false,
+                            RequireSignedTokens = false,
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                        }
+                    },
+
+                    new JwtTheoryData
+                    {
+                        SecurityToken = jwtToken2,
+                        TestId = "TokenFromCustomerReport",
+                        Token = token2,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            RequireExpirationTime = false,
+                            RequireSignedTokens = false,
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ClockSkew = timeSpan
+                        }
+                    }
+                };
+            }
         }
 
         private void RunClaimMappingVariation(JwtSecurityToken jwt, JwtSecurityTokenHandler tokenHandler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName)
