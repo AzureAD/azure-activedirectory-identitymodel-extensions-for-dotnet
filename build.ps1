@@ -6,9 +6,9 @@ param(
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
-    [string]$failBuildOnTestFailure="YES",
+    [string]$failBuildOnTest="YES",
     [string]$pack="YES",
-    [string]$addAdditionalFileInfo="YES",
+    [string]$updateAssemblyInfo="YES",
     [string]$slnFile="wilson.sln")
 
 ################################################# Functions ############################################################
@@ -38,7 +38,7 @@ function RemoveFolder($folder)
     }
 }
 
-function CreateArtifactsRoot($path)
+function CreateFolder($path)
 {
     if (!(Test-Path $path))
     {
@@ -50,16 +50,17 @@ function CreateArtifactsRoot($path)
 ################################################# Functions ############################################################
 
 WriteSectionHeader("build.ps1 - parameters");
-Write-Host "build:           " $build;
-Write-Host "buildType:       " $buildType;
-Write-Host "clean:           " $clean;
-Write-Host "restore:         " $restore;
-Write-Host "root:            " $root;
-Write-Host "runTests:        " $runTests;
-Write-Host "PSScriptRoot:    " $PSScriptRoot;
-Write-Host "failBuildOnTest: " $failBuildOnTest;
-Write-Host "dotnetDir:       " $dotnetDir
-Write-Host "slnFile:         " $slnFile;
+Write-Host "build:              " $build;
+Write-Host "buildType:          " $buildType;
+Write-Host "dotnetDir:          " $dotnetDir
+Write-Host "clean:              " $clean;
+Write-Host "restore:            " $restore;
+Write-Host "root:               " $root;
+Write-Host "runTests:           " $runTests;
+Write-Host "failBuildOnTest:    " $failBuildOnTest;
+Write-Host "pack:               " $pack;
+Write-Host "updateAssemblyInfo: " $updateAssemblyInfo
+Write-Host "slnFile:            " $slnFile;
 WriteSectionFooter("End build.ps1 - parameters");
 
 
@@ -110,14 +111,14 @@ if ($clean -eq "YES")
 if ($build -eq "YES")
 {
     WriteSectionHeader("Build");
-    CreateArtifactsRoot($artifactsRoot);
+    CreateFolder($artifactsRoot);
 
     $date = Get-Date
     $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
     $versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
     Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $dateTimeStamp));
 
-    if ($addFileInfo -eq "YES")
+    if ($updateAssemblyInfo -eq "YES")
     {
         $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
         $additionFileInfo = $releaseVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD);
@@ -152,7 +153,7 @@ if ($build -eq "YES")
 if ($pack -eq "YES")
 {
     WriteSectionHeader("Pack");
-    CreateArtifactsRoot($artifactsRoot);
+    CreateFolder($artifactsRoot);
 
     foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
     {
@@ -205,9 +206,9 @@ if ($runTests -eq "YES")
             $testExitCode = $p.ExitCode + $testExitCode
 
             popd
-        }
 
-        WriteSectionFooter("End Test");
+            WriteSectionFooter("End Test - " + $name);
+        }
     }
 
     if($testExitCode -ne 0)
