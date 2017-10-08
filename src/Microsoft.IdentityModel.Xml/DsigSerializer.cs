@@ -662,6 +662,27 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteEndElement();
             }
 
+            if (keyInfo.RSAKeyValue != null)
+            {
+                // <KeyValue>
+                writer.WriteStartElement(XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+
+                // <RSAKeyValue>
+                writer.WriteStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
+
+                // <Modulus>...</Modulus>
+                writer.WriteElementString(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
+
+                // <Exponent>...</Exponent>
+                writer.WriteElementString(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
+
+                // </RSAKeyValue>
+                writer.WriteEndElement();
+
+                // </KeyValue>
+                writer.WriteEndElement();
+            }
+
             // </KeyInfo>
             writer.WriteEndElement();
         }
