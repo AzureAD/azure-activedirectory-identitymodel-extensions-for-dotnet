@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
         {
             get
             {
-                var defaultClaimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaims.GetRange(0, 8));
+                var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
                 return new TheoryData<TokenCrossTheoryData>
@@ -84,6 +84,24 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             Subject = defaultClaimsIdentity
                         }
                     },
+                    new TokenCrossTheoryData
+                    {
+                        TokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
+                        {
+                            AppliesToAddress = Default.Audience,
+                            Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
+                            Subject = AuthenticationClaimsIdentity,
+                            TokenIssuerName = Default.Issuer,
+                        },
+                        TokenDescriptor5x = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+                        {
+                            Audience = Default.Audience,
+                            NotBefore = notBefore,
+                            Expires = expires,
+                            Issuer = Default.Issuer,
+                            Subject = AuthenticationClaimsIdentity
+                        }
+                    }
                 };
             }
         }
@@ -115,7 +133,6 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             var claimsPrincipal4x = CrossVersionTokenValidationTestsData.GetSamlClaimsPrincipal4x(theoryData.Token, theoryData.TokenValidationParameters, theoryData.X509Certificate, out System.IdentityModel.Tokens.SecurityToken validateToken4x);
             var claimsPrincipal5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.Token, tvp5x, out Microsoft.IdentityModel.Tokens.SecurityToken validateToken5x);
 
-            AreSamlTokensEqual(validateToken4x, validateToken5x, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -124,7 +141,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
         {
             get
             {
-                var defaultClaimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaims.GetRange(0, 8));
+                var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
                 var tokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
@@ -136,13 +153,56 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                     TokenIssuerName = Default.Issuer,
                 };
 
-                var token4x = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
+                var token4x_AttributeStatement = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
+
+                tokenDescriptor4x.Subject = AuthenticationClaimsIdentity;
+                tokenDescriptor4x.AuthenticationInfo = new AuthenticationInformation
+                {
+                    Address = Default.IPAddress,
+                    DnsName = Default.DNSAddress
+                };
+
+                var token4x_AuthenticationStatement = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
+
+                tokenDescriptor4x.Subject = AuthorizationDecisionClaimsIdentity;
+                var authorizationDecisionStatements = new System.IdentityModel.Tokens.SamlAuthorizationDecisionStatement(new System.IdentityModel.Tokens.SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject), Default.SamlResource, System.IdentityModel.Tokens.SamlAccessDecision.Permit, new List<System.IdentityModel.Tokens.SamlAction> { new System.IdentityModel.Tokens.SamlAction("Action") });
+                var samlAssertion_AuthorizationDecision = new System.IdentityModel.Tokens.SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), (token4x_AttributeStatement as System.IdentityModel.Tokens.SamlSecurityToken).Assertion.Conditions, null, new List<System.IdentityModel.Tokens.SamlStatement> { authorizationDecisionStatements });
+                var token4x_AuthorizationDecisionStatement = new System.IdentityModel.Tokens.SamlSecurityToken(samlAssertion_AuthorizationDecision);
 
                 return new TheoryData<ClaimsPrincipalTheoryData>
                 {
                     new ClaimsPrincipalTheoryData
                     {
-                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x),
+                        TestId = "AttributeStatement",
+                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AttributeStatement),
+                        TokenValidationParameters = new SharedTokenValidationParameters
+                        {
+                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
+                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                    },
+                    new ClaimsPrincipalTheoryData
+                    {
+                        TestId = "AuthenticationStatement",
+                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AuthenticationStatement),
+                        TokenValidationParameters = new SharedTokenValidationParameters
+                        {
+                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
+                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                    },
+                    new ClaimsPrincipalTheoryData
+                    {
+                        TestId = "AuthorizationDecisionStatement",
+                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AuthorizationDecisionStatement),
                         TokenValidationParameters = new SharedTokenValidationParameters
                         {
                             NameClaimType = ClaimsIdentity.DefaultNameClaimType,
@@ -154,6 +214,34 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                         X509Certificate = KeyingMaterial.DefaultCert_2048
                     }
                 };
+            }
+        }
+
+        private static ClaimsIdentity AuthenticationClaimsIdentity
+        {
+            get
+            {
+                var authorizationClaims = new List<Claim>
+                {
+                    Default.SamlClaims.Find(x => x.Type == ClaimTypes.NameIdentifier),
+                    new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                    new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+                };
+
+                return new ClaimsIdentity(authorizationClaims);
+            }
+        }
+
+        private static ClaimsIdentity AuthorizationDecisionClaimsIdentity
+        {
+            get
+            {
+                var authorizationDecisionClaims = new List<Claim>
+                {
+                    Default.SamlClaims.Find(x => x.Type == ClaimTypes.NameIdentifier)
+                };
+
+                return new ClaimsIdentity(authorizationDecisionClaims);
             }
         }
 
