@@ -666,7 +666,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get;
             set;
-        } = ReferenceXml.DefaultAADSigningKey;
+        } = KeyingMaterial.DefaultAADSigningKey;
 
         public Signature Signature
         {

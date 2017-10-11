@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     Xml = SignatureTestSet.DefaultSignature.Xml
                 });
 
-                var key = ReferenceXml.DefaultAADSigningKey;
+                var key = KeyingMaterial.DefaultAADSigningKey;
                 key.CryptoProviderFactory = new CustomCryptoProviderFactory();
                 theoryData.Add(new SignatureTheoryData
                 {
@@ -163,10 +163,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     Xml = SignatureTestSet.UnknownDigestAlgorithm.Xml
                 });
 
-                key = ReferenceXml.DefaultAADSigningKey;
+                key = KeyingMaterial.DefaultAADSigningKey;
                 key.CryptoProviderFactory = new CustomCryptoProviderFactory
                 {
-                    SignatureProvider = new CustomSignatureProvider(ReferenceXml.DefaultAADSigningKey, SecurityAlgorithms.RsaSha256)
+                    SignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultAADSigningKey, SecurityAlgorithms.RsaSha256)
                     {
                         VerifyResult = true,
                     },

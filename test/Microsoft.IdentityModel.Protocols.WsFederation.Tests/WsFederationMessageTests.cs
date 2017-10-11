@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         First = true,
                         TokenValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
                             ValidateIssuer = true,
                             ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
                             ValidateAudience = true,
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     {
                         TokenValidationParameters = new TokenValidationParameters
                         {
-                            IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
                             ValidateIssuer = true,
                             ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
                             ValidateAudience = true,

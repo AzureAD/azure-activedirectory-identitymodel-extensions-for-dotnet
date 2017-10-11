@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
-using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -496,6 +495,45 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)} IssuerSigningKey Rsa",
+                        Token = ReferenceTokens.SamlToken_Valid_WithRsaKeyValue,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultRsaSecurityKey1,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)} IssuerSigningKey JsonWithCertificate",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultJsonWebKeyWithCertificate1,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)} IssuerSigningKey JsonWithParameters",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultJsonWebKeyWithParameters1,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_Valid_Spaces_Added),
                         Token = ReferenceTokens.SamlToken_Valid_Spaces_Added,
                         ValidationParameters = new TokenValidationParameters
@@ -529,17 +567,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         }
                     },
                     // Removed until we have a way of matching a KeyInfo with a SecurityKey.
-                    //new SamlTheoryData
-                    //{
-                    //    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
-                    //    Handler = new SamlSecurityTokenHandler(),
-                    //    TestId = nameof(ReferenceTokens.SamlToken_Valid),
-                    //    Token = ReferenceTokens.SamlToken_Valid,
-                    //    ValidationParameters = new TokenValidationParameters
-                    //    {
-                    //        IssuerSigningKey = ReferenceXml.DefaultAADSigningKey,
-                    //    }
-                    //},
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.SamlToken_Valid),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                        }
+                    },
                     new SamlTheoryData
                     {
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),

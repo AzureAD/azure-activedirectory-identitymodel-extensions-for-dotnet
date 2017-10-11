@@ -145,28 +145,28 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     },
                     new EnvelopedSignatureTheoryData
                     {
-                        SecurityKey = ReferenceXml.DefaultAADSigningKey,
+                        SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed),
                         Xml = ReferenceXml.Saml2Token_Valid_Signed
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30019:"),
-                        SecurityKey = ReferenceXml.DefaultAADSigningKey,
+                        SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_TwoSignatures),
                         Xml = ReferenceXml.Saml2Token_TwoSignatures
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException)),
-                        SecurityKey = ReferenceXml.DefaultAADSigningKey,
+                        SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_SignatureNOTFormated),
                         Xml = ReferenceXml.Saml2Token_Valid_SignatureNOTFormated
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException)),
-                        SecurityKey = ReferenceXml.DefaultAADSigningKey,
+                        SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_Formated),
                         Xml = ReferenceXml.Saml2Token_Valid_Formated
                     }

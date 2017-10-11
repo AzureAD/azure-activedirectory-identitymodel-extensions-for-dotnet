@@ -32,6 +32,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -326,7 +328,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
 
-            //bool keyMatched = false;
+            bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
                 keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.SigningKey.KeyId, validationParameters);
@@ -336,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (key != null)
                 {
                     // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
-                    //keyMatched = true;
+                    keyMatched = true;
                     keys = new List<SecurityKey> { key };
                 }
             }
@@ -371,15 +373,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (key != null)
                 {
                     keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                // TODO: Figure out how to match signing key with KeyInfo without using Kid.
-                //    if (canMatchKey && !keyMatched && key.KeyId != null)
-                //        keyMatched = key.KeyId.Equals(samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal);
+                    if (canMatchKey && !keyMatched && key.KeyId != null)
+                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
                 }
             }
 
-            // if there was a key match with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
-            //if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
-            //    throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
+            //if there was a key match with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
+            if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
                 throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
@@ -420,21 +421,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
-            // TODO: Figure out how to match signing key with KeyInfo without using KeyId.
-            //if (samlToken.Assertion.Signature != null && samlToken.Assertion.Signature.KeyInfo != null && !string.IsNullOrEmpty(samlToken.Assertion.Signature.KeyInfo.Kid))
-            //{
-            //    if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
-            //        return validationParameters.IssuerSigningKey;
+            if (samlToken.Assertion?.Signature?.KeyInfo == null)
+                return null;
 
-            //    if (validationParameters.IssuerSigningKeys != null)
-            //    {
-            //        foreach (var key in validationParameters.IssuerSigningKeys)
-            //        {
-            //            if (key != null && string.Equals(key.KeyId, samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
-            //                return key;
-            //        }
-            //    }
-            //}
+            if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
+                return validationParameters.IssuerSigningKey;
+
+            if (validationParameters.IssuerSigningKeys != null)
+            {
+                foreach (var key in validationParameters.IssuerSigningKeys)
+                {
+                    if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(key))
+                        return key;
+                }
+            }
 
             return null;
         }

@@ -33,6 +33,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -844,21 +846,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (securityToken.Assertion == null)
                 throw LogArgumentNullException(nameof(securityToken.Assertion));
 
-            // TODO: Figure out how to match signingKey with KeyInfo without using Kid.
-            //if (securityToken.Assertion.Signature != null && securityToken.Assertion.Signature.KeyInfo != null && !string.IsNullOrEmpty(securityToken.Assertion.Signature.KeyInfo.Kid))
-            //{
-            //    if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, securityToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
-            //        return validationParameters.IssuerSigningKey;
+            if (securityToken.Assertion?.Signature?.KeyInfo == null)
+                return null;
 
-            //    if (validationParameters.IssuerSigningKeys != null)
-            //    {
-            //        foreach (var signingKey in validationParameters.IssuerSigningKeys)
-            //        {
-            //            if (signingKey != null && string.Equals(signingKey.KeyId, securityToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal))
-            //                return signingKey;
-            //        }
-            //    }
-            //}
+            if (securityToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
+                return validationParameters.IssuerSigningKey;
+
+            if (validationParameters.IssuerSigningKeys != null)
+            {
+                foreach (var key in validationParameters.IssuerSigningKeys)
+                {
+                    if (securityToken.Assertion.Signature.KeyInfo.MatchesKey(key))
+                        return key;
+                }
+            }
 
             return null;
         }
@@ -1072,7 +1073,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
                 throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
 
-            //bool keyMatched = false;
+            bool keyMatched = false;
             IEnumerable<SecurityKey> securityKeys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -1084,7 +1085,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (securityKey != null)
                 {
                     // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
-                    //keyMatched = true;
+                    keyMatched = true;
                     securityKeys = new List<SecurityKey> { securityKey };
                 }
             }
@@ -1119,15 +1120,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (securityKey != null)
                 {
                     keysAttempted.AppendLine(securityKey.ToString() + " , KeyId: " + securityKey.KeyId);
-                // TODO: Figure out how to match securityKey with KeyInfo without using Kid.
-                //  if (canMatchKey && !keyMatched && securityKey.KeyId != null)
-                //      keyMatched = securityKey.KeyId.Equals(samlToken.Assertion.Signature.KeyInfo.Kid, StringComparison.Ordinal);
+                    if (canMatchKey && !keyMatched && securityKey.KeyId != null)
+                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(securityKey);
                 }
             }
 
             // if there was a keymatch with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
-            //if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
-            //    throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
+            if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, samlToken)));
 
             if (keysAttempted.Length > 0)
                 throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
