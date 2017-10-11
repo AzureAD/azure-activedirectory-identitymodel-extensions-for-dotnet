@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22800:", typeof(FormatException)),
                         Metadata = ReferenceMetadata.MetadataMalformedCertificate,
                         TestId = nameof(ReferenceMetadata.MetadataMalformedCertificate)
                     },

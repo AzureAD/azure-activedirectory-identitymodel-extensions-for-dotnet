@@ -314,26 +314,33 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string Generate(KeyInfo keyInfo)
         {
-            var elements = new List<XmlEement>();
+            var str = "";
+            foreach (var data in keyInfo.X509Data)
+            {
+                // Make a new list of elements for each X509Data object
+                var elements = new List<XmlEement>();
+                foreach (var certificate in data.Certificates)
+                {
+                    elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509Certificate, certificate));
+                }
+                if (data.IssuerSerial != null)
+                {
+                    if (!string.IsNullOrEmpty(data.IssuerSerial.IssuerName))
+                        elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509IssuerName, data.IssuerSerial.IssuerName));
 
-            if (!string.IsNullOrEmpty(keyInfo.CertificateData))
-                elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509Certificate, keyInfo.CertificateData));
+                    if (!string.IsNullOrEmpty(data.IssuerSerial.SerialNumber))
+                        elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SerialNumber, data.IssuerSerial.SerialNumber));
+                }
+                if (!string.IsNullOrEmpty(data.SKI))
+                    elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SKI, data.SKI));
 
-            if (!string.IsNullOrEmpty(keyInfo.IssuerName))
-                elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509IssuerName, keyInfo.IssuerName));
+                if (!string.IsNullOrEmpty(data.SubjectName))
+                    elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SubjectName, data.SubjectName));
 
-            if (!string.IsNullOrEmpty(keyInfo.SerialNumber))
-                elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SerialNumber, keyInfo.SerialNumber));
+                str += XmlEement.Generate(new XmlEement(XmlSignatureConstants.Elements.X509Data, elements));
+            }
 
-            if (!string.IsNullOrEmpty(keyInfo.SKI))
-                elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SKI, keyInfo.SKI));
-
-            if (!string.IsNullOrEmpty(keyInfo.SubjectName))
-                elements.Add(new XmlEement(XmlSignatureConstants.Elements.X509SubjectName, keyInfo.SubjectName));
-
-            var str = string.Format(KeyInfoTemplate, XmlSignatureConstants.Namespace, XmlEement.Generate(new XmlEement(XmlSignatureConstants.Elements.X509Data, elements)));
-
-            return string.Format(KeyInfoTemplate, XmlSignatureConstants.Namespace, XmlEement.Generate(new XmlEement(XmlSignatureConstants.Elements.X509Data, elements)));
+            return string.Format(KeyInfoTemplate, XmlSignatureConstants.Namespace, str);
         }
 
         public static string Generate(Signature signature)

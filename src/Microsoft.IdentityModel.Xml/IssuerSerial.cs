@@ -30,45 +30,45 @@ using System;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// The RSAKeyValue found inside of the KeyValue element.
+    /// Represents the IssuerSerial property of X509Data as per:  https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data
     /// </summary>
-    public class RSAKeyValue
+    public class IssuerSerial
     {
         /// <summary>
-        /// The modulus of the RSAKeyValue.
+        /// Gets the IssuerName of the IssuerSerial.
         /// </summary>
-        public string Modulus { get; }
+        public string IssuerName { get; }
 
         /// <summary>
-        /// The exponent of the RSAKeyValue.
+        /// Gets the SerialNumber of the IssuerSerial.
         /// </summary>
-        public string Exponent { get; }
+        public string SerialNumber { get; }
 
         /// <summary>
-        /// Creates an RSAKeyValue using the specified modulus and exponent.
+        /// Creates an IssuerSerial using the specified IssuerName and SerialNumber.
         /// </summary>
-        public RSAKeyValue(string modulus, string exponent)
+        public IssuerSerial(string issuerName, string serialNumber)
         {
-            Modulus = modulus;
-            Exponent = exponent;
+            IssuerName = issuerName;
+            SerialNumber = serialNumber;
         }
 
         /// <summary>
-        /// Compares two RSAKeyValue objects.
+        /// Compares two IssuerSerial objects.
         /// </summary>
         public override bool Equals(object obj)
         {
-            var other = obj as RSAKeyValue;
+            var other = obj as IssuerSerial;
             if (other == null)
                 return false;
-            else if (string.Compare(Modulus, other.Modulus, StringComparison.OrdinalIgnoreCase) != 0
-                || string.Compare(Exponent, other.Exponent, StringComparison.OrdinalIgnoreCase) != 0)
-                    return false;
+            else if (string.Compare(IssuerName, other.IssuerName, StringComparison.OrdinalIgnoreCase) != 0
+                || string.Compare(SerialNumber, other.SerialNumber, StringComparison.OrdinalIgnoreCase) != 0)
+                return false;
             return true;
         }
 
         /// <summary>
-        /// Serves as a hash function for RSAKeyValue.
+        /// Serves as a hash function for IssuerSerial.
         /// </summary>
         public override int GetHashCode()
         {

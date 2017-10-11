@@ -39,22 +39,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             var type = typeof(KeyInfo);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 8, $"Number of properties has changed from 8 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 4, $"Number of properties has changed from 4 to: {properties.Length}, adjust tests");
 
+            var keyInfo = new KeyInfo();
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("CertificateData", new List<object>{(string)null, Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("IssuerName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("Kid", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("RetrievalMethodUri", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("RSAKeyValue", new List<object>{(RSAKeyValue)null, new RSAKeyValue(Guid.NewGuid().ToString(), Guid.NewGuid().ToString())}),
-                    new KeyValuePair<string, List<object>>("SerialNumber", new List<object>{(string)null, Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("SKI", new List<object>{(string)null, Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("SubjectName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("X509Data", new List<object>{keyInfo.X509Data, new List<X509Data>()}),
+                    new KeyValuePair<string, List<object>>("KeyName", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+
                 },
-                Object = new KeyInfo(),
+                Object = keyInfo
             };
 
             TestUtilities.GetSet(context);
