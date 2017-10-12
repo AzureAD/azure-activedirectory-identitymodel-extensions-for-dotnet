@@ -45,8 +45,10 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public class JwtSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
     {
-        private delegate bool CertMatcher(X509Certificate2 cert);
+        internal static Regex RegexJws;
+        internal static Regex RegexJwe;
 
+        private delegate bool CertMatcher(X509Certificate2 cert);
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private ISet<string> _inboundClaimFilter;
         private IDictionary<string, string> _inboundClaimTypeMap;
@@ -99,7 +101,10 @@ namespace System.IdentityModel.Tokens.Jwt
                  { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
                  { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
                  { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
-             };
+            };
+
+            RegexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
+            RegexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
         }
 
         /// <summary>
@@ -330,11 +335,11 @@ namespace System.IdentityModel.Tokens.Jwt
             string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                return Regex.IsMatch(token, JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+                return RegexJws.IsMatch(token);
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                return Regex.IsMatch(token, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+                return RegexJwe.IsMatch(token);
             }
 
             IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12720);
