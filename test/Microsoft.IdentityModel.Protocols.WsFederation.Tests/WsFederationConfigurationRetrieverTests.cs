@@ -116,6 +116,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
+                        Configuration = ReferenceMetadata.AADCommonEndpointWithEmptyElement,
+                        Metadata = ReferenceMetadata.AADCommonMetadataWithEmptyElement,
+                        TestId = nameof(ReferenceMetadata.AADCommonMetadataWithEmptyElement)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
                         Configuration = new WsFederationConfiguration
                         {
                             Issuer = ReferenceMetadata.Issuer,

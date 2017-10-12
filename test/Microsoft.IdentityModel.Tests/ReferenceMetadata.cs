@@ -251,6 +251,18 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static WsFederationConfiguration AADCommonEndpointWithEmptyElement
+        {
+            get
+            {
+                return new WsFederationConfiguration()
+                {
+                    Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/",
+                    TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed"
+                };
+            }
+        }
+
         public static WsFederationConfiguration AdfsV2Endpoint
         {
             get
@@ -721,6 +733,25 @@ namespace Microsoft.IdentityModel.Tests
                     <SingleSignOnService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"" Location=""https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/saml2"" />
                     <SingleSignOnService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/saml2"" />
                   </IDPSSODescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string AADCommonMetadataWithEmptyElement
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:PassiveRequestorEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+                        <wsa:Address>https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed</wsa:Address>
+                      </wsa:EndpointReference>
+                    </fed:PassiveRequestorEndpoint>
+                    <EmptyElement />
+                  </RoleDescriptor>
+                  <EmptyElement />
                 </EntityDescriptor>";
             }
         }
