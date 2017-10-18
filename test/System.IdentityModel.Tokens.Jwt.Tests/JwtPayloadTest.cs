@@ -175,6 +175,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Equal(payload.SerializeToJson(), compareTo);
         }
 
+        [Fact]
+        public void TestClaimWithLargeExpValue()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            jwtPayload.Add("exp", 1507680819080);
+            DateTime expirationTime = jwtPayload.ValidTo;
+            Assert.True(DateTime.MaxValue == expirationTime, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
+        }
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("PayloadDataSet")]
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
