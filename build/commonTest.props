@@ -5,7 +5,7 @@
   <PropertyGroup>
     <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
     <DelaySign>false</DelaySign>
-    <DotNetCoreAppRuntimeVersion>2.0.0-preview2-25301-07</DotNetCoreAppRuntimeVersion>
+    <DotNetCoreAppRuntimeVersion>2.0.0</DotNetCoreAppRuntimeVersion>
     <OutputTypeEx>library</OutputTypeEx>
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>

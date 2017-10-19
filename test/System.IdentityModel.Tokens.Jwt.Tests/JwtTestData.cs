@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Tests;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -218,7 +219,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 CanRead = true,
                 TestId = nameof(EncodedJwts.InvalidPayload),
                 Token = EncodedJwts.InvalidPayload,
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(FormatException))
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(JsonReaderException))
             });
 
             return theoryData;

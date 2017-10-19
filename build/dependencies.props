@@ -1,8 +1,7 @@
 <Project>
   <PropertyGroup>
     <CoreFxVersion>4.3.0</CoreFxVersion>
-    <JsonNetVersion>9.0.1</JsonNetVersion>
-    <RuntimeFrameworkVersion>2.0.0-*</RuntimeFrameworkVersion>
+    <JsonNetVersion>10.0.1</JsonNetVersion>
     <TestSdkVersion>15.0.0</TestSdkVersion>
     <XunitVersion>2.2.0</XunitVersion>
     <NetStandardVersion>1.6.0</NetStandardVersion>

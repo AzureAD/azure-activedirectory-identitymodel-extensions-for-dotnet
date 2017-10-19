@@ -32,6 +32,8 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>
@@ -39,9 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public class JwtSecurityTokenHandlerTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ActorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void Actor(JwtTheoryData theoryData)
         {
             var context = new CompareContext();
@@ -132,9 +132,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("BootstrapContextTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void BootstrapContext(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.BootstrapContext", theoryData);
@@ -200,7 +198,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(header.Alg == SecurityAlgorithms.Aes128Encryption);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory]
         [InlineData(SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256)]
         [InlineData(SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384)]
@@ -221,7 +218,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [InlineData(SecurityAlgorithms.RsaSha384, SecurityAlgorithms.RsaSha384)]
         [InlineData(SecurityAlgorithms.RsaSha512, SecurityAlgorithms.RsaSha512)]
         [InlineData(SecurityAlgorithms.Aes128Encryption, SecurityAlgorithms.Aes128Encryption)]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OutboundHeaderMappingCreateHeader(string outboundAlgorithm, string expectedValue)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -232,8 +228,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(header.Alg == expectedValue);
         }
 
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory]
         [InlineData(SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256)]
         [InlineData(SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384)]
@@ -244,7 +238,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [InlineData(SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256)]
         [InlineData(SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384)]
         [InlineData(SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512)]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void OutboundHeaderMappingCreateToken(string outboundAlgorithm, string expectedValue)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -464,9 +457,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadTimesExpressedAsDoublesTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadTimesExpressedAsDoubles(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadTimesExpressedAsDoubles", theoryData);
@@ -663,25 +654,24 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateTokenReplay(Default.AsymmetricJwt, new JwtSecurityTokenHandler(), Default.AsymmetricSignTokenValidationParameters);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SegmentTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SegmentRead(JwtTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.SegmentRead", theoryData);
             try
             {
                 theoryData.TokenHandler.ReadJwtToken(theoryData.Token);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SegmentTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SegmentCanRead(JwtTheoryData theoryData)
         {
             Assert.Equal(theoryData.CanRead, theoryData.TokenHandler.CanReadToken(theoryData.Token));
@@ -699,9 +689,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateAudienceTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateAudience(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -848,9 +836,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateIssuerTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateIssuer(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
@@ -941,10 +927,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("TokenReplayValidationTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void TokenReplayValidation(TokenReplayTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.TokenReplayValidation", theoryData);
@@ -1001,9 +984,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateLifetimeTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateLifetime(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateLifetime", theoryData);
@@ -1059,9 +1040,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateSignatureTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateSignature(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateSignature", theoryData);
@@ -1237,9 +1216,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ValidateTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ValidateToken(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -1319,9 +1296,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(WriteTokenTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void WriteToken(JwtTheoryData theoryData)
         {
             try
@@ -1446,9 +1421,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(KeyWrapTokenTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void KeyWrapTokenTest(KeyWrapTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.KeyWrapTokenTest", theoryData);
@@ -1514,9 +1487,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(ParametersCheckTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ParametersCheckTest(ParametersCheckTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ParametersCheckTest", theoryData);
@@ -1578,4 +1549,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public JwtSecurityToken token { get; set; } = new JwtSecurityToken();
         public TokenValidationParameters validationParameters { get; set; } = new TokenValidationParameters();
     }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
