@@ -31,6 +31,8 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenTests
@@ -136,9 +138,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(EmbeddedTokenConstructorData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void EmbeddedTokenConstructor1(string testId, JwtSecurityTokenTestVariation outerTokenVariation, JwtSecurityTokenTestVariation innerTokenVariation, string jwt, ExpectedException ee)
         {
             JwtSecurityToken outerJwt = null;
@@ -392,22 +392,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: variation.Expires);
         }
 
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(JwtSegmentTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void JwtSegment(JwtTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.JwtSegment", theoryData);
             try
             {
                 var jwtToken = new JwtSecurityToken(theoryData.Token);
-                theoryData.ExpectedException.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, theoryData.TestId);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<JwtTheoryData> JwtSegmentTheoryData
@@ -426,4 +426,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         }
     }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 }
