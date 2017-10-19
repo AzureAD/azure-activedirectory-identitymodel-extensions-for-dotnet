@@ -74,6 +74,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         internal const string IDX11133 = "IDX11133: The <saml:Evidence> element must contain at least one assertion or assertion reference.";
         internal const string IDX11134 = "IDX11134: Unable to read SamlSecurityToken. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX11135 = "IDX11135: Unable to read SamlSecurityToken. Saml element '{0}' must have value.";
+        internal const string IDX11136 = "IDX11136: 'AuthorizationDecisionStatement' cannot be empty.";
+        internal const string IDX11137 = "IDX11137: 'SamlAction' must have a value.";
+        internal const string IDX11138 = "IDX11138: 'SamlSubject' requires a 'NameIdentifier' or 'SubjectConfirmation'.";
 
         // Saml writting
         internal const string IDX11501 = "IDX11501: SamlAssertion Id cannot be null or empty.";

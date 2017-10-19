@@ -79,6 +79,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13139 = "IDX13139: Uri must be an AbsoluteUri is: '{0}'";
         internal const string IDX13140 = "IDX13140: EncryptedId is not supported. You will need to override ReadEncryptedId and provide support.";
         internal const string IDX13141 = "IDX13141: EncryptedAssertion is not supported. You will need to override ReadAssertion and provide support.";
+        internal const string IDX13311 = "IDX13311: 'Saml2Action' must have a value.";
+        internal const string IDX13313 = "IDX13313: 'AuthnStatement' cannot be empty.";
+        internal const string IDX13312 = "IDX13312: 'AuthnContext' cannot be empty.";
+        internal const string IDX13314 = "IDX13314: 'AuthzDecisionStatement' cannot be empty (must have at least one 'Subject').";
 
         // Saml2SecurityTokenHandler writing
         internal const string IDX13142 = "IDX13142: A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -119,6 +120,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     KeyInfoTest(KeyInfoTestSet.WithAllElements),
                     KeyInfoTest(KeyInfoTestSet.WithUnknownElements),
                     KeyInfoTest(KeyInfoTestSet.WrongNamespace, new ExpectedException(typeof(XmlReadException), "IDX30011:")),
+                    KeyInfoTest(KeyInfoTestSet.KeyInfoEmpty),
+                    KeyInfoTest(KeyInfoTestSet.X509DataEmpty, new ExpectedException(typeof(XmlReadException), "IDX30108")),
+                    KeyInfoTest(KeyInfoTestSet.IssuerSerialEmpty, new ExpectedException(typeof(XmlReadException), "IDX30011:")),
+                    KeyInfoTest(KeyInfoTestSet.RSAKeyValueEmpty, new ExpectedException(typeof(XmlReadException), "IDX30011:"))
+
                 };
             }
         }
@@ -175,7 +181,9 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     SignatureTest(SignatureTestSet.DefaultSignature, null, true),
                     SignatureTest(SignatureTestSet.UnknownDigestAlgorithm),
-                    SignatureTest(SignatureTestSet.UnknownSignatureAlgorithm)
+                    SignatureTest(SignatureTestSet.UnknownSignatureAlgorithm),
+                    SignatureTest(SignatureTestSet.EmptySignature,
+                    new ExpectedException(typeof(XmlReadException), "IDX30022:")),
                 };
             }
         }
@@ -216,7 +224,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             get
             {
                 // uncomment to view exception displayed to user
-                // ExpectedException.DefaultVerbose = true;
+                 ExpectedException.DefaultVerbose = true;
 
                 return new TheoryData<DSigSerializerTheoryData>
                 {
@@ -235,7 +243,9 @@ namespace Microsoft.IdentityModel.Xml.Tests
                         new ExpectedException(typeof(XmlReadException), "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: 'http://www.w3.org/2000/09/xmldsig#.Reference'")),
                     SignedInfoTest(SignedInfoTestSet.ReferenceDigestValueNotBase64),
                     SignedInfoTest(SignedInfoTestSet.UnknownReferenceTransform),
-                    SignedInfoTest(SignedInfoTestSet.Valid)
+                    SignedInfoTest(SignedInfoTestSet.Valid),
+                    SignedInfoTest(SignedInfoTestSet.SignedInfoEmpty,
+                    new ExpectedException(typeof(XmlReadException), "IDX30022:"))
                 };
             }
         }
@@ -247,6 +257,52 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
                 First = first,
                 SignedInfo = testSet.SignedInfo,
+                TestId = testSet.TestId ?? nameof(testSet),
+                Xml = testSet.Xml,
+            };
+        }
+
+        [Theory, MemberData("ReadReferenceTheoryData")]
+        public void ReadReference(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ReadReference", theoryData);
+            var context = new CompareContext($"{this}.ReadReference, {theoryData.TestId}");
+            try
+            {
+                var reference = theoryData.Serializer.ReadReference(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(reference, theoryData.Reference, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> ReadReferenceTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                //ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<DSigSerializerTheoryData>
+                {
+                    ReferenceTest(ReferenceTestSet.ReferenceEmpty,
+                    new ExpectedException(typeof(XmlReadException), "IDX30022:"))
+                };
+            }
+        }
+
+        public static DSigSerializerTheoryData ReferenceTest(ReferenceTestSet testSet, ExpectedException expectedException = null, bool first = false)
+        {
+            return new DSigSerializerTheoryData
+            {
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+                First = first,
+                Reference = testSet.Reference,
                 TestId = testSet.TestId ?? nameof(testSet),
                 Xml = testSet.Xml,
             };
@@ -307,6 +363,52 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 Xml = testSet.Xml,
             };
         }
+
+        [Theory, MemberData("ReadTransformsTheoryData")]
+        public void ReadTransforms(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ReadTransforms", theoryData);
+            var context = new CompareContext($"{this}.ReadTransforms, {theoryData.TestId}");
+            try
+            {
+                var transforms = theoryData.Serializer.ReadTransforms(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(transforms, theoryData.Transforms, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> ReadTransformsTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<DSigSerializerTheoryData>
+                {
+                    TransformsTest(TransformsTestSet.TransformsEmpty)
+                };
+            }
+        }
+
+        public static DSigSerializerTheoryData TransformsTest(TransformsTestSet testSet, ExpectedException expectedException = null, bool first = false)
+        {
+            return new DSigSerializerTheoryData
+            {
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+                First = first,
+                TestId = testSet.TestId ?? nameof(testSet),
+                Transforms = testSet.Transforms,
+                Xml = testSet.Xml,
+            };
+        }
+
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
@@ -372,12 +474,24 @@ namespace Microsoft.IdentityModel.Xml.Tests
             set;
         }
 
+        public Reference Reference
+        {
+            get;
+            set;
+        }
+
         public override string ToString()
         {
             return $"'{TestId}', '{ExpectedException}'";
         }
 
         public string Transform
+        {
+            get;
+            set;
+        }
+
+        public IList<string> Transforms
         {
             get;
             set;

@@ -221,12 +221,12 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509IssuerName, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.X509IssuerName, reader.NamespaceURI, reader.LocalName);
 
             var issuerName = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.X509SerialNumber, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.X509SerialNumber, reader.NamespaceURI, reader.LocalName);
 
             var serialNumber = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace);
 
@@ -244,12 +244,12 @@ namespace Microsoft.IdentityModel.Xml
             reader.ReadStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.Modulus, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Modulus, reader.NamespaceURI, reader.LocalName);
 
             string modulus = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace);
 
             if (!reader.IsStartElement(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace))
-                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Elements.Exponent, reader.LocalName);
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, XmlSignatureConstants.Namespace, XmlSignatureConstants.Elements.Exponent, reader.NamespaceURI, reader.LocalName);
 
             string exponent = reader.ReadElementContentAsString(XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace);
 

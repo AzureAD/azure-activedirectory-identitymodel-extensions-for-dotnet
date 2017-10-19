@@ -518,6 +518,24 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static string EmptyEntityDescriptorMetadata = @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/""/>";
+
+        public static string EmptyKeyDescriptor = @"<KeyDescriptor use=""signing"" xmlns=""urn:oasis:names:tc:SAML:2.0:metadata""/>";
+
+        public static string EmptyRoleDescriptor = @"<RoleDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706""/>";
+
+        public static string EmptyPassiveRequestorEndpoint = @"<PassiveRequestorEndpoint xmlns=""http://docs.oasis-open.org/wsfed/federation/200706""/>";
+
+        public static string EndpointWithEmptyEndpointReference = @"<PassiveRequestorEndpoint xmlns=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing""/>
+                    </PassiveRequestorEndpoint>";
+
+        public static string EndpointWithEmptyAddress = @"<PassiveRequestorEndpoint xmlns=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+                        <wsa:Address/>
+                      </wsa:EndpointReference>
+                    </PassiveRequestorEndpoint>";
+
         public static string AADCommonMetadataFormated
         {
             get

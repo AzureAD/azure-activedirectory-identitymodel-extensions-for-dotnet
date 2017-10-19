@@ -118,6 +118,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(Saml2SecurityTokenHandler).ToString(), CompareAllPublicProperties },
 #endif
                 { typeof(SamlStatement).ToString(), CompareAllPublicProperties },
+                { typeof(SamlSubject).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenHandler).ToString(), CompareAllPublicProperties},

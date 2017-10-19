@@ -44,12 +44,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         }
 
+        public string Xml { get; set; }
+
+        public Saml2Action Action { get; set; }
+
+        public Saml2Advice Advice { get; set; }
+
+        public Saml2Assertion Assertion { get; set; }
+
+        public Saml2Attribute Attribute { get; set; }
+
+        public Saml2AttributeStatement AttributeStatement { get; set; }
+
+        public Saml2AudienceRestriction AudienceRestriction { get; set; }
+
+        public Saml2AuthenticationStatement AuthenticationStatement { get; set; }
+
+        public Saml2AuthorizationDecisionStatement AuthorizationDecision { get; set; }
+
+        public Saml2Subject Subject { get; set; }
+
+        public Saml2Conditions Conditions{ get; set; }
+
+        public Saml2Evidence Evidence { get; set; }
+
         public List<Saml2Attribute> Attributes { get; set; }
 
         public List<Saml2Attribute> ConsolidatedAttributes { get; set; }
 
         public Saml2SecurityTokenHandler Handler { get; set; } = new Saml2SecurityTokenHandlerPublic();
 
-        public Saml2Serializer SamlSerializer { get; set; }
+        public Saml2Serializer Saml2Serializer { get; set; } = new Saml2Serializer();
     }
 }
