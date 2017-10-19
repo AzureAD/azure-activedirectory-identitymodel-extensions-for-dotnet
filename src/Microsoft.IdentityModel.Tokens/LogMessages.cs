@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Log messages and codes
     /// </summary>
-    public static class LogMessages
+    internal static class LogMessages
     {
 #pragma warning disable 1591
         // general
