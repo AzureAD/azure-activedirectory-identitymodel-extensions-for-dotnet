@@ -85,11 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
-#if NETSTANDARD1_4
-                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
-#else
-                            _privateKey = _certificate.PrivateKey;
-#endif
+                            _privateKey = RunTimeMethodResolver.GetPrivateKey(_certificate);
                             _privateKeyAvailabilityDetermined = true;
                         }
                     }
@@ -112,11 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-#if NETSTANDARD1_4
-                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(_certificate);
-#else
-                            _publicKey = _certificate.PublicKey.Key;
-#endif
+                            _publicKey = RunTimeMethodResolver.GetPublicKey(_certificate);
                         }
                     }
                 }

@@ -140,6 +140,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        private void SignatureProviders_Sign_Exception(SecurityKey key, string algorithm, byte[] rawBytes)
+        {
+            try
+            {
+                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(key, algorithm);
+                provider.Sign(rawBytes);
+                Assert.True(false, "should throw an exception");
+            }
+            catch (TargetInvocationException)
+            {
+            }
+            catch (CryptographicException)
+            {
+            }
+            catch (Exception ex)
+            {
+                Assert.True(false, string.Format("Unexpected exception of type '{0}' caught: '{1}", ex.GetType(), ex.Message));
+            }
+        }
+
         [Fact]
         public void SignatureProviders_Sign()
         {
@@ -157,27 +177,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
 
 #if NETSTANDARD1_4
-            AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.NoExceptionExpected, errors);
-            Assert.ThrowsAny<CryptographicException>(() =>
-            {
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-                provider.Sign(rawBytes);
-            });
+            SignatureProviders_Sign_Exception(KeyingMaterial.RsaSecurityKeyWithCngProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes);
 #endif
 
 #if NET452
-            // since the actual exception thrown is private - WindowsCryptographicException, using this pattern to match the derived exception
-            Assert.ThrowsAny<CryptographicException>(() =>
-            {
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-                provider.Sign(rawBytes);
-            });
-
-            Assert.ThrowsAny<CryptographicException>(() =>
-            {
-                AsymmetricSignatureProvider provider = new AsymmetricSignatureProvider(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256);
-                provider.Sign(rawBytes);
-            });
+            SignatureProviders_Sign_Exception(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes);
+            SignatureProviders_Sign_Exception(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256, rawBytes);
 #endif
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature, rawBytes, ExpectedException.InvalidOperationException("IDX10638:"), errors);
             AsymmetricSignatureProvidersSignVariation(KeyingMaterial.RsaSecurityKey_2048, "NOT_SUPPORTED", rawBytes, ExpectedException.NotSupportedException("IDX10634:"), errors);

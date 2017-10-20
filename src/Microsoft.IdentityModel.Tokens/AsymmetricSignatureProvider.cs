@@ -37,16 +37,15 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class AsymmetricSignatureProvider : SignatureProvider
     {
-#if NETSTANDARD1_4
         private ECDsa _ecdsa;
-        private HashAlgorithmName _hashAlgorithm;
         private RSA _rsa;
-#else
-        private ECDsaCng _ecdsa;
-        private string _hashAlgorithm;
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
+
+#if (NET45 || NET451)
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #endif
+
+        private string _hashAlgorithm;
+
         private bool _disposeRsa;
         private bool _disposeEcdsa;
         private bool _disposed;
@@ -167,73 +166,6 @@ namespace Microsoft.IdentityModel.Tokens
             return PrivateKeyStatus.Unknown;
         }
 
-#if NETSTANDARD1_4
-        /// <summary>
-        /// Returns the <see cref="HashAlgorithmName"/> instance.
-        /// </summary>
-        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
-        protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
-        {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
-
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha256Signature:
-                    return HashAlgorithmName.SHA256;
-
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha384Signature:
-                    return HashAlgorithmName.SHA384;
-
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha512Signature:
-                    return HashAlgorithmName.SHA512;
-            }
-
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
-        }
-
-        private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
-        {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
-
-            _hashAlgorithm = GetHashAlgorithmName(algorithm);
-            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (rsaAlgorithm != null)
-            {
-                if (rsaAlgorithm.rsa != null)
-                {
-                    _rsa = rsaAlgorithm.rsa;
-                    _disposeRsa = rsaAlgorithm.dispose;
-                    return;
-                }
-
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
-            }
-
-            var ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
-            {
-                _ecdsa = ecdsaAlgorithm.ecdsa;
-                _disposeEcdsa = ecdsaAlgorithm.dispose;
-                return;
-            }
-
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
-        }
-#else
         /// <summary>
         /// Returns the algorithm name.
         /// </summary>
@@ -276,18 +208,26 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException("algorithm");
 
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
-            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
+            RsaAlgorithm rsaAlgorithm = RsaAlgorithm.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
             if (rsaAlgorithm != null)
             {
-                if (rsaAlgorithm.rsaCryptoServiceProvider != null)
+#if (NET45 || NET451)
+                if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
                 {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
+                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
-                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
+                if (rsaAlgorithm.rsa != null && rsaAlgorithm.rsa as RSACryptoServiceProvider != null)
                 {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
+                    _rsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaAlgorithm.rsa as RSACryptoServiceProvider);
+                    _disposeRsa = rsaAlgorithm.dispose;
+                    return;
+                }
+#endif
+                if (rsaAlgorithm.rsa != null)
+                {
+                    _rsa = rsaAlgorithm.rsa;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
@@ -295,18 +235,27 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
             }
 
-            ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
+            ECDsaAlgorithm ecdsaAlgorithm = ECDsaAlgorithm.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
+
+#if (NET45 || NET451)
             if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsaCng != null)
             {
                 _ecdsa = ecdsaAlgorithm.ecdsaCng;
-                _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
+                (_ecdsa as ECDsaCng).HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
                 _disposeEcdsa = ecdsaAlgorithm.dispose;
                 return;
             }
+#else
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
+            {
+                _ecdsa = ecdsaAlgorithm.ecdsa;
+                _disposeEcdsa = ecdsaAlgorithm.dispose;
+                return;
+            }
+#endif
 
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
         }
-#endif
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.
@@ -326,19 +275,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
             if (_rsa != null)
-                return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                return RunTimeMethodResolver.SignData(_rsa, input, _hashAlgorithm);
             else if (_ecdsa != null)
-                return _ecdsa.SignData(input, _hashAlgorithm);
-#else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
+                return RunTimeMethodResolver.SignData(_ecdsa, input, _hashAlgorithm);
+#if (NET45 || NET451)
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
-            else if (_ecdsa != null)
-                return _ecdsa.SignData(input);
 #endif
+
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, _hashAlgorithm)));
         }
 
@@ -366,19 +311,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
             if (_rsa != null)
-                return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                return RunTimeMethodResolver.VerifyData(_rsa, input, signature, _hashAlgorithm);
             else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
-#else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
+                return RunTimeMethodResolver.VerifyData(_ecdsa, input, signature, _hashAlgorithm);
+#if (NET45 || NET451)
             else if (_rsaCryptoServiceProviderProxy != null)
                 return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
-            else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature);
 #endif
+
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
@@ -412,20 +353,53 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (disposing)
                 {
-#if NETSTANDARD1_4
-                    if (_rsa != null && _disposeRsa)
-                        _rsa.Dispose();
-#else
-                    if (_rsaCryptoServiceProvider != null && _disposeRsa)
-                        _rsaCryptoServiceProvider.Dispose();
-
+#if (NET45 || NET451)
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
 #endif
+                    if (_rsa != null && _disposeRsa)
+                        _rsa.Dispose();
+
                     if (_ecdsa != null && _disposeEcdsa)
                         _ecdsa.Dispose();
                 }
             }
         }
+
+        // keep the following api to avoid breaking change
+#if NETSTANDARD1_4
+        /// <summary>
+        /// Returns the <see cref="HashAlgorithmName"/> instance.
+        /// </summary>
+        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
+        protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException("algorithm");
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha256Signature:
+                    return HashAlgorithmName.SHA256;
+
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha384Signature:
+                    return HashAlgorithmName.SHA384;
+
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSha512Signature:
+                    return HashAlgorithmName.SHA512;
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+        }
+#endif
     }
 }

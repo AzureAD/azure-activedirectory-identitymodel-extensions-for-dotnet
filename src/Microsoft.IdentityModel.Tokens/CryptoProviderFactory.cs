@@ -142,13 +142,8 @@ namespace Microsoft.IdentityModel.Tokens
                 X509SecurityKey x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
-#if NETSTANDARD1_4
-                    if (x509Key.PublicKey as RSA == null)
+                    if (x509Key.PublicKey == null)
                         return false;
-#else
-                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                    return false;
-#endif
                 }
 
                 var jsonWebKey = key as JsonWebKey;
@@ -178,13 +173,9 @@ namespace Microsoft.IdentityModel.Tokens
             var x509Key = key as X509SecurityKey;
             if (x509Key != null)
             {
-#if NETSTANDARD1_4
-                if (x509Key.PublicKey as RSA == null)
+                if (x509Key.PublicKey == null)
                     return false;
-#else
-                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                    return false;
-#endif
+
                 return IsRsaAlgorithmSupported(algorithm);
             }
 
