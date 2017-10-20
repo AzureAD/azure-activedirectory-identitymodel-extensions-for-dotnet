@@ -98,6 +98,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             public const string EntityId = "entityID";
             public const string Id = "ID";
+            public const string ProtocolSupportEnumeration = "protocolSupportEnumeration";
             public const string Type = "type";
             public const string Use = "use";
         }

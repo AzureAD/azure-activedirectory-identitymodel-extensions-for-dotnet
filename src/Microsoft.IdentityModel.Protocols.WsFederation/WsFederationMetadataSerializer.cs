@@ -321,6 +321,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             writer.WriteAttributeString(Xmlns, Prefixes.Xsi, null, XmlSignatureConstants.XmlSchemaNamespace);
             writer.WriteAttributeString(Xmlns, Prefixes.Fed, null, Namespaces.FederationNamespace);
             writer.WriteAttributeString(Prefixes.Xsi, Attributes.Type, null, Prefixes.Fed + ":" + Types.SecurityTokenServiceType);
+            writer.WriteAttributeString(Attributes.ProtocolSupportEnumeration, Namespaces.FederationNamespace);
 
             // write the key infos
             if (configuration.KeyInfos != null)

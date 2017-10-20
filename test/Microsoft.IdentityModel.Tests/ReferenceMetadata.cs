@@ -332,6 +332,22 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static WsFederationConfiguration EmptyEntityDescriptor
+        {
+            get => new WsFederationConfiguration
+            {
+                Issuer = "https://DevIDPServer/sts"
+            };
+        }
+
+        public static WsFederationConfiguration NoRoleDescriptor
+        {
+            get => new WsFederationConfiguration
+            {
+                Issuer = "https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"
+            };
+        }
+
         public static Reference AADCommonReference
         {
             get
@@ -721,6 +737,56 @@ namespace Microsoft.IdentityModel.Tests
                     <SingleSignOnService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"" Location=""https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/saml2"" />
                     <SingleSignOnService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/saml2"" />
                   </IDPSSODescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptyEntityDescriptor
+        {
+            get => @"<?xml version=""1.0""?><md:EntityDescriptor xmlns:md=""urn:oasis:names:tc:SAML:2.0:metadata"" entityID=""https://DevIDPServer/sts""/>";
+        }
+
+        public static string MetadataEmptyPassiveRequestorEndpoint
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:PassiveRequestorEndpoint />
+                  </RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptyEndpointReference
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:PassiveRequestorEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"" />
+                    </fed:PassiveRequestorEndpoint>
+                  </_RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptyEndpointAddress
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:PassiveRequestorEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+                        <wsa:Address />
+                      </wsa:EndpointReference>
+                    </fed:PassiveRequestorEndpoint>
+                  </RoleDescriptor>
                 </EntityDescriptor>";
             }
         }

@@ -36,15 +36,13 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     /// <summary>
     /// WsFed metadata reading tests.
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadMetadataTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
             var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
@@ -93,6 +91,30 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         Metadata = ReferenceMetadata.AADCommonMetadata,
                         SigingKey = ReferenceMetadata.MetadataSigningKey,
                         TestId = nameof(ReferenceMetadata.AADCommonMetadata)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        Configuration = ReferenceMetadata.EmptyEntityDescriptor,
+                        Metadata = ReferenceMetadata.MetadataEmptyEntityDescriptor,
+                        TestId = nameof(ReferenceMetadata.MetadataEmptyEntityDescriptor)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        Metadata = ReferenceMetadata.MetadataEmptyPassiveRequestorEndpoint,
+                        TestId = nameof(ReferenceMetadata.MetadataEmptyPassiveRequestorEndpoint)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        Metadata = ReferenceMetadata.MetadataEmptyEndpointAddress,
+                        TestId = nameof(ReferenceMetadata.MetadataEmptyEndpointAddress)
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        Metadata = ReferenceMetadata.MetadataEmptyEndpointReference,
+                        TestId = nameof(ReferenceMetadata.MetadataEmptyEndpointReference)
                     },
                     new WsFederationMetadataTheoryData
                     {
@@ -162,7 +184,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22804:"),
+                        Configuration = ReferenceMetadata.NoRoleDescriptor,
                         Metadata = ReferenceMetadata.MetadataNoRoleDescriptor,
                         TestId = nameof(ReferenceMetadata.MetadataNoRoleDescriptor)
                     },
@@ -239,9 +261,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadEntityDescriptorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadEntityDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadEntityDescriptor", theoryData);
@@ -273,9 +293,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadKeyDescriptorForSigningTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadKeyDescriptorForSigning(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigning", theoryData);
@@ -307,9 +325,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadKeyDescriptorForSigningKeyUseTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadKeyDescriptorForSigningKeyUse(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningKeyUse", theoryData);
@@ -348,9 +364,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadSecurityTokenServiceTypeRoleDescriptorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenServiceTypeRoleDescriptor", theoryData);
@@ -382,9 +396,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("ReadSecurityTokenEndpointTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void ReadSecurityTokenEndpoint(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
@@ -416,9 +428,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData("WriteMetadataTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void WriteMetadata(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteMetadata", theoryData);
@@ -554,4 +564,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
     }
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
