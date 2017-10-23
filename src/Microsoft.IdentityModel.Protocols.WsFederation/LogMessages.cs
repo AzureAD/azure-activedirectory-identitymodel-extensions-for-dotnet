@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX22809 = "IDX22809: The expected value for attribute '{0}' is '{1}', but the current one is '{2}'.";
         internal const string IDX22810 = "IDX22810: 'Issuer' value is missing in wsfederationconfiguration.";
         internal const string IDX22811 = "IDX22811: 'TokenEndpoint' value is missing in wsfederationconfiguration.";
+        internal const string IDX22812 = "IDX22812: Element: '{0}' was an empty element. 'TokenEndpoint' value is missing in wsfederationconfiguration.";
 
 #pragma warning restore 1591
     }

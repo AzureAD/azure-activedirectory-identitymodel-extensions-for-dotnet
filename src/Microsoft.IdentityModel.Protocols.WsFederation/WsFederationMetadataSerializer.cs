@@ -97,17 +97,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             configuration.Issuer = issuer;
 
             // <EntityDescriptor>
+            bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
-
-            // flag for the existence of SecurityTokenSeviceType RoleDescriptor
-            var hasSecurityTokenServiceTypeRoleDescriptor = false;
 
             while (reader.IsStartElement())
             {
                 if (IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 {
-                    hasSecurityTokenServiceTypeRoleDescriptor = true;
-                    var roleDescriptor = ReadSecurityTokenServiceTypeRoleDescriptor(reader);
+                     var roleDescriptor = ReadSecurityTokenServiceTypeRoleDescriptor(reader);
                     foreach(var keyInfo in roleDescriptor.KeyInfos)
                     {
                         configuration.KeyInfos.Add(keyInfo);
@@ -132,11 +129,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // </EntityDescriptor>
-            reader.ReadEndElement();
-
-            // The metadata xml should contain a SecurityTokenServiceType RoleDescriptor
-            if (!hasSecurityTokenServiceTypeRoleDescriptor)
-                throw XmlUtil.LogReadException(LogMessages.IDX22804);
+            if (!isEmptyElement)
+                reader.ReadEndElement();
 
             return configuration;
         }
@@ -188,8 +182,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             var roleDescriptor = new SecurityTokenServiceTypeRoleDescriptor();
 
-            // <RoleDescriptorr>
+            // <RoleDescriptor>
+            bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
+
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace) && reader.GetAttribute(Attributes.Use).Equals(keyUse.Signing))
@@ -200,8 +196,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     reader.ReadOuterXml();
             }
 
-            // </RoleDescriptorr>
-            reader.ReadEndElement();
+            // </RoleDescriptor>
+            if (!isEmptyElement)
+                reader.ReadEndElement();
 
             if (roleDescriptor.KeyInfos.Count == 0)
                 Logger.WriteWarning(LogMessages.IDX22806);
@@ -223,14 +220,23 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             XmlUtil.CheckReaderOnEntry(reader, Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
 
             // <PassiveRequestorEndpoint>
+            if (reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX22812, Elements.PassiveRequestorEndpoint);
+
             reader.ReadStartElement();
             reader.MoveToContent();
 
             XmlUtil.CheckReaderOnEntry(reader, Elements.EndpointReference, Namespaces.AddressingNamspace);
+            if (reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX22812, Elements.EndpointReference);
+
             reader.ReadStartElement(Elements.EndpointReference, Namespaces.AddressingNamspace);  // EndpointReference
             reader.MoveToContent();
 
             XmlUtil.CheckReaderOnEntry(reader, Elements.Address, Namespaces.AddressingNamspace);
+            if (reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX22812, Elements.Address);
+
             reader.ReadStartElement(Elements.Address, Namespaces.AddressingNamspace);  // Address
             reader.MoveToContent();
 
