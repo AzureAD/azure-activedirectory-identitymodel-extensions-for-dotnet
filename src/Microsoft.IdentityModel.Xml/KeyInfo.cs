@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (rsaKey.Parameters.Equals(default(RSAParameters)))
                     rsaParameters = rsaKey.Rsa.ExportParameters(false);
         
-                RSAKeyValue = new RSAKeyValue(Base64UrlEncoder.Encode(rsaParameters.Modulus), Base64UrlEncoder.Encode(rsaParameters.Exponent));
+                RSAKeyValue = new RSAKeyValue(Convert.ToBase64String(rsaParameters.Modulus), Convert.ToBase64String(rsaParameters.Exponent));
             }
         }
 
@@ -140,5 +140,82 @@ namespace Microsoft.IdentityModel.Xml
             return base.GetHashCode();
         }
 
+        /// <summary>
+        /// Returns true if the KeyInfo object can be matched with the specified SecurityKey, returns false otherwise.
+        /// </summary>
+        internal bool MatchesKey(SecurityKey key)
+        {
+            if (key is X509SecurityKey x509SecurityKey)
+            {
+                return Matches(x509SecurityKey);
+            }
+            else if (key is RsaSecurityKey rsaSecurityKey)
+            {
+                return Matches(rsaSecurityKey);
+            }
+            else if (key is JsonWebKey jsonWebKey)
+            {
+                return Matches(jsonWebKey);
+            }
+
+            return false;
+        }
+
+        private bool Matches(X509SecurityKey key)
+        {
+            foreach (var data in X509Data)
+            {
+                foreach (var certificate in data.Certificates)
+                {
+                    var cert = new X509Certificate2(Convert.FromBase64String(certificate));
+                    if (cert.Equals(key.Certificate))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool Matches(RsaSecurityKey key)
+        {
+            if (!key.Parameters.Equals(default(RSAParameters)))
+            {
+                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(key.Parameters.Exponent))
+                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(key.Parameters.Modulus)));
+            }
+            else if (key.Rsa != null)
+            {
+                var parameters = key.Rsa.ExportParameters(false);
+                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(parameters.Exponent))
+                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(parameters.Modulus)));
+            }
+
+            return false;
+        }
+
+        private bool Matches(JsonWebKey key)
+        {
+            if (RSAKeyValue != null)
+            {
+                return (RSAKeyValue.Exponent.Equals(Convert.FromBase64String(key.E))
+                        && RSAKeyValue.Modulus.Equals(Convert.FromBase64String(key.N)));
+            }
+
+            foreach (var x5c in key.X5c)
+            {
+                var certToMatch = new X509Certificate2(Convert.FromBase64String(x5c));
+                foreach (var data in X509Data)
+                {
+                    foreach (var certificate in data.Certificates)
+                    {
+                        var cert = new X509Certificate2(Convert.FromBase64String(certificate));
+                        if (cert.Equals(certToMatch))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }
