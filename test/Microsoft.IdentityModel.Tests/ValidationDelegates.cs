@@ -112,6 +112,26 @@ namespace Microsoft.IdentityModel.Tests
             throw new SecurityTokenInvalidSignatureException("SignatureValidatorThrows");
         }
 
+        public static SecurityToken TokenReaderReturnsJwtSecurityToken(string token, TokenValidationParameters validationParameters)
+        {
+            return new JwtSecurityToken(token);
+        }
+
+        public static SecurityToken TokenReaderReturnsIncorrectSecurityTokenType(string token, TokenValidationParameters validationParameters)
+        {
+            return new CustomSecurityToken();
+        }
+
+        public static SecurityToken TokenReaderReturnsNull(string token, TokenValidationParameters validationParameters)
+        {
+            return null;
+        }
+
+        public static SecurityToken TokenReaderThrows(string token, TokenValidationParameters validationParameters)
+        {
+            throw new SecurityTokenInvalidSignatureException("TokenReaderThrows");
+        }
+
         public static bool TokenReplayValidatorReturnsTrue(DateTime? exipres, string token, TokenValidationParameters validationParameters)
         {
             return true;

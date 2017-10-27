@@ -948,7 +948,23 @@ namespace System.IdentityModel.Tokens.Jwt
                 return validatedJwt;
             }
 
-            JwtSecurityToken jwtToken = ReadJwtToken(token);
+            JwtSecurityToken jwtToken = null;
+
+            if (validationParameters.TokenReader != null)
+            {
+                var securityToken = validationParameters.TokenReader(token, validationParameters);
+                if (securityToken == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10510, token)));
+
+                jwtToken = securityToken as JwtSecurityToken;
+                if (jwtToken == null)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, typeof(JwtSecurityToken), securityToken.GetType(), token)));
+            }
+            else
+            { 
+                jwtToken = ReadJwtToken(token);
+            }
+                
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwtToken.RawHeader + "." + jwtToken.RawPayload);
             if (string.IsNullOrEmpty(jwtToken.RawSignature))
             {

@@ -96,6 +96,13 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for TokenReader.
+    /// </summary>
+    /// <param name="token">A securityToken with a signature.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate SecurityToken TokenReader(string token, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for TokenDecryptionKeyResolver.
     /// </summary>
     /// <param name="token">The <see cref="string"/> representation of the token to be decrypted.</param>
@@ -165,6 +172,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
+            TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
@@ -211,6 +219,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// If <see cref="ValidateAudience"/> is false, this delegate will not be called.
         /// </remarks>
         public AudienceValidator AudienceValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to read the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to read the token instead of normal processing.
+        /// </remarks>
+        public TokenReader TokenReader
         {
             get;
             set;

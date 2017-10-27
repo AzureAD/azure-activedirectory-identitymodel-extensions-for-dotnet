@@ -91,6 +91,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
         public const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
         public const string IDX10508 = "IDX10508: Signature validation failed. Signature is improperly formatted.";
+        public const string IDX10509 = "IDX10509: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters did not return a '{0}', but returned a '{1}' when reading token: '{2}'.";
+        public const string IDX10510 = "IDX10510: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters returned null when reading token: '{0}'.";
 
         // encryption / decryption
         public const string IDX10600 = "IDX10600: Decryption failed. There are no security keys for decryption.";
