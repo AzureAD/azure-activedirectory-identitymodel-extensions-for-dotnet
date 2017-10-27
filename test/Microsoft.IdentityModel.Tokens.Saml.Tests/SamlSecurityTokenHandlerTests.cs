@@ -251,7 +251,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
                 new SamlTheoryData
                 {
-                    First = true,
                     TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCreds_2048),
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
@@ -270,7 +269,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
                 new SamlTheoryData
                 {
-                    First = true,
                     TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCreds_2048_FromRsa),
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
@@ -289,7 +287,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
                 new SamlTheoryData
                 {
-                    First = true,
                     TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.JsonWebKeyRsa256SigningCredentials),
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
