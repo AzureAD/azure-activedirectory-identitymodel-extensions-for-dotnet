@@ -317,6 +317,60 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ValidAudience = Default.Audience,
                         ValidIssuer = Default.Issuer,
                     }
+                },
+                new Saml2TheoryData
+                {
+                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCreds_2048),
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = KeyingMaterial.RSASigningCreds_2048,
+                        Issuer = Default.Issuer,
+                        Subject = Default.ClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = KeyingMaterial.RSASigningCreds_2048_Public.Key,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
+                    },
+                },
+                new Saml2TheoryData
+                {
+                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCreds_2048_FromRsa),
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = KeyingMaterial.RSASigningCreds_2048_FromRsa,
+                        Issuer = Default.Issuer,
+                        Subject = Default.ClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = KeyingMaterial.RSASigningCreds_2048_FromRsa_Public.Key,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
+                    },
+                },
+                new Saml2TheoryData
+                {
+                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.JsonWebKeyRsa256SigningCredentials),
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                        Issuer = Default.Issuer,
+                        Subject = Default.ClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
+                    }
                 }
             };
         }
