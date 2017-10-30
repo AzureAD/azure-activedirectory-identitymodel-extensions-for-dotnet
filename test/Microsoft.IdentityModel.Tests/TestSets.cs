@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tests
             set;
         }
 
-        public static KeyInfoTestSet FullyPopulated
+        public static KeyInfoTestSet KeyInfoFullyPopulated
         {
             get
             {
@@ -782,6 +782,30 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+
+        public static SignatureTestSet SignatureFullyPopulated
+        { 
+            get
+            {
+                var signatureBytes = XmlUtilities.GenerateSignatureBytes(SignedInfoTestSet.SignedInfoFullyPopulated.SignedInfo, Default.AsymmetricSigningKey);
+                var signatureValue = Convert.ToBase64String(signatureBytes);
+
+                var signature = new Signature()
+                {
+                    SignedInfo = SignedInfoTestSet.SignedInfoFullyPopulated.SignedInfo,
+                    SignatureValue = signatureValue,
+                    KeyInfo = KeyInfoTestSet.KeyInfoFullyPopulated.KeyInfo,
+                    Id = "SignatureFullyPopulated"
+                };
+
+                return new SignatureTestSet
+                {
+                    Signature = signature,
+                    TestId = nameof(SignatureFullyPopulated),
+                    Xml = XmlGenerator.Generate(signature)
+                };
+            }
+        }
     }
 
     public class SignedInfoTestSet : XmlTestSet
@@ -1002,6 +1026,25 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+
+        public static SignedInfoTestSet SignedInfoFullyPopulated
+        {
+            get
+            {
+                var signedInfo = new SignedInfo(Default.ReferenceWithNullTokenStream)
+                {
+                    CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
+                    SignatureMethod = SecurityAlgorithms.RsaSha256Signature,
+                    Id = "SignedInfoFullyPopulated"
+                };
+
+                return new SignedInfoTestSet
+                {
+                    SignedInfo = signedInfo,
+                    Xml = XmlGenerator.Generate(signedInfo)
+                };
+            }
+        }
     }
 
     public class ReferenceTestSet : XmlTestSet
@@ -1047,7 +1090,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
     }
-
+        
     public class WsFederationMessageTestSet : XmlTestSet
     {
         public WsFederationMessage WsFederationMessage
