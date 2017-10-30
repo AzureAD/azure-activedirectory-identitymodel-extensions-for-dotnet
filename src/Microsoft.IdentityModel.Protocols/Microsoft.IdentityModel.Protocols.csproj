@@ -12,6 +12,21 @@
     <PackageTags>.NET;Windows;Authentication;Identity;OpenIdConnect;WsFederation</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.4|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
