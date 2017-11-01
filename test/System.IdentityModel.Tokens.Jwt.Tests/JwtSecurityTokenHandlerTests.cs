@@ -1276,6 +1276,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.SymmetricJws,
                         ValidationParameters = Default.SymmetricSignTokenValidationParameters
                     },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10508:", innerTypeExpected: typeof(FormatException)),
+                        TestId = "Token: Invalid Format",
+                        Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.f",
+                        ValidationParameters = new TokenValidationParameters()
+                    }
                 };
             }
         }

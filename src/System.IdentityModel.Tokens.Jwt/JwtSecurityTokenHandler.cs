@@ -707,12 +707,31 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">the JWT encoded as JWE or JWS</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
         /// <exception cref="ArgumentException">token.Length > MamimumTokenSizeInBytes.</exception>
         /// <exception cref="ArgumentException">'token' does not have 3 or 5 parts.</exception>
-        /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
-        /// <remarks><see cref="ReadToken(string)"/> for additional exceptions.</remarks>
+        /// <exception cref="ArgumentException">'token.Length' > MaximumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
+        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
+        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.alg' is not equal to 'dir'.</exception>
+        /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
+        /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException">if the signature is not properly formatted.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
+        /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
+        /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
+        /// <returns> A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
+        /// <remarks> 
+        /// Many of the exceptions listed above are not thrown directly from this method. See <class cref="Validators"/> to find most of the call graph.
+        /// <see cref = "ReadToken(string)" /> for additional exceptions. 
+        /// </remarks>
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -742,6 +761,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 validatedToken = ValidateSignature(token, validationParameters);
                 return ValidateTokenPayload(validatedToken as JwtSecurityToken, validationParameters);
+                    
             }
         }
 
@@ -970,7 +990,17 @@ namespace System.IdentityModel.Tokens.Jwt
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
             bool canMatchKey = !string.IsNullOrEmpty(jwtToken.Header.Kid);
-            byte[] signatureBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawSignature);
+            byte[] signatureBytes;
+
+            try
+            {
+                signatureBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawSignature);
+            }
+            catch (FormatException e)
+            {
+                throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
+            }
+
             foreach (var key in keys)
             {
                 try
