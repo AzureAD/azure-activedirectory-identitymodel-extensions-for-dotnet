@@ -79,6 +79,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
         public const string IDX10246 = "IDX10246: ValidateTokenReplay property on ValidationParameters is set to false. Exiting without validating the token replay.";
         public const string IDX10247 = "IDX10247: The current issuer value in ValidateIssuers property on ValidationParameters is null or emptry, skipping it for issuer validation.";
+        public const string IDX10248 = "IDX10248: X509SecurityKey validation failed. The associated certificate is not yet valid. ValidFrom: '{0}', Current time: '{1}'.";
+        public const string IDX10249 = "IDX10249: X509SecurityKey validation failed. The associated certificate has expired. ValidTo: '{0}', Current time: '{1}'.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";

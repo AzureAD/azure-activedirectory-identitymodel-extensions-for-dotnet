@@ -209,7 +209,14 @@ namespace Microsoft.IdentityModel.Tokens
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey != null)
             {
-                //validationParameters.CertificateValidator.Validate(x509SecurityKey.Certificate);
+                var cert = x509SecurityKey.Certificate;
+                DateTime utcNow = DateTime.UtcNow;
+
+                if (cert.NotBefore != null && (cert.NotBefore > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10248, cert.NotBefore, utcNow)));
+
+                if (cert.NotAfter != null && (cert.NotAfter < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10249, cert.NotAfter, utcNow)));
             }
         }
 
