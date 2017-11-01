@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22803:"),
                         Metadata = ReferenceMetadata.MetadataEmptyEndpointAddress,
                         TestId = nameof(ReferenceMetadata.MetadataEmptyEndpointAddress)
                     },
@@ -268,7 +268,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var serializer = new WsFederationMetadataSerializerPublic();
             try
             {
-                serializer.ReadEntityDescriptorPublic(null);
+                XmlReader reader = null;
+                if (theoryData.Metadata != null)
+                    reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                serializer.ReadEntityDescriptorPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -288,6 +291,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadEntityDescriptor"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        Metadata = ReferenceMetadata.EmptyEntityDescriptorMetadata,
+                        TestId = "ReadEmptyEntityDescriptor"
                     }
                 };
             }
@@ -300,7 +308,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var serializer = new WsFederationMetadataSerializerPublic();
             try
             {
-                serializer.ReadKeyDescriptorForSigningPublic(null);
+                XmlReader reader = null;
+                if (theoryData.Metadata != null)
+                    reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                serializer.ReadKeyDescriptorForSigningPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -359,6 +370,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22809:"),
                         Metadata = ReferenceMetadata.KeyDescriptorKeyUseNotForSigning,
                         TestId = "ReadKeyDescriptorForSigning: 'use' is not 'signing'"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22802"),
+                        Metadata = ReferenceMetadata.EmptyKeyDescriptor,
+                        TestId = "ReadKeyDescriptorForSigning: KeyDescriptor is empty"
                     }
                 };
             }
@@ -371,7 +388,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var serializer = new WsFederationMetadataSerializerPublic();
             try
             {
-                serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(null);
+                XmlReader reader = null;
+                if (theoryData.Metadata != null)
+                    reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                serializer.ReadSecurityTokenServiceTypeRoleDescriptorPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -391,6 +411,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadSecurityTokenServiceTypeRoleDescriptor"
+                    },
+                     new WsFederationMetadataTheoryData
+                    {
+                        Metadata = ReferenceMetadata.EmptyRoleDescriptor,
+                        TestId = "ReadSecurityTokenServiceTypeRoleDescriptor : Empty"
                     }
                 };
             }
@@ -402,8 +427,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
             var serializer = new WsFederationMetadataSerializerPublic();
             try
-            { 
-                serializer.ReadSecurityTokenEndpointPublic(null);
+            {
+                XmlReader reader = null;
+                if (theoryData.Metadata != null)
+                    reader = XmlReader.Create(new StringReader(theoryData.Metadata));
+                serializer.ReadSecurityTokenEndpointPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -423,7 +451,25 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ReadSecurityTokenEndpoint"
-                    }
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        Metadata = ReferenceMetadata.EmptyPassiveRequestorEndpoint,
+                        TestId = "ReadSecurityTokenEndpoint : Empty"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22812:"),
+                        Metadata = ReferenceMetadata.EndpointWithEmptyEndpointReference,
+                        TestId = "ReadSecurityTokenEndpoint : EmptyEndpointReference"
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22803:"),
+                        Metadata = ReferenceMetadata.EndpointWithEmptyAddress,
+                        TestId = "ReadSecurityTokenEndpoint : EmptyAddress"
+                    },
                 };
             }
         }

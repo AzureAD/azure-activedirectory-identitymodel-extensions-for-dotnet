@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (value == null)
                     throw LogArgumentNullException(nameof(value));
 
-                if (value.IsAbsoluteUri)
+                if (!value.IsAbsoluteUri)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(value), value)));
 
                 _resource = value;

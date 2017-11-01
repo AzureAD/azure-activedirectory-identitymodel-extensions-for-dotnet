@@ -230,7 +230,6 @@ namespace Microsoft.IdentityModel.Tests
                 Xml = XmlGenerator.TransformXml("", Elements.Transform, "Algorithm", null, "")
             };
         }
-
     }
 
     public class KeyInfoTestSet : XmlTestSet
@@ -658,6 +657,58 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+
+        public static KeyInfoTestSet KeyInfoEmpty
+        {
+            get
+            {
+                return new KeyInfoTestSet
+                {
+                    KeyInfo = new KeyInfo(),
+                    TestId = nameof(KeyInfoEmpty),
+                    Xml = "<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"/>"
+                };
+            }
+        }
+
+        public static KeyInfoTestSet X509DataEmpty
+        {
+            get
+            {
+                return new KeyInfoTestSet
+                {
+                    KeyInfo = new KeyInfo(),
+                    TestId = nameof(X509DataEmpty),
+                    Xml = "<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><X509Data/></KeyInfo>"
+                };
+            }
+        }
+
+        public static KeyInfoTestSet IssuerSerialEmpty
+        {
+            get
+            {
+                return new KeyInfoTestSet
+                {
+                    KeyInfo = new KeyInfo(),
+                    TestId = nameof(IssuerSerialEmpty),
+                    Xml = "<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><X509Data><X509IssuerSerial/></X509Data></KeyInfo>"
+                };
+            }
+        }
+
+        public static KeyInfoTestSet RSAKeyValueEmpty
+        {
+            get
+            {
+                return new KeyInfoTestSet
+                {
+                    KeyInfo = new KeyInfo(),
+                    TestId = nameof(RSAKeyValueEmpty),
+                    Xml = "<KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><KeyValue><RSAKeyValue/></KeyValue></KeyInfo>"
+                };
+            }
+        }
     }
 
     public class SignatureTestSet : XmlTestSet
@@ -672,6 +723,19 @@ namespace Microsoft.IdentityModel.Tests
         {
             get;
             set;
+        }
+
+        public static SignatureTestSet EmptySignature
+        {
+            get
+            {
+                return new SignatureTestSet
+                {
+                    Signature = new Signature(),
+                    TestId = nameof(EmptySignature),
+                    Xml = "<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\"></Signature>"
+                };
+            }
         }
 
         public static SignatureTestSet DefaultSignature
@@ -729,6 +793,19 @@ namespace Microsoft.IdentityModel.Tests
         {
             get;
             set;
+        }
+
+        public static SignedInfoTestSet SignedInfoEmpty
+        {
+            get
+            {
+                return new SignedInfoTestSet
+                {
+                    SignedInfo = new SignedInfo(),
+                    TestId = nameof(SignedInfoEmpty),
+                    Xml = "<SignedInfo xmlns = \"http://www.w3.org/2000/09/xmldsig#\"/>"
+                };
+            }
         }
 
         public static SignedInfoTestSet StartsWithWhiteSpace
@@ -925,7 +1002,51 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
-    }  
+    }
+
+    public class ReferenceTestSet : XmlTestSet
+    {
+        public Reference Reference
+        {
+            get;
+            set;
+        }
+
+        public static ReferenceTestSet ReferenceEmpty
+        {
+            get
+            {
+                return new ReferenceTestSet
+                {
+                    Reference = new Reference(),
+                    TestId = nameof(ReferenceEmpty),
+                    Xml = "<ds:Reference Id=\"#abcdef\" Type=\"http://referenceType\" URI=\"http://referenceUri\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"/>"
+                };
+            }
+        }
+    }
+
+    public class TransformsTestSet : XmlTestSet
+    {
+        public IList<string> Transforms
+        {
+            get;
+            set;
+        }
+
+        public static TransformsTestSet TransformsEmpty
+        {
+            get
+            {
+                return new TransformsTestSet
+                {
+                    Transforms = new List<string>(),
+                    TestId = nameof(TransformsEmpty),
+                    Xml = "<Transforms/>"
+                };
+            }
+        }
+    }
 
     public class WsFederationMessageTestSet : XmlTestSet
     {

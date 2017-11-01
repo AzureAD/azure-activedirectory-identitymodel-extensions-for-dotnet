@@ -101,6 +101,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Action, SamlConstants.Namespace);
 
+            if (reader.IsEmptyElement)
+                throw LogReadException(LogMessages.IDX11137);
+
             try
             {
                 // @xsi:type
@@ -628,6 +631,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 statement.Decision = decision;
 
+                if (reader.IsEmptyElement)
+                    throw LogReadException(LogMessages.IDX11136);
+
                 reader.ReadStartElement();
                 statement.Subject = ReadSubject(reader);
                 while (reader.IsStartElement())
@@ -854,6 +860,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Subject, SamlConstants.Namespace);
 
+            var isEmpty = reader.IsEmptyElement;
+
             try
             {
                 var subject = new SamlSubject();
@@ -923,8 +931,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     reader.ReadEndElement();
                 }
 
+                if (!isEmpty)
+                    reader.ReadEndElement();
+
                 reader.MoveToContent();
-                reader.ReadEndElement();
 
                 return subject;
             }

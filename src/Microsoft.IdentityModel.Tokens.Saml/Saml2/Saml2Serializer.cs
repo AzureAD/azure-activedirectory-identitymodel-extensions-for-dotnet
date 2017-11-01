@@ -67,6 +67,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2Action ReadAction(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Action, Saml2Constants.Namespace);
+
+            if (reader.IsEmptyElement)
+                throw LogReadException(LogMessages.IDX13310);
+
             try
             {
                 // @xsi:type
@@ -525,7 +529,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // disallow empty
                 if (reader.IsEmptyElement)
-                    LogReadException(LogMessages.IDX13104, Saml2Constants.Elements.AudienceRestriction);
+                    throw LogReadException(LogMessages.IDX13104, Saml2Constants.Elements.AudienceRestriction);
 
                 Saml2AudienceRestriction audienceRestriction;
 
@@ -578,6 +582,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnContextType, Saml2Constants.Namespace);
+
+                if (reader.IsEmptyElement)
+                    throw LogReadException(LogMessages.IDX13312);
 
                 // Content
                 reader.ReadStartElement();
@@ -647,6 +654,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // @xsi:type -- if we're a <Statement> element, this declaration must be present
                 XmlUtil.ValidateXsiType(reader, Saml2Constants.Types.AuthnStatementType, Saml2Constants.Namespace, false);
 
+                if (reader.IsEmptyElement)
+                    throw LogReadException(LogMessages.IDX13313);
+
                 // @AuthnInstant - required
                 string value = reader.GetAttribute(Saml2Constants.Attributes.AuthnInstant);
                 if (string.IsNullOrEmpty(value))
@@ -703,6 +713,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2AuthorizationDecisionStatement ReadAuthorizationDecisionStatement(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.AuthzDecisionStatement, Saml2Constants.Namespace);
+
+            if (reader.IsEmptyElement)
+                throw LogReadException(LogMessages.IDX13314);
+
             try
             {
                 // Need the attributes before we can instantiate
@@ -1134,6 +1148,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2Subject ReadSubject(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Subject, Saml2Constants.Namespace);
+            var isEmpty = reader.IsEmptyElement;
+
             try
             {
                 // @xsi:type
@@ -1154,7 +1170,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     subject.SubjectConfirmations.Add(ReadSubjectConfirmation(reader));
                 }
 
-                reader.ReadEndElement();
+                if (!isEmpty)
+                    reader.ReadEndElement();
 
                 // Must have a NameID or a SubjectConfirmation
                 if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)

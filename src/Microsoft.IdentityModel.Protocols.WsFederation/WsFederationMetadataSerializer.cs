@@ -96,15 +96,16 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 throw XmlUtil.LogReadException(LogMessages.IDX22801);
             configuration.Issuer = issuer;
 
-            // <EntityDescriptor>
             bool isEmptyElement = reader.IsEmptyElement;
+
+            // <EntityDescriptor>
             reader.ReadStartElement();
 
             while (reader.IsStartElement())
             {
                 if (IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 {
-                     var roleDescriptor = ReadSecurityTokenServiceTypeRoleDescriptor(reader);
+                    var roleDescriptor = ReadSecurityTokenServiceTypeRoleDescriptor(reader);
                     foreach(var keyInfo in roleDescriptor.KeyInfos)
                     {
                         configuration.KeyInfos.Add(keyInfo);
@@ -184,6 +185,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             // <RoleDescriptor>
             bool isEmptyElement = reader.IsEmptyElement;
+
             reader.ReadStartElement();
 
             while (reader.IsStartElement())
@@ -232,6 +234,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             reader.ReadStartElement(Elements.EndpointReference, Namespaces.AddressingNamspace);  // EndpointReference
             reader.MoveToContent();
+       
+            if (reader.IsEmptyElement)
+                throw XmlUtil.LogReadException(LogMessages.IDX22803);
 
             XmlUtil.CheckReaderOnEntry(reader, Elements.Address, Namespaces.AddressingNamspace);
             if (reader.IsEmptyElement)
