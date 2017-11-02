@@ -376,7 +376,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. See <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change outbound Json .</para>
+        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change the outbound JWT.</para>
         /// <para>If <see cref="SigningCredentials"/> is provided, then a JWS will be created.</para>
         /// </remarks>
         /// <returns>A Base64UrlEncoded string in 'Compact Serialization Format'.</returns>
@@ -399,7 +399,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
         /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
         /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change outbound Json .</para>
+        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change the outbound JWT.</para>
         /// </remarks>
         /// <returns>A Base64UrlEncoded string in 'Compact Serialization Format'.</returns>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
@@ -707,30 +707,27 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">the JWT encoded as JWE or JWS</param>
         /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
-        /// <exception cref="ArgumentException">token.Length > MamimumTokenSizeInBytes.</exception>
-        /// <exception cref="ArgumentException">'token' does not have 3 or 5 parts.</exception>
-        /// <exception cref="ArgumentException">'token.Length' > MaximumTokenSizeInBytes.</exception>
-        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
-        /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
-        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
-        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.alg' is not equal to 'dir'.</exception>
-        /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
-        /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
-        /// <exception cref="SecurityTokenInvalidSignatureException">if the signature is not properly formatted.</exception>
-        /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
-        /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
-        /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
-        /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
-        /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
-        /// <returns> A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/>.Length > MamimumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/> does not have 3 or 5 parts.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/> returns false.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException"><paramref name="token"/> was a JWE was not able to be decrypted.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException"><paramref name="token"/> 'kid' header claim is not null AND decryption fails.</exception>
+        /// <exception cref="SecurityTokenException"><paramref name="token"/> 'enc' header claim is null or empty.</exception>
+        /// <exception cref="SecurityTokenExpiredException"><paramref name="token"/> 'exp' claim is &lt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException"><see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null. Audience is not validated if <see cref="TokenValidationParameters.ValidateAudience"/> is set to false.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException"><paramref name="token"/> 'aud' claim did not match either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
+        /// <exception cref="SecurityTokenInvalidLifetimeException"><paramref name="token"/> 'nbf' claim is &gt; 'exp' claim.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"><paramref name="token"/>.signature is not properly formatted.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException"><paramref name="token"/> 'exp' claim is missing and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException"><see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
+        /// <exception cref="SecurityTokenNotYetValidException"><paramref name="token"/> 'nbf' claim is &gt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenReplayAddFailedException"><paramref name="token"/> could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
+        /// <exception cref="SecurityTokenReplayDetectedException"><paramref name="token"/> is found in the cache.</exception>
+        /// <returns> A <see cref="ClaimsPrincipal"/> from the JWT. Does not include claims found in the JWT header.</returns>
         /// <remarks> 
-        /// Many of the exceptions listed above are not thrown directly from this method. See <class cref="Validators"/> to find most of the call graph.
-        /// <see cref = "ReadToken(string)" /> for additional exceptions. 
+        /// Many of the exceptions listed above are not thrown directly from this method. See <see cref="Validators"/> to examin the call graph.
         /// </remarks>
         public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
@@ -1367,7 +1364,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">if 'jwtToken' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
-        /// <exception cref="SecurityTokenException">if 'jwtToken.Header.alg' is not equal to 'dir'.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         protected string DecryptToken(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
