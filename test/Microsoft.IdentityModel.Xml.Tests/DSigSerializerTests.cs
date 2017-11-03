@@ -70,31 +70,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData("FullyPopulatedKeyInfoTheoryData")]
-        public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
-        {
-            TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
-            var context = new CompareContext($"{this}.WriteKeyInfo, {theoryData.TestId}");
-            try
-            {
-                var keyInfo = theoryData.Serializer.ReadKeyInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
-                theoryData.ExpectedException.ProcessNoException(context.Diffs);
-                IdentityComparer.AreKeyInfosEqual(keyInfo, theoryData.KeyInfo, context);
-                var ms = new MemoryStream();
-                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
-                theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
-                writer.Flush();
-                var xml = Encoding.UTF8.GetString(ms.ToArray());
-                IdentityComparer.AreEqual(theoryData.Xml, xml);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
         public static TheoryData<DSigSerializerTheoryData> ReadKeyInfoTheoryData
         {
             get
@@ -104,7 +79,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 return new TheoryData<DSigSerializerTheoryData>
                 {
                     //KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
-                    KeyInfoTest(KeyInfoTestSet.FullyPopulated),
+                    KeyInfoTest(KeyInfoTestSet.KeyInfoFullyPopulated),
                     KeyInfoTest(KeyInfoTestSet.MultipleCertificates), 
                     KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
@@ -129,13 +104,38 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public static TheoryData<DSigSerializerTheoryData> FullyPopulatedKeyInfoTheoryData
+        [Theory, MemberData("WriteKeyInfoTheoryData")]
+        public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
+            var context = new CompareContext($"{this}.WriteKeyInfo, {theoryData.TestId}");
+            try
+            {
+                var keyInfo = theoryData.Serializer.ReadKeyInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                IdentityComparer.AreKeyInfosEqual(keyInfo, theoryData.KeyInfo, context);
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(theoryData.Xml, xml);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> WriteKeyInfoTheoryData
         {
             get
             {
                 return new TheoryData<DSigSerializerTheoryData>
                 {
-                    KeyInfoTest(KeyInfoTestSet.FullyPopulated),
+                    KeyInfoTest(KeyInfoTestSet.KeyInfoFullyPopulated),
                 };
             }
         }
@@ -184,6 +184,45 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     SignatureTest(SignatureTestSet.UnknownSignatureAlgorithm),
                     SignatureTest(SignatureTestSet.EmptySignature,
                     new ExpectedException(typeof(XmlReadException), "IDX30022:")),
+                };
+            }
+        }
+
+        [Theory, MemberData("WriteSignatureTheoryData")]
+        public void WriteSignature(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteSignature", theoryData);
+            var context = new CompareContext($"{this}.WriteSignature, {theoryData.TestId}");
+            try
+            {
+                var signature = theoryData.Serializer.ReadSignature(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                IdentityComparer.AreEqual(signature, theoryData.Signature, context);
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteSignature(writer, signature);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(theoryData.Xml, xml);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> WriteSignatureTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<DSigSerializerTheoryData>
+                {
+                    SignatureTest(SignatureTestSet.SignatureFullyPopulated)
                 };
             }
         }
@@ -246,6 +285,45 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     SignedInfoTest(SignedInfoTestSet.Valid),
                     SignedInfoTest(SignedInfoTestSet.SignedInfoEmpty,
                     new ExpectedException(typeof(XmlReadException), "IDX30022:"))
+                };
+            }
+        }
+
+        [Theory, MemberData("WriteSignedInfoTheoryData")]
+        public void WriteSignedInfo(DSigSerializerTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteSignedInfo", theoryData);
+            var context = new CompareContext($"{this}.WriteSignedInfo, {theoryData.TestId}");
+            try
+            {
+                var signedInfo = theoryData.Serializer.ReadSignedInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);
+                IdentityComparer.AreEqual(signedInfo, theoryData.SignedInfo, context);
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteSignedInfo(writer, signedInfo);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(theoryData.Xml, xml);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> WriteSignedInfoTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                // ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<DSigSerializerTheoryData>
+                { 
+                    SignedInfoTest(SignedInfoTestSet.SignedInfoFullyPopulated)
                 };
             }
         }

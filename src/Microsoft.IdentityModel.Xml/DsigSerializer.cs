@@ -660,7 +660,9 @@ namespace Microsoft.IdentityModel.Xml
 
             if (keyInfo.RetrievalMethodUri != null)
             {
-                writer.WriteElementString(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace, keyInfo.RetrievalMethodUri);
+                writer.WriteStartElement(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, keyInfo.RetrievalMethodUri);
+                writer.WriteEndElement();
             }
 
             foreach (var data in keyInfo.X509Data)
