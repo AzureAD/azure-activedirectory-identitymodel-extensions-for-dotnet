@@ -206,6 +206,21 @@ namespace Microsoft.IdentityModel.Tests
     {
     }
 #else
+    public class CustomSecurityToken : SecurityToken
+    {
+        public override string Id { get { return "CustomSecurityToken"; } }
+
+        public override string Issuer { get { return "CustomSecurityToken.Issuer"; } }
+
+        public override SecurityKey SecurityKey { get { return null; } }
+
+        public override SecurityKey SigningKey { get; set; }
+
+        public override DateTime ValidFrom { get { return DateTime.UtcNow; } }
+
+        public override DateTime ValidTo { get { return DateTime.UtcNow + TimeSpan.FromDays(1); } }
+    }
+
     public class DerivedClaim : Claim
     {
         public DerivedClaim(Claim claim, string data, byte[] bytes)

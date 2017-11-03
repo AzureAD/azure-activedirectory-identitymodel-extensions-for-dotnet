@@ -1143,6 +1143,34 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "custom TokenReader",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"),
+                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultSymmetricSecurityKey_256, null, true, null, ValidationDelegates.TokenReaderReturnsJwtSecurityToken)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10509:"),
+                        TestId = "TokenReader returns incorrect token type",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = ValidateSignatureValidationParameters(null, null, true, null, ValidationDelegates.TokenReaderReturnsIncorrectSecurityTokenType)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10510:"),
+                        TestId = "TokenReader returns null",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = ValidateSignatureValidationParameters(null, null, true, null, ValidationDelegates.TokenReaderReturnsNull)
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("TokenReaderThrows"),
+                        TestId = "TokenReader throws",
+                        Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_1024, "Parts-0-1"),
+                        ValidationParameters = ValidateSignatureValidationParameters(null, null, true, null, ValidationDelegates.TokenReaderThrows)
+                    },
+                    new JwtTheoryData
+                    {
                         TestId = "EncodedJwts.Symmetric_256",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultSymmetricSecurityKey_256, null),
@@ -1203,6 +1231,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator)
         {
+            return ValidateSignatureValidationParameters(signingKey, signingKeys, requireSignedTokens, signatureValidator, null);
+        }
+
+        private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator, TokenReader tokenReader)
+        {
             return new TokenValidationParameters()
             {
                 IssuerSigningKey = signingKey,
@@ -1210,6 +1243,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 RequireExpirationTime = false,
                 RequireSignedTokens = requireSignedTokens,
                 SignatureValidator = signatureValidator,
+                TokenReader = tokenReader,
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = false
