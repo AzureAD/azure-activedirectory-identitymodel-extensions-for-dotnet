@@ -71,9 +71,17 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(filePath))
                 throw LogHelper.LogArgumentNullException(nameof(filePath));
 
-            Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
-            _streamWriter = new StreamWriter(fileStream);
-            _streamWriter.AutoFlush = true;
+            try
+            {
+                Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+                _streamWriter = new StreamWriter(fileStream);
+                _streamWriter.AutoFlush = true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML10001, ex));
+                throw;
+            }
         }
 
         /// <summary>

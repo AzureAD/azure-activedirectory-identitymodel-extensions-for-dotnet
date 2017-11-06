@@ -28,6 +28,8 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Logging
 {
@@ -36,6 +38,14 @@ namespace Microsoft.IdentityModel.Logging
     /// </summary>
     public class LogHelper
     {
+        private static readonly List<string> CustomExceptionTypePrefixes = new List<string>()
+        {
+            "Microsoft.IdentityModel.Protocols",
+            "Microsoft.IdentityModel.Tokens.SecurityToken",
+            "Microsoft.IdentityModel.Tokens.Saml",
+            "Microsoft.IdentityModel.Xml"
+        };
+
         /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
@@ -249,6 +259,7 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
+
             return exception;
         }
 
@@ -298,7 +309,7 @@ namespace Microsoft.IdentityModel.Logging
             string message = null;
 
             if (args != null)
-                message = FormatInvariant(format, args);
+                message = string.Format(CultureInfo.InvariantCulture, format, args);
             else
                 message = format;
 
@@ -325,8 +336,35 @@ namespace Microsoft.IdentityModel.Logging
         /// <returns>Formatted string.</returns>
         public static string FormatInvariant(string format, params object[] args)
         {
+            if (!IdentityModelEventSource.ShowPII)
+                return string.Format(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray()); 
+
             return string.Format(CultureInfo.InvariantCulture, format, args);
         }
 
+        private static string RemovePII(object arg)
+        {
+            if (arg is Exception)
+            {
+                Exception e = arg as Exception;
+                if (IsCustomException(e))
+                    return e.ToString();
+                else
+                    return e.GetType().ToString();
+            }
+            else
+            {
+                return IdentityModelEventSource.HiddenPIIString;
+            }
+        }
+
+        internal static bool IsCustomException(Exception ex)
+        {
+            // check if the exception type has a custom exception prefix
+            if (CustomExceptionTypePrefixes.Exists(e => ex.GetType().FullName.Contains(e)))
+                return true;
+            else
+                return false;
+        }
     }
 }

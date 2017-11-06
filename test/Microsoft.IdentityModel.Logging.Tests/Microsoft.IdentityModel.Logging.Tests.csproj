@@ -14,6 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.OpenIdConnect\Microsoft.IdentityModel.Protocols.OpenIdConnect.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.WsFederation\Microsoft.IdentityModel.Protocols.WsFederation.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
   </ItemGroup>
 
   <ItemGroup>

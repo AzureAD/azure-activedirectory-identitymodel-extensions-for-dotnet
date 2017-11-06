@@ -27,6 +27,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Xunit;
 
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(false)]
+[assembly: CollectionBehavior(DisableTestParallelization = true)]

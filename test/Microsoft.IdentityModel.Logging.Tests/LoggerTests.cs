@@ -115,8 +115,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             var guid1 = Guid.NewGuid().ToString();
             var guid2 = Guid.NewGuid().ToString();
-            IdentityModelEventSource.Logger.WriteVerbose(guid1);
-            IdentityModelEventSource.Logger.WriteInformation(guid2);
+            LogHelper.LogVerbose(guid1);
+            LogHelper.LogInformation(guid2);
 
             Assert.DoesNotContain(guid1, listener.TraceBuffer);
             Assert.Contains(guid2, listener.TraceBuffer);
@@ -154,14 +154,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
 
             // default log file cannot be accessed because it is in use. Should throw an IO exception.
-            FileStream fileStream = File.Create(TextWriterEventListener.DefaultLogFileName);
-            Assert.Throws<IOException>(() => { new TextWriterEventListener();  });
+            string fileName = Guid.NewGuid().ToString() + ".txt";
+            FileStream fileStream = File.Create(fileName);
+            Assert.Throws<IOException>(() => { new TextWriterEventListener(fileName);  });
             Assert.Contains("MIML10001: ", listener.TraceBuffer);
             fileStream.Dispose();
-            File.Delete(TextWriterEventListener.DefaultLogFileName);
+            File.Delete(fileName);
 
             // file specified by user cannot be accessed.
-            string fileName = "testLog.txt";
+            fileName = Guid.NewGuid().ToString() + ".txt";
             fileStream = File.Create(fileName);
             FileInfo fileInfo = new FileInfo(fileName);
             fileInfo.IsReadOnly = true;
@@ -169,7 +170,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             fileInfo.IsReadOnly = false;
             fileStream.Dispose();
             File.Delete(fileName);
-
         }
 
         [Fact]
@@ -181,6 +181,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 IdentityModelEventSource.Logger.LogLevel = EventLevel.Informational;
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
 
             string logText = File.ReadAllText(TextWriterEventListener.DefaultLogFileName);
@@ -188,27 +189,34 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete(TextWriterEventListener.DefaultLogFileName);
 
             // passing custom file path
-            using (TextWriterEventListener listener = new TextWriterEventListener("testLog.txt"))
+            var filename = Guid.NewGuid().ToString() + ".txt";
+            using (TextWriterEventListener listener = new TextWriterEventListener(filename))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning for custom file path!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
-            logText = File.ReadAllText("testLog.txt");
+
+            logText = File.ReadAllText(filename);
             Assert.Contains("This is a warning for custom file path!", logText);
-            File.Delete("testLog.txt");
+            File.Delete(filename);
 
             // using StreamWriter
-            Stream fileStream = new FileStream("testLog.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            filename = Guid.NewGuid().ToString() + ".txt";
+            Stream fileStream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
             StreamWriter streamWriter = new StreamWriter(fileStream);
             using (TextWriterEventListener listener = new TextWriterEventListener(streamWriter))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning for streamwriter!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
+
+            streamWriter.Flush();
             streamWriter.Dispose();
-            logText = File.ReadAllText("testLog.txt");
+            logText = File.ReadAllText(filename);
             Assert.Contains("This is a warning for streamwriter!", logText);
-            File.Delete("testLog.txt");
+            File.Delete(filename);
         }
     }
 
