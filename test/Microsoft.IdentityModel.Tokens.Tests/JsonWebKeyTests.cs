@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 JsonWebKey testKey = new JsonWebKey
                 {
                     Kty = JsonWebAlgorithmsKeyTypes.Octet,
-                    K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE="
+                    K = KeyingMaterial.DefaultSymmetricKeyEncoded_256
                 };
                 testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
                 dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, testKey.HasPrivateKey, true);
