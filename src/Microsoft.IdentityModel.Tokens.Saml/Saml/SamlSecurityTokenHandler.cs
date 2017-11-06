@@ -33,8 +33,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -439,7 +437,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
@@ -616,7 +614,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
+            LogHelper.LogInformation(TokenLogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -706,7 +704,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="issuer">The issuer.</param>
         protected virtual void ProcessCustomSubjectStatement(SamlStatement statement, ClaimsIdentity identity, string issuer)
         {
-            IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX11516, statement.GetType());
+            LogHelper.LogWarning(LogMessages.IDX11516, statement.GetType());
         }
 
         /// <summary>
@@ -1113,7 +1111,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 try
                 {
                     samlToken.Assertion.Signature.Verify(securityKey);
-                    IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10242, token);
+                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                     samlToken.SigningKey = securityKey;
                     return samlToken;
                 }
@@ -1183,7 +1181,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 identities.ElementAt(0).BootstrapContext = token;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);
+            LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
 
             return new ClaimsPrincipal(identities);
         }

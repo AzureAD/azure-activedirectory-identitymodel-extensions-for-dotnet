@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateAudience)
             {
-                IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX10233);
+                LogHelper.LogWarning(LogMessages.IDX10233);
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (string.Equals(audience, str, StringComparison.Ordinal))
                         {
-                            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10234, audience);
+                            LogHelper.LogInformation(LogMessages.IDX10234, audience);
                             return;
                         }
                     }
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.Equals(audience, validationParameters.ValidAudience, StringComparison.Ordinal))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10234, audience);
+                        LogHelper.LogInformation(LogMessages.IDX10234, audience);
                         return;
                     }
                 }
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuer)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10235);
+                LogHelper.LogInformation(LogMessages.IDX10235);
                 return issuer;
             }
 
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10236, issuer);
+                LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                 return issuer;
             }
 
@@ -157,13 +157,13 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(str))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10235);
+                        LogHelper.LogInformation(LogMessages.IDX10235);
                         continue;
                     }
                         
                     if (string.Equals(str, issuer, StringComparison.Ordinal))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10236, issuer);
+                        LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                         return issuer;
                     }
                 }
@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuerSigningKey)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10237);
+                LogHelper.LogInformation(LogMessages.IDX10237);
                 return;
             }
 
@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateLifetime)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10238);
+                LogHelper.LogInformation(LogMessages.IDX10238);
                 return;
             }
 
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens
                     { Expires = expires.Value });
 
             // if it reaches here, that means lifetime of the token is valid
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10239);
+            LogHelper.LogInformation(LogMessages.IDX10239);
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateTokenReplay)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10246);
+                LogHelper.LogInformation(LogMessages.IDX10246);
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // if it reaches here, that means no token replay is detected.
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10240);
+            LogHelper.LogInformation(LogMessages.IDX10240);
         }
 
         /// <summary>

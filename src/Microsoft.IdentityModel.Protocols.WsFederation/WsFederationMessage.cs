@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
-using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks>If 'queryString' is null or whitespace, a default <see cref="WsFederationMessage"/> is returned. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromQueryString(string queryString)
         {
-            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX22900, queryString));
+            LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22900, queryString));
 
             var wsFederationMessage = new WsFederationMessage();
             if (!string.IsNullOrWhiteSpace(queryString))
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            Logger.WriteVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
+            LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
 
             if (uri != null && uri.Query.Length > 1)
             {
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "wsfederationMessage"));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, "wsfederationMessage"));
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "parameters"));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, "parameters"));
                 return;
             }
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                Logger.WriteWarning(FormatInvariant(LogMessages.IDX22000, "wresult"));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, "wresult"));
                 return null;
             }
 

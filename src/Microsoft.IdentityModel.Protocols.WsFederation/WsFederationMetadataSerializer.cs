@@ -28,9 +28,9 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
-using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants;
 
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             var use = reader.GetAttribute(Attributes.Use);
             if (string.IsNullOrEmpty(use))
-                Logger.WriteWarning(LogMessages.IDX22808);
+                LogHelper.LogWarning(LogMessages.IDX22808);
             else if (!use.Equals(keyUse.Signing))
                 throw XmlUtil.LogReadException(LogMessages.IDX22809, Attributes.Use, keyUse.Signing, use);
 
@@ -203,10 +203,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 reader.ReadEndElement();
 
             if (roleDescriptor.KeyInfos.Count == 0)
-                Logger.WriteWarning(LogMessages.IDX22806);
+                LogHelper.LogWarning(LogMessages.IDX22806);
 
             if (string.IsNullOrEmpty(roleDescriptor.TokenEndpoint))
-                Logger.WriteWarning(LogMessages.IDX22807);
+                LogHelper.LogWarning(LogMessages.IDX22807);
 
             return roleDescriptor;
         }

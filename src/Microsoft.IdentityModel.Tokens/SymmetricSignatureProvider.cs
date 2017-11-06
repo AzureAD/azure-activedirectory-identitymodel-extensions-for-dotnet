@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_keyedHash == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10623));
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10642, input);
+            LogHelper.LogInformation(LogMessages.IDX10642, input);
 
             return _keyedHash.ComputeHash(input);
         }
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_keyedHash == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
+            LogHelper.LogInformation(LogMessages.IDX10643, input);
 
             return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
         }
@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_keyedHash == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10643, input);
+            LogHelper.LogInformation(LogMessages.IDX10643, input);
             return Utility.AreEqual(signature, _keyedHash.ComputeHash(input), length);
         }
 

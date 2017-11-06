@@ -89,7 +89,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         static JwtSecurityTokenHandler()
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
+            LogHelper.LogVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
             DefaultOutboundAlgorithmMap = new Dictionary<string, string>
             {
                  { SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256 },
@@ -325,7 +325,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (token.Length * 2 > MaximumTokenSizeInBytes)
             {
-                IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
+                LogHelper.LogInformation(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
                 return false;
             }
 
@@ -342,7 +342,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 return RegexJwe.IsMatch(token);
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12720);
+            LogHelper.LogInformation(LogMessages.IDX12720);
             return false;
         }
 
@@ -515,7 +515,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
+            LogHelper.LogVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), notBefore, expires, issuedAt);
             JwtHeader header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials, OutboundAlgorithmMap);
 
@@ -526,7 +526,7 @@ namespace System.IdentityModel.Tokens.Jwt
             string rawPayload = payload.Base64UrlEncode();
             string rawSignature = signingCredentials == null ? string.Empty : CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
+            LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
 
             if (encryptingCredentials != null)
                 return EncryptToken(new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature), encryptingCredentials);
@@ -788,7 +788,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
 
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, jwtToken.RawData);
+            LogHelper.LogInformation(TokenLogMessages.IDX10241, jwtToken.RawData);
             return new ClaimsPrincipal(identity);
         }
 
@@ -872,7 +872,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12645);
+                LogHelper.LogVerbose(LogMessages.IDX12645);
                 return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
             }
             finally
@@ -895,7 +895,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12508, algorithm, key);
+                LogHelper.LogInformation(LogMessages.IDX12508, algorithm, key);
                 return false;
             }
 
@@ -1020,7 +1020,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, validationParameters))
                     {
-                        IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10242, token);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                         jwtToken.SigningKey = key;
                         return jwtToken;
                     }
@@ -1050,7 +1050,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
+            LogHelper.LogInformation(TokenLogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -1087,7 +1087,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
@@ -1159,7 +1159,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 string encodedJwt = actor.BootstrapContext as string;
                 if (encodedJwt != null)
                 {
-                    IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12713);
+                    LogHelper.LogVerbose(LogMessages.IDX12713);
                     return encodedJwt;
                 }
 
@@ -1168,20 +1168,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (jwtToken.RawData != null)
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12714);
+                        LogHelper.LogVerbose(LogMessages.IDX12714);
                         return jwtToken.RawData;
                     }
                     else
                     {
-                        IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12715);
+                        LogHelper.LogVerbose(LogMessages.IDX12715);
                         return this.WriteToken(jwtToken);
                     }
                 }
 
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12711);
+                LogHelper.LogVerbose(LogMessages.IDX12711);
             }
 
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX12712);
+            LogHelper.LogVerbose(LogMessages.IDX12712);
             return WriteToken(new JwtSecurityToken(claims: actor.Claims));
         }
 
@@ -1403,13 +1403,13 @@ namespace System.IdentityModel.Tokens.Jwt
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
-                    IdentityModelEventSource.Logger.WriteWarning(TokenLogMessages.IDX10607, key);
+                    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
                     continue;
                 }
 
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Enc, key))
                 {
-                    IdentityModelEventSource.Logger.WriteWarning(TokenLogMessages.IDX10611, jwtToken.Header.Enc, key);
+                    LogHelper.LogWarning(TokenLogMessages.IDX10611, jwtToken.Header.Enc, key);
                     continue;
                 }
 

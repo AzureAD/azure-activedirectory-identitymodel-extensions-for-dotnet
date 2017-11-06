@@ -240,7 +240,6 @@ namespace Microsoft.IdentityModel.Logging
             return LogExceptionMessage(EventLevel.Error, exception);
         }
 
-
         /// <summary>
         /// Logs an exception using the event source logger.
         /// </summary>
@@ -251,6 +250,39 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
             return exception;
+        }
+
+        /// <summary>
+        /// Logs an information event.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogInformation(string message, params object[] args)
+        {
+            if (IdentityModelEventSource.Logger.IsEnabled())
+                IdentityModelEventSource.Logger.WriteInformation(message, args);
+        }
+
+        /// <summary>
+        /// Logs a verbose event.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogVerbose(string message, params object[] args)
+        {
+            if (IdentityModelEventSource.Logger.IsEnabled())
+                IdentityModelEventSource.Logger.WriteVerbose(message, args);
+        }
+
+        /// <summary>
+        /// Logs a warning event.
+        /// </summary>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        public static void LogWarning(string message, params object[] args)
+        {
+            if (IdentityModelEventSource.Logger.IsEnabled())
+                IdentityModelEventSource.Logger.WriteWarning(message, args);
         }
 
         /// <summary>

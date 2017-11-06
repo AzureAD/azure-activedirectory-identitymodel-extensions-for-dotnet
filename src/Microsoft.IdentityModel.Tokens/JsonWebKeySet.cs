@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)

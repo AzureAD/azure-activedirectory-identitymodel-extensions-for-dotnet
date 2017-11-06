@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <para>for example: 635410359229176103.MjQxMzU0ODUtMTdiNi00NzAwLWE4MjYtNTE4NGExYmMxNTNlZmRkOGU4NjctZjQ5OS00MWIyLTljNTEtMjg3NmM0NzI4ZTc5</para></remarks>
         public virtual string GenerateNonce()
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21328);
+            LogHelper.LogVerbose(LogMessages.IDX21328);
             string nonce = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString() + Guid.NewGuid().ToString()));
             if (RequireTimeStampInNonce)
             {
@@ -411,7 +411,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 // if multiple audiences are present in the id_token, 'azp' claim should be present
                 if (idToken.Payload.Aud.Count > 1 && string.IsNullOrEmpty(idToken.Payload.Azp))
                 {
-                    IdentityModelEventSource.Logger.WriteWarning(LogMessages.IDX21339);
+                    LogHelper.LogWarning(LogMessages.IDX21339);
                 }
 
                 // if 'azp' claim exist, it should be equal to 'client_id' of the application
@@ -482,7 +482,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolException">If expected value does not equal the hashed value.</exception>
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX21303, expectedValue);
+            LogHelper.LogInformation(LogMessages.IDX21303, expectedValue);
             HashAlgorithm hashAlgorithm = null;
             try
             {
@@ -516,7 +516,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the 'c_hash' claim in the 'id_token' does not correspond to the 'code' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
         protected virtual void ValidateCHash(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21304);
+            LogHelper.LogVerbose(LogMessages.IDX21304);
 
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationContext));
@@ -529,7 +529,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.Code))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX21305);
+                LogHelper.LogInformation(LogMessages.IDX21305);
                 return;
             }
 
@@ -566,7 +566,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the 'at_hash' claim in the 'id_token' does not correspond to the 'access_token' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
         protected virtual void ValidateAtHash(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21309);
+            LogHelper.LogVerbose(LogMessages.IDX21309);
 
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException("validationContext");
@@ -579,7 +579,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (string.IsNullOrEmpty(validationContext.ProtocolMessage.AccessToken))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX21310);
+                LogHelper.LogInformation(LogMessages.IDX21310);
                 return;
             }
 
@@ -614,7 +614,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <para>If <see cref="OpenIdConnectProtocolValidationContext.Nonce"/> is not-null, then a matching 'nonce' must exist in the 'id_token'.</para></remarks>
         protected virtual void ValidateNonce(OpenIdConnectProtocolValidationContext validationContext)
         {
-            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21319);
+            LogHelper.LogVerbose(LogMessages.IDX21319);
 
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationContext));
@@ -627,7 +627,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             // if a nonce is not required AND there is no nonce in the context (which represents what was returned from the IDP) and the token log and return
             if (!RequireNonce && string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX21322);
+                LogHelper.LogInformation(LogMessages.IDX21322);
                 return;
             }
 
@@ -690,7 +690,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             if (!RequireStateValidation)
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX21342);
+                LogHelper.LogVerbose(LogMessages.IDX21342);
                 return;
             }
 
@@ -703,7 +703,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             // if state is missing, but not required just return. Otherwise process it.
             if (!RequireState && string.IsNullOrEmpty(validationContext.State) && string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX21341);
+                LogHelper.LogInformation(LogMessages.IDX21341);
                 return;
             }
             else if (string.IsNullOrEmpty(validationContext.State))
