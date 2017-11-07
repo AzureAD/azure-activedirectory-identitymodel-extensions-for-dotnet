@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -55,7 +56,7 @@ namespace Microsoft.IdentityModel.Xml
             if (certificate != null)
                 Certificates.Add(Convert.ToBase64String(certificate.RawData));
             else
-                throw new ArgumentNullException(nameof(certificate));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificate)));
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                throw new ArgumentNullException(nameof(certificates));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificates)));
             }
         }
 

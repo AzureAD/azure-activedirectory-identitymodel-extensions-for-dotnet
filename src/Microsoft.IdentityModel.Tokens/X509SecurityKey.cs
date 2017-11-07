@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         public X509SecurityKey(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("certificate"));
 
             _certificate = certificate;
             KeyId = certificate.Thumbprint;

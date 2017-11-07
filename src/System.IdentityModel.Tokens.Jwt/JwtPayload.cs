@@ -436,7 +436,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (claim == null)
             {
-                throw new ArgumentNullException("claim");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claim"));
             }
 
             this.AddClaims(new Claim[] { claim });
@@ -453,7 +453,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (claims == null)
             {
-                throw new ArgumentNullException("claims");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claims"));
             }
 
             foreach (Claim claim in claims)

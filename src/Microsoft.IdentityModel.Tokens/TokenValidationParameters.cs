@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("other"));
             }
 
             ActorValidationParameters = other.ActorValidationParameters?.Clone();
@@ -250,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentNullException("AuthenticationType");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("AuthenticationType"));
                 }
 
                 _authenticationType = value;
