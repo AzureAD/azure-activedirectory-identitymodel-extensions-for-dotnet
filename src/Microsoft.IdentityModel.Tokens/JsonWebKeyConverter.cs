@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (key.GetType() == typeof(X509SecurityKey))
                 return ConvertFromX509SecurityKey(key as X509SecurityKey);
             else
-                throw new System.NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, key.GetType().FullName));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, key.GetType().FullName)));
         }
 
         /// <summary>

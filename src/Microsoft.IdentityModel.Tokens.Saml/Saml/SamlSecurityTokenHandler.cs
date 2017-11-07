@@ -821,7 +821,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            throw new NotSupportedException(LogMessages.IDX11950);
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX11950));
         }
 
         /// <summary>
