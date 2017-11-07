@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols
         public StaticConfigurationManager(T configuration)
         {
             if (configuration == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), string.Format(LogMessages.IDX20000, nameof(configuration))));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), LogHelper.FormatInvariant(LogMessages.IDX20000, nameof(configuration))));
 
             _configuration = configuration;
         }

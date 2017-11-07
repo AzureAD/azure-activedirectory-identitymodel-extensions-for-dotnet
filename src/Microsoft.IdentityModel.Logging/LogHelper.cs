@@ -266,7 +266,7 @@ namespace Microsoft.IdentityModel.Logging
             string message = null;
 
             if (args != null)
-                message = string.Format(CultureInfo.InvariantCulture, format, args);
+                message = FormatInvariant(format, args);
             else
                 message = format;
 
