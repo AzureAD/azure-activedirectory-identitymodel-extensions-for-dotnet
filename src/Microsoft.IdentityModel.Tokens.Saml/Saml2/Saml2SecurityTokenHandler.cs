@@ -325,8 +325,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             var samlToken = ReadSaml2Token(token);
-            if (samlToken.Assertion.Signature == null && validationParameters.RequireSignedTokens)
-                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
+            if (samlToken.Assertion.Signature == null)
+                if (validationParameters.RequireSignedTokens)
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10504, token)));
+                else
+                    return samlToken;
 
             bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;

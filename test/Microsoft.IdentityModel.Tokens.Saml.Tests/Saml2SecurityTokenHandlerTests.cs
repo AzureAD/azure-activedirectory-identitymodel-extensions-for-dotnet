@@ -724,6 +724,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
                         }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.Saml2Token_SignatureMissing),
+                        Token = ReferenceTokens.Saml2Token_SignatureMissing,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            RequireSignedTokens = false,
+                        }
                     }
                 };
             }
