@@ -27,7 +27,6 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging
@@ -101,7 +100,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML10000);
+                LogHelper.LogInformation(LogMessages.MIML10000);
                 return;
             }
 

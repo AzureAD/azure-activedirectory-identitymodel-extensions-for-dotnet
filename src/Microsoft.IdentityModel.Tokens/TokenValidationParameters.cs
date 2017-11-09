@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10245, securityToken);
+            LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 

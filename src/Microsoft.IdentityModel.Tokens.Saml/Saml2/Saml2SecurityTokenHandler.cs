@@ -32,8 +32,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -226,7 +224,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = token;
 
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10241, token);
+            LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
 
             return new ClaimsPrincipal(identity);
         }
@@ -364,7 +362,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 try
                 {
                     samlToken.Assertion.Signature.Verify(key);
-                    IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10242, token);
+                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                     samlToken.SigningKey = key;
                     return samlToken;
                 }
@@ -393,7 +391,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
         {
-            IdentityModelEventSource.Logger.WriteInformation(TokenLogMessages.IDX10243);
+            LogHelper.LogInformation(TokenLogMessages.IDX10243);
             if (validationParameters.IssuerSigningKey != null)
                 yield return validationParameters.IssuerSigningKey;
 
@@ -1292,7 +1290,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                IdentityModelEventSource.Logger.WriteVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 

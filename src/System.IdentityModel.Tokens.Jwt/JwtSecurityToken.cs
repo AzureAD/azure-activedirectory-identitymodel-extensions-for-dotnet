@@ -27,7 +27,6 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -486,7 +485,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="rawData">the original token.</param>
         internal void Decode(string[] tokenParts, string rawData)
         {
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX12716, rawData);
+            LogHelper.LogInformation(LogMessages.IDX12716, rawData);
             try
             {
                 Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);
@@ -513,7 +512,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             // Log if CTY is set, assume compact JWS
             if (Header.Cty != null)
-                IdentityModelEventSource.Logger.WriteVerbose(LogHelper.FormatInvariant(LogMessages.IDX12738, Header.Cty));
+                LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX12738, Header.Cty));
 
             try
             {

@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         static ConfigurationManager()
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
+            LogHelper.LogVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
         }
 
         /// <summary>

@@ -32,7 +32,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -85,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX20805, address);
+                LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 HttpResponseMessage response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
 

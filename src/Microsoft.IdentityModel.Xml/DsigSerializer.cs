@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using static Microsoft.IdentityModel.Logging.IdentityModelEventSource;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Xml
                             else
                             {
                                 // Skip the element since it is not an <RSAKeyValue>
-                                Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                                LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                             }
 
                         // </KeyValue>
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Xml
                     else
                     {
                         // Skip the element since it is not one of  <RetrievalMethod>, <X509Data>, <KeyValue>
-                        Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                        LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                     }
                 }
 
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Xml
                 else
                 {
                     // Skip the element since it is not one of  <X509Certificate>, <X509IssuerSerial>, <X509SKI>, <X509SubjectName>, <X509CRL>
-                    Logger.WriteWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                    LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
                 }
             }
 
