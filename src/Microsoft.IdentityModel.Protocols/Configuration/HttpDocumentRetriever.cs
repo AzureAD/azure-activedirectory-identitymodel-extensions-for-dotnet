@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException("address");
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(LogMessages.IDX20108, address), nameof(address)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
 
             try
             {
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(String.Format(LogMessages.IDX20804, address), ex));
+                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
             }
         }
     }

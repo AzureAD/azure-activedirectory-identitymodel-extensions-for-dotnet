@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled())
             {
                 if (args != null)
-                    WriteAlways(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteAlways(LogHelper.FormatInvariant(message, args));
                 else
                     WriteAlways(message);
             }
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Verbose)
             {
                 if (args != null)
-                    WriteVerbose(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteVerbose(LogHelper.FormatInvariant(message, args));
                 else
                     WriteVerbose(message);
             }
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Informational)
             {
                 if (args != null)
-                    WriteInformation(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteInformation(LogHelper.FormatInvariant(message, args));
                 else
                     WriteInformation(message);
             }
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Logging
         public void WriteWarning(string message, params object[] args)
         {
             if (args != null)
-                WriteWarning(string.Format(CultureInfo.InvariantCulture, message, args));
+                WriteWarning(LogHelper.FormatInvariant(message, args));
             else
                 WriteWarning(message);
         }
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Error)
             {
                 if (args != null)
-                    WriteError(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteError(LogHelper.FormatInvariant(message, args));
                 else
                     WriteError(message);
             }
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Critical)
             {
                 if (args != null)
-                    WriteCritical(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteCritical(LogHelper.FormatInvariant(message, args));
                 else
                     WriteCritical(message);
             }
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (innerException != null)
             {
-                message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
+                message = LogHelper.FormatInvariant("Message: {0}, InnerException: {1}", message, innerException.Message);
             }
 
             switch (level)
@@ -285,7 +285,7 @@ namespace Microsoft.IdentityModel.Logging
                     WriteVerbose(message, args);
                     break;
                 default:
-                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML10002, level));
+                    WriteError(LogHelper.FormatInvariant(LogMessages.MIML10002, level));
                     WriteError(message, args);
                     break;
             }
@@ -305,10 +305,10 @@ namespace Microsoft.IdentityModel.Logging
                 return string.Empty;
 
             if (args != null)
-                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), 
-                    string.Format(CultureInfo.InvariantCulture, message, args));
+                return LogHelper.FormatInvariant("[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), 
+                    LogHelper.FormatInvariant(message, args));
 
-            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
+            return LogHelper.FormatInvariant("[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
         }
     }
 }
