@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (str == null)
             {
-                throw new ArgumentNullException("str");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("str"));
             }
 
             // 62nd char of encoding

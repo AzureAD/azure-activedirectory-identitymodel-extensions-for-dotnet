@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -336,7 +337,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         private static void ParseJweParts(string jwe, out string headerPart, out string encryptedKeyPart, out string initializationVectorPart, out string ciphertextPart, out string authenticationTagPart)
         {
             if (string.IsNullOrEmpty(jwe))
-                throw new ArgumentNullException(nameof(jwe));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwe)));
 
             string[] parts = jwe.Split(new char[] {'.'}, 6);
             if (parts.Length != 5)

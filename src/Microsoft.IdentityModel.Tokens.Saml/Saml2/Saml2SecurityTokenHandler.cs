@@ -483,7 +483,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>An instance of <see cref="Saml2SecurityToken"/>.</returns>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            throw new NotSupportedException(LogMessages.IDX13950);
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX13950));
         }
 
 #if SAML2_Encryption
