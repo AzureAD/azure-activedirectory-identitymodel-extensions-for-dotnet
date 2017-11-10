@@ -1079,6 +1079,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         SamlSerializer = new SamlSerializerPublic(),
                         SubjectTestSet = ReferenceSaml.SamlSubjectEmpty,
                         TestId = nameof(ReferenceSaml.SamlSubjectEmpty)
+                    },
+                    new SamlTheoryData
+                    {
+                        SamlSerializer = new SamlSerializerPublic(),
+                        SubjectTestSet = ReferenceSaml.SamlSubjectNameIDNotAbsoluteURI,
+                        TestId = nameof(ReferenceSaml.SamlSubjectNameIDNotAbsoluteURI)
                     }
                 };
             }

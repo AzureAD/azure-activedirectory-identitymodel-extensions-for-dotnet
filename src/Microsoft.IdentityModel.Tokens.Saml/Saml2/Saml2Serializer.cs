@@ -1020,9 +1020,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (nameIdentifier.Format != null &&
                     StringComparer.Ordinal.Equals(nameIdentifier.Format.OriginalString, Saml2Constants.NameIdentifierFormats.Entity.OriginalString))
                 {
-                    if (!CanCreateValidUri(nameIdentifier.Value, UriKind.Absolute))
-                        throw LogReadException(LogMessages.IDX13107, Saml2Constants.Elements.NameID, Saml2Constants.Types.NameIDType, nameIdentifier.Value);
-
                     if (!string.IsNullOrEmpty(nameIdentifier.NameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPNameQualifier)
                         || !string.IsNullOrEmpty(nameIdentifier.SPProvidedId))

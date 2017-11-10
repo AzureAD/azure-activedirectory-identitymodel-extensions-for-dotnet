@@ -155,12 +155,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new Saml2TheoryData
                     {
+                        First = true,
                         Assertion = new Saml2Assertion(new Saml2NameIdentifier(Default.Issuer)),
                         Xml = "<Assertion Version=\"2.0\" ID=\"_b95759d0-73ae-4072-a140-567ade10a7ad\" Issuer=\"http://Default.Issuer.com\" IssueInstant=\"2017-03-17T18:33:37.095Z\" xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\"/>",
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13102", typeof(XmlReadException)),
                         Saml2Serializer = new Saml2SerializerPublic(),
                         TestId = "Saml2AssertionEmpty"
-                    }
+                    },
                 };
             }
         }
@@ -500,12 +501,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new Saml2TheoryData
                     {
+                        First = true,
                         Subject = new Saml2Subject(),
                         Xml = "<Subject NameId=\"test\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"/>",
-                        First = true,
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13125:"),
                         Saml2Serializer = new Saml2SerializerPublic(),
                         TestId = "Saml2SubjectEmpty"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Subject = new Saml2Subject(),
+                        Xml = "<Subject NameId=\"test\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:entity\">test</NameID></Subject>",
+                        Saml2Serializer = new Saml2SerializerPublic(),
+                        TestId = "Saml2SubjectNameIDIsNotAbsoluteURI"
                     }
                 };
             }

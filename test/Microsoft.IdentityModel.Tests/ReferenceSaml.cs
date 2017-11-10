@@ -1157,6 +1157,19 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static SamlSubjectTestSet SamlSubjectNameIDNotAbsoluteURI
+        {
+            get
+            {
+                return new SamlSubjectTestSet
+                {
+                    Subject = new SamlSubject("urn:oasis:names:tc:SAML:1.1:nameid-format:entity", null, "test", new List<string> { Default.SamlConfirmationMethod }, Default.SamlConfirmationData),
+                    Xml = XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(null, "urn:oasis:names:tc:SAML:1.1:nameid-format:entity", "test"),
+                                XmlGenerator.SamlSubjectConfirmationXml(new List<string> { XmlGenerator.SamlConfirmationMethodXml(Default.SamlConfirmationMethod) }, Default.SamlConfirmationData))
+                };
+            }
+        }
+
         public static SamlSubjectTestSet SamlSubjectNameEmptyString
         {
             get
