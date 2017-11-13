@@ -547,11 +547,11 @@ namespace Microsoft.IdentityModel.Tests
         {
             TestUtilities.WriteHeader($"{this}.CompareSamlSecurityTokenHandlers", true);
             var context = new CompareContext($"{this}.CompareSamlSecurityTokenHandlers");
-            var samlSecurityTokenHandler1 = new SamlSecurityTokenHandler { MaximumTokenSizeInBytes = 1 };
-            var samlSecurityTokenHandler2 = new SamlSecurityTokenHandler { MaximumTokenSizeInBytes = 2 };
+            var samlSecurityTokenHandler1 = new SamlSecurityTokenHandler { Serializer = null };
+            var samlSecurityTokenHandler2 = new SamlSecurityTokenHandler();
             IdentityComparer.AreEqual(samlSecurityTokenHandler1, samlSecurityTokenHandler2, context);
 
-            Assert.True(context.Diffs.Count(s => s == "MaximumTokenSizeInBytes:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "Serializer:") == 1);
         }
 
         [Fact]
@@ -572,11 +572,11 @@ namespace Microsoft.IdentityModel.Tests
         {
             TestUtilities.WriteHeader($"{this}.CompareSaml2SecurityTokenHandlers", true);
             var context = new CompareContext($"{this}.CompareSaml2SecurityTokenHandlers");
-            var saml2SecurityTokenHandler1 = new Saml2SecurityTokenHandler { MaximumTokenSizeInBytes = 1 };
-            var saml2SecurityTokenHandler2 = new Saml2SecurityTokenHandler { MaximumTokenSizeInBytes = 2 };
+            var saml2SecurityTokenHandler1 = new Saml2SecurityTokenHandler { Serializer = null };
+            var saml2SecurityTokenHandler2 = new Saml2SecurityTokenHandler();
             IdentityComparer.AreEqual(saml2SecurityTokenHandler1, saml2SecurityTokenHandler2, context);
 
-            Assert.True(context.Diffs.Count(s => s == "MaximumTokenSizeInBytes:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "Serializer:") == 1);
         }
 
         [Fact]

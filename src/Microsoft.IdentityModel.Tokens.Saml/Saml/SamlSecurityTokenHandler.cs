@@ -47,12 +47,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
-    public class SamlSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
+    public class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         internal const string Actor = "Actor";
 
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
 
@@ -102,22 +101,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             set
             {
                 _samlSubjectEqualityComparer = value ?? throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11514));
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum size in bytes, that a will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int MaximumTokenSizeInBytes
-        {
-            get { return _maximumTokenSizeInBytes; }
-            set
-            {
-                if (value < 1)
-                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
             }
         }
 
@@ -783,7 +766,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="token">a Saml token as a string.</param>
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">If 'token.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public virtual SamlSecurityToken ReadSamlToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -804,7 +787,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="token">a Saml token as a string.</param>
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException"> If <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public override SecurityToken ReadToken(string token)
         {
             return ReadSamlToken(token);
@@ -1158,8 +1141,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt <see cref="MaximumTokenSizeInBytes"/>.</exception>
-        public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw LogArgumentNullException(nameof(token));

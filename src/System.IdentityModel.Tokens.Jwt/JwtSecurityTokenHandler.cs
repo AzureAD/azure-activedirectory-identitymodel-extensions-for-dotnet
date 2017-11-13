@@ -43,7 +43,7 @@ namespace System.IdentityModel.Tokens.Jwt
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
     /// </summary>
-    public class JwtSecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
+    public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
         internal static Regex RegexJws;
         internal static Regex RegexJwe;
@@ -53,7 +53,6 @@ namespace System.IdentityModel.Tokens.Jwt
         private ISet<string> _inboundClaimFilter;
         private IDictionary<string, string> _inboundClaimTypeMap;
         private static string _jsonClaimType = _namespace + "/json_type";
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
         private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
         private IDictionary<string, string> _outboundClaimTypeMap;
         private IDictionary<string, string> _outboundAlgorithmMap = null;
@@ -284,26 +283,6 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets and sets the maximum token size in bytes that will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int MaximumTokenSizeInBytes
-        {
-            get
-            {
-                return _maximumTokenSizeInBytes;
-            }
-
-            set
-            {
-                if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
-            }
-        }
-
-        /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
         /// <para>see: http://tools.ietf.org/html/rfc7519 </para>
         /// </summary>
@@ -315,7 +294,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </remarks>
         /// <returns>
         /// <para>'false' if the token is null or whitespace.</para>
-        /// <para>'false' if token.Length * 2 >  <see cref="MaximumTokenSizeInBytes"/>.</para>
+        /// <para>'false' if token.Length * 2 >  <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</para>
         /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// </returns>
         public override bool CanReadToken(string token)
@@ -654,7 +633,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' > MaximumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException">'token.Length' > <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
@@ -680,7 +659,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length * 2' > MaximumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException">'token.Length * 2' > <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
@@ -729,7 +708,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks> 
         /// Many of the exceptions listed above are not thrown directly from this method. See <see cref="Validators"/> to examin the call graph.
         /// </remarks>
-        public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw LogHelper.LogArgumentNullException(nameof(token));

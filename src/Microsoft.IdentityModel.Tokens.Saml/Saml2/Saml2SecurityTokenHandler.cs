@@ -45,11 +45,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml2 Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
-    public class Saml2SecurityTokenHandler : SecurityTokenHandler, ISecurityTokenValidator
+    public class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         private const string Actor = "Actor";
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -95,22 +94,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public override bool CanWriteToken
         {
             get { return true; }
-        }
-
-        /// <summary>
-        /// Gets and sets the maximum token size in bytes that will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int MaximumTokenSizeInBytes
-        {
-            get { return _maximumTokenSizeInBytes; }
-            set
-            {
-                if (value < 1)
-                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
-            }
         }
 
         /// <summary>
@@ -200,10 +183,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException">'token' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentException">token.Length is greater than <see cref="Saml2SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">token.Length is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">if the token is not well-formed.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> representing the identity contained in the token.</returns>
-        public virtual ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (token == null)
                 throw LogArgumentNullException(nameof(token));
@@ -445,7 +428,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
         /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
         public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
@@ -466,7 +449,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
         /// <exception cref="ArgumentNullException"> If 'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If 'token.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
         public override SecurityToken ReadToken(string token)
         {
