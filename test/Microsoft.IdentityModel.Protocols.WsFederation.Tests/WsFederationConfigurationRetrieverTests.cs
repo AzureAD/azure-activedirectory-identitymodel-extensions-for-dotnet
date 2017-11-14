@@ -367,7 +367,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX22809:"),
+                        ExpectedException = ExpectedException.NoExceptionExpected,
                         Metadata = ReferenceMetadata.KeyDescriptorKeyUseNotForSigning,
                         TestId = "ReadKeyDescriptorForSigning: 'use' is not 'signing'"
                     },
