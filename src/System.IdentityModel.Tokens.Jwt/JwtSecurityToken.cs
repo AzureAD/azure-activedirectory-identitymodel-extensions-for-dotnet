@@ -62,12 +62,12 @@ namespace System.IdentityModel.Tokens.Jwt
             string[] tokenParts = jwtEncodedString.Split(new char[] {'.'}, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
+                if (!JwtSecurityTokenHandler.RegexJws.IsMatch(jwtEncodedString))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                if (!Regex.IsMatch(jwtEncodedString, JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled, TimeSpan.FromMilliseconds(100)))
+                if (!JwtSecurityTokenHandler.RegexJwe.IsMatch(jwtEncodedString))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10709, jwtEncodedString)));
             }
             else
