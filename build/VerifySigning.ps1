@@ -37,7 +37,6 @@ if (($snTool -eq $null) -and ($snToolx64 -eq $null))
 Write-Host "Verify Signing..."
 
 $params = @("-vf", "")
-$filePatterns = @("Microsoft.IdentityModel.*.dll", "System.IdentityModel.Tokens.Jwt.dll")
 
 [xml]$buildConfiguration = Get-Content $root\buildConfiguration.xml
 $projects = $buildConfiguration.SelectNodes("root/projects/src/project")
@@ -48,39 +47,36 @@ foreach ($project in $projects)
 {
     foreach ($runtime in $runtimes)
     {
-        foreach ($pattern in $filePatterns)
+        $name = $project.name
+        $files = Get-ChildItem $srcPath\$name\bin\$buildType\$runtime\$name.dll 2>&1
+        if ( $? )
         {
-            $name = $project.name
-            $files = Get-ChildItem $srcPath\$name\bin\$buildType\$runtime\$pattern 2>&1
-            if ( $? )
+            foreach ($file in $files)
             {
-                foreach ($file in $files)
+                $params[1] = $file
+                $unSigned = $false
+                if ($snTool -ne $null)
                 {
-                    $params[1] = $file
-                    $unSigned = $false
-                    if ($snTool -ne $null)
+                    $x = & "$snTool" $params 2>&1
+                    if (-not $?)
                     {
-                        $x = & "$snTool" $params 2>&1
-                        if (-not $?)
-                        {
-                            $unSigned = $true
-                            $exitCode += $LASTEXITCODE
-                        }
+                        $unSigned = $true
+                        $exitCode += $LASTEXITCODE
                     }
-                    if ($snToolx64 -ne $null)
+                }
+                if ($snToolx64 -ne $null)
+                {
+                    $x = & "$snToolx64" $params 2>&1
+                    if (-not $?)
                     {
-                        $x = & "$snToolx64" $params 2>&1
-                        if (-not $?)
-                        {
-                            $unSigned = $true
-                            $exitCode += $LASTEXITCODE
-                        }
+                        $unSigned = $true
+                        $exitCode += $LASTEXITCODE
                     }
+                }
 
-                    if ($unSigned)
-                    {
-                        Write-Host "$file is unsigned."
-                    }
+                if ($unSigned)
+                {
+                    Write-Host "$file is unsigned."
                 }
             }
         }
