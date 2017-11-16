@@ -149,8 +149,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             var use = reader.GetAttribute(Attributes.Use);
             if (string.IsNullOrEmpty(use))
                 LogHelper.LogWarning(LogMessages.IDX22808);
-            else if (!use.Equals(keyUse.Signing))
-                throw XmlUtil.LogReadException(LogMessages.IDX22809, Attributes.Use, keyUse.Signing, use);
 
             // <KeyDescriptor>
             reader.ReadStartElement();
@@ -190,7 +188,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace) && reader.GetAttribute(Attributes.Use).Equals(keyUse.Signing))
+                if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace))
                     roleDescriptor.KeyInfos.Add(ReadKeyDescriptorForSigning(reader));
                 else if (reader.IsStartElement(Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace))
                     roleDescriptor.TokenEndpoint = ReadPassiveRequestorEndpoint(reader);
