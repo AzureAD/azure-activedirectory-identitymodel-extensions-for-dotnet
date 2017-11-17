@@ -1,4 +1,5 @@
 Windows Azure Active Directory IdentityModel Extensions for .Net
+## Release 5.1.5
 ===========
 
 IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
