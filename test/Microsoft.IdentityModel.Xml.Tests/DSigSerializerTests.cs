@@ -487,6 +487,33 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
+        [Theory, MemberData("WriteReferenceTheoryData")]
+        public void WriteReference(DSigSerializerTheoryData theoryData)
+        {
+            var ms = new MemoryStream();
+            var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+            DSigSerializer.Default.WriteReference(writer, theoryData.Reference);
+            writer.Flush();
+            var xml = Encoding.UTF8.GetString(ms.ToArray());
+
+            IdentityComparer.AreEqual(theoryData.Xml, xml);
+        }
+
+        public static TheoryData<DSigSerializerTheoryData> WriteReferenceTheoryData
+        {
+            get
+            {
+                // uncomment to view exception displayed to user
+                //ExpectedException.DefaultVerbose = true;
+
+                return new TheoryData<DSigSerializerTheoryData>
+                {
+                    ReferenceTest(ReferenceTestSet.ReferenceWithNoUriIdWithPound),
+                    ReferenceTest(ReferenceTestSet.ReferenceWithNoUriIdWithoutPound)
+                };
+            }
+        }
+
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 

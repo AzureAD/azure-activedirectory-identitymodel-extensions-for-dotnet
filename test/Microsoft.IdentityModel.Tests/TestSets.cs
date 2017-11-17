@@ -1067,6 +1067,32 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+
+        public static ReferenceTestSet ReferenceWithNoUriIdWithPound
+        {
+            get
+            {
+                return new ReferenceTestSet
+                {
+                    Reference = new Reference() { Id = "#test", DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
+                    TestId = nameof(ReferenceWithNoUriIdWithPound),
+                    Xml = @"<Reference Id=""test"" URI=""#test"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>"
+                };
+            }
+        }
+
+        public static ReferenceTestSet ReferenceWithNoUriIdWithoutPound
+        {
+            get
+            {
+                return new ReferenceTestSet
+                {
+                    Reference = new Reference() { Id = "test", DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
+                    TestId = nameof(ReferenceWithNoUriIdWithoutPound),
+                    Xml = @"<Reference Id=""test"" URI=""#test"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>"
+                };
+            }
+        }
     }
 
     public class TransformsTestSet : XmlTestSet
