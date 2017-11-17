@@ -106,7 +106,8 @@ namespace ApiChangeTest
                     ComparerConfiguration configuration = new ComparerConfiguration();
                     configuration.Severities.ParameterNameChanged = Severity.Warning;
                     configuration.Severities.AssemblyNameChanged = Severity.Hint;
-                    
+                    configuration.Ignore.Add("System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.MaximumTokenSizeInBytes");
+
                     // compare assemblies and write xml report
                     using (var stream = new FileStream(reportPath, FileMode.Create))
                     {
