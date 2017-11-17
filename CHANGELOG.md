@@ -1,4 +1,9 @@
 <a name="5.0.0"></a>
+# 5.1.5
+
+## Features
+* **RegEx expression uses CultureInvariant for servers with large number of locales.**
+
 # 5.1.4
 
 ## Features
