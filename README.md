@@ -5,7 +5,9 @@ IdentityModel Extensions for .Net provide assemblies that are interesting for we
 
 ## Versions
 Current version - 5.1.5
+
 Preview version - 5.2.0-preview2-41113220915 has support for WsFederation, Saml1, Saml2 and EnvelopedSignature validation.
+
 Minimum recommended version - 4.0.3  
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/CHANGELOG.md).
