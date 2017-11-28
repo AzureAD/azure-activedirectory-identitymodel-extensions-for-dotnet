@@ -38,7 +38,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Delegate for validating additional claims in 'id_token' 
+    /// Delegate for validating additional claims in 'id_token'
     /// </summary>
     /// <param name="idToken"><see cref="JwtSecurityToken"/> to validate</param>
     /// <param name="context"><see cref="OpenIdConnectProtocolValidationContext"/> used for validation</param>
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException("validationContext");
 
-            // no 'response' is recieved or 'id_token' in the response is null 
+            // no 'response' is recieved or 'id_token' in the response is null
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21333));
 
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationContext));
 
-            // no 'response' is recieved 
+            // no 'response' is recieved
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21333));
 
@@ -451,8 +451,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21301, algorithm, typeof(HashAlgorithm)), ex));
             }
-
-            throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21302, algorithm)));
         }
 
         /// <summary>
@@ -512,8 +510,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'validationContext.ValidatedIdToken' is null.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the validationContext contains a 'code' and there is no 'c_hash' claim in the 'id_token'.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the validationContext contains a 'code' and the 'c_hash' claim is not a string in the 'id_token'.</exception> 
-        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the 'c_hash' claim in the 'id_token' does not correspond to the 'code' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the validationContext contains a 'code' and the 'c_hash' claim is not a string in the 'id_token'.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidCHashException">If the 'c_hash' claim in the 'id_token' does not correspond to the 'code' in the <see cref="OpenIdConnectMessage"/> response.</exception>
         protected virtual void ValidateCHash(OpenIdConnectProtocolValidationContext validationContext)
         {
             LogHelper.LogVerbose(LogMessages.IDX21304);
@@ -547,7 +545,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                ValidateHash(chash, validationContext.ProtocolMessage.Code, validationContext.ValidatedIdToken.Header.Alg);
+                var isJwe = validationContext.ValidatedIdToken.RawData.Split('.').Length == 5;
+
+                ValidateHash(chash, validationContext.ProtocolMessage.Code, isJwe
+                    ? validationContext.ValidatedIdToken.InnerToken.Header.Alg
+                    : validationContext.ValidatedIdToken.Header.Alg);
             }
             catch(OpenIdConnectProtocolException ex)
             {
@@ -562,8 +564,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="ArgumentNullException">If 'validationContext' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'validationContext.ValidatedIdToken' is null.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the validationContext contains a 'token' and there is no 'at_hash' claim in the id_token.</exception>
-        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the validationContext contains a 'token' and the 'at_hash' claim is not a string in the 'id_token'.</exception> 
-        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the 'at_hash' claim in the 'id_token' does not correspond to the 'access_token' in the <see cref="OpenIdConnectMessage"/> response.</exception> 
+        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the validationContext contains a 'token' and the 'at_hash' claim is not a string in the 'id_token'.</exception>
+        /// <exception cref="OpenIdConnectProtocolInvalidAtHashException">If the 'at_hash' claim in the 'id_token' does not correspond to the 'access_token' in the <see cref="OpenIdConnectMessage"/> response.</exception>
         protected virtual void ValidateAtHash(OpenIdConnectProtocolValidationContext validationContext)
         {
             LogHelper.LogVerbose(LogMessages.IDX21309);
@@ -593,7 +595,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validationContext.ValidatedIdToken.Header.Alg);
+                var isJwe = validationContext.ValidatedIdToken.RawData.Split('.').Length == 5;
+                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, isJwe
+                        ?validationContext.ValidatedIdToken.InnerToken.Header.Alg
+                        : validationContext.ValidatedIdToken.Header.Alg);
             }
             catch (OpenIdConnectProtocolException ex)
             {
