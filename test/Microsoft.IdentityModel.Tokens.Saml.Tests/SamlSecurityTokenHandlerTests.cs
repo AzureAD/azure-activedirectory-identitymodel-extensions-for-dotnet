@@ -34,6 +34,8 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     /// <summary>
@@ -62,8 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CanReadTokenTheoryData")]
+        [Theory, MemberData(nameof(CanReadTokenTheoryData))]
         public void CanReadToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
@@ -116,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("CreateClaimsIdentitiesTheoryData")]
+        [Theory, MemberData(nameof(CreateClaimsIdentitiesTheoryData))]
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
@@ -172,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("ReadTokenTheoryData")]
+        [Theory, MemberData(nameof(ReadTokenTheoryData))]
         public void ReadToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
@@ -207,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("RoundTripTokenTheoryData")]
+        [Theory, MemberData(nameof(RoundTripTokenTheoryData))]
         public void RoundTripToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
@@ -306,7 +307,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
         }
 
-        [Theory, MemberData("ValidateAudienceTheoryData")]
+        [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
         public void ValidateAudience(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -341,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("ValidateIssuerTheoryData")]
+        [Theory, MemberData(nameof(ValidateIssuerTheoryData))]
         public void ValidateIssuer(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
@@ -376,7 +377,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("ValidateTokenTheoryData")]
+        [Theory, MemberData(nameof(ValidateTokenTheoryData))]
         public void ValidateToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -647,7 +648,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("WriteTokenTheoryData")]
+        [Theory, MemberData(nameof(WriteTokenTheoryData))]
         public void WriteToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
@@ -689,7 +690,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("WriteTokenXmlTheoryData")]
+        [Theory, MemberData(nameof(WriteTokenXmlTheoryData))]
         public void WriteTokenXml(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteTokenXml", theoryData);
@@ -745,8 +746,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
         private class SamlSecurityTokenHandlerPublic : SamlSecurityTokenHandler
         {
             public IEnumerable<ClaimsIdentity> CreateClaimsIdentitiesPublic(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
@@ -766,3 +765,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

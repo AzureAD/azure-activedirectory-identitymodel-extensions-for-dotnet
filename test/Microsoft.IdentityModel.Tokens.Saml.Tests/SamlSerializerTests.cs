@@ -26,22 +26,22 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
-using System.Collections.Generic;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     public class SamlSerializerTests
     {
         #region SamlAction
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadActionTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadActionTheoryData))]
         public void ReadAction(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadAction", theoryData);
@@ -120,9 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAdvice
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAdviceTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAdviceTheoryData))]
         public void ReadAdvice(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadAdvice", theoryData);
@@ -187,8 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAssertion
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAssertionTheoryData")]
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
         public void ReadAssertion(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
@@ -332,7 +329,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("WriteAssertionTheoryData")]
+        [Theory, MemberData(nameof(WriteAssertionTheoryData))]
         public void WriteAssertion(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
@@ -361,7 +358,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 
         public static TheoryData<SamlTheoryData> WriteAssertionTheoryData
         {
@@ -391,9 +387,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAttribute
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAttributeTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAttributeTheoryData))]
         public void ReadAttribute(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadAttribute", theoryData);
@@ -479,9 +473,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAttributeStatement
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAttributeStatementTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAttributeStatementTheoryData))]
         public void ReadAttributeStatement(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadAttributeStatement", theoryData);
@@ -541,9 +533,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAudienceRestrictionCondition
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAudienceRestrictionConditionTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAudienceRestrictionConditionTheoryData))]
         public void ReadAudienceRestrictionCondition(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadAudienceRestrictionCondition", theoryData);
@@ -610,9 +600,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAuthenticationStatement
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAuthenticationStatementTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAuthenticationStatementTheoryData))]
         public void ReadAuthenticationStatement(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadAuthenticationStatement", theoryData);
@@ -731,9 +719,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlAuthorizationDecisionStatement
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadAuthorizationDecisionStatementTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadAuthorizationDecisionStatementTheoryData))]
         public void ReadAuthorizationDecisionStatement(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadAuthorizationDecisionStatement", theoryData);
@@ -833,9 +819,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlConditions
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadConditionsTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadConditionsTheoryData))]
         public void ReadConditions(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadConditions", theoryData);
@@ -905,9 +889,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlEvidence
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadEvidenceTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadEvidenceTheoryData))]
         public void ReadEvidence(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadEvidence", theoryData);
@@ -980,9 +962,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         #endregion
 
         #region SamlSubject
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ReadSubjectTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ReadSubjectTheoryData))]
         public void ReadSubject(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadSubject", theoryData);
@@ -1150,3 +1130,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

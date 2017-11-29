@@ -38,10 +38,10 @@ using ApiCheck.Result.Difference;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
-namespace ApiChangeTest
-{
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
+namespace ApiChangeTest
+{
     public class ApiChangeTest
     {
         private static bool _readyToRunTests = false;
@@ -52,8 +52,7 @@ namespace ApiChangeTest
             "Microsoft.IdentityModel.Protocols",
             "Microsoft.IdentityModel.Protocols.OpenIdConnect",           
             "Microsoft.IdentityModel.Tokens",
-            "System.IdentityModel.Tokens.Jwt",
-            //"Microsoft.IdentityModel.Protocols.WsFederation"
+            "System.IdentityModel.Tokens.Jwt"
         };
 
         /// <summary>
@@ -190,6 +189,6 @@ namespace ApiChangeTest
     {
         public string PackageName;
     }
+}
 
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-}

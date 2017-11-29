@@ -31,12 +31,13 @@ using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class DelegatingXmlDictionaryWriterTests
     {
-        [Theory, MemberData("WriteXmlTheoryData")]
+        [Theory, MemberData(nameof(WriteXmlTheoryData))]
         public void WriteXml(DelegatingXmlDictionaryWriterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteXml", theoryData);
@@ -78,7 +79,6 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 
     public class DelegatingXmlDictionaryWriterPublic : DelegatingXmlDictionaryWriter
     {
@@ -94,3 +94,5 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         public DelegatingXmlDictionaryWriterPublic DelegatingWriter { get; set; }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -31,16 +31,13 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class ValidatorsTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("AudienceDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(AudienceDataSet))]
         public void Audience(List<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -77,9 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IssuerDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(IssuerDataSet))]
         public void Issuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -116,9 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("LifeTimeDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(LifeTimeDataSet))]
         public void Lifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -173,9 +166,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("SecurityKeyDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SecurityKeyDataSet))]
         public void SecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -207,9 +198,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("TokenReplayDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(TokenReplayDataSet))]
         public void TokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -259,3 +248,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -42,7 +42,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch(Exception ex)
             {
-                Assert.Equal(ex.GetType(), typeof(ArgumentException));
+                Assert.Equal(typeof(ArgumentException), ex.GetType());
                 Assert.Contains("Property with the same name already exists on object.", ex.Message);
             }
         }

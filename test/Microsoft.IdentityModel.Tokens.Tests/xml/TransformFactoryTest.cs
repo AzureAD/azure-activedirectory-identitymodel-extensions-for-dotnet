@@ -29,12 +29,13 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class TransformFactoryTest
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("GetTransformTestTheoryData")]
+        [Theory, MemberData(nameof(GetTransformTestTheoryData))]
         public void GetTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetTransformTest", theoryData);
@@ -72,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             };
         }
 
-        [Theory, MemberData("GetCanonicalizingTransformTestTheoryData")]
+        [Theory, MemberData(nameof(GetCanonicalizingTransformTestTheoryData))]
         public void GetCanonicalizingTransformTest(TransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetCanonicalizingTransformTest", theoryData);
@@ -114,7 +115,6 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 }
             };
         }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class TransformTheoryData : TheoryDataBase
@@ -122,3 +122,5 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         public string Algorithm { get; set; }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

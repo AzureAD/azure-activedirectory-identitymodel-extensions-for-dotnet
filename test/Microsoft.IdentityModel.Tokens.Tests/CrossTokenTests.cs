@@ -27,10 +27,12 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -40,9 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class CrossTokenTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CrossTokenValidateTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CrossTokenValidateTokenTheoryData))]
         public void CrossTokenValidateToken(CrossTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CrossTokenValidateToken", theoryData);
@@ -113,3 +113,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public TokenValidationParameters TokenValidationParameters { get; set; }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

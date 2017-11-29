@@ -574,7 +574,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Validation of the audience, mitigates forwarding attacks. For example, a site that receives a token, could not replay it to another side.
         /// A forwarded token would contain the audience of the original site.</remarks>
-        [DefaultValue(true)]        
+        [DefaultValue(true)]
         public bool ValidateAudience
         {
             get;

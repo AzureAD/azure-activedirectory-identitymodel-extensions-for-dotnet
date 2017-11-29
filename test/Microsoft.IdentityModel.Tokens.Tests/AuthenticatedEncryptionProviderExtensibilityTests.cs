@@ -29,6 +29,8 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -63,9 +65,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             provider.Encrypt(Guid.NewGuid().ToByteArray(), Guid.NewGuid().ToByteArray());
             Assert.True(provider.EncryptCalled);
         }
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("GetKeyBytesTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        [Theory, MemberData(nameof(GetKeyBytesTheoryData))]
         public void GetKeyBytes(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -122,9 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgorithmTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(IsSupportedAlgorithmTheoryData))]
         public void IsSupportedAlgorithm(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -188,9 +187,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateKeySizeTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateKeySizeTheoryData))]
         public void ValidateKeySize(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -249,3 +246,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

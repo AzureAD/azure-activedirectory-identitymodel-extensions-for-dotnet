@@ -26,20 +26,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
     <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="2.0.5-*" />
-    <PackageReference Include="xunit" Version="2.2.0-*" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.3.0-*" />
-    <PackageReference Include="System.Security.Claims" Version="4.3.0-*" />
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="$(CoreFxVersion)" />
+    <PackageReference Include="System.Security.Claims" Version="$(CoreFxVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <PackageReference Include="xunit.runner.console" Version="2.1.0" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System" />

@@ -32,6 +32,8 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class CreateAndValidateTokens
@@ -184,9 +186,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void RoundTripTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -395,9 +395,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(RoundTripJWEParams))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -587,9 +585,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(CreationJWEParams))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void CreateJWETokens(string testId, string jweToken, TokenValidationParameters validationParameters, JwtPayload expectedPayload, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -974,3 +970,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -31,6 +31,8 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class RsaSecurityKeyTests
@@ -85,9 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("HasPrivateKeyTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(HasPrivateKeyTheoryData))]
         public void HasPrivateKey(string testId, AsymmetricSecurityKey key, bool expected)
         {
             if (expected)
@@ -152,9 +152,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
         public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
@@ -180,3 +178,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

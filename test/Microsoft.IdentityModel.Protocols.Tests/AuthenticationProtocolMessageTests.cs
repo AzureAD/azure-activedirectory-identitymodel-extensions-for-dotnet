@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             }
 
             Assert.NotNull(authenticationProtocolMessage.Parameters);
-            Assert.Equal(authenticationProtocolMessage.Parameters.Count, 0);
+            Assert.Equal(0, authenticationProtocolMessage.Parameters.Count);
         }
 
         [Fact]
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             string queryString = authenticationProtocolMessage.BuildRedirectUrl();
             Assert.NotNull(queryString);
-            Assert.True(queryString.Contains("bob"));
+            Assert.Contains("bob", queryString);
 
             authenticationProtocolMessage.IssuerAddress = string.Empty;
             queryString = authenticationProtocolMessage.BuildRedirectUrl();

@@ -31,19 +31,19 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
-using Xunit;
 using Microsoft.IdentityModel.Protocols.Extensions.OldVersion;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
-using Microsoft.IdentityModel.Tests;
+using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 {
     public class SamlCrossVersionTokenValidationTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateTokenCrossVerstionTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateTokenCrossVerstionTheoryData))]
         public void CreateTokenCrossVerstionTest(TokenCrossTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateTokenCrossVerstionTest", theoryData);
@@ -106,9 +106,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateClaimsPrincipalCrossVersionTestTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateClaimsPrincipalCrossVersionTestTheoryData))]
         public void CreateClaimsPrincipalCrossVersionTest(ClaimsPrincipalTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsPrincipalCrossVersionTest", theoryData);
@@ -825,3 +823,5 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
         public X509Certificate2 X509Certificate { get; set; }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

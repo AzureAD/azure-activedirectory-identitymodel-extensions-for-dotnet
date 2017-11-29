@@ -29,6 +29,8 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -51,11 +53,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class RsaKeyWrapProviderTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("RsaKeyWrapConstructorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(RsaKeyWrapConstructorTheoryData))]
         public void Constructors(string testId, SecurityKey key, string algorithm, bool isDecrypt, ExpectedException ee)
         {
+            TestUtilities.WriteHeader("Constructors - " + testId, true);
             try
             {
                 var context = Guid.NewGuid().ToString();
@@ -155,9 +156,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(provider.WrapKeyCalled);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("RsaUnwrapMismatchTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(RsaUnwrapMismatchTheoryData))]
         public void RsaUnwrapMismatch(RsaKeyWrapTestParams theoryParams)
         {
             try
@@ -175,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        private static TheoryData<RsaKeyWrapTestParams> RsaUnwrapMismatchTheoryData()
+        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapMismatchTheoryData()
         {
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
@@ -212,9 +211,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("RsaUnwrapTamperedTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(RsaUnwrapTamperedTheoryData))]
         public void RsaUnwrapTamperedData(RsaKeyWrapTestParams theoryParams)
         {
             try
@@ -228,7 +225,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        private static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTamperedTheoryData()
+        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTamperedTheoryData()
         {
             var theoryData = new TheoryData<RsaKeyWrapTestParams>();
 
@@ -270,9 +267,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("RsaUnwrapTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(RsaUnwrapTheoryData))]
         public void RsaUnwrapParameterCheck(RsaKeyWrapTestParams theoryParams)
         {
             try
@@ -313,9 +308,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("RsaWrapUnwrapTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(RsaWrapUnwrapTheoryData))]
         public void RsaWrapUnwrapKey(RsaKeyWrapTestParams theoryParams)
         {
             try
@@ -420,3 +413,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

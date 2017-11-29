@@ -26,22 +26,20 @@
 //------------------------------------------------------------------------------
 
 using System.Text;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class JwtReferenceTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("Base64UrlEncodingTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
+        [Theory, MemberData(nameof(Base64UrlEncodingTheoryData))]
         public void Base64UrlEncoding(string testId, string dataToEncode, string encodedData)
         {
+            TestUtilities.WriteHeader($"Base64UrlEncoding - {testId}", true);
             Assert.True(dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal), "dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal)");
             Assert.True(encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal), "encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal)");
         }
@@ -61,11 +59,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("JwtEncodingTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(JwtEncodingTheoryData))]
         public void JwtEncoding(string testId, JwtHeader header, string encodedData)
         {
+            TestUtilities.WriteHeader($"JwtEncoding - {testId}", true);
             Assert.True(encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal), "encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal)");
         }
 
@@ -83,9 +80,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("JwtSigningTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(JwtSigningTheoryData))]
         public void JwtSigning(JwtSigningTestParams testParams)
         {
             var providerForSigning = CryptoProviderFactory.Default.CreateForSigning(testParams.PrivateKey, testParams.Algorithm);
@@ -154,3 +149,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

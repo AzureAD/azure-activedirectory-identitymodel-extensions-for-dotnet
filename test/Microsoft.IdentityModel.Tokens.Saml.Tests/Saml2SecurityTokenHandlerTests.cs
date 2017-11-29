@@ -33,9 +33,10 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
-    #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class Saml2SecurityTokenHandlerTests
     {
         [Fact]
@@ -59,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
         }
 
-        [Theory, MemberData("CanReadTokenTheoryData")]
+        [Theory, MemberData(nameof(CanReadTokenTheoryData))]
         public void CanReadToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
@@ -117,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
         }
 
-        [Theory, MemberData("ConsolidateAttributesTheoryData")]
+        [Theory, MemberData(nameof(ConsolidateAttributesTheoryData))]
         public void ConsolidateAttributes(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ConsolidateAttributes", theoryData);
@@ -239,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             return context.Merge(localContext);
         }
 
-        [Theory, MemberData("ReadTokenTheoryData")]
+        [Theory, MemberData(nameof(ReadTokenTheoryData))]
         public void ReadToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
@@ -276,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("RoundTripTokenTheoryData")]
+        [Theory, MemberData(nameof(RoundTripTokenTheoryData))]
         public void RoundTripToken(Saml2TheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
@@ -375,7 +376,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
         }
 
-        [Theory, MemberData("RoundTripActorTheoryData")]
+        [Theory, MemberData(nameof(RoundTripActorTheoryData))]
         public void RoundTripActor(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.RoundTripActor", theoryData);
@@ -402,7 +403,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
         }
 
-        [Theory, MemberData("ValidateAudienceTheoryData")]
+        [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
         public void ValidateAudience(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -438,7 +439,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("ValidateIssuerTheoryData")]
+        [Theory, MemberData(nameof(ValidateIssuerTheoryData))]
         public void ValidateIssuer(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
@@ -474,7 +475,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        [Theory, MemberData("ValidateTokenTheoryData")]
+        [Theory, MemberData(nameof(ValidateTokenTheoryData))]
         public void ValidateToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -742,8 +743,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 };
             }
         }
-
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class Saml2SecurityTokenHandlerPublic : Saml2SecurityTokenHandler
@@ -783,3 +782,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
     }
 
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -38,6 +38,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     /// <summary>
@@ -113,7 +115,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             ExpectedException ee = ExpectedException.ArgumentNullException();
             Assert.NotNull(validationParameters.HashAlgorithmMap);
-            Assert.Equal(validationParameters.HashAlgorithmMap.Count, 18);
+            Assert.Equal(18, validationParameters.HashAlgorithmMap.Count);
 
             ee = ExpectedException.ArgumentOutOfRangeException();
             try
@@ -138,9 +140,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateAuthenticationResponseTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+        [Theory, MemberData(nameof(ValidateAuthenticationResponseTheoryData))]
         public void ValidateAuthenticationResponse(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAuthenticationResponse", theoryData);
@@ -270,9 +271,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateTokenResponseTheoryData")]
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateTokenResponseTheoryData))]
         public void ValidateTokenResponse(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateTokenResponse", theoryData);
@@ -370,9 +369,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateUserInfoResponseTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateUserInfoResponseTheoryData))]
         public void ValidateUserInfoResponse(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateUserInfoResponse", theoryData);
@@ -493,9 +490,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateIdTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateIdTokenTheoryData))]
         public void ValidateIdToken(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIdToken", theoryData);
@@ -723,10 +718,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateCHashTheoryData")]
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
+        [Theory, MemberData(nameof(ValidateCHashTheoryData))]
         private void ValidateCHash(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateCHash", theoryData);
@@ -907,10 +899,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateNonceTheoryData")]
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
+        [Theory, MemberData(nameof(ValidateNonceTheoryData))]
         private void ValidateNonce(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateNonce", theoryData);
@@ -1135,9 +1124,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateAtHashTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateAtHashTheoryData))]
         public void ValidateAtHash(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAtHash", theoryData);
@@ -1248,9 +1235,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ValidateStateTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ValidateStateTheoryData))]
         public void ValidateState(OidcProtocolValidatorTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateState", theoryData);
@@ -1378,7 +1363,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory]
         [InlineData(SecurityAlgorithms.EcdsaSha256, "SHA256", true)]
         [InlineData(SecurityAlgorithms.EcdsaSha256Signature, "SHA256", true)]
@@ -1400,19 +1384,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [InlineData(SecurityAlgorithms.RsaSsaPssSha512, "SHA512", true)]
         [InlineData(SecurityAlgorithms.ExclusiveC14nWithComments, "SHA512", false)]
         [InlineData(SecurityAlgorithms.Aes128KeyWrap, "SHA512", false)]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void DefaultAlgorithmMapTest(string algorithm, string expectedHash, bool shouldFind)
         {
             var protocolValidator = new OpenIdConnectProtocolValidator();
             string hashFound;
             Assert.True(protocolValidator.HashAlgorithmMap.TryGetValue(algorithm, out hashFound) == shouldFind);
             if (shouldFind)
-                Assert.True(hashFound.Equals(expectedHash, StringComparison.Ordinal));
+                Assert.Equal(hashFound, expectedHash);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("HashAlgorithmExtensibilityTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(HashAlgorithmExtensibilityTheoryData))]
         public void HashAlgorithmExtensibility(OpenIdConnectProtocolValidator protocolValidator, string alg, Type algorithmType, ExpectedException ee)
         {
             ee.Verbose = false;
@@ -1483,9 +1464,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("GetHashAlgorithmTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(GetHashAlgorithmTheoryData))]
         public void GetHashAlgorithm(OpenIdConnectProtocolValidator protocolValidator, string alg, Type algorithmType, ExpectedException ee)
         {
             ee.Verbose = false;
@@ -1596,3 +1575,5 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

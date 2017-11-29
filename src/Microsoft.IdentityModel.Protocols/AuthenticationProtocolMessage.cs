@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using static System.Net.WebUtility;
 
 namespace Microsoft.IdentityModel.Protocols

@@ -32,7 +32,8 @@ using System.Reflection;
 using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using static Microsoft.IdentityModel.Tests.TestUtilities;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -41,12 +42,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectMessageTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ConstructorsTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(ConstructorsTheoryData))]
         public void Constructors(OpenIdConnectMessageTheoryData theoryData)
         {
-            WriteHeader($"{this}.Constructors", theoryData);
+            TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
             var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
             OpenIdConnectMessage messageFromJson;
             OpenIdConnectMessage messageFromJsonObj;
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.ExpectedException.ProcessException(exception);
             }
 
-            AssertFailIfErrors(context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<OpenIdConnectMessageTheoryData> ConstructorsTheoryData()
@@ -168,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (message.UiLocales != null)
                 errors.Add("message.UiLocales != null");
 
-            AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
+            TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
         [Fact]
@@ -234,11 +233,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateAuthenticationRequestUrlTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateAuthenticationRequestUrlTheoryData))]
         public void OidcCreateAuthenticationRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
+            TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
             var context = new CompareContext();
 #if NET452
             if(!message.SkuTelemetryValue.Equals("ID_NET451"))
@@ -497,11 +495,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateLogoutRequestUrlTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateLogoutRequestUrlTheoryData))]
         public void OidcCreateLogoutRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
+            TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
+
             var context = new CompareContext();     
 #if NET452
             if(!message.SkuTelemetryValue.Equals("ID_NET451"))
@@ -632,4 +630,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 

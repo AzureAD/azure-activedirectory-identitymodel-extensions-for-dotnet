@@ -33,6 +33,8 @@ using System.Threading;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Protocols.Tests
 {
     /// <summary>
@@ -75,9 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             TestUtilities.AssertFailIfErrors("HttpDocumentRetrieverTests_GetSets", context.Errors);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("GetMetadataTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(GetMetadataTheoryData))]
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
@@ -176,3 +176,5 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

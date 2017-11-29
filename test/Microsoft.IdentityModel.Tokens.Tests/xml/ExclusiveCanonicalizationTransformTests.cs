@@ -31,12 +31,12 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class ExclusiveCanonicalizationTransformTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
         [Fact]
         public void GetSets()
         {
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData("ConstructorTheoryData")]
+        [Theory, MemberData(nameof(ConstructorTheoryData))]
         public void Constructor(ExclusiveCanonicalizationTransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData("ProcessAndDigestTheoryData")]
+        [Theory, MemberData(nameof(ProcessAndDigestTheoryData))]
         public void ProcessAndDigest(ExclusiveCanonicalizationTransformTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}", "ProcessAndDigest", true);
@@ -142,7 +142,6 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 };
             }
         }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class ExclusiveCanonicalizationTransformTheoryData : TheoryDataBase
@@ -177,3 +176,5 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

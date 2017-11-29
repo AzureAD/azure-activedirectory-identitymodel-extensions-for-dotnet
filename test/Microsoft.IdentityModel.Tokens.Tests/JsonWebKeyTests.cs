@@ -30,13 +30,13 @@ using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeyTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("JsonWebKeyDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(JsonWebKeyDataSet))]
         public void Constructors(string json, JsonWebKey compareTo, ExpectedException ee)
         {
             var context = new CompareContext();
@@ -141,33 +141,31 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
         }
 
-        #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool isPrivateKey, bool expectedResult)
+        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
+        public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
         }
 
-        public static TheoryData<JsonWebKey, string, bool, bool> IsSupportedAlgDataSet
+        public static TheoryData<JsonWebKey, string, bool> IsSupportedAlgDataSet
         {
             get
             {
-                var dataset = new TheoryData<JsonWebKey, string, bool, bool>();
-                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, KeyingMaterial.JsonWebKeyEcdsa256.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.JsonWebKeyEcdsa256.HasPrivateKey, false);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, KeyingMaterial.JsonWebKeyRsa256.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, KeyingMaterial.JsonWebKeyRsa256.HasPrivateKey, false);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, false, true);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false, false);
+                var dataset = new TheoryData<JsonWebKey, string, bool>();
+                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.RsaSha256Signature, false);
+                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
+                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
                 JsonWebKey testKey = new JsonWebKey
                 {
                     Kty = JsonWebAlgorithmsKeyTypes.Octet,
                     K = KeyingMaterial.DefaultSymmetricKeyEncoded_256
                 };
                 testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, testKey.HasPrivateKey, true);
+                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, true);
                 return dataset;
             }
         }
@@ -208,3 +206,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

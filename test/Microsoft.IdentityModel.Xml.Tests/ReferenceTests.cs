@@ -34,10 +34,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Xml;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Xml.Tests
-{
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
+namespace Microsoft.IdentityModel.Xml.Tests
+{
     public class ReferenceTests
     {
         [Fact]
@@ -106,7 +106,7 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
             //MIIDCDCCAfCgAwIBAgIQNz4YVbYAIJVFCc47HFD3RzANBgkqhkiG9w0BAQsFADBAMT4wPAYDVQQDEzVBREZTIFNpZ25pbmcgLSBzdHMuc3ViMi5mcmFjYXMzNjUubXNmdG9ubGluZXJlcHJvLmNvbTAeFw0xNTAzMzExMDQyMTNaFw0zNDA1MzAxMDQyMTNaMEAxPjA8BgNVBAMTNUFERlMgU2lnbmluZyAtIHN0cy5zdWIyLmZyYWNhczM2NS5tc2Z0b25saW5lcmVwcm8uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxdjzB+wGV6hYekOvWwKoL/DFNBiLQsLx6w02FzcFnpGwR38gVTn/glg9CNSsOT0riRM3/MwU8o2fwseQyVtv9Kee/yvia8cB6GD0CARlYizb6GkJJzMvWkPSas1zpn10Bs3SBBgn0pvAKZCWWir5WJ7DRY32X2yo2do8mQftsoLGYsEU8+jj9AMYQWaR3A86AEWjXoQY3AodfMMzdVFX+O/kjsvKcBfPqGRT6jUSGBOOaqzMOJBT39SueD8zePDW7SejBl7fRi4TLx5H6xuMldOAAH6oD70yIrobqosGG9X/LdijHajMSoaYzZIlG7fl4PCVvAjh1Dytw/y8K70flQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBy08dAsSTKd2YlNE8bM4O5C2bFKR1YakR8L/zLEy8g+RNsKN5V/cIll0b/tf9iQ5464nc+nM///U+UVxqT8ipeR7ThIPwuWX98cFZFQNNGkha4PaYap/osquEpRAJOcTqZf2K95ipeQ+5Hhw00mK0hcV1QT/7maTUqCHDfBCaD+uYAFvaNBXOYpdoIGM9cMk7Qjc/yowLDm+DpmJek54MWmN+iZ0YtDEhMSh//QPFMLPT5Ucat+qRTen1HZNGdxfZ7NIIDL3dNKVDN+vDUbW7rjvPyxA8Rtj4JplI9ENqpzRq4m1sDWUTk2hJYw9Ec1kGo7AFKRmOS6DRbwUn5Ptdc
         }
 
-        [Theory, MemberData("VerifyTheoryData")]
+        [Theory, MemberData(nameof(VerifyTheoryData))]
         public void Verify(ReferenceTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Verify", theoryData);
@@ -165,7 +165,6 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
                 };
             }
         }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class ReferenceTheoryData : TheoryDataBase
@@ -207,3 +206,5 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -36,13 +36,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Xml;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Xml.Tests
-{
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
+namespace Microsoft.IdentityModel.Xml.Tests
+{
     public class DSigSerializerTests
     {
-        [Theory, MemberData("ReadKeyInfoTheoryData")]
+        [Theory, MemberData(nameof(ReadKeyInfoTheoryData))]
         public void ReadKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadKeyInfo", theoryData);
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData("WriteKeyInfoTheoryData")]
+        [Theory, MemberData(nameof(WriteKeyInfoTheoryData))]
         public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("ReadSignatureTheoryData")]
+        [Theory, MemberData(nameof(ReadSignatureTheoryData))]
         public void ReadSignature(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadSignature", theoryData);
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData("WriteSignatureTheoryData")]
+        [Theory, MemberData(nameof(WriteSignatureTheoryData))]
         public void WriteSignature(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteSignature", theoryData);
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("ReadSignedInfoTheoryData")]
+        [Theory, MemberData(nameof(ReadSignedInfoTheoryData))]
         public void ReadSignedInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData("WriteSignedInfoTheoryData")]
+        [Theory, MemberData(nameof(WriteSignedInfoTheoryData))]
         public void WriteSignedInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteSignedInfo", theoryData);
@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("ReadReferenceTheoryData")]
+        [Theory, MemberData(nameof(ReadReferenceTheoryData))]
         public void ReadReference(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadReference", theoryData);
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("ReadTransformTheoryData")]
+        [Theory, MemberData(nameof(ReadTransformTheoryData))]
         public void ReadTransform(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadTransform", theoryData);
@@ -442,7 +442,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("ReadTransformsTheoryData")]
+        [Theory, MemberData(nameof(ReadTransformsTheoryData))]
         public void ReadTransforms(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadTransforms", theoryData);
@@ -487,7 +487,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData("WriteReferenceTheoryData")]
+        [Theory, MemberData(nameof(WriteReferenceTheoryData))]
         public void WriteReference(DSigSerializerTheoryData theoryData)
         {
             var ms = new MemoryStream();
@@ -513,8 +513,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 };
             }
         }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class DSigSerializerTheoryData : TheoryDataBase
@@ -621,3 +619,5 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

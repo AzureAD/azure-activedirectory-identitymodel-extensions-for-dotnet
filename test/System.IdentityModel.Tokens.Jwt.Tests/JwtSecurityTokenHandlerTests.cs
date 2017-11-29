@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
@@ -36,12 +35,9 @@ using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class JwtSecurityTokenHandlerTests
     {
-        [Theory, MemberData("ActorTheoryData")]
+        [Theory, MemberData(nameof(ActorTheoryData))]
         public void Actor(JwtTheoryData theoryData)
         {
             var context = new CompareContext();
@@ -132,7 +128,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Theory, MemberData("BootstrapContextTheoryData")]
+        [Theory, MemberData(nameof(BootstrapContextTheoryData))]
         public void BootstrapContext(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.BootstrapContext", theoryData);
@@ -457,7 +453,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
         }
 
-        [Theory, MemberData("ReadTimesExpressedAsDoublesTheoryData")]
+        [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData))]
         public void ReadTimesExpressedAsDoubles(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadTimesExpressedAsDoubles", theoryData);
@@ -689,7 +685,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        [Theory, MemberData("ValidateAudienceTheoryData")]
+        [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
         public void ValidateAudience(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -836,7 +832,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-        [Theory, MemberData("ValidateIssuerTheoryData")]
+        [Theory, MemberData(nameof(ValidateIssuerTheoryData))]
         public void ValidateIssuer(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
@@ -927,7 +923,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Theory, MemberData("TokenReplayValidationTheoryData")]
+        [Theory, MemberData(nameof(TokenReplayValidationTheoryData))]
         public void TokenReplayValidation(TokenReplayTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.TokenReplayValidation", theoryData);
@@ -984,7 +980,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-        [Theory, MemberData("ValidateLifetimeTheoryData")]
+        [Theory, MemberData(nameof(ValidateLifetimeTheoryData))]
         public void ValidateLifetime(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateLifetime", theoryData);
@@ -1040,7 +1036,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-        [Theory, MemberData("ValidateSignatureTheoryData")]
+        [Theory, MemberData(nameof(ValidateSignatureTheoryData))]
         public void ValidateSignature(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateSignature", theoryData);
@@ -1250,7 +1246,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
         }
 
-        [Theory, MemberData("ValidateTokenTheoryData")]
+        [Theory, MemberData(nameof(ValidateTokenTheoryData))]
         public void ValidateToken(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -1590,5 +1586,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public JwtSecurityToken token { get; set; } = new JwtSecurityToken();
         public TokenValidationParameters validationParameters { get; set; } = new TokenValidationParameters();
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

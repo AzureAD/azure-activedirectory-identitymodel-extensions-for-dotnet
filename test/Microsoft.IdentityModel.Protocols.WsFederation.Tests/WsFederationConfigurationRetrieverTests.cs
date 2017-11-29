@@ -34,15 +34,16 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     /// <summary>
     /// WsFed metadata reading tests.
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-        [Theory, MemberData("ReadMetadataTheoryData")]
+        [Theory, MemberData(nameof(ReadMetadataTheoryData))]
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
             var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
@@ -261,7 +262,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("ReadEntityDescriptorTheoryData")]
+        [Theory, MemberData(nameof(ReadEntityDescriptorTheoryData))]
         public void ReadEntityDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadEntityDescriptor", theoryData);
@@ -301,7 +302,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("ReadKeyDescriptorForSigningTheoryData")]
+        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningTheoryData))]
         public void ReadKeyDescriptorForSigning(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigning", theoryData);
@@ -336,7 +337,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("ReadKeyDescriptorForSigningKeyUseTheoryData")]
+        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningKeyUseTheoryData))]
         public void ReadKeyDescriptorForSigningKeyUse(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningKeyUse", theoryData);
@@ -381,7 +382,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("ReadSecurityTokenServiceTypeRoleDescriptorTheoryData")]
+        [Theory, MemberData(nameof(ReadSecurityTokenServiceTypeRoleDescriptorTheoryData))]
         public void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenServiceTypeRoleDescriptor", theoryData);
@@ -421,7 +422,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("ReadSecurityTokenEndpointTheoryData")]
+        [Theory, MemberData(nameof(ReadSecurityTokenEndpointTheoryData))]
         public void ReadSecurityTokenEndpoint(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
@@ -474,7 +475,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("WriteMetadataTheoryData")]
+        [Theory, MemberData(nameof(WriteMetadataTheoryData))]
         public void WriteMetadata(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteMetadata", theoryData);
@@ -610,5 +611,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

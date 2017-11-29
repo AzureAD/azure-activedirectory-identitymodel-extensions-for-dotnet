@@ -33,11 +33,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Xml;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class SignatureTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Fact]
         public void GetSets()
         {
@@ -61,7 +62,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData("ConstructorTheoryData")]
+        [Theory, MemberData(nameof(ConstructorTheoryData))]
         public void Constructor(SignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -101,7 +102,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData("VerifyTheoryData")]
+        [Theory, MemberData(nameof(VerifyTheoryData))]
         public void Verify(SignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Verify", theoryData);
@@ -219,7 +220,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 Xml = testSet.Xml
             };
         }
-        #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 
     public class SignatureTheoryData : TheoryDataBase
@@ -261,3 +261,5 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

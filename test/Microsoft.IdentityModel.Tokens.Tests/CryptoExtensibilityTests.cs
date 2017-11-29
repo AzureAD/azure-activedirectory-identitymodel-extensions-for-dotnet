@@ -32,6 +32,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -42,9 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// SecurityTokenDescriptor.CryptoProviderFactory has priority over SecurityKey.CryptoProviderFactory
         /// </summary>
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("SecurityTokenDescriptorDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SecurityTokenDescriptorDataSet))]
         public void CryptoProviderOrderingWhenSigning(SecurityTokenDescriptor tokenDescriptor)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -106,11 +106,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// TokenValidationParameters.CryptoProviderFactory has priority over SecurityKey.CryptoProviderFactory
         /// </summary>
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("SigningCredentialsDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(SigningCredentialsDataSet))]
         public void CryptoProviderOrderingWhenVerifying(string testId, TokenValidationParameters validationParameters, string jwt)
         {
+            TestUtilities.WriteHeader("CryptoProviderOrderingWhenVerifying - " + testId, true);
             var tokenHandler = new JwtSecurityTokenHandler();
             SecurityToken token = null;
             tokenHandler.ValidateToken(jwt, validationParameters, out token);
@@ -170,9 +169,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Tests that Default behaviors
         /// </summary>
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("DefaultCryptoProviderDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(DefaultCryptoProviderDataSet))]
         public void DefaultCryptoProviderFactory(SecurityKey key, string algorithm, bool isSupported, bool supportsSigning, ExpectedException ee)
         {
             Assert.True(CryptoProviderFactory.Default.IsSupportedAlgorithm(algorithm, key) == isSupported, string.Format(CultureInfo.InvariantCulture, "SecurityKey: '{0}', algorithm: '{1}', isSupported: '{2}'", key, algorithm, isSupported));
@@ -253,7 +250,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory]
         [InlineData(SecurityAlgorithms.Sha256, true)]
         [InlineData(SecurityAlgorithms.Sha256Digest, true)]
@@ -262,7 +258,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(SecurityAlgorithms.Sha512, true)]
         [InlineData(SecurityAlgorithms.Sha512Digest, true)]
         [InlineData(SecurityAlgorithms.Aes128Encryption, false)]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void DefaultCryptoProviderFactoryGetHashAlgorithm(string algorithm, bool isSupported)
         {
             var ee = isSupported ? ExpectedException.NoExceptionExpected : ExpectedException.NotSupportedException("IDX10640:");
@@ -318,3 +313,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

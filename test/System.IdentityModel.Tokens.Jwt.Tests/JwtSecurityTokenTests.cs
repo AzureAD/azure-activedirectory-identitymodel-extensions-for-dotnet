@@ -61,7 +61,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Null(jwt.Issuer);
             Assert.Null(jwt.SecurityKey);
             Assert.NotNull(jwt.SignatureAlgorithm);
-            Assert.Equal(jwt.SignatureAlgorithm, "none");
+            Assert.Equal("none", jwt.SignatureAlgorithm);
             Assert.Null(jwt.SigningCredentials);
             Assert.Null(jwt.SigningKey);
             Assert.Null(jwt.Subject);
@@ -427,7 +427,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         }
     }
+}
 
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-
-}

@@ -26,18 +26,17 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class SymmetricSecurityKeyTests
     {
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("ConstructorDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant        
+        [Theory, MemberData(nameof(ConstructorDataSet))]
         public void Constructor(byte[] key, ExpectedException ee)
         {
             try
@@ -63,9 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
         public void IsSupportedAlgorithm(SymmetricSecurityKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
@@ -89,3 +86,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

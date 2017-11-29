@@ -35,6 +35,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtPayloadTests
@@ -114,17 +116,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string json = unicodePayload.SerializeToJson();
             JwtPayload payload = new JwtPayload(issuer, "", claims, null, null);
             string json2 = payload.SerializeToJson();
-            Assert.True(string.Equals(json, json2));
+            Assert.Equal(json, json2);
 
             JwtPayload retrievePayload = JwtPayload.Deserialize(json);
-            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+            Assert.Equal(retrievePayload.Iss, issuer);
 
             json = unicodePayload.Base64UrlEncode();
             json2 = payload.Base64UrlEncode();
-            Assert.True(string.Equals(json, json2));
+            Assert.Equal(json, json2);
 
             retrievePayload = JwtPayload.Base64UrlDeserialize(json);
-            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+            Assert.Equal(retrievePayload.Iss, issuer);
         }
 
         [Fact]
@@ -184,9 +186,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(DateTime.MaxValue == expirationTime, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("PayloadDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(PayloadDataSet))]
         public void RoundTrip(List<Claim> claims, JwtPayload payloadSetDirect, JwtPayload payloadSetUsingDeserialize)
         {
             var context = new CompareContext();
@@ -468,3 +468,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

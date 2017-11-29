@@ -26,10 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -63,9 +64,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
         public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
@@ -89,3 +88,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

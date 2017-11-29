@@ -31,16 +31,12 @@ using System.Collections.Specialized;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.IdentityModel.Xml;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
-    /// <summary>
-    /// 
-    /// </summary>
     public class WsFederationMessageTests
     {
         [Fact]
@@ -82,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData("MessageTheoryData")]
+        [Theory, MemberData(nameof(MessageTheoryData))]
         public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ConstructorTest", theoryData);
@@ -115,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("GetTokenTheoryData")]
+        [Theory, MemberData(nameof(GetTokenTheoryData))]
 
         public void GetTokenTest(WsFederationMessageTheoryData theoryData)
         {
@@ -214,7 +210,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("GetTokenNegativeTestTheoryData")]
+        [Theory, MemberData(nameof(GetTokenNegativeTestTheoryData))]
 
         public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
         {
@@ -301,7 +297,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("MessageTheoryData")]
+        [Theory, MemberData(nameof(MessageTheoryData))]
 
         public void ParametersTest(WsFederationMessageTheoryData theoryData)
         {
@@ -339,7 +335,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 wsFederationMessage.SetParameter(theoryData.Parameter1.Key, null);
 
                 // validate the parameter is removed
-                Assert.Equal(false, wsFederationMessage.Parameters.ContainsKey(theoryData.Parameter1.Key));
+                Assert.False(wsFederationMessage.Parameters.ContainsKey(theoryData.Parameter1.Key));
 
                 // create redirectUri
                 var uriString = wsFederationMessage.BuildRedirectUrl();
@@ -381,7 +377,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData("QueryStringTheoryData")]
+        [Theory, MemberData(nameof(QueryStringTheoryData))]
 
         public void QueryStringTest(WsFederationMessageTheoryData theoryData)
         {
@@ -470,5 +466,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             public string Wtrealm { get; set; }
         }
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

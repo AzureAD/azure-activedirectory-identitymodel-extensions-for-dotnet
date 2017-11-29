@@ -29,16 +29,13 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
-    /// <summary>
-    /// Test some key extensibility scenarios
-    /// </summary>
     public class JwtSecurityTokenHandlerExtensibilityTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("DecryptTokenTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(DecryptTokenTheoryData))]
         public void DecryptToken(TheoryParams theoryParams)
         {
             try
@@ -99,3 +96,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

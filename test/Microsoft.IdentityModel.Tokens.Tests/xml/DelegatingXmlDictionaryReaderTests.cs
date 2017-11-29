@@ -30,12 +30,13 @@ using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class DelegatingXmlDictionaryReaderTests
     {
-        [Theory, MemberData("ReadXmlTheoryData")]
+        [Theory, MemberData(nameof(ReadXmlTheoryData))]
         public void ReadXml(DelegatingXmlDictionaryReaderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadXml", theoryData);
@@ -77,7 +78,6 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
     }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 
     public class DelegatingXmlDictionaryReaderPublic : DelegatingXmlDictionaryReader
     {
@@ -93,3 +93,5 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         public DelegatingXmlDictionaryReaderPublic DelegatingReader { get; set; }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

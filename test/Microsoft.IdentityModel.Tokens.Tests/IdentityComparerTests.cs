@@ -36,7 +36,6 @@ using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.IdentityModel.Tokens.Xml;
 using Microsoft.IdentityModel.Xml;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -129,6 +128,7 @@ namespace Microsoft.IdentityModel.Tests
             Assert.True(context.Diffs.Count(s => s == "Properties:") == 5);
         }
 
+        [Fact]
         public void CompareClaimsIdentities()
         {
             TestUtilities.WriteHeader($"{this}.CompareClaimsIdentities", true);

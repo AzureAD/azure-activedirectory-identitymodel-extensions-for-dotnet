@@ -26,15 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Tests;
-using Xunit;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Xml;
+using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
     public class EnvelopedSignatureReaderTests
     {
         [Fact]
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData("ConstructorTheoryData")]
+        [Theory, MemberData(nameof(ConstructorTheoryData))]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData("ReadSignedXmlTheoryData")]
+        [Theory, MemberData(nameof(ReadSignedXmlTheoryData))]
         public void ReadSignedXml(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadSignedXml", theoryData);
@@ -173,6 +173,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 };
             }
         }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

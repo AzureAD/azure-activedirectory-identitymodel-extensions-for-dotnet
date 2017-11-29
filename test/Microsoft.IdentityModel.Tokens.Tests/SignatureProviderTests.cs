@@ -32,6 +32,8 @@ using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
@@ -358,9 +360,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void AsymmetricSignatureProvidersVerify(SignatureProviderTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProvidersVerify", theoryData);
@@ -789,9 +789,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SymmetricSignatureProviderVerifyTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SymmetricSignatureProvidersVerify(SignatureProviderTheoryData testParams)
         {
             try
@@ -1077,9 +1075,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return provider.Sign(rawBytes);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(KeyDisposeData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureProviderDispose_Test(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
         {
             try
@@ -1112,7 +1108,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public void AsymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
+        private void AsymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
         {
             try
             {
@@ -1136,7 +1132,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public void SymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
+        private void SymmetricProviderDispose(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
         {
             try
             {
@@ -1210,9 +1206,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SignatureTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
@@ -1237,9 +1231,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(theoryData.ProviderForVerifying.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(SignatureTheoryData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureTruncation", theoryData);
@@ -1329,3 +1321,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
