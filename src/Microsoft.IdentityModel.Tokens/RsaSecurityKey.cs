@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return bytes;
 
             var n = bytes.Length;
-            if (n > 0 && bytes[0].Equals(0x00))
+            if (n > 1 && bytes[0].Equals(0x00))
             {
                 // remove the leading zero in the decoded bytes
                 var newBytes = new byte[n - 1];
