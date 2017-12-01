@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-    <Authors>Microsoft AzureAD</Authors>
+    <Authors>Microsoft</Authors>
     <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation.</Company>
     <DelaySign>true</DelaySign>
@@ -16,6 +16,7 @@
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/LICENSE.txt</PackageLicenseUrl>
     <SignAssembly>true</SignAssembly>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
