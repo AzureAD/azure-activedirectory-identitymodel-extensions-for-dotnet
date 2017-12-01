@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(cryptoProviderFactory));
 
             if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
-                throw LogValidationException(LogMessages.IDX30201, Id);
+                throw LogValidationException(LogMessages.IDX30201, Uri ?? Id);
         }
 
         /// <summary>
