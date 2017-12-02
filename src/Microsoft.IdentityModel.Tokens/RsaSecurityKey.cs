@@ -48,6 +48,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
+#if (NET45 || NET451)
+            rsaParameters = RemoveLeadingZero(rsaParameters);
+#endif
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
@@ -64,7 +67,29 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (rsa == null)
                 throw LogHelper.LogArgumentNullException("rsa");
-
+#if (NET45 || NET451)
+            if (rsa as RSACryptoServiceProvider != null)
+            {
+                try
+                {
+                    var parameters = rsa.ExportParameters(true);
+                    parameters = RemoveLeadingZero(parameters);
+                    rsa.ImportParameters(parameters);
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        var parameters = rsa.ExportParameters(false);
+                        parameters = RemoveLeadingZero(parameters);
+                        rsa.ImportParameters(parameters);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+#endif
             Rsa = rsa;
         }
 
@@ -165,5 +190,39 @@ namespace Microsoft.IdentityModel.Tokens
         /// <see cref="RSA"/> instance used to initialize the key.
         /// </summary>
         public RSA Rsa { get; private set; }
+
+        private RSAParameters RemoveLeadingZero(RSAParameters rsaParameters)
+        {
+            // Sometimes the parameters we received have a leading 0, the reason is the parameters 
+            // are positive integers, the generator of RSA key may put a leading 0 as the sign
+            // digit. RSACng will ignore the leading 0, but RSACryptoServiceProvider doesn't, so
+            // we have to remove the leading 0 for .NET framework.
+            rsaParameters.Modulus = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.Modulus);
+            rsaParameters.Exponent = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.Exponent);
+            rsaParameters.D = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.D);
+            rsaParameters.P = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.P);
+            rsaParameters.Q = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.Q);
+            rsaParameters.DP = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.DP);
+            rsaParameters.DQ = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.DQ);
+            rsaParameters.InverseQ = RemoveLeadingZeroInBase64UrlDecodedBytes(rsaParameters.InverseQ);
+            return rsaParameters;
+        }
+
+        private byte[] RemoveLeadingZeroInBase64UrlDecodedBytes(byte[] bytes)
+        {
+            if (bytes == null)
+                return bytes;
+
+            var n = bytes.Length;
+            if (n > 1 && bytes[0].Equals(0x00))
+            {
+                // remove the leading zero in the decoded bytes
+                var newBytes = new byte[n - 1];
+                Buffer.BlockCopy(bytes, 1, newBytes, 0, n - 1);
+                return newBytes;
+            }
+
+            return bytes;
+        }
     }
 }
