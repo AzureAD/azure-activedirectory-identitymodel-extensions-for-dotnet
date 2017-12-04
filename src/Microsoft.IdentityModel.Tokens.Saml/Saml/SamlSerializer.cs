@@ -342,11 +342,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 reader.MoveToContent();
                 reader.Read();
                 // We will load all Attributes as a string value by default.
-                while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace) && !reader.IsEmptyElement)
-                    attribute.Values.Add(reader.ReadElementContentAsString());
+                while (reader.IsStartElement(SamlConstants.Elements.AttributeValue, SamlConstants.Namespace))
+                {
+                    if (!reader.IsEmptyElement)
+                        attribute.Values.Add(reader.ReadElementContentAsString());
+                    else
+                        reader.Read();
+                }
 
                 if (attribute.Values.Count == 0)
-                    throw LogReadException(LogMessages.IDX11132);
+                    LogWarning(LogMessages.IDX11132);
 
                 reader.MoveToContent();
                 reader.ReadEndElement();

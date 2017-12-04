@@ -534,6 +534,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAttributeTestSet
                 {
+                    Attribute =  Default.SamlAttributeNoValue,
                     Xml = XmlGenerator.SamlAttributeXml(Default.AttributeName, Default.AttributeNamespace, null)
                 };
             }

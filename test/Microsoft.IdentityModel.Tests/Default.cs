@@ -428,6 +428,11 @@ namespace Microsoft.IdentityModel.Tests
             get => new SamlAudienceRestrictionCondition(Default.Audiences.ToDictionary(x => new Uri(x)).Keys);
         }
 
+        public static SamlAttribute SamlAttributeNoValue
+        {
+            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new List<string> { });
+        }
+
         public static SamlAttribute SamlAttributeSingleValue
         {
             get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, Default.Country);
