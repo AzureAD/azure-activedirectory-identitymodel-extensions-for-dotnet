@@ -445,7 +445,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData()
                     {
                         AttributeTestSet = ReferenceSaml.SamlAttributeValueNull,
-                        ExpectedException = new ExpectedException(typeof(SamlSecurityTokenReadException), "IDX11132:"),
                         SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAttributeValueNull)
                     },
