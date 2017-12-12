@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tests
     {
         private static string DSigNS { get => "xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\""; }
 
-        private static string DSigPrefix { get => XmlSignatureConstants.Prefix + ":"; }
+        private static string DSigPrefix { get => XmlSignatureConstants.PreferredPrefix + ":"; }
 
         public string Transform
         {

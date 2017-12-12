@@ -159,6 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             public const string Fed = "fed";
             public const string Xsi = "xsi";
             public const string Wsa = "wsa";
+            public const string Md = "md";
         }
 
         #pragma warning restore 1591

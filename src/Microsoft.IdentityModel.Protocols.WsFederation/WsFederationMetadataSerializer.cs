@@ -320,13 +320,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             writer.WriteStartDocument();
 
             // <EntityDescriptor>
-            writer.WriteStartElement(Elements.EntityDescriptor, Namespaces.MetadataNamespace);
+            writer.WriteStartElement(Prefixes.Md, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
 
             // @entityID
             writer.WriteAttributeString(Attributes.EntityId, configuration.Issuer);
 
             // <RoleDescriptor>
-            writer.WriteStartElement(Elements.RoleDescriptor);
+            writer.WriteStartElement(Prefixes.Md, Elements.RoleDescriptor, Namespaces.MetadataNamespace);
             writer.WriteAttributeString(Xmlns, Prefixes.Xsi, null, XmlSignatureConstants.XmlSchemaNamespace);
             writer.WriteAttributeString(Xmlns, Prefixes.Fed, null, Namespaces.FederationNamespace);
             writer.WriteAttributeString(Prefixes.Xsi, Attributes.Type, null, Prefixes.Fed + ":" + Types.SecurityTokenServiceType);
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 foreach (var keyInfo in configuration.KeyInfos)
                 {
                     // <KeyDescriptor>
-                    writer.WriteStartElement(Elements.KeyDescriptor);
+                    writer.WriteStartElement(Prefixes.Md, Elements.KeyDescriptor, Namespaces.MetadataNamespace);
                     writer.WriteAttributeString(Attributes.Use, keyUse.Signing);
                     _dsigSerializer.WriteKeyInfo(writer, keyInfo);
                     // </KeyDescriptor>
@@ -347,13 +347,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // <fed:PassiveRequestorEndpoint>
-            writer.WriteStartElement(Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
+            writer.WriteStartElement(Prefixes.Fed, Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
 
             // <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
             writer.WriteStartElement(Prefixes.Wsa, Elements.EndpointReference, Namespaces.AddressingNamspace);
 
             // <wsa:Address>
-            writer.WriteStartElement(Elements.Address, Namespaces.AddressingNamspace);
+            writer.WriteStartElement(Prefixes.Wsa, Elements.Address, Namespaces.AddressingNamspace);
 
             // write TokenEndpoint
             writer.WriteString(configuration.TokenEndpoint);
