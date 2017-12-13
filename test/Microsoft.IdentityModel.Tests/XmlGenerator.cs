@@ -73,17 +73,17 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string IDPSSODescriptorTemplate
         {
-            get => "<md:IDPSSODescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">{0}</md:IDPSSODescriptor>";
+            get => "<IDPSSODescriptor protocolSupportEnumeration=\"urn:oasis:names:tc:SAML:2.0:protocol\">{0}</IDPSSODescriptor>";
         }
 
         public static string EntityDescriptorTemplate
         {
-            get => "<?xml version=\"1.0\" encoding=\"utf-8\"?><md:EntityDescriptor ID=\"{0}\" entityID=\"{1}\" xmlns=\"{2}\">{3}</md:EntityDescriptor>";
+            get => "<?xml version=\"1.0\" encoding=\"utf-8\"?><EntityDescriptor ID=\"{0}\" entityID=\"{1}\" xmlns=\"{2}\">{3}</EntityDescriptor>";
         }
 
         public static string KeyDescriptorTemplate
         {
-            get => "<md:KeyDescriptor use=\"{0}\">{1}</md:KeyDescriptor>";
+            get => "<KeyDescriptor use=\"{0}\">{1}</KeyDescriptor>";
         }
 
         public static string KeyDescriptorXml(KeyInfo keyInfo)
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string KeyInfoTemplate
         {
-            get => "<ds:KeyInfo xmlns=\"{0}\">{1}</ds:KeyInfo>";
+            get => "<KeyInfo xmlns=\"{0}\">{1}</KeyInfo>";
         }
 
         public static string KeyInfoXml(string @namespace, XmlEement x509Data)
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlActionTemplate
         {
-            get => "<saml:Action Namespace=\"{0}\" xmlns=\"{1}\">{2}</saml:Action>";
+            get => "<Action Namespace=\"{0}\" xmlns=\"{1}\">{2}</Action>";
         }
 
         public static string SamlActionXml(string @namespace, string actionNamespace, string action)
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAttributeValueTemplate
         {
-            get => "<saml:AttributeValue xmlns=\"{0}\">{1}</saml:AttributeValue>";
+            get => "<AttributeValue xmlns=\"{0}\">{1}</AttributeValue>";
         }
 
         public static string SamlAttributeValueXml(string @namespace, string value)
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAttributeTemplate
         {
-            get => "<saml:Attribute AttributeName=\"{0}\" AttributeNamespace=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</saml:Attribute>";
+            get => "<Attribute AttributeName=\"{0}\" AttributeNamespace=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</Attribute>";
         }
 
         public static string SamlAttributeXml(string name, string attributeNs, IEnumerable<string> attributes)
@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAttributeStatementTemplate
         {
-            get => "<saml:AttributeStatement xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</saml:AttributeStatement>";
+            get => "<AttributeStatement xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</AttributeStatement>";
         }
 
         public static string SamlAttributeStatementXml(string subject, string attributes)
@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAudienceTemplate
         {
-            get => "<saml:Audience xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</saml:Audience>";
+            get => "<Audience xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</Audience>";
         }
 
         public static string SamlAudienceXml(string audience)
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAudienceRestrictionConditionTemplate
         {
-            get => "<saml:AudienceRestrictionCondition xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</saml:AudienceRestrictionCondition>";
+            get => "<AudienceRestrictionCondition xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</AudienceRestrictionCondition>";
         }
 
         public static string SamlAudienceRestrictionConditionXml(IEnumerable<string> audiences)
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlSubjectLocalityTemplate
         {
-            get => "<saml:SubjectLocality IPAddress=\"{0}\" DNSAddress=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
+            get => "<SubjectLocality IPAddress=\"{0}\" DNSAddress=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
         }
 
         public static string SamlSubjectLocalityXml(string ipAddress, string dnsAddress)
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAuthorityBindingTemplate
         {
-            get => "<saml:AuthorityBinding AuthorityKind=\"{0}\" Location=\"{1}\" Binding=\"{2}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
+            get => "<AuthorityBinding AuthorityKind=\"{0}\" Location=\"{1}\" Binding=\"{2}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\"/>";
         }
 
         public static string SamlAuthorityBindingXml(string authorityKind, string location, string binding)
@@ -204,7 +204,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAuthenticationStatementTemplate
         {
-            get => "<saml:AuthenticationStatement AuthenticationMethod=\"{0}\" AuthenticationInstant=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</saml:AuthenticationStatement>";
+            get => "<AuthenticationStatement AuthenticationMethod=\"{0}\" AuthenticationInstant=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</AuthenticationStatement>";
         }
 
         public static string SamlAuthenticationStatementXml(string method, string instant, string subject, string subjectLocality, string binding)
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlConditionsTemplate
         {
-            get => "<saml:Conditions {0} {1} xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</saml:Conditions>";
+            get => "<Conditions {0} {1} xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</Conditions>";
         }
 
         public static string SamlConditionsXml(string notBefore, string notOnOrAfter, IEnumerable<string> conditions)
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlNameIdentifierTemplate
         {
-            get => "<saml:NameIdentifier NameQualifier=\"{0}\" Format=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</saml:NameIdentifier>";
+            get => "<NameIdentifier NameQualifier=\"{0}\" Format=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}</NameIdentifier>";
         }
 
         public static string SamlNameIdentifierXml(string nameQualifier, string format, string name)
@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlConfirmationMethodTemplate
         {
-            get => "<saml:ConfirmationMethod xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</saml:ConfirmationMethod>";
+            get => "<ConfirmationMethod xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</ConfirmationMethod>";
         }
 
         public static string SamlConfirmationMethodXml(string confirmationMethod)
@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAdviceTemplate
         {
-            get => "<saml:Advice xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</saml:Advice>";
+            get => "<Advice xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</Advice>";
         }
 
         public static string SamlAdviceXml(string assertionIDRef, string assertion)
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAssertionTemplate
         {
-            get => "<saml:Assertion MajorVersion=\"{0}\" MinorVersion=\"{1}\" AssertionID=\"{2}\" Issuer=\"{3}\" IssueInstant=\"{4}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{5}{6}{7}{8}</saml:Assertion>";
+            get => "<Assertion MajorVersion=\"{0}\" MinorVersion=\"{1}\" AssertionID=\"{2}\" Issuer=\"{3}\" IssueInstant=\"{4}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{5}{6}{7}{8}</Assertion>";
         }
 
         public static string SamlAssertionXml(string majorVersion, string minorVersion, string assertionId, string issuer, string issueInstant, string conditions, string advices, string statements, string signature)
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlAssertionIDRefTemplate
         {
-            get => "<saml:AssertionIDReference xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</saml:AssertionIDReference>";
+            get => "<AssertionIDReference xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}</AssertionIDReference>";
         }
 
         public static string SamlAssertionIDRefXml(string assertionID)
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Tests
         }
         public static string SamlAuthorizationDecisionStatementTemplate
         {
-            get => "<saml:AuthorizationDecisionStatement Resource=\"{0}\" Decision=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</saml:AuthorizationDecisionStatement>";
+            get => "<AuthorizationDecisionStatement Resource=\"{0}\" Decision=\"{1}\" xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{2}{3}{4}</AuthorizationDecisionStatement>";
         }
 
         public static string SamlAuthorizationDecisionStatementXml(string resource, string decision, string subject, string action, string evidence)
@@ -283,7 +283,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlEvidenceTemplate
         {
-            get => "<saml:Evidence xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</saml:Evidence>";
+            get => "<Evidence xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}{1}</Evidence>";
         }
 
         public static string SamlEvidenceXml(string assertionIdRef, string assertion)
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlSubjectConfirmationTemplate
         {
-            get => "<saml:SubjectConfirmation xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}<saml:SubjectConfirmationData>{1}</saml:SubjectConfirmationData></saml:SubjectConfirmation>";
+            get => "<SubjectConfirmation xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0}<SubjectConfirmationData>{1}</SubjectConfirmationData></SubjectConfirmation>";
         }
 
         public static string SamlSubjectConfirmationXml(List<string> confirmations, string confirmationData)
@@ -304,7 +304,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SamlSubjectTemplate
         {
-            get => "<saml:Subject xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</saml:Subject>";
+            get => "<Subject xmlns=\"urn:oasis:names:tc:SAML:1.0:assertion\">{0} {1}</Subject>";
         }
 
         public static string SamlSubjectXml(string nameIdentifier, string confirmation)
@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string ReferenceTemplate
         {
-            get => "<{0}Reference Id=\"{1}\" Type=\"{2}\" URI=\"{3}\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><ds:Transforms><ds:Transform Algorithm=\"{4}\" /><ds:Transform Algorithm=\"{5}\" /></ds:Transforms><ds:DigestMethod Algorithm=\"{6}\" /><ds:DigestValue>{7}</ds:DigestValue></{0}Reference>";
+            get => "<{0}Reference Id=\"{1}\" Type=\"{2}\" URI=\"{3}\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><Transforms><Transform Algorithm=\"{4}\" /><Transform Algorithm=\"{5}\" /></Transforms><DigestMethod Algorithm=\"{6}\" /><DigestValue>{7}</DigestValue></{0}Reference>";
         }
 
         public static string ReferenceXml(string prefix, string id, string type, string referenceUri, string envelopingAlgorithm, string c14nAlgorithm, string digestAlgorithm, string digestValue)
@@ -395,12 +395,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string RoleDescriptorTemplate
         {
-            get => "<md:RoleDescriptor xsi:type=\"{0}\" protocolSupportEnumeration=\"{1}\" xmlns:xsi=\"{2}\" xmlns:fed=\"{3}\">{4}{5}{6}{7}{8}{9}{10}</md:RoleDescriptor>";
+            get => "<RoleDescriptor xsi:type=\"{0}\" protocolSupportEnumeration=\"{1}\" xmlns:xsi=\"{2}\" xmlns:fed=\"{3}\">{4}{5}{6}{7}{8}{9}{10}</RoleDescriptor>";
         }
 
         public static string SignatureTemplate
         {
-            get => "<ds:Signature xmlns=\"{0}\">{1}<ds:SignatureValue>{2}</ds:SignatureValue>{3}</ds:Signature>";
+            get => "<Signature xmlns=\"{0}\">{1}<SignatureValue>{2}</SignatureValue>{3}</Signature>";
         }
 
         public static string SignatureXml(string @namespace, string signatureValue, string signedInfo, string keyInfo)
@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SignedInfoTemplate
         {
-            get => "<ds:SignedInfo xmlns=\"{0}\"><ds:CanonicalizationMethod Algorithm=\"{1}\" /><ds:SignatureMethod Algorithm=\"{2}\" />{3}</ds:SignedInfo>";
+            get => "<SignedInfo xmlns=\"{0}\"><CanonicalizationMethod Algorithm=\"{1}\" /><SignatureMethod Algorithm=\"{2}\" />{3}</SignedInfo>";
         }
 
         public static string SignedInfoXml(string @namespace, string c14nAlgorithm, string signatureAlgorithm, string reference)
@@ -420,12 +420,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string SingleLogoutServiceTemplate
         {
-            get => "<md:SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"https://login.microsoftonline.com/common/saml2\" />";
+            get => "<SingleLogoutService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect\" Location=\"https://login.microsoftonline.com/common/saml2\" />";
         }
 
         public static string SingleSignOnServiceTemplate
         {
-            get => "<md:SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://login.microsoftonline.com/common/saml2\" />";
+            get => "<SingleSignOnService Binding=\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\" Location=\"https://login.microsoftonline.com/common/saml2\" />";
         }
 
         public static string TransformTemplate
