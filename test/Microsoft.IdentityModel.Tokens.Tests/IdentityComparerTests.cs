@@ -572,11 +572,11 @@ namespace Microsoft.IdentityModel.Tests
         {
             TestUtilities.WriteHeader($"{this}.CompareSaml2SecurityTokenHandlers", true);
             var context = new CompareContext($"{this}.CompareSaml2SecurityTokenHandlers");
-            var saml2SecurityTokenHandler1 = new Saml2SecurityTokenHandler { Serializer = null };
+            var saml2SecurityTokenHandler1 = new Saml2SecurityTokenHandler { Serializer = new Saml2Serializer() };
             var saml2SecurityTokenHandler2 = new Saml2SecurityTokenHandler();
             IdentityComparer.AreEqual(saml2SecurityTokenHandler1, saml2SecurityTokenHandler2, context);
 
-            Assert.True(context.Diffs.Count(s => s == "Serializer:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "Serializer:") == 0);
         }
 
         [Fact]
