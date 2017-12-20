@@ -37,6 +37,33 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;
 
+using LifeTime4x = System.IdentityModel.Protocols.WSTrust.Lifetime;
+using SamlAccessDecision4x = System.IdentityModel.Tokens.SamlAccessDecision;
+using SamlAction4x = System.IdentityModel.Tokens.SamlAction;
+using SamlAdvice4x = System.IdentityModel.Tokens.SamlAdvice;
+using SamlAssertion4x = System.IdentityModel.Tokens.SamlAssertion;
+using SamlAttribute4x = System.IdentityModel.Tokens.SamlAttribute;
+using SamlAttributeStatement4x = System.IdentityModel.Tokens.SamlAttributeStatement;
+using SamlAudienceRestrictionCondition4x = System.IdentityModel.Tokens.SamlAudienceRestrictionCondition;
+using SamlAuthenticationStatement4x = System.IdentityModel.Tokens.SamlAuthenticationStatement;
+using SamlAuthorityBinding4x = System.IdentityModel.Tokens.SamlAuthorityBinding;
+using SamlAuthorizationDecisionClaimResource4x = System.IdentityModel.Tokens.SamlAuthorizationDecisionClaimResource;
+using SamlAuthorizationDecisionStatement4x = System.IdentityModel.Tokens.SamlAuthorizationDecisionStatement;
+using SamlCondition4x = System.IdentityModel.Tokens.SamlCondition;
+using SamlConditions4x = System.IdentityModel.Tokens.SamlConditions;
+using SamlDoNotCacheCondition4x = System.IdentityModel.Tokens.SamlDoNotCacheCondition;
+using SamlEvidence4x = System.IdentityModel.Tokens.SamlEvidence;
+using SamlSecurityToken4x = System.IdentityModel.Tokens.SamlSecurityToken;
+using SamlSecurityTokenHandler4x = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
+using SamlStatement4x = System.IdentityModel.Tokens.SamlStatement;
+using SamlSubject4x = System.IdentityModel.Tokens.SamlSubject;
+using SecurityToken4x = System.IdentityModel.Tokens.SecurityToken;
+using SecurityTokenDescriptor4x = System.IdentityModel.Tokens.SecurityTokenDescriptor;
+using SigningCredentials4x = System.IdentityModel.Tokens.SigningCredentials;
+using TokenValidationParameters4x = System.IdentityModel.Tokens.TokenValidationParameters;
+using X509SigningCredentials4x = System.IdentityModel.Tokens.X509SigningCredentials;
+using X509SecurityKey4x = System.IdentityModel.Tokens.X509SecurityKey;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
@@ -46,9 +73,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
         [Theory, MemberData(nameof(CreateTokenCrossVerstionTheoryData))]
         public void CreateTokenCrossVerstionTest(TokenCrossTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CreateTokenCrossVerstionTest", theoryData);
-            var context = new CompareContext($"{this}.CreateTokenCrossVerstionTest, {theoryData.TestId}");
-
+            var context = TestUtilities.WriteHeader($"{this}.CreateTokenCrossVerstionTest", theoryData);
             var token4x = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(theoryData.TokenDescriptor4x);
             var samlHandler5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler();
             var token5x = samlHandler5x.CreateToken(theoryData.TokenDescriptor5x);
@@ -68,32 +93,34 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 {
                     new TokenCrossTheoryData
                     {
-                        TokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
+                        TokenDescriptor4x = new SecurityTokenDescriptor4x
                         {
                             AppliesToAddress = Default.Audience,
-                            Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
+                            Lifetime = new LifeTime4x(notBefore, expires),
+                            SigningCredentials = new SigningCredentials4x(new X509SecurityKey4x(KeyingMaterial.CertSelfSigned2048_SHA256), SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             Subject = defaultClaimsIdentity,
                             TokenIssuerName = Default.Issuer,
                         },
-                        TokenDescriptor5x = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+                        TokenDescriptor5x = new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
                             NotBefore = notBefore,
                             Expires = expires,
                             Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
                             Subject = defaultClaimsIdentity
                         }
                     },
                     new TokenCrossTheoryData
                     {
-                        TokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
+                        TokenDescriptor4x = new SecurityTokenDescriptor4x
                         {
                             AppliesToAddress = Default.Audience,
-                            Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
+                            Lifetime = new LifeTime4x(notBefore, expires),
                             Subject = AuthenticationClaimsIdentity,
                             TokenIssuerName = Default.Issuer,
                         },
-                        TokenDescriptor5x = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
+                        TokenDescriptor5x = new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
                             NotBefore = notBefore,
@@ -109,10 +136,8 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
         [Theory, MemberData(nameof(CreateClaimsPrincipalCrossVersionTestTheoryData))]
         public void CreateClaimsPrincipalCrossVersionTest(ClaimsPrincipalTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.CreateClaimsPrincipalCrossVersionTest", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsPrincipalCrossVersionTest, {theoryData.TestId}");
-
-            var tvp5x = new Microsoft.IdentityModel.Tokens.TokenValidationParameters();
+            var context = TestUtilities.WriteHeader($"{this}.CreateClaimsPrincipalCrossVersionTest", theoryData);
+            var tvp5x = new TokenValidationParameters();
 
             PropertyInfo[] propertyInfos = typeof(SharedTokenValidationParameters).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             foreach (PropertyInfo propertyInfo in propertyInfos)
@@ -120,16 +145,16 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 if (propertyInfo.GetMethod != null)
                 {
                     object val = propertyInfo.GetValue(theoryData.TokenValidationParameters, null);
-                    PropertyInfo tvp5xPropertyInfo = typeof(Microsoft.IdentityModel.Tokens.TokenValidationParameters).GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                    PropertyInfo tvp5xPropertyInfo = typeof(TokenValidationParameters).GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                     tvp5xPropertyInfo.SetValue(tvp5x, val);
                 }
             }
 
             if (theoryData.X509Certificate != null)
-                tvp5x.IssuerSigningKey = new Microsoft.IdentityModel.Tokens.X509SecurityKey(theoryData.X509Certificate);
+                tvp5x.IssuerSigningKey = new X509SecurityKey(theoryData.X509Certificate);
 
-            var claimsPrincipal4x = CrossVersionTokenValidationTestsData.GetSamlClaimsPrincipal4x(theoryData.Token, theoryData.TokenValidationParameters, theoryData.X509Certificate, out System.IdentityModel.Tokens.SecurityToken validateToken4x);
-            var claimsPrincipal5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.Token, tvp5x, out Microsoft.IdentityModel.Tokens.SecurityToken validateToken5x);
+            var claimsPrincipal4x = CrossVersionTokenValidationTestsData.GetSamlClaimsPrincipal4x(theoryData.Token, theoryData.TokenValidationParameters, theoryData.X509Certificate, out SecurityToken4x validateToken4x);
+            var claimsPrincipal5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.Token, tvp5x, out SecurityToken validateToken5x);
 
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
             TestUtilities.AssertFailIfErrors(context);
@@ -142,11 +167,11 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
-                var tokenDescriptor4x = new System.IdentityModel.Tokens.SecurityTokenDescriptor
+                var tokenDescriptor4x = new SecurityTokenDescriptor4x
                 {
                     AppliesToAddress = Default.Audience,
-                    Lifetime = new System.IdentityModel.Protocols.WSTrust.Lifetime(notBefore, expires),
-                    SigningCredentials = new System.IdentityModel.Tokens.X509SigningCredentials(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                    Lifetime = new LifeTime4x(notBefore, expires),
+                    SigningCredentials = new X509SigningCredentials4x(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                     Subject = defaultClaimsIdentity,
                     TokenIssuerName = Default.Issuer,
                 };
@@ -163,9 +188,9 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 var token4x_AuthenticationStatement = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
 
                 tokenDescriptor4x.Subject = AuthorizationDecisionClaimsIdentity;
-                var authorizationDecisionStatements = new System.IdentityModel.Tokens.SamlAuthorizationDecisionStatement(new System.IdentityModel.Tokens.SamlSubject(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject), Default.SamlResource, System.IdentityModel.Tokens.SamlAccessDecision.Permit, new List<System.IdentityModel.Tokens.SamlAction> { new System.IdentityModel.Tokens.SamlAction("Action") });
-                var samlAssertion_AuthorizationDecision = new System.IdentityModel.Tokens.SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), (token4x_AttributeStatement as System.IdentityModel.Tokens.SamlSecurityToken).Assertion.Conditions, null, new List<System.IdentityModel.Tokens.SamlStatement> { authorizationDecisionStatements });
-                var token4x_AuthorizationDecisionStatement = new System.IdentityModel.Tokens.SamlSecurityToken(samlAssertion_AuthorizationDecision);
+                var authorizationDecisionStatements = new SamlAuthorizationDecisionStatement4x(new SamlSubject4x(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject), Default.SamlResource, SamlAccessDecision4x.Permit, new List<SamlAction4x> { new SamlAction4x("Action") });
+                var samlAssertion_AuthorizationDecision = new SamlAssertion4x(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), (token4x_AttributeStatement as SamlSecurityToken4x).Assertion.Conditions, null, new List<SamlStatement4x> { authorizationDecisionStatements });
+                var token4x_AuthorizationDecisionStatement = new SamlSecurityToken4x(samlAssertion_AuthorizationDecision);
 
                 return new TheoryData<ClaimsPrincipalTheoryData>
                 {
@@ -243,67 +268,67 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             }
         }
 
-        private static bool AreSamlTokensEqual(System.IdentityModel.Tokens.SecurityToken token1, Microsoft.IdentityModel.Tokens.SecurityToken token2, CompareContext context)
+        private static bool AreSamlTokensEqual(SecurityToken4x token4x, SecurityToken token5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(token1, token2, localContext))
+            if (!ContinueCheckingEquality(token4x, token5x, localContext))
                 return context.Merge(localContext);
 
-            if (!(token1 is System.IdentityModel.Tokens.SamlSecurityToken samlToken1))
+            if (!(token4x is SamlSecurityToken4x samlToken4x))
                 return false;
 
-            if (!(token2 is Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken samlToken2))
+            if (!(token5x is SamlSecurityToken samlToken5x))
                 return false;
 
-            if (!DateTime.Equals(samlToken1.ValidFrom, samlToken2.ValidFrom))
-                localContext.Diffs.Add(Environment.NewLine + $"token1.ValidFrom != token2.ValidFrom: {samlToken1.ValidFrom}, {samlToken2.ValidFrom}");
+            if (!DateTime.Equals(samlToken4x.ValidFrom, samlToken5x.ValidFrom))
+                localContext.Diffs.Add(Environment.NewLine + $"token1.ValidFrom != token2.ValidFrom: {samlToken4x.ValidFrom}, {samlToken5x.ValidFrom}");
 
-            if (!DateTime.Equals(samlToken1.ValidTo, samlToken2.ValidTo))
-                localContext.Diffs.Add(Environment.NewLine + $"token1.ValidTo != token2.ValidTo: {samlToken1.ValidTo}  {samlToken2.ValidTo}");
+            if (!DateTime.Equals(samlToken4x.ValidTo, samlToken5x.ValidTo))
+                localContext.Diffs.Add(Environment.NewLine + $"token1.ValidTo != token2.ValidTo: {samlToken4x.ValidTo}  {samlToken5x.ValidTo}");
 
-            AreSamlAssertionsEqual(samlToken1.Assertion, samlToken2.Assertion, localContext);
+            AreSamlAssertionsEqual(samlToken4x.Assertion, samlToken5x.Assertion, localContext);
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAssertionsEqual(System.IdentityModel.Tokens.SamlAssertion assertion1, SamlAssertion assertion2, CompareContext context)
+        private static bool AreSamlAssertionsEqual(SamlAssertion4x assertion4x, SamlAssertion assertion5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(assertion1, assertion2, localContext))
+            if (!ContinueCheckingEquality(assertion4x, assertion5x, localContext))
                 return context.Merge(localContext);
 
             // Note: We ignore compare assertion.IssueInstant, because in SamlSecurityTokenHandler.CreateToken level, this value always has been set as Utc.Now.
 
-            if (String.CompareOrdinal(assertion1.Issuer, assertion2.Issuer) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"assertion1.Issuer != assertion2.Issuer: {assertion1.Issuer}, {assertion2.Issuer}");
+            if (String.CompareOrdinal(assertion4x.Issuer, assertion5x.Issuer) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"assertion1.Issuer != assertion2.Issuer: {assertion4x.Issuer}, {assertion5x.Issuer}");
 
-            if (assertion1.MajorVersion != int.Parse(assertion2.MajorVersion))
-                localContext.Diffs.Add(Environment.NewLine + $"assertion1.MajorVersion != assertion2.MajorVersion: {assertion1.MajorVersion}, {assertion2.MajorVersion}");
+            if (assertion4x.MajorVersion != int.Parse(assertion5x.MajorVersion))
+                localContext.Diffs.Add(Environment.NewLine + $"assertion1.MajorVersion != assertion2.MajorVersion: {assertion4x.MajorVersion}, {assertion5x.MajorVersion}");
 
-            if (assertion1.MinorVersion != int.Parse(assertion2.MinorVersion))
-                localContext.Diffs.Add(Environment.NewLine + $"assertion1.MinorVersion != assertion2.MinorVersion: {assertion1.MinorVersion}, {assertion2.MinorVersion}");
+            if (assertion4x.MinorVersion != int.Parse(assertion5x.MinorVersion))
+                localContext.Diffs.Add(Environment.NewLine + $"assertion1.MinorVersion != assertion2.MinorVersion: {assertion4x.MinorVersion}, {assertion5x.MinorVersion}");
 
             // Compare advice
-            AreSamlAdvicesEqual(assertion1.Advice, assertion2.Advice, localContext);
+            AreSamlAdvicesEqual(assertion4x.Advice, assertion5x.Advice, localContext);
 
             //Compare Conditions
-            AreSamlConditionsEnumsEqual(assertion1.Conditions, assertion2.Conditions, localContext);
+            AreSamlConditionsEnumsEqual(assertion4x.Conditions, assertion5x.Conditions, localContext);
 
             // Compare Statements
-            AreSamlObjectEnumsEqual(assertion1.Statements, assertion2.Statements, localContext);
+            AreSamlObjectEnumsEqual(assertion4x.Statements, assertion5x.Statements, localContext);
 
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAdvicesEqual(System.IdentityModel.Tokens.SamlAdvice advice1, Microsoft.IdentityModel.Tokens.Saml.SamlAdvice advice2, CompareContext context)
+        private static bool AreSamlAdvicesEqual(SamlAdvice4x advice4x, SamlAdvice advice5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(advice1, advice2, localContext))
+            if (!ContinueCheckingEquality(advice4x, advice5x, localContext))
                 return context.Merge(localContext);
 
-            if (advice1.AssertionIdReferences.Count != advice2.AssertionIdReferences.Count)
-                localContext.Diffs.Add(Environment.NewLine + $"advice1.AssertionIdReferences.Count != advice2.AssertionIdReferences.Count: {advice1.AssertionIdReferences.Count}, {advice2.AssertionIdReferences.Count}");
+            if (advice4x.AssertionIdReferences.Count != advice5x.AssertionIdReferences.Count)
+                localContext.Diffs.Add(Environment.NewLine + $"advice1.AssertionIdReferences.Count != advice2.AssertionIdReferences.Count: {advice4x.AssertionIdReferences.Count}, {advice5x.AssertionIdReferences.Count}");
 
-            var diff = advice1.AssertionIdReferences.Where(x => !advice2.AssertionIdReferences.Contains(x));
+            var diff = advice4x.AssertionIdReferences.Where(x => !advice5x.AssertionIdReferences.Contains(x));
             if (diff.Count() != 0)
             {
                 foreach (var id in diff)
@@ -312,7 +337,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 }
             }
 
-            diff = advice2.AssertionIdReferences.Where(x => !advice1.AssertionIdReferences.Contains(x));
+            diff = advice5x.AssertionIdReferences.Where(x => !advice4x.AssertionIdReferences.Contains(x));
             if (diff.Count() != 0)
             {
                 foreach (var id in diff)
@@ -321,31 +346,31 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 }
             }
 
-            if (advice1.Assertions.Count != advice2.Assertions.Count)
-                localContext.Diffs.Add(Environment.NewLine + $"advice1.Assertions.Count: {advice1.Assertions.Count} != advice2.Assertions.Count: {advice2.Assertions.Count}");
+            if (advice4x.Assertions.Count != advice5x.Assertions.Count)
+                localContext.Diffs.Add(Environment.NewLine + $"advice1.Assertions.Count: {advice4x.Assertions.Count} != advice2.Assertions.Count: {advice5x.Assertions.Count}");
 
-            AreSamlObjectEnumsEqual(advice1.Assertions, advice2.Assertions, localContext);
+            AreSamlObjectEnumsEqual(advice4x.Assertions, advice5x.Assertions, localContext);
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlConditionsEqual(System.IdentityModel.Tokens.SamlCondition condition1, SamlCondition condition2, CompareContext context)
+        private static bool AreSamlConditionsEqual(SamlCondition4x condition4x, SamlCondition condition5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(condition1, condition2, localContext))
+            if (!ContinueCheckingEquality(condition4x, condition5x, localContext))
                 return context.Merge(localContext);
 
-            var type1 = condition1.GetType();
-            var type2 = condition2.GetType();
-            if (type1 == typeof(System.IdentityModel.Tokens.SamlAudienceRestrictionCondition) ^ type2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition))
-                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlCondition.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlCondition.GetType(): {condition1.GetType()}, {condition2.GetType()}");
-            else if (type1 == typeof(System.IdentityModel.Tokens.SamlDoNotCacheCondition) ^ type2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlDoNotCacheCondition))
-                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlCondition.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlCondition.GetType(): {condition1.GetType()}, {condition2.GetType()}");
+            var type4x = condition4x.GetType();
+            var type5x = condition5x.GetType();
+            if (type4x == typeof(SamlAudienceRestrictionCondition4x) ^ type5x == typeof(SamlAudienceRestrictionCondition))
+                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlCondition.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlCondition.GetType(): {condition4x.GetType()}, {condition5x.GetType()}");
+            else if (type4x == typeof(SamlDoNotCacheCondition4x) ^ type5x == typeof(SamlDoNotCacheCondition))
+                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlCondition.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlCondition.GetType(): {condition4x.GetType()}, {condition5x.GetType()}");
             else
             {
-                if (condition1 is System.IdentityModel.Tokens.SamlAudienceRestrictionCondition audienceCondition1)
+                if (condition4x is SamlAudienceRestrictionCondition4x audienceCondition1)
                 {
                     // Compare SamlAudienceRestrictionCondition
-                    var audienceCondition2 = condition2 as Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition;
+                    var audienceCondition2 = condition5x as SamlAudienceRestrictionCondition;
                     if (audienceCondition1.Audiences.Count != audienceCondition2.Audiences.Count)
                         localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlAudienceRestrictionCondition.Audiences.Count != Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition.Audiences.Count: {audienceCondition1.Audiences.Count}, {audienceCondition2.Audiences.Count}");
 
@@ -368,38 +393,38 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlConditionsEnumsEqual(System.IdentityModel.Tokens.SamlConditions conditions1, SamlConditions conditions2, CompareContext context)
+        private static bool AreSamlConditionsEnumsEqual(SamlConditions4x conditions4x, SamlConditions conditions5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(conditions1, conditions2, localContext))
+            if (!ContinueCheckingEquality(conditions4x, conditions5x, localContext))
                 return context.Merge(localContext);
 
-            if (conditions1.Conditions.Count != conditions2.Conditions.Count)
-                context.Diffs.Add(Environment.NewLine + $"conditions1.Conditions.Count != conditions2.Conditions.Count: {conditions1.Conditions.Count}, {conditions2.Conditions.Count}");
+            if (conditions4x.Conditions.Count != conditions5x.Conditions.Count)
+                context.Diffs.Add(Environment.NewLine + $"conditions1.Conditions.Count != conditions2.Conditions.Count: {conditions4x.Conditions.Count}, {conditions5x.Conditions.Count}");
 
             int numMatched = 0;
-            int numToMatch = conditions1.Conditions.Count;
-            var notMatched = new List<System.IdentityModel.Tokens.SamlCondition>();
-            foreach (var condition in conditions1.Conditions)
+            int numToMatch = conditions4x.Conditions.Count;
+            var notMatched = new List<SamlCondition4x>();
+            foreach (var condition in conditions4x.Conditions)
             {
                 var perClaimContext = new CompareContext(localContext);
                 bool matched = false;
-                for (int i = 0; i < conditions2.Conditions.Count; i++)
+                for (int i = 0; i < conditions5x.Conditions.Count; i++)
                 {
-                    var type1 = condition.GetType();
-                    var type2 = conditions2.Conditions.ElementAt(i).GetType();
+                    var type4x = condition.GetType();
+                    var type5x = conditions5x.Conditions.ElementAt(i).GetType();
 
-                    if (type1 == typeof(System.IdentityModel.Tokens.SamlAudienceRestrictionCondition) ^ type2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition))
+                    if (type4x == typeof(SamlAudienceRestrictionCondition4x) ^ type5x == typeof(SamlAudienceRestrictionCondition))
                         continue;
 
-                    if (type1 == typeof(System.IdentityModel.Tokens.SamlDoNotCacheCondition) ^ type2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlDoNotCacheCondition))
+                    if (type4x == typeof(SamlDoNotCacheCondition4x) ^ type5x == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlDoNotCacheCondition))
                         continue;
 
-                    if (AreSamlConditionsEqual(condition, conditions2.Conditions.ElementAt(i), perClaimContext))
+                    if (AreSamlConditionsEqual(condition, conditions5x.Conditions.ElementAt(i), perClaimContext))
                     {
                         numMatched++;
                         matched = true;
-                        conditions2.Conditions.Remove(conditions2.Conditions.ElementAt(i));
+                        conditions5x.Conditions.Remove(conditions5x.Conditions.ElementAt(i));
                         break;
                     }
                 }
@@ -417,18 +442,18 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 foreach (var condition in notMatched)
                 {
                     var type = condition.GetType();
-                    if (condition is System.IdentityModel.Tokens.SamlAudienceRestrictionCondition audienceCondition)
+                    if (condition is SamlAudienceRestrictionCondition4x audienceCondition)
                     {
                         localContext.Diffs.Add($"condition type: {condition.GetType()}");
                         foreach (var audience in audienceCondition.Audiences)
                             localContext.Diffs.Add($"condition value: {audienceCondition.Audiences}");
                     }
-                    else if (condition is System.IdentityModel.Tokens.SamlDoNotCacheCondition doNotCacheCondition)
+                    else if (condition is SamlDoNotCacheCondition4x doNotCacheCondition)
                         localContext.Diffs.Add($"condition type: {condition.GetType()}");
                 }
 
                 localContext.Diffs.Add(Environment.NewLine + "conditions2 NOT Matched:" + Environment.NewLine);
-                foreach (var condition in conditions2.Conditions)
+                foreach (var condition in conditions5x.Conditions)
                 {
                     var type = condition.GetType();
                     if (condition is SamlAudienceRestrictionCondition audienceCondition)
@@ -447,59 +472,59 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlStatementsEqual(System.IdentityModel.Tokens.SamlStatement statement1, SamlStatement statement2, CompareContext context)
+        private static bool AreSamlStatementsEqual(SamlStatement4x statement4x, SamlStatement statement5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(statement1, statement2, localContext))
+            if (!ContinueCheckingEquality(statement4x, statement5x, localContext))
                 return context.Merge(localContext);
 
-            var type1 = statement1.GetType();
-            var type2 = statement2.GetType();
-            if (type1 == typeof(System.IdentityModel.Tokens.SamlAuthenticationStatement) ^ type2 == typeof(SamlAuthenticationStatement))
-                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement1.GetType()}, {statement2.GetType()}");
-            else if (type1 == typeof(System.IdentityModel.Tokens.SamlAttributeStatement) ^ type2 == typeof(SamlAttributeStatement))
-                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement1.GetType()}, {statement2.GetType()}");
-            else if (type1 == typeof(System.IdentityModel.Tokens.SamlAuthorizationDecisionClaimResource) ^ type2 == typeof(SamlAuthorizationDecisionStatement))
-                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement1.GetType()}, {statement2.GetType()}");
+            var type4x = statement4x.GetType();
+            var type5x = statement5x.GetType();
+            if (type4x == typeof(SamlAuthenticationStatement4x) ^ type5x == typeof(SamlAuthenticationStatement))
+                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement4x.GetType()}, {statement5x.GetType()}");
+            else if (type4x == typeof(SamlAttributeStatement4x) ^ type5x == typeof(SamlAttributeStatement))
+                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement4x.GetType()}, {statement5x.GetType()}");
+            else if (type4x == typeof(SamlAuthorizationDecisionClaimResource4x) ^ type5x == typeof(SamlAuthorizationDecisionStatement))
+                localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlStatement.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlStatement.GetType(): {statement4x.GetType()}, {statement5x.GetType()}");
             else
             {
-                if (statement1 is System.IdentityModel.Tokens.SamlAuthenticationStatement authStatement1)
+                if (statement4x is SamlAuthenticationStatement4x authStatement4x)
                 {
-                    var authStatement2 = statement2 as SamlAuthenticationStatement;
-                    if (!DateTime.Equals(authStatement1.AuthenticationInstant, authStatement2.AuthenticationInstant))
-                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.AuthenticationInstant != authStatement2.AuthenticationInstant: {authStatement1.AuthenticationInstant}, {authStatement2.AuthenticationInstant}");
+                    var authStatement2 = statement5x as SamlAuthenticationStatement;
+                    if (!DateTime.Equals(authStatement4x.AuthenticationInstant, authStatement2.AuthenticationInstant))
+                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.AuthenticationInstant != authStatement2.AuthenticationInstant: {authStatement4x.AuthenticationInstant}, {authStatement2.AuthenticationInstant}");
 
-                    if (String.CompareOrdinal(authStatement1.AuthenticationMethod, authStatement2.AuthenticationMethod) != 0)
-                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.AuthenticationMethod != authStatement2.AuthenticationMethod: {authStatement1.AuthenticationMethod}, {authStatement2.AuthenticationMethod}");
+                    if (String.CompareOrdinal(authStatement4x.AuthenticationMethod, authStatement2.AuthenticationMethod) != 0)
+                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.AuthenticationMethod != authStatement2.AuthenticationMethod: {authStatement4x.AuthenticationMethod}, {authStatement2.AuthenticationMethod}");
 
-                    if (String.CompareOrdinal(authStatement1.DnsAddress, authStatement2.DnsAddress) != 0)
-                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.DnsAddress != authStatement2.DnsAddress: {authStatement1.DnsAddress}, {authStatement2.DnsAddress}");
+                    if (String.CompareOrdinal(authStatement4x.DnsAddress, authStatement2.DnsAddress) != 0)
+                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.DnsAddress != authStatement2.DnsAddress: {authStatement4x.DnsAddress}, {authStatement2.DnsAddress}");
 
-                    if (String.CompareOrdinal(authStatement1.IPAddress, authStatement2.IPAddress) != 0)
-                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.IPAddress != authStatement2.IPAddress: {authStatement1.IPAddress}, {authStatement2.IPAddress}");
+                    if (String.CompareOrdinal(authStatement4x.IPAddress, authStatement2.IPAddress) != 0)
+                        localContext.Diffs.Add(Environment.NewLine + $"authStatement1.IPAddress != authStatement2.IPAddress: {authStatement4x.IPAddress}, {authStatement2.IPAddress}");
 
-                    AreSamlSubjectsEqual(authStatement1.SamlSubject, authStatement2.Subject, localContext);
-                    AreSamlObjectEnumsEqual(authStatement1.AuthorityBindings, authStatement2.AuthorityBindings, localContext);
+                    AreSamlSubjectsEqual(authStatement4x.SamlSubject, authStatement2.Subject, localContext);
+                    AreSamlObjectEnumsEqual(authStatement4x.AuthorityBindings, authStatement2.AuthorityBindings, localContext);
                 }
-                else if (statement1 is System.IdentityModel.Tokens.SamlAttributeStatement attributeStatement1)
+                else if (statement4x is SamlAttributeStatement4x attributeStatement4x)
                 {
-                    var attributeStatement2 = statement2 as SamlAttributeStatement;
-                    AreSamlSubjectsEqual(attributeStatement1.SamlSubject, attributeStatement2.Subject, localContext);
-                    AreSamlObjectEnumsEqual(attributeStatement1.Attributes, attributeStatement2.Attributes, localContext);
+                    var attributeStatement2 = statement5x as SamlAttributeStatement;
+                    AreSamlSubjectsEqual(attributeStatement4x.SamlSubject, attributeStatement2.Subject, localContext);
+                    AreSamlObjectEnumsEqual(attributeStatement4x.Attributes, attributeStatement2.Attributes, localContext);
                 }
-                else if (statement1 is System.IdentityModel.Tokens.SamlAuthorizationDecisionStatement decisionStatement1)
+                else if (statement4x is SamlAuthorizationDecisionStatement4x decisionStatement4x)
                 {
-                    var decisionStatement2 = statement2 as SamlAuthorizationDecisionStatement;
-                    AreSamlSubjectsEqual(decisionStatement1.SamlSubject, decisionStatement2.Subject, localContext);
-                    AreSamlObjectEnumsEqual(decisionStatement1.SamlActions, decisionStatement2.Actions, localContext);
+                    var decisionStatement2 = statement5x as SamlAuthorizationDecisionStatement;
+                    AreSamlSubjectsEqual(decisionStatement4x.SamlSubject, decisionStatement2.Subject, localContext);
+                    AreSamlObjectEnumsEqual(decisionStatement4x.SamlActions, decisionStatement2.Actions, localContext);
 
-                    if (String.CompareOrdinal(decisionStatement1.AccessDecision.ToString(), decisionStatement2.Decision) != 0)
-                        localContext.Diffs.Add(Environment.NewLine + $"decisionStatement1.AccessDecision != decisionStatement2.Decision: {decisionStatement1.AccessDecision}, {decisionStatement2.Decision}");
+                    if (String.CompareOrdinal(decisionStatement4x.AccessDecision.ToString(), decisionStatement2.Decision) != 0)
+                        localContext.Diffs.Add(Environment.NewLine + $"decisionStatement1.AccessDecision != decisionStatement2.Decision: {decisionStatement4x.AccessDecision}, {decisionStatement2.Decision}");
 
-                    AreSamlEvidencesEqual(decisionStatement1.Evidence, decisionStatement2.Evidence, localContext);
+                    AreSamlEvidencesEqual(decisionStatement4x.Evidence, decisionStatement2.Evidence, localContext);
 
-                    if (String.CompareOrdinal(decisionStatement1.Resource, decisionStatement2.Resource) != 0)
-                        localContext.Diffs.Add(Environment.NewLine + $"decisionStatement1.Resource != decisionStatement2.Resource: {decisionStatement1.Resource}, {decisionStatement2.Resource}");
+                    if (String.CompareOrdinal(decisionStatement4x.Resource, decisionStatement2.Resource) != 0)
+                        localContext.Diffs.Add(Environment.NewLine + $"decisionStatement1.Resource != decisionStatement2.Resource: {decisionStatement4x.Resource}, {decisionStatement2.Resource}");
                 }
             }
 
@@ -527,21 +552,21 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 bool matched = false;
                 for (int i = 0; i < expectedValues.Count(); i++)
                 {
-                    var t1 = obj.GetType();
-                    var t2 = expectedValues.ElementAt(i).GetType();
+                    var type4x = obj.GetType();
+                    var type5x = expectedValues.ElementAt(i).GetType();
 
-                    if (obj is System.IdentityModel.Tokens.SamlStatement)
+                    if (obj is SamlStatement4x)
                     {
-                        if (t1 == typeof(System.IdentityModel.Tokens.SamlAttributeStatement) ^ t2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlAttributeStatement))
+                        if (type4x == typeof(SamlAttributeStatement4x) ^ type5x == typeof(SamlAttributeStatement))
                             continue;
 
-                        if (t1 == typeof(System.IdentityModel.Tokens.SamlAuthenticationStatement) ^ t2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlAuthenticationStatement))
+                        if (type4x == typeof(SamlAuthenticationStatement4x) ^ type5x == typeof(SamlAuthenticationStatement))
                             continue;
 
-                        if (t1 == typeof(System.IdentityModel.Tokens.SamlAuthorizationDecisionStatement) ^ t2 == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement))
+                        if (type4x == typeof(SamlAuthorizationDecisionStatement4x) ^ type5x == typeof(SamlAuthorizationDecisionStatement))
                             continue;
 
-                        if (AreSamlStatementsEqual(obj as System.IdentityModel.Tokens.SamlStatement, expectedValues.ElementAt(i) as SamlStatement, perClaimContext))
+                        if (AreSamlStatementsEqual(obj as SamlStatement4x, expectedValues.ElementAt(i) as SamlStatement, perClaimContext))
                         {
                             numMatched++;
                             matched = true;
@@ -549,9 +574,9 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             break;
                         }
                     }
-                    else if (obj is System.IdentityModel.Tokens.SamlAttribute)
+                    else if (obj is SamlAttribute4x)
                     {
-                        if (AreSamlAttributesEqual(obj as System.IdentityModel.Tokens.SamlAttribute, expectedValues.ElementAt(i) as SamlAttribute, perClaimContext))
+                        if (AreSamlAttributesEqual(obj as SamlAttribute4x, expectedValues.ElementAt(i) as SamlAttribute, perClaimContext))
                         {
                             numMatched++;
                             matched = true;
@@ -559,9 +584,9 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             break;
                         }
                     }
-                    else if (obj is System.IdentityModel.Tokens.SamlAction)
+                    else if (obj is SamlAction4x)
                     {
-                        if (AreSamlActionsEqual(obj as System.IdentityModel.Tokens.SamlAction, expectedValues.ElementAt(i) as SamlAction, perClaimContext))
+                        if (AreSamlActionsEqual(obj as SamlAction4x, expectedValues.ElementAt(i) as SamlAction, perClaimContext))
                         {
                             numMatched++;
                             matched = true;
@@ -569,9 +594,9 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             break;
                         }
                     }
-                    else if (obj is System.IdentityModel.Tokens.SamlAuthorityBinding)
+                    else if (obj is SamlAuthorityBinding4x)
                     {
-                        if (AreSamlAuthorityBindingsEqual(obj as System.IdentityModel.Tokens.SamlAuthorityBinding, expectedValues.ElementAt(i) as SamlAuthorityBinding, perClaimContext))
+                        if (AreSamlAuthorityBindingsEqual(obj as SamlAuthorityBinding4x, expectedValues.ElementAt(i) as SamlAuthorityBinding, perClaimContext))
                         {
                             numMatched++;
                             matched = true;
@@ -579,9 +604,9 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             break;
                         }
                     }
-                    else if (obj is System.IdentityModel.Tokens.SamlAssertion)
+                    else if (obj is SamlAssertion4x)
                     {
-                        if (AreSamlAssertionsEqual(obj as System.IdentityModel.Tokens.SamlAssertion, expectedValues.ElementAt(i) as SamlAssertion, perClaimContext))
+                        if (AreSamlAssertionsEqual(obj as SamlAssertion4x, expectedValues.ElementAt(i) as SamlAssertion, perClaimContext))
                         {
                             numMatched++;
                             matched = true;
@@ -638,56 +663,56 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAuthorityBindingsEqual(System.IdentityModel.Tokens.SamlAuthorityBinding bindings1, SamlAuthorityBinding bindings2, CompareContext context)
+        private static bool AreSamlAuthorityBindingsEqual(SamlAuthorityBinding4x binding4x, SamlAuthorityBinding binding5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(bindings1, bindings2, localContext))
+            if (!ContinueCheckingEquality(binding4x, binding5x, localContext))
                 return context.Merge(localContext);
 
-            if (String.Compare(bindings1.Binding, bindings2.Binding) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"bindings1.Binding != bindings2.Binding: {bindings1.Binding}, {bindings2.Binding}");
+            if (String.Compare(binding4x.Binding, binding5x.Binding) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"bindings1.Binding != bindings2.Binding: {binding4x.Binding}, {binding5x.Binding}");
 
-            if (String.Compare(bindings1.Location, bindings2.Location) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"bindings1.Location != bindings2.Location: {bindings1.Location}, {bindings2.Location}");
+            if (String.Compare(binding4x.Location, binding5x.Location) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"bindings1.Location != bindings2.Location: {binding4x.Location}, {binding5x.Location}");
 
-            AreNameQualifiersEqual(bindings1.AuthorityKind, bindings2.AuthorityKind, localContext);
+            AreNameQualifiersEqual(binding4x.AuthorityKind, binding5x.AuthorityKind, localContext);
             return context.Merge(localContext);
         }
 
-        private static bool AreNameQualifiersEqual(XmlQualifiedName name1, XmlQualifiedName name2, CompareContext context)
+        private static bool AreNameQualifiersEqual(XmlQualifiedName name4x, XmlQualifiedName name5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(name1, name2, localContext))
+            if (!ContinueCheckingEquality(name4x, name5x, localContext))
                 return context.Merge(localContext);
 
-            if (String.CompareOrdinal(name1.Name, name2.Name) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"name1.Name != name2.Name: {name1.Name}, {name2.Name}");
+            if (String.CompareOrdinal(name4x.Name, name5x.Name) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"name1.Name != name2.Name: {name4x.Name}, {name5x.Name}");
 
-            if (String.CompareOrdinal(name1.Namespace, name2.Namespace) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"name1.Namespace != name2.Namespace: {name1.Namespace}, {name2.Namespace}");
+            if (String.CompareOrdinal(name4x.Namespace, name5x.Namespace) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"name1.Namespace != name2.Namespace: {name4x.Namespace}, {name5x.Namespace}");
 
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlSubjectsEqual(System.IdentityModel.Tokens.SamlSubject subject1, SamlSubject subject2, CompareContext context)
+        private static bool AreSamlSubjectsEqual(SamlSubject4x subject4x, SamlSubject subject5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(subject1, subject2, localContext))
+            if (!ContinueCheckingEquality(subject4x, subject5x, localContext))
                 return context.Merge(localContext);
 
-            if (String.CompareOrdinal(subject1.SubjectConfirmationData, subject2.ConfirmationData) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"subject1.SubjectConfirmationData != subject2.ConfirmationData: {subject1.SubjectConfirmationData}, {subject2.ConfirmationData}");
+            if (String.CompareOrdinal(subject4x.SubjectConfirmationData, subject5x.ConfirmationData) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"subject1.SubjectConfirmationData != subject2.ConfirmationData: {subject4x.SubjectConfirmationData}, {subject5x.ConfirmationData}");
 
-            if (String.CompareOrdinal(subject1.NameQualifier, subject2.NameQualifier) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"subject1.NameQualifier != subject2.NameQualifier: {subject1.NameQualifier}, {subject2.NameQualifier}");
+            if (String.CompareOrdinal(subject4x.NameQualifier, subject5x.NameQualifier) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"subject1.NameQualifier != subject2.NameQualifier: {subject4x.NameQualifier}, {subject5x.NameQualifier}");
 
-            if (String.CompareOrdinal(subject1.NameFormat, subject2.NameFormat) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"subject1.NameFormat != subject2.NameFormat: {subject1.NameFormat}, {subject2.NameFormat}");
+            if (String.CompareOrdinal(subject4x.NameFormat, subject5x.NameFormat) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"subject1.NameFormat != subject2.NameFormat: {subject4x.NameFormat}, {subject5x.NameFormat}");
 
-            if (String.CompareOrdinal(subject1.Name, subject2.Name) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"subject1.Name != subject2.Name: {subject1.Name}, {subject2.Name}");
+            if (String.CompareOrdinal(subject4x.Name, subject5x.Name) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"subject1.Name != subject2.Name: {subject4x.Name}, {subject5x.Name}");
 
-            var diff = subject1.ConfirmationMethods.Where(x => !subject2.ConfirmationMethods.Contains(x));
+            var diff = subject4x.ConfirmationMethods.Where(x => !subject5x.ConfirmationMethods.Contains(x));
             if (diff.Count() > 0)
             {
                 localContext.Diffs.Add(Environment.NewLine + $"subject2.ConfirmationMethods doesn't have methods:");
@@ -695,7 +720,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                     localContext.Diffs.Add(Environment.NewLine + item);
             }
 
-            diff = subject2.ConfirmationMethods.Where(x => !subject1.ConfirmationMethods.Contains(x));
+            diff = subject5x.ConfirmationMethods.Where(x => !subject4x.ConfirmationMethods.Contains(x));
             if (diff.Count() > 0)
             {
                 localContext.Diffs.Add(Environment.NewLine + $"subject1.ConfirmationMethods doesn't have methods:");
@@ -706,33 +731,33 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlAttributesEqual(System.IdentityModel.Tokens.SamlAttribute attribute1, SamlAttribute attribute2, CompareContext context)
+        private static bool AreSamlAttributesEqual(SamlAttribute4x attribute4x, SamlAttribute attribute5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(attribute1, attribute2, localContext))
+            if (!ContinueCheckingEquality(attribute4x, attribute5x, localContext))
                 return context.Merge(localContext);
 
-            if (String.CompareOrdinal(attribute1.Name, attribute2.Name) != 0)
-                localContext.Diffs.Add($"attribute1.Name != attribute2.Name: {attribute1.Name}, {attribute2.Name}");
+            if (String.CompareOrdinal(attribute4x.Name, attribute5x.Name) != 0)
+                localContext.Diffs.Add($"attribute1.Name != attribute2.Name: {attribute4x.Name}, {attribute5x.Name}");
 
-            if (String.CompareOrdinal(attribute1.Namespace, attribute2.Namespace) != 0)
-                localContext.Diffs.Add($"attribute1.Namespace != attribute2.Namespace: {attribute1.Namespace}, {attribute2.Namespace}");
+            if (String.CompareOrdinal(attribute4x.Namespace, attribute5x.Namespace) != 0)
+                localContext.Diffs.Add($"attribute1.Namespace != attribute2.Namespace: {attribute4x.Namespace}, {attribute5x.Namespace}");
 
-            if (String.CompareOrdinal(attribute1.OriginalIssuer, attribute2.OriginalIssuer) != 0)
-                localContext.Diffs.Add($"attribute1.OriginalIssuer != attribute2.OriginalIssuer: {attribute1.OriginalIssuer}, {attribute2.OriginalIssuer}");
+            if (String.CompareOrdinal(attribute4x.OriginalIssuer, attribute5x.OriginalIssuer) != 0)
+                localContext.Diffs.Add($"attribute1.OriginalIssuer != attribute2.OriginalIssuer: {attribute4x.OriginalIssuer}, {attribute5x.OriginalIssuer}");
 
-            if (String.CompareOrdinal(attribute1.AttributeValueXsiType, attribute2.AttributeValueXsiType) != 0)
-                localContext.Diffs.Add($"attribute1.AttributeValueXsiType != attribute2.AttributeValueXsiType: {attribute1.AttributeValueXsiType}, {attribute2.AttributeValueXsiType}");
+            if (String.CompareOrdinal(attribute4x.AttributeValueXsiType, attribute5x.AttributeValueXsiType) != 0)
+                localContext.Diffs.Add($"attribute1.AttributeValueXsiType != attribute2.AttributeValueXsiType: {attribute4x.AttributeValueXsiType}, {attribute5x.AttributeValueXsiType}");
 
-            if (attribute1.AttributeValues.Count != attribute2.Values.Count)
-                localContext.Diffs.Add(Environment.NewLine + $"attribute1.AttributeValues.Count != attribute2.Values.Count: {attribute1.AttributeValues.Count}, {attribute2.Values.Count}");
+            if (attribute4x.AttributeValues.Count != attribute5x.Values.Count)
+                localContext.Diffs.Add(Environment.NewLine + $"attribute1.AttributeValues.Count != attribute2.Values.Count: {attribute4x.AttributeValues.Count}, {attribute5x.Values.Count}");
 
-            var diff = attribute1.AttributeValues.Where(x => !attribute2.Values.Contains(x));
+            var diff = attribute4x.AttributeValues.Where(x => !attribute5x.Values.Contains(x));
             if (diff.Count() != 0)
                 foreach (var item in diff)
                     localContext.Diffs.Add($"attribute2 doesn't have AttributeValue {item} which in attribute1");
 
-            diff = attribute2.Values.Where(x => !attribute1.AttributeValues.Contains(x));
+            diff = attribute5x.Values.Where(x => !attribute4x.AttributeValues.Contains(x));
             if (diff.Count() != 0)
                 foreach (var item in diff)
                     localContext.Diffs.Add($"attribute1 doesn't have AttributeValue {item} which in attribute2");
@@ -740,31 +765,31 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlActionsEqual(System.IdentityModel.Tokens.SamlAction action1, SamlAction action2, CompareContext context)
+        private static bool AreSamlActionsEqual(SamlAction4x action4x, SamlAction action5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(action1, action2, localContext))
+            if (!ContinueCheckingEquality(action4x, action5x, localContext))
                 return context.Merge(localContext);
 
-            if (String.CompareOrdinal(action1.Action, action2.Value) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"action1.Action != action.Value: {action1.Action}, {action2.Value}");
+            if (String.CompareOrdinal(action4x.Action, action5x.Value) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"action1.Action != action.Value: {action4x.Action}, {action5x.Value}");
 
-            if (String.CompareOrdinal(action1.Namespace, action2.Namespace.ToString()) != 0)
-                localContext.Diffs.Add(Environment.NewLine + $"action1.Namespace != action2.Namespace: {action1.Namespace}, {action2.Namespace}");
+            if (String.CompareOrdinal(action4x.Namespace, action5x.Namespace.ToString()) != 0)
+                localContext.Diffs.Add(Environment.NewLine + $"action1.Namespace != action2.Namespace: {action4x.Namespace}, {action5x.Namespace}");
 
             return context.Merge(localContext);
         }
 
-        private static bool AreSamlEvidencesEqual(System.IdentityModel.Tokens.SamlEvidence evidence1, SamlEvidence evidence2, CompareContext context)
+        private static bool AreSamlEvidencesEqual(SamlEvidence4x evidence4x, SamlEvidence evidence5x, CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(evidence1, evidence2, localContext))
+            if (!ContinueCheckingEquality(evidence4x, evidence5x, localContext))
                 return context.Merge(localContext);
 
-            if (evidence1.AssertionIdReferences.Count != evidence2.AssertionIDReferences.Count)
-                localContext.Diffs.Add(Environment.NewLine + $"evidence1.AssertionIdReferences.Count != evidence2.AssertionIDReferences.Count: {evidence1.AssertionIdReferences.Count}, {evidence2.AssertionIDReferences.Count}");
+            if (evidence4x.AssertionIdReferences.Count != evidence5x.AssertionIDReferences.Count)
+                localContext.Diffs.Add(Environment.NewLine + $"evidence1.AssertionIdReferences.Count != evidence2.AssertionIDReferences.Count: {evidence4x.AssertionIdReferences.Count}, {evidence5x.AssertionIDReferences.Count}");
 
-            var diff = evidence1.AssertionIdReferences.Where(x => !evidence2.AssertionIDReferences.Contains(x));
+            var diff = evidence4x.AssertionIdReferences.Where(x => !evidence5x.AssertionIDReferences.Contains(x));
             if (diff.Count() != 0)
             {
                 foreach (var id in diff)
@@ -773,7 +798,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 }
             }
 
-            diff = evidence2.AssertionIDReferences.Where(x => !evidence1.AssertionIdReferences.Contains(x));
+            diff = evidence5x.AssertionIDReferences.Where(x => !evidence4x.AssertionIdReferences.Contains(x));
             if (diff.Count() != 0)
             {
                 foreach (var id in diff)
@@ -782,10 +807,10 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 }
             }
 
-            if (evidence1.Assertions.Count != evidence2.Assertions.Count)
-                localContext.Diffs.Add(Environment.NewLine + $"evidence1.Assertions.Count != evidence2.Assertions.Count: {evidence1.Assertions.Count}, {evidence2.Assertions.Count}");
+            if (evidence4x.Assertions.Count != evidence5x.Assertions.Count)
+                localContext.Diffs.Add(Environment.NewLine + $"evidence1.Assertions.Count != evidence2.Assertions.Count: {evidence4x.Assertions.Count}, {evidence5x.Assertions.Count}");
 
-            AreSamlObjectEnumsEqual(evidence1.Assertions, evidence2.Assertions, localContext);
+            AreSamlObjectEnumsEqual(evidence4x.Assertions, evidence5x.Assertions, localContext);
             return context.Merge(localContext);
         }
 
@@ -812,14 +837,21 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
     public class TokenCrossTheoryData : TheoryDataBase
     {
-        public System.IdentityModel.Tokens.SecurityTokenDescriptor TokenDescriptor4x { get; set; }
-        public Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor TokenDescriptor5x { get; set; }
+        public SecurityTokenDescriptor4x TokenDescriptor4x { get; set; }
+
+        public SecurityTokenDescriptor TokenDescriptor5x { get; set; }
+
+        public TokenValidationParameters4x ValidationParameters4x { get; set; }
+
+        public TokenValidationParameters ValidationParameters5x { get; set; }
     }
 
     public class ClaimsPrincipalTheoryData : TheoryDataBase
     {
         public string Token { get; set; }
+
         public SharedTokenValidationParameters TokenValidationParameters { get; set; }
+
         public X509Certificate2 X509Certificate { get; set; }
     }
 }
