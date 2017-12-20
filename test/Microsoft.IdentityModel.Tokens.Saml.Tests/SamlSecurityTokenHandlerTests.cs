@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10101"));
             TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
+            TestUtilities.SetGet(samlSecurityTokenHandler, "Serializer", null, ExpectedException.ArgumentNullException());
         }
 
         [Theory, MemberData(nameof(CanReadTokenTheoryData))]

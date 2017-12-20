@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
+        private SamlSerializer _serializer = new SamlSerializer();
         private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
 
         /// <summary>
@@ -107,7 +108,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        public SamlSerializer Serializer { get; set; } = new SamlSerializer();
+        /// <exception cref="ArgumentNullException">'value' is null.</exception> 
+        public SamlSerializer Serializer
+        {
+            get { return _serializer; }
+
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                _serializer = value;
+            }
+        } 
 
         /// <summary>
         /// Gets or sets a bool that controls if token creation will set default 'NotBefore', 'NotOnOrAfter' and 'IssueInstant' if not specified.
