@@ -112,14 +112,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public SamlSerializer Serializer
         {
             get { return _serializer; }
-
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-
-                _serializer = value;
-            }
+            set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
         } 
 
         /// <summary>
