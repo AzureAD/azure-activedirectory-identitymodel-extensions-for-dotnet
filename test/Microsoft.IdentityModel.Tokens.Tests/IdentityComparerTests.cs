@@ -568,18 +568,6 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         [Fact]
-        public void CompareSaml2SecurityTokenHandlers()
-        {
-            TestUtilities.WriteHeader($"{this}.CompareSaml2SecurityTokenHandlers", true);
-            var context = new CompareContext($"{this}.CompareSaml2SecurityTokenHandlers");
-            var saml2SecurityTokenHandler1 = new Saml2SecurityTokenHandler { Serializer = new Saml2Serializer() };
-            var saml2SecurityTokenHandler2 = new Saml2SecurityTokenHandler();
-            IdentityComparer.AreEqual(saml2SecurityTokenHandler1, saml2SecurityTokenHandler2, context);
-
-            Assert.True(context.Diffs.Count(s => s == "Serializer:") == 0);
-        }
-
-        [Fact]
         public void CompareSignatures()
         {
             TestUtilities.WriteHeader($"{this}.CompareSignatures", true);
