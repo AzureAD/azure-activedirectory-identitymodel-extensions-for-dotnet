@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
     {
 #pragma warning disable 1591
         public const string Namespace = "http://www.w3.org/2000/09/xmldsig#";
-        public const string Prefix = "ds";
+        public const string PreferredPrefix = "ds";
         public const string SecurityJan2004Namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
         public const string SecurityJan2004Prefix = "o";
         public const string TransformationParameters = "TransformationParameters";
