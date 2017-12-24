@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     {
         private const string Actor = "Actor";
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
+        private Saml2Serializer _serializer = new Saml2Serializer();
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -64,11 +65,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or set the <see cref="Saml2Serializer"/> that will be used to read and write a <see cref="Saml2SecurityToken"/>.
         /// </summary>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public Saml2Serializer Serializer
         {
-            get;
-            set;
-        } = new Saml2Serializer();
+            get { return _serializer; }
+            set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
+        }
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
