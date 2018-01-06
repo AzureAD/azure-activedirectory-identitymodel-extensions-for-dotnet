@@ -20,7 +20,7 @@ use File::Basename;
 
 # TODO the script doesn't know about comments and #if, so it can have false-positives on commented-out code...
 
-my $PERF_DEBUG = (1==1); # print debug info to screen, so a human watching output in real time can see where time spent
+my $PERF_DEBUG = (1==0); # print debug info to screen, so a human watching output in real time can see where time spent
 my $ERRORS_ONLY_MODE = (1==0);  # only print serious errors
 my $THERE_ARE_ERRORS = (1==0);
 # prefix strings so build won't filter messages
@@ -93,7 +93,7 @@ sub PrintPerf($)
 
 my $FORMAT_STR_ARG = qr/
                         (?<!{)         # not preceded by {
-                        {              # {
+                        \{              # {
                         (\d+)          # arg# SAVED IN $1
                         (?:,-?\d+)?    # optional alignment (signed integer)
                         (?::[^}]*)?    # optional formatString
@@ -234,7 +234,7 @@ foreach my $directory (@directories)
     PrintPerf("\nPERF: starting script\n");
     PrintPerf("\nPERF: Analyzing file: $resources_txt\n");
 
-    print ("$resources_txt");
+    Print("$resources_txt\n\n");
     open(RES, "< $resources_txt") or die "can't open $resources_txt: $!";
 
     my %ids;   # key is identifier, value is a tuple: [# references in code, number of formatString args, the resource string itself]
@@ -274,7 +274,7 @@ foreach my $directory (@directories)
             my $stringid = substr($stringvalue, 0, $length); # get prefix of string value
             if (not $id eq $stringid) 
             {
-                PrintError("string name ($id) is not the same as it's value: $stringid \n");
+                PrintError("string name ($id) is not the same as it's value: $stringid \n \n");
             }
             
         }
@@ -328,7 +328,7 @@ foreach my $directory (@directories)
 
     PrintPerf("\nPERF: done reading and processing source files\n");
     {
-        Print("\nDone processing files\n");
+        PrintPerf("\nDone processing files\n");
 
         my $numUnreferencedIds = 0;
         foreach my $id (keys(%ids))
@@ -351,4 +351,6 @@ foreach my $directory (@directories)
         PrintError("See ndp\\indigo\\tools\\Resources\\ProperUsage\\README.txt for details if you need help.\n");
         exit 1;
     }
+
+    Print("--------------\n\n");
 }
