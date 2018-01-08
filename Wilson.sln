@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}"
 EndProject
@@ -57,9 +57,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrossVersionTokenValidation
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossVersionTokenValidation.Tests", "test\CrossVersionTokenValidation.Tests\CrossVersionTokenValidation.Tests.csproj", "{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocol.Extensions.OldVersion", "test\Microsoft.IdentityModel.Protocol.Extensions.4x\Microsoft.IdentityModel.Protocol.Extensions.OldVersion.csproj", "{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiChangeTest", "test\ApiChangeTest\ApiChangeTest.csproj", "{3EF9B56A-33C9-423A-A744-80AA102CECEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiChangeTest", "test\ApiChangeTest\ApiChangeTest.csproj", "{3EF9B56A-33C9-423A-A744-80AA102CECEB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -143,10 +141,6 @@ Global
 		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -176,7 +170,6 @@ Global
 		{CBBB1441-1704-4B2E-93BC-A163DD2CD222} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{310A34D3-8685-4355-8590-84351B5223BC} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1} = {310A34D3-8685-4355-8590-84351B5223BC}
-		{4FD10FD7-F579-4EFE-BAB3-6BB4EC39CF47} = {310A34D3-8685-4355-8590-84351B5223BC}
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
