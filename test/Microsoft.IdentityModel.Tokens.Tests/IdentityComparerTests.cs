@@ -552,7 +552,6 @@ namespace Microsoft.IdentityModel.Tests
             IdentityComparer.AreEqual(saml2SecurityToken1, saml2SecurityToken2, context);
             Assert.True(context.Diffs.Count(s => s == "Id:") == 2);
             Assert.True(context.Diffs.Count(s => s == "Issuer:") == 2);
-            Assert.True(context.Diffs.Count(s => s == "IssueInstant:") == 1);
         }
 
         [Fact]
