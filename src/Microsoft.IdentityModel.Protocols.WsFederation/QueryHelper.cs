@@ -33,20 +33,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// <summary>
     /// Class for parsing query string.
     /// </summary>
-    public static class QueryHelper
+    internal static class QueryHelper
     {
         /// <summary>
         /// Parse a query string into its component key and value parts.
         /// </summary>
         /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
         /// <returns>A collection of parsed keys and values.</returns>
-        public static Dictionary<string, List<string>> ParseQuery(string queryString)
+        public static IDictionary<string, IList<string>> ParseQuery(string queryString)
         {
             var result = ParseNullableQuery(queryString);
 
             if (result == null)
             {
-                return new Dictionary<string, List<string>>();
+                return new Dictionary<string, IList<string>>();
             }
 
             return result;
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
         /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
-        public static Dictionary<string, List<string>> ParseNullableQuery(string queryString)
+        public static IDictionary<string, IList<string>> ParseNullableQuery(string queryString)
         {
             var accumulator = new KeyValueAccumulator();
 
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     internal class KeyValueAccumulator
     {
-        public Dictionary<string, List<string>> Result { get; } = new Dictionary<string, List<string>>();
+        public IDictionary<string, IList<string>> Result { get; } = new Dictionary<string, IList<string>>();
 
         public bool HasValues { get; set; } = false;
 

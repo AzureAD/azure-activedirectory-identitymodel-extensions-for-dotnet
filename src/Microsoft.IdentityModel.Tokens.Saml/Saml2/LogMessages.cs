@@ -48,6 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13513 = "IDX13513: NotBefore '{0}', is after NotOnOrAfter '{1}'.";
         internal const string IDX13514 = "IDX13514: NotOnOrAfter '{0}', is before NotBefore '{1}'.";
         internal const string IDX13515 = "IDX13515: SamlId value threw on XmlConvert.VerifyNCName. value: '{0}'";
+        internal const string IDX13516 = "IDX13516: A Saml2Statement of type: '{0}' was found when ProcessingStatements and creating the ClaimsIdentity. These claims have been skipped. If you need to process this Statement, you will need to derive a custom Saml2SecurityTokenHandler and override ProcessStatements.";
 
         // SamlSerializing reading
         internal const string IDX13102 = "IDX13102: Exception thrown while reading '{0}' for Saml2SecurityToken. Inner exception: '{1}'.";

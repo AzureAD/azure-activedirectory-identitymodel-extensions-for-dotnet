@@ -29,7 +29,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.Extensions.OldVersion;
 using Microsoft.IdentityModel.Tests;
@@ -37,6 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;
 
+using AuthenticationInformation4x = System.Security.Claims.AuthenticationInformation;
 using LifeTime4x = System.IdentityModel.Protocols.WSTrust.Lifetime;
 using SamlAccessDecision4x = System.IdentityModel.Tokens.SamlAccessDecision;
 using SamlAction4x = System.IdentityModel.Tokens.SamlAction;
@@ -54,15 +54,16 @@ using SamlConditions4x = System.IdentityModel.Tokens.SamlConditions;
 using SamlDoNotCacheCondition4x = System.IdentityModel.Tokens.SamlDoNotCacheCondition;
 using SamlEvidence4x = System.IdentityModel.Tokens.SamlEvidence;
 using SamlSecurityToken4x = System.IdentityModel.Tokens.SamlSecurityToken;
-using SamlSecurityTokenHandler4x = System.IdentityModel.Tokens.SamlSecurityTokenHandler;
 using SamlStatement4x = System.IdentityModel.Tokens.SamlStatement;
 using SamlSubject4x = System.IdentityModel.Tokens.SamlSubject;
+using SecurityKeyIdentifier4x = System.IdentityModel.Tokens.SecurityKeyIdentifier;
 using SecurityToken4x = System.IdentityModel.Tokens.SecurityToken;
 using SecurityTokenDescriptor4x = System.IdentityModel.Tokens.SecurityTokenDescriptor;
 using SigningCredentials4x = System.IdentityModel.Tokens.SigningCredentials;
 using TokenValidationParameters4x = System.IdentityModel.Tokens.TokenValidationParameters;
-using X509SigningCredentials4x = System.IdentityModel.Tokens.X509SigningCredentials;
 using X509SecurityKey4x = System.IdentityModel.Tokens.X509SecurityKey;
+using X509SigningCredentials4x = System.IdentityModel.Tokens.X509SigningCredentials;
+using X509ThumbprintKeyIdentifierClause4x = System.IdentityModel.Tokens.X509ThumbprintKeyIdentifierClause;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -70,53 +71,69 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 {
     public class SamlCrossVersionTokenValidationTests
     {
-        [Theory, MemberData(nameof(CreateTokenCrossVerstionTheoryData))]
-        public void CreateTokenCrossVerstionTest(TokenCrossTheoryData theoryData)
+        [Theory, MemberData(nameof(CrossVersionSamlTokenTestTheoryData))]
+        public void CrossVersionSamlTokenTest(CrossTokenVersionTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.CreateTokenCrossVerstionTest", theoryData);
-            var token4x = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(theoryData.TokenDescriptor4x);
-            var samlHandler5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler();
-            var token5x = samlHandler5x.CreateToken(theoryData.TokenDescriptor5x);
+            var context = TestUtilities.WriteHeader($"{this}.CrossVersionSamlTokenTest", theoryData);
+            var samlHandler5x = new Tokens.Saml.SamlSecurityTokenHandler();
 
-            AreSamlTokensEqual(token4x, token5x, context);
+            var samlToken4x = CrossVersionUtility.CreateSamlToken4x(theoryData.TokenDescriptor4x);
+            var samlToken5x = samlHandler5x.CreateToken(theoryData.TokenDescriptor5x, theoryData.AuthenticationInformationSaml) as SamlSecurityToken;
+
+            AreSamlTokensEqual(samlToken4x, samlToken5x, context);
+
+            var token4x = CrossVersionUtility.WriteSamlToken(samlToken4x);
+            var token5x = samlHandler5x.WriteToken(samlToken5x);
+
+            var claimsPrincipalFrom4xUsing5xHandler = samlHandler5x.ValidateToken(token4x, theoryData.ValidationParameters5x, out SecurityToken validatedSamlToken4xUsing5xHandler);
+            var claimsPrincipalFrom5xUsing5xHandler = samlHandler5x.ValidateToken(token5x, theoryData.ValidationParameters5x, out SecurityToken validatedSamlToken5xUsing5xHandler);
+            var claimsPrincipalFrom4xUsing4xHandler = CrossVersionUtility.ValidateSamlToken(token4x, theoryData.ValidationParameters4x, out SecurityToken4x validatedSamlToken4xUsing4xHandler);
+            var claimsPrincipalFrom5xUsing4xHandler = CrossVersionUtility.ValidateSamlToken(token5x, theoryData.ValidationParameters4x, out SecurityToken4x validatedSamlToken5xUsing4xHandler);
+
+            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom4xUsing4xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
+            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom4xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
+            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom5xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<TokenCrossTheoryData> CreateTokenCrossVerstionTheoryData
+        public static TheoryData<CrossTokenVersionTheoryData> CrossVersionSamlTokenTestTheoryData
         {
             get
             {
+                var certificate = KeyingMaterial.CertSelfSigned2048_SHA256;
                 var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
-                return new TheoryData<TokenCrossTheoryData>
+                var key = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
+                var keyClause = new X509ThumbprintKeyIdentifierClause4x(certificate);
+                var keyIdentifier = new SecurityKeyIdentifier4x(keyClause);
+
+                return new TheoryData<CrossTokenVersionTheoryData>
                 {
-                    new TokenCrossTheoryData
+                    new CrossTokenVersionTheoryData
                     {
-                        TokenDescriptor4x = new SecurityTokenDescriptor4x
+                        AuthenticationInformationSaml = new Tokens.Saml.AuthenticationInformation(Default.AuthenticationMethodUri, Default.AuthenticationInstantDateTime)
                         {
-                            AppliesToAddress = Default.Audience,
-                            Lifetime = new LifeTime4x(notBefore, expires),
-                            SigningCredentials = new SigningCredentials4x(new X509SecurityKey4x(KeyingMaterial.CertSelfSigned2048_SHA256), SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = defaultClaimsIdentity,
-                            TokenIssuerName = Default.Issuer,
+                             DnsName = Default.DNSName,
+                             NotOnOrAfter = Default.NotOnOrAfter,
+                             Session = Default.Session,
+                             IPAddress = Default.IPAddress
                         },
-                        TokenDescriptor5x = new SecurityTokenDescriptor
-                        {
-                            Audience = Default.Audience,
-                            NotBefore = notBefore,
-                            Expires = expires,
-                            Issuer = Default.Issuer,
-                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
-                            Subject = defaultClaimsIdentity
-                        }
-                    },
-                    new TokenCrossTheoryData
-                    {
+                        First = true,
+                        TestId = "Test1",
                         TokenDescriptor4x = new SecurityTokenDescriptor4x
                         {
                             AppliesToAddress = Default.Audience,
+                            AuthenticationInfo = new AuthenticationInformation4x
+                            {
+                                Address = Default.IPAddress,
+                                DnsName = Default.DNSName,
+                                NotOnOrAfter = Default.NotOnOrAfter,
+                                Session = Default.Session
+                            },
                             Lifetime = new LifeTime4x(notBefore, expires),
+                            SigningCredentials = new SigningCredentials4x(new X509SecurityKey4x(certificate), SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier),
                             Subject = AuthenticationClaimsIdentity,
                             TokenIssuerName = Default.Issuer,
                         },
@@ -126,115 +143,188 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             NotBefore = notBefore,
                             Expires = expires,
                             Issuer = Default.Issuer,
-                            Subject = AuthenticationClaimsIdentity
+                            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                        },
+                        ValidationParameters4x = new TokenValidationParameters4x
+                        {
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = new X509SecurityKey4x(certificate)
+                        },
+                        ValidationParameters5x = new TokenValidationParameters
+                        {
+                            AuthenticationType = "Federation",
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = key
                         }
+                    },
+                    new CrossTokenVersionTheoryData
+                    {
+                        AuthenticationInformationSaml = new Tokens.Saml.AuthenticationInformation(Default.AuthenticationMethodUri, Default.AuthenticationInstantDateTime)
+                        {
+                             DnsName = Default.DNSName,
+                             NotOnOrAfter = Default.NotOnOrAfter,
+                             Session = Default.Session,
+                             IPAddress = Default.IPAddress
+                        },
+                        TestId = "Test2",
+                        TokenDescriptor4x = new SecurityTokenDescriptor4x
+                        {
+                            AppliesToAddress = Default.Audience,
+                            AuthenticationInfo = new AuthenticationInformation4x
+                            {
+                                Address = Default.IPAddress,
+                                DnsName = Default.DNSName,
+                                NotOnOrAfter = Default.NotOnOrAfter,
+                                Session = Default.Session
+                            },
+                            Lifetime = new LifeTime4x(notBefore, expires),
+                            SigningCredentials = new SigningCredentials4x(new X509SecurityKey4x(certificate), SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest, keyIdentifier),
+                            Subject = AuthenticationClaimsIdentity,
+                            TokenIssuerName = Default.Issuer,
+                        },
+                        TokenDescriptor5x = new SecurityTokenDescriptor
+                        {
+                            Audience = Default.Audience,
+                            NotBefore = notBefore,
+                            Expires = expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                        },
+                        ValidationParameters4x = new TokenValidationParameters4x
+                        {
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = new X509SecurityKey4x(certificate)
+                        },
+                        ValidationParameters5x = new TokenValidationParameters
+                        {
+                            AuthenticationType = "Federation",
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = key
+                        },
                     }
                 };
             }
         }
 
-        [Theory, MemberData(nameof(CreateClaimsPrincipalCrossVersionTestTheoryData))]
-        public void CreateClaimsPrincipalCrossVersionTest(ClaimsPrincipalTheoryData theoryData)
+        [Theory, MemberData(nameof(CrossVersionClaimsPrincipalTestTheoryData))]
+        public void CrossVersionClaimsPrincipalTest(CrossTokenVersionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateClaimsPrincipalCrossVersionTest", theoryData);
-            var tvp5x = new TokenValidationParameters();
+            ClaimsPrincipal claimsPrincipal4xFrom4x = null;
+            ClaimsPrincipal claimsPrincipal5xFrom4x = null;
 
-            PropertyInfo[] propertyInfos = typeof(SharedTokenValidationParameters).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            foreach (PropertyInfo propertyInfo in propertyInfos)
+            try
             {
-                if (propertyInfo.GetMethod != null)
-                {
-                    object val = propertyInfo.GetValue(theoryData.TokenValidationParameters, null);
-                    PropertyInfo tvp5xPropertyInfo = typeof(TokenValidationParameters).GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-                    tvp5xPropertyInfo.SetValue(tvp5x, val);
-                }
+                claimsPrincipal4xFrom4x = CrossVersionUtility.ValidateSamlToken(theoryData.TokenString4x, theoryData.ValidationParameters4x, out SecurityToken4x validateToken4x);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"CrossVersionTokenValidationTestsData.ValidateToken threw: '{ex}'.");
             }
 
-            if (theoryData.X509Certificate != null)
-                tvp5x.IssuerSigningKey = new X509SecurityKey(theoryData.X509Certificate);
+            try
+            {
+                claimsPrincipal5xFrom4x = new Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.TokenString4x, theoryData.ValidationParameters5x, out SecurityToken validateToken5x);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Tokens.Saml.SamlSecurityTokenHandler().ValidateToken threw: '{ex}'.");
+            }
 
-            var claimsPrincipal4x = CrossVersionTokenValidationTestsData.GetSamlClaimsPrincipal4x(theoryData.Token, theoryData.TokenValidationParameters, theoryData.X509Certificate, out SecurityToken4x validateToken4x);
-            var claimsPrincipal5x = new Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler().ValidateToken(theoryData.Token, tvp5x, out SecurityToken validateToken5x);
-
-            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
+            IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4xFrom4x, claimsPrincipal5xFrom4x, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<ClaimsPrincipalTheoryData> CreateClaimsPrincipalCrossVersionTestTheoryData
+        public static TheoryData<CrossTokenVersionTheoryData> CrossVersionClaimsPrincipalTestTheoryData
         {
             get
             {
-                var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
+                var signingCredentials = new X509SigningCredentials4x(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
                 var tokenDescriptor4x = new SecurityTokenDescriptor4x
                 {
                     AppliesToAddress = Default.Audience,
                     Lifetime = new LifeTime4x(notBefore, expires),
-                    SigningCredentials = new X509SigningCredentials4x(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = defaultClaimsIdentity,
+                    SigningCredentials = signingCredentials,
+                    Subject = new ClaimsIdentity(Default.SamlClaims),
                     TokenIssuerName = Default.Issuer,
                 };
 
-                var token4x_AttributeStatement = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
-
+                var token4x_AttributeStatement = CrossVersionUtility.CreateSamlToken4x(tokenDescriptor4x);
                 tokenDescriptor4x.Subject = AuthenticationClaimsIdentity;
-                tokenDescriptor4x.AuthenticationInfo = new AuthenticationInformation
+                tokenDescriptor4x.AuthenticationInfo = new AuthenticationInformation4x
                 {
                     Address = Default.IPAddress,
                     DnsName = Default.DNSAddress
                 };
 
-                var token4x_AuthenticationStatement = CrossVersionTokenValidationTestsData.GetSamlSecurityToken4x(tokenDescriptor4x);
+                var token4x_AuthenticationStatement = CrossVersionUtility.CreateSamlToken4x(tokenDescriptor4x);
 
                 tokenDescriptor4x.Subject = AuthorizationDecisionClaimsIdentity;
                 var authorizationDecisionStatements = new SamlAuthorizationDecisionStatement4x(new SamlSubject4x(Default.NameIdentifierFormat, Default.NameQualifier, Default.Subject), Default.SamlResource, SamlAccessDecision4x.Permit, new List<SamlAction4x> { new SamlAction4x("Action") });
-                var samlAssertion_AuthorizationDecision = new SamlAssertion4x(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), (token4x_AttributeStatement as SamlSecurityToken4x).Assertion.Conditions, null, new List<SamlStatement4x> { authorizationDecisionStatements });
-                var token4x_AuthorizationDecisionStatement = new SamlSecurityToken4x(samlAssertion_AuthorizationDecision);
+                var token4x_AuthorizationDecisionStatement = new SamlSecurityToken4x(
+                    new SamlAssertion4x(
+                        Default.SamlAssertionID,
+                        Default.Issuer,
+                        DateTime.Parse(Default.IssueInstantString),
+                        (token4x_AttributeStatement as SamlSecurityToken4x).Assertion.Conditions,
+                        null,
+                        new List<SamlStatement4x> { authorizationDecisionStatements }
+                    )
+                    {
+                        SigningCredentials = signingCredentials
+                    }
+                );
 
-                return new TheoryData<ClaimsPrincipalTheoryData>
+                var validationParameters4x = new TokenValidationParameters4x
                 {
-                    new ClaimsPrincipalTheoryData
+                    IssuerSigningKey = new X509SecurityKey4x(KeyingMaterial.DefaultCert_2048),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                };
+
+                var validationParameters5x = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new X509SecurityKey(KeyingMaterial.DefaultCert_2048),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                };
+
+                return new TheoryData<CrossTokenVersionTheoryData>
+                {
+                    new CrossTokenVersionTheoryData
                     {
                         TestId = "AttributeStatement",
-                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AttributeStatement),
-                        TokenValidationParameters = new SharedTokenValidationParameters
-                        {
-                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
-                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                        TokenString4x = CrossVersionUtility.WriteSamlToken(token4x_AttributeStatement),
+                        ValidationParameters4x = validationParameters4x,
+                        ValidationParameters5x = validationParameters5x
                     },
-                    new ClaimsPrincipalTheoryData
+                    new CrossTokenVersionTheoryData
                     {
                         TestId = "AuthenticationStatement",
-                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AuthenticationStatement),
-                        TokenValidationParameters = new SharedTokenValidationParameters
-                        {
-                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
-                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                        TokenString4x = CrossVersionUtility.WriteSamlToken(token4x_AuthenticationStatement),
+                        ValidationParameters4x = validationParameters4x,
+                        ValidationParameters5x = validationParameters5x
                     },
-                    new ClaimsPrincipalTheoryData
+                    new CrossTokenVersionTheoryData
                     {
                         TestId = "AuthorizationDecisionStatement",
-                        Token = CrossVersionTokenValidationTestsData.GetSamlToken(token4x_AuthorizationDecisionStatement),
-                        TokenValidationParameters = new SharedTokenValidationParameters
-                        {
-                            NameClaimType = ClaimsIdentity.DefaultNameClaimType,
-                            RoleClaimType = ClaimsIdentity.DefaultRoleClaimType,
-                            ValidateIssuer = false,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        X509Certificate = KeyingMaterial.DefaultCert_2048
+                        TokenString4x = CrossVersionUtility.WriteSamlToken(token4x_AuthorizationDecisionStatement),
+                        ValidationParameters4x = validationParameters4x,
+                        ValidationParameters5x = validationParameters5x
                     }
                 };
             }
@@ -242,17 +332,11 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
         private static ClaimsIdentity AuthenticationClaimsIdentity
         {
-            get
+            get => new ClaimsIdentity(new List<Claim>(Default.SamlClaims)
             {
-                var authorizationClaims = new List<Claim>
-                {
-                    Default.SamlClaims.Find(x => x.Type == ClaimTypes.NameIdentifier),
-                    new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
-                    new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
-                };
-
-                return new ClaimsIdentity(authorizationClaims);
-            }
+                new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+            });
         }
 
         private static ClaimsIdentity AuthorizationDecisionClaimsIdentity
@@ -367,21 +451,21 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlCondition.GetType() != Microsoft.IdentityModel.Tokens.Saml.SamlCondition.GetType(): {condition4x.GetType()}, {condition5x.GetType()}");
             else
             {
-                if (condition4x is SamlAudienceRestrictionCondition4x audienceCondition1)
+                if (condition4x is SamlAudienceRestrictionCondition4x audienceCondition4x)
                 {
                     // Compare SamlAudienceRestrictionCondition
-                    var audienceCondition2 = condition5x as SamlAudienceRestrictionCondition;
-                    if (audienceCondition1.Audiences.Count != audienceCondition2.Audiences.Count)
-                        localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlAudienceRestrictionCondition.Audiences.Count != Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition.Audiences.Count: {audienceCondition1.Audiences.Count}, {audienceCondition2.Audiences.Count}");
+                    var audienceCondition5x = condition5x as SamlAudienceRestrictionCondition;
+                    if (audienceCondition4x.Audiences.Count != audienceCondition5x.Audiences.Count)
+                        localContext.Diffs.Add(Environment.NewLine + $"System.IdentityModel.Tokens.SamlAudienceRestrictionCondition.Audiences.Count != Microsoft.IdentityModel.Tokens.Saml.SamlAudienceRestrictionCondition.Audiences.Count: {audienceCondition4x.Audiences.Count}, {audienceCondition5x.Audiences.Count}");
 
-                    var diff = audienceCondition1.Audiences.Where(x => !audienceCondition2.Audiences.Contains(x));
+                    var diff = audienceCondition4x.Audiences.Where(x => !audienceCondition5x.Audiences.Contains(x));
                     if (diff.Count() != 0)
                     {
                         foreach (var item in diff)
                             localContext.Diffs.Add(Environment.NewLine + $"condition2 doesn't have audience: {item} which in condition1");
                     }
 
-                    diff = audienceCondition2.Audiences.Where(x => !audienceCondition1.Audiences.Contains(x));
+                    diff = audienceCondition5x.Audiences.Where(x => !audienceCondition4x.Audiences.Contains(x));
                     if (diff.Count() != 0)
                     {
                         foreach (var item in diff)
@@ -405,14 +489,16 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             int numMatched = 0;
             int numToMatch = conditions4x.Conditions.Count;
             var notMatched = new List<SamlCondition4x>();
+            var toMatchConditions = new List<SamlCondition>(conditions5x.Conditions);
+
             foreach (var condition in conditions4x.Conditions)
             {
                 var perClaimContext = new CompareContext(localContext);
                 bool matched = false;
-                for (int i = 0; i < conditions5x.Conditions.Count; i++)
+                for (int i = 0; i < toMatchConditions.Count; i++)
                 {
                     var type4x = condition.GetType();
-                    var type5x = conditions5x.Conditions.ElementAt(i).GetType();
+                    var type5x = toMatchConditions[i].GetType();
 
                     if (type4x == typeof(SamlAudienceRestrictionCondition4x) ^ type5x == typeof(SamlAudienceRestrictionCondition))
                         continue;
@@ -420,11 +506,11 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                     if (type4x == typeof(SamlDoNotCacheCondition4x) ^ type5x == typeof(Microsoft.IdentityModel.Tokens.Saml.SamlDoNotCacheCondition))
                         continue;
 
-                    if (AreSamlConditionsEqual(condition, conditions5x.Conditions.ElementAt(i), perClaimContext))
+                    if (AreSamlConditionsEqual(condition, toMatchConditions[i], perClaimContext))
                     {
                         numMatched++;
                         matched = true;
-                        conditions5x.Conditions.Remove(conditions5x.Conditions.ElementAt(i));
+                        toMatchConditions.Remove(toMatchConditions.ElementAt(i));
                         break;
                     }
                 }
@@ -833,26 +919,6 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
             return true;
         }
-    }
-
-    public class TokenCrossTheoryData : TheoryDataBase
-    {
-        public SecurityTokenDescriptor4x TokenDescriptor4x { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor5x { get; set; }
-
-        public TokenValidationParameters4x ValidationParameters4x { get; set; }
-
-        public TokenValidationParameters ValidationParameters5x { get; set; }
-    }
-
-    public class ClaimsPrincipalTheoryData : TheoryDataBase
-    {
-        public string Token { get; set; }
-
-        public SharedTokenValidationParameters TokenValidationParameters { get; set; }
-
-        public X509Certificate2 X509Certificate { get; set; }
     }
 }
 

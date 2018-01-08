@@ -47,9 +47,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Initializes a new instance of the Saml2Attribute class.
         /// </summary>
         /// <param name="name">The name of the attribute.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="name"/> is Null or Empty.</exception>
         public Saml2Attribute(string name)
-            : this(name, (string)null)
         {
+            Name = name;
+            Values = new List<string>();
         }
 
         /// <summary>
@@ -57,6 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="name">The name of the attribute.</param>
         /// <param name="value">The value of the attribute.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="name"/> is Null or Empty.</exception>
         public Saml2Attribute(string name, string value)
             : this(name, new string[] { value })
         {
@@ -67,6 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="name">The name of the attribute.</param>
         /// <param name="values">The collection of values that define the attribute.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="name"/> is Null or Empty.</exception>
         public Saml2Attribute(string name, IEnumerable<string> values)
         {
             Name = name;

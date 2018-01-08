@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -37,7 +36,6 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using static Microsoft.IdentityModel.Logging.LogHelper;
-
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
@@ -253,7 +251,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return null;
         }
 
-        // TODO - introduce a delegate to return the ns / name pair
         /// <summary>
         /// Generates a SamlAttribute from a claim.
         /// </summary>
@@ -347,63 +344,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Override this method to provide a custom implementation.
         /// </summary>
         /// <param name="subject">The SamlSubject of the Statement.</param>
-        /// <param name="tokenDescriptor">Contains all the other information that is used in token issuance.</param>
+        /// <param name="authenticationInformation">Contains all the other information that is used in token issuance.</param>
         /// <returns>SamlAuthenticationStatement</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="subject"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         /// <exception cref="SamlSecurityTokenException">if Assertion has one or more AuthenticationStatement, and one of AuthenticationMethod and authenticationInstant is null.</exception>
-        protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(SamlSubject subject, SecurityTokenDescriptor tokenDescriptor)
+        protected virtual SamlAuthenticationStatement CreateAuthenticationStatement(SamlSubject subject, AuthenticationInformation authenticationInformation)
         {
             if (subject == null)
                 throw LogArgumentNullException(nameof(subject));
 
-            if (tokenDescriptor == null)
-                throw LogArgumentNullException(nameof(tokenDescriptor));
-
-            if (tokenDescriptor.Subject == null)
+            if (authenticationInformation == null)
                 return null;
 
-            string authenticationMethod = null;
-            string authenticationInstant = null;
+            return new SamlAuthenticationStatement(subject, authenticationInformation.AuthenticationMethod.OriginalString, authenticationInformation.AuthenticationInstant, authenticationInformation.DnsName, authenticationInformation.IPAddress, authenticationInformation.AuthorityBindings);
+        }
 
-            // Search for an Authentication Claim.
-            var claimCollection = (from claim in tokenDescriptor.Subject.Claims
-                                   where claim.Type == ClaimTypes.AuthenticationMethod
-                                   select claim);
-            if (claimCollection.Count<Claim>() > 0)
-            {
-                // We support only one authentication statement and hence we just pick the first authentication type
-                // claim found in the claim collection. Since the spec allows multiple Auth Statements 
-                // we do not throw an error.
-                authenticationMethod = claimCollection.First<Claim>().Value;
-            }
-
-            claimCollection = (from claim in tokenDescriptor.Subject.Claims
-                               where claim.Type == ClaimTypes.AuthenticationInstant
-                               select claim);
-            if (claimCollection.Count<Claim>() > 0)
-                authenticationInstant = claimCollection.First<Claim>().Value;
-
-            if (authenticationMethod == null && authenticationInstant == null)
-                return null;
-            else if (authenticationMethod == null)
-                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11519));
-            else if (authenticationInstant == null)
-                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11520));
-
-            var authInstantTime = DateTime.ParseExact(authenticationInstant,
-                                                      SamlConstants.AcceptedDateTimeFormats,
-                                                      DateTimeFormatInfo.InvariantInfo,
-                                                      DateTimeStyles.None).ToUniversalTime();
-            // we need to add authInfo
-            //if (authInfo == null)
-            //{
-            return new SamlAuthenticationStatement(subject, authenticationMethod, authInstantTime, null, null, null);
-            //}
-            //else
-            //{
-            //    return new SamlAuthenticationStatement(subject, authenticationMethod, authInstantTime, authInfo.DnsName, authInfo.Address, null);
-            //}
+        /// <summary>
+        /// Creates a <see cref="SamlAuthorizationDecisionStatement"/> from a <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor">The token descriptor.</param>
+        /// <returns>A <see cref="SamlAuthorizationDecisionStatement"/>.</returns>
+        /// <remarks>By default a null statement is returned. Override to return a <see cref="SamlAuthorizationDecisionStatement"/> to be added to a <see cref="SamlSecurityToken"/>.</remarks>
+        public virtual SamlAuthorizationDecisionStatement CreateAuthorizationDecisionStatement(SecurityTokenDescriptor tokenDescriptor)
+        {
+            return null;
         }
 
         /// <summary>
@@ -448,9 +412,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var conditions = new SamlConditions();
             if (tokenDescriptor.NotBefore.HasValue)
                 conditions.NotBefore = tokenDescriptor.NotBefore.Value;
+            else if (SetDefaultTimesOnTokenCreation)
+                conditions.NotBefore = DateTime.UtcNow;
 
             if (tokenDescriptor.Expires.HasValue)
                 conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
+            else if (SetDefaultTimesOnTokenCreation)
+                conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                 conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
@@ -467,12 +435,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// 1. CreateSamlSubject
         /// 2. CreateAttributeStatements
         /// 3. CreateAuthenticationStatements
+        /// 4. CreateAuthorizationDecisionStatement
         /// </para>
         /// </summary>
         /// <param name="tokenDescriptor">The SecurityTokenDescriptor to use to build the statements.</param>
+        /// <param name="authenticationInformation">additional information for creating a <see cref="SamlAuthenticationStatement"/>.</param>
         /// <returns>An enumeration of SamlStatement.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
-        protected virtual ICollection<SamlStatement> CreateStatements(SecurityTokenDescriptor tokenDescriptor)
+        protected virtual ICollection<SamlStatement> CreateStatements(SecurityTokenDescriptor tokenDescriptor, AuthenticationInformation authenticationInformation)
         {
             if (null == tokenDescriptor)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
@@ -483,9 +453,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (attributeStatement != null)
                 statements.Add(attributeStatement);
 
-            var authnStatement = CreateAuthenticationStatement(subject, tokenDescriptor);
+            var authnStatement = CreateAuthenticationStatement(subject, authenticationInformation);
             if (authnStatement != null)
                 statements.Add(authnStatement);
+
+            var authzStatement = CreateAuthorizationDecisionStatement(tokenDescriptor);
+            if (authzStatement != null)
+                statements.Add(authzStatement);
 
             return statements;
         }
@@ -526,7 +500,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            // TODO - handle these special claims
             if (identityClaim != null)
             {
                 samlSubject.Name = identityClaim.Value;
@@ -538,30 +511,38 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Creates a <see cref="SecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
+        /// Creates a <see cref="SamlSecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
         /// </summary>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
         /// <returns>A <see cref="SecurityToken"/> instance.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="tokenDescriptor"/> is null.</exception>
         public override SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
+            return CreateToken(tokenDescriptor, null);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="SamlSecurityToken"/> based on a information contained in the <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> that has creation information.</param>
+        /// <param name="authenticationInformation">additional information for creating the <see cref="SamlAuthenticationStatement"/>.</param>
+        /// <returns>A <see cref="SecurityToken"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="tokenDescriptor"/> is null.</exception>
+        public virtual SecurityToken CreateToken(SecurityTokenDescriptor tokenDescriptor, AuthenticationInformation authenticationInformation)
+        {
             if (null == tokenDescriptor)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
-            var statements = CreateStatements(tokenDescriptor);
-
-            // - NotBefore / NotAfter
-            // - Audience Restriction
+            var statements = CreateStatements(tokenDescriptor, authenticationInformation);
             var conditions = CreateConditions(tokenDescriptor);
             var advice = CreateAdvice(tokenDescriptor);
-            // TODO - GUID is not correct form.
-            var assertion = new SamlAssertion("_" + Guid.NewGuid().ToString(), tokenDescriptor.Issuer, DateTime.UtcNow, conditions, advice, statements);
-            assertion.SigningCredentials = tokenDescriptor.SigningCredentials;
-            return new SamlSecurityToken(assertion);
 
-            //
-            // TODO - handle encryption
-            //
+            var issuedAt = tokenDescriptor.IssuedAt.HasValue ? tokenDescriptor.IssuedAt.Value : DateTime.UtcNow;
+            return new SamlSecurityToken(new SamlAssertion("_" + Guid.NewGuid().ToString(), tokenDescriptor.Issuer, issuedAt, conditions, advice, statements)
+            {
+                SigningCredentials = tokenDescriptor.SigningCredentials
+            });
+
         }
 
         /// <summary>
@@ -963,7 +944,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             Validators.ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
 
-            // TODO - concat all the audiences together
             if (securityToken.Assertion.Conditions.Conditions.ElementAt(0) is SamlAudienceRestrictionCondition)
             {
                 foreach (var condition in securityToken.Assertion.Conditions.Conditions)

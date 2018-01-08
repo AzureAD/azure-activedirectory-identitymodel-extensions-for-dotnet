@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tests
                     SignedInfo = new SignedInfo(reference)
                 };
 
-                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
+                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
                 {
                     Signature = signature
                 };
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(null, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(null, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MinorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, null, null, null, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MinorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, null, null, null, null)
                 };
             }
         }
@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(2), SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(Convert.ToString(2), SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, null, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, null, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -317,7 +317,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, Convert.ToString(2), Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, Convert.ToString(2), Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -328,7 +328,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, null, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, null, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -339,7 +339,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, "12345", Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, "12345", Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -350,7 +350,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, null, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, null, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -372,8 +372,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, null, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, null, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -384,8 +384,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, null, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, null, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, null, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, null, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, null, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, null, null)
                 };
             }
         }
@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlActionValid.Xml, null)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlActionValid.Xml, null)
                 };
             }
         }
@@ -418,8 +418,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, null)
                 };
             }
         }
@@ -428,16 +428,16 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signatureXml = @"<ds:Signature xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/><ds:SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256""/><ds:Reference Id=""_b95759d0-73ae-4072-a140-567ade10a7ad"" URI=""#_b95759d0-73ae-4072-a140-567ade10a7ad""><ds:Transforms><ds:Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature""/><ds:Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/></ds:Transforms><ds:DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><ds:DigestValue>X4cgKhs9rKMieNRH1nlX8T+yyM25ex0O1FhrK5pxf7s=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>CybTQwqQ0L15iaU5g8RairZgmBRZXoXP17x61uwjN6x3Y3DeBn8fOH9GzOoyXfm1yqOPTQ46rPo19aomyTZkRz4ZAjLseFs4oaMHskMPayZRzRaoyRZR0aWzgdcYGzJca9y78gmTvMw2nJ4P/n74fOd14YlvaZFyPGzh+FW8d3ixdq2LSopi/ixFHKGdGROjVWpwM1jKdU8/ZE24n7MCXKgmanzxB2ZXzXUSVQPsvCjFBPRD5pZZO2IL7lQjXPB2oZYDZXOHHT8zhGn1t3t90SWfRQU0P8H3i68vn6N3nUib39P9r5yG0RiwXmLsr7OgHK2Q1cIKnsqIjT+eMiW4bg==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDJTCCAg2gAwIBAgIQGzlg2gNmfKRKBa6dqqZXxzANBgkqhkiG9w0BAQQFADAiMSAwHgYDVQQDExdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0xMTExMDkxODE5MDZaFw0zOTEyMzEyMzU5NTlaMCIxIDAeBgNVBAMTF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9wIDAQABo1cwVTBTBgNVHQEETDBKgBA3gSuALjvEuAVmF/x8knXvoSQwIjEgMB4GA1UEAxMXS2V5U3RvcmVUZXN0Q2VydGlmaWNhdGWCEBs5YNoDZnykSgWunaqmV8cwDQYJKoZIhvcNAQEEBQADggEBAFZvDA7PBh/vvFZb/QCBelTyD2Yqij16v3tk30A3Akli6UIILdbbOcA5BiPktT1kJxcsgSXNHUODlfG2Fy9HTqwunr8G7FYniOUXPVrRL+HwhKOzRFDMUS3+On+ZDzum7rbpm3SYlnJDyNb8wynPw/bXQw72jGjt63uh6OnkYE8fJ8iPfVWOenZkP/IXPIXK/bBwLMDJ1y77ZauPYbp7oiQ/991pn0c7F4ugT9LYmbAdJKhiainOaoBTvIHN8/lMZ8gHUuxvOJhPrbgo3NTqvT1/3kfD0AISP4R3pH0QL/0m7cO34nK4rFFLZs1sFUguYUJhfkyq1N8MiyyAqRmrvBQ=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>";
+                var signatureXml = @"<ds:Signature xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/><ds:SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256""/><ds:Reference Id=""_b95759d0-73ae-4072-a140-567ade10a7ad"" URI=""#_b95759d0-73ae-4072-a140-567ade10a7ad""><ds:Transforms><ds:Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature""/><ds:Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/></ds:Transforms><ds:DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><ds:DigestValue>NLCLU+vIJShFuQF8kGFSShWFmYXhj1XDA5vBR+BSHdI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>QyDvaRhV1EzJE0z0rsJY5nayt5jjLZlxDH4daqPPqnfRG288D0aMx4Q2hd7iAjf0YJPWOjDkjIwkogX+GyPo4EICm3QO4G7N0gNqAy7vG8WtnXCKwSFe/lNXi3TYf3uSLXRUWaNrpCM2LXDx9hti1I7ybNeDS0OnuOAQmiF0sU5cuC0ewOKKOqpBVGPF6QM4wsf9/PFhgxAyWPtr+je3mmXC7BsICZFmHplD3EaS9p6vxZ3Ld8FV5S4VhxB0+soM5b7RhYRgHRcz/nJyycRyqZgG2TqnG3jJMN1rIbLJ1asE26AXWGU/4G8UD2iZKy8SYHKH1WGzhQa1xN1fXxch9g==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDJTCCAg2gAwIBAgIQGzlg2gNmfKRKBa6dqqZXxzANBgkqhkiG9w0BAQQFADAiMSAwHgYDVQQDExdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0xMTExMDkxODE5MDZaFw0zOTEyMzEyMzU5NTlaMCIxIDAeBgNVBAMTF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9wIDAQABo1cwVTBTBgNVHQEETDBKgBA3gSuALjvEuAVmF/x8knXvoSQwIjEgMB4GA1UEAxMXS2V5U3RvcmVUZXN0Q2VydGlmaWNhdGWCEBs5YNoDZnykSgWunaqmV8cwDQYJKoZIhvcNAQEEBQADggEBAFZvDA7PBh/vvFZb/QCBelTyD2Yqij16v3tk30A3Akli6UIILdbbOcA5BiPktT1kJxcsgSXNHUODlfG2Fy9HTqwunr8G7FYniOUXPVrRL+HwhKOzRFDMUS3+On+ZDzum7rbpm3SYlnJDyNb8wynPw/bXQw72jGjt63uh6OnkYE8fJ8iPfVWOenZkP/IXPIXK/bBwLMDJ1y77ZauPYbp7oiQ/991pn0c7F4ugT9LYmbAdJKhiainOaoBTvIHN8/lMZ8gHUuxvOJhPrbgo3NTqvT1/3kfD0AISP4R3pH0QL/0m7cO34nK4rFFLZs1sFUguYUJhfkyq1N8MiyyAqRmrvBQ=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>";
                 var dsigSerializer = DSigSerializer.Default;
-                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement });
+                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement });
                 assertion.SigningCredentials = Default.AsymmetricSigningCredentials;
                 assertion.Signature = dsigSerializer.ReadSignature(XmlUtilities.CreateDictionaryReader(signatureXml));
                 assertion.Signature.SignedInfo.References[0].TokenStream = Default.TokenStream;
                 return new SamlAssertionTestSet
                 {
                     Assertion = assertion,
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, signatureXml)
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, signatureXml)
                 };
             }
         }
@@ -448,8 +448,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAttributeStatementSingleAttribute.AttributeStatement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAttributeStatementSingleAttribute.Xml), null)
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAttributeStatementSingleAttribute.AttributeStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAttributeStatementSingleAttribute.Xml), null)
                 };
             }
         }
@@ -463,8 +463,8 @@ namespace Microsoft.IdentityModel.Tests
 
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, statement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml,
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, statement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml,
                         string.Concat(SamlAttributeStatementSingleAttribute.Xml, XmlGenerator.SamlAttributeStatementXml(XmlGenerator.SamlSubjectXml(XmlGenerator.SamlNameIdentifierXml(Default.NameQualifier, Default.NameIdentifierFormat, Default.Subject), null), SamlAttributeSingleValue.Xml)), null)
                 };
             }
@@ -476,8 +476,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SamlAssertionTestSet
                 {
-                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAuthenticationStatementValid.AuthenticationStatement }),
-                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstant, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAuthenticationStatementValid.Xml), null)
+                    Assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement, SamlAuthenticationStatementValid.AuthenticationStatement }),
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, string.Concat(SamlAttributeStatementSingleAttribute.Xml, SamlAuthenticationStatementValid.Xml), null)
                 };
             }
         }
@@ -1273,7 +1273,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new SamlTokenTestSet
             {
-                SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { ReferenceSaml.GetAttributeStatement(new SamlSubject(), Default.Claims) }))
+                SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, null, new List<SamlStatement> { ReferenceSaml.GetAttributeStatement(new SamlSubject(), Default.Claims) }))
             };
         }
 
@@ -1293,7 +1293,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SamlTokenTestSet
                 {
                     Identities = new List<ClaimsIdentity> { identity },
-                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { statement, statement })),
+                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, null, new List<SamlStatement> { statement, statement })),
                 };
             }
         }
@@ -1332,7 +1332,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SamlTokenTestSet
                 {
                     Identities = new List<ClaimsIdentity> { identity1, identity2 },
-                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstant), null, null, new List<SamlStatement> { statement1, statement2, statement3 }))
+                    SecurityToken = new SamlSecurityToken(new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, null, new List<SamlStatement> { statement1, statement2, statement3 }))
                 };
             }
         }

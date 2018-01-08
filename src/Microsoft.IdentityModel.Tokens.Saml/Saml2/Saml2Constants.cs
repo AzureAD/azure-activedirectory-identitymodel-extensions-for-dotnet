@@ -35,15 +35,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public static class Saml2Constants
     {
 #pragma warning disable 1591
-        public const string PreferredPrefix = "saml";
         public const string Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
-        public const string Saml2TokenProfile11 = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string OasisWssSaml2TokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0";
+        public const string PreferredPrefix = "saml";
+        public const string Saml2TokenProfile11 = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string Version = "2.0";
-
-        // TODO - is this the right place ?
-        public const string ClaimValueTypeSerializationPrefix = "tn"; // for target namespace
-        public const string ClaimValueTypeSerializationPrefixWithColon = "tn:";
         public static string[] AcceptedDateTimeFormats = new string[] {
                 "yyyy-MM-ddTHH:mm:ss.fffffffZ",
                 "yyyy-MM-ddTHH:mm:ss.ffffffZ",
@@ -62,8 +58,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 "yyyy-MM-ddTHH:mm:ss.fzzz",
                 "yyyy-MM-ddTHH:mm:sszzz" };
 
-        public const string AssertionIdPrefix = "Saml2SecurityToken-";
-        public const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+        internal const string ClaimType2009Namespace = "http://schemas.xmlsoap.org/ws/2009/09/identity/claims";
+        internal const string ClaimValueTypeSerializationPrefix = "tn";
+        internal const string ClaimValueTypeSerializationPrefixWithColon = "tn:";
+        internal const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
+        internal const string MsIdentityNamespaceUri = "http://schemas.microsoft.com/ws/2008/06/identity";
 
         public static class AccessDecision
         {
@@ -72,34 +71,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public static string Indeterminate {  get { return "Indeterminate"; } }
 
             public static string Permit {  get { return "Permit"; } }
-        }
-
-        public static class ActionNamespaces
-        {
-            /// <summary>
-            /// Read/Write/Execute/Delete/Control [Saml2Core, 8.1.1]
-            /// </summary>
-            public static readonly Uri Rwedc = new Uri(RwedcString);
-
-            /// <summary>
-            /// Read/Write/Execute/Delete/Control with Negation [Saml2Core, 8.1.2]
-            /// </summary>
-            public static readonly Uri RwedcNegation = new Uri(RwedcNegationString);
-
-            /// <summary>
-            /// Get/Head/Put/Post [Saml2Core, 8.1.3]
-            /// </summary>
-            public static readonly Uri Ghpp = new Uri(GhppString);
-
-            /// <summary>
-            /// UNIX file permissions [Saml2Core, 8.1.4]
-            /// </summary> 
-            public static readonly Uri Unix = new Uri(UnixString);
-
-            public const string RwedcString = "urn:oasis:names:tc:SAML:1.0:action:rwedc";
-            public const string RwedcNegationString = "urn:oasis:names:tc:SAML:1.0:action:rwedc-negation";
-            public const string GhppString = "urn:oasis:names:tc:SAML:1.0:action:ghpp";
-            public const string UnixString = "urn:oasis:names:tc:SAML:1.0:action:unix";
         }
 
         public static class Attributes
@@ -130,112 +101,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public const string SPProvidedID = "SPProvidedID";
             public const string Type = "type";
             public const string Version = "Version";
-        }
-
-        public static class AuthenticationContextClasses
-        {
-            // [Saml2AuthnContext, 3.4.1]
-            public static readonly Uri InternetProtocol = new Uri(InternetProtocolString);
-
-            // [Saml2AuthnContext, 3.4.2]
-            public static readonly Uri InternetProtocolPassword = new Uri(InternetProtocolPasswordString);
-
-            // [Saml2AuthnContext, 3.4.3]
-            public static readonly Uri Kerberos = new Uri(KerberosString);
-
-            // [Saml2AuthnContext, 3.4.4]
-            public static readonly Uri MobileOneFactorUnregistered = new Uri(MobileOneFactorUnregisteredString);
-
-            // [Saml2AuthnContext, 3.4.5]
-            public static readonly Uri MobileTwoFactorUnregistered = new Uri(MobileTwoFactorUnregisteredString);
-
-            // [Saml2AuthnContext, 3.4.6]
-            public static readonly Uri MobileOneFactorContract = new Uri(MobileOneFactorContractString);
-
-            // [Saml2AuthnContext, 3.4.7]
-            public static readonly Uri MobileTwoFactorContract = new Uri(MobileTwoFactorContractString);
-
-            // [Saml2AuthnContext, 3.4.8]
-            public static readonly Uri Password = new Uri(PasswordString);
-
-            // [Saml2AuthnContext, 3.4.9]
-            public static readonly Uri PasswordProtectedTransport = new Uri(PasswordProtectedTransportString);
-
-            // [Saml2AuthnContext, 3.4.10]
-            public static readonly Uri PreviousSession = new Uri(PreviousSessionString);
-
-            // [Saml2AuthnContext, 3.4.11]
-            public static readonly Uri X509 = new Uri(X509String);
-
-            // [Saml2AuthnContext, 3.4.12]
-            public static readonly Uri Pgp = new Uri(PgpString);
-
-            // [Saml2AuthnContext, 3.4.13]
-            public static readonly Uri Spki = new Uri(SpkiString);
-
-            // [Saml2AuthnContext, 3.4.14]
-            public static readonly Uri XmlDSig = new Uri(XmlDsigString);
-
-            // [Saml2AuthnContext, 3.4.15]
-            public static readonly Uri Smartcard = new Uri(SmartcardString);
-
-            // [Saml2AuthnContext, 3.4.16]
-            public static readonly Uri SmartcardPki = new Uri(SmartcardPkiString);
-
-            // [Saml2AuthnContext, 3.4.17]
-            public static readonly Uri SoftwarePki = new Uri(SoftwarePkiString);
-
-            // [Saml2AuthnContext, 3.4.18]
-            public static readonly Uri Telephony = new Uri(TelephonyString);
-
-            // [Saml2AuthnContext, 3.4.19]
-            public static readonly Uri NomadTelephony = new Uri(NomadTelephonyString);
-
-            // [Saml2AuthnContext, 3.4.20]
-            public static readonly Uri PersonalTelephony = new Uri(PersonalTelephonyString);
-
-            // [Saml2AuthnContext, 3.4.21]
-            public static readonly Uri AuthenticatedTelephony = new Uri(AuthenticatedTelephonyString);
-
-            // [Saml2AuthnContext, 3.4.22]
-            public static readonly Uri SecureRemotePassword = new Uri(SecureRemotePasswordString);
-
-            // [Saml2AuthnContext, 3.4.23]
-            public static readonly Uri TlsClient = new Uri(TlsClientString);
-
-            // [Saml2AuthnContext, 3.4.24]
-            public static readonly Uri TimeSyncToken = new Uri(TimeSyncTokenString);
-
-            // [Saml2AuthnContext, 3.4.25]
-            public static readonly Uri Unspecified = new Uri(UnspecifiedString);
-
-            public const string InternetProtocolString = "urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocol";
-            public const string InternetProtocolPasswordString = "urn:oasis:names:tc:SAML:2.0:ac:classes:InternetProtocolPassword";
-            public const string KerberosString = "urn:oasis:names:tc:SAML:2.0:ac:classes:Kerberos";
-            public const string MobileOneFactorUnregisteredString = "urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorUnregistered";
-            public const string MobileTwoFactorUnregisteredString = "urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorUnregistered";
-            public const string MobileOneFactorContractString = "urn:oasis:names:tc:SAML:2.0:ac:classes:MobileOneFactorContract";
-            public const string MobileTwoFactorContractString = "urn:oasis:names:tc:SAML:2.0:ac:classes:MobileTwoFactorContract";
-            public const string PasswordString = "urn:oasis:names:tc:SAML:2.0:ac:classes:Password";
-            public const string PasswordProtectedTransportString = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
-            public const string PreviousSessionString = "urn:oasis:names:tc:SAML:2.0:ac:classes:PreviousSession";
-            public const string X509String = "urn:oasis:names:tc:SAML:2.0:ac:classes:X509";
-            public const string PgpString = "urn:oasis:names:tc:SAML:2.0:ac:classes:PGP";
-            public const string SpkiString = "urn:oasis:names:tc:SAML:2.0:ac:classes:SPKI";
-            public const string XmlDsigString = "urn:oasis:names:tc:SAML:2.0:ac:classes:XMLDSig";
-            public const string SecureRempotePasswordString = "urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword";
-            public const string SmartcardString = "urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard";
-            public const string SmartcardPkiString = "urn:oasis:names:tc:SAML:2.0:ac:classes:SmartcardPKI";
-            public const string SoftwarePkiString = "urn:oasis:names:tc:SAML:2.0:ac:classes:SoftwarePKI";
-            public const string TelephonyString = "urn:oasis:names:tc:SAML:2.0:ac:classes:Telephony";
-            public const string NomadTelephonyString = "urn:oasis:names:tc:SAML:2.0:ac:classes:NomadTelephony";
-            public const string PersonalTelephonyString = "urn:oasis:names:tc:SAML:2.0:ac:classes:PersonalTelephony";
-            public const string AuthenticatedTelephonyString = "urn:oasis:names:tc:SAML:2.0:ac:classes:AuthenticatedTelephony";
-            public const string SecureRemotePasswordString = "urn:oasis:names:tc:SAML:2.0:ac:classes:SecureRemotePassword";
-            public const string TlsClientString = "urn:oasis:names:tc:SAML:2.0:ac:classes:TLSClient";
-            public const string TimeSyncTokenString = "urn:oasis:names:tc:SAML:2.0:ac:classes:TimeSyncToken";
-            public const string UnspecifiedString = "urn:oasis:names:tc:SAML:2.0:ac:classes:Unspecified";
-            public const string WindowsString = "urn:federation:authentication:windows";
         }
 
         public static class ConfirmationMethods

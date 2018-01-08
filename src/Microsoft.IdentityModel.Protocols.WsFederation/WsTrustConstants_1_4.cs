@@ -25,27 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Set defaults for TheoryData
+    /// Constants for WsTrust 1.4
     /// </summary>
-    public class TheoryDataBase
+    public static class WsTrustConstants_1_4
     {
-        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
+#pragma warning disable 1591
 
-        public bool First { get; set; } = false;
+        public const string Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200802";
+        public const string PreferredPrefix = "t";
 
-        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; }
-
-        public string TestId { get; set; }
-
-        public override string ToString()
+        public static class Actions
         {
-            return $"{TestId}, {ExpectedException}";
+            public const string Issue = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue";
         }
+
+        #pragma warning restore 1591
     }
 }
+ 

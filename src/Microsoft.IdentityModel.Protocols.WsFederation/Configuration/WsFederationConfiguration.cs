@@ -41,8 +41,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         public WsFederationConfiguration()
         {
-            SigningKeys = new List<SecurityKey>();
-            KeyInfos = new List<KeyInfo>();
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public ICollection<SecurityKey> SigningKeys
         {
             get;
-        }
+        } = new List<SecurityKey>();
 
         /// <summary>
         /// The <see cref="Xml.Signature"/> element that was found when reading metadata.
@@ -86,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public ICollection<KeyInfo> KeyInfos
         {
             get;
-        }
+        } = new List<KeyInfo>();
 
         /// <summary>
         /// Gets or sets token endpoint.

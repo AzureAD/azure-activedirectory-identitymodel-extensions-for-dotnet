@@ -101,15 +101,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets ClaimType.
-        /// </summary>
-        // TODO what is this for?
-        public static string ClaimType
-        {
-            get => System.Security.Claims.ClaimTypes.Authentication;
-        }
-
-        /// <summary>
         /// Gets or sets Domain Name Service address.
         /// </summary>
         public string DnsAddress
@@ -126,14 +117,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             get;
             set;
         }
-
-        // TODO - how to service claims
-        //protected override void AddClaimsToList(IList<Claim> claims)
-        //{
-        //    if (claims == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(claims");
-
-        //    claims.Add(new Claim(ClaimTypes.Authentication, new SamlAuthenticationClaimResource(this.authenticationInstant, this.authenticationMethod, this.dnsAddress, this.ipAddress, this.authorityBindings), Rights.PossessProperty));
-        //}
     }
 }

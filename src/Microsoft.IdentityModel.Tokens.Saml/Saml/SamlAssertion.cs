@@ -39,14 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     {
         private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
         private string _issuer;
-
-        ///// <summary>
-        ///// Creates an instance of <see cref="SamlAssertion"/>.
-        ///// </summary>
-        //public SamlAssertion()
-        //{
-        //    Statements = new List<SamlStatement>();
-        //}
+        private DateTime _issueInstant;
 
         /// <summary>
         /// Creates an instance of <see cref="SamlAssertion"/>.
@@ -70,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             AssertionId = assertionId;
             Issuer = issuer;
-            IssueInstant = issueInstant.ToUniversalTime();
+            IssueInstant = issueInstant;
             Conditions = samlConditions;
             Advice = samlAdvice;
         }
@@ -121,7 +114,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets or sets the time instant of issue in UTC.
         /// </summary>
-        public DateTime IssueInstant { get; set; } = DateTime.UtcNow;
+        public DateTime IssueInstant
+        {
+            get { return _issueInstant; }
+            set { _issueInstant = DateTimeUtil.ToUniversalTime(value); }
+        }
 
         /// <summary>
         /// Gets the major version of this assertion. [Saml, 2.3.2]

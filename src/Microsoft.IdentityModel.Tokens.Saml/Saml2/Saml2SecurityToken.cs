@@ -30,7 +30,6 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    // TODO review
     /// <summary>
     /// A security token backed by a SAML2 assertion.
     /// </summary>
@@ -112,7 +111,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public override string Issuer
         {
-            // TODO - is this right, Saml2NameIdentifier is a complex type
             get { return Assertion.Issuer.Value; }
         }
 

@@ -45,6 +45,12 @@ namespace Microsoft.IdentityModel.Tests
             Title = title;
         }
 
+        public CompareContext(string testName, TheoryDataBase theoryData)
+        {
+            Title = testName;
+            PropertiesToIgnoreWhenComparing = theoryData.PropertiesToIgnoreWhenComparing;
+        }
+
         public CompareContext(CompareContext other)
         {
             if (other == null)
@@ -57,6 +63,7 @@ namespace Microsoft.IdentityModel.Tests
             IgnoreProperties = other.IgnoreProperties;
             IgnoreSubject = other.IgnoreSubject;
             IgnoreType = other.IgnoreType;
+            PropertiesToIgnoreWhenComparing = other.PropertiesToIgnoreWhenComparing;
             StringComparison = other.StringComparison;
             Title = other.Title;
         }
@@ -64,6 +71,8 @@ namespace Microsoft.IdentityModel.Tests
         public List<string> Diffs { get { return _diffs; } }
 
         public bool ExpectRawData { get; set; }
+
+        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; }
 
         /// <summary>
         /// Adds diffs and returns if any diffs were added.

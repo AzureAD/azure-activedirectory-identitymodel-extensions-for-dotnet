@@ -33,21 +33,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public static class SamlConstants
     {
 #pragma warning disable 1591
+        public const string BearerConfirmationMethod = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
         public const string DefaultActionNamespace = "urn:oasis:names:tc:SAML:1.0:action:rwedc-negation";
         public const string MajorVersionValue = "1";
         public const string MinorVersionValue = "1";
         public const string Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
         public const string NamespaceAttributePrefix = "NamespaceAttributePrefix";
+        public const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
         public const string PreferredPrefix = "saml";
         public const string Saml11Namespace = "urn:oasis:names:tc:SAML:1.0:assertion";
-        public const string BearerConfirmationMethod = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
-        public const string SenderVouches = "urn:oasis:names:tc:SAML:1.0:cm:sender-vouches";
         public const string Statement = "Statement";
         public const string SubjectStatement = "SubjectStatement";
-        public const string OasisWssSamlTokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
         public const string UserName = "UserName";
         public const string UserNameNamespace = "urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName";
         public const string UnspecifiedAuthenticationMethod = "urn:oasis:names:tc:SAML:1.0:am:unspecified";
+
         internal const string ClaimType2009Namespace = "http://schemas.xmlsoap.org/ws/2009/09/identity/claims";
         internal const string MsIdentityNamespaceUri = "http://schemas.microsoft.com/ws/2008/06/identity";
 

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -190,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new Saml2TheoryData()
                     {
-                        Attribute = new Saml2Attribute("County"),
+                        Attribute = new Saml2Attribute("Country"),
                         Xml = "<Attribute Name =\"Country\" AttributeNamespace=\"http://schemas.xmlsoap.org/ws/2005/05/identity/claims\" xmlns=\"urn:oasis:names:tc:SAML:2.0:assertion\"/>",
                         First = true,
                         Saml2Serializer = new Saml2SerializerPublic(),
@@ -398,7 +399,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 {
                     new Saml2TheoryData
                     {
-                        Conditions = new Saml2Conditions(),
+                        Conditions = new Saml2Conditions
+                        {
+                            NotBefore = DateTime.ParseExact("2017-03-17T18:33:37.080Z", Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None),
+                            NotOnOrAfter = DateTime.ParseExact("2017-03-18T18:33:37.080Z", Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None)
+                        },
                         Xml = @"<Conditions NotBefore=""2017-03-17T18:33:37.080Z"" NotOnOrAfter=""2017-03-18T18:33:37.080Z"" xmlns=""urn:oasis:names:tc:SAML:2.0:assertion""/>",
                         First = true, 
                         Saml2Serializer = new Saml2SerializerPublic(),
@@ -480,16 +485,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new Saml2TheoryData
                     {
                         First = true,
-                        Subject = new Saml2Subject(),
-                        Xml = "<Subject NameId=\"test\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"/>",
+                        Subject = new Saml2Subject(new Saml2NameIdentifier("samlSubjectId")),
+                        Xml = "<Subject NameId=\"samlSubjectId\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"/>",
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13125:"),
                         Saml2Serializer = new Saml2SerializerPublic(),
                         TestId = "Saml2SubjectEmpty"
                     },
                     new Saml2TheoryData
                     {
-                        Subject = new Saml2Subject(),
-                        Xml = "<Subject NameId=\"test\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:entity\">test</NameID></Subject>",
+                        Subject = new Saml2Subject(new Saml2NameIdentifier("samlSubjectId", new Uri("urn:oasis:names:tc:SAML:2.0:nameid-format:entity"))),
+                        Xml = "<Subject NameId=\"test\" xmlns =\"urn:oasis:names:tc:SAML:2.0:assertion\"><NameID Format=\"urn:oasis:names:tc:SAML:2.0:nameid-format:entity\">samlSubjectId</NameID></Subject>",
                         Saml2Serializer = new Saml2SerializerPublic(),
                         TestId = "Saml2SubjectNameIDIsNotAbsoluteURI"
                     }

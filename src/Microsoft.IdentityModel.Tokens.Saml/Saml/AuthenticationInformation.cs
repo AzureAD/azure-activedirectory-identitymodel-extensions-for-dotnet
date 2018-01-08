@@ -26,9 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Saml2
+namespace Microsoft.IdentityModel.Tokens.Saml
 {
     /// <summary>
     /// The authentication information that an authority asserted when creating a token for a subject.
@@ -47,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or sets the address of the authority that created the token.
         /// </summary>
-        public string Address { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the AuthenticationMethod
@@ -62,6 +64,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Gets or sets the AuthenticationInstant
         /// </summary>
         public DateTime AuthenticationInstant { get; set; }
+
+        /// <summary>
+        /// Gets the collection of authority bindings.
+        /// </summary>
+        public ICollection<SamlAuthorityBinding> AuthorityBindings { get; } = new Collection<SamlAuthorityBinding>();
 
         /// <summary>
         /// Gets or sets the DNS name of the authority that created the token.

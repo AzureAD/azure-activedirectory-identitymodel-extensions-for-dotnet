@@ -48,39 +48,17 @@ namespace Microsoft.IdentityModel.Protocols.Extensions.OldVersion
     /// </summary>
     public class CrossVersionTokenValidationTestsData
     {
-        public static SecurityToken4x GetSamlSecurityToken4x(SecurityTokenDescriptor descriptor)
+        public static SecurityToken4x CreateToken4x(SecurityTokenDescriptor descriptor)
         {
             return new SamlSecurityTokenHandler4x().CreateToken(descriptor);
         }
 
-        public static SecurityToken4x GetSamlSecurityToken4x(string token, TokenValidationParameters4x validationParameters)
+        public static ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters4x validationParameters, out SecurityToken4x validatedToken)
         {
-            new SamlSecurityTokenHandler4x().ValidateToken(token, validationParameters, out SecurityToken4x samlToken);
-
-            return samlToken;
+            return new SamlSecurityTokenHandler4x().ValidateToken(securityToken, validationParameters, out validatedToken);
         }
 
-        public static ClaimsPrincipal GetSamlClaimsPrincipal4x(string securityToken, SharedTokenValidationParameters tokenValidationParameters, X509Certificate2 certificate, out SecurityToken4x validatedToken)
-        {
-            var tvp = new TokenValidationParameters4x();
-            PropertyInfo[] propertyInfos = typeof(SharedTokenValidationParameters).GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            foreach (PropertyInfo propertyInfo in propertyInfos)
-            {
-                if (propertyInfo.GetMethod != null)
-                {
-                    object val = propertyInfo.GetValue(tokenValidationParameters, null);
-                    PropertyInfo tvp4xPropertyInfo = typeof(TokenValidationParameters4x).GetProperty(propertyInfo.Name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-                    tvp4xPropertyInfo.SetValue(tvp, val);
-                }
-            }
-
-            if (certificate != null)
-                tvp.IssuerSigningKey = new X509SecurityKey4x(certificate);
-
-            return new SamlSecurityTokenHandler4x().ValidateToken(securityToken, tvp, out validatedToken);
-        }
-
-        public static string GetSamlToken(SecurityToken4x token)
+        public static string WriteToken(SecurityToken4x token)
         {
             StringBuilder sb = new StringBuilder();
             XmlWriter writer = XmlWriter.Create(sb);
@@ -89,28 +67,5 @@ namespace Microsoft.IdentityModel.Protocols.Extensions.OldVersion
             writer.Close();
             return sb.ToString();
         }
-    }
-
-    public class SharedTokenValidationParameters
-    {
-        public TimeSpan ClockSkew { get; set; }
-        public string NameClaimType { get; set; }
-        public bool RequireExpirationTime { get; set; }
-        public bool RequireSignedTokens { get; set; }
-        public string RoleClaimType { get; set; }
-        public bool SaveSigninToken { get; set; }
-        [DefaultValue(false)]
-        public bool ValidateActor { get; set; }
-        [DefaultValue(true)]
-        public bool ValidateAudience { get; set; }
-        [DefaultValue(true)]
-        public bool ValidateIssuer { get; set; }
-        public bool ValidateIssuerSigningKey { get; set; }
-        [DefaultValue(true)]
-        public bool ValidateLifetime { get; set; }
-        public string ValidAudience { get; set; }
-        public IEnumerable<string> ValidAudiences { get; set; }
-        public string ValidIssuer { get; set; }
-        public IEnumerable<string> ValidIssuers { get; set; }
     }
 }

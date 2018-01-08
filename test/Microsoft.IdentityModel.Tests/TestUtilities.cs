@@ -444,7 +444,7 @@ namespace Microsoft.IdentityModel.Tests
         public static CompareContext WriteHeader(string testcase, TheoryDataBase theoryData)
         {
             WriteHeader($"{testcase} : {theoryData.TestId}", theoryData.First);
-            return new CompareContext($"{testcase} : {theoryData.TestId}");
+            return new CompareContext($"{testcase} : {theoryData.TestId}", theoryData);
         }
 
         public static void WriteHeader(string testcase, bool first)

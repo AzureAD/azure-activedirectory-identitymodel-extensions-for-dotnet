@@ -113,12 +113,30 @@ namespace Microsoft.IdentityModel.Tests
 #if !CrossVersionTokenValidation
                 { typeof(SamlSecurityTokenHandler).ToString(), CompareAllPublicProperties },
 #endif
+                { typeof(SamlStatement).ToString(), CompareAllPublicProperties },
+                { typeof(SamlSubject).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Action).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Advice).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Assertion).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Attribute).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2AttributeStatement).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2AudienceRestriction).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2AuthenticationContext).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2AuthenticationStatement).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2AuthorizationDecisionStatement).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Conditions).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Evidence).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Id).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2NameIdentifier).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2ProxyRestriction).ToString(), CompareAllPublicProperties },
                 { typeof(Saml2SecurityToken).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2Subject).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2SubjectConfirmation).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2SubjectConfirmationData).ToString(), CompareAllPublicProperties },
+                { typeof(Saml2SubjectLocality).ToString(), CompareAllPublicProperties },
 #if !CrossVersionTokenValidation
                 { typeof(Saml2SecurityTokenHandler).ToString(), CompareAllPublicProperties },
 #endif
-                { typeof(SamlStatement).ToString(), CompareAllPublicProperties },
-                { typeof(SamlSubject).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenHandler).ToString(), CompareAllPublicProperties},
@@ -874,6 +892,20 @@ namespace Microsoft.IdentityModel.Tests
             // Touch each public property
             foreach (var propertyInfo in propertyInfos)
             {
+                bool skipProperty = false;
+                if (context.PropertiesToIgnoreWhenComparing != null && context.PropertiesToIgnoreWhenComparing.TryGetValue(type, out List<string> propertiesToIgnore))
+                {
+                    foreach(var val in propertiesToIgnore)
+                        if(string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            skipProperty = true;
+                            break;
+                        }
+                }
+
+                if (skipProperty)
+                    continue;
+
                 var propertyContext = new CompareContext(context);
                 try
                 {

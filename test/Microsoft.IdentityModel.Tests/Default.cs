@@ -154,9 +154,19 @@ namespace Microsoft.IdentityModel.Tests
             get => "2017-03-18T18:33:37.080Z";
         }
 
+        public static DateTime AuthenticationInstantDateTime
+        {
+            get => new DateTime(2017, 03, 18, 18, 33, 37, 80, DateTimeKind.Utc);
+        }
+
         public static string AuthenticationMethod
         {
             get => "urn:oasis:names:tc:SAML:1.0:am:password";
+        }
+
+        public static Uri AuthenticationMethodUri
+        {
+            get => new Uri("urn:oasis:names:tc:SAML:1.0:am:password");
         }
 
         public static string AuthenticationType
@@ -229,6 +239,22 @@ namespace Microsoft.IdentityModel.Tests
             get => "corp.microsoft.com";
         }
 
+        public static string DNSName
+        {
+            get => "default.dns.name";
+        }
+
+        public static DateTime Expires
+        {
+            get => DateTime.Parse(ExpiresString);
+        }
+
+
+        public static string ExpiresString
+        {
+            get => "2021-03-17T18:33:37.080Z";
+        }
+
         public static HashAlgorithm HashAlgorithm
         {
             get => SHA256.Create();
@@ -250,7 +276,12 @@ namespace Microsoft.IdentityModel.Tests
             get => "127.0.0.1";
         }
 
-        public static string IssueInstant
+        public static DateTime IssueInstant
+        {
+            get => DateTime.Parse(IssueInstantString);
+        }
+
+        public static string IssueInstantString
         {
             get => "2017-03-17T18:33:37.095Z";
         }
@@ -393,12 +424,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Saml2Attribute Saml2AttributeMultiValue
         {
-            get => new Saml2Attribute(Default.AttributeName, new List<string> { Default.Country, Default.Country });
+            get => new Saml2Attribute(AttributeName, new List<string> { Country, Country });
         }
 
         public static Saml2Attribute Saml2AttributeSingleValue
         {
-            get => new Saml2Attribute(Default.AttributeName, Default.Country);
+            get => new Saml2Attribute(AttributeName, Country);
         }
 
         public static string SamlAccessDecision
@@ -420,27 +451,27 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlAudienceRestrictionCondition SamlAudienceRestrictionConditionSingleAudience
         {
-            get => new SamlAudienceRestrictionCondition(new Uri(Default.Audience));
+            get => new SamlAudienceRestrictionCondition(new Uri(Audience));
         }
 
         public static SamlAudienceRestrictionCondition SamlAudienceRestrictionConditionMultiAudience
         {
-            get => new SamlAudienceRestrictionCondition(Default.Audiences.ToDictionary(x => new Uri(x)).Keys);
+            get => new SamlAudienceRestrictionCondition(Audiences.ToDictionary(x => new Uri(x)).Keys);
         }
 
         public static SamlAttribute SamlAttributeNoValue
         {
-            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new List<string> { });
+            get => new SamlAttribute(AttributeNamespace, AttributeName, new List<string> { });
         }
 
         public static SamlAttribute SamlAttributeSingleValue
         {
-            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, Default.Country);
+            get => new SamlAttribute(AttributeNamespace, AttributeName, Country);
         }
 
         public static SamlAttribute SamlAttributeMultiValue
         {
-            get => new SamlAttribute(Default.AttributeNamespace, Default.AttributeName, new string[] { Default.Country, Default.Country });
+            get => new SamlAttribute(AttributeNamespace, AttributeName, new string[] { Country, Country });
         }
 
         /// <summary>
@@ -450,14 +481,34 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new List<Claim>
             {
-                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
+            };
+        }
+
+        /// <summary>
+        /// SamlClaims require the ability to split into name / namespace
+        /// </summary>
+        public static List<Claim> SamlClaimsIssuerEqOriginalIssuer
+        {
+            get => new List<Claim>
+            {
+                new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.NameIdentifier, "Bob", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.Email, "Bob@contoso.com", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.GivenName, "Bob", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer),
             };
         }
 
@@ -468,17 +519,17 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlConditions SamlConditionsSingleCondition
         {
-            get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionSingleAudience });
+            get => new SamlConditions(NotBefore, NotOnOrAfter, new List<SamlCondition> { SamlAudienceRestrictionConditionSingleAudience });
         }
 
         public static SamlConditions SamlConditionsMultiCondition
         {
-            get => new SamlConditions(Default.NotBefore, Default.NotOnOrAfter, new List<SamlCondition> { Default.SamlAudienceRestrictionConditionMultiAudience });
+            get => new SamlConditions(NotBefore, NotOnOrAfter, new List<SamlCondition> { SamlAudienceRestrictionConditionMultiAudience });
         }
 
         public static string SamlConfirmationData
         {
-            get => "Default.ConfirmationData";
+            get => "ConfirmationData";
         }
 
         public static string SamlConfirmationMethod
@@ -521,6 +572,11 @@ namespace Microsoft.IdentityModel.Tests
             return SecurityTokenDescriptor(null, signingCredentials, null);
         }
 
+        public static string Session
+        {
+            get => "session";
+        }
+
 #if !CrossVersionTokenValidation
         public static Signature Signature
         {
@@ -528,8 +584,8 @@ namespace Microsoft.IdentityModel.Tests
             {
                 var signature = new Signature
                 {
-                    KeyInfo = Default.KeyInfo,
-                    SignedInfo = Default.SignedInfo
+                    KeyInfo = KeyInfo,
+                    SignedInfo = SignedInfo
                 };
 
                 XmlGenerator.Generate(signature);

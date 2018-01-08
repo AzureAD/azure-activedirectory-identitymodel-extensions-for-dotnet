@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Xml
     public class DSigSerializer
     {
         private static DSigSerializer _default;
+        private string _preferredPrefix = XmlSignatureConstants.PreferredPrefix;
 
         /// <summary>
         /// Returns the default <see cref="DSigSerializer"/> instance.
@@ -54,10 +55,7 @@ namespace Microsoft.IdentityModel.Xml
             }
             set
             {
-                if (value == null)
-                    throw LogArgumentNullException("value");
-
-                _default = value;
+                _default = value ?? throw LogArgumentNullException(nameof(value));
             }
         }
 
@@ -74,6 +72,21 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public DSigSerializer()
         {
+        }
+
+        /// <summary>
+        /// Gets or sets the prefix to use when writing xml.
+        /// </summary>
+        public string PreferredPrefix
+        {
+            get => _preferredPrefix;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    throw LogExceptionMessage(new ArgumentNullException(nameof(value)));
+
+                _preferredPrefix = value;
+            }
         }
 
         /// <summary>
@@ -630,26 +643,26 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(keyInfo));
 
             // <KeyInfo>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
             if (keyInfo.KeyName != null)
             {
-                writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace, keyInfo.KeyName);
+                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace, keyInfo.KeyName);
             }
 
             if (keyInfo.RSAKeyValue != null)
             {
                 // <KeyValue>
-                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
 
                 // <RSAKeyValue>
-                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
 
                 // <Modulus>...</Modulus>
-                writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
+                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
 
                 // <Exponent>...</Exponent>
-                writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
+                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
 
                 // </RSAKeyValue>
                 writer.WriteEndElement();
@@ -660,7 +673,7 @@ namespace Microsoft.IdentityModel.Xml
 
             if (keyInfo.RetrievalMethodUri != null)
             {
-                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace);
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, keyInfo.RetrievalMethodUri);
                 writer.WriteEndElement();
             }
@@ -668,39 +681,39 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var data in keyInfo.X509Data)
             {
                 // <X509Data>
-                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
 
                 if (data.IssuerSerial != null)
                 {
-                    writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace, data.IssuerSerial.IssuerName);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace, data.IssuerSerial.IssuerName);
 
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace, data.IssuerSerial.SerialNumber);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace, data.IssuerSerial.SerialNumber);
 
                     writer.WriteEndElement();
                 }
 
                 if (data.SKI != null)
                 {
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace, data.SKI);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace, data.SKI);
 
                 }
 
                 if (data.SubjectName != null)
                 {
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace, data.SubjectName);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace, data.SubjectName);
                 }
 
                 foreach (var certificate in data.Certificates)
                 {
                     // <X509Certificate>...</X509Certificate>
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, certificate);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, certificate);
                 }
 
                 if (data.CRL != null)
                 {
-                    writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace, data.CRL);
+                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace, data.CRL);
                 }
 
                 // </X509Data>
@@ -737,7 +750,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestValue);
 
             // <Reference>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
 
             // @Id
             if (reference.Id != null)
@@ -757,7 +770,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, reference.Type);
 
             // <Transforms>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
 
             // <Transform>
             foreach (var transform in reference.Transforms)
@@ -766,7 +779,7 @@ namespace Microsoft.IdentityModel.Xml
                     throw XmlUtil.LogWriteException(LogMessages.IDX30403);
 
                 // <Transform>
-                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
 
                 // @Algorithm
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, transform);
@@ -779,7 +792,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // <DigestMethod>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
 
             // @Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, reference.DigestMethod);
@@ -788,7 +801,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // <DigestValue />
-            writer.WriteElementString(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, reference.DigestValue);
+            writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, reference.DigestValue);
 
             // </Reference>
             writer.WriteEndElement();
@@ -820,7 +833,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30404);
 
             // <Signature>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             if (signature.Id != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, signature.Id);
 
@@ -828,7 +841,7 @@ namespace Microsoft.IdentityModel.Xml
             WriteSignedInfo(writer, signature.SignedInfo);
 
             // <SignatureValue>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
 
             // TODO - need signature value id
             // @Id
@@ -879,21 +892,21 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30405);
 
             // <SignedInfo>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
 
             // @Id
             if (signedInfo.Id != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, signedInfo.Id);
 
             // <CanonicalizationMethod>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
             
             //@Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, signedInfo.CanonicalizationMethod);
             writer.WriteEndElement();
 
             // <SignatureMethod>
-            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.SignatureMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignatureMethod, XmlSignatureConstants.Namespace);
             
             // @Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, signedInfo.SignatureMethod);

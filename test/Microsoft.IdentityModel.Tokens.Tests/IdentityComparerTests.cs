@@ -423,8 +423,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             TestUtilities.WriteHeader($"{this}.CompareSamlAssertions", true);
             var context = new CompareContext($"{this}.CompareSamlAssertions");
-            var samlAssertion1 = new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer, DateTime.Parse(Default.IssueInstant), null, new SamlAdvice(), new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(), new List<SamlAttribute> { new SamlAttribute("1", "2", "3") } )});
-            var samlAssertion2 = new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer, DateTime.Parse(Default.IssueInstant), null, new SamlAdvice(), new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(), new List<SamlAttribute> { new SamlAttribute("1", "2", "3") }) });
+            var samlAssertion1 = new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, new SamlAdvice(), new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(), new List<SamlAttribute> { new SamlAttribute("1", "2", "3") } )});
+            var samlAssertion2 = new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer, DateTime.Parse(Default.IssueInstantString), null, new SamlAdvice(), new List<SamlStatement> { new SamlAttributeStatement(new SamlSubject(), new List<SamlAttribute> { new SamlAttribute("1", "2", "3") }) });
             IdentityComparer.AreEqual(samlAssertion1, samlAssertion2, context);
 
             Assert.True(context.Diffs.Count(s => s == "AssertionId:") == 1);
@@ -521,7 +521,7 @@ namespace Microsoft.IdentityModel.Tests
             var context = new CompareContext($"{this}.CompareSamlSecurityTokens");
             var samlSecurityToken1 =
                 new SamlSecurityToken(new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer,
-                    DateTime.Parse(Default.IssueInstant), null, new SamlAdvice(),
+                    DateTime.Parse(Default.IssueInstantString), null, new SamlAdvice(),
                     new List<SamlStatement>
                     {
                         new SamlAttributeStatement(new SamlSubject(),
@@ -529,7 +529,7 @@ namespace Microsoft.IdentityModel.Tests
                     }));
             var samlSecurityToken2 = 
                 new SamlSecurityToken(new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer,
-                    DateTime.Parse(Default.IssueInstant), null, new SamlAdvice(),
+                    DateTime.Parse(Default.IssueInstantString), null, new SamlAdvice(),
                     new List<SamlStatement>
                     {
                         new SamlAttributeStatement(new SamlSubject(),
@@ -550,9 +550,9 @@ namespace Microsoft.IdentityModel.Tests
             var saml2SecurityToken1 = new Saml2SecurityToken(new Saml2Assertion(new Saml2NameIdentifier(Guid.NewGuid().ToString())));
             var saml2SecurityToken2 = new Saml2SecurityToken(new Saml2Assertion(new Saml2NameIdentifier(Guid.NewGuid().ToString())));
             IdentityComparer.AreEqual(saml2SecurityToken1, saml2SecurityToken2, context);
-
-            Assert.True(context.Diffs.Count(s => s == "Id:") == 1);
-            Assert.True(context.Diffs.Count(s => s == "Issuer:") == 1);
+            Assert.True(context.Diffs.Count(s => s == "Id:") == 2);
+            Assert.True(context.Diffs.Count(s => s == "Issuer:") == 2);
+            Assert.True(context.Diffs.Count(s => s == "IssueInstant:") == 1);
         }
 
         [Fact]

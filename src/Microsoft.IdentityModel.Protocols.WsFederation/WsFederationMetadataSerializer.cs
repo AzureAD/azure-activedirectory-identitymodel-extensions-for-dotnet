@@ -41,15 +41,24 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     public class WsFederationMetadataSerializer
     {
-
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
+        private string _preferredPrefix =  WsFederationConstants.PreferredPrefix;
 
         /// <summary>
         /// Metadata serializer for WsFed.
         /// </summary>
         public WsFederationMetadataSerializer() { }
 
-#region Read Metadata
+        /// <summary>
+        /// Gets or sets the prefix to use when writing xml.
+        /// </summary>
+        public string PreferredPrefix
+        {
+            get => _preferredPrefix;
+            set => _preferredPrefix = string.IsNullOrEmpty(value) ? throw LogExceptionMessage(new ArgumentNullException(nameof(value))) : value;
+        }
+
+        #region Read Metadata
 
         /// <summary>
         /// Read metadata and create the corresponding <see cref="WsFederationConfiguration"/>.
@@ -59,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <exception cref="XmlReadException">if error occurs when reading metadata</exception>
         public WsFederationConfiguration ReadMetadata(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, MetadataNamespace);
 
             var envelopeReader = new EnvelopedSignatureReader(reader);
 
@@ -86,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <exception cref="XmlReadException">if error occurs when reading entity descriptor</exception>
         protected virtual WsFederationConfiguration ReadEntityDescriptor(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.EntityDescriptor, MetadataNamespace);
 
             var configuration = new WsFederationConfiguration();
 
@@ -144,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <exception cref="XmlReadException">if error occurs when reading key descriptor</exception>
         protected virtual KeyInfo ReadKeyDescriptorForSigning(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.KeyDescriptor, Namespaces.MetadataNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.KeyDescriptor, MetadataNamespace);
 
             var use = reader.GetAttribute(Attributes.Use);
             if (string.IsNullOrEmpty(use))
@@ -174,7 +183,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <exception cref="XmlReadException">if error occurs when reading role descriptor</exception>
         protected virtual SecurityTokenServiceTypeRoleDescriptor ReadSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.RoleDescriptor, Namespaces.MetadataNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.RoleDescriptor, MetadataNamespace);
 
             if (!IsSecurityTokenServiceTypeRoleDescriptor(reader))
                 throw XmlUtil.LogReadException(LogMessages.IDX22804);
@@ -188,9 +197,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             while (reader.IsStartElement())
             {
-                if (reader.IsStartElement(Elements.KeyDescriptor, Namespaces.MetadataNamespace))
+                if (reader.IsStartElement(Elements.KeyDescriptor, MetadataNamespace))
                     roleDescriptor.KeyInfos.Add(ReadKeyDescriptorForSigning(reader));
-                else if (reader.IsStartElement(Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace))
+                else if (reader.IsStartElement(Elements.PassiveRequestorEndpoint, Namespace))
                     roleDescriptor.TokenEndpoint = ReadPassiveRequestorEndpoint(reader);
                 else
                     reader.ReadOuterXml();
@@ -217,7 +226,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <exception cref="XmlReadException">if error occurs when reading PassiveRequestorEndpoint</exception>
         protected virtual string ReadPassiveRequestorEndpoint(XmlReader reader)
         {
-            XmlUtil.CheckReaderOnEntry(reader, Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
+            XmlUtil.CheckReaderOnEntry(reader, Elements.PassiveRequestorEndpoint, Namespace);
 
             // <PassiveRequestorEndpoint>
             if (reader.IsEmptyElement)
@@ -226,21 +235,21 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             reader.ReadStartElement();
             reader.MoveToContent();
 
-            XmlUtil.CheckReaderOnEntry(reader, Elements.EndpointReference, Namespaces.AddressingNamspace);
+            XmlUtil.CheckReaderOnEntry(reader, WsAddressing.Elements.EndpointReference, WsAddressing.Namespace);
             if (reader.IsEmptyElement)
-                throw XmlUtil.LogReadException(LogMessages.IDX22812, Elements.EndpointReference);
+                throw XmlUtil.LogReadException(LogMessages.IDX22812, WsAddressing.Elements.EndpointReference);
 
-            reader.ReadStartElement(Elements.EndpointReference, Namespaces.AddressingNamspace);  // EndpointReference
+            reader.ReadStartElement(WsAddressing.Elements.EndpointReference, WsAddressing.Namespace);
             reader.MoveToContent();
        
             if (reader.IsEmptyElement)
                 throw XmlUtil.LogReadException(LogMessages.IDX22803);
 
-            XmlUtil.CheckReaderOnEntry(reader, Elements.Address, Namespaces.AddressingNamspace);
+            XmlUtil.CheckReaderOnEntry(reader, WsAddressing.Elements.Address, WsAddressing.Namespace);
             if (reader.IsEmptyElement)
-                throw XmlUtil.LogReadException(LogMessages.IDX22812, Elements.Address);
+                throw XmlUtil.LogReadException(LogMessages.IDX22812, WsAddressing.Elements.Address);
 
-            reader.ReadStartElement(Elements.Address, Namespaces.AddressingNamspace);  // Address
+            reader.ReadStartElement(WsAddressing.Elements.Address, WsAddressing.Namespace);
             reader.MoveToContent();
 
             var tokenEndpoint = Trim(reader.ReadContentAsString());
@@ -265,7 +274,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
         private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
         {
-            if (reader == null || !reader.IsStartElement(Elements.RoleDescriptor, Namespaces.MetadataNamespace))
+            if (reader == null || !reader.IsStartElement(Elements.RoleDescriptor, MetadataNamespace))
                 return false;
 
             var type = reader.GetAttribute(Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
@@ -274,7 +283,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (!string.IsNullOrEmpty(type))
                 typeQualifiedName = XmlUtil.ResolveQName(reader, type);
 
-            if (!XmlUtil.EqualsQName(typeQualifiedName, Types.SecurityTokenServiceType, Namespaces.FederationNamespace))
+            if (!XmlUtil.EqualsQName(typeQualifiedName, Types.SecurityTokenServiceType, Namespace))
                 return false;
 
             return true;
@@ -289,16 +298,19 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             return stringToTrim.Trim(charsToTrim);
         }
 
-#endregion
+        #endregion
 
-#region Write Metadata
+        #region Write Metadata
 
         /// <summary>
         /// Write the content in configuration into writer.
         /// </summary>
         /// <param name="writer">The <see cref="XmlWriter"/> used to write the configuration content.</param>
         /// <param name="configuration">The <see cref="WsFederationConfiguration"/> provided.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> or <paramref name="configuration"/> parameter is missing.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="configuration"/> is null.</exception>
+        /// <exception cref="XmlWriteException">if <paramref name="configuration"/>.Issuer is null or empty.</exception>
+        /// <exception cref="XmlWriteException">if <paramref name="configuration"/>.TokenEndpoint is null or empty.</exception>
         /// <exception cref="XmlWriteException">if error occurs when writing metadata.</exception>
         public void WriteMetadata(XmlWriter writer, WsFederationConfiguration configuration)
         {
@@ -308,29 +320,29 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (configuration == null)
                 throw LogArgumentNullException(nameof(configuration));
 
-            if (configuration.SigningCredentials != null)
-                writer = new EnvelopedSignatureWriter(writer, configuration.SigningCredentials, "id");
-
             if (string.IsNullOrEmpty(configuration.Issuer))
                 throw XmlUtil.LogWriteException(LogMessages.IDX22810);
 
             if (string.IsNullOrEmpty(configuration.TokenEndpoint))
                 throw XmlUtil.LogWriteException(LogMessages.IDX22811);
 
+            if (configuration.SigningCredentials != null)
+                writer = new EnvelopedSignatureWriter(writer, configuration.SigningCredentials, "id");
+
             writer.WriteStartDocument();
 
             // <EntityDescriptor>
-            writer.WriteStartElement(Prefixes.Md, Elements.EntityDescriptor, Namespaces.MetadataNamespace);
+            writer.WriteStartElement(Prefixes.Md, Elements.EntityDescriptor, MetadataNamespace);
 
             // @entityID
             writer.WriteAttributeString(Attributes.EntityId, configuration.Issuer);
 
             // <RoleDescriptor>
-            writer.WriteStartElement(Prefixes.Md, Elements.RoleDescriptor, Namespaces.MetadataNamespace);
+            writer.WriteStartElement(Prefixes.Md, Elements.RoleDescriptor, MetadataNamespace);
             writer.WriteAttributeString(Xmlns, Prefixes.Xsi, null, XmlSignatureConstants.XmlSchemaNamespace);
-            writer.WriteAttributeString(Xmlns, Prefixes.Fed, null, Namespaces.FederationNamespace);
-            writer.WriteAttributeString(Prefixes.Xsi, Attributes.Type, null, Prefixes.Fed + ":" + Types.SecurityTokenServiceType);
-            writer.WriteAttributeString(Attributes.ProtocolSupportEnumeration, Namespaces.FederationNamespace);
+            writer.WriteAttributeString(Xmlns, PreferredPrefix, null, Namespace);
+            writer.WriteAttributeString(Prefixes.Xsi, Attributes.Type, null, PreferredPrefix + ":" + Types.SecurityTokenServiceType);
+            writer.WriteAttributeString(Attributes.ProtocolSupportEnumeration, Namespace);
 
             // write the key infos
             if (configuration.KeyInfos != null)
@@ -338,8 +350,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 foreach (var keyInfo in configuration.KeyInfos)
                 {
                     // <KeyDescriptor>
-                    writer.WriteStartElement(Prefixes.Md, Elements.KeyDescriptor, Namespaces.MetadataNamespace);
-                    writer.WriteAttributeString(Attributes.Use, keyUse.Signing);
+                    writer.WriteStartElement(Prefixes.Md, Elements.KeyDescriptor, MetadataNamespace);
+                    writer.WriteAttributeString(Attributes.Use, KeyUse.Signing);
                     _dsigSerializer.WriteKeyInfo(writer, keyInfo);
                     // </KeyDescriptor>
                     writer.WriteEndElement();
@@ -347,13 +359,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // <fed:PassiveRequestorEndpoint>
-            writer.WriteStartElement(Prefixes.Fed, Elements.PassiveRequestorEndpoint, Namespaces.FederationNamespace);
+            writer.WriteStartElement(PreferredPrefix, Elements.PassiveRequestorEndpoint, Namespace);
 
             // <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
-            writer.WriteStartElement(Prefixes.Wsa, Elements.EndpointReference, Namespaces.AddressingNamspace);
+            writer.WriteStartElement(WsAddressing.PreferredPrefix, WsAddressing.Elements.EndpointReference, WsAddressing.Namespace);
 
             // <wsa:Address>
-            writer.WriteStartElement(Prefixes.Wsa, Elements.Address, Namespaces.AddressingNamspace);
+            writer.WriteStartElement(WsAddressing.PreferredPrefix, WsAddressing.Elements.Address, WsAddressing.Namespace);
 
             // write TokenEndpoint
             writer.WriteString(configuration.TokenEndpoint);
@@ -376,6 +388,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             writer.WriteEndDocument();
         }
 
-#endregion
+        #endregion
     }
 }

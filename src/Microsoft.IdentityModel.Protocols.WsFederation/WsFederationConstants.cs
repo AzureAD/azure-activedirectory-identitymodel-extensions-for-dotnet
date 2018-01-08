@@ -34,6 +34,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     {
         #pragma warning disable 1591
 
+        public const string MetadataNamespace = "urn:oasis:names:tc:SAML:2.0:metadata";
+        public const string Namespace =  "http://docs.oasis-open.org/wsfed/federation/200706";
+        public const string PreferredPrefix = "fed";
+
         /// <summary>
         /// Constants for WsFederation actions.
         /// </summary>
@@ -108,14 +112,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         public static class Elements
         {
-            public const string Address = "Address";
-            public const string EndpointReference = "EndpointReference";
             public const string EntityDescriptor = "EntityDescriptor";
             public const string IdpssoDescriptor = "IDPSSODescriptor";
             public const string KeyDescriptor = "KeyDescriptor";
             public const string RoleDescriptor = "RoleDescriptor";
             public const string PassiveRequestorEndpoint = "PassiveRequestorEndpoint";
-            public const string Signature = "Signature";
             public const string SpssoDescriptor = "SPSSODescriptor";
         }
 
@@ -124,9 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         public static class Namespaces
         {
-            public const string AddressingNamspace = "http://www.w3.org/2005/08/addressing";
-            public const string FederationNamespace = "http://docs.oasis-open.org/wsfed/federation/200706";
-            public const string MetadataNamespace = "urn:oasis:names:tc:SAML:2.0:metadata";
+
         }
 
         /// <summary>
@@ -141,7 +140,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Defines the key use value in key descriptor for WsFederation metadata xml.
         /// </summary>
-        public static class keyUse
+        public static class KeyUse
         {
             public const string Signing = "signing";
         }

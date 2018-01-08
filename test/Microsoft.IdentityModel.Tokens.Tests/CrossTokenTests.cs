@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SamlTokenHandler = samlTokenHandler,
                         Saml2TokenHandler = saml2TokenHandler,
                         TestId = "AsymmetricSignToken",
-                        SecurityTokenDescriptor = Default.SecurityTokenDescriptor(null, Default.AsymmetricSigningCredentials, Default.SamlClaims),
+                        SecurityTokenDescriptor = Default.SecurityTokenDescriptor(null, Default.AsymmetricSigningCredentials, Default.SamlClaimsIssuerEqOriginalIssuer),
                         TokenValidationParameters =  Default.AsymmetricSignTokenValidationParameters
                     }
                 };

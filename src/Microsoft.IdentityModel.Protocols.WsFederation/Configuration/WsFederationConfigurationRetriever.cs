@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -51,8 +52,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <param name="address">address of the metadata document.</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
+
             return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
 
@@ -61,10 +66,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <param name="address">address of the metadata document.</param>
         /// <param name="httpClient">the <see cref="HttpClient"/> to use to read the metadata document.</param>
-        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <param name="cancel">a <see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="httpClient"/> is null.</exception>
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
+
+            if (httpClient == null)
+                throw LogArgumentNullException(nameof(httpClient));
+
             return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
 
@@ -80,15 +93,17 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <param name="retriever">the <see cref="IDocumentRetriever"/> to use to read the metadata document</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
         public static async Task<WsFederationConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            if (string.IsNullOrWhiteSpace(address))
-                LogArgumentNullException(nameof(address));
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
 
             if (retriever == null)
-                LogArgumentNullException(nameof(retriever));
+                throw LogArgumentNullException(nameof(retriever));
 
-            string document = await retriever.GetDocumentAsync(address, cancel);
+            string document = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
             using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
