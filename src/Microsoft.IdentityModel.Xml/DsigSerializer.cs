@@ -738,10 +738,10 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteReference(XmlWriter writer, Reference reference)
         {
             if (writer == null)
-                LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (reference == null)
-                LogArgumentNullException(nameof(reference));
+                throw LogArgumentNullException(nameof(reference));
 
             if (string.IsNullOrEmpty(reference.DigestMethod))
                 throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestMethod);
@@ -821,10 +821,10 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteSignature(XmlWriter writer, Signature signature)
         {
             if (writer == null)
-                LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (signature == null)
-                LogArgumentNullException(nameof(signature));
+                throw LogArgumentNullException(nameof(signature));
 
             if (string.IsNullOrEmpty(signature.SignatureValue))
                 throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Elements.SignatureValue);
@@ -854,7 +854,6 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // <KeyInfo>
-            //signature.KeyInfo = new KeyInfo(signature.SigningCredentials.Key);
             if (signature.KeyInfo != null)
                 WriteKeyInfo(writer, signature.KeyInfo);
 
@@ -877,10 +876,10 @@ namespace Microsoft.IdentityModel.Xml
         public virtual void WriteSignedInfo(XmlWriter writer, SignedInfo signedInfo)
         {
             if (writer == null)
-                LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer));
 
             if (signedInfo == null)
-                LogArgumentNullException(nameof(signedInfo));
+                throw LogArgumentNullException(nameof(signedInfo));
 
             if (string.IsNullOrEmpty(signedInfo.CanonicalizationMethod))
                 throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Elements.CanonicalizationMethod);

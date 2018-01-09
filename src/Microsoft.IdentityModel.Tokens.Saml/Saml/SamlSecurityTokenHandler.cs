@@ -299,10 +299,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
 
             if (subject == null)
-                LogArgumentNullException(nameof(subject));
+                throw LogArgumentNullException(nameof(subject));
 
             if (tokenDescriptor == null)
-                LogArgumentNullException(nameof(tokenDescriptor));
+                throw LogArgumentNullException(nameof(tokenDescriptor));
 
             if (tokenDescriptor.Subject != null)
             {

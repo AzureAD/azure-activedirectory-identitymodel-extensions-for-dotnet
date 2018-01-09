@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Xml
         public Reference(IEnumerable<string> transforms)
         {
             if (transforms == null)
-                LogArgumentNullException(nameof(transforms));
+                throw LogArgumentNullException(nameof(transforms));
 
             Transforms = new List<string>(transforms);
         }

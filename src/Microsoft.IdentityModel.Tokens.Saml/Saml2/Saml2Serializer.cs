@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual Saml2AudienceRestriction ReadAudienceRestriction(XmlDictionaryReader reader)
         {
             if (reader == null)
-                LogArgumentNullException(nameof(reader));
+                throw LogArgumentNullException(nameof(reader));
 
             // throw if wrong element
             bool isConditionElement = false;

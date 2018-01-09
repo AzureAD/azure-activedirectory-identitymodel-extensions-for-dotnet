@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
         public override XmlTokenStream Process(XmlTokenStream tokenStream)
         {
             if (tokenStream == null)
-                LogArgumentNullException(nameof(tokenStream));
+                throw LogArgumentNullException(nameof(tokenStream));
 
             tokenStream.SetElementExclusion("Signature", "http://www.w3.org/2000/09/xmldsig#");
             return tokenStream;

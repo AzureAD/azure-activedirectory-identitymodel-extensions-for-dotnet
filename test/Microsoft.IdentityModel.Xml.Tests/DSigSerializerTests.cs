@@ -42,6 +42,26 @@ namespace Microsoft.IdentityModel.Xml.Tests
 {
     public class DSigSerializerTests
     {
+        [Fact]
+        public void GetSets()
+        {
+            var dsigSerializer = new DSigSerializer();
+            TestUtilities.SetGet(dsigSerializer, "PreferredPrefix", (object)null, ExpectedException.ArgumentNullException("value"));
+
+            dsigSerializer = new DSigSerializer();
+            var context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("PreferredPrefix", new List<object>{XmlSignatureConstants.PreferredPrefix, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                },
+                Object = dsigSerializer
+            };
+
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors("DSigSerializerTests_GetSets", context.Errors);
+        }
+
         [Theory, MemberData(nameof(ReadKeyInfoTheoryData))]
         public void ReadKeyInfo(DSigSerializerTheoryData theoryData)
         {

@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual byte[] GetKeyBytes(SecurityKey key)
         {
             if (key == null)
-                LogHelper.LogArgumentNullException(nameof(key));
+                throw LogHelper.LogArgumentNullException(nameof(key));
 
             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
             if (symmetricSecurityKey != null)

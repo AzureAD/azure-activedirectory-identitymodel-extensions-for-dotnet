@@ -213,7 +213,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
                     {KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256Signature, true, false, ExpectedException.NoExceptionExpected},
                     {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.Aes256KeyWrap, false, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.DesEncryption, false, false, ExpectedException.NoExceptionExpected},
 
                     {KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true, true, ExpectedException.NoExceptionExpected},
                     {KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
