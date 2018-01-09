@@ -40,7 +40,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private string _decision;
         private string _resource;
 
-        // TODO - rewrite so this internal is not needed
         internal SamlAuthorizationDecisionStatement()
         {
             Actions = new List<SamlAction>();
@@ -126,7 +125,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        // TODO can this be null ???
         /// <summary>
         /// Gets or sets the evidence contained in the AuthorizationDecisionStatement.
         /// </summary>
@@ -136,7 +134,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             set;
         }
 
-        // TODO can this be null ???
         /// <summary>
         /// Gets or sets the resource contained in the AuthorizationDecisionStatement.
         /// </summary>
@@ -152,19 +149,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        // TODO - how do we surface claims?
-        //protected override void AddClaimsToList(IList<Claim> claims)
-        //{
-        //    if (claims == null)
-        //        throw LogHelper.LogExceptionMessage(new ArgumentNullException("claims"));
-
-        //    for (int i = 0; i < this.actions.Count; ++i)
-        //    {
-        //        claims.Add(new Claim(ClaimTypes.AuthorizationDecision, new SamlAuthorizationDecisionClaimResource(this.resource, this.accessDecision, this.actions[i].Namespace, this.actions[i].Action), Rights.PossessProperty));
-        //    }
-        //}
-
-        // TODO - incorporate validation of #actions
         void CheckObjectValidity()
         {
             if (Actions.Count == 0)

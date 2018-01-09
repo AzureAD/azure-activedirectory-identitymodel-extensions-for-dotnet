@@ -84,7 +84,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 // TODO - need to pass actual Saml2Token
-
                 if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
                     Assert.False(true, $"Expected CanRead != CanRead, token: {theoryData.Token}");
 

@@ -27,7 +27,7 @@
 
 using System;
 using static Microsoft.IdentityModel.Logging.LogHelper;
-//TODO review
+
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     /// <summary>

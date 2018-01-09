@@ -504,7 +504,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.</remarks>
         /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="InvalidOperationException">'algorithm' is not supported.</exception>
-        // TODO does key param need to be a SecurityKey? do we need to support JsonWebKey here or just SymmetricSecurityKey OR byte[]?
         public virtual KeyedHashAlgorithm CreateKeyedHashAlgorithm(byte[] keyBytes, string algorithm)
         {
             if (keyBytes == null)
@@ -582,7 +581,6 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            // TODO improve this message. Nothing about JsonWebKey is mentioned.
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10800, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
         }
 

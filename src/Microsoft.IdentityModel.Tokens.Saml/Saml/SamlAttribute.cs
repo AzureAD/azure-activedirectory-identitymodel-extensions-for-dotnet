@@ -38,13 +38,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlAttribute
     {
+        private string _attributeValueXsiType = ClaimValueTypes.String;
         private string _name;
         private string _nameSpace;
         private string _originalIssuer;
-        private string _attributeValueXsiType = ClaimValueTypes.String;
-        private List<Claim> _claims;
 
-        // TODO remove this internal
         /// <summary>
         /// Initializes a new instance of <see cref="SamlAttribute"/>.
         /// </summary>
@@ -80,7 +78,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ClaimType = string.IsNullOrEmpty(_nameSpace) ? _name : _nameSpace + "/" + _name;
         }
 
-        // TODO don't think this is still needed
         /// <summary>
         /// Gets or sets the xsi:type of the values contained in the SAML Attribute.
         /// </summary>
@@ -163,20 +160,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets a collection of <see cref="ICollection{String}"/> representing attributes.
         /// </summary>
         public ICollection<string> Values { get; }
-
-        // TODO - hide this behind SamlToken.Claims OR SamlAssertion.Claims.
-        internal virtual ReadOnlyCollection<Claim> ExtractClaims()
-        {
-            if (_claims == null)
-            {
-                List<Claim> tempClaims = new List<Claim>(Values.Count);
-                foreach (var value in Values)
-                    tempClaims.Add(new Claim(ClaimType, value ?? "nil"));
-
-                _claims = tempClaims;
-            }
-
-            return _claims.AsReadOnly();
-        }
     }
 }

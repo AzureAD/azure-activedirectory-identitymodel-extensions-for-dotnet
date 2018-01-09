@@ -36,7 +36,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlAudienceRestrictionCondition : SamlCondition
     {
-        // TODO - remove this internal
         internal SamlAudienceRestrictionCondition()
         {
             Audiences = new List<Uri>();

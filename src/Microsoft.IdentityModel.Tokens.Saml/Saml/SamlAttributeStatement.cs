@@ -64,27 +64,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         ///  Gets a collection of <see cref="ICollection{SamlAttribute}"/>.
         /// </summary>
         public ICollection<SamlAttribute> Attributes { get; }
-
-        // TODO - how to extract claims
-        // SamlSecurityTokenHandler?
-        //protected override void AddClaimsToList(IList<Claim> claims)
-        //{
-        //    if (claims == null)
-        //        throw LogHelper.LogArgumentNullException(nameof(claims");
-
-        //    for (int i = 0; i < attributes.Count; i++)
-        //    {
-        //        if (attributes[i] != null)
-        //        {
-        //            ReadOnlyCollection<Claim> attributeClaims = attributes[i].ExtractClaims();
-        //            if (attributeClaims != null)
-        //            {
-        //                for (int j = 0; j < attributeClaims.Count; ++j)
-        //                    if (attributeClaims[j] != null)
-        //                        claims.Add(attributeClaims[j]);
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

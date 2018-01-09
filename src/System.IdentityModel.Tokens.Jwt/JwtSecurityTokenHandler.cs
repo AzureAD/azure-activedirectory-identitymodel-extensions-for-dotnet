@@ -548,7 +548,6 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                 }
             }
-            // TODO: check that KW is supported, generate key, wrap key
             else
             {
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Alg, encryptingCredentials.Key))

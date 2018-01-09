@@ -68,7 +68,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         public Saml2AuthenticationContext AuthenticationContext
         {
-            // TODO review should allow null.
             get { return _authnContext; }
             set { _authnContext = value ?? throw LogArgumentNullException(nameof(value)); }
         }

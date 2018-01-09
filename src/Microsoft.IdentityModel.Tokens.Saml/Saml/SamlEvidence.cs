@@ -39,7 +39,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </remarks>
     public class SamlEvidence
     {
-        // TODO - remove this internal
         internal SamlEvidence()
         {
             AssertionIDReferences = new List<string>();

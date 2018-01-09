@@ -127,7 +127,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 true,
                 ExpectedException.NoExceptionExpected);
 
-            // TODO - rethink how we check for private key.
             theoryData.Add(
                 "OnlyRSAPublicKeyProvided",
                 KeyingMaterial.JsonWebKeyRsa256Public,

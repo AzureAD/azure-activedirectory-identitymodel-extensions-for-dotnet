@@ -70,8 +70,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateKeySize(key, algorithm);
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
             _hashAlgorithm = GetHashAlgorithm(algorithm);
-
-            // TODO - should we defer and use CreateForSigning for encrypt, CreateForVerifying for decrypt?
             _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hashAlgorithm) as SymmetricSignatureProvider;
             if (_symmetricSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));

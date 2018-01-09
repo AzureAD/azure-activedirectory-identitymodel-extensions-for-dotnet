@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private SecurityKey _securityKey;
         private KeyInfo _keyInfo;
 
-        // TODO remove this internal
+        // TODO should this be internal?
         /// <summary>
         /// Initialize an instance of <see cref="SamlSubject"/>.
         /// </summary>
@@ -103,7 +103,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public ICollection<string> ConfirmationMethods { get; }
 
-        // TODO - surface here or from assertion / token
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/>.
         /// </summary>
@@ -168,62 +167,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if ((ConfirmationMethods.Count == 0) && (ConfirmationData != null))
                 throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11510));
         }
-
-        // TODO - get out claims
-        //public virtual ReadOnlyCollection<Claim> ExtractClaims()
-        //{
-        //    if (this.claims == null)
-        //    {
-        //        this.claims = new List<Claim>();
-        //        if (!string.IsNullOrEmpty(this.name))
-        //        {
-        //            this.claims.Add(new Claim(ClaimTypes.NameIdentifier, new SamlNameIdentifierClaimResource(this.name, this.nameQualifier, this.nameFormat), Rights.Identity));
-        //            this.claims.Add(new Claim(ClaimTypes.NameIdentifier, new SamlNameIdentifierClaimResource(this.name, this.nameQualifier, this.nameFormat), Rights.PossessProperty));
-        //        }
-        //    }
-
-        //    return this.claims.AsReadOnly();
-        //}
-
-        // TODO - where / does this fit in?
-        //public virtual ClaimSet ExtractSubjectKeyClaimSet(SamlSecurityTokenAuthenticator samlAuthenticator)
-        //{
-        //    if ((this.subjectKeyClaimset == null) && (this.securityKeyIdentifier != null))
-        //    {
-        //        if (samlAuthenticator == null)
-        //            throw LogHelper.LogArgumentNullException(nameof(samlAuthenticator");
-
-        //        if (this.subjectToken != null)
-        //        {
-        //            this.subjectKeyClaimset = samlAuthenticator.ResolveClaimSet(this.subjectToken);
-
-        //            this.identity = samlAuthenticator.ResolveIdentity(this.subjectToken);
-        //            if ((this.identity == null) && (this.subjectKeyClaimset != null))
-        //            {
-        //                Claim identityClaim = null;
-        //                foreach (Claim claim in this.subjectKeyClaimset.FindClaims(null, Rights.Identity))
-        //                {
-        //                    identityClaim = claim;
-        //                    break;
-        //                }
-
-        //                if (identityClaim != null)
-        //                {
-        //                    this.identity = SecurityUtils.CreateIdentity(identityClaim.Resource.ToString(), this.GetType().Name);
-        //                }
-        //            }
-        //        }
-
-        //        if (this.subjectKeyClaimset == null)
-        //        {
-        //            // Add the type of the primary claim as the Identity claim.
-        //            this.subjectKeyClaimset = samlAuthenticator.ResolveClaimSet(this.securityKeyIdentifier);
-        //            this.identity = samlAuthenticator.ResolveIdentity(this.securityKeyIdentifier);
-        //        }
-        //    }
-
-        //    return this.subjectKeyClaimset;
-        //}
     }
 
     internal class SamlSubjectEqualityComparer : EqualityComparer<SamlSubject>

@@ -64,24 +64,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ComputeHashCode();
             }
 
-            // TODO - see if needed for SAML2
-            //public AttributeKey( Saml2Attribute attribute )
-            //{
-            //    if ( attribute == null )
-            //    {
-            //        throw LogHelper.ExceptionUtility.ThrowHelperArgumentNull( "attribute" );
-            //    }
-
-            //    _friendlyName = attribute.FriendlyName ?? String.Empty;
-            //    _name = attribute.Name;
-            //    _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.AbsoluteUri;
-            //    _namespace = String.Empty;
-            //    _valueType = attribute.AttributeValueXsiType ?? String.Empty;
-            //    _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
-
-            //    ComputeHashCode();
-            //}
-
             internal string FriendlyName { get; }
             internal string Name { get; }
             internal string NameFormat { get; }

@@ -229,7 +229,6 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        // TODO : Add this test case after complete SamlAssertion test cases
         public static SamlAdviceTestSet SamlAdviceWithAssertions
         {
             get
@@ -1058,7 +1057,6 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        // TODO : Add this test case after complete SamlAssertion test cases
         public static SamlEvidenceTestSet SamlEvidenceWithAssertions
         {
             get

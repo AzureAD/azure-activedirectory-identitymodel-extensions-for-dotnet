@@ -39,7 +39,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private string _binding;
         private string _location;
 
-        // TODO - rework code to remove this internal
         internal SamlAuthorityBinding()
         {
         }

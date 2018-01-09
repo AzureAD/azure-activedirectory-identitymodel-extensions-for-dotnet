@@ -25,13 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-//TODO review
 using System;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-
     /// <summary>
     /// Represents the SubjectLocality element specified in [Saml2Core, 2.7.2.1].
     /// </summary>
@@ -47,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Initializes an instance of <see cref="Saml2SubjectLocality"/>.
         /// </summary>
-        public Saml2SubjectLocality()
+        internal Saml2SubjectLocality()
         {
         }
 

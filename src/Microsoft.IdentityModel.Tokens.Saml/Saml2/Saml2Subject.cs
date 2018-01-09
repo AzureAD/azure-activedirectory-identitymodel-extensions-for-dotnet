@@ -31,7 +31,6 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    //TODO - review
     /// <summary>
     /// Represents the Subject element specified in [Saml2Core, 2.4.1].
     /// see: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
@@ -47,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Initialize an instance of <see cref="Saml2Subject"/>.
         /// </summary>
-        public Saml2Subject() { }
+        internal Saml2Subject() { }
 
         /// <summary>
         /// Initializes an instance of <see cref="Saml2Subject"/> from a <see cref="Saml2NameIdentifier"/>.

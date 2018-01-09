@@ -1187,8 +1187,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     }
                 };
 
-                // TODO break IssuerSecurityKeyValidator into separate tests.
-                // User has set an IssuerSecurityKeyValidator which returns false
                 var expectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:");
                 expectedException.PropertiesExpected.Add("SigningKey", Default.AsymmetricSigningKey);
                 var validationParameters = Default.AsymmetricSignTokenValidationParameters;
