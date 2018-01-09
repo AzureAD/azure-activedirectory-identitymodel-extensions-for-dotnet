@@ -38,8 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #if NETSTANDARD1_4
         private RSA _rsa;
+#elif NET46
+        private RSACng _rsa;
+        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #else
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #endif
         private bool _disposeRsa;
@@ -72,23 +74,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
             if (rsaAlgorithm != null && rsaAlgorithm.rsa != null)
             {
                 _rsa = rsaAlgorithm.rsa;
                 _disposeRsa = rsaAlgorithm.dispose;
                 return;
             }
-#else
+#endif
+#if NET45 || NET451 || NET46
             if (rsaAlgorithm != null)
             {
-                if (rsaAlgorithm.rsaCryptoServiceProvider != null)
-                {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
-                    _disposeRsa = rsaAlgorithm.dispose;
-                    return;
-                }
-
                 if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
                 {
                     _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
@@ -126,13 +122,11 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (disposing)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();
-#else
-                    if (_rsaCryptoServiceProvider != null && _disposeRsa)
-                        _rsaCryptoServiceProvider.Dispose();
-
+#endif
+#if NET45 || NET451 || NET46
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
 #endif
@@ -170,10 +164,11 @@ namespace Microsoft.IdentityModel.Tokens
                 var x509Key = key as X509SecurityKey;
                 if (x509Key != null)
                 {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
                     if (x509Key.PublicKey as RSA != null)
                         return true;
-#else
+#endif
+#if NET45 || NET451 || NET46
                     if (x509Key.PublicKey as RSACryptoServiceProvider != null)
                         return true;
 #endif
@@ -205,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
             var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                         || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
                         ? RSAEncryptionPadding.OaepSHA1
@@ -219,14 +214,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10659, ex)));
             }
-#else
+#endif
+#if NET45 || NET451 || NET46
             bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                       || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
             try
             {
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Decrypt(keyBytes, fOAEP);
-                else if (_rsaCryptoServiceProviderProxy != null)
+                if (_rsaCryptoServiceProviderProxy != null)
                     return _rsaCryptoServiceProviderProxy.Decrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)
@@ -254,7 +248,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
             var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                         || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
@@ -268,14 +262,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex)));
             }
-#else
+#endif
+#if NET45 || NET451 || NET46
             bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                       || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
             try
             {
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Encrypt(keyBytes, fOAEP);
-                else if (_rsaCryptoServiceProviderProxy != null)
+                if (_rsaCryptoServiceProviderProxy != null)
                     return _rsaCryptoServiceProviderProxy.Encrypt(keyBytes, fOAEP);
             }
             catch (Exception ex)

@@ -287,21 +287,39 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 },
                 new SamlTheoryData
                 {
-                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCreds_2048_FromRsa),
+#if NETCOREAPP2_0
+                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCredsWithCngProvider_2048_FromRsa),
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
                         Audience = Default.Audience,
-                        SigningCredentials = KeyingMaterial.RSASigningCreds_2048_FromRsa,
+                        SigningCredentials = KeyingMaterial.RSASigningCredsWithCngProvider_2048_FromRsa,
                         Issuer = Default.Issuer,
                         Subject = Default.SamlClaimsIdentity
                     },
                     ValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = KeyingMaterial.RSASigningCreds_2048_FromRsa_Public.Key,
+                        IssuerSigningKey = KeyingMaterial.RSASigningCredsWithCngProvider_2048_FromRsa_Public.Key,
                         ValidAudience = Default.Audience,
                         ValidIssuer = Default.Issuer,
                     },
+#else
+                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RSASigningCredsWithCspProvider_2048_FromRsa),
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Audience = Default.Audience,
+                        SigningCredentials = KeyingMaterial.RSASigningCredsWithCspProvider_2048_FromRsa,
+                        Issuer = Default.Issuer,
+                        Subject = Default.SamlClaimsIdentity
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = KeyingMaterial.RSASigningCredsWithCspProvider_2048_FromRsa_Public.Key,
+                        ValidAudience = Default.Audience,
+                        ValidIssuer = Default.Issuer,
+                    },
+#endif
                 },
                 new SamlTheoryData
                 {

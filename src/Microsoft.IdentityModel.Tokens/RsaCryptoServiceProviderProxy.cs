@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET451 || NET45
+#if NET451 || NET45 || NET46
 
 using System;
 using System.Security.Cryptography;
