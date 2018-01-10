@@ -55,6 +55,13 @@ namespace ApiChangeTest
             "System.IdentityModel.Tokens.Jwt"
         };
 
+        // Add the list of allowed breaking changes here
+        // Full name must be provided, i.e. namespace.className.propertyName
+        private static List<string> _allowedApiBreakingChanges = new List<string>()
+        {
+            "System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.MaximumTokenSizeInBytes"
+        };
+
         /// <summary>
         /// This function is used to create the directories needed for dev assemblies and reports, and copy
         /// dev assemblies into the devAssemblies directory.
@@ -105,7 +112,8 @@ namespace ApiChangeTest
                     ComparerConfiguration configuration = new ComparerConfiguration();
                     configuration.Severities.ParameterNameChanged = Severity.Warning;
                     configuration.Severities.AssemblyNameChanged = Severity.Hint;
-                    configuration.Ignore.Add("System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.MaximumTokenSizeInBytes");
+                    foreach(var allowedBreakingChange in _allowedApiBreakingChanges)
+                        configuration.Ignore.Add(allowedBreakingChange);
 
                     // compare assemblies and write xml report
                     using (var stream = new FileStream(reportPath, FileMode.Create))
