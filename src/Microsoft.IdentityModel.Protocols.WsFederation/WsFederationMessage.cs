@@ -155,12 +155,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }).BuildRedirectUrl();
         }
 
+        // TODO much faster than using XmlDocument, explore if we should us this by default
         /// <summary>
         /// Reads the 'wresult' and returns the embedded security token.
         /// </summary>
         /// <returns>the 'SecurityToken'.</returns>
         /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetToken()
+        public virtual string GetTokenUsingXmlReader()
         {
             if (Wresult == null)
             {
@@ -235,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <returns>the 'SecurityToken'.</returns>
         /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetToken2()
+        public virtual string GetToken()
         {
             if (Wresult == null)
             {

@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var context = TestUtilities.WriteHeader($"{this}.GetTokenTest2", theoryData);
             try
             {
-                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken2();
+                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetTokenUsingXmlReader();
                 //Assert.Equal(theoryData.Token, token);
                 if (theoryData.TokenValidationParameters != null)
                 {
