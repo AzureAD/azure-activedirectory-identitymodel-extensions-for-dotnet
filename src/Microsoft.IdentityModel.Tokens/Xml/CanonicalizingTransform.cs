@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
     /// <summary>
     /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
     /// </summary>
-    public abstract class CanonicalizingTransfrom
+    public abstract class CanonicalizingTransfrom : Transform
     {
         /// <summary>
         /// Gets or sets a value indicating if this transform should include comments.

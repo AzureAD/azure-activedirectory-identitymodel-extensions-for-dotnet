@@ -851,6 +851,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
+                    TestId = nameof(CanonicalizationMethodMissing),
                     Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("CanonicalizationMethod", "_CanonicalizationMethod")
                 };
             }
@@ -870,6 +871,7 @@ namespace Microsoft.IdentityModel.Tests
                     _signedInfo_ReferenceDigestValueNotBase64 = new SignedInfoTestSet
                     {
                         SignedInfo = signedInfo,
+                        TestId = nameof(ReferenceDigestValueNotBase64),
                         Xml = XmlGenerator.SignedInfoXml(
                                 XmlSignatureConstants.Namespace,
                                 SecurityAlgorithms.ExclusiveC14n,
@@ -896,6 +898,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
+                    TestId = nameof(ReferenceMissing),
                     Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("Reference", "_Reference")
                 };
             }
@@ -916,6 +919,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
+                    TestId = nameof(NoTransforms),
                     Xml = XmlGenerator.Generate(signedInfo)
                 };
             }
@@ -935,6 +939,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
+                    TestId = nameof(SignedInfoTestSet),
                     Xml = XmlGenerator.Generate(signedInfo)
                 };
             }
@@ -955,6 +960,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
+                    TestId = nameof(TransformsMissing),
                     Xml = XmlGenerator.Generate(signedInfo)
                 };
             }
@@ -975,6 +981,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
+                    TestId = nameof(UnknownReferenceTransform),
                     Xml = XmlGenerator.SignedInfoXml(
                             XmlSignatureConstants.Namespace,
                             SecurityAlgorithms.ExclusiveC14n,
@@ -999,6 +1006,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
+                    TestId = nameof(MissingDigestMethod),
                     Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("DigestMethod", "_DigestMethod")
                 };
             }
@@ -1010,6 +1018,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 return new SignedInfoTestSet
                 {
+                    TestId = nameof(MissingDigestValue),
                     Xml = XmlGenerator.Generate(Default.SignedInfo).Replace("DigestValue", "_DigestValue")
                 };
             }
@@ -1022,6 +1031,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = Default.SignedInfo,
+                    TestId = nameof(Valid),
                     Xml = XmlGenerator.Generate(Default.SignedInfo)
                 };
             }
@@ -1041,6 +1051,7 @@ namespace Microsoft.IdentityModel.Tests
                 return new SignedInfoTestSet
                 {
                     SignedInfo = signedInfo,
+                    TestId = nameof(SignedInfoFullyPopulated),
                     Xml = XmlGenerator.Generate(signedInfo)
                 };
             }

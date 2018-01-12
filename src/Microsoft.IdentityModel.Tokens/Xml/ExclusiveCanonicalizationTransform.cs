@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
@@ -36,23 +37,35 @@ namespace Microsoft.IdentityModel.Tokens.Xml
     /// <summary>
     /// Represents Canonicalization algorithms found in &lt;SignedInfo> and in &lt;Reference>.
     /// </summary>
-    public sealed class ExclusiveCanonicalizationTransform : CanonicalizingTransfrom
+    public class ExclusiveCanonicalizationTransform : CanonicalizingTransfrom
     {
+        private string _inclusivePrefixList;
+
         /// <summary>
         /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
         /// </summary>
         /// <param name="includeComments">controls if the transform will include comments.</param>
-        public ExclusiveCanonicalizationTransform(bool includeComments)
+        public ExclusiveCanonicalizationTransform(bool includeComments):
+            this(includeComments, null)
         {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
+        /// </summary>
+        /// <param name="includeComments">controls if the transform will include comments.</param>
+        /// <param name="inclusivePrefixList">list of inclusive prefixes.</param>
+        public ExclusiveCanonicalizationTransform(bool includeComments, string inclusivePrefixList)
+        {
+            _inclusivePrefixList = inclusivePrefixList;
             IncludeComments = includeComments;
         }
 
         static string[] TokenizeInclusivePrefixList(string prefixList)
         {
             if (prefixList == null)
-            {
                 return null;
-            }
+
             string[] prefixes = prefixList.Split(null);
             int count = 0;
             for (int i = 0; i < prefixes.Length; i++)
@@ -84,6 +97,17 @@ namespace Microsoft.IdentityModel.Tokens.Xml
         }
 
         /// <summary>
+        /// Transforms a XmlTokenStream
+        /// </summary>
+        /// <param name="tokenStream"> <see cref="XmlTokenStream"/> to process.</param>
+        /// <returns><see cref="XmlTokenStream"/>.</returns>
+        /// <remarks>throws <see cref="NotSupportedException"/> for this transform. Override if needed to perform transformation.</remarks>
+        public override XmlTokenStream Process( XmlTokenStream tokenStream )
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Applies a canonicalization transform over a set of XML nodes and computes the hash value.
         /// </summary>
         /// <param name="tokenStream">the set of XML nodes to transform.</param>
@@ -99,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
 
             using (var stream = new MemoryStream())
             {
-                WriteCanonicalStream(stream, tokenStream, IncludeComments);
+                WriteCanonicalStream(stream, tokenStream, IncludeComments, _inclusivePrefixList);
                 stream.Flush();
                 return hash.ComputeHash(stream.ToArray());
             }
@@ -111,9 +135,10 @@ namespace Microsoft.IdentityModel.Tokens.Xml
         /// <param name="stream"><see cref="Stream"/>that will receive the canonicalized XML.</param>
         /// <param name="tokenStream"><see cref="XmlReader"/>that is positioned at the XML to canonicalized.</param>
         /// <param name="includeComments">controls if comments are included in the canonicalized XML.</param>
+        /// <param name="inclusivePrefixList">inclusive prefix list to use when canonicalizing.</param>
         /// <exception cref="ArgumentNullException">if 'stream' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
-        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments)
+        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments, string inclusivePrefixList)
         {
             if (stream == null)
                 throw LogArgumentNullException(nameof(stream));
@@ -123,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
 
             using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
             {
-                writer.StartCanonicalization(stream, includeComments, null);
+                writer.StartCanonicalization(stream, includeComments, TokenizeInclusivePrefixList(inclusivePrefixList));
                 tokenStream.WriteTo(writer);
                 writer.EndCanonicalization();
                 writer.Flush();

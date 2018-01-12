@@ -262,8 +262,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         [Theory, MemberData(nameof(ReadSignedInfoTheoryData))]
         public void ReadSignedInfo(DSigSerializerTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
-            var context = new CompareContext($"{this}.SignedInfoReadFrom, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
             try
             {
                 var signedInfo = theoryData.Serializer.ReadSignedInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
@@ -283,7 +282,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             get
             {
                 // uncomment to view exception displayed to user
-                 ExpectedException.DefaultVerbose = true;
+                ExpectedException.DefaultVerbose = true;
 
                 return new TheoryData<DSigSerializerTheoryData>
                 {
@@ -304,7 +303,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     SignedInfoTest(SignedInfoTestSet.UnknownReferenceTransform),
                     SignedInfoTest(SignedInfoTestSet.Valid),
                     SignedInfoTest(SignedInfoTestSet.SignedInfoEmpty,
-                    new ExpectedException(typeof(XmlReadException), "IDX30022:"))
+                        new ExpectedException(typeof(XmlReadException), "IDX30022:"))
                 };
             }
         }

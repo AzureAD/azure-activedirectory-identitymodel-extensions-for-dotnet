@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
     /// <summary>
     /// Defines a XML transform that removes the XML nodes associated with the Signature.
     /// </summary>
-    public sealed class EnvelopedSignatureTransform : Transform
+    public class EnvelopedSignatureTransform : Transform
     {
         /// <summary>
         /// Creates an EnvelopedSignatureTransform
