@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Xml
             public const string Id = "Id";
             public const string NcName = "NCName";
             public const string Nil = "nil";
+            public const string PrefixList = "PrefixList";
             public const string Type = "Type";
             public const string URI = "URI";
         }
@@ -68,6 +69,7 @@ namespace Microsoft.IdentityModel.Xml
             public const string KeyValue = "KeyValue";
             public const string Modulus = "Modulus";
             public const string Object = "Object";
+            public const string InclusiveNamespaces = "InclusiveNamespaces";
             public const string Reference = "Reference";
             public const string RetrievalMethod = "RetrievalMethod";
             public const string RSAKeyValue = "RSAKeyValue";
