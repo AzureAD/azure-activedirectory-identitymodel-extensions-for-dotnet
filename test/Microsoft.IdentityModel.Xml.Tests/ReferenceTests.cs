@@ -31,7 +31,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Xml;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Xml;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             var type = typeof(Reference);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 8, $"Number of properties has changed from 8 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 10, $"Number of properties has changed from 10 to: {properties.Length}, adjust tests");
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     new KeyValuePair<string, List<object>>("Prefix", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("DigestMethod", new List<object>{null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("DigestValue", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("TransformFactory", new List<object>{TransformFactory.Default}),
                     new KeyValuePair<string, List<object>>("TokenStream", new List<object>{(XmlTokenStream)null, new XmlTokenStream(), new XmlTokenStream()}),
                     new KeyValuePair<string, List<object>>("Type", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("Uri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),

@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -42,18 +43,33 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         {
             var type = typeof(ExclusiveCanonicalizationTransform);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 1, $"Number of properties has changed from 1 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 2, $"Number of properties has changed from 2 to: {properties.Length}, adjust tests");
 
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
                     new KeyValuePair<string, List<object>>("IncludeComments", new List<object>{false, true}),
+                    new KeyValuePair<string, List<object>>("Algorithm", new List<object>{SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments, SecurityAlgorithms.ExclusiveC14n })
                 },
                 Object = new ExclusiveCanonicalizationTransform(false),
             };
 
             TestUtilities.GetSet(context);
+
+            context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("IncludeComments", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("Algorithm", new List<object>{SecurityAlgorithms.ExclusiveC14nWithComments, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments }),
+
+                },
+                Object = new ExclusiveCanonicalizationTransform(true),
+            };
+
+            TestUtilities.GetSet(context);
+
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 

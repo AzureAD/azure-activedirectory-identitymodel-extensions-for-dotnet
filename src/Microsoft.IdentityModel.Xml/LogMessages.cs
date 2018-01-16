@@ -36,6 +36,14 @@ namespace Microsoft.IdentityModel.Xml
     internal static class LogMessages
     {
 #pragma warning disable 1591
+
+        internal const string IDX14023 = "IDX14023: Unsupported NodeType: {0}.";
+        internal const string IDX14210 = "IDX14210: The TransformFactory does not support the transform: '{0}'.";
+        internal const string IDX14211 = "IDX14211: The TransfromFactory does not support the canonicalizing transform: '{0}'.";
+        internal const string IDX14102 = "IDX14102: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
+        internal const string IDX14208 = "IDX14208: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
+        internal const string IDX14209 = "IDX14209: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
+
         // XML reading
         internal const string IDX30011 = "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
         internal const string IDX30013 = "IDX30013: Unable to read XML. While reading element '{0}', Required attribute was not found : '{1}'.";

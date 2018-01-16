@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -37,6 +38,26 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public static class XmlUtil
     {
+        private static Dictionary<byte, string> _hexDictionary = new Dictionary<byte, string>
+        {
+            { 0, "0" },
+            { 1, "1" },
+            { 2, "2" },
+            { 3, "3" },
+            { 4, "4" },
+            { 5, "5" },
+            { 6, "6" },
+            { 7, "7" },
+            { 8, "8" },
+            { 9, "9" },
+            { 10, "A" },
+            { 11, "B" },
+            { 12, "C" },
+            { 13, "D" },
+            { 14, "E" },
+            { 15, "F" }
+        };
+
         /// <summary>
         /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
         /// </summary>
@@ -134,6 +155,24 @@ namespace Microsoft.IdentityModel.Xml
             return null != qualifiedName
                 && StringComparer.Ordinal.Equals(name, qualifiedName.Name)
                 && StringComparer.Ordinal.Equals(@namespace, qualifiedName.Namespace);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns>Hex representation of bytes</returns>
+        internal static string GenerateHexString(byte[] bytes)
+        {
+            var stringBuilder = new StringBuilder();
+
+            foreach (var b in bytes)
+            {
+                stringBuilder.Append(_hexDictionary[(byte)(b >> 4)]);
+                stringBuilder.Append(_hexDictionary[(byte)(b & (byte)0x0F)]);
+            }
+
+            return stringBuilder.ToString();
         }
 
         /// <summary>

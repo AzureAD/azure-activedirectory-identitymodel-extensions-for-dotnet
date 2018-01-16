@@ -30,9 +30,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Represents Canonicalization algorithms found in &lt;SignedInfo> and in &lt;Reference>.
@@ -40,6 +41,14 @@ namespace Microsoft.IdentityModel.Tokens.Xml
     public class ExclusiveCanonicalizationTransform : CanonicalizingTransfrom
     {
         private string _inclusivePrefixList;
+
+        /// <summary>
+        /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
+        /// </summary>
+        public ExclusiveCanonicalizationTransform() :
+            this(false, null)
+        {
+        }
 
         /// <summary>
         /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
@@ -61,7 +70,12 @@ namespace Microsoft.IdentityModel.Tokens.Xml
             IncludeComments = includeComments;
         }
 
-        static string[] TokenizeInclusivePrefixList(string prefixList)
+        /// <summary>
+        /// Gets the Algorithm associated with this transform
+        /// </summary>
+        public override string Algorithm { get => IncludeComments ? SecurityAlgorithms.ExclusiveC14nWithComments : SecurityAlgorithms.ExclusiveC14n; }
+
+        private static string[] TokenizeInclusivePrefixList(string prefixList)
         {
             if (prefixList == null)
                 return null;
@@ -104,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml
         /// <remarks>throws <see cref="NotSupportedException"/> for this transform. Override if needed to perform transformation.</remarks>
         public override XmlTokenStream Process( XmlTokenStream tokenStream )
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -127,6 +141,25 @@ namespace Microsoft.IdentityModel.Tokens.Xml
                 stream.Flush();
                 return hash.ComputeHash(stream.ToArray());
             }
+        }
+
+        /// <summary>
+        /// Writes the Canonicalized XML into the stream.
+        /// </summary>
+        /// <param name="stream"><see cref="Stream"/>that will receive the canonicalized XML.</param>
+        /// <param name="tokenStream"><see cref="XmlReader"/>that is positioned at the XML to canonicalized.</param>
+        /// <param name="includeComments">controls if comments are included in the canonicalized XML.</param>
+        /// <exception cref="ArgumentNullException">if 'stream' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
+        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments)
+        {
+            if (stream == null)
+                throw LogArgumentNullException(nameof(stream));
+
+            if (tokenStream == null)
+                throw LogArgumentNullException(nameof(tokenStream));
+
+            WriteCanonicalStream(stream, tokenStream, includeComments, null);
         }
 
         /// <summary>

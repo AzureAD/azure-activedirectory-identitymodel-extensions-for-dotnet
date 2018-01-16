@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     internal class XmlTokenStreamWriter
     {

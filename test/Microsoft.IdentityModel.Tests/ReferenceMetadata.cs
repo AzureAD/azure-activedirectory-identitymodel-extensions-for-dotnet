@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Xml;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tests
@@ -105,9 +104,9 @@ namespace Microsoft.IdentityModel.Tests
 
         public static string AADCommonMetadataSignatureValue { get => "KD9uWOD/9pvF1NlNCpYoXymUPS1l9uIBgBDe0uOQgQv+tUI/1jJX4UpjADDHCOx6HCl5ZgZSXNmOC2lLSJEwmv21BZzI+PAOxF5hdH99cS/lMC/hxgyWdLVeGnr1I4WbPxGqVmjFNuBdBMaourO4z/5f3D2JZQmgnlu8H+4gv2SpjeZz/YhIN6ZrNfmHwsKZashMGtSmE5uHro+uO5yO17Gr9YfUbtokLRIq5Dk9kqnxG8YZF1C1nC9O0PMdlHb4ubwgO20Cvz5sU2iswn9m68btS5TLF5OVhETzyKir1QA+H1tCgGRqIWd4Geyoucdct1r4zAJGCNIekdKnY3NXwg=="; }
 
-        public static string AADCommonMetadataReferenceC14nTransform { get => "http://www.w3.org/2001/10/xml-exc-c14n#"; }
+        public static CanonicalizingTransfrom AADCommonMetadataReferenceC14nTransform { get => new ExclusiveCanonicalizationTransform(); }
 
-        public static string AADCommonMetadataReferenceEnvelopedTransform { get => "http://www.w3.org/2000/09/xmldsig#enveloped-signature"; }
+        public static EnvelopedSignatureTransform AADCommonMetadataReferenceEnvelopedTransform { get => new EnvelopedSignatureTransform(); }
 
         public static string AADCommonMetadataReferenceDigestMethod { get => "http://www.w3.org/2001/04/xmlenc#sha256"; }
 
@@ -352,11 +351,13 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var reference = new Reference();
-                reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
-                reference.DigestValue = AADCommonMetadataReferenceDigestValue;
+                var reference = new Reference
+                {
+                    DigestMethod = AADCommonMetadataReferenceDigestMethod,
+                    DigestValue = AADCommonMetadataReferenceDigestValue
+                };
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AADCommonMetadataReferenceURI;
                 return reference;
@@ -382,7 +383,7 @@ namespace Microsoft.IdentityModel.Tests
                 reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
                 reference.DigestValue = AdfsV2ReferenceDigestValue;
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AdfsV2ReferenceURI;
                 return reference;
@@ -408,7 +409,7 @@ namespace Microsoft.IdentityModel.Tests
                 reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
                 reference.DigestValue = AdfsV3ReferenceDigestValue;
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AdfsV3ReferenceURI;
                 return reference;
@@ -434,7 +435,7 @@ namespace Microsoft.IdentityModel.Tests
                 reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
                 reference.DigestValue = AdfsV4ReferenceDigestValue;
                 reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.Transforms.Add(AADCommonMetadataReferenceC14nTransform);
+                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
                 reference.TokenStream = new XmlTokenStream();
                 reference.Uri = AdfsV4ReferenceURI;
                 return reference;

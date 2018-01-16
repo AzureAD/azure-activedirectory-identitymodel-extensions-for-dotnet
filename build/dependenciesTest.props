@@ -3,7 +3,7 @@
     <CoreFxVersion>4.3.0-*</CoreFxVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
     <MicrosoftNETTestSdkVersion>15.5.0</MicrosoftNETTestSdkVersion>
-    <XunitVersion>2.3.0</XunitVersion>
+    <XunitVersion>2.3.1</XunitVersion>
     <NetStandardVersion>1.6.1</NetStandardVersion>
   </PropertyGroup>
 </Project>

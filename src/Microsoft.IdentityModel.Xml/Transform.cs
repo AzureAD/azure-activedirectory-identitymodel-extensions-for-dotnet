@@ -25,51 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Xml;
-
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
-    internal class XmlTokenEntry
+    /// <summary>
+    /// Defines a XMLTransform
+    /// </summary>
+    public abstract class Transform
     {
-        internal XmlNodeType NodeType;
-        internal string _prefix;
-        internal string _localName;
-        internal string _namespace;
-        private string _value;
+        /// <summary>
+        /// Called to transform a <see cref="XmlTokenStream"/>
+        /// </summary>
+        /// <param name="tokenStream">the <see cref="XmlTokenStream"/> to process.</param>
+        /// <returns></returns>
+        public abstract XmlTokenStream Process(XmlTokenStream tokenStream);
 
-        public bool IsEmptyElement
-        {
-            get { return _value == null; }
-            set { _value = value ? null : ""; }
-        }
-
-        public string Value
-        {
-            get; private set;
-        }
-
-        public XmlTokenEntry(XmlNodeType nodeType, string value)
-        {
-            NodeType = nodeType;
-            Value = value;
-        }
-
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
-        {
-            NodeType = nodeType;
-            _prefix = prefix;
-            _localName = localName;
-            _namespace = @namespace;
-            Value = value;
-        }
-
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
-        {
-            NodeType = nodeType;
-            _prefix = prefix;
-            _localName = localName;
-            _namespace = @namespace;
-            IsEmptyElement = isEmptyElement;
-        }
+        /// <summary>
+        /// Gets the algorithm
+        /// </summary>
+        public abstract string Algorithm { get; }
     }
 }

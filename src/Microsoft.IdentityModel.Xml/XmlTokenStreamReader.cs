@@ -29,7 +29,7 @@ using System;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// An XmlReader that captures xml as a XmlTokenStream

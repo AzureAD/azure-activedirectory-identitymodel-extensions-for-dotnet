@@ -29,7 +29,7 @@ using System;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Wraps a <see cref="XmlDictionaryWriter"/> and delegates to InnerWriter.

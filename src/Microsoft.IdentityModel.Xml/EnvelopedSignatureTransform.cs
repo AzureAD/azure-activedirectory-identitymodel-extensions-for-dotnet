@@ -25,52 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Utilities for working with XML
+    /// Defines a XML transform that removes the XML nodes associated with the Signature.
     /// </summary>
-    internal static class XmlUtil
+    public class EnvelopedSignatureTransform : Transform
     {
-        private static Dictionary<byte, string> _hexDictionary = new Dictionary<byte, string>
+        /// <summary>
+        /// Creates an EnvelopedSignatureTransform
+        /// </summary>
+        public EnvelopedSignatureTransform()
         {
-            { 0, "0" },
-            { 1, "1" },
-            { 2, "2" },
-            { 3, "3" },
-            { 4, "4" },
-            { 5, "5" },
-            { 6, "6" },
-            { 7, "7" },
-            { 8, "8" },
-            { 9, "9" },
-            { 10, "A" },
-            { 11, "B" },
-            { 12, "C" },
-            { 13, "D" },
-            { 14, "E" },
-            { 15, "F" }
-        };
+        }
 
         /// <summary>
-        /// 
+        /// Gets the Algorithm associated with this transform
         /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns>Hex representation of bytes</returns>
-        internal static string GenerateHexString(byte[] bytes)
+        public override string Algorithm { get => SecurityAlgorithms.EnvelopedSignature; }
+
+        /// <summary>
+        /// Sets the reader to exclude the &lt;Signature> element
+        /// </summary>
+        /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
+        /// <returns><see cref="XmlTokenStream"/>with exclusion set.</returns>
+        public override XmlTokenStream Process(XmlTokenStream tokenStream)
         {
-            var stringBuilder = new StringBuilder();
+            if (tokenStream == null)
+                throw LogArgumentNullException(nameof(tokenStream));
 
-            foreach (var b in bytes)
-            {
-                stringBuilder.Append(_hexDictionary[(byte)(b >> 4)]);
-                stringBuilder.Append(_hexDictionary[(byte)(b & (byte)0x0F)]);
-            }
-
-            return stringBuilder.ToString();
+            tokenStream.SetElementExclusion(XmlSignatureConstants.Elements.Signature, "http://www.w3.org/2000/09/xmldsig#");
+            return tokenStream;
         }
     }
 }

@@ -30,7 +30,6 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -110,12 +109,15 @@ namespace Microsoft.IdentityModel.Xml
         private Signature CreateSignature()
         {
             var hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
-            var reference = new Reference(new string[] {SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n})
+            var reference = new Reference//new string[] {SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n})
             {
                 Id = _referenceId,
                 DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
                 DigestMethod = _signingCredentials.Digest
             };
+
+            reference.Transforms.Add(new EnvelopedSignatureTransform());
+            reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(false);
 
             var signedInfo = new SignedInfo(reference)
             {

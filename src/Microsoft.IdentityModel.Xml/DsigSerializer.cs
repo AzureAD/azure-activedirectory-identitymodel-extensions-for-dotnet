@@ -43,6 +43,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private static DSigSerializer _default;
         private string _preferredPrefix = XmlSignatureConstants.PreferredPrefix;
+        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Returns the default <see cref="DSigSerializer"/> instance.
@@ -407,14 +408,17 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-                var prefix = reader.Prefix;
-                var id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
-                var uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null);
-                var type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null);
+
+                var reference = new Reference
+                {
+                    Prefix = reader.Prefix,
+                    Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null),
+                    Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null),
+                    Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null)
+                };
 
                 reader.Read();
-
-                var transforms = ReadTransforms(reader);
+                AddTransforms(reader, reference);
 
                 // <DigestMethod> - required
                 XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
@@ -422,6 +426,8 @@ namespace Microsoft.IdentityModel.Xml
                 var digestMethod = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 if (string.IsNullOrEmpty(digestMethod))
                     throw XmlUtil.OnRequiredAttributeMissing(XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Attributes.Algorithm);
+
+                reference.DigestMethod = digestMethod;
 
                 reader.Read();
                 reader.MoveToContent();
@@ -432,21 +438,15 @@ namespace Microsoft.IdentityModel.Xml
                 XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace);
                 var digestValue = reader.ReadElementContentAsString().Trim();
                 if (string.IsNullOrEmpty(digestValue))
-                    throw XmlUtil.LogReadException(LogMessages.IDX30206, id);
+                    throw XmlUtil.LogReadException(LogMessages.IDX30206, reference.Uri ?? reference.Id);
+
+                reference.DigestValue = digestValue;
 
                 // </Reference>
                 reader.MoveToContent();
                 reader.ReadEndElement();
 
-                return new Reference(transforms)
-                {
-                    DigestMethod = digestMethod,
-                    DigestValue = digestValue,
-                    Id = id,
-                    Prefix = prefix,
-                    Type = type,
-                    Uri = uri
-                };
+                return reference;
             }
             catch(Exception ex)
             {
@@ -456,6 +456,74 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Reference);
             }
         }
+
+        /// <summary>
+        /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Transforms
+        /// </summary>
+        /// <param name="reader">a <see cref="XmlReader"/>positioned on a &lt;Transforms> element.</param>
+        /// <param name="reference">a <see cref="Reference"/> to attach references.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
+        /// <returns>a <see cref="IList{T}"/> with the transform names.</returns>
+        public void AddTransforms(XmlReader reader, Reference reference)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            if (reference == null)
+                throw LogArgumentNullException(nameof(reference));
+
+            try
+            {
+                // <Transforms> - optional
+                if (!reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
+                    return;
+
+                if (reader.IsEmptyElement)
+                {
+                    reader.Read();
+                    return;
+                }
+
+                reader.Read();
+                XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
+                {
+                    var isEmptyElement = reader.IsEmptyElement;
+                    var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    if (string.IsNullOrEmpty(algorithm))
+                        throw XmlUtil.LogReadException(LogMessages.IDX30105);
+
+                    if (TransformFactory.IsSupportedTransform(algorithm))
+                        reference.Transforms.Add(TransformFactory.GetTransform(algorithm));
+                    // TODO - extra parameters
+                    else if (TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm))
+                        reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
+                    else
+                        throw XmlUtil.LogReadException(LogMessages.IDX14210, algorithm);
+
+                    reader.Read();
+                    reader.MoveToContent();
+                    if (!isEmptyElement)
+                    {
+                        reader.MoveToContent();
+                        reader.ReadEndElement();
+                    }
+                }
+
+                // </ Transforms>
+                reader.MoveToContent();
+                reader.ReadEndElement();
+            }
+            catch (Exception ex)
+            {
+                if (ex is XmlReadException)
+                    throw;
+
+                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transforms);
+            }
+        }
+
 
         /// <summary>
         /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Transforms
@@ -522,6 +590,10 @@ namespace Microsoft.IdentityModel.Xml
                 var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
                 if (string.IsNullOrEmpty(algorithm))
                     throw XmlUtil.LogReadException(LogMessages.IDX30105);
+
+                if (TransformFactory.IsSupportedTransform(algorithm))
+
+                TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm);
 
                 reader.Read();
                 reader.MoveToContent();
@@ -775,19 +847,33 @@ namespace Microsoft.IdentityModel.Xml
             // <Transform>
             foreach (var transform in reference.Transforms)
             {
-                if (string.IsNullOrEmpty(transform))
+                if (transform == null)
                     throw XmlUtil.LogWriteException(LogMessages.IDX30403);
 
                 // <Transform>
                 writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
 
                 // @Algorithm
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, transform);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, transform.Algorithm);
 
                 // </Transform>
                 writer.WriteEndElement();
             }
             
+            // Write Canonicalizing transform
+            if (reference.CanonicalizingTransfrom != null)
+            {
+                // <Transform>
+                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+
+                // @Algorithm
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, reference.CanonicalizingTransfrom.Algorithm);
+
+                // </Transform>
+                writer.WriteEndElement();
+
+            }
+
             // </Transforms>
             writer.WriteEndElement();
 
@@ -919,6 +1005,15 @@ namespace Microsoft.IdentityModel.Xml
 
             // </SignedInfo>
             writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="TransformFactory"/> to use when processing transforms in References
+        /// </summary>
+        public TransformFactory TransformFactory
+        {
+            get => _transformFactory;
+            set => _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
         }
     }
 }

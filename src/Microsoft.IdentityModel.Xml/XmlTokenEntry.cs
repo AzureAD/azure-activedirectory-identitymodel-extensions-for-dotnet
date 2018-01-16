@@ -25,34 +25,51 @@
 //
 //------------------------------------------------------------------------------
 
-using static Microsoft.IdentityModel.Logging.LogHelper;
+using System.Xml;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
-    /// <summary>
-    /// Defines a XML transform that removes the XML nodes associated with the Signature.
-    /// </summary>
-    public class EnvelopedSignatureTransform : Transform
+    internal class XmlTokenEntry
     {
-        /// <summary>
-        /// Creates an EnvelopedSignatureTransform
-        /// </summary>
-        public EnvelopedSignatureTransform()
+        internal XmlNodeType NodeType;
+        internal string _prefix;
+        internal string _localName;
+        internal string _namespace;
+        private string _value;
+
+        public bool IsEmptyElement
         {
+            get { return _value == null; }
+            set { _value = value ? null : ""; }
         }
 
-        /// <summary>
-        /// Sets the reader to exclude the &lt;Signature> element
-        /// </summary>
-        /// <param name="tokenStream"><see cref="XmlTokenStream"/>to process.</param>
-        /// <returns><see cref="XmlTokenStream"/>with exclusion set.</returns>
-        public override XmlTokenStream Process(XmlTokenStream tokenStream)
+        public string Value
         {
-            if (tokenStream == null)
-                throw LogArgumentNullException(nameof(tokenStream));
+            get; private set;
+        }
 
-            tokenStream.SetElementExclusion("Signature", "http://www.w3.org/2000/09/xmldsig#");
-            return tokenStream;
+        public XmlTokenEntry(XmlNodeType nodeType, string value)
+        {
+            NodeType = nodeType;
+            Value = value;
+        }
+
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
+        {
+            NodeType = nodeType;
+            _prefix = prefix;
+            _localName = localName;
+            _namespace = @namespace;
+            Value = value;
+        }
+
+        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
+        {
+            NodeType = nodeType;
+            _prefix = prefix;
+            _localName = localName;
+            _namespace = @namespace;
+            IsEmptyElement = isEmptyElement;
         }
     }
 }

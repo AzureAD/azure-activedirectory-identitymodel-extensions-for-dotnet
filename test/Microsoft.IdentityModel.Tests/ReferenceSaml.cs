@@ -50,8 +50,8 @@ namespace Microsoft.IdentityModel.Tests
                     Uri = "#091a00cc-4361-4303-9f1a-d4be45b2b84c"
                 };
 
-                reference.Transforms.Add("http://www.w3.org/2000/09/xmldsig#enveloped-signature");
-                reference.Transforms.Add("http://www.w3.org/2001/10/xml-exc-c14n#");
+                reference.Transforms.Add(new EnvelopedSignatureTransform());
+                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
 
                 var signature = new Signature
                 {

@@ -27,7 +27,7 @@
 
 using System.Security.Cryptography;
 
-namespace Microsoft.IdentityModel.Tokens.Xml
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.

@@ -974,8 +974,8 @@ namespace Microsoft.IdentityModel.Tests
                 var reference = Default.ReferenceWithNullTokenStream;
                 var unknownTransform = "_http://www.w3.org/2000/09/xmldsig#enveloped-signature";
                 reference.Transforms.Clear();
-                reference.Transforms.Add(unknownTransform);
-                reference.Transforms.Add(SecurityAlgorithms.ExclusiveC14n);
+                reference.Transforms.Add(new EnvelopedSignatureTransform());
+                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
                 signedInfo.References.Clear();
                 signedInfo.References.Add(reference);
                 return new SignedInfoTestSet

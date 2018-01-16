@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Xml.XmlUtil;
 
@@ -42,9 +42,11 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class Reference : DSigElement
     {
+        private CanonicalizingTransfrom _canonicalizingTransfrom;
         private string _digestMethod;
         private string _digestValue;
         private XmlTokenStream _tokenStream;
+        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Initializes an instance of <see cref="Reference"/>
@@ -55,14 +57,32 @@ namespace Microsoft.IdentityModel.Xml
 
         /// <summary>
         /// Initializes an instance of <see cref="Reference"/>.
-        /// </summary>
+        /// Gets or sets the CanonicalizingTransform
+         /// </summary>
         /// <param name="transforms">an <see cref="IEnumerable{T}"/> of transforms to apply.</param>
         public Reference(IEnumerable<string> transforms)
         {
             if (transforms == null)
                 throw LogArgumentNullException(nameof(transforms));
 
-            Transforms = new List<string>(transforms);
+            foreach (var transform in transforms)
+            {
+                if (TransformFactory.IsSupportedTransform(transform))
+                    Transforms.Add(TransformFactory.GetTransform(transform));
+                else if (TransformFactory.IsSupportedCanonicalizingTransfrom(transform))
+                    CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(transform);
+                else
+                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX14210, transform)));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the CanonicalizingTransform
+        /// </summary>
+        public CanonicalizingTransfrom CanonicalizingTransfrom
+        {
+            get => _canonicalizingTransfrom;
+            set => _canonicalizingTransfrom = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -96,12 +116,22 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
+        /// Gets or set the <see cref="TransformFactory"/> to use when processing references.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        public TransformFactory TransformFactory
+        {
+            get => _transformFactory;
+            set => _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
         /// Gets the <see cref="IList{T}"/> of transforms to apply.
         /// </summary>
-        public IList<string> Transforms
+        public IList<Transform> Transforms
         {
             get;
-        } = new List<string>();
+        } = new List<Transform>();
 
         /// <summary>
         /// Gets or sets the Type of this Reference.
@@ -190,18 +220,10 @@ namespace Microsoft.IdentityModel.Xml
 
                 // specification requires last transform to be a canonicalizing transform
                 // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
-                for (int i = 0;  i < Transforms.Count-1; i++)
-                {
-                    if (!TransformFactory.Default.IsSupportedTransform(Transforms[i]))
-                        throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30210, Transforms[i])));
+                for (int i = 0;  i < Transforms.Count; i++)
+                    TokenStream = Transforms[i].Process(TokenStream);
 
-                    TokenStream = TransformFactory.Default.GetTransform(Transforms[i]).Process(TokenStream);
-                }
-
-                if (!TransformFactory.Default.IsSupportedCanonicalizingTransfrom(Transforms[Transforms.Count - 1]))
-                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30210, Transforms[Transforms.Count - 1])));
-
-                return TransformFactory.Default.GetCanonicalizingTransform(Transforms[Transforms.Count - 1]).ProcessAndDigest(TokenStream, hashAlg);
+                return CanonicalizingTransfrom.ProcessAndDigest(TokenStream, hashAlg);
             }
             finally
             {
