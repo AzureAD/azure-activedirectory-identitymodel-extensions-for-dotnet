@@ -40,13 +40,11 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class ExclusiveCanonicalizationTransform : CanonicalizingTransfrom
     {
-        private string _inclusivePrefixList;
-
         /// <summary>
         /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
         /// </summary>
         public ExclusiveCanonicalizationTransform() :
-            this(false, null)
+            this(false)
         {
         }
 
@@ -54,19 +52,8 @@ namespace Microsoft.IdentityModel.Xml
         /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
         /// </summary>
         /// <param name="includeComments">controls if the transform will include comments.</param>
-        public ExclusiveCanonicalizationTransform(bool includeComments):
-            this(includeComments, null)
+        public ExclusiveCanonicalizationTransform(bool includeComments)
         {
-        }
-
-        /// <summary>
-        /// Initializes an instance of <see cref="ExclusiveCanonicalizationTransform"/>.
-        /// </summary>
-        /// <param name="includeComments">controls if the transform will include comments.</param>
-        /// <param name="inclusivePrefixList">list of inclusive prefixes.</param>
-        public ExclusiveCanonicalizationTransform(bool includeComments, string inclusivePrefixList)
-        {
-            _inclusivePrefixList = inclusivePrefixList;
             IncludeComments = includeComments;
         }
 
@@ -111,17 +98,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Transforms a XmlTokenStream
-        /// </summary>
-        /// <param name="tokenStream"> <see cref="XmlTokenStream"/> to process.</param>
-        /// <returns><see cref="XmlTokenStream"/>.</returns>
-        /// <remarks>throws <see cref="NotSupportedException"/> for this transform. Override if needed to perform transformation.</remarks>
-        public override XmlTokenStream Process( XmlTokenStream tokenStream )
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
         /// Applies a canonicalization transform over a set of XML nodes and computes the hash value.
         /// </summary>
         /// <param name="tokenStream">the set of XML nodes to transform.</param>
@@ -137,54 +113,15 @@ namespace Microsoft.IdentityModel.Xml
 
             using (var stream = new MemoryStream())
             {
-                WriteCanonicalStream(stream, tokenStream, IncludeComments, _inclusivePrefixList);
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
+                {
+                    writer.StartCanonicalization(stream, IncludeComments, TokenizeInclusivePrefixList(InclusivePrefixList));
+                    tokenStream.WriteTo(writer);
+                    writer.EndCanonicalization();
+                    writer.Flush();
+                }
                 stream.Flush();
                 return hash.ComputeHash(stream.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Writes the Canonicalized XML into the stream.
-        /// </summary>
-        /// <param name="stream"><see cref="Stream"/>that will receive the canonicalized XML.</param>
-        /// <param name="tokenStream"><see cref="XmlReader"/>that is positioned at the XML to canonicalized.</param>
-        /// <param name="includeComments">controls if comments are included in the canonicalized XML.</param>
-        /// <exception cref="ArgumentNullException">if 'stream' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
-        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments)
-        {
-            if (stream == null)
-                throw LogArgumentNullException(nameof(stream));
-
-            if (tokenStream == null)
-                throw LogArgumentNullException(nameof(tokenStream));
-
-            WriteCanonicalStream(stream, tokenStream, includeComments, null);
-        }
-
-        /// <summary>
-        /// Writes the Canonicalized XML into the stream.
-        /// </summary>
-        /// <param name="stream"><see cref="Stream"/>that will receive the canonicalized XML.</param>
-        /// <param name="tokenStream"><see cref="XmlReader"/>that is positioned at the XML to canonicalized.</param>
-        /// <param name="includeComments">controls if comments are included in the canonicalized XML.</param>
-        /// <param name="inclusivePrefixList">inclusive prefix list to use when canonicalizing.</param>
-        /// <exception cref="ArgumentNullException">if 'stream' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'reader' is null.</exception>
-        public static void WriteCanonicalStream(Stream stream, XmlTokenStream tokenStream, bool includeComments, string inclusivePrefixList)
-        {
-            if (stream == null)
-                throw LogArgumentNullException(nameof(stream));
-
-            if (tokenStream == null)
-                throw LogArgumentNullException(nameof(tokenStream));
-
-            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
-            {
-                writer.StartCanonicalization(stream, includeComments, TokenizeInclusivePrefixList(inclusivePrefixList));
-                tokenStream.WriteTo(writer);
-                writer.EndCanonicalization();
-                writer.Flush();
             }
         }
     }

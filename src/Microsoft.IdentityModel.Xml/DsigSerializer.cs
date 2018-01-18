@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.Xml
                 };
 
                 reader.Read();
-                AddTransforms(reader, reference);
+                ReadTransforms(reader, reference);
 
                 // <DigestMethod> - required
                 XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
@@ -461,11 +461,11 @@ namespace Microsoft.IdentityModel.Xml
         /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Transforms
         /// </summary>
         /// <param name="reader">a <see cref="XmlReader"/>positioned on a &lt;Transforms> element.</param>
-        /// <param name="reference">a <see cref="Reference"/> to attach references.</param>
+        /// <param name="reference">a <see cref="Reference"/> to attach transforms.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="reference"/> is null.</exception>
         /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
-        /// <returns>a <see cref="IList{T}"/> with the transform names.</returns>
-        public void AddTransforms(XmlReader reader, Reference reference)
+        public void ReadTransforms(XmlReader reader, Reference reference)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
@@ -486,11 +486,12 @@ namespace Microsoft.IdentityModel.Xml
                 }
 
                 reader.Read();
-                XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+
+                // <Transform> - unbounded
                 while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
                 {
                     var isEmptyElement = reader.IsEmptyElement;
-                    var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
+                    var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm);
                     if (string.IsNullOrEmpty(algorithm))
                         throw XmlUtil.LogReadException(LogMessages.IDX30105);
 
@@ -498,17 +499,21 @@ namespace Microsoft.IdentityModel.Xml
                         reference.Transforms.Add(TransformFactory.GetTransform(algorithm));
                     // TODO - extra parameters
                     else if (TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm))
+                    {
                         reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
+                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace))
+                        {
+                            reader.ReadStartElement();
+                            reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
+                        }
+                    }
                     else
                         throw XmlUtil.LogReadException(LogMessages.IDX14210, algorithm);
 
                     reader.Read();
                     reader.MoveToContent();
                     if (!isEmptyElement)
-                    {
-                        reader.MoveToContent();
                         reader.ReadEndElement();
-                    }
                 }
 
                 // </ Transforms>
@@ -521,99 +526,6 @@ namespace Microsoft.IdentityModel.Xml
                     throw;
 
                 throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transforms);
-            }
-        }
-
-
-        /// <summary>
-        /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Transforms
-        /// </summary>
-        /// <param name="reader">a <see cref="XmlReader"/>positioned on a &lt;Transforms> element.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
-        /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
-        /// <returns>a <see cref="IList{T}"/> with the transform names.</returns>
-        public IList<string> ReadTransforms(XmlReader reader)
-        {
-            if (reader == null)
-                throw LogArgumentNullException(nameof(reader));
-
-            try
-            {
-                var transforms = new List<string>();
-
-                // <Transforms> - optional
-                if (!reader.IsStartElement(XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace))
-                    return transforms;
-
-                if (reader.IsEmptyElement)
-                {
-                    reader.Read();
-                    return transforms;
-                }
-
-                reader.Read();
-                XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
-                while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
-                {
-                    transforms.Add(ReadTransform(reader));
-                }
-
-                // </ Transforms>
-                reader.MoveToContent();
-                reader.ReadEndElement();
-
-                return transforms;
-            }
-            catch(Exception ex)
-            {
-                if (ex is XmlReadException)
-                    throw;
-
-                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transforms);
-            }
-        }
-
-        /// <summary>
-        /// Reads XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-Transforms
-        /// </summary>
-        /// <param name="reader">a <see cref="XmlReader"/>positioned on a &lt;Transforms> element.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
-        /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
-        /// <returns>A string with the type of transform.</returns>
-        public virtual string ReadTransform(XmlReader reader)
-        {
-            XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.Transform);
-
-            try
-            {
-                var isEmptyElement = reader.IsEmptyElement;
-                var algorithm = reader.GetAttribute(XmlSignatureConstants.Attributes.Algorithm, null);
-                if (string.IsNullOrEmpty(algorithm))
-                    throw XmlUtil.LogReadException(LogMessages.IDX30105);
-
-                if (TransformFactory.IsSupportedTransform(algorithm))
-
-                TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm);
-
-                reader.Read();
-                reader.MoveToContent();
-                if (!isEmptyElement)
-                {
-                    if (reader.IsStartElement(XmlSignatureConstants.ExclusiveC14nInclusiveNamespaces))
-                        throw XmlUtil.LogReadException(LogMessages.IDX30107);
-
-                    reader.MoveToContent();
-                    reader.ReadEndElement();
-                }
-
-                return algorithm;
-            }
-            catch(Exception ex)
-            {
-                if (ex is XmlReadException)
-                    throw;
-
-                throw XmlUtil.LogReadException(LogMessages.IDX30016, ex, XmlSignatureConstants.Elements.Transform);
             }
         }
 

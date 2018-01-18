@@ -32,12 +32,26 @@ namespace Microsoft.IdentityModel.Xml
     /// <summary>
     /// Defines a XML transform that applies C14n canonicalization and produces a hash over the transformed XML nodes.
     /// </summary>
-    public abstract class CanonicalizingTransfrom : Transform
+    public abstract class CanonicalizingTransfrom
     {
+        /// <summary>
+        /// Gets the algorithm
+        /// </summary>
+        public abstract string Algorithm { get; }
+
         /// <summary>
         /// Gets or sets a value indicating if this transform should include comments.
         /// </summary>
         public bool IncludeComments
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the inclusive prefix list
+        /// </summary>
+        public string InclusivePrefixList
         {
             get;
             set;

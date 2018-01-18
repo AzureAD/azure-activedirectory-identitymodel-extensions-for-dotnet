@@ -37,12 +37,14 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes128Encryption = "http://www.w3.org/2001/04/xmlenc#aes128-cbc";
         public const string Aes192Encryption = "http://www.w3.org/2001/04/xmlenc#aes192-cbc";
         public const string Aes256Encryption = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
+        public const string DesEncryption = "http://www.w3.org/2001/04/xmlenc#des-cbc";
 
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-kw-aes
         public const string Aes128KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
         public const string Aes192KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
         public const string Aes256KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes256";
         public const string RsaV15KeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-1_5";
+        public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
 
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP
         public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
