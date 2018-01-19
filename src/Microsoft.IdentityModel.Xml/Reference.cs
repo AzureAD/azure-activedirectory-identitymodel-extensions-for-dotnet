@@ -56,24 +56,17 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="Reference"/>.
-        /// Gets or sets the CanonicalizingTransform
-         /// </summary>
-        /// <param name="transforms">an <see cref="IEnumerable{T}"/> of transforms to apply.</param>
-        public Reference(IEnumerable<string> transforms)
+        /// Initializes an instance of <see cref="Reference"/>
+        /// </summary>
+        /// <param name="transform">the <see cref="Transform"/> to apply</param>
+        /// <param name="canonicalizingTransfrom">the <see cref="CanonicalizingTransfrom"/> to use.</param>
+        public Reference(Transform transform, CanonicalizingTransfrom canonicalizingTransfrom)
         {
-            if (transforms == null)
-                throw LogArgumentNullException(nameof(transforms));
+            if (transform == null)
+                throw LogArgumentNullException(nameof(transform));
 
-            foreach (var transform in transforms)
-            {
-                if (TransformFactory.IsSupportedTransform(transform))
-                    Transforms.Add(TransformFactory.GetTransform(transform));
-                else if (TransformFactory.IsSupportedCanonicalizingTransfrom(transform))
-                    CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(transform);
-                else
-                    throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX14210, transform)));
-            }
+            CanonicalizingTransfrom = canonicalizingTransfrom;
+            Transforms.Add(transform);
         }
 
         /// <summary>

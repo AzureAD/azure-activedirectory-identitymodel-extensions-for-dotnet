@@ -47,15 +47,16 @@ namespace Microsoft.IdentityModel.Xml
         private bool _disposed;
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
-        private string _referenceId;
+        private string _inclusivePrefixList;
         private XmlWriter _originalWriter;
+        private string _referenceId;
         private long _signaturePosition;
         private SigningCredentials _signingCredentials;
         private MemoryStream _writerStream;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
-        /// to write the envelope. The signature will be automatically generated when 
+        /// to write the envelope. The signature will be automatically generated when
         /// the envelope is completed.
         /// </summary>
         /// <param name="writer">Writer to wrap/</param>
@@ -65,15 +66,47 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="referenceId"/> is null or Empty.</exception>
         public EnvelopedSignatureWriter(XmlWriter writer, SigningCredentials signingCredentials, string referenceId)
+            : this(writer, signingCredentials, referenceId, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
+        /// to write the envelope. The signature will be automatically generated when
+        /// the envelope is completed.
+        /// </summary>
+        /// <param name="writer">Writer to wrap/</param>
+        /// <param name="signingCredentials">SigningCredentials to be used to generate the signature.</param>
+        /// <param name="referenceId">The reference Id of the envelope.</param>
+        /// <param name="inclusivePrefixList">inclusive prefix list to use for exclusive canonicalization.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="referenceId"/> is null or Empty.</exception>
+        public EnvelopedSignatureWriter(XmlWriter writer, SigningCredentials signingCredentials, string referenceId, string inclusivePrefixList)
         {
             _originalWriter = writer ?? throw LogArgumentNullException(nameof(writer));
             _signingCredentials = signingCredentials ?? throw LogArgumentNullException(nameof(signingCredentials));
+            if (string.IsNullOrEmpty(referenceId))
+                throw LogArgumentNullException(nameof(referenceId));
+
+            _inclusivePrefixList = inclusivePrefixList;
             _referenceId = referenceId;
             _writerStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
             InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
-            InnerWriter.StartCanonicalization(_canonicalStream, false, null);
+            InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList);
             _signaturePosition = -1;
+        }
+
+
+        /// <summary>
+        /// Gets or sets the <see cref="DSigSerializer"/> to use.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if value is null.</exception>
+        public DSigSerializer DSigSerializer
+        {
+            get => _dsigSerializer;
+            set => _dsigSerializer = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
@@ -91,7 +124,7 @@ namespace Microsoft.IdentityModel.Xml
             var signature = CreateSignature();
             var signatureStream = new MemoryStream();
             var signatureWriter = CreateTextWriter(signatureStream);
-            _dsigSerializer.WriteSignature(signatureWriter, signature);
+            DSigSerializer.WriteSignature(signatureWriter, signature);
             signatureWriter.Flush();
             var signatureBytes = signatureStream.ToArray();
             var writerBytes = _writerStream.ToArray();
@@ -109,15 +142,12 @@ namespace Microsoft.IdentityModel.Xml
         private Signature CreateSignature()
         {
             var hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
-            var reference = new Reference//new string[] {SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n})
+            var reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusivePrefixList = _inclusivePrefixList })
             {
                 Id = _referenceId,
                 DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
                 DigestMethod = _signingCredentials.Digest
             };
-
-            reference.Transforms.Add(new EnvelopedSignatureTransform());
-            reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(false);
 
             var signedInfo = new SignedInfo(reference)
             {
@@ -127,8 +157,8 @@ namespace Microsoft.IdentityModel.Xml
 
             var canonicalSignedInfoStream = new MemoryStream();
             var signedInfoWriter = CreateTextWriter(Stream.Null);
-            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
-            _dsigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
+            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList));
+            DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
             signedInfoWriter.EndCanonicalization();
             signedInfoWriter.Flush();
             var provider = _signingCredentials.Key.CryptoProviderFactory.CreateForSigning(_signingCredentials.Key, signedInfo.SignatureMethod);

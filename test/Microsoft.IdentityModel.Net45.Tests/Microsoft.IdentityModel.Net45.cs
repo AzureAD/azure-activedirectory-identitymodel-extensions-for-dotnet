@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.IdentityModel.Tests;
@@ -48,7 +50,14 @@ namespace Microsoft.IdentityModel.Net45.Tests
             var jwtToken = new JwtSecurityToken(jwt) { SigningKey = Default.AsymmetricSigningKey };
             SecurityToken token = null;
             handler.ValidateToken(jwt, Default.AsymmetricSignTokenValidationParameters, out token);
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                }
+            };
 
             if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken, token as JwtSecurityToken, context))
                 TestUtilities.AssertFailIfErrors("TestJwtTokenCreationAndValidation", context.Diffs);

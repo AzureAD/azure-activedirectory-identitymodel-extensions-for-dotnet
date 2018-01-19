@@ -44,28 +44,29 @@ namespace Microsoft.IdentityModel.Tests
             {
                 var reference = new Reference
                 {
+                    CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(),
                     DigestMethod = "http://www.w3.org/2001/04/xmlenc#sha256",
                     DigestValue = "JaDhvSguu/XZ8jZmh7KmhbOr4deZB4/iL1adETm9oPc=",
+                    Prefix = "",
                     TokenStream = Default.TokenStream,
                     Uri = "#091a00cc-4361-4303-9f1a-d4be45b2b84c"
                 };
 
                 reference.Transforms.Add(new EnvelopedSignatureTransform());
-                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
-
                 var signature = new Signature
                 {
                     KeyInfo = new KeyInfo(KeyingMaterial.AADSigningCert),
                     SignatureValue = "NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==",
                     SignedInfo = new SignedInfo(reference)
+                    {
+                        Prefix = ""
+                    }
                 };
 
-                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
+                return new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditions, null, new Collection<SamlStatement> { SamlAttributeStatement })
                 {
                     Signature = signature
                 };
-
-                return assertion;
             }
         }
 
@@ -81,7 +82,12 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SamlSubject SamlSubject
         {
-            get => new SamlSubject(string.Empty, string.Empty, string.Empty, new string[] { Default.SamlConfirmationMethod }, string.Empty);
+            get
+            {
+                var subject = new SamlSubject();
+                subject.ConfirmationMethods.Add(Default.SamlConfirmationMethod);
+                return subject;
+            }
         }
 
         public static SamlAttributeStatement SamlAttributeStatement
@@ -427,11 +433,35 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var signatureXml = @"<ds:Signature xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/><ds:SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256""/><ds:Reference Id=""_b95759d0-73ae-4072-a140-567ade10a7ad"" URI=""#_b95759d0-73ae-4072-a140-567ade10a7ad""><ds:Transforms><ds:Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature""/><ds:Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/></ds:Transforms><ds:DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><ds:DigestValue>NLCLU+vIJShFuQF8kGFSShWFmYXhj1XDA5vBR+BSHdI=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>QyDvaRhV1EzJE0z0rsJY5nayt5jjLZlxDH4daqPPqnfRG288D0aMx4Q2hd7iAjf0YJPWOjDkjIwkogX+GyPo4EICm3QO4G7N0gNqAy7vG8WtnXCKwSFe/lNXi3TYf3uSLXRUWaNrpCM2LXDx9hti1I7ybNeDS0OnuOAQmiF0sU5cuC0ewOKKOqpBVGPF6QM4wsf9/PFhgxAyWPtr+je3mmXC7BsICZFmHplD3EaS9p6vxZ3Ld8FV5S4VhxB0+soM5b7RhYRgHRcz/nJyycRyqZgG2TqnG3jJMN1rIbLJ1asE26AXWGU/4G8UD2iZKy8SYHKH1WGzhQa1xN1fXxch9g==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDJTCCAg2gAwIBAgIQGzlg2gNmfKRKBa6dqqZXxzANBgkqhkiG9w0BAQQFADAiMSAwHgYDVQQDExdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0xMTExMDkxODE5MDZaFw0zOTEyMzEyMzU5NTlaMCIxIDAeBgNVBAMTF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9wIDAQABo1cwVTBTBgNVHQEETDBKgBA3gSuALjvEuAVmF/x8knXvoSQwIjEgMB4GA1UEAxMXS2V5U3RvcmVUZXN0Q2VydGlmaWNhdGWCEBs5YNoDZnykSgWunaqmV8cwDQYJKoZIhvcNAQEEBQADggEBAFZvDA7PBh/vvFZb/QCBelTyD2Yqij16v3tk30A3Akli6UIILdbbOcA5BiPktT1kJxcsgSXNHUODlfG2Fy9HTqwunr8G7FYniOUXPVrRL+HwhKOzRFDMUS3+On+ZDzum7rbpm3SYlnJDyNb8wynPw/bXQw72jGjt63uh6OnkYE8fJ8iPfVWOenZkP/IXPIXK/bBwLMDJ1y77ZauPYbp7oiQ/991pn0c7F4ugT9LYmbAdJKhiainOaoBTvIHN8/lMZ8gHUuxvOJhPrbgo3NTqvT1/3kfD0AISP4R3pH0QL/0m7cO34nK4rFFLZs1sFUguYUJhfkyq1N8MiyyAqRmrvBQ=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>";
-                var dsigSerializer = DSigSerializer.Default;
-                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement });
-                assertion.SigningCredentials = Default.AsymmetricSigningCredentials;
-                assertion.Signature = dsigSerializer.ReadSignature(XmlUtilities.CreateDictionaryReader(signatureXml));
+                var signatureXml = @"<Signature xmlns=""http://www.w3.org/2000/09/xmldsig#""><SignedInfo><CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/><SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256""/><Reference Id=""_b95759d0-73ae-4072-a140-567ade10a7ad"" URI=""#_b95759d0-73ae-4072-a140-567ade10a7ad""><Transforms><Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature""/><Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/></Transforms><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>7H6G6SOiNyCDPGb7HP1VJYI50YT7MEJsnh1K0htg4mo=</DigestValue></Reference></SignedInfo><SignatureValue>T1k5NI7xmSIYNzUoVxLWOqyeBhwddgbKEgpBQ2fM4S58Wk1rFBUgdLx3PzjHqR8wyM+ge5rJ/VuQuxM/IgveZfnM7b+708IEoMmYNL7QESmzS86QXiM6LsJKBpDTlR5syfsnP8HBvZfcDhhD6vYaSip2PrQa4vlCdyFT16Va9dCCeCebge10BEdvtiBfn5QSClVcWu5STJi6bLVdhi2r2B/7d1v+0DlMvILAKQwiW20L0wzLg5hbImF8HQj49DZwKF6Mv0brAJUS6nHZF4Guuri1OZ9/4x3GE1IR9Lcq5wKCjC4CQdCzrPNctiq48ck0zWtvfXomlxyv34sum3yENg==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDJTCCAg2gAwIBAgIQGzlg2gNmfKRKBa6dqqZXxzANBgkqhkiG9w0BAQQFADAiMSAwHgYDVQQDExdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0xMTExMDkxODE5MDZaFw0zOTEyMzEyMzU5NTlaMCIxIDAeBgNVBAMTF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9wIDAQABo1cwVTBTBgNVHQEETDBKgBA3gSuALjvEuAVmF/x8knXvoSQwIjEgMB4GA1UEAxMXS2V5U3RvcmVUZXN0Q2VydGlmaWNhdGWCEBs5YNoDZnykSgWunaqmV8cwDQYJKoZIhvcNAQEEBQADggEBAFZvDA7PBh/vvFZb/QCBelTyD2Yqij16v3tk30A3Akli6UIILdbbOcA5BiPktT1kJxcsgSXNHUODlfG2Fy9HTqwunr8G7FYniOUXPVrRL+HwhKOzRFDMUS3+On+ZDzum7rbpm3SYlnJDyNb8wynPw/bXQw72jGjt63uh6OnkYE8fJ8iPfVWOenZkP/IXPIXK/bBwLMDJ1y77ZauPYbp7oiQ/991pn0c7F4ugT9LYmbAdJKhiainOaoBTvIHN8/lMZ8gHUuxvOJhPrbgo3NTqvT1/3kfD0AISP4R3pH0QL/0m7cO34nK4rFFLZs1sFUguYUJhfkyq1N8MiyyAqRmrvBQ=</X509Certificate></X509Data></KeyInfo></Signature>";
+                var dsigSerializer = new DSigSerializer();
+                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement })
+                {
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    Signature = dsigSerializer.ReadSignature(XmlUtilities.CreateDictionaryReader(signatureXml))
+                };
+
+                assertion.Signature.SignedInfo.References[0].TokenStream = Default.TokenStream;
+                return new SamlAssertionTestSet
+                {
+                    Assertion = assertion,
+                    Xml = XmlGenerator.SamlAssertionXml(SamlConstants.MajorVersionValue, SamlConstants.MinorVersionValue, Default.SamlAssertionID, Default.Issuer, Default.IssueInstantString, SamlConditionsSingleCondition.Xml, AdviceWithAssertionIDRef.Xml, SamlAttributeStatementSingleAttribute.Xml, signatureXml)
+                };
+            }
+        }
+
+        public static SamlAssertionTestSet SamlAssertionWithSignatureNS
+        {
+            get
+            {
+                var signatureXml = @"<ds:Signature xmlns:ds=""http://www.w3.org/2000/09/xmldsig#""><ds:SignedInfo><ds:CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/><ds:SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256""/><ds:Reference Id=""_b95759d0-73ae-4072-a140-567ade10a7ad"" URI=""#_b95759d0-73ae-4072-a140-567ade10a7ad""><ds:Transforms><ds:Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature""/><ds:Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/></ds:Transforms><ds:DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><ds:DigestValue>7H6G6SOiNyCDPGb7HP1VJYI50YT7MEJsnh1K0htg4mo=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>BHxg/Z6VuwcV83kkSSvkGjZt1t6GwW9qS4GlYnP/iswZSrpnM1eTt1mdaQtqSz8LM9e3YA8y4TsotDsFaZeG4AYcIeIIwvRhmi5oK8n1j9cEOOgSLIr6N0fLW9+jfq5nCKc+NXitv1ZkRYNHEbUcJd1eh3DQtTu1XLWszF/axeTP35wYRXpTZCd5ZBl4scJsyCOWNzxymD9n8bKyfLBickgK0fl2y9l3sxYntD5iiH8aV3yT2Fyf+wmjBy1wmSs+Ayhc+77s3jE6kV8pUKJ/HzDRck9Z+yC/Ko52SSMq+6NDrquMflZDEayxNEErqdYBbT76dEC9dSkY8IWR+Pe9bw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDJTCCAg2gAwIBAgIQGzlg2gNmfKRKBa6dqqZXxzANBgkqhkiG9w0BAQQFADAiMSAwHgYDVQQDExdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0xMTExMDkxODE5MDZaFw0zOTEyMzEyMzU5NTlaMCIxIDAeBgNVBAMTF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAns1cm8RU1hKZILPI6pB5Zoxn9mW2tSS0atV+o9FCn9NyeOktEOj1kEXOeIz0KfnqxgPMF1GpshuZBAhgjkyy2kNGE6Zx50CCJgq6XUatvVVJpMp8/FV18ynPf+/TRlF8V2HO3IVJ0XqRJ9fGA2f5xpOweWsdLYitdHbaDCl6IBNSXo52iNuqWAcB1k7jBlsnlXpuvslhLIzj60dnghAVA4ltS3NlFyw1Tz3pGlZQDt7x83IBHe7DA9bV3aJs1trkm1NzI1HoRS4vOqU3n4fn+DlfAE2vYKNkSi/PjuAX+1YQCq6e5uN/hOeSEqji8SsWC2nk/bMTKPwD67rn3jNC9wIDAQABo1cwVTBTBgNVHQEETDBKgBA3gSuALjvEuAVmF/x8knXvoSQwIjEgMB4GA1UEAxMXS2V5U3RvcmVUZXN0Q2VydGlmaWNhdGWCEBs5YNoDZnykSgWunaqmV8cwDQYJKoZIhvcNAQEEBQADggEBAFZvDA7PBh/vvFZb/QCBelTyD2Yqij16v3tk30A3Akli6UIILdbbOcA5BiPktT1kJxcsgSXNHUODlfG2Fy9HTqwunr8G7FYniOUXPVrRL+HwhKOzRFDMUS3+On+ZDzum7rbpm3SYlnJDyNb8wynPw/bXQw72jGjt63uh6OnkYE8fJ8iPfVWOenZkP/IXPIXK/bBwLMDJ1y77ZauPYbp7oiQ/991pn0c7F4ugT9LYmbAdJKhiainOaoBTvIHN8/lMZ8gHUuxvOJhPrbgo3NTqvT1/3kfD0AISP4R3pH0QL/0m7cO34nK4rFFLZs1sFUguYUJhfkyq1N8MiyyAqRmrvBQ=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature>";
+                var dsigSerializer = new DSigSerializer();
+                var assertion = new SamlAssertion(Default.SamlAssertionID, Default.Issuer, DateTime.Parse(Default.IssueInstantString), SamlConditionsSingleCondition.Conditions, AdviceWithAssertionIDRef.Advice, new List<SamlStatement> { SamlAttributeStatementSingleAttribute.AttributeStatement })
+                {
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    Signature = dsigSerializer.ReadSignature(XmlUtilities.CreateDictionaryReader(signatureXml))
+                };
+
                 assertion.Signature.SignedInfo.References[0].TokenStream = Default.TokenStream;
                 return new SamlAssertionTestSet
                 {

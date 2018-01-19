@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Xml
             if (transform == SecurityAlgorithms.EnvelopedSignature)
                 return new EnvelopedSignatureTransform();
 
-            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX14210, transform)));
+            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30210, transform)));
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Xml
             else if (transform == SecurityAlgorithms.ExclusiveC14n)
                 return new ExclusiveCanonicalizationTransform(false);
 
-            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX14211, transform)));
+            throw LogExceptionMessage(new NotSupportedException(FormatInvariant(LogMessages.IDX30211, transform)));
         }
     }
 }

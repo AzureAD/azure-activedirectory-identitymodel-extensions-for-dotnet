@@ -62,41 +62,6 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public override string Algorithm { get => IncludeComments ? SecurityAlgorithms.ExclusiveC14nWithComments : SecurityAlgorithms.ExclusiveC14n; }
 
-        private static string[] TokenizeInclusivePrefixList(string prefixList)
-        {
-            if (prefixList == null)
-                return null;
-
-            string[] prefixes = prefixList.Split(null);
-            int count = 0;
-            for (int i = 0; i < prefixes.Length; i++)
-            {
-                string prefix = prefixes[i];
-                if (prefix == "#default")
-                {
-                    prefixes[count++] = string.Empty;
-                }
-                else if (prefix.Length > 0)
-                {
-                    prefixes[count++] = prefix;
-                }
-            }
-            if (count == 0)
-            {
-                return null;
-            }
-            else if (count == prefixes.Length)
-            {
-                return prefixes;
-            }
-            else
-            {
-                string[] result = new string[count];
-                Array.Copy(prefixes, result, count);
-                return result;
-            }
-        }
-
         /// <summary>
         /// Applies a canonicalization transform over a set of XML nodes and computes the hash value.
         /// </summary>
@@ -115,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
                 {
-                    writer.StartCanonicalization(stream, IncludeComments, TokenizeInclusivePrefixList(InclusivePrefixList));
+                    writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusivePrefixList(InclusivePrefixList));
                     tokenStream.WriteTo(writer);
                     writer.EndCanonicalization();
                     writer.Flush();

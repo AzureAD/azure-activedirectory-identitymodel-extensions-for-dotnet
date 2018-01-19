@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
@@ -57,6 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public SamlAuthorizationDecisionStatementTestSet AuthorizationDecisionTestSet { get; set; }
 
         public SamlConditionsTestSet ConditionsTestSet { get; set; }
+
+        public DSigSerializer DSigSerializer { get; set; } = new DSigSerializer();
 
         public SamlEvidenceTestSet EvidenceTestSet { get; set; }
 

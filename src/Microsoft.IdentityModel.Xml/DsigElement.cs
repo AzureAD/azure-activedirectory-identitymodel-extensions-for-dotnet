@@ -62,6 +62,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             get;
             set;
-        }
+        } = "";
     }
 }

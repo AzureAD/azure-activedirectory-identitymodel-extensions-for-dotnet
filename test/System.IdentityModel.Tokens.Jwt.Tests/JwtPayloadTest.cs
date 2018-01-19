@@ -132,7 +132,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void JwtPayloadEncoding()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtPayload), new List<string> { "Item" } },
+                }
+            };
+
             RunEncodingVariation(JwtPayloadTestData.ClaimForEachProperty, JwtPayloadTestData.ObjectForEachProperty, context);
             RunEncodingVariation(JwtPayloadTestData.Multiples.Key, JwtPayloadTestData.Multiples.Value, context);
 
@@ -193,16 +200,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var payload = new JwtPayload(claims);
             var encodedPayload = payload.SerializeToJson();
             var payloadDeserialized = JwtPayload.Deserialize(encodedPayload);
-            var instanceContext = new CompareContext();
+            var instanceContext = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                }
+            };
 
             IdentityComparer.AreEqual(payload, payloadDeserialized, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadDeserialized)), instanceContext);
 
-            instanceContext = new CompareContext();
+            instanceContext.Diffs.Clear();
             IdentityComparer.AreEqual(payload, payloadSetDirect, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadSetDirect)), instanceContext);
 
-            instanceContext = new CompareContext();
+            instanceContext.Diffs.Clear();
             IdentityComparer.AreEqual(payload, payloadSetUsingDeserialize, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadSetUsingDeserialize)), instanceContext);
 

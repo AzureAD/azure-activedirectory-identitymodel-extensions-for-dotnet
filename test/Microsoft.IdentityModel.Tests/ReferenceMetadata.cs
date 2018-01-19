@@ -161,6 +161,7 @@ namespace Microsoft.IdentityModel.Tests
                     Signature = new Signature
                     {
                         KeyInfo = keyInfo1,
+                        Prefix = "",
                         SignatureValue = AADCommonMetadataSignatureValue,
                         SignedInfo = AADCommonSignedInfo
                     },
@@ -291,6 +292,7 @@ namespace Microsoft.IdentityModel.Tests
                     Signature = new Signature(AdfsV3SignedInfo)
                     {
                         KeyInfo = keyInfo,
+                        Prefix = "ds",
                         SignatureValue = AdfsV3SignatureValue,
                     },
                     TokenEndpoint = "https://fs.msidlab2.com/adfs/ls/"
@@ -318,6 +320,7 @@ namespace Microsoft.IdentityModel.Tests
                     Signature = new Signature(AdfsV4SignedInfo)
                     {
                         KeyInfo = keyInfo,
+                        Prefix = "ds",
                         SignatureValue = AdfsV4SignatureValue,
                     },
                     TokenEndpoint = "https://fs.msidlab11.com/adfs/ls/"
@@ -349,97 +352,73 @@ namespace Microsoft.IdentityModel.Tests
 
         public static Reference AADCommonReference
         {
-            get
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
-                var reference = new Reference
-                {
                     DigestMethod = AADCommonMetadataReferenceDigestMethod,
-                    DigestValue = AADCommonMetadataReferenceDigestValue
-                };
-                reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform();
-                reference.TokenStream = new XmlTokenStream();
-                reference.Uri = AADCommonMetadataReferenceURI;
-                return reference;
-            }
+                    DigestValue = AADCommonMetadataReferenceDigestValue,
+                    TokenStream = new XmlTokenStream(),
+                    Uri = AADCommonMetadataReferenceURI,
+            };
         }
 
         public static SignedInfo AADCommonSignedInfo
         {
-            get
+            get => new SignedInfo(AADCommonReference)
             {
-                var signedInfo = new SignedInfo();
-                signedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
-                signedInfo.References.Add(AADCommonReference);
-                return signedInfo;
-            }
+                CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#",
+            };
         }
 
         public static Reference AdfsV2Reference
         {
-            get
+            get => new Reference(AADCommonMetadataReferenceEnvelopedTransform, AADCommonMetadataReferenceC14nTransform)
             {
-                var reference = new Reference();
-                reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
-                reference.DigestValue = AdfsV2ReferenceDigestValue;
-                reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
-                reference.TokenStream = new XmlTokenStream();
-                reference.Uri = AdfsV2ReferenceURI;
-                return reference;
-            }
+                DigestMethod = AADCommonMetadataReferenceDigestMethod,
+                DigestValue = AdfsV2ReferenceDigestValue,
+                TokenStream = new XmlTokenStream(),
+                Uri = AdfsV2ReferenceURI,
+            };
         }
 
         public static SignedInfo AdfsV2SignedInfo
         {
-            get
+            get => new SignedInfo(AdfsV2Reference)
             {
-                var signedInfo = new SignedInfo();
-                signedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
-                signedInfo.References.Add(AdfsV2Reference);
-                return signedInfo;
-            }
+                CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#"
+            };
         }
 
         public static Reference AdfsV3Reference
         {
-            get
+            get => new Reference(AADCommonMetadataReferenceEnvelopedTransform, AADCommonMetadataReferenceC14nTransform)
             {
-                var reference = new Reference();
-                reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
-                reference.DigestValue = AdfsV3ReferenceDigestValue;
-                reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
-                reference.TokenStream = new XmlTokenStream();
-                reference.Uri = AdfsV3ReferenceURI;
-                return reference;
-            }
+                DigestMethod = AADCommonMetadataReferenceDigestMethod,
+                DigestValue = AdfsV3ReferenceDigestValue,
+                Prefix = "ds",
+                TokenStream = new XmlTokenStream(),
+                Uri = AdfsV3ReferenceURI
+            };
         }
 
         public static SignedInfo AdfsV3SignedInfo
         {
-            get
+            get => new SignedInfo(AdfsV3Reference)
             {
-                var signedInfo = new SignedInfo();
-                signedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
-                signedInfo.References.Add(AdfsV3Reference);
-                return signedInfo;
-            }
+                CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#",
+                Prefix = "ds"
+            };
         }
 
         public static Reference AdfsV4Reference
         {
-            get
+            get => new Reference(AADCommonMetadataReferenceEnvelopedTransform, AADCommonMetadataReferenceC14nTransform)
             {
-                var reference = new Reference();
-                reference.DigestMethod = AADCommonMetadataReferenceDigestMethod;
-                reference.DigestValue = AdfsV4ReferenceDigestValue;
-                reference.Transforms.Add(AADCommonMetadataReferenceEnvelopedTransform);
-                reference.CanonicalizingTransfrom = AADCommonMetadataReferenceC14nTransform;
-                reference.TokenStream = new XmlTokenStream();
-                reference.Uri = AdfsV4ReferenceURI;
-                return reference;
-            }
+                DigestMethod = AADCommonMetadataReferenceDigestMethod,
+                DigestValue = AdfsV4ReferenceDigestValue,
+                Prefix = "ds",
+                TokenStream = new XmlTokenStream(),
+                Uri = AdfsV4ReferenceURI
+            };
         }
 
         public static SignedInfo AdfsV4SignedInfo
@@ -449,6 +428,7 @@ namespace Microsoft.IdentityModel.Tests
                 var signedInfo = new SignedInfo();
                 signedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
                 signedInfo.References.Add(AdfsV4Reference);
+                signedInfo.Prefix = "ds";
                 return signedInfo;
             }
         }

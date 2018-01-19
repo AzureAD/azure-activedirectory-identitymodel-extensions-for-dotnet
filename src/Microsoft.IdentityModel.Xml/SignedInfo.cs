@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Initializes a <see cref="SignedInfo"/> instance.
         /// </summary>
+        /// <param name="reference">a <see cref="Reference"/> to include.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="reference"/> is null.</exception>
         public SignedInfo(Reference reference)
         {

@@ -67,9 +67,9 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Fact]
         public void GetSets()
         {
-            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = "http://www.gotjwt.com" };
+            var authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = "http://www.gotjwt.com" };
 
-            List<string> properties = new List<string>()
+            var properties = new List<string>()
             {
                 "IssuerAddress",
                 "PostTitle",
@@ -77,13 +77,16 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 "ScriptDisabledText",
             };
 
+            var context = new GetSetContext();
             foreach(string property in properties)
             {
-                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"));
-                TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
-                TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
-                TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected, context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected, context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context.Errors);
         }
 
         [Fact]

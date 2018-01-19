@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets or set the KeyInfo
+        /// Gets or sets the KeyInfo
         /// </summary>
         public KeyInfo KeyInfo
         {
@@ -93,12 +93,16 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
         /// <exception cref="ArgumentNullException"> if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="key"/>.CryptoProviderFactory is null.</exception>
+        /// <exception cref="XmlValidationException"> if <see cref="SignedInfo"/> null.</exception>
         /// <exception cref="XmlValidationException"> if <see cref="SignedInfo.SignatureMethod"/> is not supported.</exception>
         /// <exception cref="XmlValidationException"> if signature does not validate.</exception>
         public void Verify(SecurityKey key)
         {
             if (key == null)
                 throw LogArgumentNullException(nameof(key));
+
+            if (SignedInfo == null)
+                throw LogValidationException(LogMessages.IDX30212);
 
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 throw LogValidationException(LogMessages.IDX30207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());

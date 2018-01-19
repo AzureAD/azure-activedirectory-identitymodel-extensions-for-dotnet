@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -43,7 +44,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             SigningCredentials signingCredentials = null;
             var header2 = new JwtHeader(signingCredentials);
 
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                }
+            };
+
             IdentityComparer.AreEqual(header1, header2, context);
             TestUtilities.AssertFailIfErrors("JwtHeaderTests.Constructors", context.Diffs);
         }

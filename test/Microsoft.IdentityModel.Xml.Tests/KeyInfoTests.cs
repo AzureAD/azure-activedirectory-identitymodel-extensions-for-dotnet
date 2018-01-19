@@ -39,13 +39,15 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             var type = typeof(KeyInfo);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 4, $"Number of properties has changed from 4 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 6, $"Number of properties has changed from 6 to: {properties.Length}, adjust tests");
 
             var keyInfo = new KeyInfo();
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
+                    new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{"", Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("RetrievalMethodUri", new List<object>{(string)null, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("RSAKeyValue", new List<object>{(RSAKeyValue)null, new RSAKeyValue(Guid.NewGuid().ToString(), Guid.NewGuid().ToString())}),
                     new KeyValuePair<string, List<object>>("X509Data", new List<object>{keyInfo.X509Data, new List<X509Data>()}),
@@ -66,7 +68,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get;
             set;
-        } = DSigSerializer.Default;
+        } = new DSigSerializer();
 
         public KeyInfo KeyInfo
         {

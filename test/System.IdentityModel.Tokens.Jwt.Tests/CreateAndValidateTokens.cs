@@ -182,6 +182,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var jwtToken = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
             var jwt = handler.WriteToken(jwtToken);
             var context = new CompareContext();
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                { typeof(JwtHeader), new List<string> { "Item" } },
+                { typeof(JwtPayload), new List<string> { "Item" } }
+            };
             IdentityComparer.AreJwtSecurityTokensEqual(jwtToken, new JwtSecurityToken(handler.WriteToken(jwtToken)), context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -245,7 +250,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
-            var localContext = new CompareContext();
+            var localContext = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                }
+            };
+
             if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken2, localContext))
             {
                 context.Diffs.Add("jwtToken1 != jwtToken2");
@@ -426,6 +439,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, testId);
 
                 var context = new CompareContext();
+                context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                };
+
                 if (!IdentityComparer.AreEqual(jweCreatedInMemory.Payload, outerToken.Payload, context))
                     context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
 

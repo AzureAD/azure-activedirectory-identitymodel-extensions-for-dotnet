@@ -49,9 +49,9 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
                     new KeyValuePair<string, List<object>>("CanonicalizationMethod", new List<object>{SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments}),
-                    new KeyValuePair<string, List<object>>("SignatureMethod", new List<object>{SecurityAlgorithms.RsaSha256Signature, Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{"", Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SignatureMethod", new List<object>{SecurityAlgorithms.RsaSha256Signature, Guid.NewGuid().ToString()})
                 },
                 Object = new SignedInfo(),
             };
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
     public class SignedInfoTheoryData : TheoryDataBase
     {
-        public DSigSerializer Serializer { get; set; } = DSigSerializer.Default;
+        public DSigSerializer Serializer { get; set; } = new DSigSerializer();
 
         public SignedInfo SignedInfo { get; set; }
 

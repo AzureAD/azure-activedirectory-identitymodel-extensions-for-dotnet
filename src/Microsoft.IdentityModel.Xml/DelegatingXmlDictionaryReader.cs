@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="InvalidOperationException"> if <see cref="InnerReader"/> is null.</exception>
         protected XmlDictionaryReader UseInnerReader
         {
-            get => InnerReader ?? throw LogExceptionMessage(new InvalidOperationException(LogMessages.IDX14208));
+            get => InnerReader ?? throw LogExceptionMessage(new InvalidOperationException(LogMessages.IDX30027));
         }
     }
 }

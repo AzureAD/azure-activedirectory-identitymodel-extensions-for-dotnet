@@ -263,9 +263,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var data = new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData)));
                 var keyInfo = new KeyInfo();
-                keyInfo.X509Data.Add(data);
+                keyInfo.X509Data.Add(new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData))));
                 return keyInfo;
             }
         }
@@ -358,28 +357,53 @@ namespace Microsoft.IdentityModel.Tests
         }
 
 #if !CrossVersionTokenValidation
-        public static Reference ReferenceWithNullTokenStream
+        public static Reference Reference
         {
-            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
                 Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
                 DigestValue = _referenceDigestValue,
-                Prefix = ReferencePrefix,
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
                 Type = ReferenceType,
                 Uri = ReferenceUri
             };
         }
 
-        public static Reference Reference
+        public static Reference ReferenceNS
         {
-            get => new Reference(new List<string> { SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.ExclusiveC14n })
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
                 Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
                 DigestValue = _referenceDigestValue,
-                Prefix = ReferencePrefix,
+                Prefix = "ds",
                 TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
+                Uri = ReferenceUri
+            };
+        }
+
+        public static Reference ReferenceWithNullTokenStream
+        {
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            {
+                Id = ReferenceId,
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Type = ReferenceType,
+                Uri = ReferenceUri
+            };
+        }
+
+        public static Reference ReferenceWithNullTokenStreamNS
+        {
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            {
+                Id = ReferenceId,
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Prefix = "ds",
                 Type = ReferenceType,
                 Uri = ReferenceUri
             };
@@ -577,6 +601,7 @@ namespace Microsoft.IdentityModel.Tests
         }
 
 #if !CrossVersionTokenValidation
+
         public static Signature Signature
         {
             get
@@ -584,10 +609,25 @@ namespace Microsoft.IdentityModel.Tests
                 var signature = new Signature
                 {
                     KeyInfo = KeyInfo,
-                    SignedInfo = SignedInfo
+                    SignedInfo = SignedInfo,
+                    SignatureValue = "biUXAYkV/sx8E7B/0POdk4J5LDkgsRLqHwZDvlJOHSDrsKuGlAlg6+oCfuV14j7uNGu/NSoOFavDSXuS9tJNAxGfeWuy3AOOeXqG+VtJY+cEJtw2WpjSs9xVc3aP58OM/x2phYOZ60Gp4h+mjjG76q7NSAoPrqaVTpw67efbB30pvPSLqTTYdXSOodcKBS25fmEFLraHvWnxAyvFCqbteIOcuOeCDL68dTcqTwVXSZIfeU3Xz8dztA7S4+DuIVuPyEFz9oV3ku8LaNfBO1Zu+v76bZMvLy2iBWhH756UILSLgEndFEOVeAb/PDzXqhwAU4NCUOeNe2WBE6nttNKmXQ=="
+                };
+                return signature;
+            }
+        }
+
+        public static Signature SignatureNS
+        {
+            get
+            {
+                var signature = new Signature
+                {
+                    KeyInfo = KeyInfo,
+                    Prefix = "ds",
+                    SignedInfo = SignedInfoNS,
+                    SignatureValue = "biUXAYkV/sx8E7B/0POdk4J5LDkgsRLqHwZDvlJOHSDrsKuGlAlg6+oCfuV14j7uNGu/NSoOFavDSXuS9tJNAxGfeWuy3AOOeXqG+VtJY+cEJtw2WpjSs9xVc3aP58OM/x2phYOZ60Gp4h+mjjG76q7NSAoPrqaVTpw67efbB30pvPSLqTTYdXSOodcKBS25fmEFLraHvWnxAyvFCqbteIOcuOeCDL68dTcqTwVXSZIfeU3Xz8dztA7S4+DuIVuPyEFz9oV3ku8LaNfBO1Zu+v76bZMvLy2iBWhH756UILSLgEndFEOVeAb/PDzXqhwAU4NCUOeNe2WBE6nttNKmXQ==",                    
                 };
 
-                XmlGenerator.Generate(signature);
                 return signature;
             }
         }
@@ -599,16 +639,26 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SignedInfo SignedInfo
         {
-            get => new SignedInfo(ReferenceWithNullTokenStream)
+            get => new SignedInfo(Reference)
             {
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
                 SignatureMethod = SecurityAlgorithms.RsaSha256Signature
             };
         }
 
+        public static SignedInfo SignedInfoNS
+        {
+            get => new SignedInfo(ReferenceWithNullTokenStreamNS)
+            {
+                CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
+                Prefix = "ds",
+                SignatureMethod = SecurityAlgorithms.RsaSha256Signature
+            };
+        }
+
         public static string SignatureValue
         {
-            get => Signature.SignatureValue;
+            get => SignatureNS.SignatureValue;
         }
 #endif
 

@@ -276,7 +276,7 @@ namespace Microsoft.IdentityModel.Tests
         /// <param name="property">the name of the property.</param>
         /// <param name="propertyValue">value to set on the property.</param>
         /// <param name="expectedException">checks that exception is correct.</param>
-        public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException)
+        public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException, GetSetContext context)
         {
             if (obj == null)
                 throw new TestException("obj == null");
@@ -288,25 +288,33 @@ namespace Microsoft.IdentityModel.Tests
             PropertyInfo propertyInfo = type.GetProperty(property);
 
             if (propertyInfo == null)
-                throw new TestException("'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
+            {
+                context.Errors.Add("'get is not found for property: '" + property + "', type: '" + type.ToString() + "'");
+                return;
+            }
 
             if (!propertyInfo.CanWrite)
-                throw new TestException("can not write to property: '" + property + "', type: '" + type.ToString() + "'");
+            {
+                context.Errors.Add("can not write to property: '" + property + "', type: '" + type.ToString() + "'");
+                return;
+            }
+
+            var compareContext = new CompareContext();
 
             try
             {
                 propertyInfo.SetValue(obj, propertyValue);
                 object retval = propertyInfo.GetValue(obj);
-                if (!IdentityComparer.AreEqual(propertyValue, retval))
-                    throw new TestException($"propertyValue != retval: '{propertyValue} : {retval}'");
-
-                expectedException.ProcessNoException();
+                IdentityComparer.AreEqual(propertyValue, retval, compareContext);
+                expectedException.ProcessNoException(compareContext);
             }
             catch (Exception exception)
             {
-                // pass inner exception
-                expectedException.ProcessException(exception.InnerException);
+                // look for InnerException as exception is a wrapped exception.
+                expectedException.ProcessException(exception.InnerException, compareContext);
             }
+
+            context.Errors.AddRange(compareContext.Diffs);
         }
 
         /// <summary>

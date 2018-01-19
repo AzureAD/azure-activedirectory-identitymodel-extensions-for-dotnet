@@ -50,10 +50,10 @@ namespace Microsoft.IdentityModel.Xml.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("DigestMethod", new List<object>{null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("DigestValue", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Id", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("Prefix", new List<object>{"", Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("TransformFactory", new List<object>{TransformFactory.Default}),
                     new KeyValuePair<string, List<object>>("TokenStream", new List<object>{(XmlTokenStream)null, new XmlTokenStream(), new XmlTokenStream()}),
                     new KeyValuePair<string, List<object>>("Type", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -143,14 +143,14 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30202"),
                         ProviderFactory = CryptoProviderFactory.Default,
-                        Reference = Default.ReferenceWithNullTokenStream,
+                        Reference = Default.ReferenceWithNullTokenStreamNS,
                         TestId = "XmlTokenStream == null"
                     },
                     new ReferenceTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30208"),
                         ProviderFactory = new CustomCryptoProviderFactory(),
-                        Reference = Default.Reference,
+                        Reference = Default.ReferenceNS,
                         TestId = "DigestMethod Not Supported"
                     },
                     new ReferenceTheoryData
@@ -160,7 +160,7 @@ return</saml:AttributeValue></saml:Attribute></saml:AttributeStatement><saml:Aut
                         {
                             SupportedAlgorithms = new List<string>{Default.ReferenceDigestMethod}
                         },
-                        Reference = Default.Reference,
+                        Reference = Default.ReferenceNS,
                         TestId = "CryptoProviderFactory returns null HashAlgorithm"
                     }
                 };

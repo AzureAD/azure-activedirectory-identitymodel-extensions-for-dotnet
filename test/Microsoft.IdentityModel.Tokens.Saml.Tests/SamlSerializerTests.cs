@@ -337,6 +337,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 var memoryStream = new MemoryStream();
                 var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+                theoryData.SamlSerializer.DSigSerializer = theoryData.DSigSerializer;
                 theoryData.SamlSerializer.WriteAssertion(writer, theoryData.AssertionTestSet.Assertion);
                 theoryData.ExpectedException.ProcessNoException(context);
                 writer.Flush();
@@ -371,14 +372,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     new SamlTheoryData
                     {
                         AssertionTestSet = ReferenceSaml.SamlAssertionWithSignature,
-                        SamlSerializer = new SamlSerializerPublic(),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                         TestId = nameof(ReferenceSaml.SamlAssertionWithSignature)
                     },
                     new SamlTheoryData
                     {
+                        AssertionTestSet = ReferenceSaml.SamlAssertionWithSignatureNS,
+                        DSigSerializer = new DSigSerializer{Prefix = "ds"},
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        TestId = nameof(ReferenceSaml.SamlAssertionWithSignatureNS)
+                    },
+                    new SamlTheoryData
+                    {
                         AssertionTestSet = ReferenceSaml.SamlAssertionNoSignature,
-                        SamlSerializer = new SamlSerializerPublic(),
                         TestId = nameof(ReferenceSaml.SamlAssertionNoSignature)
                     }
                 };

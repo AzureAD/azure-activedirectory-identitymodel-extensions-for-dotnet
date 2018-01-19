@@ -523,6 +523,16 @@ namespace Microsoft.IdentityModel.Tests
         public static SecurityKey New { get { return new NotAsymmetricOrSymmetricSecurityKey(); } }
     }
 
+    public class CustomCryptoProviderSecurityKey : SecurityKey
+    {
+        public CustomCryptoProviderSecurityKey(CustomCryptoProviderFactory  customCryptoProviderFactory)
+        {
+            CryptoProviderFactory = customCryptoProviderFactory;
+        }
+
+        public override int KeySize => throw new NotImplementedException();
+    }
+
     public class ReturnNullAsymmetricSecurityKey : AsymmetricSecurityKey
     {
         public ReturnNullAsymmetricSecurityKey() { }

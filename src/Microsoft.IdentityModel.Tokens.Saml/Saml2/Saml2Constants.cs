@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 #pragma warning disable 1591
         public const string Namespace = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string OasisWssSaml2TokenProfile11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0";
-        public const string PreferredPrefix = "saml";
+        public const string Prefix = "saml";
         public const string Saml2TokenProfile11 = "urn:oasis:names:tc:SAML:2.0:assertion";
         public const string Version = "2.0";
         public static string[] AcceptedDateTimeFormats = new string[] {

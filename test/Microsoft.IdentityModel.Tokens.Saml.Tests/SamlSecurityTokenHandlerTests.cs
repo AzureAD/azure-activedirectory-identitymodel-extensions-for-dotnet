@@ -59,12 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Fact]
         public void GetSets()
         {
-            SamlSecurityTokenHandler samlSecurityTokenHandler = new SamlSecurityTokenHandler();
-            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10101"));
-            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected);
-            TestUtilities.SetGet(samlSecurityTokenHandler, "Serializer", null, ExpectedException.ArgumentNullException());
-
-            samlSecurityTokenHandler = new SamlSecurityTokenHandler();
+            var samlSecurityTokenHandler = new SamlSecurityTokenHandler();
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
@@ -77,6 +72,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
 
             TestUtilities.GetSet(context);
+
+            samlSecurityTokenHandler = new SamlSecurityTokenHandler();
+            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)0, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10101"), context);
+            TestUtilities.SetGet(samlSecurityTokenHandler, "MaximumTokenSizeInBytes", (object)1, ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(samlSecurityTokenHandler, "Serializer", null, ExpectedException.ArgumentNullException(), context);
+
             TestUtilities.AssertFailIfErrors("Saml2SecurityTokenHandlerTests_GetSets", context.Errors);
 
         }

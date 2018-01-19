@@ -42,7 +42,6 @@ namespace Microsoft.IdentityModel.Xml
     public class DSigSerializer
     {
         private static DSigSerializer _default;
-        private string _preferredPrefix = XmlSignatureConstants.PreferredPrefix;
         private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
@@ -76,18 +75,12 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets or sets the prefix to use when writing xml.
+        /// Gets or sets the prefix to use when writing the Signature element.
         /// </summary>
-        public string PreferredPrefix
+        public string Prefix
         {
-            get => _preferredPrefix;
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw LogExceptionMessage(new ArgumentNullException(nameof(value)));
-
-                _preferredPrefix = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -101,14 +94,17 @@ namespace Microsoft.IdentityModel.Xml
         {
             XmlUtil.CheckReaderOnEntry(reader, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
-            var keyInfo = new KeyInfo();
+            var keyInfo = new KeyInfo
+            {
+                Prefix = reader.Prefix
+            };
+
             try
             {
                 bool isEmptyElement = reader.IsEmptyElement;
 
                 // <KeyInfo>
                 reader.ReadStartElement();
-
                 while (reader.IsStartElement())
                 {
                     // <X509Data>
@@ -309,6 +305,7 @@ namespace Microsoft.IdentityModel.Xml
                 {
                     Id = id,
                     KeyInfo = keyInfo,
+                    Prefix = prefix,
                     SignedInfo = signedInfo,
                     SignatureValue = signatureValue
                 };
@@ -359,31 +356,30 @@ namespace Microsoft.IdentityModel.Xml
                 //
                 using (var canonicalizingReader = XmlDictionaryReader.CreateTextReader(bufferedStream, XmlDictionaryReaderQuotas.Max))
                 {
-                    var canonicalStream = new MemoryStream();
-                    canonicalizingReader.StartCanonicalization(canonicalStream, false, null);
+                    var signedInfo = new SignedInfo();
+                    signedInfo.CanonicalStream = new MemoryStream();
+
+                    // TODO - should not always use 'false'
+                    canonicalizingReader.StartCanonicalization(signedInfo.CanonicalStream, false, null);
                     canonicalizingReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-                    var prefix = canonicalizingReader.Prefix;
-                    var id = canonicalizingReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
+                    signedInfo.Prefix = canonicalizingReader.Prefix;
+                    signedInfo.Id = canonicalizingReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
                     // read <SignedInfo ...> start element
                     canonicalizingReader.Read();
-                    var canonicalizationMethod = ReadCanonicalizationMethod(canonicalizingReader);
-                    var signatureMethod = ReadSignatureMethod(canonicalizingReader);
-                    var reference = ReadReference(canonicalizingReader);
+                    // TODO - if comments are not false, then we need to reset.
+                    // this should be very rare.
+                    signedInfo.CanonicalizationMethod = ReadCanonicalizationMethod(canonicalizingReader);
+                    signedInfo.SignatureMethod = ReadSignatureMethod(canonicalizingReader);
+                    signedInfo.References.Add(ReadReference(canonicalizingReader));
 
                     if (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
                         throw XmlUtil.LogReadException(LogMessages.IDX30020);
 
                     canonicalizingReader.ReadEndElement();
                     canonicalizingReader.EndCanonicalization();
-                    canonicalStream.Flush();
+                    signedInfo.CanonicalStream.Flush();
 
-                    return new SignedInfo(reference)
-                    {
-                        CanonicalizationMethod = canonicalizationMethod,
-                        CanonicalStream = canonicalStream,
-                        Id = id,
-                        SignatureMethod = signatureMethod
-                    };
+                    return signedInfo;
                 }
             }
             catch(Exception ex)
@@ -408,7 +404,6 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-
                 var reference = new Reference
                 {
                     Prefix = reader.Prefix,
@@ -486,8 +481,8 @@ namespace Microsoft.IdentityModel.Xml
                 }
 
                 reader.Read();
-
                 // <Transform> - unbounded
+
                 while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
                 {
                     var isEmptyElement = reader.IsEmptyElement;
@@ -496,21 +491,26 @@ namespace Microsoft.IdentityModel.Xml
                         throw XmlUtil.LogReadException(LogMessages.IDX30105);
 
                     if (TransformFactory.IsSupportedTransform(algorithm))
+                    {
                         reference.Transforms.Add(TransformFactory.GetTransform(algorithm));
-                    // TODO - extra parameters
+                        reader.Read();
+                    }
                     else if (TransformFactory.IsSupportedCanonicalizingTransfrom(algorithm))
                     {
                         reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
-                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace))
+                        reader.Read();
+                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
                         {
-                            reader.ReadStartElement();
+                            bool isOnEmptyElement = reader.IsEmptyElement;
                             reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
+                            reader.ReadStartElement();
+                            if (!isOnEmptyElement)
+                                reader.ReadEndElement();
                         }
                     }
                     else
-                        throw XmlUtil.LogReadException(LogMessages.IDX14210, algorithm);
+                        throw XmlUtil.LogReadException(LogMessages.IDX30210, algorithm);
 
-                    reader.Read();
                     reader.MoveToContent();
                     if (!isEmptyElement)
                         reader.ReadEndElement();
@@ -627,26 +627,26 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(keyInfo));
 
             // <KeyInfo>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
 
             if (keyInfo.KeyName != null)
             {
-                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace, keyInfo.KeyName);
+                writer.WriteElementString(Prefix, XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace, keyInfo.KeyName);
             }
 
             if (keyInfo.RSAKeyValue != null)
             {
                 // <KeyValue>
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.KeyValue, XmlSignatureConstants.Namespace);
 
                 // <RSAKeyValue>
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
 
                 // <Modulus>...</Modulus>
-                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
+                writer.WriteElementString(Prefix, XmlSignatureConstants.Elements.Modulus, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Modulus);
 
                 // <Exponent>...</Exponent>
-                writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
+                writer.WriteElementString(Prefix, XmlSignatureConstants.Elements.Exponent, XmlSignatureConstants.Namespace, keyInfo.RSAKeyValue.Exponent);
 
                 // </RSAKeyValue>
                 writer.WriteEndElement();
@@ -657,7 +657,7 @@ namespace Microsoft.IdentityModel.Xml
 
             if (keyInfo.RetrievalMethodUri != null)
             {
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(keyInfo.Prefix, XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace);
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, keyInfo.RetrievalMethodUri);
                 writer.WriteEndElement();
             }
@@ -665,39 +665,39 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var data in keyInfo.X509Data)
             {
                 // <X509Data>
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(keyInfo.Prefix, XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
 
                 if (data.IssuerSerial != null)
                 {
-                    writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(keyInfo.Prefix, XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace, data.IssuerSerial.IssuerName);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509IssuerName, XmlSignatureConstants.Namespace, data.IssuerSerial.IssuerName);
 
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace, data.IssuerSerial.SerialNumber);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509SerialNumber, XmlSignatureConstants.Namespace, data.IssuerSerial.SerialNumber);
 
                     writer.WriteEndElement();
                 }
 
                 if (data.SKI != null)
                 {
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace, data.SKI);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509SKI, XmlSignatureConstants.Namespace, data.SKI);
 
                 }
 
                 if (data.SubjectName != null)
                 {
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace, data.SubjectName);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509SubjectName, XmlSignatureConstants.Namespace, data.SubjectName);
                 }
 
                 foreach (var certificate in data.Certificates)
                 {
                     // <X509Certificate>...</X509Certificate>
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, certificate);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace, certificate);
                 }
 
                 if (data.CRL != null)
                 {
-                    writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace, data.CRL);
+                    writer.WriteElementString(keyInfo.Prefix, XmlSignatureConstants.Elements.X509CRL, XmlSignatureConstants.Namespace, data.CRL);
                 }
 
                 // </X509Data>
@@ -734,7 +734,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30401, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Elements.DigestValue);
 
             // <Reference>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace);
 
             // @Id
             if (reference.Id != null)
@@ -754,7 +754,7 @@ namespace Microsoft.IdentityModel.Xml
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, reference.Type);
 
             // <Transforms>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);
 
             // <Transform>
             foreach (var transform in reference.Transforms)
@@ -763,7 +763,7 @@ namespace Microsoft.IdentityModel.Xml
                     throw XmlUtil.LogWriteException(LogMessages.IDX30403);
 
                 // <Transform>
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
 
                 // @Algorithm
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, transform.Algorithm);
@@ -776,10 +776,18 @@ namespace Microsoft.IdentityModel.Xml
             if (reference.CanonicalizingTransfrom != null)
             {
                 // <Transform>
-                writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
+                writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace);
 
                 // @Algorithm
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, reference.CanonicalizingTransfrom.Algorithm);
+
+                // <InclusivePrefixList>
+                if (!string.IsNullOrEmpty(reference.CanonicalizingTransfrom.InclusivePrefixList))
+                {
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.InclusiveNamespaces);
+                    writer.WriteAttributeString(Prefix, XmlSignatureConstants.Attributes.PrefixList, XmlSignatureConstants.Namespace, reference.CanonicalizingTransfrom.InclusivePrefixList);
+                    writer.WriteEndElement();
+                }
 
                 // </Transform>
                 writer.WriteEndElement();
@@ -790,7 +798,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // <DigestMethod>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.DigestMethod, XmlSignatureConstants.Namespace);
 
             // @Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, reference.DigestMethod);
@@ -799,7 +807,7 @@ namespace Microsoft.IdentityModel.Xml
             writer.WriteEndElement();
 
             // <DigestValue />
-            writer.WriteElementString(PreferredPrefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, reference.DigestValue);
+            writer.WriteElementString(Prefix, XmlSignatureConstants.Elements.DigestValue, XmlSignatureConstants.Namespace, reference.DigestValue);
 
             // </Reference>
             writer.WriteEndElement();
@@ -831,7 +839,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30404);
 
             // <Signature>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Signature, XmlSignatureConstants.Namespace);
             if (signature.Id != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, signature.Id);
 
@@ -839,7 +847,7 @@ namespace Microsoft.IdentityModel.Xml
             WriteSignedInfo(writer, signature.SignedInfo);
 
             // <SignatureValue>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignatureValue, XmlSignatureConstants.Namespace);
 
             // TODO - need signature value id
             // @Id
@@ -889,21 +897,21 @@ namespace Microsoft.IdentityModel.Xml
                 throw XmlUtil.LogWriteException(LogMessages.IDX30405);
 
             // <SignedInfo>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
 
             // @Id
             if (signedInfo.Id != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Id, null, signedInfo.Id);
 
             // <CanonicalizationMethod>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.CanonicalizationMethod, XmlSignatureConstants.Namespace);
             
             //@Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, signedInfo.CanonicalizationMethod);
             writer.WriteEndElement();
 
             // <SignatureMethod>
-            writer.WriteStartElement(PreferredPrefix, XmlSignatureConstants.Elements.SignatureMethod, XmlSignatureConstants.Namespace);
+            writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.SignatureMethod, XmlSignatureConstants.Namespace);
             
             // @Algorithm
             writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, null, signedInfo.SignatureMethod);

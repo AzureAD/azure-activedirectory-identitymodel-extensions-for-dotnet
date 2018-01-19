@@ -82,6 +82,9 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
+                { typeof(ExclusiveCanonicalizationTransform).ToString(), CompareAllPublicProperties },
+                { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },
+                { typeof(EnvelopedSignatureTransform).ToString(), CompareAllPublicProperties },
                 { typeof(IssuerSerial).ToString(), CompareAllPublicProperties },
                 { typeof(JArray).ToString(), AreJArraysEqual },
 #if !CrossVersionTokenValidation
@@ -146,6 +149,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(string).ToString(), AreStringsEqual },
                 { typeof(SymmetricSecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(TokenValidationParameters).ToString(), CompareAllPublicProperties },
+                { typeof(Transform).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationConfiguration).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationMessage).ToString(), CompareAllPublicProperties },
                 { typeof(Uri).ToString(), AreUrisEqual },
@@ -887,7 +891,7 @@ namespace Microsoft.IdentityModel.Tests
             var localContext = new CompareContext(context);
 
             // public instance properties
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             // Touch each public property
             foreach (var propertyInfo in propertyInfos)

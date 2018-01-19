@@ -40,14 +40,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Theory, MemberData(nameof(SamlReadFromTheoryData))]
         public void SamlSecurityTokenReadFrom(SamlTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SamlSecurityTokenReadFrom", theoryData);
-            var context = new CompareContext($"{this}.SamlSecurityTokenReadFrom, {theoryData.TestId}");
+            var context = TestUtilities.WriteHeader($"{this}.SamlSecurityTokenReadFrom", theoryData);
             try
             {
                 var sr = new StringReader(theoryData.SamlTokenTestSet.Xml);
                 var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr));
-                var samlSerializer = theoryData.SamlSerializer;
-                var assertion = samlSerializer.ReadAssertion(reader);
+                var assertion = theoryData.SamlSerializer.ReadAssertion(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 IdentityComparer.AreEqual(assertion, (theoryData.SamlTokenTestSet.SecurityToken as SamlSecurityToken).Assertion, context);

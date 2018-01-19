@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
             try
             {
+                var config = ReferenceMetadata.AADCommonEndpoint;
                 var configuration = new WsFederationConfiguration();
 
                 if (!string.IsNullOrEmpty(theoryData.Metadata))
