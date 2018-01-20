@@ -4,6 +4,12 @@
   <runtimes>netstandard1.4,net451,net45</runtimes>
   <release>5.2.0</release>
   <nugetPreview>preview2</nugetPreview>
+  <tools>
+    <tool name = "RegexAnalyzer">      
+        <project name="RegexAnalyzer" />
+        <test name="RegexAnalyzer.Test" test="yes" />
+    </tool>
+  </tools>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging" />

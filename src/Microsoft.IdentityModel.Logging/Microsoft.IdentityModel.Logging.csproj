@@ -34,4 +34,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="RegexAnalyzer" Version="5.2.0-*" />
+  </ItemGroup>
+
 </Project>

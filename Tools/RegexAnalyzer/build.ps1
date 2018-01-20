@@ -2,14 +2,15 @@ param(
     [string]$build="YES",
     [string]$buildType="Debug",
     [string]$dotnetDir="c:\Program Files\dotnet",
+    [string]$msbuildexe="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe",
     [string]$clean="YES",
     [string]$restore="YES",
     [string]$root=$PSScriptRoot,
+    [string]$wilsonRoot = (get-item $PSScriptRoot).parent.parent.FullName,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
-    [string]$pack="YES",
     [string]$updateAssemblyInfo="YES",
-    [string]$slnFile="wilson.sln")
+    [string]$slnFile="RegexAnalyzer.sln")
 
 ################################################# Functions ############################################################
 
@@ -53,18 +54,19 @@ WriteSectionHeader("build.ps1 - parameters");
 Write-Host "build:              " $build;
 Write-Host "buildType:          " $buildType;
 Write-Host "dotnetDir:          " $dotnetDir
+Write-Host "msbuildDir:         " $msbuildDir;
 Write-Host "clean:              " $clean;
 Write-Host "restore:            " $restore;
 Write-Host "root:               " $root;
+Write-Host "wilsonRoot:         " $wilsonRoot;
 Write-Host "runTests:           " $runTests;
 Write-Host "failBuildOnTest:    " $failBuildOnTest;
-Write-Host "pack:               " $pack;
 Write-Host "updateAssemblyInfo: " $updateAssemblyInfo
 Write-Host "slnFile:            " $slnFile;
 WriteSectionFooter("End build.ps1 - parameters");
 
 
-[xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
+[xml]$buildConfiguration = Get-Content $wilsonRoot\buildConfiguration.xml
 $artifactsRoot = "$root\artifacts";
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
@@ -78,6 +80,7 @@ Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "artifactsRoot:  " $artifactsRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
+Write-Host "msbuildexe:     " $msbuildexe;
 Write-Host "nugetVersion:   " $nugetVersion;
 Write-Host "releaseVersion: " $releaseVersion;
 Write-Host "nugetPreview:   " $nugetPreview;
@@ -85,26 +88,22 @@ WriteSectionFooter("End Environment");
 
 $ErrorActionPreference = "Stop"
 
-Push-Location "$root/Tools/RegexAnalyzer"
-& $root/Tools/RegexAnalyzer\build.ps1
-Pop-Location
-
 if ($clean -eq "YES")
 {
     WriteSectionHeader("Clean");
 
-    $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-    foreach($project in $projects) {
-        $name = $project.name;
-        RemoveFolder("$root\src\$name\bin");
-        RemoveFolder("$root\src\$name\obj");
-    }
+    $tools = $buildConfiguration.SelectNodes("root/tools/tool")
+    foreach ($tool in $tools) {
+        $toolName = $tool.Name;
+        RemoveFolder("$root\$toolName\$toolName\bin");
+        RemoveFolder("$root\$toolName\$toolName\obj");
 
-    $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects) {
-        $name = $testProject.name;
-        RemoveFolder("$root\test\$name\bin");
-        RemoveFolder("$root\test\$name\obj");
+        $toolTests= $buildConfiguration.SelectNodes("root/tools/tool[@name='$toolName']/test")
+        foreach ($test in $toolTests) {
+            $name = $test.name;
+            RemoveFolder("$root\$toolName\$name\bin");
+            RemoveFolder("$root\$toolName\$name\obj");
+        }
     }
 
     RemoveFolder($artifactsRoot);
@@ -119,12 +118,12 @@ if ($build -eq "YES")
 
     $date = Get-Date
     $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
-    $versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
-    Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $dateTimeStamp));
+    $versionProps = Get-Content ($wilsonRoot + "/build/version.props");
+    Set-Content ($wilsonRoot + "\build\dynamicVersion.props") ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $dateTimeStamp));
 
     if ($updateAssemblyInfo -eq "YES")
     {
-        $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
+        $projects = $buildConfiguration.SelectNodes("root/tools/tool[@name='RegexAnalyzer']/project");
         $additionFileInfo = $releaseVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD);
         $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
         $fileVersion = $releaseVersion + "." + $dateTimeStamp;
@@ -138,82 +137,72 @@ if ($build -eq "YES")
             Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
             Write-Host "assemblyFileVersion: " $assemblyFileVersion
 
-            $assemblyInfoPath = "$root\src\$name\properties\assemblyinfo.cs";
+            $assemblyInfoPath = "$root\RegexAnalyzer\$name\properties\assemblyinfo.cs";
             $content = Get-Content $assemblyInfoPath;
             $content = $content -replace $assemblyInformationalRegex, $assemblyInformationalVersion;
             $content = $content -replace $assemblyFileVersionRegex, $assemblyFileVersion;
             Set-Content $assemblyInfoPath $content
         }
     }
-
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\$slnFile"
-    Start-Process -wait -NoNewWindow $dotnetexe "restore $root\$slnFile"
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\$slnFile"
-    Start-Process -wait -NoNewWindow $dotnetexe "build $root\$slnFile"
+    
+    Write-Host ">>>" + $msbuildexe + "$root/RegexAnalyzer.sln  /t:restore"
+    & $msbuildexe "RegexAnalyzer.sln" "/t:restore"
+    Write-Host ">>>" + $msbuildexe + "$root/RegexAnalyzer.sln  /t:build"
+    & $msbuildexe "RegexAnalyzer.sln" "/t:build"
 
     WriteSectionFooter("End Build");
 }
 
-if ($pack -eq "YES")
-{
-    WriteSectionHeader("Pack");
-    CreateFolder($artifactsRoot);
-
-    foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
-    {
-        $name = $project.name;
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build $root\src\$name -c $buildType -o $artifactsRoot -s --include-symbols"
-        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name\$name.csproj --no-build -c $buildType -o $artifactsRoot -s --include-symbols"
-    }
-
-    WriteSectionFooter("End Pack");
-}
-
 if ($runTests -eq "YES")
 {
-
-    $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects)
+    WriteSectionHeader("Test");
+    foreach($tool in $buildConfiguration.SelectNodes("root/tools/tool")) 
     {
-        if ($testProject.test -eq "yes")
+        $toolName = $tool.Name;
+        $testProjects = $buildConfiguration.SelectNodes("root/tools/tool[@name='$toolName']/test")
+        foreach ($testProject in $testProjects)
         {
-            $name = $testProject.name;
-            WriteSectionHeader("Test - " + $name);
+            if ($testProject.test -eq "yes")
+            {
+                $name = $testProject.name;
+                WriteSectionHeader("Test - " + $name);
 
-            Write-Host ">>> Set-Location $root\test\$name"
-            pushd
-            Set-Location $root\test\$name
-            if ($build -ne "YES")
-            {
-                Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $name.csproj"
-                Start-Process -wait -NoNewWindow $dotnetexe "restore $name.csproj"
-                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' -c $buildType"
-                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
-            }
-            else
-            {
-                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' --no-build -c $buildType"
-                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --no-build -c $buildType"
-            }
-
-            if($p.ExitCode -ne 0)
-            {
-                if (!$testExitCode)
+                Write-Host ">>> Set-Location $root\$tool\$name"
+                pushd
+                Set-Location $root\$toolName\$name
+                if ($build -ne "YES")
                 {
-                    $failedTestProjects = "$name"
+                    Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe 'restore' $name.csproj"
+                    Start-Process -wait -NoNewWindow $dotnetexe"restore $name.csproj"
+                    Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $msbuildexe 'test $name.csproj' -c $buildType"
+                    $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
                 }
                 else
                 {
-                    $failedTestProjects = "$failedTestProjects, $name"
+                    Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $msbuildexe 'test $name.csproj' --no-build -c $buildType"
+                    $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --no-build -c $buildType"
                 }
+
+                if($p.ExitCode -ne 0)
+                {
+                    if (!$testExitCode)
+                    {
+                        $failedTestProjects = "$name"
+                    }
+                    else
+                    {
+                        $failedTestProjects = "$failedTestProjects, $name"
+                    }
+                }
+                $testExitCode = $p.ExitCode + $testExitCode
+
+                popd
+
+                WriteSectionFooter("End Test - " + $name);
             }
-            $testExitCode = $p.ExitCode + $testExitCode
-
-            popd
-
-            WriteSectionFooter("End Test - " + $name);
         }
     }
+
 
     if($testExitCode -ne 0)
     {
@@ -225,6 +214,8 @@ if ($runTests -eq "YES")
             throw "Exiting test run."
         }
     }
+
+    WriteSectionFooter("End Test")
 }
 
 Write-Host "============================"

@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
+    <PackageReference Include="RegexAnalyzer" Version="5.2.0-*" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 

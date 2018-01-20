@@ -10,6 +10,7 @@
     <PackageReference Include="ApiCheck" Version="1.1.82" />
     <PackageReference Include="ApiCheck.Console" Version="1.1.82" />
     <PackageReference Include="ApiCheck.NUnit" Version="1.1.82" />
+    <PackageReference Include="RegexAnalyzer" Version="5.2.0-*" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
     <PackageReference Include="xunit.abstractions" Version="2.0.1" />
     <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
