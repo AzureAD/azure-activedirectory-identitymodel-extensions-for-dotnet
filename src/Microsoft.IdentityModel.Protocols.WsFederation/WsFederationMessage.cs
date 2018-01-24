@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             string token = null;
             using (var sr = new StringReader(Wresult))
             {
-                var xmlReader = XmlReader.Create(sr);                
+                XmlReader xmlReader = XmlReader.Create(sr);
                 xmlReader.MoveToContent();
 
                 // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
@@ -294,9 +294,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                             dom.Load(memoryReader);
                             token = dom.DocumentElement.InnerXml;
                         }
-
-                        // </RequestedSecurityToken>
-                        xmlReader.ReadEndElement();
                     }
 
                     // Read </RequestSecurityTokenResponse>
@@ -313,9 +310,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Gets a boolean representing if the <see cref="WsFederationMessage"/> is a 'sign-in-message'.
         /// </summary>
-        /// <returns>the 'SecurityToken'.</returns>
-        /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetToken2()
+        public bool IsSignInMessage
         {
             get => Wa == WsFederationConstants.WsFederationActions.SignIn;
         }
