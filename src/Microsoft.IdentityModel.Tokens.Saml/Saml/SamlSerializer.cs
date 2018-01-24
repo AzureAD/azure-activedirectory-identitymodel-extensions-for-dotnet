@@ -1060,7 +1060,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             // dispose the inner writer, which we don't properly own.
             EnvelopedSignatureWriter signatureWriter = null;
             if (assertion.SigningCredentials != null)
-                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.AssertionId) { DSigSerializer = DSigSerializer };
+                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.AssertionId, assertion.InclusivePrefixList) { DSigSerializer = DSigSerializer };
 
             try
             {

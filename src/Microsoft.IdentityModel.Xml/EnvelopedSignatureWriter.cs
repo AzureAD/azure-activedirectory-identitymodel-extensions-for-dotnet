@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Xml
             _writerStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
             InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
-            InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList);
+            InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList));
             _signaturePosition = -1;
         }
 

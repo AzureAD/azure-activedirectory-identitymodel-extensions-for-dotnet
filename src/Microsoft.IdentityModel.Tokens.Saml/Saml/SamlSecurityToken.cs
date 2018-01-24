@@ -74,11 +74,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> contained in this token.
+        /// Gets the <see cref="SecurityKey"/>s for this instance.
         /// </summary>
         public override SecurityKey SecurityKey
         {
-            get { return Assertion.SecurityKey; }
+            get { return null; }
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         public override SecurityKey SigningKey
         {
-            get { return Assertion.SigningKey; }
-            set { Assertion.SigningKey = value; }
+            get;
+            set;
         }
 
         /// <summary>

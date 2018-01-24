@@ -114,6 +114,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
+        /// Gets or sets the InclusivePrefixList to use when writing token.
+        /// </summary>
+        public string InclusivePrefixList
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used by the issuer to protect the integrity of the assertion.
         /// </summary>
         public SigningCredentials SigningCredentials

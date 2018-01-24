@@ -62,20 +62,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets the <see cref="SecurityToken"/> of the issuer.
+        /// Gets the issuer of this token
         /// </summary>
-        public SecurityToken IssuerToken
+        public override string Issuer
         {
-            get;
-            set;
+            get { return Assertion.Issuer.Value; }
         }
 
         /// <summary>
-        /// Gets the collection of <see cref="SecurityKey"/> contained in this token.
+        /// Gets the <see cref="SecurityKey"/>s for this instance.
         /// </summary>
         public override SecurityKey SecurityKey
         {
+            get { return null; }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that was used to Sign this assertion.
+        /// </summary>
+        public override SecurityKey SigningKey
+        {
             get;
+            set;
         }
 
         /// <summary>
@@ -104,23 +112,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 else
                     return DateTime.MaxValue;
             }
-        }
-
-        /// <summary>
-        /// Gets the issuer of this token
-        /// </summary>
-        public override string Issuer
-        {
-            get { return Assertion.Issuer.Value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that was used to Sign this assertion.
-        /// </summary>
-        public override SecurityKey SigningKey
-        {
-            get;
-            set;
         }
     }
 }

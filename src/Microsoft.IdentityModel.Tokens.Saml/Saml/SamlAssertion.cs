@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlAssertion
     {
-        private string _assertionId = SamlConstants.AssertionIdPrefix + Guid.NewGuid().ToString();
+        private string _assertionId;
         private string _issuer;
         private DateTime _issueInstant;
 
@@ -97,6 +97,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public SamlConditions Conditions { get; set; }
 
         /// <summary>
+        /// Gets or sets the InclusivePrefixList to use when writing token.
+        /// </summary>
+        public string InclusivePrefixList { get; set; }
+
+        /// <summary>
         /// Gets or sets the issuer in the assertion.
         /// </summary>
         public string Issuer
@@ -143,19 +148,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/>.
-        /// </summary>
-        public SecurityKey SecurityKey { get; set; }
-
-        /// <summary>
         /// Gets or sets the <see cref="Signature"/> on the Assertion.
         /// </summary>
         public Signature Signature { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> on the Assertion.
-        /// </summary>
-        public SecurityKey SigningKey { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used by the issuer to protect the integrity of the assertion.

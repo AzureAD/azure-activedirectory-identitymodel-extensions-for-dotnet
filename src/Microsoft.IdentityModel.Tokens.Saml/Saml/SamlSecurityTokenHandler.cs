@@ -948,10 +948,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 foreach (var condition in securityToken.Assertion.Conditions.Conditions)
                 {
-                    SamlAudienceRestrictionCondition audienceRestriction = condition as SamlAudienceRestrictionCondition;
-                    if (validationParameters.AudienceValidator != null)
-                        validationParameters.AudienceValidator(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
-                    else
+                    if (condition is SamlAudienceRestrictionCondition audienceRestriction)
                         Validators.ValidateAudience(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
                 }
             }            
@@ -1108,6 +1105,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
+        /// Validates the <see cref="SamlSecurityToken.SigningKey"/> is an expected value.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> to validate.</param>
+        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
+        /// <remarks>If the <see cref="SamlSecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using the CertificateValidator.</remarks>
+        protected virtual void ValidateIssuerSecurityKey(SecurityKey key, SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateIssuerSecurityKey(key, securityToken, validationParameters);
+        }
+
+        /// <summary>
         /// Validates the token replay.
         /// </summary>
         /// <param name="expiration">expiration time of the <see cref="SamlSecurityToken"/></param>
@@ -1143,6 +1152,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
+            ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)

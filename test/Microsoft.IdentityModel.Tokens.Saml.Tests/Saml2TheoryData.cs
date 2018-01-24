@@ -35,13 +35,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
     {
         public Saml2TheoryData()
         {
-
         }
 
         public Saml2TheoryData(TokenTheoryData tokenTheoryData)
             : base(tokenTheoryData)
         {
-
         }
 
         public string Xml { get; set; }
@@ -54,6 +52,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public Saml2Attribute Attribute { get; set; }
 
+        public List<Saml2Attribute> Attributes { get; set; }
+
         public Saml2AttributeStatement AttributeStatement { get; set; }
 
         public Saml2AudienceRestriction AudienceRestriction { get; set; }
@@ -62,18 +62,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public Saml2AuthorizationDecisionStatement AuthorizationDecision { get; set; }
 
-        public Saml2Subject Subject { get; set; }
-
         public Saml2Conditions Conditions{ get; set; }
-
-        public Saml2Evidence Evidence { get; set; }
-
-        public List<Saml2Attribute> Attributes { get; set; }
 
         public List<Saml2Attribute> ConsolidatedAttributes { get; set; }
 
+        public Saml2Evidence Evidence { get; set; }
+
         public Saml2SecurityTokenHandler Handler { get; set; } = new Saml2SecurityTokenHandlerPublic();
 
+        public string InclusivePrefixList { get; set; }
+
         public Saml2Serializer Saml2Serializer { get; set; } = new Saml2Serializer();
+
+        public Saml2Subject Subject { get; set; }
     }
 }

@@ -784,8 +784,8 @@ namespace Microsoft.IdentityModel.Xml
                 // <InclusivePrefixList>
                 if (!string.IsNullOrEmpty(reference.CanonicalizingTransfrom.InclusivePrefixList))
                 {
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.InclusiveNamespaces);
-                    writer.WriteAttributeString(Prefix, XmlSignatureConstants.Attributes.PrefixList, XmlSignatureConstants.Namespace, reference.CanonicalizingTransfrom.InclusivePrefixList);
+                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace);
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.PrefixList, reference.CanonicalizingTransfrom.InclusivePrefixList);
                     writer.WriteEndElement();
                 }
 

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Security.Claims;
 using System.Xml;
@@ -670,9 +671,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void WriteToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                { typeof(SamlAssertion), new List<string> { "IssueInstant", "InclusivePrefixList", "Signature", "SigningCredentials" } },
+                { typeof(SamlSecurityToken), new List<string> { "SigningKey" } },
+            };
+
             try
             {
-                var xml = (theoryData.Handler as SamlSecurityTokenHandler).WriteToken(theoryData.TokenTestSet.SecurityToken);
+                var token = theoryData.Handler.WriteToken(theoryData.SecurityToken);
+                theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                IdentityComparer.AreEqual(validatedToken, theoryData.SecurityToken, context);
+                if (!string.IsNullOrEmpty(theoryData.InclusivePrefixList))
+                {
+                    if (!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as SamlSecurityToken).Assertion.InclusivePrefixList))
+                        context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as SamlSecurityToken).Assertion.InclusivePrefixList)");
+
+                    if (!string.Equals(theoryData.InclusivePrefixList, (validatedToken as SamlSecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))
+                        context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (validatedToken as SamlSecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))");
+                }
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -687,24 +705,139 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
+                var key = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Audience = Default.Audience,
+                    NotBefore = Default.NotBefore,
+                    Expires = Default.Expires,
+                    Issuer = Default.Issuer,
+                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                    Subject = new ClaimsIdentity(Default.SamlClaims)
+                };
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = key
+                };
+
+                var tokenHandler = new SamlSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor) as SamlSecurityToken;
+                token.Assertion.InclusivePrefixList = "#default saml ds xml";
+
                 // uncomment to view exception displayed to user
                 // ExpectedException.DefaultVerbose = true;
-                return new TheoryData<SamlTheoryData>
+                var theoryData = new TheoryData<SamlTheoryData>();
+
+                theoryData.Add(new SamlTheoryData
                 {
-                    new SamlTheoryData
-                    {
-                        ExpectedException = ExpectedException.ArgumentNullException("token"),
-                        First = true,
-                        TestId = nameof(ReferenceSaml.NullToken),
-                        TokenTestSet = ReferenceSaml.NullToken
-                    },
-                    new SamlTheoryData
-                    {
-                        ExpectedException = ExpectedException.ArgumentException("IDX11400:"),
-                        TestId = nameof(ReferenceSaml.JwtToken),
-                        TokenTestSet = ReferenceSaml.JwtToken
-                    }
+                    ExpectedException = ExpectedException.ArgumentNullException("token"),
+                    First = true,
+                    SecurityToken = null,
+                    TestId = nameof(ReferenceSaml.NullToken),
+                });
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX11400:"),
+                    SecurityToken = new JwtSecurityToken(Default.AsymmetricJwt),
+                    TestId = nameof(ReferenceSaml.JwtToken),
+                });
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    InclusivePrefixList = "#default saml ds xml",
+                    SecurityToken = token,
+                    TestId = "WithInclusivePrefixList",
+                    ValidationParameters = validationParameters
+                });
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = "WithoutInclusivePrefixList",
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKeyValidator = ValidationDelegates.IssuerSecurityKeyValidatorThrows,
+                    IssuerSigningKey = key
                 };
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException)),
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.IssuerSecurityKeyValidatorThrows),
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    IssuerSigningKeyValidator = ValidationDelegates.IssuerSecurityKeyValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.IssuerSecurityKeyValidatorThrows) + "-false",
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException)),
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.AudienceValidatorThrows),
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new SamlTheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.AudienceValidatorThrows) + "-false",
+                    ValidationParameters = validationParameters
+                });
+
+                return theoryData;
             }
         }
 

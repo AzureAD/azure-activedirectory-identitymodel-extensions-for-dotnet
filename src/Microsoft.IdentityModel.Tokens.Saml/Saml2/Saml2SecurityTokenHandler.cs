@@ -237,6 +237,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
+            ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
@@ -272,6 +273,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (subjectConfirmation != null && subjectConfirmation.SubjectConfirmationData != null)
                     ValidateConfirmationData(samlToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
             }
+        }
+
+        /// <summary>
+        /// Validates the <see cref="Saml2SecurityToken.SigningKey"/> is an expected value.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> to validate.</param>
+        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
+        /// <remarks>If the <see cref="Saml2SecurityToken.SigningKey"/> is a <see cref="X509SecurityKey"/> then the X509Certificate2 will be validated using the CertificateValidator.</remarks>
+        protected virtual void ValidateIssuerSecurityKey(SecurityKey key, Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateIssuerSecurityKey(key, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -926,10 +939,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             foreach (var audienceRestriction in samlToken.Assertion.Conditions.AudienceRestrictions)
             {
-                if (validationParameters.AudienceValidator != null)
-                    validationParameters.AudienceValidator(audienceRestriction.Audiences, samlToken, validationParameters);
-                else
-                    Validators.ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
+                Validators.ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
             }
         }
 

@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         [Theory, MemberData(nameof(RoundTripSaml2TheoryData))]
         public void RoundTripSaml2(EnvelopedSignatureTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.WriteXml", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripSaml2", theoryData);
             try
             {
                 var serializer = new Saml2Serializer();

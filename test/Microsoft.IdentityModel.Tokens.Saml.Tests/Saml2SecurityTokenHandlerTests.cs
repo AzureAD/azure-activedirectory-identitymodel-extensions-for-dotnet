@@ -402,6 +402,163 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var actor = handler.CreateActorStringPublic(theoryData.TokenDescriptor.Subject);
         }
 
+        [Theory, MemberData(nameof(WriteTokenTheoryData))]
+        public void WriteToken(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusivePrefixList", "Signature", "SigningCredentials" } },
+                { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
+            };
+
+            try
+            {
+                var token = theoryData.Handler.WriteToken(theoryData.SecurityToken);
+                theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(validatedToken, theoryData.SecurityToken, context);
+                if (!string.IsNullOrEmpty(theoryData.InclusivePrefixList))
+                {
+                    if (!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as Saml2SecurityToken).Assertion.InclusivePrefixList))
+                        context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as Saml2SecurityToken).Assertion.InclusivePrefixList)");
+
+                    if (!string.Equals(theoryData.InclusivePrefixList, (validatedToken as Saml2SecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))
+                        context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (validatedToken as Saml2SecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))");
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> WriteTokenTheoryData
+        {
+            get
+            {
+                var key = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Audience = Default.Audience,
+                    NotBefore = Default.NotBefore,
+                    Expires = Default.Expires,
+                    Issuer = Default.Issuer,
+                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                    Subject = new ClaimsIdentity(Default.SamlClaims)
+                };
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = key
+                };
+
+                var tokenHandler = new Saml2SecurityTokenHandler();
+                var theoryData = new TheoryData<Saml2TheoryData>();
+
+                var token = tokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;
+                token.Assertion.InclusivePrefixList = "#default saml ds xml";
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    First = true,
+                    InclusivePrefixList = "#default saml ds xml",
+                    SecurityToken = token,
+                    TestId = "WithInclusivePrefixList",
+                    ValidationParameters = validationParameters
+                });
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = "WithoutInclusivePrefixList",
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKeyValidator = ValidationDelegates.IssuerSecurityKeyValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException)),
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.IssuerSecurityKeyValidatorThrows),
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    IssuerSigningKeyValidator = ValidationDelegates.IssuerSecurityKeyValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.IssuerSecurityKeyValidatorThrows) + "-false",
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException)),
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.AudienceValidatorThrows),
+                    ValidationParameters = validationParameters
+                });
+
+                validationParameters = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = false,
+                    AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
+                    IssuerSigningKey = key
+                };
+
+                theoryData.Add(new Saml2TheoryData
+                {
+                    SecurityToken = tokenHandler.CreateToken(tokenDescriptor),
+                    TestId = nameof(ValidationDelegates.AudienceValidatorThrows) + "-false",
+                    ValidationParameters = validationParameters
+                });
+
+                return theoryData;
+            }
+        }
+
         public static TheoryData<Saml2TheoryData> RoundTripActorTheoryData
         {
             get =>  new TheoryData<Saml2TheoryData>
@@ -796,7 +953,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
         }
     }
-
 }
 
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
