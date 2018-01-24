@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
-                { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusivePrefixList", "Signature", "SigningCredentials" } },
+                { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials" } },
                 { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
             };
 
@@ -418,12 +418,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(validatedToken, theoryData.SecurityToken, context);
-                if (!string.IsNullOrEmpty(theoryData.InclusivePrefixList))
+                if (!string.IsNullOrEmpty(theoryData.InclusiveNamespacesPrefixList))
                 {
-                    if (!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as Saml2SecurityToken).Assertion.InclusivePrefixList))
+                    if (!string.Equals(theoryData.InclusiveNamespacesPrefixList, (theoryData.SecurityToken as Saml2SecurityToken).Assertion.InclusiveNamespacesPrefixList))
                         context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (theoryData.SecurityToken as Saml2SecurityToken).Assertion.InclusivePrefixList)");
 
-                    if (!string.Equals(theoryData.InclusivePrefixList, (validatedToken as Saml2SecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))
+                    if (!string.Equals(theoryData.InclusiveNamespacesPrefixList, (validatedToken as Saml2SecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusiveNamespacesPrefixList))
                         context.Diffs.Add("!string.Equals(theoryData.InclusivePrefixList, (validatedToken as Saml2SecurityToken).Assertion.Signature.SignedInfo.References[0].CanonicalizingTransfrom.InclusivePrefixList))");
                 }
             }
@@ -463,12 +463,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 var theoryData = new TheoryData<Saml2TheoryData>();
 
                 var token = tokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;
-                token.Assertion.InclusivePrefixList = "#default saml ds xml";
+                token.Assertion.InclusiveNamespacesPrefixList = "#default saml ds xml";
 
                 theoryData.Add(new Saml2TheoryData
                 {
                     First = true,
-                    InclusivePrefixList = "#default saml ds xml",
+                    InclusiveNamespacesPrefixList = "#default saml ds xml",
                     SecurityToken = token,
                     TestId = "WithInclusivePrefixList",
                     ValidationParameters = validationParameters

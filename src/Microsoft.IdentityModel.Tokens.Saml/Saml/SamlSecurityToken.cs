@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/>s for this instance.
+        /// Gets the <see cref="SecurityKey"/> for this instance.
         /// </summary>
         public override SecurityKey SecurityKey
         {

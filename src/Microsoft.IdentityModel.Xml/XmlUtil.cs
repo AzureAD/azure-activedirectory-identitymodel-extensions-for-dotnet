@@ -396,12 +396,12 @@ namespace Microsoft.IdentityModel.Xml
             return LogExceptionMessage(new XmlWriteException(FormatInvariant(format, args), inner));
         }
 
-        internal static string[] TokenizeInclusivePrefixList(string prefixList)
+        internal static string[] TokenizeInclusiveNamespacesPrefixList(string inclusiveNamespacesPrefixList)
         {
-            if (prefixList == null)
+            if (inclusiveNamespacesPrefixList == null)
                 return null;
 
-            string[] prefixes = prefixList.Split(null);
+            string[] prefixes = inclusiveNamespacesPrefixList.Split(null);
             int count = 0;
             for (int i = 0; i < prefixes.Length; i++)
             {

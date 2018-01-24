@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
                 {
-                    writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusivePrefixList(InclusivePrefixList));
+                    writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusiveNamespacesPrefixList(InclusiveNamespacesPrefixList));
                     tokenStream.WriteTo(writer);
                     writer.EndCanonicalization();
                     writer.Flush();

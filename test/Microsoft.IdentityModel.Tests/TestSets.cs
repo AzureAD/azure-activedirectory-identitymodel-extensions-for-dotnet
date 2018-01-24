@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new TransformTestSet
             {
-                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(true) { InclusivePrefixList = "#default saml ds xs xsi" },
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(true) { InclusiveNamespacesPrefixList = "#default saml ds xs xsi" },
                 TestId = nameof(C14n_WithInclusivePrefix),
                 Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformWithInclusivePrefixXml(DSigPrefix, "Algorithm", SecurityAlgorithms.ExclusiveC14nWithComments, "", "<InclusiveNamespaces PrefixList=\"#default saml ds xs xsi\" xmlns=\"http://www.w3.org/2001/10/xml-exc-c14n#\" />" ) }, DSigNS)
             };

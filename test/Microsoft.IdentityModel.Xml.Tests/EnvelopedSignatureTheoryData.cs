@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 
         public string ReferenceId { get; set; }
 
-        public string InclusivePrefixList { get; set; }
+        public string InclusiveNamespacesPrefixList { get; set; }
 
         public SecurityKey SecurityKey { get; set; }
 

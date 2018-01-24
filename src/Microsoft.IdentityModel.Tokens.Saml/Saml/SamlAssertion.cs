@@ -97,9 +97,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public SamlConditions Conditions { get; set; }
 
         /// <summary>
-        /// Gets or sets the InclusivePrefixList to use when writing token.
+        /// Gets or sets the a PrefixList to use when there is a need to include InclusiveNamespaces writing token.
         /// </summary>
-        public string InclusivePrefixList { get; set; }
+        public string InclusiveNamespacesPrefixList { get; set; }
 
         /// <summary>
         /// Gets or sets the issuer in the assertion.

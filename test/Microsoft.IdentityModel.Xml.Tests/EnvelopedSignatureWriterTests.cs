@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
             try
             {
-                var envelopedWriter = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId, theoryData.InclusivePrefixList);
+                var envelopedWriter = new EnvelopedSignatureWriter(theoryData.XmlWriter, theoryData.SigningCredentials, theoryData.ReferenceId, theoryData.InclusiveNamespacesPrefixList);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)

@@ -114,9 +114,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets the InclusivePrefixList to use when writing token.
+        /// Gets or sets the a PrefixList to use when there is a need to include InclusiveNamespaces writing token.
         /// </summary>
-        public string InclusivePrefixList
+        public string InclusiveNamespacesPrefixList
         {
             get;
             set;

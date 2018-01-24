@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public SamlSecurityTokenHandler Handler { get; set; } = new SamlSecurityTokenHandler();
 
-        public string InclusivePrefixList { get; set; }
+        public string InclusiveNamespacesPrefixList { get; set; }
 
         public SamlSerializer SamlSerializer { get; set; } = new SamlSerializer();
 

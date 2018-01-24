@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Tests
                 var keyInfo = new KeyInfo();
                 keyInfo.X509Data.Add(data);
 
-                var configuration = new WsFederationConfiguration()
+                var configuration = new WsFederationConfiguration
                 {
                     Issuer = "http://fs.msidlab11.com/adfs/services/trust",
                     Signature = new Signature(AdfsV4SignedInfo)
@@ -423,14 +423,11 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SignedInfo AdfsV4SignedInfo
         {
-            get
+            get => new SignedInfo(AdfsV4Reference)
             {
-                var signedInfo = new SignedInfo();
-                signedInfo.CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#";
-                signedInfo.References.Add(AdfsV4Reference);
-                signedInfo.Prefix = "ds";
-                return signedInfo;
-            }
+                CanonicalizationMethod = "http://www.w3.org/2001/10/xml-exc-c14n#",
+                Prefix = "ds"
+            };
         }
 
         public static string X509CertificateKeyId1 { get => "6B740DD01652EECE2737E05DAE36C5D18FCB74C3"; }

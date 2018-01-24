@@ -294,7 +294,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         [Theory, MemberData(nameof(ReadSignedInfoTheoryData))]
         public void ReadSignedInfo(DSigSerializerTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.SignedInfoReadFrom", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ReadSignedInfo", theoryData);
             try
             {
                 var signedInfo = theoryData.Serializer.ReadSignedInfo(XmlUtilities.CreateDictionaryReader(theoryData.Xml));

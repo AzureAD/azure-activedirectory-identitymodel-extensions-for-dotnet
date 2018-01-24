@@ -49,9 +49,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
 
         /// <summary>
-        /// Gets or sets the <see cref="DSigSerializer"/> to use.
+        /// Gets or sets the <see cref="DSigSerializer"/> to use for reading / writing the <see cref="Xml.Signature"/>
         /// </summary>
         /// <exception cref="ArgumentNullException">if value is null.</exception>
+        /// <remarks>Passed to <see cref="EnvelopedSignatureReader"/> and <see cref="EnvelopedSignatureWriter"/>.</remarks>
         public DSigSerializer DSigSerializer
         {
             get => _dsigSerializer;
@@ -1537,7 +1538,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // dispose the inner writer, which we don't properly own.
             EnvelopedSignatureWriter signatureWriter = null;
             if (assertion.SigningCredentials != null)
-                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value, assertion.InclusivePrefixList) { DSigSerializer = DSigSerializer };
+                writer = signatureWriter = new EnvelopedSignatureWriter(writer, assertion.SigningCredentials, assertion.Id.Value, assertion.InclusiveNamespacesPrefixList) { DSigSerializer = DSigSerializer };
 
             if (assertion.Subject == null)
             {

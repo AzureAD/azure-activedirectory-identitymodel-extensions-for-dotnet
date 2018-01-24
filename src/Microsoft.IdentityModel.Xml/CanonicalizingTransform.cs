@@ -49,9 +49,9 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Gets or sets the inclusive prefix list
+        /// Gets or sets the a PrefixList to use when there is a need to include InclusiveNamespaces writing token.
         /// </summary>
-        public string InclusivePrefixList
+        public string InclusiveNamespacesPrefixList
         {
             get;
             set;

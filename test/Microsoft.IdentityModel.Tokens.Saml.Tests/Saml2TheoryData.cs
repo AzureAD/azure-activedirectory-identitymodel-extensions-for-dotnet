@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public Saml2SecurityTokenHandler Handler { get; set; } = new Saml2SecurityTokenHandlerPublic();
 
-        public string InclusivePrefixList { get; set; }
+        public string InclusiveNamespacesPrefixList { get; set; }
 
         public Saml2Serializer Saml2Serializer { get; set; } = new Saml2Serializer();
 

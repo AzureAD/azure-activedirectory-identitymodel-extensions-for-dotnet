@@ -41,13 +41,13 @@ namespace Microsoft.IdentityModel.Xml
     /// calling WriteSignature to indicate the location inside the envelope where
     /// the signature should be inserted.
     /// </summary>
-    public sealed class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
+    public class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
     {
         private MemoryStream _canonicalStream;
         private bool _disposed;
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
-        private string _inclusivePrefixList;
+        private string _inclusiveNamespacesPrefixList;
         private XmlWriter _originalWriter;
         private string _referenceId;
         private long _signaturePosition;
@@ -89,12 +89,12 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(referenceId))
                 throw LogArgumentNullException(nameof(referenceId));
 
-            _inclusivePrefixList = inclusivePrefixList;
+            _inclusiveNamespacesPrefixList = inclusivePrefixList;
             _referenceId = referenceId;
             _writerStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
             InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
-            InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList));
+            InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusiveNamespacesPrefixList(_inclusiveNamespacesPrefixList));
             _signaturePosition = -1;
         }
 
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Xml
         private Signature CreateSignature()
         {
             var hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
-            var reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusivePrefixList = _inclusivePrefixList })
+            var reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
             {
                 Id = _referenceId,
                 DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Xml
 
             var canonicalSignedInfoStream = new MemoryStream();
             var signedInfoWriter = CreateTextWriter(Stream.Null);
-            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, XmlUtil.TokenizeInclusivePrefixList(_inclusivePrefixList));
+            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, XmlUtil.TokenizeInclusiveNamespacesPrefixList(_inclusiveNamespacesPrefixList));
             DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
             signedInfoWriter.EndCanonicalization();
             signedInfoWriter.Flush();

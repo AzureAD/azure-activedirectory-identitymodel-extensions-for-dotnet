@@ -460,7 +460,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="reference"/> is null.</exception>
         /// <exception cref="XmlReadException">if there is a problem reading the XML.</exception>
-        public void ReadTransforms(XmlReader reader, Reference reference)
+        public virtual void ReadTransforms(XmlReader reader, Reference reference)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
@@ -502,7 +502,7 @@ namespace Microsoft.IdentityModel.Xml
                         if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
                         {
                             bool isOnEmptyElement = reader.IsEmptyElement;
-                            reference.CanonicalizingTransfrom.InclusivePrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
+                            reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
                             reader.ReadStartElement();
                             if (!isOnEmptyElement)
                                 reader.ReadEndElement();
@@ -781,11 +781,12 @@ namespace Microsoft.IdentityModel.Xml
                 // @Algorithm
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.Algorithm, reference.CanonicalizingTransfrom.Algorithm);
 
-                // <InclusivePrefixList>
-                if (!string.IsNullOrEmpty(reference.CanonicalizingTransfrom.InclusivePrefixList))
+                // <InclusiveNamespaces>
+                if (!string.IsNullOrEmpty(reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList))
                 {
+                    // @PrefixList
                     writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace);
-                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.PrefixList, reference.CanonicalizingTransfrom.InclusivePrefixList);
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.PrefixList, reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList);
                     writer.WriteEndElement();
                 }
 
