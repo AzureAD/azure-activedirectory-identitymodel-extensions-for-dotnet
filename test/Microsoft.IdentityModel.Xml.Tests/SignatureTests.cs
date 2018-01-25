@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             var context = TestUtilities.WriteHeader($"{this}.Verify", theoryData);
             try
             {
-                theoryData.Signature.Verify(theoryData.SecurityKey);
+                theoryData.Signature.Verify(theoryData.SecurityKey, theoryData.CryptoProviderFactory);
             }
             catch (Exception ex)
             {
@@ -141,18 +141,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
-                var key = Default.AsymmetricSigningKey;
-                var cryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
-                key.CryptoProviderFactory = cryptoProviderFactory;
-
-                var keyUnknownDigest = Default.AsymmetricSigningKey;
-                cryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature })
-                {
-                    SignatureProvider = new CustomSignatureProvider(key, SecurityAlgorithms.RsaSha256Signature)
-                };
-
-                keyUnknownDigest.CryptoProviderFactory = cryptoProviderFactory;
-
                 var signatureUnknownReferenceDigestAlg = Default.Signature;
                 signatureUnknownReferenceDigestAlg.SignedInfo.References[0].DigestMethod = $"_{SecurityAlgorithms.Sha256Digest}";
 
@@ -175,6 +163,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     },
                     new SignatureTheoryData
                     {
+                        CryptoProviderFactory = null,
+                        ExpectedException = ExpectedException.ArgumentNullException("cryptoProviderFactory"),
+                        SecurityKey = Default.AsymmetricSigningKey,
+                        Signature = new Signature(),
+                        TestId = "CryptoProviderFactory:Null"
+                    },
+                    new SignatureTheoryData
+                    {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30207:"),
                         SecurityKey = Default.AsymmetricSigningKey,
                         Signature = new Signature(new SignedInfo{SignatureMethod = SecurityAlgorithms.Aes128CbcHmacSha256 }),
@@ -182,15 +178,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     },
                     new SignatureTheoryData
                     {
+                        CryptoProviderFactory =  new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature }),
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30203:"),
-                        SecurityKey = key,
+                        SecurityKey = Default.AsymmetricSigningKey,
                         Signature = new Signature(new SignedInfo{SignatureMethod = SecurityAlgorithms.RsaSha256Signature }),
                         TestId = "SignatureProvider.CreateForVerifying:ReturnsNull"
                     },
                     new SignatureTheoryData
                     {
+                        CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature })
+                        {
+                            SignatureProvider = new CustomSignatureProvider(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSha256Signature)
+                        },
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30208:"),
-                        SecurityKey = keyUnknownDigest,
+                        SecurityKey = Default.AsymmetricSigningKey,
                         Signature = signatureUnknownReferenceDigestAlg,
                         TestId = "Reference:UnknownDigestAlg",
                     }
@@ -214,6 +215,12 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
     public class SignatureTheoryData : TheoryDataBase
     {
+        public CryptoProviderFactory CryptoProviderFactory
+        {
+            get;
+            set;
+        } = CryptoProviderFactory.Default;
+
         public SecurityKey SecurityKey
         {
             get;

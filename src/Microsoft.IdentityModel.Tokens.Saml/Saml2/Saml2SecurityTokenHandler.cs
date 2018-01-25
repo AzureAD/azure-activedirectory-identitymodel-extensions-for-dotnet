@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 try
                 {
-                    samlToken.Assertion.Signature.Verify(key);
+                    samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
                     LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                     samlToken.SigningKey = key;
                     return samlToken;

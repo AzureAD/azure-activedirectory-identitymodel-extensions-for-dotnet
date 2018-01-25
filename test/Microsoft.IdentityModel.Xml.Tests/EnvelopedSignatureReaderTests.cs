@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     if (envelopedReader.Signature == null)
                         Assert.False(true, "theoryData.ExpectSignature == true && envelopedReader.ExpectSignature == null");
 
-                    envelopedReader.Signature.Verify(theoryData.SecurityKey);
+                    envelopedReader.Signature.Verify(theoryData.SecurityKey, theoryData.SecurityKey.CryptoProviderFactory);
                 }
 
                 theoryData.ExpectedException.ProcessNoException();
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     if (envelopedReader.Signature == null)
                         Assert.False(true, "theoryData.ExpectSignature == true && envelopedReader.Signature == null");
 
-                    envelopedReader.Signature.Verify(theoryData.SecurityKey);
+                    envelopedReader.Signature.Verify(theoryData.SecurityKey, theoryData.CryptoProviderFactory);
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -140,7 +140,15 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         First = true,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed) + " No Key",
+                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed) + ":SecurityKey==null",
+                        Xml = ReferenceXml.Saml2Token_Valid_Signed
+                    },
+                    new EnvelopedSignatureTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        SecurityKey = KeyingMaterial.DefaultAADSigningKey,
+                        CryptoProviderFactory = null,
+                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed) + ":CryptoProviderFactory==null",
                         Xml = ReferenceXml.Saml2Token_Valid_Signed
                     },
                     new EnvelopedSignatureTheoryData

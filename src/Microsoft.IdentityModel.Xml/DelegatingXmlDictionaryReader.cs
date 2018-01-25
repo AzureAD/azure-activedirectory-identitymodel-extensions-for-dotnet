@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Xml
         private XmlDictionaryReader _innerReader;
 
         /// <summary>
-        /// sdaf
+        /// Creates a new <see cref="DelegatingXmlDictionaryReader"/>.
         /// </summary>
         protected DelegatingXmlDictionaryReader()
         {

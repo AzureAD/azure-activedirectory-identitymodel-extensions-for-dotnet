@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
@@ -141,13 +142,26 @@ namespace Microsoft.IdentityModel.Xml
 
         private Signature CreateSignature()
         {
-            var hashAlgorithm = _signingCredentials.Key.CryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
-            var reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+            CryptoProviderFactory cryptoProviderFactory = _signingCredentials.CryptoProviderFactory ?? _signingCredentials.Key.CryptoProviderFactory;
+            var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
+            if (hashAlgorithm == null)
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Digest)));
+
+            Reference reference = null;
+            try
             {
-                Id = _referenceId,
-                DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
-                DigestMethod = _signingCredentials.Digest
-            };
+                reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+                {
+                    Id = _referenceId,
+                    DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
+                    DigestMethod = _signingCredentials.Digest
+                };
+            }
+            finally
+            {
+                if (hashAlgorithm != null)
+                    cryptoProviderFactory.ReleaseHashAlgorithm(hashAlgorithm);
+            }
 
             var signedInfo = new SignedInfo(reference)
             {
@@ -157,17 +171,29 @@ namespace Microsoft.IdentityModel.Xml
 
             var canonicalSignedInfoStream = new MemoryStream();
             var signedInfoWriter = CreateTextWriter(Stream.Null);
-            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, XmlUtil.TokenizeInclusiveNamespacesPrefixList(_inclusiveNamespacesPrefixList));
+            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
             DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
             signedInfoWriter.EndCanonicalization();
             signedInfoWriter.Flush();
-            var provider = _signingCredentials.Key.CryptoProviderFactory.CreateForSigning(_signingCredentials.Key, signedInfo.SignatureMethod);
-            return new Signature
+
+            var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
+            if (provider == null)
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
+
+            try
             {
-                KeyInfo = new KeyInfo(_signingCredentials.Key),
-                SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
-                SignedInfo = signedInfo,
-            };
+                return new Signature
+                {
+                    KeyInfo = new KeyInfo(_signingCredentials.Key),
+                    SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
+                    SignedInfo = signedInfo,
+                };
+            }
+            finally
+            {
+                if (provider != null)
+                    cryptoProviderFactory.ReleaseSignatureProvider(provider);
+            }
         }
 
         /// <summary>

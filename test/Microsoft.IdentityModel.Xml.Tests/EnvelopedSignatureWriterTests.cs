@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 var xml = Encoding.UTF8.GetString(stream.ToArray());
                 samlAssertion.SigningCredentials = null;
                 var samlAssertion2 = serializer.ReadAssertion(XmlUtilities.CreateDictionaryReader(xml));
-                samlAssertion2.Signature.Verify(theoryData.SigningCredentials.Key);
+                samlAssertion2.Signature.Verify(theoryData.SigningCredentials.Key, theoryData.CryptoProviderFactory);
                 IdentityComparer.AreEqual(samlAssertion, samlAssertion2, context);
             }
             catch (Exception ex)

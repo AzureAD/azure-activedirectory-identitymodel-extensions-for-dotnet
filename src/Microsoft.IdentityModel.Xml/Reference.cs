@@ -58,8 +58,10 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Initializes an instance of <see cref="Reference"/>
         /// </summary>
-        /// <param name="transform">the <see cref="Transform"/> to apply</param>
+        /// <param name="transform">the <see cref="Transform"/> to apply.</param>
         /// <param name="canonicalizingTransfrom">the <see cref="CanonicalizingTransfrom"/> to use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="transform"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="canonicalizingTransfrom"/> is null.</exception>
         public Reference(Transform transform, CanonicalizingTransfrom canonicalizingTransfrom)
         {
             if (transform == null)
@@ -72,6 +74,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Gets or sets the CanonicalizingTransform
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public CanonicalizingTransfrom CanonicalizingTransfrom
         {
             get => _canonicalizingTransfrom;
@@ -106,16 +109,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             get => _tokenStream;
             set => _tokenStream = value ?? throw LogArgumentNullException(nameof(value));
-        }
-
-        /// <summary>
-        /// Gets or set the <see cref="TransformFactory"/> to use when processing references.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
-        public TransformFactory TransformFactory
-        {
-            get => _transformFactory;
-            set => _transformFactory = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>

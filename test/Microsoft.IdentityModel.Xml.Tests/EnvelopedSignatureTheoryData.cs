@@ -33,6 +33,8 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class EnvelopedSignatureTheoryData : TheoryDataBase
     {
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = CryptoProviderFactory.Default;
+
         public bool ExpectSignature { get; set; } = true;
 
         public string ReferenceId { get; set; }

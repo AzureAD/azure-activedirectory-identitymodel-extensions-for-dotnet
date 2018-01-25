@@ -346,7 +346,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 if (theoryData.SigningCredentials != null)
                 {
                     assertion.SigningCredentials = theoryData.SigningCredentials;
-                    assertion.Signature.Verify(theoryData.SigningCredentials.Key);
+                    assertion.Signature.Verify(theoryData.SigningCredentials.Key, theoryData.SigningCredentials.Key.CryptoProviderFactory);
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);

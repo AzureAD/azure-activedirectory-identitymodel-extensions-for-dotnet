@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 }
 
                 if (theoryData.SigingKey != null)
-                    configuration.Signature.Verify(theoryData.SigingKey);
+                    configuration.Signature.Verify(theoryData.SigingKey, theoryData.SigingKey.CryptoProviderFactory);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreWsFederationConfigurationsEqual(configuration, theoryData.Configuration, context);
@@ -512,7 +512,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         // assign signingcredentials and verify the signature of created metadata
                         configuration.SigningCredentials = theoryData.Configuration.SigningCredentials;
                         if (configuration.SigningCredentials != null)
-                            configuration.Signature.Verify(configuration.SigningCredentials.Key);
+                            configuration.Signature.Verify(configuration.SigningCredentials.Key, configuration.SigningCredentials.Key.CryptoProviderFactory);
 
                         // remove the signature and do the comparison
                         configuration.Signature = null;

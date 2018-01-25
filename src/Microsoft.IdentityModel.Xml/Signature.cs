@@ -91,25 +91,29 @@ namespace Microsoft.IdentityModel.Xml
         /// Verifies the signature over the SignedInfo.
         /// </summary>
         /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
+        /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> to obtain cryptographic operators.</param>
         /// <exception cref="ArgumentNullException"> if <paramref name="key"/> is null.</exception>
-        /// <exception cref="ArgumentNullException"> if <paramref name="key"/>.CryptoProviderFactory is null.</exception>
+        /// <exception cref="ArgumentNullException"> if <paramref name="cryptoProviderFactory"/> is null.</exception>
         /// <exception cref="XmlValidationException"> if <see cref="SignedInfo"/> null.</exception>
         /// <exception cref="XmlValidationException"> if <see cref="SignedInfo.SignatureMethod"/> is not supported.</exception>
         /// <exception cref="XmlValidationException"> if signature does not validate.</exception>
-        public void Verify(SecurityKey key)
+        public void Verify(SecurityKey key, CryptoProviderFactory cryptoProviderFactory)
         {
             if (key == null)
                 throw LogArgumentNullException(nameof(key));
 
+            if (cryptoProviderFactory == null)
+                throw LogArgumentNullException(nameof(cryptoProviderFactory));
+
             if (SignedInfo == null)
                 throw LogValidationException(LogMessages.IDX30212);
 
-            if (!key.CryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
-                throw LogValidationException(LogMessages.IDX30207, SignedInfo.SignatureMethod, key.CryptoProviderFactory.GetType());
+            if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
+                throw LogValidationException(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType());
 
-            var signatureProvider = key.CryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
+            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider == null)
-                throw LogValidationException(LogMessages.IDX30203, key.CryptoProviderFactory, key, SignedInfo.SignatureMethod);
+                throw LogValidationException(LogMessages.IDX30203, cryptoProviderFactory, key, SignedInfo.SignatureMethod);
 
             try
             {
@@ -117,16 +121,16 @@ namespace Microsoft.IdentityModel.Xml
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
-                        throw LogValidationException(LogMessages.IDX30200, key.CryptoProviderFactory, key);
+                        throw LogValidationException(LogMessages.IDX30200, cryptoProviderFactory, key);
                 }
+
+                SignedInfo.Verify(cryptoProviderFactory);
             }
             finally
             {
                 if (signatureProvider != null)
-                    key.CryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                    cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
-
-            SignedInfo.Verify(key.CryptoProviderFactory);
         }
     }
 }

@@ -60,6 +60,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Gets or sets the <see cref="DSigSerializer"/> to use when reading XmlDSig elements.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public DSigSerializer Serializer
         {
             get => _dsigSerializer;
