@@ -144,9 +144,8 @@ if ($build -eq "YES")
 
     Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\$slnFile"
     Start-Process -wait -NoNewWindow $dotnetexe "restore $root\$slnFile"
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' $root\$slnFile"
-    Start-Process -wait -NoNewWindow $dotnetexe "build $root\$slnFile"
-
+    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' -c $buildType $root\$slnFile"
+    Start-Process -wait -NoNewWindow $dotnetexe "build -c $buildType $root\$slnFile"
     WriteSectionFooter("End Build");
 }
 
