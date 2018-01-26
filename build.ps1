@@ -68,7 +68,7 @@ WriteSectionFooter("End build.ps1 - parameters");
 $artifactsRoot = "$root\artifacts";
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
-$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/release").InnerText;
+$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/releaseVersion").InnerText;
 $nugetPreview = $buildConfiguration.SelectSingleNode("root/nugetPreview").InnerText;
 $rootNode = $buildConfiguration.root
 
@@ -115,8 +115,16 @@ if ($build -eq "YES")
 
     $date = Get-Date
     $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
-    $versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
-    Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $dateTimeStamp));
+    if ($nugetPreview -eq "")
+    {
+        $versionProps = "<Project><PropertyGroup><VersionPrefix>"+$releaseVersion+"</VersionPrefix><VersionSuffix></VersionSuffix></PropertyGroup></Project>"
+    }
+    else
+    {
+        $versionProps = "<Project><PropertyGroup><VersionPrefix>"+$releaseVersion+"</VersionPrefix><VersionSuffix>" + $nugetPreview + "-$dateTimeStamp" + "</VersionSuffix></PropertyGroup></Project>"
+    }
+
+    Set-Content "build\dynamicVersion.props" $versionProps;
 
     if ($updateAssemblyInfo -eq "YES")
     {
