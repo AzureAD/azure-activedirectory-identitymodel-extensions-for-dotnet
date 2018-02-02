@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
                             _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
 #else
                             _privateKey = _certificate.PrivateKey;
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-#if NETSTANDARD1_4
+#if NETSTANDARD1_4 || NET46
                             _publicKey = RSACertificateExtensions.GetRSAPublicKey(_certificate);
 #else
                             _publicKey = _certificate.PublicKey.Key;
