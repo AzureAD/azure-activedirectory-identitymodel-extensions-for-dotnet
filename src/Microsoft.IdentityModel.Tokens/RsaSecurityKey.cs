@@ -48,14 +48,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
-#if (NET45 || NET451)
-            rsaParameters = RemoveLeadingZero(rsaParameters);
-#endif
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
 
+#if (NET45 || NET451)
+            rsaParameters = RemoveLeadingZero(rsaParameters);
+#endif
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
+            _foundPrivateKey = _hasPrivateKey.Value ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
+            _foundPrivateKeyDetermined = true;
             Parameters = rsaParameters;
         }
 
@@ -65,32 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="rsa"><see cref="RSA"/></param>
         public RsaSecurityKey(RSA rsa)
         {
-            if (rsa == null)
-                throw LogHelper.LogArgumentNullException("rsa");
-#if (NET45 || NET451)
-            if (rsa as RSACryptoServiceProvider != null)
-            {
-                try
-                {
-                    var parameters = rsa.ExportParameters(true);
-                    parameters = RemoveLeadingZero(parameters);
-                    rsa.ImportParameters(parameters);
-                }
-                catch (Exception)
-                {
-                    try
-                    {
-                        var parameters = rsa.ExportParameters(false);
-                        parameters = RemoveLeadingZero(parameters);
-                        rsa.ImportParameters(parameters);
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-            }
-#endif
-            Rsa = rsa;
+            Rsa = rsa ?? throw LogHelper.LogArgumentNullException(nameof(rsa));
         }
 
         /// <summary>
@@ -141,25 +118,32 @@ namespace Microsoft.IdentityModel.Tokens
                     return _foundPrivateKey;
 
                 _foundPrivateKeyDetermined = true;
-
                 if (Rsa != null)
                 {
                     try
                     {
-                        Parameters = Rsa.ExportParameters(true);                       
+                        var parameters = Rsa.ExportParameters(true);
+                        if (parameters.D != null && parameters.DP != null && parameters.DQ != null &&
+                            parameters.P != null && parameters.Q != null && parameters.InverseQ != null)
+                            _foundPrivateKey = PrivateKeyStatus.Exists;
+                        else
+                            _foundPrivateKey = PrivateKeyStatus.DoesNotExist;
+
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         _foundPrivateKey = PrivateKeyStatus.Unknown;
                         return _foundPrivateKey;
                     }
                 }
-
-                if (Parameters.D != null && Parameters.DP != null && Parameters.DQ != null &&
-                    Parameters.P != null && Parameters.Q != null && Parameters.InverseQ != null)
-                    _foundPrivateKey = PrivateKeyStatus.Exists;
                 else
-                    _foundPrivateKey = PrivateKeyStatus.DoesNotExist;
+                {
+                    if (Parameters.D != null && Parameters.DP != null && Parameters.DQ != null &&
+                        Parameters.P != null && Parameters.Q != null && Parameters.InverseQ != null)
+                        _foundPrivateKey = PrivateKeyStatus.Exists;
+                    else
+                        _foundPrivateKey = PrivateKeyStatus.DoesNotExist;
+                }
 
                 return _foundPrivateKey;
             }           
