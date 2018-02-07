@@ -1253,38 +1253,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
         }
 
-        [Fact]
-        public void GenerateAndValidateTokenWithLeadingZero()
-        {
-            var expectedException = ExpectedException.NoExceptionExpected;
-
-            var handler = new JwtSecurityTokenHandler();
-            var key = new RsaSecurityKey(PrependZeroToRSAParameters(KeyingMaterial.RsaParameters_2048));
-
-            try
-            {
-                var descriptor = new SecurityTokenDescriptor()
-                {
-                    SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256)
-                };
-                var token = handler.CreateEncodedJwt(descriptor);
-
-                var validationParameters = new TokenValidationParameters()
-                {
-                    IssuerSigningKey = key,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-                handler.ValidateToken(token, validationParameters, out SecurityToken securityToken);
-
-                expectedException.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                expectedException.ProcessException(ex);
-            }
-        }
-
         public static TheoryData<JwtTheoryData> ValidateTokenTheoryData
         {
             get
@@ -1589,32 +1557,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000")
                 }
             };
-        }
-
-        private RSAParameters PrependZeroToRSAParameters(RSAParameters rsaParameters)
-        {
-            return new RSAParameters()
-            {
-                Exponent = PrependZero(rsaParameters.Exponent),
-                Modulus = PrependZero(rsaParameters.Modulus),
-                D = PrependZero(rsaParameters.D),
-                P = PrependZero(rsaParameters.P),
-                Q = PrependZero(rsaParameters.Q),
-                DP = PrependZero(rsaParameters.DP),
-                DQ = PrependZero(rsaParameters.DQ),
-                InverseQ = PrependZero(rsaParameters.InverseQ)
-            };
-        }
-
-        private byte[] PrependZero(byte[] array)
-        {
-            if (array == null)
-                return null;
-
-            byte[] newArray = new byte[array.Length + 1];
-            array.CopyTo(newArray, 1);
-            newArray[0] = 0x00;
-            return newArray;
         }
     }
 
