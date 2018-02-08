@@ -25,7 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// Constants for Json Web tokens.

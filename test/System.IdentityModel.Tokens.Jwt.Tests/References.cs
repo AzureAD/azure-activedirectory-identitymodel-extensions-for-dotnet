@@ -32,7 +32,12 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// references from https://tools.ietf.org/html/rfc7520

@@ -30,7 +30,12 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// This class is used to define the construction of a JWT for testing purposes.

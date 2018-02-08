@@ -27,7 +27,11 @@
 
 using System;
 using System.Collections.Generic;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;

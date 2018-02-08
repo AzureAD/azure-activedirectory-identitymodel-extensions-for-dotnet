@@ -30,7 +30,12 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// Used in extensibility tests to ensure that the same token flows through validation.

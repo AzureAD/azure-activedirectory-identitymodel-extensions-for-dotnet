@@ -29,7 +29,12 @@ using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json;
 using Xunit;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// Contains theory data shared between different tests

@@ -28,7 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;

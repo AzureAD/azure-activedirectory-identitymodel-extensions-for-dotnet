@@ -27,7 +27,12 @@
 
 using Xunit;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     public class JsonExtensionsTests
     {

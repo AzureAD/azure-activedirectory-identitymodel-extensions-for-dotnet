@@ -27,8 +27,16 @@
 
 using System;
 using System.Collections.Generic;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+<<<<<<< HEAD
 using Microsoft.IdentityModel.Logging;
+=======
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
+
+>>>>>>> ifdef namespace
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

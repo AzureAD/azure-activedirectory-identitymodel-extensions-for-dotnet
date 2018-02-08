@@ -26,7 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;

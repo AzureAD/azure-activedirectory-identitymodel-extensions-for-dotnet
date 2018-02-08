@@ -26,7 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {

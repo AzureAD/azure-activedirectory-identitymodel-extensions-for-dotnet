@@ -28,7 +28,11 @@
 using System;
 using System.Collections.Generic;
 #if !CrossVersionTokenValidation
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 #endif
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
