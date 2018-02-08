@@ -33,7 +33,12 @@ using Xunit;
 // since we are in the System ns, we need to map to M.IM.Tokens
 using Token = Microsoft.IdentityModel.Tokens.SecurityToken;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// Test some key extensibility scenarios

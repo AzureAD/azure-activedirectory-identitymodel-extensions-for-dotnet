@@ -28,7 +28,11 @@
 // System.IdentityModel.Tokens.Jwt
 // Range: 12000 - 12999
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// Log messages and codes

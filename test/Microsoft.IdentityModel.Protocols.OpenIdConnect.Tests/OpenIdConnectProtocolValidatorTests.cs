@@ -29,7 +29,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;

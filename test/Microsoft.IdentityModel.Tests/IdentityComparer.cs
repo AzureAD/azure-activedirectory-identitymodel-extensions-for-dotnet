@@ -41,7 +41,11 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Newtonsoft.Json.Linq;
 #if !CrossVersionTokenValidation
+#if System
 using System.IdentityModel.Tokens.Jwt;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+#endif
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 #endif

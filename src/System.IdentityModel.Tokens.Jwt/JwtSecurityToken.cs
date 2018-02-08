@@ -28,9 +28,14 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
+#if System
+using Microsoft.IdentityModel.Tokens;
 namespace System.IdentityModel.Tokens.Jwt
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).

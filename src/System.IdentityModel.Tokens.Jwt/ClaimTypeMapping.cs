@@ -28,7 +28,11 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// Defines the inbound and outbound mapping for claim claim types from jwt to .net claim 

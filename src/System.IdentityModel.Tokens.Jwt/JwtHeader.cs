@@ -29,7 +29,12 @@ using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 

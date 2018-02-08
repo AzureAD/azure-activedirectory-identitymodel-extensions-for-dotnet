@@ -28,7 +28,11 @@
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     public class JwtTheoryData : TheoryDataBase
     {

@@ -30,7 +30,12 @@ using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt.Tests
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+#endif
 {
     /// <summary>
     /// 

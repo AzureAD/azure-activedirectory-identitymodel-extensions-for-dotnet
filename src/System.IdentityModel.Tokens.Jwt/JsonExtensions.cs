@@ -28,7 +28,12 @@
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// Delegate that can be set on <see cref="JsonExtensions.Serializer"/> to control serialization of objects into JSON.

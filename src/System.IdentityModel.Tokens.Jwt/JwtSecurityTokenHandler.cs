@@ -38,7 +38,12 @@ using Microsoft.IdentityModel.Tokens;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
+#if System
 namespace System.IdentityModel.Tokens.Jwt
+#else
+using System;
+namespace Microsoft.IdentityModel.Tokens.Jwt
+#endif
 {
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
@@ -304,11 +309,17 @@ namespace System.IdentityModel.Tokens.Jwt
                 _defaultTokenLifetimeInMinutes = value;
             }
         }
-
+#if System
         /// <summary>
         /// Gets the type of the <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.
         /// </summary>
         /// <return>The type of <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>
+#else
+        /// <summary>
+        /// Gets the type of the <see cref="Microsoft.IdentityModel.Tokens.Jwt.JwtSecurityToken" />
+        /// </summary>
+        /// <return>The type of <see cref="Microsoft.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>
+#endif
         public override Type TokenType
         {
             get { return typeof(JwtSecurityToken); }
