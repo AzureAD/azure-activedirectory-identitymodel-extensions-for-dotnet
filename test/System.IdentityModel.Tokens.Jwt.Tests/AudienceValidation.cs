@@ -27,8 +27,8 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -38,9 +38,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void Variations()
         {
-            var context = new CompareContext();
-            RunAudienceVariation(ClaimSets.MultipleAudiences(), IdentityUtilities.DefaultAudiences, context);
-            RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { IdentityUtilities.DefaultAudience }, context);
+            var context = new CompareContext { IgnoreType = true };
+            RunAudienceVariation(ClaimSets.MultipleAudiences(), Default.Audiences, context);
+            RunAudienceVariation(ClaimSets.SingleAudience(), new List<string> { Default.Audience }, context);
 
             TestUtilities.AssertFailIfErrors("AudienceValidation: ", context.Diffs);
         }
@@ -48,19 +48,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         private void RunAudienceVariation(List<Claim> audienceClaims, List<string> expectedAudiences, CompareContext context)
         {
             var handler = new JwtSecurityTokenHandler();
-            var tokenDescriptor = IdentityUtilities.DefaultAsymmetricSecurityTokenDescriptor(audienceClaims);
+            var tokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(audienceClaims);
             tokenDescriptor.Audience = null;
             var jwt = handler.CreateEncodedJwt(tokenDescriptor);
 
             SecurityToken token = null;
-            var claimsPrincipal = handler.ValidateToken(jwt, IdentityUtilities.DefaultAsymmetricTokenValidationParameters, out token);
+            var claimsPrincipal = handler.ValidateToken(jwt, Default.AsymmetricSignTokenValidationParameters, out token);
             var jwtToken = token as JwtSecurityToken;
             var audiences = jwtToken.Audiences;
 
             IdentityComparer.AreEqual(audiences, expectedAudiences as IEnumerable<string>, context);
 
             ClaimsIdentity identity = claimsPrincipal.Identity as ClaimsIdentity;
-            IdentityComparer.AreEqual(identity.FindAll(JwtRegisteredClaimNames.Aud), audienceClaims, context);
+            IdentityComparer.AreEqual(identity.FindAll(JwtRegisteredClaimNames.Aud), audienceClaims.AsReadOnly(), context);
         }
     }
 }

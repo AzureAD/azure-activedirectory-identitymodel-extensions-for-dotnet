@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
+using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         public X509SecurityKey(X509Certificate2 certificate)
         {
             if (certificate == null)
-                throw new ArgumentNullException("certificate");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("certificate"));
 
             _certificate = certificate;
             KeyId = certificate.Thumbprint;
@@ -135,9 +135,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
+        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
         public override bool HasPrivateKey
         {
             get { return (PrivateKey != null); }
+        }
+
+        /// <summary>
+        /// Gets an enum indicating if a private key exists.
+        /// </summary>
+        /// <return>'Exists' if private key exists for sure; 'DoesNotExist' if private key doesn't exist for sure; 'Unknown' if we cannot determine.</return>
+        public override PrivateKeyStatus PrivateKeyStatus
+        {
+            get
+            {
+                return PrivateKey == null ? PrivateKeyStatus.DoesNotExist : PrivateKeyStatus.Exists;
+            }
         }
 
         /// <summary>
@@ -158,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 return false;
 
-            return other.Certificate.Thumbprint.ToString() == this._certificate.Thumbprint.ToString();
+            return other.Certificate.Thumbprint.ToString() == _certificate.Thumbprint.ToString();
         }
 
         /// <summary>

@@ -28,6 +28,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Logging
 {
@@ -51,6 +52,16 @@ namespace Microsoft.IdentityModel.Logging
         /// Static logger that is exposed externally. An external application or framework can hook up a listener to this event source to log data in a custom way.
         /// </summary>
         public static IdentityModelEventSource Logger { get; }
+
+        /// <summary>
+        /// Flag which indicates whether or not PII is shown in logs. False by default.
+        /// </summary>
+        public static bool ShowPII { get; set; } = false;
+
+        /// <summary>
+        /// String that is used in place of any arguments to log messages if the 'ShowPII' flag is set to false.
+        /// </summary>
+        public static string HiddenPIIString { get; } = "[PII is hidden by default. Set the 'ShowPII' flag in IdentityModelEventSource.cs to true to reveal it.]";
 
         /// <summary>
         /// Writes an event log by using the provided string argument and current UTC time.
@@ -79,7 +90,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled())
             {
                 if (args != null)
-                    WriteAlways(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteAlways(FormatInvariant(message, args));
                 else
                     WriteAlways(message);
             }
@@ -110,7 +121,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Verbose)
             {
                 if (args != null)
-                    WriteVerbose(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteVerbose(FormatInvariant(message, args));
                 else
                     WriteVerbose(message);
             }
@@ -141,7 +152,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Informational)
             {
                 if (args != null)
-                    WriteInformation(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteInformation(FormatInvariant(message, args));
                 else
                     WriteInformation(message);
             }
@@ -170,7 +181,7 @@ namespace Microsoft.IdentityModel.Logging
         public void WriteWarning(string message, params object[] args)
         {
             if (args != null)
-                WriteWarning(string.Format(CultureInfo.InvariantCulture, message, args));
+                WriteWarning(FormatInvariant(message, args));
             else
                 WriteWarning(message);
         }
@@ -200,7 +211,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Error)
             {
                 if (args != null)
-                    WriteError(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteError(FormatInvariant(message, args));
                 else
                     WriteError(message);
             }
@@ -231,7 +242,7 @@ namespace Microsoft.IdentityModel.Logging
             if (IsEnabled() && LogLevel >= EventLevel.Critical)
             {
                 if (args != null)
-                    WriteCritical(string.Format(CultureInfo.InvariantCulture, message, args));
+                    WriteCritical(FormatInvariant(message, args));
                 else
                     WriteCritical(message);
             }
@@ -261,7 +272,11 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (innerException != null)
             {
-                message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
+                // if PII is turned off and 'innerException' is a System exception only display the exception type
+                if (!ShowPII && !LogHelper.IsCustomException(innerException))
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.GetType());
+                else // otherwise it's safe to display the entire exception message
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
             }
 
             switch (level)
@@ -285,7 +300,7 @@ namespace Microsoft.IdentityModel.Logging
                     WriteVerbose(message, args);
                     break;
                 default:
-                    WriteError(string.Format(CultureInfo.InvariantCulture, LogMessages.MIML11002, level));
+                    WriteError(FormatInvariant(LogMessages.MIML10002, level));
                     WriteError(message, args);
                     break;
             }
@@ -305,8 +320,7 @@ namespace Microsoft.IdentityModel.Logging
                 return string.Empty;
 
             if (args != null)
-                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), 
-                    string.Format(CultureInfo.InvariantCulture, message, args));
+                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), FormatInvariant(message, args));
 
             return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
         }

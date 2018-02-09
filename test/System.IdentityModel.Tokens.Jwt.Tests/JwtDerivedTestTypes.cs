@@ -165,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public void ValidateAudiencePublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
-            base.ValidateAudience(new string[]{jwt.Issuer}, jwt, validationParameters);
+            base.ValidateAudience(jwt.Audiences, jwt, validationParameters);
         }
 
         public string ValidateIssuerPublic(JwtSecurityToken jwt, TokenValidationParameters validationParameters)

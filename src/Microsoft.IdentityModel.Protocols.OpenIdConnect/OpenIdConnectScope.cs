@@ -36,6 +36,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     public static class OpenIdConnectScope
     {
         /// <summary>
+        /// Indicates email scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// </summary>
+        public const string Email = "email";
+
+        /// <summary>
+        /// Indicates offline_access scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// </summary>
+        public const string OfflineAccess = "offline_access";
+
+        /// <summary>
         /// Indicates openid scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string OpenId = "openid";

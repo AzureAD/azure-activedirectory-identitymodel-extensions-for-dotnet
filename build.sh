@@ -1,46 +1,60 @@
 #!/usr/bin/env bash
-repoFolder="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $repoFolder
 
-koreBuildZip="https://github.com/aspnet/KoreBuild/archive/dev.zip"
-if [ ! -z $KOREBUILD_ZIP ]; then
-    koreBuildZip=$KOREBUILD_ZIP
-fi
+RESET="\033[0m"
+RED="\033[0;31m"
 
-buildFolder=".build"
-buildFile="$buildFolder/KoreBuild.sh"
+print_install_instruction() {
+  echo -e "${RED} Please refer to https://github.com/dotnet/cli#add-debian-feed to install the latest dotnet \n\n ${RESET}"
+}
 
-if test ! -d $buildFolder; then
-    echo "Downloading KoreBuild from $koreBuildZip"
-    
-    tempFolder="/tmp/KoreBuild-$(uuidgen)"    
-    mkdir $tempFolder
-    
-    localZipFile="$tempFolder/korebuild.zip"
-    
-    retries=6
-    until (wget -O $localZipFile $koreBuildZip 2>/dev/null || curl -o $localZipFile --location $koreBuildZip 2>/dev/null)
-    do
-        echo "Failed to download '$koreBuildZip'"
-        if [ "$retries" -le 0 ]; then
-            exit 1
-        fi
-        retries=$((retries - 1))
-        echo "Waiting 10 seconds before retrying. Retries left: $retries"
-        sleep 10s
-    done
-    
-    unzip -q -d $tempFolder $localZipFile
+restore() {
+  echo -e "==========================================================="
+  echo -e "Restore ...... "
+  echo -e "===========================================================\n"
+
+  dotnet restore WilsonLinux.sln
+  echo -e "\n"
+}
+
+build() {
+  echo -e "==========================================================="
+  echo -e "Build ...... "
+  echo -e "===========================================================\n"
+
+  dotnet build WilsonLinux.sln
+  echo -e "\n"
+}
+
+pack() {
+  echo -e "==========================================================="
+  echo -e "Pack ...... "
+  echo -e "===========================================================\n"
+
+  dotnet pack WilsonLinux.sln
   
-    mkdir $buildFolder
-    cp -r $tempFolder/**/build/** $buildFolder
-    
-    chmod +x $buildFile
-    
-    # Cleanup
-    if test ! -d $tempFolder; then
-        rm -rf $tempFolder  
-    fi
+  echo -e "\n"
+  echo -e "==========================================================="
+  echo -e "Moving nuget packages to 'artifacts' folder ...... "
+  echo -e "===========================================================\n"
+  rm -rf artifacts
+  mkdir artifacts
+  mv src/*/bin/Debug/*.nupkg artifacts
+}
+
+echo -e "==========================================================="
+echo -e "Check the installation and the version of dotnet ...... "
+echo -e "===========================================================\n"
+
+if ! type "dotnet" > /dev/null 2>&1; then
+  echo -e "${RED}Error: dotnet is not installed\n ${RESET}"
+  print_install_instruction
+else
+  VERSION="$(dotnet --version)"
+  echo -e "  dotnet version ${VERSION} is found.\n"
+  restore
+  build
+  pack
 fi
 
-$buildFile -r $repoFolder "$@"
+echo -e "done."
+

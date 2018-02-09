@@ -28,7 +28,6 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -54,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Base64Url encoding of the UTF8 bytes.</returns>
         public static string Encode(string arg)
         {
-            if (null == arg)
+            if (arg == null)
                 throw LogHelper.LogArgumentNullException("arg");
 
             return Encode(Encoding.UTF8.GetBytes(arg));
@@ -109,9 +108,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>UTF8 bytes.</returns>
         public static byte[] DecodeBytes(string str)
         {
-            if (null == str)
+            if (str == null)
             {
-                throw new ArgumentNullException("str");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("str"));
             }
 
             // 62nd char of encoding
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
                     str += base64PadCharacter;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new FormatException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX14700, str)));
+                    throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
             }
 
             return Convert.FromBase64String(str);

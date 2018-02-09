@@ -28,7 +28,6 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -39,6 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool? _hasPrivateKey;
 
+        private bool _foundPrivateKeyDetermined = false;
+
+        private PrivateKeyStatus _foundPrivateKey;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RsaSecurityKey"/> class.
         /// </summary>
@@ -47,9 +50,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, rsaParameters.ToString())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
+            _foundPrivateKey = _hasPrivateKey.Value ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
+            _foundPrivateKeyDetermined = true;
             Parameters = rsaParameters;
         }
 
@@ -59,16 +64,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="rsa"><see cref="RSA"/></param>
         public RsaSecurityKey(RSA rsa)
         {
-            if (rsa == null)
-                throw LogHelper.LogArgumentNullException("rsa");
-
-            Rsa = rsa;
+            Rsa = rsa ?? throw LogHelper.LogArgumentNullException(nameof(rsa));
         }
 
         /// <summary>
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
+        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
         public override bool HasPrivateKey
         {
             get
@@ -98,6 +101,49 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 return _hasPrivateKey.Value;
             }
+        }
+
+        /// <summary>
+        /// Gets an enum indicating if a private key exists.
+        /// </summary>
+        /// <return>'Exists' if private key exists for sure; 'DoesNotExist' if private key doesn't exist for sure; 'Unknown' if we cannot determine.</return>
+        public override PrivateKeyStatus PrivateKeyStatus
+        {
+            get
+            {
+                if (_foundPrivateKeyDetermined)
+                    return _foundPrivateKey;
+
+                _foundPrivateKeyDetermined = true;
+                if (Rsa != null)
+                {
+                    try
+                    {
+                        var parameters = Rsa.ExportParameters(true);
+                        if (parameters.D != null && parameters.DP != null && parameters.DQ != null &&
+                            parameters.P != null && parameters.Q != null && parameters.InverseQ != null)
+                            _foundPrivateKey = PrivateKeyStatus.Exists;
+                        else
+                            _foundPrivateKey = PrivateKeyStatus.DoesNotExist;
+
+                    }
+                    catch (Exception)
+                    {
+                        _foundPrivateKey = PrivateKeyStatus.Unknown;
+                        return _foundPrivateKey;
+                    }
+                }
+                else
+                {
+                    if (Parameters.D != null && Parameters.DP != null && Parameters.DQ != null &&
+                        Parameters.P != null && Parameters.Q != null && Parameters.InverseQ != null)
+                        _foundPrivateKey = PrivateKeyStatus.Exists;
+                    else
+                        _foundPrivateKey = PrivateKeyStatus.DoesNotExist;
+                }
+
+                return _foundPrivateKey;
+            }           
         }
 
         /// <summary>

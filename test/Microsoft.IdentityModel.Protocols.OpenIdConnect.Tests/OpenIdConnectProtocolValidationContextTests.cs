@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectProtocolValidationContextTests
     {
-        [Fact(DisplayName = "OpenIdConnectProtocolValidationContextTests: GetSets, test covers defaults")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectProtocolValidationContext validationContext = new OpenIdConnectProtocolValidationContext();

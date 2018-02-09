@@ -25,11 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
+using static System.Net.WebUtility;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -58,25 +59,25 @@ namespace Microsoft.IdentityModel.Protocols
         /// <returns>html with head set to 'Title', body containing a hiden from with action = IssuerAddress.</returns>
         public virtual string BuildFormPost()
         {
-            StringBuilder strBuilder = new StringBuilder();
+            var strBuilder = new StringBuilder();
             strBuilder.Append("<html><head><title>");
-            strBuilder.Append(PostTitle);
+            strBuilder.Append(HtmlEncode(PostTitle));
             strBuilder.Append("</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"");
-            strBuilder.Append(Uri.EscapeDataString(IssuerAddress));
+            strBuilder.Append(HtmlEncode(IssuerAddress));
             strBuilder.Append("\">");
             foreach (KeyValuePair<string, string> parameter in _parameters)
             {
                 strBuilder.Append("<input type=\"hidden\" name=\"");
-                strBuilder.Append(Uri.EscapeDataString(parameter.Key));
+                strBuilder.Append(HtmlEncode(parameter.Key));
                 strBuilder.Append("\" value=\"");
-                strBuilder.Append(Uri.EscapeDataString(parameter.Value));
+                strBuilder.Append(HtmlEncode(parameter.Value));
                 strBuilder.Append("\" />");
             }
 
             strBuilder.Append("<noscript><p>");
-            strBuilder.Append(ScriptDisabledText);
+            strBuilder.Append(HtmlEncode(ScriptDisabledText));
             strBuilder.Append("</p><input type=\"submit\" value=\"");
-            strBuilder.Append(ScriptButtonText);
+            strBuilder.Append(HtmlEncode(ScriptButtonText));
             strBuilder.Append("\" /></noscript>");
             strBuilder.Append("</form><script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script></body></html>");
             return strBuilder.ToString();

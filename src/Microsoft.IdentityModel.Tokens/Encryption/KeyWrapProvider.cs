@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 

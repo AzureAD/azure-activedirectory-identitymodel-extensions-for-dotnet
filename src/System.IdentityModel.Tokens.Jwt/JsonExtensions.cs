@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -71,7 +72,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
 
                 _serializer = value;
             }
@@ -90,7 +91,7 @@ namespace System.IdentityModel.Tokens.Jwt
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("value");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
 
                 _deserializer = value;
             }

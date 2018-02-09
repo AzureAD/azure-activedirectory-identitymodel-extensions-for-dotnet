@@ -30,15 +30,16 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// A wrapper class for properties that are used for signature valdiation.
+    /// Defines the <see cref="SecurityKey"/>, algorithm and digest for digital signatures.
     /// </summary>
     public class SigningCredentials
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
         /// </summary>
-        /// <param name="key"><see cref="SecurityKey"/></param>
+        /// <param name="key"><see cref="SecurityKey"/>.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <remarks>the 'digest method' if needed may be implied from the algorithm. For example <see cref="SecurityAlgorithms.HmacSha256Signature"/> implies Sha256.</remarks>
         public SigningCredentials(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -52,7 +53,29 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the algorithm which used for signature valdiation.
+        /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
+        /// </summary>
+        /// <param name="key"><see cref="SecurityKey"/>.</param>
+        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="digest">The digest algorithm to apply.</param>
+        public SigningCredentials(SecurityKey key, string algorithm, string digest)
+        {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException("key");
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException("algorithm");
+
+            Algorithm = algorithm;
+            Key = key;
+
+            // digest can be null
+            if (!string.IsNullOrEmpty(digest))
+                Digest = digest;
+        }
+
+        /// <summary>
+        /// Gets the algorithm used for signatures.
         /// </summary>
         public string Algorithm
         {
@@ -61,12 +84,22 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets the algorithm used for digests.
+        /// </summary>
+        public string Digest
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
         /// </summary>
+        /// <remarks>This will have precedence over <see cref="SecurityKey.CryptoProviderFactory"/></remarks>
         public CryptoProviderFactory CryptoProviderFactory { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> which used for signature valdiation.
+        /// Gets the <see cref="SecurityKey"/> which used for signature validation.
         /// </summary>
         public SecurityKey Key
         {
@@ -75,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the key id which used for signature valdiation.
+        /// Gets the key id associated with <see cref="SecurityKey"/>.
         /// </summary>
         public string Kid
         {

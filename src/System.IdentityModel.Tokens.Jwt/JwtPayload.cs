@@ -96,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (notBefore.Value >= expires.Value)
                     {
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10401, expires.Value, notBefore.Value)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
                     }
 
                     this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
@@ -436,7 +436,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (claim == null)
             {
-                throw new ArgumentNullException("claim");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claim"));
             }
 
             this.AddClaims(new Claim[] { claim });
@@ -453,7 +453,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (claims == null)
             {
-                throw new ArgumentNullException("claims");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claims"));
             }
 
             foreach (Claim claim in claims)
@@ -618,7 +618,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         try
                         {
-                            retval = Convert.ToInt32(obj, CultureInfo.InvariantCulture);
+                            retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(obj, CultureInfo.InvariantCulture)));
                         }
                         catch (System.FormatException)
                         {
@@ -643,7 +643,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        retval = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                        retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
                     }
                     catch (System.FormatException)
                     {
@@ -729,19 +729,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 // null converts to 0.
-                secondsAfterBaseTime = Convert.ToInt64(dateValue, CultureInfo.InvariantCulture);
+                secondsAfterBaseTime = Convert.ToInt64(Math.Truncate(Convert.ToDouble(dateValue, CultureInfo.InvariantCulture)));
                 return EpochTime.DateTime(secondsAfterBaseTime);
             }
             catch (Exception ex)
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12700, key, (dateValue ?? "<null>")), ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10701, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12701, key, (dateValue ?? "<null>")), ex));
                 }
 
                 throw;

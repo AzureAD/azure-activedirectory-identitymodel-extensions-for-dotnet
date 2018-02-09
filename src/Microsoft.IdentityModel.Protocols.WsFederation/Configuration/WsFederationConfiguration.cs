@@ -26,44 +26,73 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
-    /// Contains WsFederation metadata that can be populated from a xml string.
+    /// Contains WsFederation metadata that can be populated from a XML string.
     /// </summary>
     public class WsFederationConfiguration
     {
-        private Collection<SecurityKey> _signingKeys = new Collection<SecurityKey>();
-
         /// <summary>
         /// Initializes an new instance of <see cref="WsFederationConfiguration"/>.
         /// </summary>
         public WsFederationConfiguration()
-        {           
+        {
         }
 
         /// <summary>
         /// Gets or sets the token issuer.
         /// </summary>
-        public string Issuer { get; set; }
+        public string Issuer
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
+        /// Gets the <see cref="IList{SecurityKey}"/> that the IdentityProvider indicates are to be used signing keys.
         /// </summary>
         public ICollection<SecurityKey> SigningKeys
         {
-            get
-            {
-                return _signingKeys;
-            }
+            get;
+        } = new List<SecurityKey>();
+
+        /// <summary>
+        /// The <see cref="Xml.Signature"/> element that was found when reading metadata.
+        /// </summary>
+        public Signature Signature
+        {
+            get;
+            set;
         }
+
+        /// <summary>
+        /// The <see cref="Tokens.SigningCredentials"/> that was used to sign the metadata.
+        /// </summary>
+        public SigningCredentials SigningCredentials
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Get the <see cref="IList{KeyInfo}"/> that the IdentityProvider indicates are to be used signing keys.
+        /// </summary>
+        public ICollection<KeyInfo> KeyInfos
+        {
+            get;
+        } = new List<KeyInfo>();
 
         /// <summary>
         /// Gets or sets token endpoint.
         /// </summary>
-        public string TokenEndpoint { get; set; }
+        public string TokenEndpoint
+        {
+            get;
+            set;
+        }
     }
 }

@@ -34,22 +34,22 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class StaticConfigurationManagerTests
     {
-        [Fact(DisplayName = "StaticConfigurationManagerTests: Constructors")]
+        [Fact]
         public void StaticConfigurationManager_Constructors()
         {
         }
 
-        [Fact(DisplayName = "StaticConfigurationManagerTests: Defaults")]
+        [Fact]
         public void StaticConfigurationManager_Defaults()
         {
         }
 
-        [Fact(DisplayName = "StaticConfigurationManagerTests: GetSets")]
+        [Fact]
         public void StaticConfigurationManager_GetSets()
         {
         }
 
-        [Fact(DisplayName = "StaticConfigurationManagerTests: Publics")]
+        [Fact]
         public void StaticConfigurationManager_Publics()
         {
         }

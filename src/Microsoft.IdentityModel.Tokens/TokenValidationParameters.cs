@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -81,11 +80,27 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate bool LifetimeValidator(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for TokenReplayValidator.
+    /// </summary>
+    /// <param name="expirationTime">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns></returns>
+    public delegate bool TokenReplayValidator(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for SignatureValidator.
     /// </summary>
     /// <param name="token">A securityToken with a signature.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     public delegate SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for TokenReader.
+    /// </summary>
+    /// <param name="token">A securityToken with a signature.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    public delegate SecurityToken TokenReader(string token, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for TokenDecryptionKeyResolver.
@@ -110,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
         /// </summary>
-        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation";
+        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
         /// <summary>
         /// Default for the clock skew.
@@ -131,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (other == null)
             {
-                throw new ArgumentNullException("other");
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException("other"));
             }
 
             ActorValidationParameters = other.ActorValidationParameters?.Clone();
@@ -145,6 +160,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            TokenReplayValidator = other.TokenReplayValidator;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             RequireExpirationTime = other.RequireExpirationTime;
@@ -156,12 +172,14 @@ namespace Microsoft.IdentityModel.Tokens
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
+            TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
             ValidateIssuer = other.ValidateIssuer;
             ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
             ValidateLifetime = other.ValidateLifetime;
+            ValidateTokenReplay = other.ValidateTokenReplay;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences;
             ValidIssuer = other.ValidIssuer;
@@ -181,6 +199,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateIssuer = true;
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
+            ValidateTokenReplay = false;
         }
 
         /// <summary>
@@ -206,6 +225,18 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets or sets a delegate that will be used to read the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to read the token instead of normal processing.
+        /// </remarks>
+        public TokenReader TokenReader
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">If 'value' is null or whitespace.</exception>
@@ -219,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentNullException("AuthenticationType");
+                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("AuthenticationType"));
                 }
 
                 _authenticationType = value;
@@ -257,7 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10100, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10100, value)));
 
                 _clockSkew = value;
             }
@@ -302,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            IdentityModelEventSource.Logger.WriteInformation(LogMessages.IDX10245, securityToken);
+            LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
@@ -399,6 +430,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// If <see cref="ValidateLifetime"/> is false, this delegate will not be called.
         /// </remarks>
         public LifetimeValidator LifetimeValidator
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the token replay of the token
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the token replay of the token, instead of normal processing.
+        /// If <see cref="ValidateTokenReplay"/> is false, this delegate will not be called.
+        /// </remarks>
+        public TokenReplayValidator TokenReplayValidator
         {
             get;
             set;
@@ -530,7 +574,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>Validation of the audience, mitigates forwarding attacks. For example, a site that receives a token, could not replay it to another side.
         /// A forwarded token would contain the audience of the original site.</remarks>
-        [DefaultValue(true)]        
+        [DefaultValue(true)]
         public bool ValidateAudience
         {
             get;
@@ -571,6 +615,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. </remarks>
         [DefaultValue(false)]
         public bool ValidateIssuerSigningKey
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets a boolean to control if the token replay will be validated during token validation.
+        /// </summary>                
+        [DefaultValue(false)]
+        public bool ValidateTokenReplay
         {
             get;
             set;

@@ -28,8 +28,8 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class End2EndTests
     {
-        [Fact(DisplayName = "End2EndTests: OpenIdConnect")]
+        [Fact]
         public void OpenIdConnect()
         {
             SigningCredentials rsaSigningCredentials =
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             JwtSecurityToken jwtToken = 
                 tokenHandler.CreateJwtSecurityToken(
                     configuration.Issuer,
-                    IdentityUtilities.DefaultAudience,
+                    Default.Audience,
                     ClaimSets.DefaultClaimsIdentity,
                     DateTime.UtcNow,
                     DateTime.UtcNow + TimeSpan.FromHours(1),
@@ -67,17 +67,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new TokenValidationParameters
                 {
                     IssuerSigningKeys = configuration.SigningKeys,
-                    ValidAudience = IdentityUtilities.DefaultAudience,
+                    ValidAudience = Default.Audience,
                     ValidIssuer = configuration.Issuer,
                 };
 
             SecurityToken securityToken = null;
             tokenHandler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
-        }
-
-        [Fact(DisplayName = "End2EndTests: WsFederation")]
-        public void WsFederation()
-        {
         }
     }
 }

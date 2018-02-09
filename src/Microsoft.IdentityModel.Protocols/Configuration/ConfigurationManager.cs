@@ -32,7 +32,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -79,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         static ConfigurationManager()
         {
-            IdentityModelEventSource.Logger.WriteVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
+            LogHelper.LogVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
         }
 
         /// <summary>
@@ -115,14 +114,13 @@ namespace Microsoft.IdentityModel.Protocols
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
-                throw LogHelper.LogArgumentNullException("metadataAddress");
+                throw LogHelper.LogArgumentNullException(nameof(metadataAddress));
 
             if (configRetriever == null)
-                throw LogHelper.LogArgumentNullException("configRetriever");
+                throw LogHelper.LogArgumentNullException(nameof(configRetriever));
 
             if (docRetriever == null)
-                throw LogHelper.LogArgumentNullException("docRetriever");
-
+                throw LogHelper.LogArgumentNullException(nameof(docRetriever));
 
             _metadataAddress = metadataAddress;
             _docRetriever = docRetriever;
@@ -139,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(LogMessages.IDX10107, MinimumAutomaticRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20107, MinimumAutomaticRefreshInterval, value)));
 
                 _automaticRefreshInterval = value;
             }
@@ -154,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", String.Format(LogMessages.IDX10106, MinimumRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20106, MinimumRefreshInterval, value)));
 
                 _refreshInterval = value;
             }
@@ -201,7 +199,7 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, (_metadataAddress ?? "null")), ex));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null")), ex));
                     }
                 }
 
@@ -210,7 +208,7 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 else
                 {
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10803, (_metadataAddress ?? "null"))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null"))));
                 }
             }
             finally

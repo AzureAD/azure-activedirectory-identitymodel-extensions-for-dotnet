@@ -29,12 +29,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -43,7 +44,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// Test Context Wrapper instance on top of TestContext. Provides better accessor functions
         /// </summary>
-        [Fact(DisplayName = "JwtPayloadTests: Ensures that JwtPayload defaults are as expected")]
+        [Fact]
         public void Defaults()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -71,7 +72,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
         }
 
-        [Fact(DisplayName = "JwtPayloadTests: GetSets, covers defaults")]
+        [Fact]
         public void GetSets()
         {
             // Aud, Claims, ValidFrom, ValidTo handled in Defaults.
@@ -115,23 +116,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string json = unicodePayload.SerializeToJson();
             JwtPayload payload = new JwtPayload(issuer, "", claims, null, null);
             string json2 = payload.SerializeToJson();
-            Assert.True(string.Equals(json, json2));
+            Assert.Equal(json, json2);
 
             JwtPayload retrievePayload = JwtPayload.Deserialize(json);
-            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+            Assert.Equal(retrievePayload.Iss, issuer);
 
             json = unicodePayload.Base64UrlEncode();
             json2 = payload.Base64UrlEncode();
-            Assert.True(string.Equals(json, json2));
+            Assert.Equal(json, json2);
 
             retrievePayload = JwtPayload.Base64UrlDeserialize(json);
-            Assert.True(string.Equals(retrievePayload.Iss, issuer));
+            Assert.Equal(retrievePayload.Iss, issuer);
         }
 
         [Fact]
         public void JwtPayloadEncoding()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtPayload), new List<string> { "Item" } },
+                }
+            };
+
             RunEncodingVariation(JwtPayloadTestData.ClaimForEachProperty, JwtPayloadTestData.ObjectForEachProperty, context);
             RunEncodingVariation(JwtPayloadTestData.Multiples.Key, JwtPayloadTestData.Multiples.Value, context);
 
@@ -176,25 +184,38 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Equal(payload.SerializeToJson(), compareTo);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("PayloadDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Fact]
+        public void TestClaimWithLargeExpValue()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            jwtPayload.Add("exp", 1507680819080);
+            DateTime expirationTime = jwtPayload.ValidTo;
+            Assert.True(DateTime.MaxValue == expirationTime, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
+        }
+
+        [Theory, MemberData(nameof(PayloadDataSet))]
         public void RoundTrip(List<Claim> claims, JwtPayload payloadSetDirect, JwtPayload payloadSetUsingDeserialize)
         {
             var context = new CompareContext();
             var payload = new JwtPayload(claims);
             var encodedPayload = payload.SerializeToJson();
             var payloadDeserialized = JwtPayload.Deserialize(encodedPayload);
-            var instanceContext = new CompareContext();
+            var instanceContext = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                }
+            };
 
             IdentityComparer.AreEqual(payload, payloadDeserialized, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadDeserialized)), instanceContext);
 
-            instanceContext = new CompareContext();
+            instanceContext.Diffs.Clear();
             IdentityComparer.AreEqual(payload, payloadSetDirect, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadSetDirect)), instanceContext);
 
-            instanceContext = new CompareContext();
+            instanceContext.Diffs.Clear();
             IdentityComparer.AreEqual(payload, payloadSetUsingDeserialize, instanceContext);
             context.Merge(string.Format(CultureInfo.InvariantCulture, "AreEqual({0}, {1})", nameof(payload), nameof(payloadSetUsingDeserialize)), instanceContext);
 
@@ -460,3 +481,5 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

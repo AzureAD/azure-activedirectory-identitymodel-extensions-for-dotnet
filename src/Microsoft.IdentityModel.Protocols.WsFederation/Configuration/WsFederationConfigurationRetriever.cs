@@ -26,14 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IdentityModel.Tokens;
 using System.IO;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
@@ -42,7 +40,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
+#if NETSTANDARD1_4
+        private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#else
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
+#endif
 
         /// <summary>
         /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.
@@ -50,8 +52,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <param name="address">address of the metadata document.</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
+
             return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
 
@@ -60,10 +66,18 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <param name="address">address of the metadata document.</param>
         /// <param name="httpClient">the <see cref="HttpClient"/> to use to read the metadata document.</param>
-        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <param name="cancel">a <see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="httpClient"/> is null.</exception>
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
+
+            if (httpClient == null)
+                throw LogArgumentNullException(nameof(httpClient));
+
             return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
 
@@ -79,58 +93,22 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <param name="retriever">the <see cref="IDocumentRetriever"/> to use to read the metadata document</param>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>A populated <see cref="WsFederationConfiguration"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
         public static async Task<WsFederationConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
-            if (string.IsNullOrWhiteSpace(address))
-            {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": address"), typeof(ArgumentNullException), EventLevel.Verbose);
-            }
+            if (string.IsNullOrEmpty(address))
+                throw LogArgumentNullException(nameof(address));
 
             if (retriever == null)
+                throw LogArgumentNullException(nameof(retriever));
+
+            string document = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
+
+            using (var metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
             {
-                LogHelper.Throw(string.Format(CultureInfo.InvariantCulture, LogMessages.IDX10000, GetType() + ": retriever"), typeof(ArgumentNullException), EventLevel.Verbose);
+                return (new WsFederationMetadataSerializer()).ReadMetadata(metaDataReader);
             }
-
-            WsFederationConfiguration configuration = new WsFederationConfiguration();
-
-            string document = await retriever.GetDocumentAsync(address, cancel);
-
-            using (XmlReader metaDataReader = XmlReader.Create(new StringReader(document), SafeSettings))
-            {
-                var serializer = new MetadataSerializer { CertificateValidationMode = X509CertificateValidationMode.None };
-
-                MetadataBase metadataBase = serializer.ReadMetadata(metaDataReader);
-                var entityDescriptor = (EntityDescriptor)metadataBase;
-
-                if (!string.IsNullOrWhiteSpace(entityDescriptor.EntityId.Id))
-                {
-                    configuration.Issuer = entityDescriptor.EntityId.Id;
-                }
-
-                SecurityTokenServiceDescriptor stsd = entityDescriptor.RoleDescriptors.OfType<SecurityTokenServiceDescriptor>().First();
-                if (stsd != null)
-                {
-                    configuration.TokenEndpoint = stsd.PassiveRequestorEndpoints.First().Uri.AbsoluteUri;
-                    foreach (KeyDescriptor keyDescriptor in stsd.Keys)
-                    {
-                        if (keyDescriptor.KeyInfo != null && (keyDescriptor.Use == KeyType.Signing || keyDescriptor.Use == KeyType.Unspecified))
-                        {
-                            IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10807);
-                            foreach (SecurityKeyIdentifierClause clause in keyDescriptor.KeyInfo)
-                            {
-                                X509RawDataKeyIdentifierClause x509Clause = clause as X509RawDataKeyIdentifierClause;
-                                if (x509Clause != null)
-                                {
-                                    var key = new X509SecurityKey(new X509Certificate2(x509Clause.GetX509RawData()));
-                                    configuration.SigningKeys.Add(key);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return configuration;
         }
     }
 }

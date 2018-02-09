@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             }
             catch (Exception ex)
             {
-                Assert.Equal(ex.GetType(), typeof(ArgumentNullException));
+                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
                 Assert.Contains(guid, listener.TraceBuffer);
             }
         }
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             // default logs at Error
             var exception = LogHelper.LogExceptionMessage(new ArgumentException(guid1));
-            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+            Assert.Equal(typeof(ArgumentException), exception.GetType());
             Assert.True(string.IsNullOrEmpty(listener.TraceBuffer));
             Assert.Contains(guid1, exception.Message);
 
@@ -79,12 +79,12 @@ namespace Microsoft.IdentityModel.Logging.Tests
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
 
             exception = LogHelper.LogExceptionMessage(new ArgumentException(guid1));
-            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+            Assert.Equal(typeof(ArgumentException), exception.GetType());
             Assert.Contains(guid1, exception.Message);
 
             exception = LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid2)));
             Assert.Contains(guid2, exception.Message);
-            Assert.Equal(exception.GetType(), typeof(ArgumentException));
+            Assert.Equal(typeof(ArgumentException), exception.GetType());
 
             exception = LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid3)));
             Assert.Contains(guid3, exception.Message);
@@ -92,12 +92,12 @@ namespace Microsoft.IdentityModel.Logging.Tests
             exception = LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid4), new NotSupportedException()));
             Assert.Contains(guid4, exception.Message);
             Assert.NotNull(exception.InnerException);
-            Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));
+            Assert.Equal(typeof(NotSupportedException), exception.InnerException.GetType());
 
             exception = LogHelper.LogExceptionMessage(EventLevel.Informational, new ArgumentException(String.Format(CultureInfo.InvariantCulture, messageWithParams, guid5), new NotSupportedException()));
             Assert.Contains(guid5, exception.Message);
             Assert.NotNull(exception.InnerException);
-            Assert.Equal(exception.InnerException.GetType(), typeof(NotSupportedException));
+            Assert.Equal(typeof(NotSupportedException), exception.InnerException.GetType());
 
             Assert.Contains(guid1, listener.TraceBuffer);
             Assert.Contains(guid2, listener.TraceBuffer);
@@ -115,8 +115,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             var guid1 = Guid.NewGuid().ToString();
             var guid2 = Guid.NewGuid().ToString();
-            IdentityModelEventSource.Logger.WriteVerbose(guid1);
-            IdentityModelEventSource.Logger.WriteInformation(guid2);
+            LogHelper.LogVerbose(guid1);
+            LogHelper.LogInformation(guid2);
 
             Assert.DoesNotContain(guid1, listener.TraceBuffer);
             Assert.Contains(guid2, listener.TraceBuffer);
@@ -154,14 +154,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
 
             // default log file cannot be accessed because it is in use. Should throw an IO exception.
-            FileStream fileStream = File.Create(TextWriterEventListener.DefaultLogFileName);
-            Assert.Throws<IOException>(() => { new TextWriterEventListener();  });
-            Assert.Contains("MIML11001: ", listener.TraceBuffer);
+            string fileName = Guid.NewGuid().ToString() + ".txt";
+            FileStream fileStream = File.Create(fileName);
+            Assert.Throws<IOException>(() => { new TextWriterEventListener(fileName);  });
+            Assert.Contains("MIML10001: ", listener.TraceBuffer);
             fileStream.Dispose();
-            File.Delete(TextWriterEventListener.DefaultLogFileName);
+            File.Delete(fileName);
 
             // file specified by user cannot be accessed.
-            string fileName = "testLog.txt";
+            fileName = Guid.NewGuid().ToString() + ".txt";
             fileStream = File.Create(fileName);
             FileInfo fileInfo = new FileInfo(fileName);
             fileInfo.IsReadOnly = true;
@@ -169,7 +170,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             fileInfo.IsReadOnly = false;
             fileStream.Dispose();
             File.Delete(fileName);
-
         }
 
         [Fact]
@@ -181,6 +181,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 IdentityModelEventSource.Logger.LogLevel = EventLevel.Informational;
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
 
             string logText = File.ReadAllText(TextWriterEventListener.DefaultLogFileName);
@@ -188,27 +189,34 @@ namespace Microsoft.IdentityModel.Logging.Tests
             File.Delete(TextWriterEventListener.DefaultLogFileName);
 
             // passing custom file path
-            using (TextWriterEventListener listener = new TextWriterEventListener("testLog.txt"))
+            var filename = Guid.NewGuid().ToString() + ".txt";
+            using (TextWriterEventListener listener = new TextWriterEventListener(filename))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning for custom file path!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
-            logText = File.ReadAllText("testLog.txt");
+
+            logText = File.ReadAllText(filename);
             Assert.Contains("This is a warning for custom file path!", logText);
-            File.Delete("testLog.txt");
+            File.Delete(filename);
 
             // using StreamWriter
-            Stream fileStream = new FileStream("testLog.txt", FileMode.OpenOrCreate, FileAccess.Write);
+            filename = Guid.NewGuid().ToString() + ".txt";
+            Stream fileStream = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
             StreamWriter streamWriter = new StreamWriter(fileStream);
             using (TextWriterEventListener listener = new TextWriterEventListener(streamWriter))
             {
                 listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Informational);
                 IdentityModelEventSource.Logger.WriteWarning("This is a warning for streamwriter!");
+                listener.DisableEvents(IdentityModelEventSource.Logger);
             }
+
+            streamWriter.Flush();
             streamWriter.Dispose();
-            logText = File.ReadAllText("testLog.txt");
+            logText = File.ReadAllText(filename);
             Assert.Contains("This is a warning for streamwriter!", logText);
-            File.Delete("testLog.txt");
+            File.Delete(filename);
         }
     }
 

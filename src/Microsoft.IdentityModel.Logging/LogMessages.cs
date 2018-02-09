@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+// System.IdentityModel.Logging
+// Range: MIML10000 - MIML10999
+
 namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
@@ -33,17 +36,10 @@ namespace Microsoft.IdentityModel.Logging
     internal static class LogMessages
     {
 #pragma warning disable 1591
-        // general
-        internal const string MIML10000 = "MIML10000: The parameter '{0}' cannot be a 'null' or an empty object.";
-        internal const string MIML10001 = "MIML10001: The property value '{0}' cannot be a 'null' or an empty object.";
-
         // logging
-        internal const string MIML11000 = "MIML11000: eventData.Payload is null or empty. Not logging any messages.";
-        internal const string MIML11001 = "MIML11001: Cannot create the fileStream or StreamWriter to write logs. See inner exception.";
-        internal const string MIML11002 = "MIML11002: Unknown log level: {0}.";
-
-        // general exceptions
-        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        internal const string MIML10000 = "MIML10000: eventData.Payload is null or empty. Not logging any messages.";
+        internal const string MIML10001 = "MIML10001: Cannot create the fileStream or StreamWriter to write logs. See inner exception.";
+        internal const string MIML10002 = "MIML10002: Unknown log level: {0}.";
 #pragma warning restore 1591
 
     }

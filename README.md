@@ -4,10 +4,7 @@ Windows Azure Active Directory IdentityModel Extensions for .Net
 IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
 
 ## Versions
-Current version - 5.1.5
-
-Preview version - 5.2.0-preview2-41113220915 has support for WsFederation, Saml1, Saml2 and EnvelopedSignature validation.
-
+Current version - 5.2.1
 Minimum recommended version - 4.0.3  
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/CHANGELOG.md).
@@ -18,8 +15,7 @@ IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known secu
 ## Usage
 IdentityModel Extensions for .NET 5 has now been released. If you are using IdentityModel Extensions with ASP.NET, the following combinations are supported:
 * **IdentityModel Extensions for .NET 4.x** and **ASP.NET 4**
-* **IdentityModel Extensions for .NET 5.x** and **ASP.NET Core 1.x**
-
+* **IdentityModel Extensions for .NET 5.x**, **ASP.NET Core 1.x** and **ASP.NET Core 2.x**
 All other combinations aren't supported.
 
 ## Samples and Documentation

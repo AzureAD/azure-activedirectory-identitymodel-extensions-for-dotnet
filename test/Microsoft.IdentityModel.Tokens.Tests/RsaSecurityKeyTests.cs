@@ -28,7 +28,10 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -47,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // testing constructor that takes Rsa instance
             RsaSecurityKeyConstructorWithRsa(null, ExpectedException.ArgumentNullException("rsa"));
-#if NET451
+#if NET452
             RSA rsaCsp_2048 = new RSACryptoServiceProvider();
             rsaCsp_2048.ImportParameters(KeyingMaterial.RsaParameters_2048);
             RSA rsaCsp_2048_Public = new RSACryptoServiceProvider();
@@ -84,21 +87,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("HasPrivateKeyTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(HasPrivateKeyTheoryData))]
         public void HasPrivateKey(string testId, AsymmetricSecurityKey key, bool expected)
         {
             if (expected)
-                Assert.True(key.HasPrivateKey, testId);
+                Assert.True(key.PrivateKeyStatus == PrivateKeyStatus.Exists, testId);
             else
-                Assert.False(key.HasPrivateKey, testId);
+                Assert.True(key.PrivateKeyStatus != PrivateKeyStatus.Exists, testId);
         }
 
         public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
         {
             var theoryData = new TheoryData<string, SecurityKey, bool>();
-#if NET451
+#if NET452
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
@@ -112,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             );
 #endif
 
-#if NETCOREAPP1_0
+#if NETSTANDARD1_4
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCngProvider_2048,
@@ -143,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void KeySize()
         {
-#if NET451
+#if NET452
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
 #endif
@@ -151,31 +152,31 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("IsSupportedAlgDataSet")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool isPrivateKey, bool expectedResult)
+        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
+        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
         {
             if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
                 Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
        }
 
-        public static TheoryData<RsaSecurityKey, string, bool, bool> IsSupportedAlgDataSet
+        public static TheoryData<RsaSecurityKey, string, bool> IsSupportedAlgDataSet
         {
             get
             {
-                var dataset = new TheoryData<RsaSecurityKey, string, bool, bool>();
-#if NET451
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.HasPrivateKey, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.HasPrivateKey, false);
+                var dataset = new TheoryData<RsaSecurityKey, string, bool>();
+#if NET452
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, false);
 #endif
-                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, KeyingMaterial.RsaSecurityKey_2048.HasPrivateKey, true);
+                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
                 RsaSecurityKey testKey = new RsaSecurityKey(KeyingMaterial.RsaParameters1);
                 testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.EcdsaSha256 });
-                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, testKey.HasPrivateKey, true);
+                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, true);
                 return dataset;
             }
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

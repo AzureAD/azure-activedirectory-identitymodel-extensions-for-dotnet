@@ -27,7 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.Tests
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class AuthenticationProtocolMessageTests
     {
-        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             List<string> errors = new List<string>();
@@ -61,15 +61,15 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             }
 
             Assert.NotNull(authenticationProtocolMessage.Parameters);
-            Assert.Equal(authenticationProtocolMessage.Parameters.Count, 0);
+            Assert.Equal(0, authenticationProtocolMessage.Parameters.Count);
         }
 
-        [Fact(DisplayName = "AuthenticationProtocolMessageTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
-            AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = "http://www.gotjwt.com" };
+            var authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = "http://www.gotjwt.com" };
 
-            List<string> properties = new List<string>()
+            var properties = new List<string>()
             {
                 "IssuerAddress",
                 "PostTitle",
@@ -77,16 +77,19 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 "ScriptDisabledText",
             };
 
+            var context = new GetSetContext();
             foreach(string property in properties)
             {
-                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"));
-                TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected);
-                TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected);
-                TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected, context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected, context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context.Errors);
         }
 
-        [Fact(DisplayName = "AuthenticationProtocolMessageTests: Publics")]
+        [Fact]
         public void Publics()
         {
             string value1 = "value1";
@@ -148,7 +151,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             string queryString = authenticationProtocolMessage.BuildRedirectUrl();
             Assert.NotNull(queryString);
-            Assert.True(queryString.Contains("bob"));
+            Assert.Contains("bob", queryString);
 
             authenticationProtocolMessage.IssuerAddress = string.Empty;
             queryString = authenticationProtocolMessage.BuildRedirectUrl();

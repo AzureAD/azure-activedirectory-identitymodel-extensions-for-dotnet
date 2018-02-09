@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\commonTest.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <DefineConstants>CrossVersionTokenValidation</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Microsoft.IdentityModel.Tests\ClaimSets.cs" Link="ClaimSets.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\CompareContext.cs" Link="CompareContext.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\Default.cs" Link="Default.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\ExpectedException.cs" Link="ExpectedException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\IdentityComparer.cs" Link="IdentityComparer.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\KeyingMaterial.cs" Link="KeyingMaterial.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TestException.cs" Link="TestException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TestUtilities.cs" Link="TestUtilities.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.Tests\TheoryDataBase.cs" Link="TheoryDataBase.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Protocol.Extensions" Version="1.0.4.403061554" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="4.0.4.403061554" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.assert" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+</Project>

@@ -30,8 +30,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.Tests
 {
@@ -40,19 +42,19 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     /// </summary>
     public class HttpDocumentRetrieverTests
     {
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
             Assert.Throws<ArgumentNullException>(() => new HttpDocumentRetriever(null));
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
@@ -74,34 +76,105 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors("HttpDocumentRetrieverTests_GetSets", context.Errors);
         }
-        private void GetDocument(string address, IDocumentRetriever docRetriever, ExpectedException ee)
+
+        [Theory, MemberData(nameof(GetMetadataTheoryData))]
+        public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
-                string doc = docRetriever.GetDocumentAsync(address, CancellationToken.None).Result;
-                ee.ProcessNoException();
+                string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
+                Assert.NotNull(doc);
+                theoryData.ExpectedException.ProcessNoException();
             }
-            catch (AggregateException ex)
+            catch (AggregateException aex)
             {
-                ex.Handle((x) =>
+                aex.Handle((x) =>
                 {
-                    ee.ProcessException(x);
+                    theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
             }
         }
 
-        [Fact(DisplayName = "HttpDocumentRetrieverTests: Publics")]
-        public void Publics()
+        public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData
         {
-            HttpDocumentRetriever docRetriever = new HttpDocumentRetriever();
-            GetDocument(null, docRetriever, ExpectedException.ArgumentNullException());
-            GetDocument("OpenIdConnectMetadata.json", docRetriever, new ExpectedException(typeof(ArgumentException), "IDX10108:"));
-            GetDocument("httpss://OpenIdConnectMetadata.json", docRetriever, new ExpectedException(typeof(ArgumentException), "IDX10108:"));
-            GetDocument("HTTPS://login.windows.net/common/.well-known/openid-configuration", docRetriever, ExpectedException.NoExceptionExpected);
-            GetDocument("https://login.windows.net/common/.well-known/openid-configuration", docRetriever, ExpectedException.NoExceptionExpected);
-            docRetriever.RequireHttps = false;
-            GetDocument("OpenIdConnectMetadata.json", docRetriever, new ExpectedException(typeof(IOException), "IDX10804:", typeof(InvalidOperationException)));
+            get
+            {
+                var theoryData = new TheoryData<DocumentRetrieverTheoryData>();
+
+                var documentRetriever = new HttpDocumentRetriever();
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = null,
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = ExpectedException.ArgumentNullException(),
+                    First = true,
+                    TestId = "Address NULL"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "OpenIdConnectMetadata.json",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX20108:"),
+                    TestId = "Require https, using file: 'OpenIdConnectMetadata.json'"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "httpss://OpenIdConnectMetadata.json",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX20108:"),
+                    TestId = "Require https, Address: 'httpss://OpenIdConnectMetadata.json'"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.microsoftonline.com/common/.well-known/openid-configuration",
+                    DocumentRetriever = documentRetriever,
+                    TestId = "AAD common: https"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "HTTPS://login.microsoftonline.com/common/.well-known/openid-configuration",
+                    DocumentRetriever = documentRetriever,
+                    TestId = "AAD common: HTTPS"
+                });
+
+                documentRetriever = new HttpDocumentRetriever() { RequireHttps = false };
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "OpenIdConnectMetadata.json",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20804:", typeof(InvalidOperationException)),
+                    TestId = "RequireHttps == false, Address: 'OpenIdConnectMetadata.json'"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.microsoftonline.com/common/FederationMetadata/2007-06/FederationMetadata.xml",
+                    DocumentRetriever = documentRetriever,
+                    TestId = "AAD common: WsFed"
+                });
+
+                return theoryData;
+            }
+        }
+    }
+
+    public class DocumentRetrieverTheoryData : TheoryDataBase
+    {
+        public string Address { get; set; }
+
+        public IDocumentRetriever DocumentRetriever { get; set; }
+
+        public override string ToString()
+        {
+            return $"{TestId}, {Address}, {ExpectedException}";
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

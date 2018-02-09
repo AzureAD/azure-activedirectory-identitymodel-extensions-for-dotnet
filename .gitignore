@@ -14,11 +14,11 @@ project.lock.json
 [Dd]ebugPublic/
 [Rr]elease/
 x64/
-build/
 .build/dotnetcli/local/*/
 bld/
 [Bb]in/
 [Oo]bj/
+build/dynamicVersion.props
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
@@ -195,13 +195,11 @@ target
 artifacts
 StyleCop.Cache
 node_modules
-*.snk
+
 
 # Wilson project folder
 .nuget/*
-*.xml
 Artifacts/*
-build/*
 lib/*
 log
 packages/*
@@ -211,3 +209,5 @@ docs/*
 backup/*
 .testPublish/
 /.vs/
+test/ApiChangeTest/Resource/devAssemblies
+test/ApiChangeTest/Resource/reports

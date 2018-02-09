@@ -1,7 +1,34 @@
-﻿using System.Collections.Generic;
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -12,20 +39,20 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // an object for each first class property
             ObjectForEachProperty = new Dictionary<string, object>
             {
-                {JwtRegisteredClaimNames.Acr, IdentityUtilities.DefaultAcr},
-                {JwtRegisteredClaimNames.Actort, IdentityUtilities.DefaultAsymmetricJwt},
-                {JwtRegisteredClaimNames.Amr, IdentityUtilities.DefaultAmr},
+                {JwtRegisteredClaimNames.Acr, Default.Acr},
+                {JwtRegisteredClaimNames.Actort, Default.AsymmetricJwt},
+                {JwtRegisteredClaimNames.Amr, Default.Amr},
                 {JwtRegisteredClaimNames.AuthTime, EpochTime.GetIntDate(DateTime.UtcNow)},
-                {JwtRegisteredClaimNames.Aud, IdentityUtilities.DefaultAudience},
-                {JwtRegisteredClaimNames.Azp, IdentityUtilities.DefaultAuthorizedParty},
+                {JwtRegisteredClaimNames.Aud, Default.Audience},
+                {JwtRegisteredClaimNames.Azp, Default.AuthorizedParty},
                 {JwtRegisteredClaimNames.CHash, Guid.NewGuid().ToString()},
                 {JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow + TimeSpan.FromHours(1))},
                 {JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()},
                 {JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow + TimeSpan.FromSeconds(1))},
-                {JwtRegisteredClaimNames.Iss, IdentityUtilities.DefaultIssuer},
+                {JwtRegisteredClaimNames.Iss, Default.Issuer},
                 {JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.UtcNow - TimeSpan.FromHours(1))},
                 {JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString()},
-                {JwtRegisteredClaimNames.Sub, IdentityUtilities.DefaultSubject},
+                {JwtRegisteredClaimNames.Sub, Default.Subject},
             };
 
             // a claim for each first class property
@@ -49,14 +76,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Multiples = new KeyValuePair<List<Claim>, Dictionary<string, object>>(new List<Claim>(), new Dictionary<string, object>());
             Multiples.Value[JwtRegisteredClaimNames.Aud] = new List<object>();
-            foreach (var aud in IdentityUtilities.DefaultAudiences)
+            foreach (var aud in Default.Audiences)
             {
                 Multiples.Key.Add(new Claim(JwtRegisteredClaimNames.Aud, aud));
                 (Multiples.Value[JwtRegisteredClaimNames.Aud] as List<object>).Add(aud);
             }
 
             Multiples.Value[JwtRegisteredClaimNames.Amr] = new List<object>();
-            foreach (var amr in IdentityUtilities.DefaultAmrs)
+            foreach (var amr in Default.Amrs)
             {
                 Multiples.Key.Add(new Claim(JwtRegisteredClaimNames.Amr, amr));
                 (Multiples.Value[JwtRegisteredClaimNames.Amr] as List<object>).Add(amr);

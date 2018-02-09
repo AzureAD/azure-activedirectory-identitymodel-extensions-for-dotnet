@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -36,19 +37,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public class JwtHeaderTests
     {
-        [Fact(DisplayName = "JwtHeaderTests: Constructors")]
+        [Fact]
         public void Constructors()
         {
             var header1 = new JwtHeader();
             SigningCredentials signingCredentials = null;
             var header2 = new JwtHeader(signingCredentials);
 
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                }
+            };
+
             IdentityComparer.AreEqual(header1, header2, context);
             TestUtilities.AssertFailIfErrors("JwtHeaderTests.Constructors", context.Diffs);
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             JwtHeader jwtHeader = new JwtHeader();
@@ -59,12 +67,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
         }
 
-        [Fact(DisplayName = "JwtHeaderTests: Publics")]
+        [Fact]
         public void Publics()
         {
         }

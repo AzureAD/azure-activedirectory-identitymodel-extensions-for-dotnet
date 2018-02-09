@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 // since we are in the System ns, we need to map to M.IM.Tokens
@@ -40,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public class ExtensibilityTests
     {
-        [Fact(DisplayName = "ExtensibilityTests: JwtSecurityTokenHandler")]
+        [Fact]
         public void JwtSecurityTokenHandler_Extensibility()
         {
             DerivedJwtSecurityTokenHandler handler = new DerivedJwtSecurityTokenHandler()
@@ -51,9 +51,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtSecurityToken jwt =
                 new JwtSecurityToken
                 (
-                    issuer: IdentityUtilities.DefaultIssuer,
-                    audience: IdentityUtilities.DefaultAudience,
-                    claims: ClaimSets.Simple(IdentityUtilities.DefaultIssuer, IdentityUtilities.DefaultIssuer),
+                    issuer: Default.Issuer,
+                    audience: Default.Audience,
+                    claims: ClaimSets.Simple(Default.Issuer, Default.Issuer),
                     signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
                     expires: DateTime.UtcNow + TimeSpan.FromHours(10),
                     notBefore: DateTime.UtcNow
@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
                 ValidateAudience = false,
-                ValidIssuer = IdentityUtilities.DefaultIssuer,
+                ValidIssuer = Default.Issuer,
             };
 
             List<string> errors = new List<string>();

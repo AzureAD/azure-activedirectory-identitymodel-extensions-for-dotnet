@@ -1,0 +1,20 @@
+<Project>
+  <Import Project="dependenciesTest.props" />
+  <Import Project="version.props" />
+
+  <PropertyGroup>
+    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <DelaySign>false</DelaySign>
+    <DotNetCoreAppRuntimeVersion>2.0.0</DotNetCoreAppRuntimeVersion>
+    <OutputTypeEx>library</OutputTypeEx>
+    <Product>Microsoft IdentityModel</Product>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework' AND '$(OutputType)'=='library'">
+    <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
+  </ItemGroup>
+
+</Project>

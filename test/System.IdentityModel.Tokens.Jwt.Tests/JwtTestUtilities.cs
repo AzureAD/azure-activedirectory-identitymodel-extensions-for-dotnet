@@ -27,8 +27,8 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -46,47 +46,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         // ===========================
         // token setup params - different variations will set different items
-        public JwtSecurityToken Actor { get; set; }
         public string Audience { get; set; }
-        public bool BoolRetVal { get; set; }
         public IEnumerable<Claim> Claims { get; set; }
-        public ClaimsPrincipal ClaimsPrincipal { get; set; }
-        public CryptoProviderFactory CryptoProviderFactory { get; set; }
-        public int DefaultTokenLifetimeInMinutes { get; set; }
         public JwtHeader Header { get; set; }
-        public string EncodedString { get; set; }
-        public EncryptingCredentials EncryptingCredentials { get; set; }
-        public IList<Exception> Exceptions { get; set; }
         public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
         public JwtSecurityToken ExpectedJwtSecurityToken { get; set; }
         public DateTime Expires { get; set; } = DateTime.UtcNow + TimeSpan.FromHours(1);
-        public JwtSecurityToken InnerToken { get; set; }
         public string Issuer { get; set; }
-        public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; } = new JwtSecurityTokenHandler();
-        public JwtSecurityToken JwtSecurityToken { get; set; }
-        public TimeSpan MaxClockSkew { get; set; }
-        public int MaxTokenSizeInBytes { get; set; }
         public string Name { get; set; }
-        public string NameClaimType { get; set; }
         public DateTime NotBefore { get; set; } = DateTime.UtcNow;
-        public string OriginalIssuer { get; set; }
-        public JwtPayload Payload { get; set; }
         public string RawAuthenticationTag { get; set; }
         public string RawCiphertext { get; set; }
         public string RawEncryptedKey { get; set; }
         public string RawHeader { get; set; }
         public string RawInitializationVector { get; set; }
-        public bool RequireExpirationTime { get; set; }
-        public bool RequireSignedTokens { get; set; }
-        public string RoleClaimType { get; set; }
-        public SecurityToken SecurityToken { get; set; }
-        public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
-        public byte[] Signature { get; set; }
         public SigningCredentials SigningCredentials { get; set; }
-        public string SigningInput { get; set; }
-        public Type TokenType { get; set; }
-        public TokenValidationParameters TokenValidationParameters { get; set; }
-        public byte[] UnsignedBytes { get; set; }
     }
 
     public class JwtTestUtilities

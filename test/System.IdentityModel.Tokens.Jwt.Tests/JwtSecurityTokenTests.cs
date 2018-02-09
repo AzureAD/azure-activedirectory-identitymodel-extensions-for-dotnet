@@ -27,9 +27,12 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -58,7 +61,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Null(jwt.Issuer);
             Assert.Null(jwt.SecurityKey);
             Assert.NotNull(jwt.SignatureAlgorithm);
-            Assert.Equal(jwt.SignatureAlgorithm, "none");
+            Assert.Equal("none", jwt.SignatureAlgorithm);
             Assert.Null(jwt.SigningCredentials);
             Assert.Null(jwt.SigningKey);
             Assert.Null(jwt.Subject);
@@ -106,7 +109,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, .Net datetime",
                     NotBefore = DateTime.UtcNow + TimeSpan.FromHours(1),
                     Expires = DateTime.UtcNow,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -115,7 +118,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, UnixEpoch - 1 ms",
                     NotBefore = DateTime.UtcNow,
                     Expires = EpochTime.UnixEpoch - TimeSpan.FromMilliseconds(1),
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -124,7 +127,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Name = "NotBefore > Expires, UnixEpoch - 1 s",
                     NotBefore = DateTime.UtcNow,
                     Expires = EpochTime.UnixEpoch - TimeSpan.FromSeconds(1),
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10401"),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12401"),
                 });
 
             RunConstructionTest(
@@ -136,9 +139,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
         [Theory, MemberData(nameof(EmbeddedTokenConstructorData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
         public void EmbeddedTokenConstructor1(string testId, JwtSecurityTokenTestVariation outerTokenVariation, JwtSecurityTokenTestVariation innerTokenVariation, string jwt, ExpectedException ee)
         {
             JwtSecurityToken outerJwt = null;
@@ -158,7 +159,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // create outer token
             try
             {
-                if (String.IsNullOrEmpty(jwt))
+                if (string.IsNullOrEmpty(jwt))
                     outerJwt = new JwtSecurityToken(
                         header: outerTokenVariation.Header,
                         innerToken: innerJwt,
@@ -279,12 +280,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
             // Hand in a valid variation. We should fail before the variation is used.
-            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
-            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX10709"));
+            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
+            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX12709"));
 
             return dataSet;
         }
@@ -335,12 +336,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         private static void ParseJweParts(string jwe, out string headerPart, out string encryptedKeyPart, out string initializationVectorPart, out string ciphertextPart, out string authenticationTagPart)
         {
-            if (String.IsNullOrEmpty(jwe))
-                throw new ArgumentNullException(nameof(jwe));
+            if (string.IsNullOrEmpty(jwe))
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwe)));
 
             string[] parts = jwe.Split(new char[] {'.'}, 6);
             if (parts.Length != 5)
-                throw new ArgumentException(String.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
+                throw new ArgumentException(string.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
 
             headerPart = parts[0];
             encryptedKeyPart = parts[1];
@@ -392,92 +393,40 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: variation.Expires);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(ValidEncodedSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void ValidEncodedSegments(string testId, string jwt, ExpectedException ee)
+        [Theory, MemberData(nameof(JwtSegmentTheoryData))]
+        public void JwtSegment(JwtTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.JwtSegment", theoryData);
             try
             {
-                var jwtToken = new JwtSecurityToken(jwt);
-                ee.ProcessNoException();
-                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+                var jwtToken = new JwtSecurityToken(theoryData.Token);
+                theoryData.ExpectedException.ProcessNoException(context);
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, theoryData.TestId);
             }
             catch (Exception ex)
             {
-                ee.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, string, ExpectedException> ValidEncodedSegmentsData()
+        public static TheoryData<JwtTheoryData> JwtSegmentTheoryData
         {
-            return JwtTestData.ValidEncodedSegmentsData();
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidEncodedSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidEncodedSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
+            get
             {
-                var jwtToken = new JwtSecurityToken(jwt);
-                ee.ProcessNoException();
-                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(jwtToken, testId);
+                var theoryData = new TheoryData<JwtTheoryData>();
+
+                JwtTestData.InvalidRegExSegmentsData("IDX12709:", theoryData);
+                JwtTestData.InvalidNumberOfSegmentsData("IDX12709:", theoryData);
+                JwtTestData.InvalidEncodedSegmentsData("", theoryData);
+                JwtTestData.ValidEncodedSegmentsData(theoryData);
+
+                return theoryData;
             }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
 
-        public static TheoryData<string, string, ExpectedException> InvalidEncodedSegmentsData()
-        {
-            return JwtTestData.InvalidEncodedSegmentsData("");
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidNumberOfSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidNumberOfSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
-            {
-                new JwtSecurityToken(jwt);
-
-                ee.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
-
-        public static TheoryData<string, string, ExpectedException> InvalidNumberOfSegmentsData()
-        {
-            return JwtTestData.InvalidNumberOfSegmentsData("IDX10709:");
-        }
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData(nameof(InvalidRegExSegmentsData))]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-        public void InvalidRegExSegments(string testId, string jwt, ExpectedException ee)
-        {
-            try
-            {
-                new JwtSecurityToken(jwt);
-
-                ee.ProcessNoException();
-            }
-            catch (Exception ex)
-            {
-                ee.ProcessException(ex);
-            }
-        }
-
-        public static TheoryData<string, string, ExpectedException> InvalidRegExSegmentsData()
-        {
-            return JwtTestData.InvalidRegExSegmentsData("IDX10709:");
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

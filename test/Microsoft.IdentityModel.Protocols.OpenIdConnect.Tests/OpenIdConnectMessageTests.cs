@@ -29,9 +29,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.IdentityModel.Tokens.Tests;
+using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json.Linq;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -40,76 +42,85 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectMessageTests
     {
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Constructors")]
-        public void Constructors()
+        [Theory, MemberData(nameof(ConstructorsTheoryData))]
+        public void Constructors(OpenIdConnectMessageTheoryData theoryData)
         {
-            OpenIdConnectMessage openIdConnectMessage = new OpenIdConnectMessage();
-            Assert.Equal(openIdConnectMessage.IssuerAddress, string.Empty);
-            openIdConnectMessage = new OpenIdConnectMessage() { IssuerAddress = "http://www.got.jwt.com" };
-            Assert.Equal(openIdConnectMessage.IssuerAddress, "http://www.got.jwt.com");
-            ExpectedException expectedException = ExpectedException.NoExceptionExpected;
-            string json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}";
-            string badJson = @"{""response_mode"":""responseMode"";""respone_mode"":""badResponeMode""}";
-
-            // null stirng json
-            expectedException = ExpectedException.ArgumentNullException();
-            TestJsonStringConstructor((string)null, expectedException);
-
-            // bad string json
-            expectedException = ExpectedException.ArgumentException("IDX10106");
-            TestJsonStringConstructor(badJson, expectedException);
-
-            // no exception, well-formed json
-            expectedException = ExpectedException.NoExceptionExpected;
-            openIdConnectMessage = TestJsonStringConstructor(json, expectedException);
-            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
-
-            // no exception, using JObject ctor
-            expectedException = ExpectedException.NoExceptionExpected;
+            TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
+            var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
+            OpenIdConnectMessage messageFromJson;
+            OpenIdConnectMessage messageFromJsonObj;
+            var diffs = new List<string>();
             try
             {
-                openIdConnectMessage = new OpenIdConnectMessage(JObject.Parse(json));
-                expectedException.ProcessNoException();
+                messageFromJson = new OpenIdConnectMessage(theoryData.Json);
+                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
+                IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
+                IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
+                theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                theoryData.ExpectedException.ProcessException(exception);
             }
 
-            Assert.True(openIdConnectMessage.RefreshToken.Equals("refreshToken"), "openIdConnectMessage.RefreshToken does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseMode.Equals("responseMode"), "openIdConnectMessage.ResponseMode does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ResponseType.Equals("responseType"), "openIdConnectMessage.ResponseType does not match expected value: refreshToken");
-            Assert.True(openIdConnectMessage.ClientId == null, "openIdConnectMessage.ClientId is not null");
-
-            // test with an empty JObject
-            openIdConnectMessage = new OpenIdConnectMessage(new JObject());
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        private OpenIdConnectMessage TestJsonStringConstructor(string json, ExpectedException expectedException)
+        public static TheoryData<OpenIdConnectMessageTheoryData> ConstructorsTheoryData()
         {
-            OpenIdConnectMessage openIdConnectMessage = null;
-
-            try
+            return new TheoryData<OpenIdConnectMessageTheoryData>
             {
-                openIdConnectMessage = new OpenIdConnectMessage(json);
-                expectedException.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                expectedException.ProcessException(exception);
-            }
-
-            return openIdConnectMessage;
+                new OpenIdConnectMessageTheoryData
+                {
+                    First = true,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Json = "",
+                    TestId = "empty string"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    TestId = "null string"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
+                    TestId = "null jobject"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX21106"),
+                    Json =  @"{""response_mode"":""responseMode"";""respone_mode"":""duplicateResponeMode""}",
+                    TestId = "ResponseMode duplicated"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    JObject = new JObject(),
+                    Json = "{}",
+                    Message = new OpenIdConnectMessage(),
+                    TestId = "empty json string, empty jobj"
+                },
+                new OpenIdConnectMessageTheoryData
+                {
+                    JObject = JObject.Parse(@"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}"),
+                    Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
+                    Message = new OpenIdConnectMessage
+                    {
+                        RefreshToken = "refreshToken",
+                        ResponseMode = "responseMode",
+                        ResponseType = "responseType"
+                    },
+                    TestId = "ValidJson"
+                }
+            };
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Defaults")]
+        [Fact]
         public void Defaults()
         {
             List<string> errors = new List<string>();
-            OpenIdConnectMessage message = new OpenIdConnectMessage();
+            var message = new OpenIdConnectMessage();
             
             if (message.AcrValues != null)
                 errors.Add("message.ArcValues != null");
@@ -159,7 +170,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_Defaults*** Test Failures:\n", errors);
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: GetSets")]
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectMessage message = new OpenIdConnectMessage();
@@ -222,12 +233,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateAuthenticationRequestUrlTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateAuthenticationRequestUrlTheoryData))]
         public void OidcCreateAuthenticationRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
-            Assert.Equal(message.CreateAuthenticationRequestUrl(), expectedMessage);
+            TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
+            var context = new CompareContext();
+#if NET452
+            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NETCOREAPP2_0
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+#endif
+            IdentityComparer.AreEqual(message.CreateAuthenticationRequestUrl(), expectedMessage, context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<string, OpenIdConnectMessage, string> CreateAuthenticationRequestUrlTheoryData()
@@ -435,10 +454,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             );
 
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
+            message = new OpenIdConnectMessage();
             theoryData.Add(
                 "Telemetry",
-                new OpenIdConnectMessage(),
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                message,
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off
@@ -448,7 +468,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             theoryData.Add(
                 "TelemetryStaticFalseInstanceTrue",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off using static switch
@@ -475,24 +495,35 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("CreateLogoutRequestUrlTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(CreateLogoutRequestUrlTheoryData))]
         public void OidcCreateLogoutRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
-            Assert.Equal(message.CreateLogoutRequestUrl(), expectedMessage);
+            TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
+
+            var context = new CompareContext();     
+#if NET452
+            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NETCOREAPP2_0
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+#endif
+            IdentityComparer.AreEqual(message.CreateLogoutRequestUrl(), expectedMessage, context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<string, OpenIdConnectMessage, string> CreateLogoutRequestUrlTheoryData()
         {
             var theoryData = new TheoryData<string, OpenIdConnectMessage, string>();
 
+            bool defaultValue = OpenIdConnectMessage.EnableTelemetryParametersByDefault;
+
             OpenIdConnectMessage.EnableTelemetryParametersByDefault = true;
             var message = new OpenIdConnectMessage();
             theoryData.Add(
                 "Telemetry",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
 
             // Telemetry turned off using static switch
@@ -511,8 +542,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             theoryData.Add(
                 "TelemetryStaticFalseInstanceTrue",
                 message,
-                string.Format(CultureInfo.InvariantCulture, @"?x-client-SKU=ID_NET&x-client-ver={0}", typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString())
+                string.Format(CultureInfo.InvariantCulture, $@"?x-client-SKU={message.SkuTelemetryValue}&x-client-ver={typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version}")
             );
+
+            OpenIdConnectMessage.EnableTelemetryParametersByDefault = defaultValue;
 
             return theoryData;
         }
@@ -521,13 +554,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void NullFormParameters()
         {
-            List<KeyValuePair<string, string[]>> formData = new List<KeyValuePair<string, string[]>>();
-            formData.Add(new KeyValuePair<string, string[]>("key", new string[] { "data" }));
-            formData.Add(new KeyValuePair<string, string[]>("nullData", new string[] { null }));
-            formData.Add(new KeyValuePair<string, string[]>("emptyData", new string[] { string.Empty }));
-            formData.Add(new KeyValuePair<string, string[]>(null, new string[] { null }));
-            formData.Add(new KeyValuePair<string, string[]>(null, null));
-            OpenIdConnectMessage msg = new OpenIdConnectMessage(formData);
+            var msg = new OpenIdConnectMessage(new List<KeyValuePair<string, string[]>>
+            {
+                new KeyValuePair<string, string[]>("key", new string[] { "data" }),
+                new KeyValuePair<string, string[]>("nullData", new string[] { null }),
+                new KeyValuePair<string, string[]>("emptyData", new string[] { string.Empty }),
+                new KeyValuePair<string, string[]>(null, new string[] { null }),
+                new KeyValuePair<string, string[]>(null, null)
+            });
+
             Assert.NotNull(msg);
         }
 
@@ -540,18 +575,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void Extensibility()
         {
-            var customOpenIdConnectMessage =
-                new CustomOpenIdConnectMessage()
-                {
-                    AuthenticationRequestUrl = Guid.NewGuid().ToString(),
-                    LogoutRequestUrl = Guid.NewGuid().ToString(),
-                };
+            var msg = new CustomOpenIdConnectMessage()
+            {
+                AuthenticationRequestUrl = Guid.NewGuid().ToString(),
+                LogoutRequestUrl = Guid.NewGuid().ToString(),
+            };
 
-            Assert.True(customOpenIdConnectMessage.AuthenticationRequestUrl == customOpenIdConnectMessage.CreateAuthenticationRequestUrl(), "AuthenticationRequestUrl, CreateAuthenticationRequestUrl: " + customOpenIdConnectMessage.AuthenticationRequestUrl + ", " + customOpenIdConnectMessage.CreateAuthenticationRequestUrl());
-            Assert.True(customOpenIdConnectMessage.LogoutRequestUrl == customOpenIdConnectMessage.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + customOpenIdConnectMessage.LogoutRequestUrl + ", " + customOpenIdConnectMessage.CreateLogoutRequestUrl());
+            Assert.True(msg.AuthenticationRequestUrl == msg.CreateAuthenticationRequestUrl(), "AuthenticationRequestUrl, CreateAuthenticationRequestUrl: " + msg.AuthenticationRequestUrl + ", " + msg.CreateAuthenticationRequestUrl());
+            Assert.True(msg.LogoutRequestUrl == msg.CreateLogoutRequestUrl(), "LogoutRequestUrl, CreateLogoutRequestUrl(): " + msg.LogoutRequestUrl + ", " + msg.CreateLogoutRequestUrl());
         }
 
-        [Fact(DisplayName = "OpenIdConnectMessageTests: Tests if _issuerAddress has '?'")]
+        [Fact]
         public void OpenIdConnectMessage_IssuerAddressHasQuery()
         {
             List<string> errors = new List<string>();
@@ -564,7 +598,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             message.ClientId = clientId;
             url = message.BuildRedirectUrl();
-            var expected = string.Format(CultureInfo.InvariantCulture, @"{0}&client_id={1}", address, clientId);
+            var expected = $"{address}&client_id={clientId}";
 
             Report("2", errors, url, expected);
         }
@@ -582,8 +616,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             public string AuthenticationRequestUrl { get; set; }
+
             public string LogoutRequestUrl { get; set; }
+        }
+
+        public class OpenIdConnectMessageTheoryData : TheoryDataBase
+        {
+            public OpenIdConnectMessage Message { get; set; }
+            
+            public string Json { get; set; }
+
+            public JObject JObject { get; set; }
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
 

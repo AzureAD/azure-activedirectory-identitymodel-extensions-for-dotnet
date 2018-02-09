@@ -26,8 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -51,11 +53,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class KeyWrapProviderTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("KeyWrapConstructorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(KeyWrapConstructorTheoryData))]
         public void Constructors(string testId, SecurityKey key, string algorithm, ExpectedException ee)
         {
+            TestUtilities.WriteHeader("Constructors - " + testId, true);
             try
             {
                 var context = Guid.NewGuid().ToString();
@@ -80,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             theoryData.Add("Test1", null, null, ExpectedException.ArgumentNullException());
             theoryData.Add("Test2", Default.SymmetricEncryptionKey128, null, ExpectedException.ArgumentNullException());
-            theoryData.Add("Test3", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test3", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128Encryption, ExpectedException.NotSupportedException("IDX10661:"));
             theoryData.Add("Test4", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 
@@ -88,11 +89,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test7", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
 
             JsonWebKey key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.Octet };
-            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
 
             key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K };
-            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
-            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentException("IDX10661:"));
+            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
+            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
             theoryData.Add("Test11", KeyingMaterial.JsonWebKeySymmetric128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test12", KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
 
@@ -119,9 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(provider.GetSymmetricAlgorithmCalled);
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("WrapUnwrapTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(WrapUnwrapTheoryData))]
         public void WrapUnwrapKey(KeyWrapTestParams theoryParams)
         {
             try
@@ -181,9 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("UnwrapTamperedTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(UnwrapTamperedTheoryData))]
         public void UnwrapTamperedData(KeyWrapTestParams theoryParams)
         {
             try
@@ -197,7 +194,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        private static TheoryData<KeyWrapTestParams> UnwrapTamperedTheoryData()
+        public static TheoryData<KeyWrapTestParams> UnwrapTamperedTheoryData()
         {
             var theoryData = new TheoryData<KeyWrapTestParams>();
 
@@ -225,9 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("UnwrapMismatchTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(UnwrapMismatchTheoryData))]
         public void UnwrapMismatch(KeyWrapTestParams theoryParams)
         {
             try
@@ -245,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        private static TheoryData<KeyWrapTestParams> UnwrapMismatchTheoryData()
+        public static TheoryData<KeyWrapTestParams> UnwrapMismatchTheoryData()
         {
             var theoryData = new TheoryData<KeyWrapTestParams>();
 
@@ -270,9 +265,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("UnwrapTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(UnwrapTheoryData))]
         public void UnwrapParameterCheck(KeyWrapTestParams theoryParams)
         {
             try
@@ -327,3 +320,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

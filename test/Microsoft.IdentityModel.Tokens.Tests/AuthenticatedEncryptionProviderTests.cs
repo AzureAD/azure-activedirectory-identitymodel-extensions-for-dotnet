@@ -27,7 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -76,11 +79,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class AuthenticatedEncryptionProviderTests
     {
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("AEPConstructorTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(AEPConstructorTheoryData))]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
         {
+            TestUtilities.WriteHeader("Constructors - " + testId, true);
             try
             {
                 var context = Guid.NewGuid().ToString();
@@ -123,9 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("DecryptTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(DecryptTheoryData))]
         public void Decrypt(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -245,9 +245,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("DecryptMismatchTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(DecryptMismatchTheoryData))]
         public void DecryptMismatch(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -350,9 +348,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-        [Theory, MemberData("EncryptDecryptTheoryData")]
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+        [Theory, MemberData(nameof(EncryptDecryptTheoryData))]
         public void EncryptDecrypt(AuthenticatedEncryptionTestParams theoryParams)
         {
             try
@@ -426,3 +422,5 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

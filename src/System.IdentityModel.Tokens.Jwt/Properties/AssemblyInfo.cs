@@ -29,16 +29,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("System.IdentityModel.Tokens.Jwt")]
-[assembly: AssemblyDescription("Contains classes for Json Web Tokens.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyProduct("System.IdentityModel.Tokens.Jwt")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-[assembly: ComVisible(false)]
-[assembly: CLSCompliant(true)]
-[assembly: Guid("20A7CE07-5612-4F93-9D3E-F2DFF8CA19E2")]
+[assembly: AssemblyInformationalVersion("5.2.1")]
+[assembly: AssemblyFileVersion("5.2.1")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.1.5")]
-
+[assembly: AssemblyVersion("5.2.1")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -41,8 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 32)
-                Assert.True(false, "Number of properties has changed from 32 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 35)
+                Assert.True(false, "Number of properties has changed from 35 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
@@ -71,13 +72,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
                 ActorValidationParameters = actorValidationParameters,
-                AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue,
+                AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue,
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey }; },
                 IssuerSigningKeys = issuerSigningKeys,
-                IssuerValidator = IdentityUtilities.IssuerValidatorEcho,
-                LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue,
-                SignatureValidator = IdentityUtilities.SignatureValidatorReturnsTokenAsIs,
+                IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
+                LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
+                SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -98,13 +99,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.ActorValidationParameters = actorValidationParameters;
-            validationParametersSets.AudienceValidator = IdentityUtilities.AudienceValidatorReturnsTrue;
+            validationParametersSets.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue;
             validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
             validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey2 }; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
-            validationParametersSets.IssuerValidator = IdentityUtilities.IssuerValidatorEcho;
-            validationParametersSets.LifetimeValidator = IdentityUtilities.LifetimeValidatorReturnsTrue;
-            validationParametersSets.SignatureValidator = IdentityUtilities.SignatureValidatorReturnsTokenAsIs;
+            validationParametersSets.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
+            validationParametersSets.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
+            validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             validationParametersSets.SaveSigninToken = true;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
@@ -129,14 +130,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("TokenValidationParameters", compareContext.Diffs);
         }
 
-        [Fact( DisplayName = "TokenValidationParametersTests: GetSets, covers defaults")]
+        [Fact]
         public void GetSets()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 32)
-                Assert.True(false, "Number of public fields has changed from 32 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 35)
+                Assert.True(false, "Number of public fields has changed from 35 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -158,6 +159,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
+                        new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     },
                     Object = validationParameters,

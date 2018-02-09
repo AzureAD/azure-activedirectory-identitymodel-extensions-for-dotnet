@@ -26,15 +26,21 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Claims;
 using System.Xml;
+using static Microsoft.IdentityModel.Logging.LogHelper;
+
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Defines the interface for a Security Token Handler.
     /// </summary>
-    public abstract class SecurityTokenHandler
+    public abstract class SecurityTokenHandler : ISecurityTokenValidator
     {
+        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+
         /// <summary>
         /// Creates an instance of <see cref="SecurityTokenHandler"/>
         /// </summary>
@@ -100,7 +106,23 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return false;
         }
-        
+
+        /// <summary>
+        /// Gets and sets the maximum token size in bytes that will be processed.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
+        public virtual int MaximumTokenSizeInBytes
+        {
+            get { return _maximumTokenSizeInBytes; }
+            set
+            {
+                if (value < 1)
+                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
+
+                _maximumTokenSizeInBytes = value;
+            }
+        }
+
         /// <summary>
         /// Deserializes from string a token of the type handled by this instance.
         /// </summary>
@@ -145,5 +167,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
         /// <remarks>SecurityToken instance which represents the serialized token.</remarks>
         public abstract SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters);
+
+        /// <summary>
+        /// This must be overridden to validate a token passed as a string using <see cref="TokenValidationParameters"/>
+        /// </summary>
+        /// <param name="securityToken">A token of type <see cref="TokenType"/>.</param>
+        /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
+        /// <param name="validatedToken">The token of type <see cref="TokenType"/> that was validated.</param>
+        public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

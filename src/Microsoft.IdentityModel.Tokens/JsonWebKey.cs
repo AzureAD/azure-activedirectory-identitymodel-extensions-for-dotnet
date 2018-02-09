@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -36,7 +35,7 @@ using Newtonsoft.Json;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
+    /// Represents a JSON Web Key as defined in http://tools.ietf.org/html/rfc7517.
     /// </summary>
     [JsonObject]
     public class JsonWebKey : SecurityKey
@@ -89,12 +88,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
             }
         }
 
@@ -249,6 +248,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the key size of <see cref="JsonWebKey"/>.
         /// </summary>
+        [JsonIgnore]
         public override int KeySize
         {
             get
@@ -268,6 +268,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
+        [JsonIgnore]
         public bool HasPrivateKey
         {
             get
@@ -279,6 +280,26 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'key_ops' (Key Operations) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'key_ops' (Key Operations) is not empty; otherwise, false.</return>
+        public bool ShouldSerializeKeyOps()
+        {
+            return KeyOps.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'x5c' collection (X.509 Certificate Chain) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        ///</summary>
+        /// <return>true if 'x5c' collection (X.509 Certificate Chain) is not empty; otherwise, false.</return>
+        public bool ShouldSerializeX5c()
+        {
+            return X5c.Count > 0;
         }
 
         internal ECDsaCng CreateECDsa(string algorithm, bool usePrivateKey)
@@ -304,11 +325,12 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                     keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
 #else
-                 if (usePrivateKey)
-                     keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
-                 else
-                     keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
+                if (usePrivateKey)
+                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
+                else
+                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
 #endif
+
                 keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
                 IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
                 byte[] x = Base64UrlEncoder.DecodeBytes(X);
@@ -339,7 +361,7 @@ namespace Microsoft.IdentityModel.Tokens
                         if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
                 else
@@ -350,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens
                         if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
                     }
                 }
             }
@@ -364,7 +386,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal RSAParameters CreateRsaParameters()
         {
             if (N == null || E == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10700, this)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this)));
 
             RSAParameters parameters = new RSAParameters();
 
@@ -416,7 +438,7 @@ namespace Microsoft.IdentityModel.Tokens
                     keyByteCount = 64;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return keyByteCount;
         }
@@ -455,7 +477,7 @@ namespace Microsoft.IdentityModel.Tokens
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(String.Format(CultureInfo.InvariantCulture, LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return (uint)magicNumber;
         }

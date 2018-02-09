@@ -27,7 +27,6 @@
 
 using System;
 using System.Diagnostics.Tracing;
-using System.Globalization;
 using System.IO;
 
 namespace Microsoft.IdentityModel.Logging
@@ -58,7 +57,7 @@ namespace Microsoft.IdentityModel.Logging
             }
             catch (Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML11001, ex));
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML10001, ex));
                 throw;
             }
         }
@@ -72,9 +71,17 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(filePath))
                 throw LogHelper.LogArgumentNullException(nameof(filePath));
 
-            Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
-            _streamWriter = new StreamWriter(fileStream);
-            _streamWriter.AutoFlush = true;
+            try
+            {
+                Stream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+                _streamWriter = new StreamWriter(fileStream);
+                _streamWriter.AutoFlush = true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.MIML10001, ex));
+                throw;
+            }
         }
 
         /// <summary>
@@ -101,7 +108,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (eventData.Payload == null || eventData.Payload.Count <= 0)
             {
-                IdentityModelEventSource.Logger.WriteInformation(LogMessages.MIML11000);
+                LogHelper.LogInformation(LogMessages.MIML10000);
                 return;
             }
 

@@ -1,4 +1,11 @@
 <a name="5.0.0"></a>
+# 5.2.1
+
+## Major Changes from 5.1.5
+* Support for WsFederation, Saml and Saml2 tokens.
+* Support for Enveloped Xml Signatures.
+* PII hiding in log files for GDPR concerns
+
 # 5.1.5
 
 ## Features

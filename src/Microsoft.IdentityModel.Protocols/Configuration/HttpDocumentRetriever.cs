@@ -32,7 +32,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -81,11 +80,11 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException("address");
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10108, address));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
 
             try
             {
-                IdentityModelEventSource.Logger.WriteVerbose(LogMessages.IDX10805, address);
+                LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 HttpResponseMessage response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
 
@@ -94,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(String.Format(LogMessages.IDX10804, address), ex));
+                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
             }
         }
     }
