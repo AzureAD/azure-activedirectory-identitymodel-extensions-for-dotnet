@@ -1,5 +1,9 @@
 <a name="5.0.0"></a>
-# 5.1.3
+# 5.2.1
+## Major Changes from 5.1.2
+* Support for WsFederation, Saml and Saml2 tokens.
+* Support for Enveloped Xml Signatures.
+* PII hiding in log files for GDPR concerns
 
 ## Features
 * **JWE Support:** AES and RSA key wrap support
