@@ -358,7 +358,7 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
                     {
-                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                        if (ECDsaAlgorithm.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
                             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
                     {
-                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
+                        if (ECDsaAlgorithm.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
                             return new ECDsaCng(cngKey);
                         else
                             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
