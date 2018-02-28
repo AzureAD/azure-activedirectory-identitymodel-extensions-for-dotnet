@@ -339,6 +339,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             get { return "eyJhbGciOiJFUzUxMiIsImtpZCI6ImJpbGJvLmJhZ2dpbnNAaG9iYml0b24uZXhhbXBsZSJ9"; }
         }
 
+        public static string ES512Encoded
+        {
+            get { return ES512HeaderEncoded + "." + PayloadEncoded; }
+        }
+
         public static JwtHeader ES512JwtHeader
         {
             get

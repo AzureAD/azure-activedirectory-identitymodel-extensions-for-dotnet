@@ -88,7 +88,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var signatureBytes = providerForSigning.Sign(Encoding.UTF8.GetBytes(testParams.EncodedData));
             var encodedSignature = Base64UrlEncoder.Encode(signatureBytes);
 
-            Assert.True(testParams.EncodedSignature.Equals(encodedSignature, StringComparison.Ordinal), "encodedSignature != testParams.EncodedSignature");
+            // Signatures aren't necessarily deterministic across different algorithms
+            if (testParams.DeterministicSignatures)
+                Assert.True(testParams.EncodedSignature.Equals(encodedSignature, StringComparison.Ordinal), "encodedSignature != testParams.EncodedSignature");
             Assert.True(providerForVerifying.Verify(Encoding.UTF8.GetBytes(testParams.EncodedData), Base64UrlEncoder.DecodeBytes(testParams.EncodedSignature)), "Verify Failed");
         }
 
@@ -103,27 +105,29 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Algorithm = RFC7520References.RSAJwtHeader.Alg,
                     EncodedData = RFC7520References.RSAEncoded,
                     EncodedSignature = RFC7520References.RSASignatureEncoded,
+                    DeterministicSignatures = true,
                     PrivateKey = RFC7520References.RSASigningPrivateKey,
                     PublicKey = RFC7520References.RSASigningPublicKey,
                     TestId = "Test1"
                 });
 
-                // clr runtime is failing to create the key.
-                //theoryData.Add(new JwtSigningTestParams
-                //{
-                //    Algorithm = RFC7520References.ES512JwtHeader.Alg,
-                //    EncodedData = RFC7520References.ES512Encoded,
-                //    EncodedSignature = RFC7520References.ES512SignatureEncoded,
-                //    PrivateKey = RFC7520References.ECDsaPrivateKey,
-                //    PublicKey = RFC7520References.ECDsaPublicKey,
-                //    TestId = "Test2"
-                //});
+                theoryData.Add(new JwtSigningTestParams
+                {
+                    Algorithm = RFC7520References.ES512JwtHeader.Alg,
+                    EncodedData = RFC7520References.ES512Encoded,
+                    EncodedSignature = RFC7520References.ES512SignatureEncoded,
+                    DeterministicSignatures = false,
+                    PrivateKey = RFC7520References.ECDsaPrivateKey,
+                    PublicKey = RFC7520References.ECDsaPublicKey,
+                    TestId = "Test2"
+                });
 
                 theoryData.Add(new JwtSigningTestParams
                 {
                     Algorithm = RFC7520References.SymmetricJwtHeader.Alg,
                     EncodedData = RFC7520References.SymmetricEncoded,
                     EncodedSignature = RFC7520References.SymmetricSignatureEncoded,
+                    DeterministicSignatures = true,
                     PrivateKey = RFC7520References.SymmetricKeyMac,
                     PublicKey = RFC7520References.SymmetricKeyMac,
                     TestId = "Test3"
@@ -138,6 +142,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             public string Algorithm { get; set; }
             public string EncodedData { get; set; }
             public string EncodedSignature { get; set; }
+            public bool DeterministicSignatures { get; set; }
             public SecurityKey PrivateKey { get; set; }
             public SecurityKey PublicKey { get; set; }
             public string TestId { get; set; }
