@@ -278,18 +278,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
-                var theoryData = new TheoryData<Saml2TheoryData>();
-
-                theoryData.Add(new Saml2TheoryData
+                return new TheoryData<Saml2TheoryData>
                 {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
-                    First = true,
-                    Handler = new Saml2SecurityTokenHandler(),
-                    TestId = nameof(ReferenceTokens.Saml2Token_Valid),
-                    Token = ReferenceTokens.Saml2Token_Valid
-                });
-
-                return theoryData;
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        First = true,
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.Saml2Token_Valid),
+                        Token = ReferenceTokens.Saml2Token_Valid
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.Saml2Token_InclusiveNamespaces_WithPrefix),
+                        Token = ReferenceTokens.Saml2Token_InclusiveNamespaces_WithPrefix
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.Saml2Token_InclusiveNamespaces_WithoutPrefix),
+                        Token = ReferenceTokens.Saml2Token_InclusiveNamespaces_WithoutPrefix
+                    }
+                };
             }
         }
 
