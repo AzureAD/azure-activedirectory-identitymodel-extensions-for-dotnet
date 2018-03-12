@@ -783,6 +783,68 @@ namespace Microsoft.IdentityModel.Tests
             get => new SigningCredentials(JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
         }
 
+        public static JsonWebKey JsonWebKeyPublicWrongX
+        {
+            get
+            {
+                var curvePointParameterLength = 2 << 20;
+                var curvePointParameter = Base64UrlEncoder.Encode(new byte[curvePointParameterLength]);
+
+                var jsonString = string.Format(
+                    @"{{
+                    ""kty"": ""EC"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""crv"": ""P-521"",
+                    ""x"": ""{0}"",
+                    ""y"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1""
+                    }}", curvePointParameter);
+
+                return new JsonWebKey(jsonString);
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyPublicWrongY
+        {
+            get
+            {
+                var curvePointParameterLength = 2 << 20;
+                var curvePointParameter = Base64UrlEncoder.Encode(new byte[curvePointParameterLength]);
+
+                var jsonString = string.Format(@"{{
+                    ""kty"": ""EC"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""crv"": ""P-521"",
+                    ""x"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"",
+                    ""y"": ""{0}""
+                    }}", curvePointParameter);
+
+                return new JsonWebKey(jsonString);
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyPrivateWrongD
+        {
+            get
+            {
+                var curvePointParameterLength = 2 << 20;
+                var curvePointParameter = Base64UrlEncoder.Encode(new byte[curvePointParameterLength]);
+
+                var jsonString = string.Format(@"{{
+                    ""kty"": ""EC"",
+                    ""kid"": ""bilbo.baggins@hobbiton.example"",
+                    ""use"": ""sig"",
+                    ""crv"": ""P-521"",
+                    ""x"": ""AHKZLLOsCOzz5cY97ewNUajB957y-C-U88c3v13nmGZx6sYl_oJXu9A5RkTKqjqvjyekWF-7ytDyRXYgCF5cj0Kt"",
+                    ""y"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"",
+                    ""d"": ""{{0}}""
+                    }}", curvePointParameter);
+                
+                return new JsonWebKey(jsonString);
+            }
+        }
+
         public static JsonWebKey JsonWebKeyEcdsa256
         {
             get
