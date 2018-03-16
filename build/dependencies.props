@@ -1,7 +1,20 @@
 <Project>
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net451'">
+    <CoreFxVersion>4.3.0</CoreFxVersion>
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+    <NetStandardVersion>1.6.0</NetStandardVersion>
+  </PropertyGroup>
+  
+   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'" >
+    <CoreFxVersion>4.3.0</CoreFxVersion>
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+    <NetStandardVersion>1.6.0</NetStandardVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'" >
     <CoreFxVersion>4.3.0</CoreFxVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
     <NetStandardVersion>1.6.0</NetStandardVersion>
   </PropertyGroup>
+  
 </Project>
