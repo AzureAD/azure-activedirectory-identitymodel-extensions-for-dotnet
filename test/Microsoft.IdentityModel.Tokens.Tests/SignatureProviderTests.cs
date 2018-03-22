@@ -261,7 +261,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // constructing using a key with wrong key size:
             AsymmetricConstructorVariation("Verifying:    - ECDSA with unmatched keysize", KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, ExpectedException.NotSupportedException("IDX10641:"));
-            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with unmatched keysize", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10671:"));
+            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with unmatched keysize", KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
+
+            // Constructing using a key with an incorrect 'X' value
+            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with incorrect 'x' value", KeyingMaterial.JsonWebKeyPublicWrongX, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
+
+            // Constructing using a key with an incorrect 'Y' value
+            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with incorrect 'y' value", KeyingMaterial.JsonWebKeyPublicWrongY, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
+
+            // Constructing using a key with an incorrect 'D' value
+            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with incorrect 'd' value", KeyingMaterial.JsonWebKeyPrivateWrongD, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
         }
 
         private void AsymmetricConstructorVariation(string testcase, SecurityKey key, string algorithm, ExpectedException expectedException)
