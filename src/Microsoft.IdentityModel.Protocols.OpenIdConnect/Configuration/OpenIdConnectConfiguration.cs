@@ -32,6 +32,7 @@ using System.ComponentModel;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -92,11 +93,220 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX21806, json, this);
+#if NET45 || NET451
+                SetJsonParameters(json);
+#else
                 JsonConvert.PopulateObject(json, this);
+#endif
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, GetType()), ex));
+            }
+        }
+
+        private void SetJsonParameters(string json)
+        {
+            var jsonObj = JObject.Parse(json);
+            foreach (var pair in jsonObj)
+            {
+                if (jsonObj.TryGetValue(pair.Key, out JToken value))
+                {
+                    SetParameter(pair.Key, value);
+                }
+            }
+        }
+
+        private void SetParameter(string key, JToken jToken)
+        {
+            if (key.Equals(OpenIdProviderMetadataNames.AcrValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, AcrValuesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.AuthorizationEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                AuthorizationEndpoint = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.CheckSessionIframe, StringComparison.OrdinalIgnoreCase))
+            {
+                CheckSessionIframe = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ClaimsLocalesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ClaimsLocalesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ClaimsParameterSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                if (jToken.Type == JTokenType.Boolean)
+                {
+                    ClaimsParameterSupported = Convert.ToBoolean(jToken.ToString());
+                }
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ClaimsSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ClaimsSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ClaimTypesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ClaimTypesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.DisplayValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, DisplayValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.EndSessionEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                EndSessionEndpoint = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.FrontchannelLogoutSessionSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                FrontchannelLogoutSessionSupported = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.FrontchannelLogoutSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                FrontchannelLogoutSupported = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.HttpLogoutSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                if (jToken.Type == JTokenType.Boolean)
+                    HttpLogoutSupported = Convert.ToBoolean(jToken.ToString());
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.GrantTypesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, GrantTypesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.IdTokenEncryptionAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, IdTokenEncryptionAlgValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.IdTokenEncryptionEncValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, IdTokenEncryptionEncValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.IdTokenSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, IdTokenSigningAlgValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.JwksUri, StringComparison.OrdinalIgnoreCase))
+            {
+                JwksUri = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.Issuer, StringComparison.OrdinalIgnoreCase))
+            {
+                Issuer = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.LogoutSessionSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                LogoutSessionSupported = Convert.ToBoolean(jToken.ToString());
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.MicrosoftMultiRefreshToken, StringComparison.OrdinalIgnoreCase))
+            {
+                AdditionalData.Add(new KeyValuePair<string, object>(OpenIdProviderMetadataNames.MicrosoftMultiRefreshToken, Convert.ToBoolean(jToken.ToString())));
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.OpPolicyUri, StringComparison.OrdinalIgnoreCase))
+            {
+                OpPolicyUri = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.OpTosUri, StringComparison.OrdinalIgnoreCase))
+            {
+                OpTosUri = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RegistrationEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                RegistrationEndpoint = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RequestObjectEncryptionAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, RequestObjectEncryptionAlgValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RequestObjectEncryptionEncValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, RequestObjectEncryptionEncValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RequestObjectSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, RequestObjectSigningAlgValuesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RequestParameterSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                if (jToken.Type == JTokenType.Boolean)
+                    RequestParameterSupported = Convert.ToBoolean(jToken.ToString());
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.RequestUriParameterSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                if (jToken.Type == JTokenType.Boolean)
+                    RequestUriParameterSupported = Convert.ToBoolean(jToken.ToString());
+            }
+
+            else if (key.Equals(OpenIdProviderMetadataNames.RequireRequestUriRegistration, StringComparison.OrdinalIgnoreCase))
+            {
+                if (jToken.Type == JTokenType.Boolean)
+                    RequireRequestUriRegistration = Convert.ToBoolean(jToken.ToString());
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ResponseModesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ResponseModesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ResponseTypesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ResponseTypesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.ServiceDocumentation, StringComparison.OrdinalIgnoreCase))
+            {
+                ServiceDocumentation = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.ScopesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, ScopesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.SubjectTypesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, SubjectTypesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.TokenEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                TokenEndpoint = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.TokenEndpointAuthMethodsSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, TokenEndpointAuthMethodsSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.TokenEndpointAuthSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, TokenEndpointAuthSigningAlgValuesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.UILocalesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, UILocalesSupported);
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.UserInfoEndpoint, StringComparison.OrdinalIgnoreCase))
+            {
+                UserInfoEndpoint = jToken.ToString();
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.UserInfoEncryptionAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, UserInfoEndpointEncryptionAlgValuesSupported);
+            }
+            else if (key.Equals(OpenIdProviderMetadataNames.UserInfoEncryptionEncValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, UserInfoEndpointEncryptionEncValuesSupported); 
+            }
+            else if(key.Equals(OpenIdProviderMetadataNames.UserInfoSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, UserInfoEndpointSigningAlgValuesSupported);
+            }
+            else
+            {
+                AdditionalData.Add(new KeyValuePair<string, object>(key, jToken.ToString()));
+            }
+        }
+
+        private void SetJArray(JToken jToken, ICollection<string> collection)
+        {
+            if (jToken.Type == JTokenType.Array)
+            {
+                foreach (var child in jToken.Children())
+                    collection.Add(child.ToString());
             }
         }
 

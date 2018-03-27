@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
 {
     public class JsonExtensionsTests
     {
+#if (NETSTANDARD1_4)
         [Fact]
         public void JsonWithDuplicateNames()
         {
@@ -51,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
                 Assert.Contains("Property with the same name already exists on object.", ex.Message);
             }
         }
-
+#endif
         [Fact]
         public void MalformedJson()
         {

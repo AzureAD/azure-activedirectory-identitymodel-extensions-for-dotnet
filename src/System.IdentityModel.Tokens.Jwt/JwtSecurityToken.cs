@@ -28,11 +28,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
-<<<<<<< HEAD
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
-=======
->>>>>>> ifdef namespace
 
 #if System
 using Microsoft.IdentityModel.Tokens;

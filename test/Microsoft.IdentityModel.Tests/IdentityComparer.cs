@@ -43,15 +43,13 @@ using Newtonsoft.Json.Linq;
 #if !CrossVersionTokenValidation
 #if System
 using System.IdentityModel.Tokens.Jwt;
-<<<<<<< HEAD
-using Microsoft.IdentityModel.JsonWebTokens;
-=======
 #else
 using Microsoft.IdentityModel.Tokens.Jwt;
 #endif
->>>>>>> ifdef namespace
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
+
 #endif
 
 namespace Microsoft.IdentityModel.Tests

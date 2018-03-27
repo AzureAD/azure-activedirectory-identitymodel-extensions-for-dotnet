@@ -31,6 +31,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -92,13 +93,138 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
+#if NET45 || NET451
+                SetJsonParameters(json);
+#else
                 JsonConvert.PopulateObject(json, this);
+#endif
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
             }
         }
+
+        private void SetJsonParameters(string json)
+        {
+            var jsonObj = JObject.Parse(json);
+            foreach (var pair in jsonObj)
+            {
+                if (jsonObj.TryGetValue(pair.Key, out JToken value))
+                {
+                    SetParameter(pair.Key, value);
+                }
+            }
+        }
+
+        private void SetParameter(string key, JToken jToken)
+        {
+            if (key.Equals(JsonWebKeyParameterNames.Alg, StringComparison.OrdinalIgnoreCase))
+            {
+                Alg = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Crv, StringComparison.OrdinalIgnoreCase))
+            {
+                Crv = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.D, StringComparison.OrdinalIgnoreCase))
+            {
+                D = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.DP, StringComparison.OrdinalIgnoreCase))
+            {
+                DP = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.DQ, StringComparison.OrdinalIgnoreCase))
+            {
+                DQ = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.E, StringComparison.OrdinalIgnoreCase))
+            {
+                E = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.K, StringComparison.OrdinalIgnoreCase))
+            {
+                K = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.KeyOps, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, KeyOps);
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
+            {
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Kid, StringComparison.OrdinalIgnoreCase))
+            {
+                Kid = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Kty, StringComparison.OrdinalIgnoreCase))
+            {
+                Kty = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.N, StringComparison.OrdinalIgnoreCase))
+            {
+                N = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Oth, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, Oth);
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.P, StringComparison.OrdinalIgnoreCase))
+            {
+                P = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Q, StringComparison.OrdinalIgnoreCase))
+            {
+                Q = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.QI, StringComparison.OrdinalIgnoreCase))
+            {
+                QI = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Use, StringComparison.OrdinalIgnoreCase))
+            {
+                Use = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.X5c, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, X5c);
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.X5t, StringComparison.OrdinalIgnoreCase))
+            {
+                X5t = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.X5tS256, StringComparison.OrdinalIgnoreCase))
+            {
+                X5tS256 = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.X5u, StringComparison.OrdinalIgnoreCase))
+            {
+                X5u = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.X, StringComparison.OrdinalIgnoreCase))
+            {
+                X = jToken.ToString();
+            }
+            else if (key.Equals(JsonWebKeyParameterNames.Y, StringComparison.OrdinalIgnoreCase))
+            {
+                Y = jToken.ToString();
+            }
+            else
+            {
+                AdditionalData.Add(new KeyValuePair<string, object>(key, jToken.ToString()));
+            }
+        }
+
+        private void SetJArray(JToken jToken, IList<string> collection)
+        {
+            if (jToken.Type == JTokenType.Array)
+            {
+                foreach (var child in jToken.Children())
+                    collection.Add(child.ToString());
+            }
+        }
+
 
         /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.

@@ -2,7 +2,6 @@
 <Project>
     <PropertyGroup>
         <VersionPrefix>5.3.1</VersionPrefix>
-        <VersionPrefix>5.3.0</VersionPrefix>
-        <VersionSuffix>preview</VersionSuffix>
+        <VersionSuffix>internal</VersionSuffix>
     </PropertyGroup>
 </Project>

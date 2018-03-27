@@ -276,31 +276,9 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             get { return true; }
         }
 
-        /// <summary>
-<<<<<<< HEAD
-=======
-        /// Gets or sets the token lifetime in minutes.
-        /// </summary>
-        /// <remarks>Used by <see cref="CreateToken(SecurityTokenDescriptor)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int TokenLifetimeInMinutes
-        {
-            get
-            {
-                return _defaultTokenLifetimeInMinutes;
-            }
 
-            set
-            {
-                if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10104, value)));
-
-                _defaultTokenLifetimeInMinutes = value;
-            }
-        }
 #if System
         /// <summary>
->>>>>>> ifdef namespace
         /// Gets the type of the <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.
         /// </summary>
         /// <return>The type of <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>

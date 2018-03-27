@@ -37,9 +37,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class JsonWebKeyTests
     {
         [Theory, MemberData(nameof(JsonWebKeyDataSet))]
-        public void Constructors(string json, JsonWebKey compareTo, ExpectedException ee)
+        public void Constructors(string testId, string json, JsonWebKey compareTo, ExpectedException ee)
         {
-            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.Constructors", testId, true);
+            var context = new CompareContext(testId);
             try
             {
                 var jsonWebKey = new JsonWebKey(json);
@@ -55,19 +56,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, JsonWebKey, ExpectedException> JsonWebKeyDataSet
+        public static TheoryData<string, string, JsonWebKey, ExpectedException> JsonWebKeyDataSet
         {
             get
             {
-                var dataset = new TheoryData<string, JsonWebKey, ExpectedException>();
+                var dataset = new TheoryData<string, string, JsonWebKey, ExpectedException>();
 
-                dataset.Add(null, null, ExpectedException.ArgumentNullException(substringExpected: "json"));
-                dataset.Add(DataSets.JsonWebKeyFromPingString1, DataSets.JsonWebKeyFromPing1, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeyString1, DataSets.JsonWebKey1, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeyString2, DataSets.JsonWebKey2, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
-                dataset.Add(DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonSerializationException)));
-                dataset.Add(DataSets.JsonWebKeyBadX509String, DataSets.JsonWebKeyBadX509Data, ExpectedException.NoExceptionExpected);
+                dataset.Add("null", null, null, ExpectedException.ArgumentNullException(substringExpected: "json"));
+                dataset.Add(nameof(DataSets.JsonWebKeyFromPingString1), DataSets.JsonWebKeyFromPingString1, DataSets.JsonWebKeyFromPing1, ExpectedException.NoExceptionExpected);
+                dataset.Add(nameof(DataSets.JsonWebKeyString1), DataSets.JsonWebKeyString1, DataSets.JsonWebKey1, ExpectedException.NoExceptionExpected);
+                dataset.Add(nameof(DataSets.JsonWebKeyString2), DataSets.JsonWebKeyString2, DataSets.JsonWebKey2, ExpectedException.NoExceptionExpected);
+                dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString1), DataSets.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
+#if NET452
+                dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString2), DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
+#else
+                dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString2), DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonSerializationException)));
+#endif
+                dataset.Add(nameof(DataSets.JsonWebKeyBadX509String), DataSets.JsonWebKeyBadX509String, DataSets.JsonWebKeyBadX509Data, ExpectedException.NoExceptionExpected);
 
                 return dataset;
             }
@@ -171,7 +176,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         // Tests to make sure conditional property serialization for JsonWebKeys is working properly.
+#if NET452
+        [Fact(Skip ="Writing not supported")]
+#else
         [Fact]
+#endif
         public void ConditionalPropertySerialization()
         {
             var context = new CompareContext();
