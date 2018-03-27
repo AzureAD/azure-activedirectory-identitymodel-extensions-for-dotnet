@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -89,14 +90,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
             LogHelper.LogVerbose(LogMessages.IDX21811, doc);
-            OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
+            var openIdConnectConfiguration = OpenIdConnectConfiguration.Create(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 LogHelper.LogVerbose(LogMessages.IDX21812, openIdConnectConfiguration.JwksUri);
                 string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel).ConfigureAwait(false);
 
                 LogHelper.LogVerbose(LogMessages.IDX21813, openIdConnectConfiguration.JwksUri);
-                openIdConnectConfiguration.JsonWebKeySet = JsonConvert.DeserializeObject<JsonWebKeySet>(keys);
+                openIdConnectConfiguration.JsonWebKeySet = JsonWebKeySet.Create(keys);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
                 {
                     openIdConnectConfiguration.SigningKeys.Add(key);

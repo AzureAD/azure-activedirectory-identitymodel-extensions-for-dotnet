@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadUriKeysString, string.Empty, expectedException: ExpectedException.IOException());
 
             // stream is not well formated
-            await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadFormatString, string.Empty, expectedException: new ExpectedException(typeExpected: typeof(Newtonsoft.Json.JsonReaderException)));
+            await GetConfigurationFromTextAsync(OpenIdConfigData.OpenIdConnectMetadataBadFormatString, string.Empty, expectedException: new ExpectedException(typeExpected: typeof(ArgumentException), innerTypeExpected: typeof(Newtonsoft.Json.JsonReaderException)));
 
             configuration = await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataSingleX509DataString, expectedException: ExpectedException.NoExceptionExpected);
             IdentityComparer.AreEqual(configuration, OpenIdConfigData.SingleX509Data, context);

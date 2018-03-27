@@ -31,6 +31,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -88,6 +89,9 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
+#if NET45 || NET451
+                SetJsonParameters(json);
+#else
                 if (jsonSerializerSettings != null)
                 {
                     JsonConvert.PopulateObject(json, this, jsonSerializerSettings);
@@ -96,10 +100,44 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     JsonConvert.PopulateObject(json, this);
                 }
+#endif
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
+            }
+        }
+
+        private void SetJsonParameters(string json)
+        {
+            var jsonObj = JObject.Parse(json);
+            foreach (var pair in jsonObj)
+            {
+                if (jsonObj.TryGetValue(pair.Key, out JToken value))
+                {
+                    SetParameter(pair.Key, value);
+                }
+            }
+        }
+
+        private void SetParameter(string key, JToken jToken)
+        {
+            if (key.Equals(JsonWebKeySetParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
+            {
+                SetJArray(jToken, Keys);
+            }
+            else
+            {
+                AdditionalData.Add(new KeyValuePair<string, object>(key, jToken.ToString()));
+            }
+        }
+
+        private void SetJArray(JToken jToken, IList<JsonWebKey> keys)
+        {
+            if (jToken.Type == JTokenType.Array)
+            {
+                foreach (var child in jToken.Children())
+                    keys.Add(new JsonWebKey(child.ToString()));
             }
         }
 

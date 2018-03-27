@@ -3,13 +3,14 @@
   <Import Project="..\..\build\commonTest.props" />
 
   <PropertyGroup>
-    <AssemblyName>System.IdentityModel.Tokens.Jwt.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.Tokens.Jwt.Tests</AssemblyName>
     <Description>System.IdentityModel.Tokens.Jwt.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>System.IdentityModel.Tokens.Jwt.Tests</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net452;netcoreapp2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
+    <RootNamespace>Microsoft.IdentityModel.Tokens.Jwt.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

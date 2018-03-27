@@ -202,7 +202,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
         }
 
+#if NET452
+        [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
+#else
         [Fact]
+#endif
         public void RoundTripFromJson()
         {
             var context = new CompareContext { Title = "RoundTripFromJson" };
@@ -221,7 +225,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET452
+        [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
+#else
         [Fact]
+#endif
         public void EmptyCollectionSerialization()
         {
             var context = new CompareContext {Title = "EmptyCollectionSerialization"};
@@ -234,7 +242,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET452
+        [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
+#else
         [Fact]
+#endif
         public void NonemptyCollectionSerialization()
         {
             var context = new CompareContext { Title = "NonemptyCollectionSerialization" };

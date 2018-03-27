@@ -224,7 +224,11 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
                 CanRead = true,
                 TestId = nameof(EncodedJwts.InvalidPayload),
                 Token = EncodedJwts.InvalidPayload,
+#if NET452
+                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(FormatException))
+#else
                 ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(JsonReaderException))
+#endif
             });
 
             return theoryData;
