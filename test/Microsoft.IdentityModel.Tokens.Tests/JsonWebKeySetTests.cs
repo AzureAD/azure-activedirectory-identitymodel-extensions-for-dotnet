@@ -35,8 +35,21 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class JsonWebKeySetTests
+    public class JsonWebKeySetTests : IDisposable
     {
+        public JsonWebKeySetTests()
+        {
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+            };
+        }
+
+        public void Dispose()
+        {
+            JsonConvert.DefaultSettings = null;
+        }
+
         [Theory, MemberData(nameof(JsonWekKeySetDataSet))]
         public void Constructors(string json, JsonWebKeySet compareTo, ExpectedException ee)
         {

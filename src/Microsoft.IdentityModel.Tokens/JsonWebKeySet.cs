@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>       
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeySetParameterNames.Keys, Required = Required.Default)]
-        public IList<JsonWebKey> Keys { get; } = new List<JsonWebKey>();
+        public IList<JsonWebKey> Keys { get; private set; } = new List<JsonWebKey>();
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
