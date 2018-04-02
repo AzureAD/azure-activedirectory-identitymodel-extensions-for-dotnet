@@ -28,6 +28,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.Reflection;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Logging
@@ -67,11 +68,6 @@ namespace Microsoft.IdentityModel.Logging
         /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.
         /// </summary>
         public static bool HeaderWritten { get; set; } = false;
-
-        /// <summary>
-        /// The current library version.
-        /// </summary>
-        private static string _version = "5.2.2";
 
         /// <summary>
         /// The log message that indicates the current library version.
@@ -313,7 +309,8 @@ namespace Microsoft.IdentityModel.Logging
             // Logs basic information: library version, date, and whether PII (personally identifiable information) logging is on or off.
             if (!HeaderWritten)
             {
-                WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, _version));
+                // Obtain the current library version dynamically.
+                WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version.ToString()));
                 WriteAlways(string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow));
                 if (ShowPII) 
                     WriteAlways(_piiOnLogMessage);
