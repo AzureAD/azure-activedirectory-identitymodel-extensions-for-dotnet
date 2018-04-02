@@ -83,6 +83,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return new JwtSecurityToken(header, payload);
         }
 
+        private static JwtSecurityToken CreateValidatedIdToken(string claimType, object claimValue, string alg)
+        {
+            var jwt = CreateValidatedIdToken(claimType, claimValue);
+            jwt.Header[JwtHeaderParameterNames.Alg] = alg;
+            return jwt;
+        }
+
         [Fact]
         public void GenerateNonce()
         {

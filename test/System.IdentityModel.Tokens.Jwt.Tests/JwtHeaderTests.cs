@@ -132,16 +132,16 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
                 Assert.Equal(jwtHeader[headerKey], jwtHeaderPropertyValues[headerKey]);
 
             // check that headers are in the expected order, compare ordered lists
-            var jwtHeaderValues = new List<string>();
+            var jwtHeaderExpectedOrderedValues = new List<string>();
             foreach (var propertyValue in jwtHeaderPropertyValues.Values)
-                jwtHeaderValues.Add(propertyValue);
+                jwtHeaderExpectedOrderedValues.Add(propertyValue);
 
-            var jwtExpectedHeaderValues = new List<string>();
+            var jwtHeaderActualOrderedValues = new List<string>();
             foreach (var propertyValue in jwtHeader.Values)
-                jwtExpectedHeaderValues.Add(propertyValue as string);
+                jwtHeaderActualOrderedValues.Add(propertyValue as string);
 
-            for (int index = 0; index < jwtExpectedHeaderValues.Count; index++)
-                Assert.Equal(jwtHeaderValues[index], jwtExpectedHeaderValues[index]);
+            for (int index = 0; index < jwtHeaderActualOrderedValues.Count; index++)
+                Assert.Equal(jwtHeaderExpectedOrderedValues[index], jwtHeaderActualOrderedValues[index]);
 
             // compare serialization
             var headerAsJson = jwtHeader.SerializeToJson();
