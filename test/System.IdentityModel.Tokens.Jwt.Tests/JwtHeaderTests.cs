@@ -29,6 +29,8 @@ using System.Collections.Generic;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -67,86 +69,10 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
-        public void Constructors(JwtHeaderTheoryData theoryData)
+
+        [Fact]
+        public void Publics()
         {
-            var context = TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
-
-            try
-            {
-                var jwtHeader = new JwtHeader(theoryData.SigningCredentials, theoryData.OutboundAlgorithmMap);
-                theoryData.ExpectedException.ProcessNoException();
-                if (theoryData.SigningCredentials != null)
-                {
-                    if (theoryData.OutboundAlgorithmMap != null)
-                    {
-                        if (theoryData.OutboundAlgorithmMap.TryGetValue(theoryData.SigningCredentials.Algorithm, out string alg))
-                        {
-                            if (!jwtHeader.Alg.Equals(alg))
-                                context.AddDiff($"!jwtHeader.Alg.Equals(alg), '{jwtHeader.Alg}' : '{alg}', using OutboundAlgorithmMap");
-                        }
-                        else
-                        {
-                            if (jwtHeader.Alg != theoryData.SigningCredentials.Algorithm)
-                                context.AddDiff($"jwtHeader.Alg != theoryData.SigningCredentials.Algorithm, '{jwtHeader.Alg}' : '{alg}'");
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(theoryData.SigningCredentials.Key.KeyId))
-                    {
-                        if (!string.IsNullOrEmpty(jwtHeader.Kid))
-                            context.AddDiff($"Kid should not be set as SigningCredentials.Key.KeyId is Null or Empty. Kid : '{jwtHeader.Kid}'");
-                    }
-                    else if (!theoryData.SigningCredentials.Key.KeyId.Equals(jwtHeader.Kid))
-                    {
-                        context.AddDiff($"!theoryData.SigningCredentials.Key.KeyId.Equals(jwtHeader.Kid)");
-                    }
-
-                    if (theoryData.SigningCredentials is X509SigningCredentials x509SigningCredentials)
-                    {
-                        var x5t = jwtHeader[JwtHeaderParameterNames.X5t] as string;
-                        if (string.IsNullOrEmpty(x5t))
-                            context.AddDiff("!theoryData.SigningCredentials.Key.KeyId.Equals(jwtHeader.Kid)");
-                        else if (!x5t.Equals(Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash())))
-                            context.AddDiff("!x5t.Equals(Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash()))");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<JwtHeaderTheoryData> ConstructorTheoryData
-        {
-            get => new TheoryData<JwtHeaderTheoryData>
-            {
-                new JwtHeaderTheoryData
-                {
-                    First = true,
-                    SigningCredentials = Default.AsymmetricSigningCredentials,
-                    TestId = "Test1"
-                },
-                new JwtHeaderTheoryData
-                {
-                    SigningCredentials = new X509SigningCredentials(Default.Certificate),
-                    TestId = "Test2"
-                },
-                new JwtHeaderTheoryData
-                {
-                    SigningCredentials = new X509SigningCredentials(Default.Certificate, SecurityAlgorithms.RsaSha512),
-                    TestId = "Test3"
-                },
-                new JwtHeaderTheoryData
-                {
-                    OutboundAlgorithmMap = new Dictionary<string, string>{ { SecurityAlgorithms.RsaSha512, SecurityAlgorithms.RsaSha384} },
-                    SigningCredentials = new X509SigningCredentials(Default.Certificate, SecurityAlgorithms.RsaSha512),
-                    TestId = "Test4"
-                }
-            };
         }
 
         [Fact]
