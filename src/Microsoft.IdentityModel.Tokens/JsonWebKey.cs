@@ -443,7 +443,7 @@ namespace Microsoft.IdentityModel.Tokens
                     break;
                 case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
                 case JsonWebKeyECTypes.P521:
-                    keyByteCount = 64;
+                    keyByteCount = 66;
                     break;
                 default:
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
