@@ -91,8 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             }
             else
             {
-                string outboundAlg;
-                if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out outboundAlg))
+                if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out string outboundAlg))
                     Alg = outboundAlg;
                 else
                     Alg = signingCredentials.Algorithm;
@@ -119,6 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (encryptingCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
+            Kid = "foo";
             string outboundAlg;
             if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
                 Alg = outboundAlg;
@@ -290,6 +290,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         {
             return JsonExtensions.DeserializeJwtHeader(jsonString);
         }
+
         /// <summary>
         /// Gets a standard claim from the header.
         /// A standard cliam is either a string or a value of another type serialized in JSON format.
