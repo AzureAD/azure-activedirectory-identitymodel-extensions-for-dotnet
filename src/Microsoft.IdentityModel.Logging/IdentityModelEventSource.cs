@@ -316,6 +316,7 @@ namespace Microsoft.IdentityModel.Logging
                     WriteAlways(_piiOnLogMessage);
                 else
                     WriteAlways(_piiOffLogMessage);
+
                 HeaderWritten = true; // We only want to log this information once before any log messages are written.
             }
 
