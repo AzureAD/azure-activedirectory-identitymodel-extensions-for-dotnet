@@ -40,6 +40,9 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKey : SecurityKey
     {
+
+        private string _kid;
+
         /// <summary>
         /// Magic numbers identifying ECDSA blob types
         /// </summary>
@@ -150,6 +153,16 @@ namespace Microsoft.IdentityModel.Tokens
         public string K { get; set; }
 
         /// <summary>
+        /// Gets the key id of this <see cref="JsonWebKey"/>.
+        /// </summary>
+        [JsonIgnore]
+        public override string KeyId
+        {
+            get { return _kid; }
+            set { _kid = value; }
+        }
+
+        /// <summary>
         /// Gets the 'key_ops' (Key Operations)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.KeyOps, Required = Required.Default)]
@@ -159,7 +172,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'kid' (Key ID)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kid, Required = Required.Default)]
-        public string Kid { get; set; }
+        public string Kid
+        {
+            get { return _kid; }
+            set { _kid = value; }
+        }
 
         /// <summary>
         /// Gets or sets the 'kty' (Key Type)..
