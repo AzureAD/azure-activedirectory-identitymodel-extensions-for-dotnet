@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, token, validationParameters);
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);

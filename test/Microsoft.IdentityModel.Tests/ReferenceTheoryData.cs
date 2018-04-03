@@ -1,4 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
+using System.IdentityModel.Tokens.Jwt;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tests
@@ -58,6 +61,44 @@ namespace Microsoft.IdentityModel.Tests
                 };
             }
         }
+
+        public static TheoryData<TokenReplayTheoryData> CheckParametersForTokenReplayTheoryData
+        {
+            get
+            {
+                return new TheoryData<TokenReplayTheoryData>
+                {
+                    new TokenReplayTheoryData
+                    {
+                        First = true,
+                        TestId = $"ValidateTokenReplay: true, {nameof(ValidationDelegates.TokenReplayValidatorChecksExpirationTimeJwt)}",
+                        SecurityToken = Default.AsymmetricJwt,
+                        SecurityTokenHandler = new JwtSecurityTokenHandler(),
+                        SigningKey = Default.AsymmetricSigningKey,
+                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorChecksExpirationTimeJwt,
+                        ValidateTokenReplay = true
+                    },
+                    new TokenReplayTheoryData
+                    {
+                        TestId = $"ValidateTokenReplay: true, {nameof(ValidationDelegates.TokenReplayValidatorChecksExpirationTimeSaml)}",
+                        SecurityToken = ReferenceTokens.SamlToken_Valid,
+                        SecurityTokenHandler = new SamlSecurityTokenHandler(),
+                        SigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorChecksExpirationTimeSaml,
+                        ValidateTokenReplay = true,
+                    },
+                    new TokenReplayTheoryData
+                    {
+                        TestId = $"ValidateTokenReplay: true, {nameof(ValidationDelegates.TokenReplayValidatorChecksExpirationTimeSaml2)}",
+                        SecurityToken = ReferenceTokens.Saml2Token_Valid,
+                        SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        SigningKey = KeyingMaterial.DefaultAADSigningKey,
+                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorChecksExpirationTimeSaml2,
+                        ValidateTokenReplay = true,
+                    }
+                };
+            }
+        }
     }
 
     public class TokenReplayTheoryData : TheoryDataBase
@@ -72,5 +113,23 @@ namespace Microsoft.IdentityModel.Tests
             get;
             set;
         } = false;
+
+        public string SecurityToken
+        {
+            get;
+            set;
+        }
+
+        public SecurityTokenHandler SecurityTokenHandler
+        {
+            get;
+            set;
+        }
+
+        public SecurityKey SigningKey
+        {
+            get;
+            set;
+        }
     }
 }
