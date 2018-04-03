@@ -727,7 +727,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 var jwtToken = ReadJwtToken(token);
                 var decryptedJwt = DecryptToken(jwtToken, validationParameters);
                 var innerToken = ValidateSignature(decryptedJwt, validationParameters);
-                ValidateTokenPayload(innerToken, validationParameters);
                 jwtToken.InnerToken = innerToken;
                 validatedToken = jwtToken;
                 return ValidateTokenPayload(innerToken, validationParameters);
