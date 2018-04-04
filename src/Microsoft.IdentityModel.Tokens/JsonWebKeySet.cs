@@ -67,9 +67,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
+        /// <param name="jsonSerializerSettings">jsonSerializerSettings</param>
         /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
-        public JsonWebKeySet(string json)
+        public JsonWebKeySet(string json, JsonSerializerSettings jsonSerializerSettings = null)
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
@@ -77,7 +78,14 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
-                JsonConvert.PopulateObject(json, this);
+                if (jsonSerializerSettings != null)
+                {
+                    JsonConvert.PopulateObject(json, this, jsonSerializerSettings);
+                }
+                else
+                {
+                    JsonConvert.PopulateObject(json, this);
+                }
             }
             catch (Exception ex)
             {
