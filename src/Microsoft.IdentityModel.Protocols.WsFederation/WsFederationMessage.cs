@@ -172,7 +172,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             string token = null;
             using (var sr = new StringReader(Wresult))
             {
-                var xmlReader = XmlReader.Create(sr);                
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                settings.XmlResolver = null;
+#endif
+                XmlReader xmlReader = XmlReader.Create(sr, settings);
                 xmlReader.MoveToContent();
 
                 // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
@@ -247,7 +251,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             string token = null;
             using (var sr = new StringReader(Wresult))
             {
-                XmlReader xmlReader = XmlReader.Create(sr);
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                settings.XmlResolver = null;
+#endif
+                XmlReader xmlReader = XmlReader.Create(sr, settings);
                 xmlReader.MoveToContent();
 
                 // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
@@ -288,7 +296,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                             var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
                             var dom = new XmlDocument()
                             {
-                                PreserveWhitespace = true
+                                PreserveWhitespace = true,
+#if NET45 || NET451
+                                XmlResolver = null
+#endif
                             };
 
                             dom.Load(memoryReader);
