@@ -35,28 +35,24 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class JsonWebKeySetTests : IDisposable
+    public class JsonWebKeySetTests
     {
-        public JsonWebKeySetTests()
+        private static readonly JsonSerializerSettings _jsonSerializerSettingsForRegressionTest = new JsonSerializerSettings
         {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                ObjectCreationHandling = ObjectCreationHandling.Replace,
-            };
-        }
-
-        public void Dispose()
-        {
-            JsonConvert.DefaultSettings = null;
-        }
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+        };
 
         [Theory, MemberData(nameof(JsonWekKeySetDataSet))]
-        public void Constructors(string json, JsonWebKeySet compareTo, ExpectedException ee)
+        public void Constructors(
+            string json,
+            JsonWebKeySet compareTo,
+            JsonSerializerSettings settings,
+            ExpectedException ee)
         {
             var context = new CompareContext();
             try
             {
-                var jsonWebKeys = new JsonWebKeySet(json);
+                var jsonWebKeys = new JsonWebKeySet(json, settings);
                 var keys = jsonWebKeys.GetSigningKeys();
                 ee.ProcessNoException(context);
                 if (compareTo != null)
@@ -71,22 +67,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, JsonWebKeySet, ExpectedException> JsonWekKeySetDataSet
+        public static TheoryData<string, JsonWebKeySet, JsonSerializerSettings, ExpectedException> JsonWekKeySetDataSet
         {
             get
             {
-                var dataset = new TheoryData<string, JsonWebKeySet, ExpectedException>();
+                var dataset = new TheoryData<string, JsonWebKeySet, JsonSerializerSettings, ExpectedException>();
 
-                dataset.Add(DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, ExpectedException.NoExceptionExpected);
-                dataset.Add(null, null, ExpectedException.ArgumentNullException());
-                dataset.Add(DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
-                dataset.Add(File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-                dataset.Add(DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
-                dataset.Add(DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadX509String, null, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+                foreach (var setting in new[] { _jsonSerializerSettingsForRegressionTest, null })
+                {
+                    dataset.Add(DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(null, null, setting, ExpectedException.ArgumentNullException());
+                    dataset.Add(DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(DataSets.JsonWebKeySetBadFormatingString, null, setting, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
+                    dataset.Add(File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(DataSets.JsonWebKeySetBadRsaExponentString, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+                    dataset.Add(DataSets.JsonWebKeySetBadRsaModulusString, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)));
+                    dataset.Add(DataSets.JsonWebKeySetKtyNotRsaString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(DataSets.JsonWebKeySetUseNotSigString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(DataSets.JsonWebKeySetBadX509String, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+                }
 
                 return dataset;
             }
