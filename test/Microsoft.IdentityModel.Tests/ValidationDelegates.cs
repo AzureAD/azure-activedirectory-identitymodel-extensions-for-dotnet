@@ -29,6 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -132,17 +134,44 @@ namespace Microsoft.IdentityModel.Tests
             throw new SecurityTokenInvalidSignatureException("TokenReaderThrows");
         }
 
-        public static bool TokenReplayValidatorReturnsTrue(DateTime? exipres, string token, TokenValidationParameters validationParameters)
+        public static bool TokenReplayValidatorReturnsTrue(DateTime? expires, string token, TokenValidationParameters validationParameters)
         {
             return true;
         }
 
-        public static bool TokenReplayValidatorReturnsFalse(DateTime? exipres, string token, TokenValidationParameters validationParameters)
+        public static bool TokenReplayValidatorReturnsFalse(DateTime? expires, string token, TokenValidationParameters validationParameters)
         {
             return false;
         }
 
-        public static bool TokenReplayValidatorThrows(DateTime? exipres, string token, TokenValidationParameters validationParameters)
+        public static bool TokenReplayValidatorChecksExpirationTimeJwt(DateTime? expires, string token, TokenValidationParameters validationParameters)
+        {
+            if (expires == null)
+                return false;
+
+            var jwtToken = new JwtSecurityTokenHandler().ReadToken(token);
+            return jwtToken.ValidTo == expires;
+        }
+
+        public static bool TokenReplayValidatorChecksExpirationTimeSaml(DateTime? expires, string token, TokenValidationParameters validationParameters)
+        {
+            if (expires == null)
+                return false;
+
+            var samlToken = (SamlSecurityToken) new SamlSecurityTokenHandler().ReadToken(token);
+            return samlToken.Assertion.Conditions.NotOnOrAfter == expires;
+        }
+
+        public static bool TokenReplayValidatorChecksExpirationTimeSaml2(DateTime? expires, string token, TokenValidationParameters validationParameters)
+        {
+            if (expires == null)
+                return false;
+
+            var saml2Token = (Saml2SecurityToken) new Saml2SecurityTokenHandler().ReadToken(token);
+            return saml2Token.Assertion.Conditions.NotOnOrAfter == expires;
+        }
+
+        public static bool TokenReplayValidatorThrows(DateTime? expires, string token, TokenValidationParameters validationParameters)
         {
             throw new SecurityTokenReplayDetectedException("TokenReplayValidatorThrows");
         }
