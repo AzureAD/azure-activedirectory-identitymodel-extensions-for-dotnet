@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             Assert.Null(jwt.Subject);
             Assert.Equal(jwt.ValidFrom, DateTime.MinValue);
             Assert.Equal(jwt.ValidTo, DateTime.MinValue);
-            Assert.Null(jwt.RawData);
+            Assert.NotNull(jwt.RawData);
             Assert.NotNull(jwt.Header);
             Assert.NotNull(jwt.Payload);
             Assert.NotNull(jwt.EncodedHeader);

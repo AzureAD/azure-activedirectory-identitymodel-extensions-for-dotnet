@@ -121,9 +121,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (encryptingCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
-            Kid = "foo";
-            string outboundAlg;
-            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out string outboundAlg))
                 Alg = outboundAlg;
             else
                 Alg = encryptingCredentials.Alg;

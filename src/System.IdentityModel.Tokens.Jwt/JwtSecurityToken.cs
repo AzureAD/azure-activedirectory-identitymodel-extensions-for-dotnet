@@ -202,6 +202,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
             Header = new JwtHeader(signingCredentials);
             RawSignature = string.Empty;
+            RawData = string.Concat(RawHeader, ".", RawPayload, ".", RawSignature);
         }
 
         /// <summary>
