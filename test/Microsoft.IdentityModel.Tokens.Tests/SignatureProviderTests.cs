@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with incorrect 'y' value", KeyingMaterial.JsonWebKeyPublicWrongY, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
 
             // Constructing using a key with an incorrect 'D' value
-            AsymmetricConstructorVariation("Verifying:    - JsonWebKey for ECDSA with incorrect 'd' value", KeyingMaterial.JsonWebKeyPrivateWrongD, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
+            AsymmetricConstructorVariation("Signing:    - JsonWebKey for ECDSA with incorrect 'd' value", KeyingMaterial.JsonWebKeyPrivateWrongD, SecurityAlgorithms.EcdsaSha512, ExpectedException.ArgumentOutOfRangeException("IDX10675:"));
         }
 
         private void AsymmetricConstructorVariation(string testcase, SecurityKey key, string algorithm, ExpectedException expectedException)
