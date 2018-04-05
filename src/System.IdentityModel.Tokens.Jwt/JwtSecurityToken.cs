@@ -94,11 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException">'rawHeader' or 'rawPayload' is null or whitespace.</exception>
         public JwtSecurityToken(JwtHeader header, JwtPayload payload, string rawHeader, string rawPayload, string rawSignature)
         {
-            if (header == null)
-                throw LogHelper.LogArgumentNullException(nameof(header));
-
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            Header = header ?? throw LogHelper.LogArgumentNullException(nameof(header));
+            Payload = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrWhiteSpace(rawHeader))
                 throw LogHelper.LogArgumentNullException(nameof(rawHeader));
@@ -109,10 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (rawSignature == null)
                 throw LogHelper.LogArgumentNullException(nameof(rawSignature));
 
-            Header = header;
-            Payload = payload;
             RawData = string.Concat(rawHeader, ".", rawPayload, ".", rawSignature);
-
             RawHeader = rawHeader;
             RawPayload = rawPayload;
             RawSignature = rawSignature;
@@ -180,15 +174,12 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
         public JwtSecurityToken(JwtHeader header, JwtPayload payload)
         {
-            if (header == null)
-                throw LogHelper.LogArgumentNullException(nameof(header));
-
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            Header = header;
-            Payload = payload;
+            Header = header ?? throw LogHelper.LogArgumentNullException(nameof(header));
+            Payload = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
+            RawHeader = header.Base64UrlEncode();
+            RawPayload = payload.Base64UrlEncode();
             RawSignature = string.Empty;
+            RawData = string.Concat(RawHeader, ".", RawPayload, ".", RawSignature);
         }
 
         /// <summary>
