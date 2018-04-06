@@ -76,5 +76,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Publics()
         {
         }
+
+        [Fact]
+        public void Kid()
+        {
+            var jsonWebKey = new JsonWebKey(DataSets.JsonWebKeyString1);
+            var credentials = new SigningCredentials(jsonWebKey, SecurityAlgorithms.RsaSha256Signature);
+            var token = new JwtSecurityToken(claims: Default.Claims, signingCredentials: credentials);
+            Assert.Equal(jsonWebKey.Kid, token.Header.Kid);
+        }
     }
 }
