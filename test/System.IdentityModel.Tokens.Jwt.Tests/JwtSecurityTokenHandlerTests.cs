@@ -183,13 +183,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.False(handler2.OutboundAlgorithmMap.ContainsKey(SecurityAlgorithms.Aes128Encryption));
 
             var header = new JwtHeader(
-                new SigningCredentials(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption),
+                new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.Aes128Encryption),
                 handler1.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == SecurityAlgorithms.EcdsaSha256);
 
             header = new JwtHeader(
-                new SigningCredentials(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption),
+                new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.Aes128Encryption),
                 handler2.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == SecurityAlgorithms.Aes128Encryption);
@@ -219,7 +219,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var handler = new JwtSecurityTokenHandler();
             var header = new JwtHeader(
-                            new SigningCredentials(KeyingMaterial.ECDsa256Key, outboundAlgorithm),
+                            new SigningCredentials(KeyingMaterial.Ecdsa256Key, outboundAlgorithm),
                             handler.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == expectedValue);
@@ -243,13 +243,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             switch (outboundAlgorithm)
             {
                 case SecurityAlgorithms.EcdsaSha256Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa256Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, outboundAlgorithm) });
                     break;
                 case SecurityAlgorithms.EcdsaSha384Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa384Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa384Key, outboundAlgorithm) });
                     break;
                 case SecurityAlgorithms.EcdsaSha512Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa521Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa521Key, outboundAlgorithm) });
                     break;
 
                 case SecurityAlgorithms.RsaSha256Signature:
@@ -1087,7 +1087,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:"),
                         TestId = "Signature missing, required",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1"),
-                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultX509Key_Public_2048, null)
+                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048_Public, null)
                     },
                     new JwtTheoryData
                     {

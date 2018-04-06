@@ -479,7 +479,7 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// This works that is a parameter is null, we throw the exception when asked for the property
+    /// This type is helpful to test difficult call graphs and simulate throwing.
     /// </summary>
     public class FaultingSymmetricSecurityKey : SymmetricSecurityKey
     {

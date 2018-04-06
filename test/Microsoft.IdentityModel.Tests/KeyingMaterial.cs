@@ -105,10 +105,10 @@ namespace Microsoft.IdentityModel.Tests
         public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
         public static X509Certificate2 DefaultAsymmetricCert_2048 = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_2048), CertPassword, X509KeyStorageFlags.MachineKeySet);
 
-        public static string DefaultX509Data_Public_2048 = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
-        public static X509Certificate2 DefaultCert_Public_2048 = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_Public_2048));
-        public static X509SecurityKey DefaultX509Key_Public_2048 = new X509SecurityKey(DefaultCert_Public_2048);
-        public static SigningCredentials DefaultX509SigningCreds_Public_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_Public_2048, SecurityAlgorithms.RsaSha256Signature);
+        public static string DefaultX509Data_2048_Public = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
+        public static X509Certificate2 DefaultCert_2048_Public = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_2048_Public));
+        public static X509SecurityKey DefaultX509Key_2048_Public = new X509SecurityKey(DefaultCert_2048_Public);
+        public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2_Public = new SigningCredentials(DefaultX509Key_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
         public static string ExpiredX509Data_Public = @"MIIDKTCCAhGgAwIBAgIQWYE2RAW22K1AwRf9VBgsLDANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tMB4XDTE3MTEwMjIyNTMwNloXDTE3MTEwMjIzMDI0NVowJDEiMCAGA1UEAwwZaHR0cDovL0RlZmF1bHQuSXNzdWVyLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK79bBjoH2zMR2poFZDm7wJjzgp+Nidk8jkrps3iqzqqf1YVFtEtFBng4KE+2jfyaQxS4FO3dnd1Nh7wdCBH/60A0e6uROEBe4L/kydyJS3u2wsz+aabCBJ2M8FVUWziGZ4o2NKwAvRbCWFbsA9irhXTEw3hjqP7DDdjAayztmczG7vgeU10GnEPcYanyrraNRWkVaZGAI6EeFOy4QEYtFLd7N7gb84ScW/h2edVKm5VoYaVXF6KE7gfbMp+uflqJ8hBaLXjFSoXxN3Y6BQqxUGxX4qdAnpuRqDJzYQjDUm81MtD2XIfY46duJDDZOwpRPyXRe2YeJp5rVG5Pr0i7gECAwEAAaNXMFUwDgYDVR0PAQH/BAQDAgWgMCQGA1UdEQQdMBuCGWh0dHA6Ly9EZWZhdWx0Lklzc3Vlci5jb20wHQYDVR0OBBYEFJI/4wsmVjLpK1tRYJ96zKoBULBzMA0GCSqGSIb3DQEBCwUAA4IBAQBUToqoMJ0QJciKd+GRzivq3idPzCEyo4/V2V7B/H5czwzVx+lhn2e/EwCaMBPk3x9C5DQbJdmSp6DoX9VvD2XNOiFFeabBu/w9jhkRiDpOtNnWMJwzjHMAD0f4z8fSO5ZXcvFr2Ze3zGDTEY1vdXkAK2k9WuKu7c9kcoZO55Tads5T15vg4e8OmBq9kcGNEZRt2xBHkjlef0v6gBZ/lFeJHe0qTuKNCiTxJvUfAPnP0sTAdFdsDBt9bqLBHx+Wz/ALj535dUpCi5tXv4bI/t6qgh8toQNvJ7lNMv34W4+CiRYAPR9fK5bGsua+tb1FvfEqXx17yOLLgHgsu8oOsaZo"; 
         public static X509Certificate2 ExpiredX509Cert_Public = new X509Certificate2(Convert.FromBase64String(ExpiredX509Data_Public));
@@ -186,22 +186,22 @@ namespace Microsoft.IdentityModel.Tests
         public static RsaSecurityKey RsaSecurityKey_4096;
         public static RsaSecurityKey RsaSecurityKey_4096_Public;
 
-        public static SigningCredentials RSASigningCreds_1024;
-        public static SigningCredentials RSASigningCreds_1024_Public;
-        public static SigningCredentials RSASigningCreds_2048;
-        public static SigningCredentials RSASigningCreds_2048_Public;
-        public static SigningCredentials RSASigningCreds_2048_FromRsa;
-        public static SigningCredentials RSASigningCreds_2048_FromRsa_Public;
-        public static SigningCredentials RSASigningCreds_4096;
-        public static SigningCredentials RSASigningCreds_4096_Public;
+        public static SigningCredentials RsaSigningCreds_1024;
+        public static SigningCredentials RsaSigningCreds_1024_Public;
+        public static SigningCredentials RsaSigningCreds_2048;
+        public static SigningCredentials RsaSigningCreds_2048_Public;
+        public static SigningCredentials RsaSigningCreds_2048_FromRsa;
+        public static SigningCredentials RsaSigningCreds_2048_FromRsa_Public;
+        public static SigningCredentials RsaSigningCreds_4096;
+        public static SigningCredentials RsaSigningCreds_4096_Public;
 
         // ECDSA Cng security keys
-        public static readonly ECDsaSecurityKey ECDsa256Key;
-        public static readonly ECDsaSecurityKey ECDsa384Key;
-        public static readonly ECDsaSecurityKey ECDsa521Key;
-        public static readonly ECDsaSecurityKey ECDsa256Key_Public;
-        public static readonly ECDsaSecurityKey ECDsa384Key_Public;
-        public static readonly ECDsaSecurityKey ECDsa521Key_Public;
+        public static readonly ECDsaSecurityKey Ecdsa256Key;
+        public static readonly ECDsaSecurityKey Ecdsa384Key;
+        public static readonly ECDsaSecurityKey Ecdsa521Key;
+        public static readonly ECDsaSecurityKey Ecdsa256Key_Public;
+        public static readonly ECDsaSecurityKey Ecdsa384Key_Public;
+        public static readonly ECDsaSecurityKey Ecdsa521Key_Public;
 
         // SymmetricKeys
 
@@ -414,14 +414,14 @@ namespace Microsoft.IdentityModel.Tests
             RsaSecurityKey_1024_Public = new RsaSecurityKey(RsaParameters_1024_Public);
             RsaSecurityKey_4096 = new RsaSecurityKey(RsaParameters_4096);
             RsaSecurityKey_4096_Public = new RsaSecurityKey(RsaParameters_4096_Public);
-            RSASigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
-            RSASigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_2048_FromRsa = new SigningCredentials(RsaSecurityKey_2048_FromRsa, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
-            RSASigningCreds_2048_FromRsa_Public = new SigningCredentials(RsaSecurityKey_2048_FromRsa_Public, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
-            RSASigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
-            RSASigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_1024 = new SigningCredentials(RsaSecurityKey_1024, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_1024_Public = new SigningCredentials(RsaSecurityKey_1024_Public, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_2048 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
+            RsaSigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_2048_FromRsa = new SigningCredentials(RsaSecurityKey_2048_FromRsa, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
+            RsaSigningCreds_2048_FromRsa_Public = new SigningCredentials(RsaSecurityKey_2048_FromRsa_Public, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
+            RsaSigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
             //ecdsa
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
@@ -435,12 +435,12 @@ namespace Microsoft.IdentityModel.Tests
             CngKey ecdsa512Key = CngKey.Import(ecdsa521KeyBlob, CngKeyBlobFormat.EccPrivateBlob);
             CngKey ecdsa512Public = CngKey.Import(ecdsa512Key.Export(CngKeyBlobFormat.EccPublicBlob), CngKeyBlobFormat.EccPublicBlob);
 
-            ECDsa256Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Key));
-            ECDsa384Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Key));
-            ECDsa521Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Key));
-            ECDsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public));
-            ECDsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public));
-            ECDsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public));
+            Ecdsa256Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Key)) { KeyId = "ECDsa256Key" };
+            Ecdsa384Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Key)) { KeyId = "ECDsa384Key" };
+            Ecdsa521Key = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Key)) { KeyId = "ECDsa521Key" };
+            Ecdsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public)) { KeyId = "ECDsa256Key_Public" };
+            Ecdsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public)) { KeyId = "ECDsa384Key_Public" };
+            Ecdsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public)) { KeyId = "ECDsa521Key_Public" };
 
         }
 
@@ -532,7 +532,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return new RsaSecurityKey(RsaParameters_2048_Public) { KeyId = "RsaSecurityKey_FromRsaParameters_2048" };
+                return new RsaSecurityKey(RsaParameters_2048_Public) { KeyId = "RsaSecurityKey_2048_Public" };
             }
         }
 
@@ -540,7 +540,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                return new RsaSecurityKey(RsaParameters_2048) { KeyId = "RsaSecurityKey_FromRsaParameters_2048" };
+                return new RsaSecurityKey(RsaParameters_2048) { KeyId = "RsaSecurityKey_2048" };
             }
         }
 
@@ -754,7 +754,7 @@ namespace Microsoft.IdentityModel.Tests
                     P = "_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk",
                     Q = "7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c",
                     Kty = JsonWebAlgorithmsKeyTypes.RSA,
-                    Kid = "RsaSecurityKey_FromRsaParameters_2048"
+                    Kid = "RsaSecurityKey_2048"
                 };
             }
         }
@@ -773,7 +773,7 @@ namespace Microsoft.IdentityModel.Tests
                     E = "AQAB",
                     N = "6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw",
                     Kty = JsonWebAlgorithmsKeyTypes.RSA,
-                    Kid = "RsaSecurityKey_FromRsaParameters_2048"
+                    Kid = "RsaSecurityKey_2048_Public"
                 };
             }
         }
@@ -783,7 +783,7 @@ namespace Microsoft.IdentityModel.Tests
             get => new SigningCredentials(JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
         }
 
-        public static JsonWebKey JsonWebKeyPublicWrongX
+        public static JsonWebKey JsonWebKeyP521WrongX_Public
         {
             get
             {
@@ -804,7 +804,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static JsonWebKey JsonWebKeyPublicWrongY
+        public static JsonWebKey JsonWebKeyP521WrongY_Public
         {
             get
             {
@@ -824,7 +824,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static JsonWebKey JsonWebKeyPrivateWrongD
+        public static JsonWebKey JsonWebKeyP521WrongD
         {
             get
             {
@@ -845,7 +845,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static JsonWebKey JsonWebKeyEcdsa256
+        public static JsonWebKey JsonWebKeyP256
         {
             get
             {
@@ -862,7 +862,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static JsonWebKey JsonWebKeyEcdsa256Public
+        public static JsonWebKey JsonWebKeyP256_Public
         {
             get
             {
@@ -871,8 +871,8 @@ namespace Microsoft.IdentityModel.Tests
                     Crv = "P-256",
                     X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
                     Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
-                    KeyId = "JsonWebKeyEcdsa256",
-                    Kid = "JsonWebKeyEcdsa256",
+                    KeyId = "JsonWebKeyEcdsa256_Public",
+                    Kid = "JsonWebKeyEcdsa256_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -903,7 +903,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static JsonWebKey JsonWebKeyDefaultX509Key_2048
+        public static JsonWebKey JsonWebKeyX509_2048
         {
             get
             {

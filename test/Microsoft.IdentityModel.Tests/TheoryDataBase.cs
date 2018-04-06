@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -35,6 +36,11 @@ namespace Microsoft.IdentityModel.Tests
     /// </summary>
     public class TheoryDataBase
     {
+        public TheoryDataBase()
+        {
+            IdentityModelEventSource.ShowPII = true;
+        }
+
         public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 
         public bool First { get; set; } = false;

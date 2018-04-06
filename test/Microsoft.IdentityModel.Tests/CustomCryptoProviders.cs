@@ -73,6 +73,11 @@ namespace Microsoft.IdentityModel.Tests
         {
         }
 
+        public CustomCryptoProviderFactory(ICryptoProvider cryptoProvider)
+        {
+            CustomCryptoProvider = cryptoProvider;
+        }
+
         public CustomCryptoProviderFactory(string[] supportedAlgorithms)
         {
             SupportedAlgorithms.AddRange(supportedAlgorithms);
@@ -122,6 +127,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public override bool IsSupportedAlgorithm(string algorithm)
         {
+
             IsSupportedAlgorithmCalled = true;
             foreach (var alg in SupportedAlgorithms)
                 if (alg.Equals(algorithm, StringComparison.OrdinalIgnoreCase))
@@ -161,7 +167,18 @@ namespace Microsoft.IdentityModel.Tests
 
     public class CustomCryptoProvider : ICryptoProvider
     {
+        public CustomCryptoProvider()
+        {
+        }
+
+        public CustomCryptoProvider(string[] supportedAlgorithms)
+        {
+            SupportedAlgorithms.AddRange(supportedAlgorithms);
+        }
+
         public SignatureProvider SignatureProvider { get; set; }
+
+        public List<string> SupportedAlgorithms { get; set; } = new List<string>();
 
         public IList<string> AdditionalHashAlgorithms { get; private set; } = new List<string>();
 
@@ -209,6 +226,10 @@ namespace Microsoft.IdentityModel.Tests
         public bool IsSupportedAlgorithm(string algorithm, params object[] args)
         {
             IsSupportedAlgorithmCalled = true;
+            foreach (var alg in SupportedAlgorithms)
+                if (alg.Equals(algorithm, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
             return IsSupportedResult;
         }
 

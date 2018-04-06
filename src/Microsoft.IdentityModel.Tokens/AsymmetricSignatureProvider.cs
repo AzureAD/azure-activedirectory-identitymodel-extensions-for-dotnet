@@ -117,9 +117,6 @@ namespace Microsoft.IdentityModel.Tokens
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
@@ -130,6 +127,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            WillCreateSignatures = willCreateSignatures;
         }
 
         /// <summary>
@@ -137,10 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForSigningMap
         {
-            get
-            {
-                return _minimumAsymmetricKeySizeInBitsForSigningMap;
-            }
+            get => _minimumAsymmetricKeySizeInBitsForSigningMap;
         }
 
         /// <summary>
@@ -148,10 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForVerifyingMap
         {
-            get
-            {
-                return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
-            }
+            get => _minimumAsymmetricKeySizeInBitsForVerifyingMap;
         }
 
         private PrivateKeyStatus FoundPrivateKey(SecurityKey key)
@@ -321,24 +313,36 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (_disposed)
+            {
+                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
 
+            try
+            {
 #if NETSTANDARD1_4
-            if (_rsa != null)
-                return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_ecdsa != null)
-                return _ecdsa.SignData(input, _hashAlgorithm);
+                if (_rsa != null)
+                    return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                else if (_ecdsa != null)
+                    return _ecdsa.SignData(input, _hashAlgorithm);
 #else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
-            else if (_ecdsa != null)
-                return _ecdsa.SignData(input);
+                if (_rsaCryptoServiceProvider != null)
+                    return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
+                else if (_rsaCryptoServiceProviderProxy != null)
+                    return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
+                else if (_ecdsa != null)
+                    return _ecdsa.SignData(input);
 #endif
+            }
+            catch
+            {
+                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                throw;
+            }
+
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, _hashAlgorithm)));
         }
 
@@ -358,27 +362,39 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signature == null || signature.Length == 0)
-                throw LogHelper.LogArgumentNullException("signature");
+                throw LogHelper.LogArgumentNullException(nameof(signature));
 
             if (_disposed)
+            {
+                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
 
+            try
+            {
 #if NETSTANDARD1_4
-            if (_rsa != null)
-                return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
+                if (_rsa != null)
+                    return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                else if (_ecdsa != null)
+                    return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
 #else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
-            else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature);
+                if (_rsaCryptoServiceProvider != null)
+                    return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
+                else if (_rsaCryptoServiceProviderProxy != null)
+                    return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
+                else if (_ecdsa != null)
+                    return _ecdsa.VerifyData(input, signature);
 #endif
+            }
+            catch
+            {
+                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                throw;
+            }
+
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
@@ -412,6 +428,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (disposing)
                 {
+                    CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
 #if NETSTANDARD1_4
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();

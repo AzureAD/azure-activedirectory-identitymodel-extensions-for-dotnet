@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
@@ -169,86 +167,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Tests that Default behaviors
         /// </summary>
-        [Theory, MemberData(nameof(DefaultCryptoProviderDataSet))]
-        public void DefaultCryptoProviderFactory(SecurityKey key, string algorithm, bool isSupported, bool supportsSigning, ExpectedException ee)
-        {
-            Assert.True(CryptoProviderFactory.Default.IsSupportedAlgorithm(algorithm, key) == isSupported, string.Format(CultureInfo.InvariantCulture, "SecurityKey: '{0}', algorithm: '{1}', isSupported: '{2}'", key, algorithm, isSupported));
-            if (isSupported && supportsSigning)
-            {
-                try
-                {
-                    var signatureProvider = CryptoProviderFactory.Default.CreateForSigning(key, algorithm);
-                    var signatureProviderVerify = CryptoProviderFactory.Default.CreateForVerifying(key, algorithm);
-                    var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
-                    var signature = signatureProvider.Sign(bytes);
-                    var signatureCheck = signatureProviderVerify.Verify(bytes, signature);
-                    Assert.True(signatureCheck);
-                    CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
-                    CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProviderVerify);
-                    ee.ProcessNoException();
-                }
-                catch (Exception ex)
-                {
-                    ee.ProcessException(ex);
-                }
-            }
-        }
-
-        public static TheoryData<SecurityKey, string, bool, bool, ExpectedException> DefaultCryptoProviderDataSet
-        {
-            get
-            {
-                return new TheoryData<SecurityKey, string, bool, bool, ExpectedException>
-                {
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384, true, true, ExpectedException.NotSupportedException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512, true, true, ExpectedException.NotSupportedException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha384Signature, true, true, ExpectedException.NotSupportedException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha512Signature, true, true, ExpectedException.NotSupportedException("IDX10641:")},
-                    {KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256, true, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyEcdsa256Public, SecurityAlgorithms.EcdsaSha256Signature, true, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.Aes256KeyWrap, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256, true, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyRsa256Public, SecurityAlgorithms.RsaSha256Signature, true, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.Aes192KeyWrap, false, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeyRsa256Public, SecurityAlgorithms.Aes192KeyWrap, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.EcdsaSha512Signature, false, false, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha384, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha384Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes128Encryption, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha384, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha384Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha512, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha512Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.Aes128Encryption, false, false, ExpectedException.NoExceptionExpected},
-
-                    {KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256Signature, true, true, ExpectedException.NoExceptionExpected},
-                    {KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.RsaSha256Signature, false, false, ExpectedException.NoExceptionExpected}
-                };
-            }
-        }
-
         [Theory]
         [InlineData(SecurityAlgorithms.Sha256, true)]
         [InlineData(SecurityAlgorithms.Sha256Digest, true)]
@@ -278,15 +196,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CustomCryptoProvider()
         {
             var cryptoProviderFactoryDefault = CryptoProviderFactory.Default;
-            var cryptoProviderFactoryWithCustomProvider = new CustomCryptoProviderFactory();
             var customCryptoProvider = new CustomCryptoProvider
             {
                 HashAlgorithm = new CustomHashAlgorithm(),
                 SignatureProvider = new CustomSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256),
-                IsSupportedResult = true,
+                IsSupportedResult = true
             };
 
-            cryptoProviderFactoryWithCustomProvider.CustomCryptoProvider = customCryptoProvider;
+            var cryptoProviderFactoryWithCustomProvider = new CustomCryptoProviderFactory
+            {
+                CustomCryptoProvider = customCryptoProvider
+            };
+
             var cryptoProviderFactoryDefault2 = CryptoProviderFactory.Default;
 
             Assert.Null(cryptoProviderFactoryDefault.CustomCryptoProvider);
@@ -309,6 +230,75 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(customCryptoProvider.CreateCalled, "customCryptoProvider.CreateCalled");
             Assert.True(customSignatureProvider.DisposeCalled, "customSignatureProvider.DisposeCalled");
             Assert.False(customHashAlgorithm.DisposeCalled, "customHashAlgorithm.DisposeCalled");
+        }
+
+        [Theory, MemberData(nameof(CreateSignatureProviderExtensibilityTheoryData))]
+        public void CreateSignatureProviderExtensibility(CryptoProviderFactoryTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateSignatureProviderExtensibility", theoryData);
+
+            try
+            {
+                theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
+                theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyingKey, theoryData.VerifyingAlgorithm);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CryptoProviderFactoryTheoryData> CreateSignatureProviderExtensibilityTheoryData
+        {
+            get => new TheoryData<CryptoProviderFactoryTheoryData>
+            {
+                // These are in the order processed by the method
+
+                // CustomCryptoProvider
+                // IsSupported
+                // !IsSupported
+                // SignatureProvider==Null
+                // SignatureProvider!=null
+                new CryptoProviderFactoryTheoryData
+                {
+                    SigningAlgorithm = SecurityAlgorithms.RsaSha256Signature,
+                    CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.RsaSha256Signature }) },
+                    ExpectedException = ExpectedException.InvalidOperationException("IDX10646:"),
+                    SigningKey = KeyingMaterial.X509SecurityKey_1024,
+                    TestId = $"Extensibility1"
+                },
+                new CryptoProviderFactoryTheoryData
+                {
+                    SigningAlgorithm = SecurityAlgorithms.HmacSha256Signature,
+                    CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.HmacSha256Signature }) },
+                    ExpectedException = ExpectedException.InvalidOperationException("IDX10646:"),
+                    SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_56,
+                    TestId = $"Extensibility2",
+                },
+                new CryptoProviderFactoryTheoryData
+                {
+                    SigningAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { "SecurityAlgorithms.HmacSha256Signature" })
+                    { SignatureProvider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256) } },
+                    SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    VerifyingAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    VerifyingKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    TestId = $"Extensibility3",
+                },
+                new CryptoProviderFactoryTheoryData
+                {
+                    SigningAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { "!SecurityAlgorithms.HmacSha256Signature" }) },
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
+                    SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    VerifyingAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    VerifyingKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    TestId = $"Extensibility4"
+                },
+            };
         }
     }
 }

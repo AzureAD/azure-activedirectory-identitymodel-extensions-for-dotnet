@@ -46,20 +46,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(false, "Number of properties has changed from 35 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
-            SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
+            SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
             SecurityKey issuerSigningKey2 = KeyingMaterial.RsaSecurityKey_2048;
 
             List<SecurityKey> issuerSigningKeys =
                 new List<SecurityKey>
                 {
-                    KeyingMaterial.DefaultX509Key_Public_2048,
+                    KeyingMaterial.DefaultX509Key_2048_Public,
                     KeyingMaterial.RsaSecurityKey_2048
                 };
 
             List<SecurityKey> issuerSigningKeysDup =
                 new List<SecurityKey>
                 {
-                    KeyingMaterial.DefaultX509Key_Public_2048,
+                    KeyingMaterial.DefaultX509Key_2048_Public,
                     KeyingMaterial.RsaSecurityKey_2048
                 };
 
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.ActorValidationParameters = actorValidationParameters;
             validationParametersSets.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue;
-            validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_Public_2048;
+            validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
             validationParametersSets.IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey2 }; };
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;

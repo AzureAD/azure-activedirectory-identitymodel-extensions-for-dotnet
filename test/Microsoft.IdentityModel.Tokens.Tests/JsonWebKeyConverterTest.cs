@@ -96,12 +96,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new ConverterTheoryData
                     {
                         SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
-                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyDefaultX509Key_2048,
+                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
                         TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId)
                     },
                     new ConverterTheoryData
                     {
-                        SecurityKey = KeyingMaterial.ECDsa256Key,
+                        SecurityKey = KeyingMaterial.Ecdsa256Key,
                         ExpectedException = ExpectedException.NotSupportedException("IDX10674"),
                         TestId = "Security key not supported test"
                     },
