@@ -166,6 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10673 = "IDX10673: CryptoProviderFactory.GetHashAlgorithm returned null, factory: {0}, algorithm: {1}.";
         public const string IDX10674 = "IDX10674: JsonWebKeyConverter does not support SecurityKey of type: {0}";
         public const string IDX10675 = "IDX10675: The value of '{0}' must be '{1}' bits, but was {2}.";
+        public const string IDX10676 = "IDX10676: ECDsa creation is currently only supported for the Windows operating system.";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
