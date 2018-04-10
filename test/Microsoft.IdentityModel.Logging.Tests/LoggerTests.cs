@@ -218,6 +218,17 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Contains("This is a warning for streamwriter!", logText);
             File.Delete(filename);
         }
+
+        // This test will throw a FormatException if the PrepareMessage() method in IdentityModelEventSource attempts to format a message using an empty 'args' argument.
+        [Fact]
+        public void PrepareMessageWithNoArguments()
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+             var exception = LogHelper.LogExceptionMessage(new ArgumentException("This is the first parameter '{0}'. This is the second parameter '{1}'."));
+        }
     }
 
     class SampleListener : EventListener

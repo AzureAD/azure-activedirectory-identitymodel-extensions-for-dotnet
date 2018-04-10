@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Logging
             if (message == null)
                 return string.Empty;
 
-            if (args != null)
+            if (args != null && args.Length > 0)
                 return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), FormatInvariant(message, args));
 
             return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
