@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -64,12 +65,38 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtHeader.Alg == SecurityAlgorithms.None, "jwtHeader.SignatureAlgorithm == null");
             Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
             Assert.True(jwtHeader.Kid == null, "jwtHeader.Kid == null");
+            Assert.True(jwtHeader.X5t == null, "jwtHeader.X5t == null");
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
         [Fact]
         public void GetSets()
         {
+            var jwtHeader = new JwtHeader();
+            Type type = typeof(JwtHeader);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 14)
+                Assert.True(false, "Number of properties has changed from 14 to: " + properties.Length + ", adjust tests");
+
+            GetSetContext context =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                    {
+                        new KeyValuePair<string, List<object>>("Alg", new List<object>{SecurityAlgorithms.None, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Cty", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Enc", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("EncryptingCredentials", new List<object>{(EncryptingCredentials)null, Default.SymmetricEncryptingCredentials}),
+                        new KeyValuePair<string, List<object>>("IV", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("Kid", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("SigningCredentials", new List<object>{(SigningCredentials)null, Default.AsymmetricSigningCredentials}),
+                        new KeyValuePair<string, List<object>>("Typ", new List<object>{JwtConstants.HeaderType, Guid.NewGuid().ToString()}),
+                        new KeyValuePair<string, List<object>>("X5t", new List<object>{(string)null, Guid.NewGuid().ToString()}),
+                    },
+                    Object = jwtHeader,
+                };
+            TestUtilities.GetSet(context);
+            TestUtilities.AssertFailIfErrors("JwtHeader_GetSets", context.Errors);
         }
 
         [Fact]

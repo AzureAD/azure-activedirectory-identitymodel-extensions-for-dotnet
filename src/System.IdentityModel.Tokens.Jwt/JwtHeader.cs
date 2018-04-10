@@ -94,6 +94,10 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
                     Kid = signingCredentials.Key.KeyId;
+
+                var x509SecurityKey = signingCredentials.Key as X509SecurityKey;
+                if (x509SecurityKey != null && x509SecurityKey.Certificate != null)
+                    X5t = Base64UrlEncoder.Encode(x509SecurityKey.Certificate.GetCertHash());
             }
 
             Typ = JwtConstants.HeaderType;
@@ -129,6 +133,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 Kid = encryptingCredentials.Key.KeyId;
 
             Typ = JwtConstants.HeaderType;
+
+            var x509SecurityKey = encryptingCredentials.Key as X509SecurityKey;
+            if (x509SecurityKey != null && x509SecurityKey.Certificate != null)
+                X5t = Base64UrlEncoder.Encode(x509SecurityKey.Certificate.GetCertHash());
 
             EncryptingCredentials = encryptingCredentials;
         }
@@ -251,6 +259,11 @@ namespace System.IdentityModel.Tokens.Jwt
             get
             {
                 return GetStandardClaim(JwtHeaderParameterNames.X5t);
+            }
+
+            private set
+            {
+                this[JwtHeaderParameterNames.X5t] = value;
             }
         }
 
