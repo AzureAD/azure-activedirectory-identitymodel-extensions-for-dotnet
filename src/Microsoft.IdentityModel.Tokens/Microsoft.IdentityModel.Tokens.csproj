@@ -11,6 +11,10 @@
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;SecurityTokens;Cryptographic operations;Signing;Verifying Signatures;Encryption</PackageTags>
   </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <DefineConstants>WINDOWS</DefineConstants>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
     <DocumentationFile>bin\Release\net45\Microsoft.IdentityModel.Tokens.xml</DocumentationFile>
