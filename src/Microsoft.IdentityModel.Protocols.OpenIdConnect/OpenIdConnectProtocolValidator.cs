@@ -674,7 +674,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString())));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, nonceTime.ToString(CultureInfo.InvariantCulture), utcNow.ToString(CultureInfo.InvariantCulture), NonceLifetime.ToString("c", CultureInfo.InvariantCulture))));
             }
         }
 

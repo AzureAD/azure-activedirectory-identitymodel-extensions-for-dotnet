@@ -744,7 +744,7 @@ namespace Microsoft.IdentityModel.Xml
             if (reference.Uri != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Uri);
             else if (reference.Id != null)
-                if (reference.Id.StartsWith("#"))
+                if (reference.Id.StartsWith("#", StringComparison.Ordinal))
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Id);
                 else
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, "#" + reference.Id);
