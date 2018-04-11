@@ -50,8 +50,11 @@ namespace ApiChangeTest
         {
             "Microsoft.IdentityModel.Logging",
             "Microsoft.IdentityModel.Protocols",
-            "Microsoft.IdentityModel.Protocols.OpenIdConnect",           
+            "Microsoft.IdentityModel.Protocols.OpenIdConnect",
+            "Microsoft.IdentityModel.Protocols.WsFederation",
             "Microsoft.IdentityModel.Tokens",
+            "Microsoft.IdentityModel.Tokens.Saml",
+            "Microsoft.IdentityModel.Xml",
             "System.IdentityModel.Tokens.Jwt"
         };
 
