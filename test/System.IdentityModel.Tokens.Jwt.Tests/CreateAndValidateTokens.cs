@@ -408,6 +408,48 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
+        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData))]
+        public void SerializeDeserializeJwtTokens(JwtTheoryData theoryData)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var context = TestUtilities.WriteHeader($"{this}.SerializeDeserializeJwtTokens", theoryData);
+
+            try
+            {
+                var originalToken = theoryData.Token;
+                var token = new JwtSecurityToken(originalToken); // Deserialize token
+                var tokenString = handler.WriteToken(token); // Serialize token
+
+                // Strip the signature off of the original token since we don't generate one when deserializing it.
+                int index = theoryData.Token.LastIndexOf(".");
+                originalToken = originalToken.Substring(0, index + 1);
+
+                IdentityComparer.AreEqual(tokenString, originalToken, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> SerializeDeserializeJwtTokensTheoryData()
+        {
+            var theoryData = new TheoryData<JwtTheoryData>();
+            var handler = new JwtSecurityTokenHandler();
+
+            theoryData.Add(new JwtTheoryData
+            {
+                First = true,
+                TestId = "Test1",
+                Token = Default.AsymmetricJwt,
+            });
+
+            return theoryData;
+        }
+
         [Theory, MemberData(nameof(RoundTripJWEParams))]
         public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
