@@ -179,7 +179,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             var payload = new JwtPayload();
             var header = new JwtHeader();
-            var jwtToken = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
+            var jwtToken = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "");
             var jwt = handler.WriteToken(jwtToken);
             var context = new CompareContext();
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
@@ -406,6 +406,49 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             });
 
             return theoryData;
+        }
+
+        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData))]
+        public void SerializeDeserializeJwtTokens(JwtTheoryData theoryData)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var context = TestUtilities.WriteHeader($"{this}.SerializeDeserializeJwtTokens", theoryData);
+
+            try
+            {
+                var originalToken = theoryData.Token;
+                var token = new JwtSecurityToken(originalToken); // Deserialize token
+                var tokenString = handler.WriteToken(token); // Serialize token
+
+                // Strip the signature off of the original token since we don't generate one when deserializing it.
+                int index = theoryData.Token.LastIndexOf(".");
+                originalToken = originalToken.Substring(0, index + 1);
+
+                IdentityComparer.AreEqual(tokenString, originalToken, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> SerializeDeserializeJwtTokensTheoryData
+        {
+            get
+            {
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                    First = true,
+                    TestId = "Test1",
+                    Token = Default.AsymmetricJwt,
+                    }
+                };
+            }                  
         }
 
         [Theory, MemberData(nameof(RoundTripJWEParams))]

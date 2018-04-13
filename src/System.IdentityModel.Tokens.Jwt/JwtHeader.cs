@@ -43,7 +43,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
-            : this((SigningCredentials)null)
         {
         }
 
