@@ -179,7 +179,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             var payload = new JwtPayload();
             var header = new JwtHeader();
-            var jwtToken = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
+            var jwtToken = new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "");
             var jwt = handler.WriteToken(jwtToken);
             var context = new CompareContext();
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
@@ -435,19 +435,20 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JwtTheoryData> SerializeDeserializeJwtTokensTheoryData()
+        public static TheoryData<JwtTheoryData> SerializeDeserializeJwtTokensTheoryData
         {
-            var theoryData = new TheoryData<JwtTheoryData>();
-            var handler = new JwtSecurityTokenHandler();
-
-            theoryData.Add(new JwtTheoryData
+            get
             {
-                First = true,
-                TestId = "Test1",
-                Token = Default.AsymmetricJwt,
-            });
-
-            return theoryData;
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                    First = true,
+                    TestId = "Test1",
+                    Token = Default.AsymmetricJwt,
+                    }
+                };
+            }                  
         }
 
         [Theory, MemberData(nameof(RoundTripJWEParams))]
