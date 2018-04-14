@@ -48,7 +48,7 @@ All code is licensed under the MIT license and we triage actively on GitHub. We 
 
 * Support for creating and consuming OpenId and WsFederation messages.
 * Support for validating Saml and Saml2 tokens using TokenValidationParameters.
-* Support for dynamic metatdata retreival.
+* Support for dynamic metadata retrieval.
 
 ### 4.x
 #### System.IdentityModel.Tokens.Jwt (version 4.x)
