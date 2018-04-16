@@ -436,13 +436,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns>A <see cref="HashAlgorithm"/>.</returns>
         public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
-            if (algorithm == null)
-                algorithm = SecurityAlgorithms.RsaSha256;
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21350));
 
             try
             {
-                string hashAlgorithm;
-                if (!HashAlgorithmMap.TryGetValue(algorithm, out hashAlgorithm))
+                if (!HashAlgorithmMap.TryGetValue(algorithm, out string hashAlgorithm))
                     hashAlgorithm = algorithm;
 
                 return CryptoProviderFactory.CreateHashAlgorithm(hashAlgorithm);

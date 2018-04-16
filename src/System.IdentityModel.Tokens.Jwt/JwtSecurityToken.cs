@@ -126,9 +126,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">'innerToken' is null.</exception>
         /// <exception cref="ArgumentNullException">'rawHeader' is null.</exception>
         /// <exception cref="ArgumentNullException">'rawEncryptedKey' is null.</exception>
-        /// <exception cref="ArgumentNullException">'rawInitialVector' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'rawCiphertext' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'rawInitialVector' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">'rawCiphertext' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">'rawAuthenticationTag' is null or empty.</exception>
         public JwtSecurityToken(JwtHeader header,
                                 JwtSecurityToken innerToken,
                                 string rawHeader,
@@ -204,7 +204,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
-            Header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials);
+            Header = new JwtHeader(signingCredentials);
             RawSignature = string.Empty;
         }
 
