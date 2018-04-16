@@ -118,6 +118,17 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JwtSecurityToken"/>. 
+        /// <para>If this is set to true, the <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping. Otherwise, no mapping occurs.</para>
+        /// <para>The default value is true.</para>
+        /// </summary>
+        public bool MapInboundClaims
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
         /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
         /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap.</para>
@@ -1067,7 +1078,12 @@ namespace System.IdentityModel.Tokens.Jwt
                 LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
+            
+            return MapInboundClaims ? CreateClaimsIdentityWithMapping(jwtToken, actualIssuer, validationParameters) : CreateClaimsIdentityWithoutMapping(jwtToken, actualIssuer, validationParameters);
+        }
 
+        private ClaimsIdentity CreateClaimsIdentityWithMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
+        {
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
@@ -1105,6 +1121,42 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 if (wasMapped)
                     claim.Properties[ShortClaimTypeProperty] = jwtClaim.Type;
+
+                identity.AddClaim(claim);
+            }
+
+            return identity;
+        }
+
+        private ClaimsIdentity CreateClaimsIdentityWithoutMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
+        {
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            foreach (Claim jwtClaim in jwtToken.Claims)
+            {
+                if (_inboundClaimFilter.Contains(jwtClaim.Type))
+                    continue;
+
+                string claimType = jwtClaim.Type;
+
+                if (claimType == ClaimTypes.Actor)
+                {
+                    if (identity.Actor != null)
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
+
+                    if (CanReadToken(jwtClaim.Value))
+                    {
+                        JwtSecurityToken actor = ReadToken(jwtClaim.Value) as JwtSecurityToken;
+                        identity.Actor = CreateClaimsIdentity(actor, actualIssuer, validationParameters);
+                    }
+                }
+
+                Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity);
+
+                if (jwtClaim.Properties.Count > 0)
+                {
+                    foreach (var kv in jwtClaim.Properties)
+                        claim.Properties[kv.Key] = kv.Value;
+                }
 
                 identity.AddClaim(claim);
             }
