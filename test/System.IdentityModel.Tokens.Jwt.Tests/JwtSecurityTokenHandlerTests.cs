@@ -26,11 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-using System.Security.Cryptography;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -44,9 +44,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var context = new CompareContext();
             try
             {
-                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
-                var actorIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Actor, theoryData.ActorTokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
-                IdentityComparer.AreEqual(claimsIdentity.Actor, actorIdentity, context);
+                theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -72,10 +70,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ValidateActor = true;
                 theoryData.Add(
                     new JwtTheoryData
-                    {
-                        Actor = Default.AsymmetricJwt,
-                        ActorTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
-                        TestId = "Test1",
+                    { 
+                        TestId = "ActorValidationUsingTVP - True",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
@@ -85,7 +81,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // Actor validation is true
                 // Actor is signed with symmetric key
-                // TokenValidationParameters.ActorValidationParameters will not find signing key
+                // TokenValidationParameters.ActorValidationParameters will not find signing key because an assymetric signing key is provided
                 claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
@@ -94,15 +90,33 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 theoryData.Add(
                     new JwtTheoryData
                     {
-                        Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        TestId = "Test2",
+                        TestId = "ActorValidationUsingActorTVP - ExceptionExpected",
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
                     }
                 );
+
+                // Actor validation is true
+                // Actor is signed with symmetric key
+                // TokenValidationParameters.ActorValidationParameters is null
+                // TokenValidationParameters will be used, but will not find signing key because an assymetric signing key is provided
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                theoryData.Add(
+                    new JwtTheoryData
+                    {
+                        TestId = "ActorValidationUsingTVP - ExceptionExpected",
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
+
 
                 // Actor validation is false
                 // Actor is signed with symmetric key
@@ -114,10 +128,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ActorValidationParameters = Default.AsymmetricSignTokenValidationParameters;
                 theoryData.Add(
                     new JwtTheoryData
+                    {                     
+                        TestId = "ActorValidationFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
+
+                // Actor validation is true
+                // Actor will be validated using validationsParameters.ActorValidationParameters
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ActorValidationParameters = Default.SymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                theoryData.Add(
+                    new JwtTheoryData
                     {
-                        Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        TestId = "Test3",
+                        TestId = "ActorValidationUsingActorTVP - True",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
@@ -452,6 +482,24 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             expectedClaims.Add(claim);
 
             RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
+        }
+
+        [Fact]
+        public void InboundClaimTypeMappingOff()
+        {
+            var handler = new JwtSecurityTokenHandler();
+            handler.MapInboundClaims = false;
+
+            var claims = new List<Claim>
+            {
+             new Claim(JwtRegisteredClaimNames.Email, "Bob@contoso.com", ClaimValueTypes.String, Default.Issuer),
+             new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer)
+            };
+
+            var jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
+         
+            foreach (var claim in claims)
+                jwt.Claims.Single(s => s.Type == claim.Type && s.Value == claim.Value);
         }
 
         [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData))]
