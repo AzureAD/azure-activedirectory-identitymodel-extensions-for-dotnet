@@ -523,14 +523,58 @@ namespace Microsoft.IdentityModel.Tests
         public static SecurityKey New { get { return new NotAsymmetricOrSymmetricSecurityKey(); } }
     }
 
-    public class CustomCryptoProviderSecurityKey : SecurityKey
+    /// <summary>
+    /// Useful when one needs a security key to fault at different times.
+    /// Each Get / Set has an exception associated with it that if set will throw
+    /// instead of returning the value passed in the constructor.
+    /// </summary>
+    public class DerivedSecurityKey : SecurityKey
     {
-        public CustomCryptoProviderSecurityKey(CustomCryptoProviderFactory  customCryptoProviderFactory)
+        private string _keyId;
+        private int _keySize;
+
+        public DerivedSecurityKey(string keyId, int keySize)
         {
-            CryptoProviderFactory = customCryptoProviderFactory;
+            _keyId = keyId;
+            _keySize = keySize;
         }
 
-        public override int KeySize => throw new NotImplementedException();
+        public Exception ThrowOnGetKeyId { get; set; }
+
+        public Exception ThrowOnSetKeyId { get; set; }
+
+        public Exception ThrowOnGetKeySize { get; set; }
+
+
+        public override string KeyId
+        {
+            get
+            {
+                if (ThrowOnGetKeyId != null)
+                    throw ThrowOnGetKeyId;
+
+                return _keyId;
+            }
+
+            set
+            {
+                if (ThrowOnSetKeyId != null)
+                    throw ThrowOnSetKeyId;
+
+                _keyId = value;
+            }
+        }
+
+        public override int KeySize
+        {
+            get
+            {
+                if (ThrowOnGetKeySize != null)
+                    throw ThrowOnGetKeySize;
+
+                return _keySize;
+            }
+        }
     }
 
     public class ReturnNullAsymmetricSecurityKey : AsymmetricSecurityKey

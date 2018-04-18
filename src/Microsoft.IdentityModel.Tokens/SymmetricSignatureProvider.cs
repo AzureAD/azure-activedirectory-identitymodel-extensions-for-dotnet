@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10676, (algorithm ?? "null"), key), ex));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10676, key, (algorithm ?? "null")), ex));
             }
 
             if (_keyedHash == null)
@@ -151,13 +151,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
             }
 
             if (_keyedHash == null)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
             }
 
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
         }
@@ -196,13 +196,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
             }
 
             if (_keyedHash == null)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
             }
 
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
         }
@@ -246,13 +246,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
             }
 
             if (_keyedHash == null)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
             }
 
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
         }
@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 _disposed = true;
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
 
                 if (disposing)
                 {

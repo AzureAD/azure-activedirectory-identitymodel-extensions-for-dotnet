@@ -148,12 +148,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         private PrivateKeyStatus FoundPrivateKey(SecurityKey key)
         {
-            AsymmetricSecurityKey asymmetricSecurityKey = key as AsymmetricSecurityKey;
-            if (asymmetricSecurityKey != null)
+            if (key is AsymmetricSecurityKey asymmetricSecurityKey)
                 return asymmetricSecurityKey.PrivateKeyStatus;
 
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
+            if (key is JsonWebKey jsonWebKey)
                 return jsonWebKey.HasPrivateKey ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
 
             return PrivateKeyStatus.Unknown;
@@ -233,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             switch (algorithm)
             {
@@ -317,7 +315,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
@@ -339,11 +337,29 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
 
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, _hashAlgorithm)));
+        }
+
+        /// <summary>
+        /// Validates that the asymmetric key size is more than the allowed minimum
+        /// </summary>
+        /// <param name="key">The asymmetric key to validate</param>
+        /// <param name="algorithm">Algorithm for which this key will be used</param>
+        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures</param>
+        public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            if (willCreateSignatures)
+            {
+                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
+            }
+
+            if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
         }
 
         /// <summary>
@@ -369,7 +385,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_disposed)
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
@@ -391,29 +407,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch
             {
-                CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
 
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
-        }
-
-        /// <summary>
-        /// Validates that the asymmetric key size is more than the allowed minimum
-        /// </summary>
-        /// <param name="key">The asymmetric key to validate</param>
-        /// <param name="algorithm">Algorithm for which this key will be used</param>
-        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures</param>
-        public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
-        {
-            if (willCreateSignatures)
-            {
-                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
-            }
-
-            if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
         }
 
         /// <summary>
@@ -428,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (disposing)
                 {
-                    CryptoProviderFactory?.RemoveCachedSignatureProvider(this);
+                    CryptoProviderCache?.TryRemove(this);
 #if NETSTANDARD1_4
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();

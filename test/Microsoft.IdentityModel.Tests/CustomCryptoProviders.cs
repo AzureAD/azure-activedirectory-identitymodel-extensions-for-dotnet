@@ -38,8 +38,20 @@ namespace Microsoft.IdentityModel.Tests
     public class CustomSignatureProvider : SignatureProvider
     {
         public CustomSignatureProvider(SecurityKey key, string algorithm)
-            : base(key, algorithm)
+            : this(key, algorithm, true)
         { }
+
+        public CustomSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
+            : this(key, algorithm, willCreateSignatures, null)
+        {
+        }
+
+        public CustomSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, CryptoProviderCache cryptoProviderCache)
+            : base(key, algorithm)
+        {
+            CryptoProviderCache = cryptoProviderCache;
+            WillCreateSignatures = willCreateSignatures;
+        }
 
         public bool DisposeCalled { get; set; } = false;
 
@@ -239,8 +251,7 @@ namespace Microsoft.IdentityModel.Tests
             if (cryptoObject as ICustomObject != null)
                 return;
 
-            var disposableObject = cryptoObject as IDisposable;
-            if (disposableObject != null)
+            if (cryptoObject is IDisposable disposableObject)
                 disposableObject.Dispose();
         }
     }

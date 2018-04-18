@@ -101,6 +101,11 @@ namespace Microsoft.IdentityModel.Tests
             get => CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
         }
 
+        public static string AsymmetricSigningAlgorithm
+        {
+            get => SecurityAlgorithms.RsaSha256;
+        }
+
         public static SecurityKey AsymmetricSigningKey
         {
             get => new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
