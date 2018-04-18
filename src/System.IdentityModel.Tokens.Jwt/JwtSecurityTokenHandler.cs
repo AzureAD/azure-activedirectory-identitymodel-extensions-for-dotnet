@@ -57,6 +57,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private IDictionary<string, string> _outboundClaimTypeMap;
         private IDictionary<string, string> _outboundAlgorithmMap = null;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
+        private bool _mapInboundClaims = DefaultMapInboundClaims;
 
         /// <summary>
         /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
@@ -67,6 +68,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Default claim type mapping for inbound claims.
         /// </summary>
         public static IDictionary<string, string> DefaultInboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
+
+        /// <summary>
+        /// Default value for the flag that determines whether or not the InboundClaimTypeMap is used.
+        /// </summary>
+        public static bool DefaultMapInboundClaims = true;
 
         /// <summary>
         /// Default claim type mapping for outbound claims.
@@ -111,7 +117,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public JwtSecurityTokenHandler()
         {
-            _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+            if (_mapInboundClaims)
+                _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+
             _outboundClaimTypeMap = new Dictionary<string, string>(DefaultOutboundClaimTypeMap);
             _inboundClaimFilter = new HashSet<string>(DefaultInboundClaimFilter);
             _outboundAlgorithmMap = new Dictionary<string, string>(DefaultOutboundAlgorithmMap);
@@ -124,9 +132,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         public bool MapInboundClaims
         {
-            get;
-            set;
-        } = true;
+            get
+            {
+                return _mapInboundClaims;
+            }
+
+            set
+            {
+                // If the inbound claim type mapping was turned off and is being turned on for the first time, make sure that the _inboundClaimTypeMap is initialized.
+                if (!_mapInboundClaims && value && _inboundClaimTypeMap == null)
+                    _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+
+                _mapInboundClaims = value;            
+            }
+        } 
 
         /// <summary>
         /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 

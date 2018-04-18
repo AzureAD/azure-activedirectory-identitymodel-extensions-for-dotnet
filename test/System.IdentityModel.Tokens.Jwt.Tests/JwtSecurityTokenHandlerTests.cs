@@ -44,7 +44,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var context = new CompareContext();
             try
             {
-                theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
+                Assert.True(claimsIdentity.Actor != null);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -485,10 +486,18 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void InboundClaimTypeMappingOff()
+        public void MapInboundClaims()
         {
             var handler = new JwtSecurityTokenHandler();
-            handler.MapInboundClaims = false;
+
+            // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap.
+            Assert.True(handler.InboundClaimTypeMap != null);
+
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+            handler = new JwtSecurityTokenHandler();
+
+            // Make sure that we don't initialize the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
+            Assert.True(handler.InboundClaimTypeMap == null);
 
             var claims = new List<Claim>
             {
@@ -498,8 +507,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             var jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
          
+            // Check to make sure none of the short claim types have been mapped to longer ones.
             foreach (var claim in claims)
-                jwt.Claims.Single(s => s.Type == claim.Type && s.Value == claim.Value);
+                jwt.Claims.Single(s => s.Type == claim.Type);
+
+            handler.MapInboundClaims = true;
+
+            // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map if it was previously null.
+            Assert.True(handler.InboundClaimTypeMap != null);
+            // Check to make sure that changing the instance property did not alter the static property.
+            Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
         }
 
         [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData))]
