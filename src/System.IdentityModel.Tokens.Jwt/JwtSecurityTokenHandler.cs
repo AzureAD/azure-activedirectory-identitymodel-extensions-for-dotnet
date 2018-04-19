@@ -1156,7 +1156,6 @@ namespace System.IdentityModel.Tokens.Jwt
                     continue;
 
                 string claimType = jwtClaim.Type;
-
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
@@ -1170,7 +1169,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity);
-
                 if (jwtClaim.Properties.Count > 0)
                 {
                     foreach (var kv in jwtClaim.Properties)
