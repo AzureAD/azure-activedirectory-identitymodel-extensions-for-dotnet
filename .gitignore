@@ -205,7 +205,6 @@ log
 packages/*
 stash/*
 TestResults/*
-docs/*
 backup/*
 .testPublish/
 /.vs/
