@@ -490,14 +490,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var handler = new JwtSecurityTokenHandler();
 
-            // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap.
-            Assert.True(handler.InboundClaimTypeMap != null);
+            // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap with the default mappings.
+            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
 
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             handler = new JwtSecurityTokenHandler();
 
-            // Make sure that we don't initialize the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
-            Assert.True(handler.InboundClaimTypeMap == null);
+            // Make sure that we don't populate the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
+            Assert.Equal(0, handler.InboundClaimTypeMap.Count);
 
             var claims = new List<Claim>
             {
@@ -513,8 +513,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             handler.MapInboundClaims = true;
 
-            // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map if it was previously null.
-            Assert.True(handler.InboundClaimTypeMap != null);
+            // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map with the default mappings if it was previously empty.
+            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
             // Check to make sure that changing the instance property did not alter the static property.
             Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
         }
