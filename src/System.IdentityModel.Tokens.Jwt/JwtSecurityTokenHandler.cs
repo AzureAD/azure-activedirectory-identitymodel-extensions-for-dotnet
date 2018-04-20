@@ -119,6 +119,8 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (_mapInboundClaims)
                 _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+            else
+                _inboundClaimTypeMap = new Dictionary<string, string>();
 
             _outboundClaimTypeMap = new Dictionary<string, string>(DefaultOutboundClaimTypeMap);
             _inboundClaimFilter = new HashSet<string>(DefaultInboundClaimFilter);
@@ -139,8 +141,8 @@ namespace System.IdentityModel.Tokens.Jwt
 
             set
             {
-                // If the inbound claim type mapping was turned off and is being turned on for the first time, make sure that the _inboundClaimTypeMap is initialized.
-                if (!_mapInboundClaims && value && _inboundClaimTypeMap == null)
+                // If the inbound claim type mapping was turned off and is being turned on for the first time, make sure that the _inboundClaimTypeMap is populated with the default mappings.
+                if (!_mapInboundClaims && value && _inboundClaimTypeMap.Count == 0)
                     _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
 
                 _mapInboundClaims = value;            
