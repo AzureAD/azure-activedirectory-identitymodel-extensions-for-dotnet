@@ -191,6 +191,228 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
 
+        [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData))]
+        public void RoundTripTokensUsingCache(JwtTheoryData theoryData)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            handler.InboundClaimTypeMap.Clear();
+            var encodedJwt1 = handler.CreateEncodedJwt(theoryData.TokenDescriptor);
+            var encodedJwt2 = handler.CreateEncodedJwt(
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials);
+            var jwtToken1 = new JwtSecurityToken(encodedJwt1);
+            var jwtToken2 = new JwtSecurityToken(encodedJwt2);
+            var jwtToken3 = handler.CreateJwtSecurityToken(theoryData.TokenDescriptor);
+            var jwtToken4 = handler.CreateJwtSecurityToken(
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials);
+            var jwtToken5 = handler.CreateToken(theoryData.TokenDescriptor) as JwtSecurityToken;
+            var jwtToken6 = handler.CreateJwtSecurityToken(
+                theoryData.TokenDescriptor.Issuer,
+                theoryData.TokenDescriptor.Audience,
+                theoryData.TokenDescriptor.Subject,
+                theoryData.TokenDescriptor.NotBefore,
+                theoryData.TokenDescriptor.Expires,
+                theoryData.TokenDescriptor.IssuedAt,
+                theoryData.TokenDescriptor.SigningCredentials,
+                theoryData.TokenDescriptor.EncryptingCredentials);
+            var encodedJwt3 = handler.WriteToken(jwtToken3);
+            var encodedJwt4 = handler.WriteToken(jwtToken4);
+            var encodedJwt5 = handler.WriteToken(jwtToken5);
+            var encodedJwt6 = handler.WriteToken(jwtToken6);
+
+            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, theoryData.ValidationParameters, out SecurityToken validatedJwtToken1);
+            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, theoryData.ValidationParameters, out SecurityToken validatedJwtToken2);
+            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, theoryData.ValidationParameters, out SecurityToken validatedJwtToken3);
+            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, theoryData.ValidationParameters, out SecurityToken validatedJwtToken4);
+            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, theoryData.ValidationParameters, out SecurityToken validatedJwtToken5);
+            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out SecurityToken validatedJwtToken6);
+            var context = new CompareContext();
+            var localContext = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtHeader), new List<string> { "Item" } },
+                    { typeof(JwtPayload), new List<string> { "Item" } }
+                }
+            };
+
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken2, localContext))
+            {
+                context.Diffs.Add("jwtToken1 != jwtToken2");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken3, jwtToken4, localContext))
+            {
+                context.Diffs.Add("jwtToken3 != jwtToken4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken3, jwtToken5, localContext))
+            {
+                context.Diffs.Add("jwtToken3 != jwtToken5");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken2, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken2");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken3, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken3");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken4, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken5, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken5");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreEqual(validatedJwtToken1, validatedJwtToken6, localContext))
+            {
+                context.Diffs.Add("validatedJwtToken1 != validatedJwtToken6");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal2, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal2");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal3, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal3");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal4, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal4");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal5, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal5");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            localContext.Diffs.Clear();
+            if (!IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal1, claimsPrincipal6, localContext))
+            {
+                context.Diffs.Add("claimsPrincipal1 != claimsPrincipal6");
+                context.Diffs.AddRange(localContext.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripTokensUsingCache: Case '{0}'", theoryData.TestId), context.Diffs);
+        }
+
+        public static TheoryData<JwtTheoryData> RoundTripTokensUsingCacheTheoryData()
+        {
+            var theoryData = new TheoryData<JwtTheoryData>();
+            var handler = new JwtSecurityTokenHandler();
+            var asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null);
+            var cryptorProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = true };
+            asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
+            var asymmetricTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters;
+            asymmetricTokenValidationParameters.CryptoProviderFactory = cryptorProviderFactory;
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache1",
+                TokenDescriptor = asymmetricSecurityTokenDescriptor,
+                ValidationParameters = asymmetricTokenValidationParameters
+            });
+
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache2",
+                TokenDescriptor = new SecurityTokenDescriptor(),
+                ValidationParameters = new TokenValidationParameters
+                {
+                    CryptoProviderFactory = cryptorProviderFactory,
+                    RequireSignedTokens = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuer = false,
+                }
+            });
+
+            asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DuplicateTypes());
+            asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache3",
+                TokenDescriptor = asymmetricSecurityTokenDescriptor,
+                ValidationParameters = asymmetricTokenValidationParameters,
+            });
+
+            asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims);
+            asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache4",
+                TokenDescriptor = asymmetricSecurityTokenDescriptor,
+                ValidationParameters = asymmetricTokenValidationParameters
+            });
+
+            var symmetricSecruityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.DefaultClaims);
+            symmetricSecruityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
+            var symmetricTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters;
+            symmetricTokenValidationParameters.CryptoProviderFactory = cryptorProviderFactory;
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache5",
+                TokenDescriptor = symmetricSecruityTokenDescriptor,
+                ValidationParameters = symmetricTokenValidationParameters
+            });
+
+            symmetricSecruityTokenDescriptor = Default.SymmetricSignSecurityTokenDescriptor(ClaimSets.GetDefaultRoleClaims(handler));
+            symmetricSecruityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "RoundTripUsingCache6",
+                TokenDescriptor = symmetricSecruityTokenDescriptor,
+                ValidationParameters = symmetricTokenValidationParameters
+            });
+
+            return theoryData;
+        }
+
+
         [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
         public void RoundTripTokens(JwtTheoryData theoryData)
         {

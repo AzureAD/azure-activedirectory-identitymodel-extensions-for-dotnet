@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         public abstract bool Verify(byte[] input, byte[] signature);
 
         /// <summary>
-        /// Gets or sets a bool indicating if the <see cref="SymmetricSignatureProvider"/> will create signatures
+        /// Gets or sets a bool indicating if this <see cref="SignatureProvider"/> is expected to create signatures.
         /// </summary>
         public bool WillCreateSignatures { get; protected set; }
     }

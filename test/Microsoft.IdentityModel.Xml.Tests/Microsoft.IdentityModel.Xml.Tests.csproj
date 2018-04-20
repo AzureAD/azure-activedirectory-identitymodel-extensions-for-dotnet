@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj" />
   </ItemGroup>
 

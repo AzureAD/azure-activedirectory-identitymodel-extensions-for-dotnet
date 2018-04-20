@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ArgumentNullException(),
                     First = true,
                     SigningKey = KEY.X509SecurityKey_1024,
-                    TestId = "Algorithm-string.Empty",
+                    TestId = "AlgorithmString.Empty",
                     WillCreateSignatures = true
                 },
                 new SignatureProviderTheoryData
@@ -126,14 +126,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SigningAlgorithm = null,
                     ExpectedException = EE.ArgumentNullException(),
                     SigningKey = KEY.X509SecurityKey_1024,
-                    TestId = "Algorithm-null"
+                    TestId = "AlgorithmNULL"
                 },
                 new SignatureProviderTheoryData
                 {
                     SigningAlgorithm = ALG.RsaSha256,
                     ExpectedException = EE.ArgumentNullException(),
                     SigningKey = null,
-                    TestId = "Key-null",
+                    TestId = "SigningKeyNULL",
                 },
             };
         }
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignAndVerify", theoryData);
             try
             {
-                var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyingKey, theoryData.VerifyingAlgorithm);
+                var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
                 var signatureProviderSign = theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
                 var signature = signatureProviderSign.Sign(bytes);
@@ -211,8 +211,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
 #endif
-                new SignatureProviderTheoryData("UnknownKeyType1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("UnKnownKeyType2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.RsaSecurityKey_2048, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("UnknownKeyType1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
+                new SignatureProviderTheoryData("UnKnownKeyType2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.RsaSecurityKey_2048, EE.NotSupportedException("IDX10621:")),
 
                 // Private keys missing
                 new SignatureProviderTheoryData("PrivateKeyMissing1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_Public, KEY.JsonWebKeyP256_Public, EE.InvalidOperationException("IDX10638:")),
@@ -238,7 +238,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.SignAndVerify", theoryData);
             try
             {
-                var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyingKey, theoryData.VerifyingAlgorithm);
+                var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
                 var signatureProviderSign = theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
                 var signature = signatureProviderSign.Sign(bytes);
@@ -288,16 +288,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                                                 ALG.HmacSha256Signature,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
                                                 KEY.SymmetricSecurityKey2_256,
-                                                EE.InvalidOperationException("IDX10676:", typeof(CryptographicException))),
+                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
                 new SignatureProviderTheoryData("SymmetricSecurityKey13",
                                                 ALG.HmacSha256Signature,
                                                 ALG.HmacSha256Signature,
                                                 KEY.SymmetricSecurityKey2_256,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
-                                                EE.InvalidOperationException("IDX10676:", typeof(CryptographicException))),
+                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
 
-                new SignatureProviderTheoryData("UnknownKeyType1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("UnknownKeyType2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("UnknownKeyType1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10621:")),
+                new SignatureProviderTheoryData("UnknownKeyType2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
 
                 // Key size checks
                 new SignatureProviderTheoryData("KeySize1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.DefaultSymmetricSecurityKey_56, KEY.DefaultSymmetricSecurityKey_56, EE.ArgumentOutOfRangeException("IDX10603:")),
@@ -445,7 +445,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProviderVerifyParameterChecks", theoryData);
             try
             {
-                theoryData.SignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature);
+                theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -468,7 +468,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = null,
                         Signature = new byte[1],
-                        SignatureProvider = signatureProvider,
+                        VerifySignatureProvider = signatureProvider,
                         TestId = "RawBytes-NULL"
                     },
                     new SignatureProviderTheoryData
@@ -476,7 +476,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[1],
                         Signature = null,
-                        SignatureProvider = signatureProvider,
+                        VerifySignatureProvider = signatureProvider,
                         TestId = "Signature-NULL"
                     },
                     new SignatureProviderTheoryData
@@ -484,7 +484,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[0],
                         Signature = new byte[1],
-                        SignatureProvider = signatureProvider,
+                        VerifySignatureProvider = signatureProvider,
                         TestId = "RawBytes-Size:0"
                     },
                     new SignatureProviderTheoryData
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[1],
                         Signature = new byte[0],
-                        SignatureProvider = signatureProvider,
+                        VerifySignatureProvider = signatureProvider,
                         TestId = "Signature-Size:0"
                     }
                 };
@@ -505,7 +505,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSignatureProviderVerifyParameterChecks", theoryData);
             try
             {
-                theoryData.SignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature);
+                theoryData.SigningSignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -528,7 +528,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = null,
                         Signature = new byte[1],
-                        SignatureProvider = signatureProvider,
+                        SigningSignatureProvider = signatureProvider,
                         TestId = "RawBytes-NULL"
                     },
                     new SignatureProviderTheoryData
@@ -536,7 +536,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[1],
                         Signature = null,
-                        SignatureProvider = signatureProvider,
+                        SigningSignatureProvider = signatureProvider,
                         TestId = "Signature-NULL"
                     },
                     new SignatureProviderTheoryData
@@ -544,7 +544,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[0],
                         Signature = new byte[1],
-                        SignatureProvider = signatureProvider,
+                        SigningSignatureProvider = signatureProvider,
                         TestId = "RawBytes-Size:0"
                     },
                     new SignatureProviderTheoryData
@@ -552,7 +552,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = EE.ArgumentNullException(),
                         RawBytes = new byte[1],
                         Signature = new byte[0],
-                        SignatureProvider = signatureProvider,
+                        SigningSignatureProvider = signatureProvider,
                         TestId = "Signature-Size:0"
                     }
                 };
@@ -744,14 +744,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         continue;
 
                     copiedSignature[i] = b;
-                    Assert.False(theoryData.SignatureProvider.Verify(theoryData.RawBytes, copiedSignature), $"signature should not have verified: {theoryData.TestId} : {i} : {b} : {copiedSignature[i]}");
+                    Assert.False(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), $"signature should not have verified: {theoryData.TestId} : {i} : {b} : {copiedSignature[i]}");
 
                     // reset so we move to next byte
                     copiedSignature[i] = originalB;
                 }
             }
 
-            Assert.True(theoryData.SignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
+            Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
         [Theory, MemberData(nameof(SignatureTheoryData))]
@@ -762,10 +762,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var truncatedSignature = new byte[i + 1];
                 Array.Copy(theoryData.Signature, truncatedSignature, i + 1);
-                Assert.False(theoryData.SignatureProvider.Verify(theoryData.RawBytes, truncatedSignature), $"signature should not have verified: {theoryData.TestId} : {i}");
+                Assert.False(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, truncatedSignature), $"signature should not have verified: {theoryData.TestId} : {i}");
             }
 
-            Assert.True(theoryData.SignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature), "Final check should have verified");
+            Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature), "Final check should have verified");
         }
 
         public static TheoryData<SignatureProviderTheoryData> SignatureTheoryData()
@@ -776,46 +776,46 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var asymmetricProvider = new AsymmetricSignatureProvider(KEY.DefaultX509Key_2048, ALG.RsaSha256, true);
             theoryData.Add(new SignatureProviderTheoryData
             {
-                SigningAlgorithm = ALG.RsaSha256,
                 First = true,
-                SigningKey = KEY.DefaultX509Key_2048,
-                SignatureProvider = asymmetricProvider,
                 RawBytes = rawBytes,
                 Signature = asymmetricProvider.Sign(rawBytes),
-                TestId = ALG.RsaSha256
+                TestId = ALG.RsaSha256,
+                VerifyKey = KEY.DefaultX509Key_2048,
+                VerifyAlgorithm = ALG.RsaSha256,
+                VerifySignatureProvider = asymmetricProvider
             });
 
             var asymmetricProvider2 = new AsymmetricSignatureProvider(KEY.Ecdsa256Key, ALG.EcdsaSha256, true);
             theoryData.Add(new SignatureProviderTheoryData
             {
-                SigningAlgorithm = ALG.EcdsaSha256,
-                SigningKey = KEY.Ecdsa256Key,
-                SignatureProvider = asymmetricProvider2,
                 RawBytes = rawBytes,
                 Signature = asymmetricProvider2.Sign(rawBytes),
-                TestId = ALG.EcdsaSha256
+                TestId = ALG.EcdsaSha256,
+                VerifyKey = KEY.Ecdsa256Key,
+                VerifyAlgorithm = ALG.EcdsaSha256,
+                VerifySignatureProvider = asymmetricProvider2
             });
 
             var symmetricProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha256);
             theoryData.Add(new SignatureProviderTheoryData
             {
-                SigningAlgorithm = ALG.HmacSha256,
-                SigningKey = KEY.SymmetricSecurityKey2_256,
-                SignatureProvider = symmetricProvider,
                 RawBytes = rawBytes,
                 Signature = symmetricProvider.Sign(rawBytes),
-                TestId = ALG.HmacSha256
+                TestId = ALG.HmacSha256,
+                VerifyKey = KEY.SymmetricSecurityKey2_256,
+                VerifyAlgorithm = ALG.HmacSha256,
+                VerifySignatureProvider = symmetricProvider,
             });
 
             var symmetricProvider2 = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_512, ALG.HmacSha512);
             theoryData.Add(new SignatureProviderTheoryData
             {
-                SigningAlgorithm = ALG.HmacSha512,
-                SigningKey = KEY.SymmetricSecurityKey2_512,
-                SignatureProvider = symmetricProvider2,
                 RawBytes = rawBytes,
                 Signature = symmetricProvider2.Sign(rawBytes),
-                TestId = ALG.HmacSha512
+                TestId = ALG.HmacSha512,
+                VerifyKey = KEY.SymmetricSecurityKey2_512,
+                VerifyAlgorithm = ALG.HmacSha512,
+                VerifySignatureProvider = symmetricProvider2
             });
 
             return theoryData;
@@ -826,31 +826,41 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public CryptoProviderFactoryTheoryData() { }
 
-        public CryptoProviderFactoryTheoryData(string testId, string algorithm, SecurityKey signingKey, SecurityKey validatingKey, ExpectedException expectedException = null)
+        public CryptoProviderFactoryTheoryData(string testId, string algorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null)
         {
             SigningAlgorithm = algorithm;
             SigningKey = signingKey;
-            VerifyingKey = validatingKey;
+            VerifyKey = verifyKey;
             ExpectedException = expectedException ?? EE.NoExceptionExpected;
             TestId = testId;
         }
 
         public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory{ CacheSignatureProviders = false };
 
-        public SignatureProvider SignatureProvider { get; set; }
+        public bool ShouldFindSignSignatureProvider { get; set; }
+
+        public bool ShouldFindVerifySignatureProvider { get; set; }
 
         public string SigningAlgorithm { get; set; }
 
         public SecurityKey SigningKey { get; set; }
+
+        public SignatureProvider SigningSignatureProvider { get; set; }
+
+        public string SigningSignatureProviderType { get; set; }
 
         public override string ToString()
         {
             return TestId + ", " + SigningAlgorithm + ", " + SigningKey;
         }
 
-        public string VerifyingAlgorithm { get; set; }
+        public string VerifyAlgorithm { get; set; }
 
-        public SecurityKey VerifyingKey { get; set; }
+        public SecurityKey VerifyKey { get; set; }
+
+        public SignatureProvider VerifySignatureProvider { get; set; }
+
+        public string VerifySignatureProviderType { get; set; }
 
         public bool WillCreateSignatures { get; set; } = false;
     }
@@ -859,12 +869,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public SignatureProviderTheoryData() { }
 
-        public SignatureProviderTheoryData(string testId, string signingAlgorithm, string verifyingAlgorithm, SecurityKey signingKey, SecurityKey verifyingKey, EE expectedException = null)
+        public SignatureProviderTheoryData(string testId, string signingAlgorithm, string verifyAlgorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null)
         {
             SigningAlgorithm = signingAlgorithm;
-            VerifyingAlgorithm = verifyingAlgorithm;
+            VerifyAlgorithm = verifyAlgorithm;
             SigningKey = signingKey;
-            VerifyingKey = verifyingKey;
+            VerifyKey = verifyKey;
             ExpectedException = expectedException ?? EE.NoExceptionExpected;
             TestId = testId;
         }
@@ -872,6 +882,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public byte[] RawBytes { get; set; }
 
         public byte[] Signature { get; set; }
+
+        public bool VerifySpecifyingLength { get; set; }
     }
 }
 

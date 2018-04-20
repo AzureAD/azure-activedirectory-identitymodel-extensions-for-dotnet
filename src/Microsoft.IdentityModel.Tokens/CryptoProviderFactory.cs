@@ -166,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 KeyWrapProvider keyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as KeyWrapProvider;
                 if (keyWrapProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SymmetricSignatureProvider))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return keyWrapProvider;
             }
@@ -343,46 +343,56 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureProvider signatureProvider = null;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
-                signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SymmetricSignatureProvider;
+                signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SymmetricSignatureProvider))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return signatureProvider;
             }
 
+            // types are checked in order of expected occurance
+            string typeofSignatureProvider = null;
+            bool createAsymmetric = true;
+            if (key is AsymmetricSecurityKey asymmetricSecurityKey)
+            {
+                typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+            }
+            else if (key is JsonWebKey jsonWebKey)
+            {
+                if (jsonWebKey.Kty != null)
+                {
+                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                        typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+
+                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    {
+                        typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                        createAsymmetric = false;
+                    }
+                }
+            }
+            else if (key is SymmetricSecurityKey symmetricSecurityKey)
+            {
+                typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                createAsymmetric = false;
+            }
+
+            if (typeofSignatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10621, typeof(SymmetricSignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+
             if (CacheSignatureProviders)
             {
-                if (_cryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeof(AsymmetricSignatureProvider).ToString(), willCreateSignatures, out signatureProvider))
-                    return signatureProvider;
-
-                if (_cryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeof(SymmetricSignatureProvider).ToString(), true, out signatureProvider))
+                if (_cryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
                     return signatureProvider;
             }
 
             if (!IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
 
-            if (key is AsymmetricSecurityKey asymmetricKey)
-            {
-                signatureProvider = new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures);
-            }
-            else if (key is SymmetricSecurityKey symmetricKey)
-                signatureProvider = new SymmetricSignatureProvider(symmetricKey, algorithm);
-
-            else if (key is JsonWebKey jsonWebKey)
-            {
-                if (jsonWebKey.Kty != null)
-                {
-                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                        signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
-
-                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                        signatureProvider = new SymmetricSignatureProvider(key, algorithm);
-                }
-            }
-
-            if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10800, typeof(SymmetricSignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+            if (createAsymmetric)
+                signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+            else
+                signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
             if (CacheSignatureProviders)
                 _cryptoProviderCache.TryAdd(signatureProvider);
@@ -619,7 +629,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
 
-            if (signatureProvider != null && !CacheSignatureProviders)
+            if (signatureProvider != null && signatureProvider.CryptoProviderCache == null)
                 signatureProvider.Dispose();
         }
     }

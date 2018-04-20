@@ -52,19 +52,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Assert.True((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForSigningCalled);
                 Assert.True((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled);
-                Assert.True(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).SignCalled);
-                Assert.True(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled);
+                Assert.True(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).SignCalled);
+                Assert.True(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).DisposeCalled);
             }
             else
             {
                 Assert.True((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForSigningCalled);
                 Assert.True((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled);
-                Assert.True(((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).SignCalled);
-                Assert.True(((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled);
+                Assert.True(((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).SignCalled);
+                Assert.True(((tokenDescriptor.SigningCredentials.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).DisposeCalled);
                 Assert.False((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForSigningCalled);
                 Assert.False((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled);
-                Assert.False(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).SignCalled);
-                Assert.False(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled);
+                Assert.False(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).SignCalled);
+                Assert.False(((tokenDescriptor.SigningCredentials.Key.CryptoProviderFactory as CustomCryptoProviderFactory).SigningSignatureProvider as CustomSignatureProvider).DisposeCalled);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var key = new SymmetricSecurityKey(new byte[256]);
                 key.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
-                    SignatureProvider = new CustomSignatureProvider(key, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(key, "alg")
                 };
 
                 var tokenDescriptor = Default.SecurityTokenDescriptor(new SigningCredentials(key, "alg"));
@@ -87,13 +87,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 key = new SymmetricSecurityKey(new byte[256]);
                 key.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
-                    SignatureProvider = new CustomSignatureProvider(key, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(key, "alg")
                 };
 
                 tokenDescriptor = Default.SecurityTokenDescriptor(new SigningCredentials(key, "alg"));
                 tokenDescriptor.SigningCredentials.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
-                    SignatureProvider = new CustomSignatureProvider(key, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(key, "alg")
                 };
 
                 dataset.Add(tokenDescriptor);
@@ -116,19 +116,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Assert.True((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForVerifyingCalled, "IssuerSigningKey.CustomCryptoProviderFactory.CreateForVerifyingCalled was NOT called");
                 Assert.True((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled, "IssuerSigningKey.CustomCryptoProviderFactory.ReleaseSignatureProviderCalled was NOT called");
-                Assert.True(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).VerifyCalled, "IssuerSigningKey.CustomCryptoProviderFactory.VerifyCalled was NOT called");
-                Assert.True(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled, "IssuerSigningKey.CustomCryptoProviderFactory.DisposeCalled was NOT called");
+                Assert.True(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).VerifyCalled, "IssuerSigningKey.CustomCryptoProviderFactory.VerifyCalled was NOT called");
+                Assert.True(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).DisposeCalled, "IssuerSigningKey.CustomCryptoProviderFactory.DisposeCalled was NOT called");
             }
             else
             {
                 Assert.True((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForVerifyingCalled, "validationParameters.CustomCryptoProviderFactory.CreateForVerifyingCalled was NOT called");
                 Assert.True((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled, "validationParameters.CustomCryptoProviderFactory.ReleaseSignatureProviderCalled was NOT called");
-                Assert.True(((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).VerifyCalled, "validationParameters.CustomSignatureProvider.VerifyCalled was NOT called");
-                Assert.True(((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled, "validationParameters.CustomSignatureProvider.DisposeCalled was NOT called");
+                Assert.True(((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).VerifyCalled, "validationParameters.CustomSignatureProvider.VerifyCalled was NOT called");
+                Assert.True(((validationParameters.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).DisposeCalled, "validationParameters.CustomSignatureProvider.DisposeCalled was NOT called");
                 Assert.False((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).CreateForVerifyingCalled, "IssuerSigningKey.CustomCryptoProviderFactory.CreateForVerifyingCalled WAS called");
                 Assert.False((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).ReleaseSignatureProviderCalled, "IssuerSigningKey.CustomCryptoProviderFactory.ReleaseSignatureProviderCalled was WAS called");
-                Assert.False(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).VerifyCalled, "IssuerSigningKey.CustomSignatureProvider.VerifyCalled was WAS called");
-                Assert.False(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).SignatureProvider as CustomSignatureProvider).DisposeCalled, "IssuerSigningKey.CustomSignatureProvider.DisposeCalled was WAS called");
+                Assert.False(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).VerifyCalled, "IssuerSigningKey.CustomSignatureProvider.VerifyCalled was WAS called");
+                Assert.False(((validationParameters.IssuerSigningKey.CryptoProviderFactory as CustomCryptoProviderFactory).VerifyingSignatureProvider as CustomSignatureProvider).DisposeCalled, "IssuerSigningKey.CustomSignatureProvider.DisposeCalled was WAS called");
             }
         }
 
@@ -141,7 +141,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.IssuerSigningKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { "RS256" })
                 {
-                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg"),
+                    VerifyingSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
                 };
 
                 dataset.Add("Test1", validationParameters, Default.AsymmetricJwt);
@@ -149,13 +150,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { "RS256" })
                 {
-                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg"),
+                    VerifyingSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
                 };
+
 
                 // this is only set to check that it wasn't called
                 validationParameters.IssuerSigningKey.CryptoProviderFactory = new CustomCryptoProviderFactory()
                 {
-                    SignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
+                    SigningSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg"),
+                    VerifyingSignatureProvider = new CustomSignatureProvider(validationParameters.IssuerSigningKey, "alg")
                 };
 
                 dataset.Add("Test2", validationParameters, Default.AsymmetricJwt);
@@ -224,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.NotNull(customSignatureProvider);
             Assert.NotNull(customHashAlgorithm);
             Assert.True(cryptoProviderFactoryWithCustomProvider.ReleaseSignatureProviderCalled, "cryptoProviderFactoryWithCustomProvider.ReleaseSignatureProviderCalled");
-            Assert.True(cryptoProviderFactoryWithCustomProvider.ReleaseAlgorithmCalled, "cryptoProviderFactoryWithCustomProvider.ReleaseAlgorithmCalled");
+            Assert.True(cryptoProviderFactoryWithCustomProvider.ReleaseHashAlgorithmCalled, "cryptoProviderFactoryWithCustomProvider.ReleaseAlgorithmCalled");
             Assert.True(customCryptoProvider.IsSupportedAlgorithmCalled, "customCryptoProvider.IsSupportedAlgorithmCalled");
             Assert.True(customCryptoProvider.ReleaseCalled, "customCryptoProvider.ReleaseCalled");
             Assert.True(customCryptoProvider.CreateCalled, "customCryptoProvider.CreateCalled");
@@ -240,7 +244,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
-                theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyingKey, theoryData.VerifyingAlgorithm);
+                theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -284,8 +288,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { "SecurityAlgorithms.HmacSha256Signature" })
                     { SignatureProvider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256) } },
                     SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
-                    VerifyingAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
-                    VerifyingKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    VerifyAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    VerifyKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
                     TestId = $"Extensibility3",
                 },
                 new CryptoProviderFactoryTheoryData
@@ -294,8 +298,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     CryptoProviderFactory = new CryptoProviderFactory{ CustomCryptoProvider = new CustomCryptoProvider(new string[] { "!SecurityAlgorithms.HmacSha256Signature" }) },
                     ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
                     SigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
-                    VerifyingAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
-                    VerifyingKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
+                    VerifyAlgorithm = "SecurityAlgorithms.HmacSha256Signature",
+                    VerifyKey = KeyingMaterial.DefaultSymmetricSecurityKey_256,
                     TestId = $"Extensibility4"
                 },
             };

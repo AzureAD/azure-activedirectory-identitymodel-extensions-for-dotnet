@@ -1201,7 +1201,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
 
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
-                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
+                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SigningSignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
                 theoryData.Add(new JwtTheoryData
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -1366,14 +1366,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test2",
-                SecurityToken = new CustomSecurityToken()
+                SecurityToken = new DerivedSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test3",
-                SecurityToken = new CustomSecurityToken()
+                SecurityToken = new DerivedSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData

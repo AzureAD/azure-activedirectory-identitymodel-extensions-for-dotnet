@@ -118,8 +118,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10401 = "IDX10401: Invalid requested key size. Valid key sizes are: 256, 384, and 512.";
 
         // Crypto Errors
-        public const string IDX10800 = "IDX10600: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
-        public const string IDX10803 = "IDX10603: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
+        public const string IDX10621 = "IDX10621: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
+        public const string IDX10622 = "IDX10622: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
         public const string IDX10623 = "IDX10623: Cannot sign data because the KeyedHashAlgorithm is null.";
         public const string IDX10624 = "IDX10624: Cannot verify data because the KeyedHashAlgorithm is null.";
         public const string IDX10627 = "IDX10627: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than '{0}'.";
@@ -167,6 +167,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10674 = "IDX10674: JsonWebKeyConverter does not support SecurityKey of type: {0}";
         public const string IDX10675 = "IDX10675: The value of '{0}' must be '{1}' bits, but was {2}.";
         public const string IDX10676 = "IDX10676: ECDsa creation is currently only supported for the Windows operating system.";
+        public const string IDX10677 = "IDX10677: GetKeyedHashAlgorithm threw, key: {0}, algorithm {1}.";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

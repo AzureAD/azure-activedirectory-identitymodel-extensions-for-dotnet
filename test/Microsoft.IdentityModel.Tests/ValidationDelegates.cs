@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static SecurityToken TokenReaderReturnsIncorrectSecurityTokenType(string token, TokenValidationParameters validationParameters)
         {
-            return new CustomSecurityToken();
+            return new DerivedSecurityToken();
         }
 
         public static SecurityToken TokenReaderReturnsNull(string token, TokenValidationParameters validationParameters)
