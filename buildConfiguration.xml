@@ -3,6 +3,7 @@
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
   <runtimes>net45,net451,net461,netstandard1.4,netstandard2.0</runtimes>
   <release>5.3.1</release>
+  <runtimes>netstandard1.4,net451,net45</runtimes>
   <nugetPreview>preview</nugetPreview>
   <projects>
     <src>
