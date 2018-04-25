@@ -14,8 +14,8 @@ IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known secu
 
 ## Usage
 IdentityModel Extensions for .NET 5 has now been released. If you are using IdentityModel Extensions with ASP.NET, the following combinations are supported:
-* **IdentityModel Extensions for .NET 5.x**, **ASP.NET Core 1.x**, **ASP.NET Core 2.x**, Katana 4.x**
-* **IdentityModel Extensions for .NET 4.x**, **ASP.NET 4**, Katana 3.x**
+* **IdentityModel Extensions for .NET 5.x**, **ASP.NET Core 1.x**, **ASP.NET Core 2.x**, **Katana 4.x**
+* **IdentityModel Extensions for .NET 4.x**, **ASP.NET 4**, **Katana 3.x**
 All other combinations aren't supported.
 
 ## Samples and Documentation
@@ -36,8 +36,9 @@ If you find a security issue with our libraries or services please report it to 
 
 All code is licensed under the MIT license and we triage actively on GitHub. We enthusiastically welcome contributions and feedback. See [Contributing.md](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/Contributing.md) for guidelines, branch information, build instructions, and legalese. 
 
-## Assemblies in this repo
-See the [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
+## For information on the assemblies in this repo
+
+See [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
 ----
 
 ## License
