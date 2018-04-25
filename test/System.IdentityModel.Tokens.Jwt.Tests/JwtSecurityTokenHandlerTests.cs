@@ -26,11 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-using System.Security.Cryptography;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -45,8 +45,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             try
             {
                 var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
-                var actorIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Actor, theoryData.ActorTokenValidationParameters, out validatedToken).Identity as ClaimsIdentity;
-                IdentityComparer.AreEqual(claimsIdentity.Actor, actorIdentity, context);
+                Assert.True(claimsIdentity.Actor != null);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -72,10 +71,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ValidateActor = true;
                 theoryData.Add(
                     new JwtTheoryData
-                    {
-                        Actor = Default.AsymmetricJwt,
-                        ActorTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters,
-                        TestId = "Test1",
+                    { 
+                        TestId = "ActorValidationUsingTVP - True",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
@@ -85,7 +82,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // Actor validation is true
                 // Actor is signed with symmetric key
-                // TokenValidationParameters.ActorValidationParameters will not find signing key
+                // TokenValidationParameters.ActorValidationParameters will not find signing key because an assymetric signing key is provided
                 claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
@@ -94,15 +91,33 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 theoryData.Add(
                     new JwtTheoryData
                     {
-                        Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        TestId = "Test2",
+                        TestId = "ActorValidationUsingActorTVP - ExceptionExpected",
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
                     }
                 );
+
+                // Actor validation is true
+                // Actor is signed with symmetric key
+                // TokenValidationParameters.ActorValidationParameters is null
+                // TokenValidationParameters will be used, but will not find signing key because an assymetric signing key is provided
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                theoryData.Add(
+                    new JwtTheoryData
+                    {
+                        TestId = "ActorValidationUsingTVP - ExceptionExpected",
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
+
 
                 // Actor validation is false
                 // Actor is signed with symmetric key
@@ -114,10 +129,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.ActorValidationParameters = Default.AsymmetricSignTokenValidationParameters;
                 theoryData.Add(
                     new JwtTheoryData
+                    {                     
+                        TestId = "ActorValidationFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
+
+                // Actor validation is true
+                // Actor will be validated using validationsParameters.ActorValidationParameters
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ActorValidationParameters = Default.SymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                theoryData.Add(
+                    new JwtTheoryData
                     {
-                        Actor = Default.SymmetricJws,
-                        ActorTokenValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        TestId = "Test3",
+                        TestId = "ActorValidationUsingActorTVP - True",
                         ExpectedException = ExpectedException.NoExceptionExpected,
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
@@ -183,13 +214,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.False(handler2.OutboundAlgorithmMap.ContainsKey(SecurityAlgorithms.Aes128Encryption));
 
             var header = new JwtHeader(
-                new SigningCredentials(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption),
+                new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.Aes128Encryption),
                 handler1.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == SecurityAlgorithms.EcdsaSha256);
 
             header = new JwtHeader(
-                new SigningCredentials(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.Aes128Encryption),
+                new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.Aes128Encryption),
                 handler2.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == SecurityAlgorithms.Aes128Encryption);
@@ -219,7 +250,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var handler = new JwtSecurityTokenHandler();
             var header = new JwtHeader(
-                            new SigningCredentials(KeyingMaterial.ECDsa256Key, outboundAlgorithm),
+                            new SigningCredentials(KeyingMaterial.Ecdsa256Key, outboundAlgorithm),
                             handler.OutboundAlgorithmMap);
 
             Assert.True(header.Alg == expectedValue);
@@ -243,13 +274,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             switch (outboundAlgorithm)
             {
                 case SecurityAlgorithms.EcdsaSha256Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa256Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, outboundAlgorithm) });
                     break;
                 case SecurityAlgorithms.EcdsaSha384Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa384Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa384Key, outboundAlgorithm) });
                     break;
                 case SecurityAlgorithms.EcdsaSha512Signature:
-                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.ECDsa521Key, outboundAlgorithm) });
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa521Key, outboundAlgorithm) });
                     break;
 
                 case SecurityAlgorithms.RsaSha256Signature:
@@ -452,6 +483,40 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             expectedClaims.Add(claim);
 
             RunClaimMappingVariation(jwt, handler, validationParameters, expectedClaims: expectedClaims, identityName: null);
+        }
+
+        [Fact]
+        public void MapInboundClaims()
+        {
+            var handler = new JwtSecurityTokenHandler();
+
+            // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap with the default mappings.
+            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+            handler = new JwtSecurityTokenHandler();
+
+            // Make sure that we don't populate the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
+            Assert.Equal(0, handler.InboundClaimTypeMap.Count);
+
+            var claims = new List<Claim>
+            {
+             new Claim(JwtRegisteredClaimNames.Email, "Bob@contoso.com", ClaimValueTypes.String, Default.Issuer),
+             new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer)
+            };
+
+            var jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
+         
+            // Check to make sure none of the short claim types have been mapped to longer ones.
+            foreach (var claim in claims)
+                jwt.Claims.Single(s => s.Type == claim.Type);
+
+            handler.MapInboundClaims = true;
+
+            // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map with the default mappings if it was previously empty.
+            Assert.Equal(73, handler.InboundClaimTypeMap.Count);
+            // Check to make sure that changing the instance property did not alter the static property.
+            Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
         }
 
         [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData))]
@@ -1087,7 +1152,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10504:"),
                         TestId = "Signature missing, required",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "Parts-0-1"),
-                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultX509Key_Public_2048, null)
+                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048_Public, null)
                     },
                     new JwtTheoryData
                     {
@@ -1201,7 +1266,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
 
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
-                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
+                validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SigningSignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
                 theoryData.Add(new JwtTheoryData
                 {
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
@@ -1366,14 +1431,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test2",
-                SecurityToken = new CustomSecurityToken()
+                SecurityToken = new DerivedSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData
             {
                 ExpectedException = ExpectedException.ArgumentException("IDX12706:"),
                 TestId = "Test3",
-                SecurityToken = new CustomSecurityToken()
+                SecurityToken = new DerivedSecurityToken()
             });
 
             theoryData.Add(new JwtTheoryData

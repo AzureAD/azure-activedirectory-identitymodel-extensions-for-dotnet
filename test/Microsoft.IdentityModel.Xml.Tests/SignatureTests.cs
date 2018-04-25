@@ -188,7 +188,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     {
                         CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature })
                         {
-                            SignatureProvider = new CustomSignatureProvider(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSha256Signature)
+                            SigningSignatureProvider = new CustomSignatureProvider(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSha256Signature),
+                            VerifyingSignatureProvider = new CustomSignatureProvider(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSha256Signature)
                         },
                         ExpectedException = new ExpectedException(typeof(XmlValidationException), "IDX30208:"),
                         SecurityKey = Default.AsymmetricSigningKey,

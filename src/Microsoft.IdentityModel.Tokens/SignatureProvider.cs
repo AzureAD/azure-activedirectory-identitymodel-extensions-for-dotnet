@@ -41,14 +41,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+            Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            Key = key;
             Algorithm = algorithm;
         }
+
+        /// <summary>
+        /// Gets the signature algorithm.
+        /// </summary>
+        public string Algorithm { get; private set; }
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
@@ -56,14 +62,29 @@ namespace Microsoft.IdentityModel.Tokens
         public string Context { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="CryptoProviderCache"/> that is associated with this <see cref="SignatureProvider"/>
+        /// </summary>
+        public CryptoProviderCache CryptoProviderCache { get; set; }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Can be over written in descendants to dispose of internal components.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer</param>
+        protected abstract void Dispose(bool disposing);
+
+        /// <summary>
         /// Gets the <see cref="SecurityKey"/>.
         /// </summary>
         public SecurityKey Key { get; private set; }
-
-        /// <summary>
-        /// Gets the signature algorithm.
-        /// </summary>
-        public string Algorithm { get; private set; }
 
         /// <summary>
         /// This must be overridden to produce a signature over the 'input'.
@@ -80,23 +101,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
         public abstract bool Verify(byte[] input, byte[] signature);
 
-        #region IDisposable Members
-
         /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Gets or sets a bool indicating if this <see cref="SignatureProvider"/> is expected to create signatures.
         /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Can be over written in descendants to dispose of internal components.
-        /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer</param>     
-        protected abstract void Dispose(bool disposing);
-
-        #endregion
+        public bool WillCreateSignatures { get; protected set; }
     }
 }

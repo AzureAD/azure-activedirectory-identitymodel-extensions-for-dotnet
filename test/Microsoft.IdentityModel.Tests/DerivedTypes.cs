@@ -25,245 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-// This file contains derived types that are useful across multiple handlers / protocols.
-
-
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
+/// <summary>
+/// Contains derived types that are useful across multiple handlers / protocols.
+/// </summary>
 namespace Microsoft.IdentityModel.Tests
 {
-#if LATER
-    // waiting for xunit to be in net451, dotnet54
-    public class DerivedClaim : Claim
-    {
-        string _dataString;
-        byte[] _dataBytes;
-
-        public DerivedClaim(Claim claim, string dataString, byte[] dataBytes)
-            : base(claim)
-        {
-            _dataString = dataString;
-            _dataBytes = dataBytes.CloneByteArray();
-        }
-
-        public DerivedClaim(DerivedClaim other)
-            : this(other, (ClaimsIdentity)null)
-        { }
-
-        public DerivedClaim(DerivedClaim other, ClaimsIdentity subject)
-            : base(other, subject)
-        {
-            _dataString = other._dataString;
-            if (other._dataBytes != null)
-                _dataBytes = other._dataBytes.CloneByteArray();
-        }
-
-        public DerivedClaim(BinaryReader reader)
-            : this(reader, (ClaimsIdentity)null)
-        { }
-
-        public DerivedClaim(BinaryReader reader, ClaimsIdentity subject)
-            : base(reader, subject)
-        {
-            _dataString = reader.ReadString();
-            Int32 cb = reader.ReadInt32();
-            if (cb > 0)
-                _dataBytes = reader.ReadBytes(cb);
-        }
-
-        public byte[] DataBytes
-        {
-            get
-            {
-                return _dataBytes;
-            }
-
-            set
-            {
-                _dataBytes = value;
-            }
-        }
-
-        public string DataString
-        {
-            get
-            {
-                return _dataString;
-            }
-
-            set
-            {
-                _dataString = value;
-            }
-        }
-
-        public override Claim Clone()
-        {
-            return Clone((ClaimsIdentity)null);
-        }
-
-        public override Claim Clone(ClaimsIdentity identity)
-        {
-            return new DerivedClaim(this, identity);
-        }
-
-        public override void WriteTo(IO.BinaryWriter writer)
-        {
-            base.WriteTo(writer);
-            writer.Write(_dataString);
-            if (_dataBytes == null || _dataBytes.Length == 0)
-            {
-                writer.Write((Int32)0);
-            }
-            else
-            {
-                writer.Write((Int32)_dataBytes.Length);
-                writer.Write(_dataBytes);
-            }
-        }
-    }
-
-    public class DerivedClaimsIdentity : ClaimsIdentity
-    {
-        string _dataString;
-        byte[] _dataBytes;
-
-        public DerivedClaimsIdentity(BinaryReader reader)
-            : base(reader)
-        {
-            _dataString = reader.ReadString();
-            Int32 cb = reader.ReadInt32();
-            if (cb > 0)
-                _dataBytes = reader.ReadBytes(cb);
-
-        }
-
-        public DerivedClaimsIdentity(IEnumerable<Claim> claims, string dataString, byte[] dataBytes)
-            : base(claims)
-        {
-            _dataString = dataString;
-
-            if (dataBytes != null && dataBytes.Length > 0)
-                _dataBytes = dataBytes.CloneByteArray();
-        }
-
-        public string ClaimType { get; set; }
-
-        public byte[] DataBytes
-        {
-            get
-            {
-                return _dataBytes;
-            }
-
-            set
-            {
-                _dataBytes = value;
-            }
-        }
-
-        public string DataString
-        {
-            get
-            {
-                return _dataString;
-            }
-
-            set
-            {
-                _dataString = value;
-            }
-        }
-
-        public override void WriteTo(BinaryWriter writer)
-        {
-            base.WriteTo(writer);
-            writer.Write(_dataString);
-            if (_dataBytes == null || _dataBytes.Length == 0)
-            {
-                writer.Write((Int32)0);
-            }
-            else
-            {
-                writer.Write((Int32)_dataBytes.Length);
-                writer.Write(_dataBytes);
-            }
-
-            writer.Flush();
-        }
-
-        protected override Claim CreateClaim(BinaryReader reader)
-        {
-            return new DerivedClaim(reader, this);
-        }
-    }
-
-    public class DerivedClaimsPrincipal : ClaimsPrincipal
-    {
-    }
-#else
-    public class CustomSecurityToken : SecurityToken
-    {
-        public override string Id { get { return "CustomSecurityToken"; } }
-
-        public override string Issuer { get { return "CustomSecurityToken.Issuer"; } }
-
-        public override SecurityKey SecurityKey { get { return null; } }
-
-        public override SecurityKey SigningKey { get; set; }
-
-        public override DateTime ValidFrom { get { return DateTime.UtcNow; } }
-
-        public override DateTime ValidTo { get { return DateTime.UtcNow + TimeSpan.FromDays(1); } }
-    }
-
-    public class DerivedClaim : Claim
-    {
-        public DerivedClaim(Claim claim, string data, byte[] bytes)
-            : base(claim.Value, claim.Type)
-        {
-        }
-    }
-
-    public class DerivedClaimsIdentity : ClaimsIdentity
-    {
-        public DerivedClaimsIdentity(IEnumerable<Claim> claims, string data, byte[] bytes)
-            : base(claims)
-        {
-
-        }
-    }
-
-    public class DerivedClaimsPrincipal : ClaimsPrincipal
-    {
-
-    }
-#endif
-
-    /// <summary>
-    /// Helpful for extensibility testing for errors.
-    /// </summary>
-    public class DerivedCryptoProviderFactory : CryptoProviderFactory
-    {
-        public SymmetricSignatureProvider SymmetricSignatureProviderForSigning { get; set; }
-
-        public SymmetricSignatureProvider SymmetricSignatureProviderForVerifying { get; set; }
-
-        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
-        {
-            return SymmetricSignatureProviderForSigning;
-        }
-
-        public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
-        {
-            return SymmetricSignatureProviderForVerifying;
-        }
-    }
-
     public class DerivedAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
     {
         public DerivedAuthenticatedEncryptionProvider()
@@ -335,6 +105,26 @@ namespace Microsoft.IdentityModel.Tests
         }
     }
 
+    /// <summary>
+    /// Helpful for extensibility testing for errors.
+    /// </summary>
+    public class DerivedCryptoProviderFactory : CryptoProviderFactory
+    {
+        public SymmetricSignatureProvider SymmetricSignatureProviderForSigning { get; set; }
+
+        public SymmetricSignatureProvider SymmetricSignatureProviderForVerifying { get; set; }
+
+        public override SignatureProvider CreateForSigning(SecurityKey key, string algorithm)
+        {
+            return SymmetricSignatureProviderForSigning;
+        }
+
+        public override SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
+        {
+            return SymmetricSignatureProviderForVerifying;
+        }
+    }
+
     public class DerivedKeyWrapProvider : SymmetricKeyWrapProvider
     {
         public DerivedKeyWrapProvider(SecurityKey key, string algorithm)
@@ -343,9 +133,13 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         public bool GetSymmetricAlgorithmCalled { get; set; } = false;
+
         public bool IsSupportedAlgorithmCalled { get; set; } = false;
+
         public bool UnwrapKeyCalled { get; set; } = false;
+
         public bool WrapKeyCalled { get; set; } = false;
+
         protected override SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
         {
             GetSymmetricAlgorithmCalled = true;
@@ -379,8 +173,11 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         public bool IsSupportedAlgorithmCalled { get; set; } = false;
+
         public bool ResolveRsaAlgorithmCalled { get; set; } = false;
+
         public bool UnwrapKeyCalled { get; set; } = false;
+
         public bool WrapKeyCalled { get; set; } = false;
 
         protected override bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
@@ -403,96 +200,88 @@ namespace Microsoft.IdentityModel.Tests
     }
 
     /// <summary>
-    /// Useful for trigging an exception.
+    /// Useful when one needs a security key to fault at different times.
+    /// Each Get / Set has an exception associated with it that if set will throw
+    /// instead of returning the value passed in the constructor.
     /// </summary>
-    public class DerivedAsymmetricSecurityKey : AsymmetricSecurityKey
+    public class DerivedSecurityKey : SecurityKey
     {
-        AsymmetricSecurityKey _key;
+        private string _keyId;
+        private int _keySize;
 
-        public DerivedAsymmetricSecurityKey(AsymmetricSecurityKey key = null, AsymmetricAlgorithm agorithm = null, bool hasPrivateKey = false)
+        public DerivedSecurityKey(string keyId, int keySize)
         {
-            _key = key;
+            _keyId = keyId;
+            _keySize = keySize;
         }
 
-        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
-        public override bool HasPrivateKey
-        {
-            get { return _key.HasPrivateKey; }
-        }
+        public Exception ThrowOnGetKeyId { get; set; }
 
-        public override PrivateKeyStatus PrivateKeyStatus
+        public Exception ThrowOnSetKeyId { get; set; }
+
+        public Exception ThrowOnGetKeySize { get; set; }
+
+        public override string KeyId
         {
             get
             {
-                return _key.PrivateKeyStatus;
-            }
-        }
+                if (ThrowOnGetKeyId != null)
+                    throw ThrowOnGetKeyId;
 
-        public override int KeySize { get { return _key.KeySize; } }
-    }
-
-    public class FaultingKeyedHashAlgorithm : KeyedHashAlgorithm
-    {
-        KeyedHashAlgorithm _keyedHashAlgorithm;
-        Exception _throwMe;
-        byte[] _key;
-
-        public FaultingKeyedHashAlgorithm(KeyedHashAlgorithm keyedHashAlgorithm, Exception throwMe, byte[] key)
-        {
-            _keyedHashAlgorithm = keyedHashAlgorithm;
-            _throwMe = throwMe;
-            _key = key;
-        }
-
-        public override byte[] Key
-        {
-            get
-            {
-                if (_throwMe != null)
-                {
-                    throw _throwMe;
-                }
-
-                return _key;
+                return _keyId;
             }
 
             set
             {
-                _key = value;
+                if (ThrowOnSetKeyId != null)
+                    throw ThrowOnSetKeyId;
+
+                _keyId = value;
             }
         }
 
-        protected override void HashCore(byte[] array, int ibStart, int cbSize)
+        public override int KeySize
         {
-            throw new NotImplementedException();
-        }
+            get
+            {
+                if (ThrowOnGetKeySize != null)
+                    throw ThrowOnGetKeySize;
 
-        protected override byte[] HashFinal()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Initialize()
-        {
-            throw new NotImplementedException();
+                return _keySize;
+            }
         }
     }
 
+    public class DerivedSecurityToken : SecurityToken
+    {
+        public override string Id { get { return "DeriverSecurityToken"; } }
+
+        public override string Issuer { get { return "DeriverSecurityToken.Issuer"; } }
+
+        public override SecurityKey SecurityKey { get { return null; } }
+
+        public override SecurityKey SigningKey { get; set; }
+
+        public override DateTime ValidFrom { get { return DateTime.UtcNow; } }
+
+        public override DateTime ValidTo { get { return DateTime.UtcNow + TimeSpan.FromDays(1); } }
+    }
+
     /// <summary>
-    /// This works that is a parameter is null, we throw the exception when asked for the property
+    /// This type is helpful to test difficult call graphs and simulate throwing.
     /// </summary>
     public class FaultingSymmetricSecurityKey : SymmetricSecurityKey
     {
-        Exception _throwMe;
+        Exception _throwOnKeyProperty;
         KeyedHashAlgorithm _keyedHash;
         SymmetricSecurityKey _key;
         SymmetricAlgorithm _agorithm;
         byte[] _keyBytes;
 
-        public FaultingSymmetricSecurityKey(SymmetricSecurityKey key, Exception throwMe, SymmetricAlgorithm algorithm = null, KeyedHashAlgorithm keyedHash = null, byte[] keyBytes = null)
+        public FaultingSymmetricSecurityKey(SymmetricSecurityKey key, Exception throwOnKeyProperty, SymmetricAlgorithm algorithm = null, KeyedHashAlgorithm keyedHash = null, byte[] keyBytes = null)
             : base(keyBytes)
         {
-            _throwMe = throwMe;
+            _throwOnKeyProperty = throwOnKeyProperty;
             _key = key;
             _keyedHash = keyedHash;
             _agorithm = algorithm;
@@ -503,8 +292,8 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                if (_throwMe != null)
-                    throw _throwMe;
+                if (_throwOnKeyProperty != null)
+                    throw _throwOnKeyProperty;
 
                 return _keyBytes;
             }
@@ -521,71 +310,5 @@ namespace Microsoft.IdentityModel.Tests
         }
 
         public static SecurityKey New { get { return new NotAsymmetricOrSymmetricSecurityKey(); } }
-    }
-
-    public class CustomCryptoProviderSecurityKey : SecurityKey
-    {
-        public CustomCryptoProviderSecurityKey(CustomCryptoProviderFactory  customCryptoProviderFactory)
-        {
-            CryptoProviderFactory = customCryptoProviderFactory;
-        }
-
-        public override int KeySize => throw new NotImplementedException();
-    }
-
-    public class ReturnNullAsymmetricSecurityKey : AsymmetricSecurityKey
-    {
-        public ReturnNullAsymmetricSecurityKey() { }
-
-        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
-        public override bool HasPrivateKey
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override PrivateKeyStatus PrivateKeyStatus
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override int KeySize
-        {
-            get { throw new NotImplementedException(); }
-        }
-    }
-
-    public class ReturnNullSymmetricSecurityKey : SymmetricSecurityKey
-    {
-        public ReturnNullSymmetricSecurityKey(byte[] keyBytes)
-            : base(keyBytes)
-        { }
-
-        public SymmetricSecurityKey SymmetricSecurityKey { get; set; }
-
-        public override byte[] Key
-        {
-            get
-            {
-                if (SymmetricSecurityKey == null)
-                {
-                    return null;
-                }
-
-                return SymmetricSecurityKey.Key;
-            }
-        }
-
-        public override int KeySize
-        {
-            get
-            {
-                if (SymmetricSecurityKey != null)
-                {
-                    return SymmetricSecurityKey.KeySize;
-                }
-
-                return 256;
-            }
-        }
     }
 }

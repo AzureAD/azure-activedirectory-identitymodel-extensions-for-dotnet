@@ -231,8 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is SymmetricSecurityKey)
                 return true;
 
-            var jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
+            if (key is JsonWebKey jsonWebKey)
                 return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
 
             return false;
@@ -292,12 +291,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
+            if (key is SymmetricSecurityKey symmetricSecurityKey)
                 return symmetricSecurityKey.Key;
 
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+            if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                 return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));

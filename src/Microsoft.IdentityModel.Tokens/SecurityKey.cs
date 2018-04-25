@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the key id of this <see cref="SecurityKey"/>.
         /// </summary>
         [JsonIgnore]
-        public string KeyId { get; set; }
+        public virtual string KeyId { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.

@@ -52,33 +52,34 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to use.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="NotSupportedException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">'<see cref="SecurityKey"/>.KeySize' is smaller than <see cref="SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits"/>.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> throws.</exception>
-        /// <exception cref="InvalidOperationException"><see cref="SymmetricSignatureProvider.GetKeyedHashAlgorithm"/> returns null.</exception>
         public SymmetricSignatureProvider(SecurityKey key, string algorithm)
+            : this(key, algorithm, true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SymmetricSignatureProvider"/> class that uses an <see cref="SecurityKey"/> to create and / or verify signatures over a array of bytes.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
+        /// <param name="algorithm">The signature algorithm to use.</param>
+        /// <param name="willCreateSignatures">indicates if this <see cref="SymmetricSignatureProvider"/> will be used to create signatures.</param>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="NotSupportedException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">'<see cref="SecurityKey"/>.KeySize' is smaller than <see cref="SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits"/>.</exception>
+        public SymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
-
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.KeySize), LogHelper.FormatInvariant(LogMessages.IDX10803, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.KeySize), LogHelper.FormatInvariant(LogMessages.IDX10603, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key.KeySize)));
 
-            try
-            {
-                _keyedHash = GetKeyedHashAlgorithm(GetKeyBytes(key), algorithm);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key), ex));
-            }
-
-            if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10672, key, (algorithm ?? "null"))));
+            WillCreateSignatures = willCreateSignatures;
         }
 
         /// <summary>
@@ -116,12 +117,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
+            if (key is SymmetricSecurityKey symmetricSecurityKey)
                 return symmetricSecurityKey.Key;
 
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+            if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                 return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));
@@ -135,7 +134,42 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns></returns>
         protected virtual KeyedHashAlgorithm GetKeyedHashAlgorithm(byte[] keyBytes, string algorithm)
         {
-            return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(keyBytes, algorithm);
+            if (_keyedHash == null)
+            {
+                try
+                {
+                    _keyedHash = Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(keyBytes, algorithm);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10677, Key, (algorithm ?? "null")), ex));
+                }
+            }
+
+            return _keyedHash;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="KeyedHashAlgorithm"/> for this <see cref="SymmetricSignatureProvider"/>.
+        /// </summary>
+        private KeyedHashAlgorithm KeyedHashAlgorithm
+        {
+            get
+            {
+                if (_keyedHash == null)
+                {
+                    try
+                    {
+                        _keyedHash = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10677, Key, (Algorithm ?? "null")), ex));
+                    }
+                }
+
+                return _keyedHash;
+            }
         }
 
         /// <summary>
@@ -150,17 +184,24 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (_disposed)
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
-
-            if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10623));
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+            }
 
             LogHelper.LogInformation(LogMessages.IDX10642, input);
-
-            return _keyedHash.ComputeHash(input);
+            try
+            {
+                return KeyedHashAlgorithm.ComputeHash(input);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
         }
 
         /// <summary>
@@ -184,14 +225,22 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
             if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+            }
 
-            if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
 
             LogHelper.LogInformation(LogMessages.IDX10643, input);
-
-            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input));
+            try
+            {
+                return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input));
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
         }
 
         /// <summary>
@@ -220,13 +269,21 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10655, length)));
 
             if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
-
-            if (_keyedHash == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10624));
+            }
 
             LogHelper.LogInformation(LogMessages.IDX10643, input);
-            return Utility.AreEqual(signature, _keyedHash.ComputeHash(input), length);
+            try
+            {
+                return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input), length);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
         }
 
         #region IDisposable Members
@@ -240,6 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 _disposed = true;
+                CryptoProviderCache?.TryRemove(this);
 
                 if (disposing)
                 {

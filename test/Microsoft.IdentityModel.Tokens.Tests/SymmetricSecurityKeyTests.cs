@@ -29,6 +29,10 @@ using System;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
+using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
+using EE = Microsoft.IdentityModel.Tests.ExpectedException;
+using KEY = Microsoft.IdentityModel.Tests.KeyingMaterial;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -37,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
 
         [Theory, MemberData(nameof(ConstructorDataSet))]
-        public void Constructor(byte[] key, ExpectedException ee)
+        public void Constructor(byte[] key, EE ee)
         {
             try
             {
@@ -50,14 +54,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        public static TheoryData<byte[], ExpectedException> ConstructorDataSet
+        public static TheoryData<byte[], EE> ConstructorDataSet
         {
             get
             {
-                var dataset = new TheoryData<byte[], ExpectedException>();
-                dataset.Add(KeyingMaterial.DefaultSymmetricKeyBytes_256, ExpectedException.NoExceptionExpected);
-                dataset.Add(null, ExpectedException.ArgumentNullException());
-                dataset.Add(new byte[0], ExpectedException.ArgumentException());
+                var dataset = new TheoryData<byte[], EE>();
+                dataset.Add(KEY.DefaultSymmetricKeyBytes_256, EE.NoExceptionExpected);
+                dataset.Add(null, EE.ArgumentNullException());
+                dataset.Add(new byte[0], EE.ArgumentException());
                 return dataset;
             }
         }
@@ -74,13 +78,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var dataset = new TheoryData<SymmetricSecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256, true);
-                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha384Signature, true);
-                dataset.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.Aes128Encryption, false);
+                dataset.Add(KEY.DefaultSymmetricSecurityKey_256, ALG.HmacSha256, true);
+                dataset.Add(KEY.SymmetricSecurityKey2_256, ALG.HmacSha384Signature, true);
+                dataset.Add(KEY.DefaultSymmetricSecurityKey_256, ALG.Aes128Encryption, false);
 
-                SymmetricSecurityKey testKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_256);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.Aes128Encryption });
-                dataset.Add(testKey, SecurityAlgorithms.Aes128Encryption, true);
+                SymmetricSecurityKey testKey = new SymmetricSecurityKey(KEY.DefaultSymmetricKeyBytes_256);
+                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.Aes128Encryption });
+                dataset.Add(testKey, ALG.Aes128Encryption, true);
                 return dataset;
             }
         }

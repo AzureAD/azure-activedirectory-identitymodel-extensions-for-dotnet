@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -499,7 +498,8 @@ namespace Microsoft.IdentityModel.Xml
                     {
                         reference.CanonicalizingTransfrom = TransformFactory.GetCanonicalizingTransform(algorithm);
                         reader.Read();
-                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
+                        // release 5.2.1 did not require 'ec' ns. So, we need to accept names with and without a prefix.
+                        if (reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.ExclusiveC14nNamespace) || reader.IsStartElement(XmlSignatureConstants.Elements.InclusiveNamespaces))
                         {
                             bool isOnEmptyElement = reader.IsEmptyElement;
                             reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList = reader.GetAttribute(XmlSignatureConstants.Attributes.PrefixList);
@@ -744,7 +744,7 @@ namespace Microsoft.IdentityModel.Xml
             if (reference.Uri != null)
                 writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Uri);
             else if (reference.Id != null)
-                if (reference.Id.StartsWith("#"))
+                if (reference.Id.StartsWith("#", StringComparison.Ordinal))
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Id);
                 else
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, "#" + reference.Id);
@@ -785,14 +785,13 @@ namespace Microsoft.IdentityModel.Xml
                 if (!string.IsNullOrEmpty(reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList))
                 {
                     // @PrefixList
-                    writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.Namespace);
+                    writer.WriteStartElement(XmlSignatureConstants.ExclusiveC14nPrefix, XmlSignatureConstants.Elements.InclusiveNamespaces, XmlSignatureConstants.ExclusiveC14nNamespace);
                     writer.WriteAttributeString(XmlSignatureConstants.Attributes.PrefixList, reference.CanonicalizingTransfrom.InclusiveNamespacesPrefixList);
                     writer.WriteEndElement();
                 }
 
                 // </Transform>
                 writer.WriteEndElement();
-
             }
 
             // </Transforms>

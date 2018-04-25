@@ -40,6 +40,9 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKey : SecurityKey
     {
+
+        private string _kid;
+
         /// <summary>
         /// Magic numbers identifying ECDSA blob types
         /// </summary>
@@ -150,6 +153,16 @@ namespace Microsoft.IdentityModel.Tokens
         public string K { get; set; }
 
         /// <summary>
+        /// Gets the key id of this <see cref="JsonWebKey"/>.
+        /// </summary>
+        [JsonIgnore]
+        public override string KeyId
+        {
+            get { return _kid; }
+            set { _kid = value; }
+        }
+
+        /// <summary>
         /// Gets the 'key_ops' (Key Operations)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.KeyOps, Required = Required.Default)]
@@ -159,7 +172,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'kid' (Key ID)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kid, Required = Required.Default)]
-        public string Kid { get; set; }
+        public string Kid
+        {
+            get { return _kid; }
+            set { _kid = value; }
+        }
 
         /// <summary>
         /// Gets or sets the 'kty' (Key Type)..
@@ -302,8 +319,11 @@ namespace Microsoft.IdentityModel.Tokens
             return X5c.Count > 0;
         }
 
-        internal ECDsaCng CreateECDsa(string algorithm, bool usePrivateKey)
+        internal ECDsa CreateECDsa(string algorithm, bool usePrivateKey)
         {
+#if !WINDOWS
+            throw new NotImplementedException(LogMessages.IDX10676);
+#endif
             if (Crv == null)
                 throw LogHelper.LogArgumentNullException(nameof(Crv));
 
@@ -312,6 +332,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (Y == null)
                 throw LogHelper.LogArgumentNullException(nameof(Y));
+
+            int keySize = GetKeySize(Crv);
+            if (!Utility.ValidateECDSAKeySize(keySize, algorithm))
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("keySize", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(keySize), ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], keySize)));
 
             GCHandle keyBlobHandle = new GCHandle();
             try
@@ -333,8 +357,15 @@ namespace Microsoft.IdentityModel.Tokens
 
                 keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
                 IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
+
                 byte[] x = Base64UrlEncoder.DecodeBytes(X);
+                if (x.Length > cbKey)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("x.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(x), cbKey, x.Length)));
+
                 byte[] y = Base64UrlEncoder.DecodeBytes(Y);
+                if (y.Length > cbKey)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("y.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(y), cbKey, y.Length)));
+
 
                 Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
                 Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
@@ -352,16 +383,16 @@ namespace Microsoft.IdentityModel.Tokens
                         throw LogHelper.LogArgumentNullException(nameof(D));
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(D);
+                    if (d.Length > cbKey)
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("d.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(d), cbKey, d.Length)));
+
                     foreach (byte b in d)
                         Marshal.WriteByte(keyBlobPtr, index++, b);
 
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPrivateBlob))
                     {
-                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
-                            return new ECDsaCng(cngKey);
-                        else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                        return new ECDsaCng(cngKey);
                     }
                 }
                 else
@@ -369,10 +400,7 @@ namespace Microsoft.IdentityModel.Tokens
                     Marshal.Copy(keyBlobPtr, keyBlob, 0, keyBlob.Length);
                     using (CngKey cngKey = CngKey.Import(keyBlob, CngKeyBlobFormat.EccPublicBlob))
                     {
-                        if (Utility.ValidateECDSAKeySize(cngKey.KeySize, algorithm))
-                            return new ECDsaCng(cngKey);
-                        else
-                            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10671, cngKey, ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], cngKey.KeySize)));
+                        return new ECDsaCng(cngKey);
                     }
                 }
             }
@@ -435,12 +463,42 @@ namespace Microsoft.IdentityModel.Tokens
                     break;
                 case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
                 case JsonWebKeyECTypes.P521:
-                    keyByteCount = 64;
+                    keyByteCount = 66;
                     break;
                 default:
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return keyByteCount;
+        }
+
+        /// <summary>
+        /// Returns the size of key in bits.
+        /// </summary>
+        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <returns>Size of the key in bits.</returns>
+        private int GetKeySize(string curveId)
+        {
+            if (string.IsNullOrEmpty(curveId))
+                throw LogHelper.LogArgumentNullException(nameof(curveId));
+
+            int keySize;
+            switch (curveId)
+            {
+                case JsonWebKeyECTypes.P256:
+                    keySize = 256;
+                    break;
+                case JsonWebKeyECTypes.P384:
+                    keySize = 384;
+                    break;
+                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
+                case JsonWebKeyECTypes.P521:
+                    keySize = 521;
+                    break;
+                default:
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
+            }
+
+            return keySize;
         }
 
         /// <summary>

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -37,6 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CryptoProviderFactory
     {
+        private CryptoProviderCache _cryptoProviderCache = new InMemoryCryptoProviderCache();
         private static CryptoProviderFactory _default;
 
         /// <summary>
@@ -47,19 +49,15 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _default; }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
-
-                _default = value;
+                _default = value ?? throw LogHelper.LogArgumentNullException("value");
             }
         }
 
         /// <summary>
-        /// Extensibility point for custom crypto support application wide.
+        /// Gets or sets the default value for caching
         /// </summary>
-        /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> will be called before crypto operations.
-        /// If true is returned, then this will be called for operations.</remarks>
-        public ICryptoProvider CustomCryptoProvider { get; set; }
+        [DefaultValue(false)]
+        public static bool DefaultCacheSignatureProviders { get; set; } = false;
 
         /// <summary>
         /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
@@ -89,183 +87,22 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Answers if an algorithm is supported
+        /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        /// <param name="algorithm">the name of the crypto algorithm</param>
-        /// <returns></returns>
-        public virtual bool IsSupportedAlgorithm(string algorithm)
-        {
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
-                return true;
-
-            return IsSupportedHashAlgorithm(algorithm);
-        }
-
-        private bool IsSupportedAuthenticatedEncryptionAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
-                return false;
-
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            var jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
-
-            return false;
-        }
-
-        private bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
-            {
-                if (key is RsaSecurityKey)
-                    return true;
-
-                X509SecurityKey x509Key = key as X509SecurityKey;
-                if (x509Key != null)
-                {
-#if NETSTANDARD1_4
-                    if (x509Key.PublicKey as RSA == null)
-                        return false;
-#else
-                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                    return false;
-#endif
-                }
-
-                var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return true;
-
-                return false;
-            }
-
-            return false;
-        }
+        public CryptoProviderCache CryptoProviderCache { get => _cryptoProviderCache; }
 
         /// <summary>
-        /// Checks if an 'algorithm, key' pair is supported.
+        /// Extensibility point for custom crypto support application wide.
         /// </summary>
-        /// <param name="algorithm">the algorithm to check.</param>
-        /// <param name="key">the <see cref="SecurityKey"/>.</param>
-        /// <returns>true if 'algorithm, key' pair is supported.</returns>
-        public virtual bool IsSupportedAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
-                return true;
+        /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> will be called before crypto operations.
+        /// If true is returned, then this will be called for operations.</remarks>
+        public ICryptoProvider CustomCryptoProvider { get; set; }
 
-            if (key as RsaSecurityKey != null)
-                return IsRsaAlgorithmSupported(algorithm);
-
-            var x509Key = key as X509SecurityKey;
-            if (x509Key != null)
-            {
-#if NETSTANDARD1_4
-                if (x509Key.PublicKey as RSA == null)
-                    return false;
-#else
-                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                    return false;
-#endif
-                return IsRsaAlgorithmSupported(algorithm);
-            }
-
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
-            {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return IsRsaAlgorithmSupported(algorithm);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                    return IsEcdsaAlgorithmSupported(algorithm);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return IsSymmetricAlgorithmSupported(algorithm);
-
-                return false;
-            }
-
-            ECDsaSecurityKey ecdsaSecurityKey = key as ECDsaSecurityKey;
-            if (ecdsaSecurityKey != null)
-                return IsEcdsaAlgorithmSupported(algorithm);
-
-            if (key as SymmetricSecurityKey != null)
-                return IsSymmetricAlgorithmSupported(algorithm);
-
-            return false;
-        }
-
-        private bool IsEcdsaAlgorithmSupported(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsRsaAlgorithmSupported(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                case SecurityAlgorithms.RsaOAEP:
-                case SecurityAlgorithms.RsaPKCS1:
-                case SecurityAlgorithms.RsaOaepKeyWrap:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsSymmetricAlgorithmSupported(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                case SecurityAlgorithms.Aes192CbcHmacSha384:
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                case SecurityAlgorithms.Aes128KW:
-                case SecurityAlgorithms.Aes256KW:
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha256:
-                case SecurityAlgorithms.HmacSha384:
-                case SecurityAlgorithms.HmacSha512:
-                    return true;
-            }
-
-            return false;
-        }
+        /// <summary>
+        /// Gets or sets a bool controlling if <see cref="SignatureProvider"/> should be cached.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool CacheSignatureProviders { get; set; } = DefaultCacheSignatureProviders;
 
         /// <summary>
         /// Creates an instance of <see cref="AuthenticatedEncryptionProvider"/> for a specific &lt;SecurityKey, Algorithm>.
@@ -317,23 +154,6 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateKeyWrapProvider(key, algorithm, false);
         }
 
-        /// <summary>
-        /// Creates an instance of <see cref="KeyWrapProvider"/> for a specific &lt;SecurityKey, Algorithm>.
-        /// </summary>
-        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
-        /// <param name="algorithm">the algorithm to use.</param>
-        /// <returns>an instance of <see cref="KeyWrapProvider"/></returns>
-        /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
-        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <remarks>
-        /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
-        /// </remarks>
-        public virtual KeyWrapProvider CreateKeyWrapProviderForUnwrap(SecurityKey key, string algorithm)
-        {
-            return CreateKeyWrapProvider(key, algorithm, true);
-        }
-
         private KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
         {
             if (key == null)
@@ -351,34 +171,46 @@ namespace Microsoft.IdentityModel.Tokens
                 return keyWrapProvider;
             }
 
-            var rsaKey = key as RsaSecurityKey;
-            if (rsaKey != null && IsRsaAlgorithmSupported(algorithm))
+            if (key is RsaSecurityKey rsaKey && IsSupportedRsaAlgorithm(algorithm))
                 return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
-            var x509Key = key as X509SecurityKey;
-            if (x509Key != null && IsRsaAlgorithmSupported(algorithm))
+            if (key is X509SecurityKey x509Key && IsSupportedRsaAlgorithm(algorithm))
                 return new RsaKeyWrapProvider(x509Key, algorithm, willUnwrap);
 
-            var jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
+            if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA &&  IsRsaAlgorithmSupported(algorithm))
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA && IsSupportedRsaAlgorithm(algorithm))
                 {
                     return new RsaKeyWrapProvider(jsonWebKey, algorithm, willUnwrap);
                 }
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet &&  IsSymmetricAlgorithmSupported(algorithm))
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet && IsSupportedSymmetricAlgorithm(algorithm))
                 {
                     return new SymmetricKeyWrapProvider(jsonWebKey, algorithm);
                 }
             }
 
-            var symmetricKey = key as SymmetricSecurityKey;
-            if ( symmetricKey != null && IsSymmetricAlgorithmSupported(algorithm))
+            if (key is SymmetricSecurityKey symmetricKey && IsSupportedSymmetricAlgorithm(algorithm))
                 return new SymmetricKeyWrapProvider(symmetricKey, algorithm);
 
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="KeyWrapProvider"/> for a specific &lt;SecurityKey, Algorithm>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to use.</param>
+        /// <returns>an instance of <see cref="KeyWrapProvider"/></returns>
+        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <remarks>
+        /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
+        /// </remarks>
+        public virtual KeyWrapProvider CreateKeyWrapProviderForUnwrap(SecurityKey key, string algorithm)
+        {
+            return CreateKeyWrapProvider(key, algorithm, true);
+        }
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -413,46 +245,6 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm)
         {
             return CreateSignatureProvider(key, algorithm, false);
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose()"/>
-        /// </summary>
-        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>
-        public virtual void ReleaseSignatureProvider(SignatureProvider signatureProvider)
-        {
-            if (signatureProvider != null)
-                signatureProvider.Dispose();
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="HashAlgorithm"/> call this method for cleanup. The default behavior is to call <see cref="HashAlgorithm.Dispose()"/>
-        /// </summary>
-        /// <param name="hashAlgorithm"><see cref="HashAlgorithm"/> to be released.</param>
-        public virtual void ReleaseHashAlgorithm(HashAlgorithm hashAlgorithm)
-        {
-            if (hashAlgorithm != null)
-                hashAlgorithm.Dispose();
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="KeyWrapProvider"/> call this method for cleanup."/>
-        /// </summary>
-        /// <param name="provider"><see cref="KeyWrapProvider"/> to be released.</param>
-        public virtual void ReleaseKeyWrapProvider(KeyWrapProvider provider)
-        {
-            if (provider != null)
-                provider.Dispose();
-        }
-
-        /// <summary>
-        /// When finished with a <see cref="RsaKeyWrapProvider"/> call this method for cleanup."/>
-        /// </summary>
-        /// <param name="provider"><see cref="RsaKeyWrapProvider"/> to be released.</param>
-        public virtual void ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider provider)
-        {
-            if (provider != null)
-                provider.Dispose();
         }
 
         /// <summary>
@@ -548,40 +340,162 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
+            SignatureProvider signatureProvider = null;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
-                SignatureProvider signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
+                signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
                 if (signatureProvider == null)
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return signatureProvider;
             }
 
-            if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
-
-            AsymmetricSecurityKey asymmetricKey = key as AsymmetricSecurityKey;
-            if (asymmetricKey != null)
-                return new AsymmetricSignatureProvider(asymmetricKey, algorithm, willCreateSignatures);
-
-            SymmetricSecurityKey symmetricKey = key as SymmetricSecurityKey;
-            if (symmetricKey != null)
-                return new SymmetricSignatureProvider(symmetricKey, algorithm);
-
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
+            // types are checked in order of expected occurance
+            string typeofSignatureProvider = null;
+            bool createAsymmetric = true;
+            if (key is AsymmetricSecurityKey asymmetricSecurityKey)
+            {
+                typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+            }
+            else if (key is JsonWebKey jsonWebKey)
             {
                 if (jsonWebKey.Kty != null)
                 {
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                        return new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+                        typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
 
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                        return new SymmetricSignatureProvider(key, algorithm);
+                    {
+                        typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                        createAsymmetric = false;
+                    }
                 }
             }
+            else if (key is SymmetricSecurityKey symmetricSecurityKey)
+            {
+                typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                createAsymmetric = false;
+            }
 
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10800, typeof(SignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+            if (typeofSignatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10621, typeof(SymmetricSignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
+
+            if (CacheSignatureProviders)
+            {
+                if (_cryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                    return signatureProvider;
+            }
+
+            if (!IsSupportedAlgorithm(algorithm, key))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
+
+            if (createAsymmetric)
+                signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+            else
+                signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+
+            if (CacheSignatureProviders)
+                _cryptoProviderCache.TryAdd(signatureProvider);
+
+            return signatureProvider;
+        }
+
+        /// <summary>
+        /// Answers if an algorithm is supported
+        /// </summary>
+        /// <param name="algorithm">the name of the crypto algorithm</param>
+        /// <returns></returns>
+        public virtual bool IsSupportedAlgorithm(string algorithm)
+        {
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
+                return true;
+
+            return IsSupportedHashAlgorithm(algorithm);
+        }
+
+        /// <summary>
+        /// Checks if an 'algorithm, key' pair is supported.
+        /// </summary>
+        /// <param name="algorithm">the algorithm to check.</param>
+        /// <param name="key">the <see cref="SecurityKey"/>.</param>
+        /// <returns>true if 'algorithm, key' pair is supported.</returns>
+        public virtual bool IsSupportedAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
+                return true;
+
+            if (key as RsaSecurityKey != null)
+                return IsSupportedRsaAlgorithm(algorithm);
+
+            if (key is X509SecurityKey x509Key)
+            {
+#if NETSTANDARD1_4
+                if (x509Key.PublicKey as RSA == null)
+                    return false;
+#else
+                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
+                    return false;
+#endif
+                return IsSupportedRsaAlgorithm(algorithm);
+            }
+
+            if (key is JsonWebKey jsonWebKey)
+            {
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return IsSupportedRsaAlgorithm(algorithm);
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    return IsSupportedEcdsaAlgorithm(algorithm);
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    return IsSupportedSymmetricAlgorithm(algorithm);
+
+                return false;
+            }
+
+            if (key is ECDsaSecurityKey ecdsaSecurityKey)
+                return IsSupportedEcdsaAlgorithm(algorithm);
+
+            if (key as SymmetricSecurityKey != null)
+                return IsSupportedSymmetricAlgorithm(algorithm);
+
+            return false;
+        }
+
+        private bool IsSupportedAuthenticatedEncryptionAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
+                return false;
+
+            if (key is SymmetricSecurityKey)
+                return true;
+
+            if (key is JsonWebKey jsonWebKey)
+                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+
+            return false;
+        }
+
+        private bool IsSupportedEcdsaAlgorithm(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                    return true;
+            }
+
+            return false;
         }
 
         private bool IsSupportedHashAlgorithm(string algorithm)
@@ -599,6 +513,124 @@ namespace Microsoft.IdentityModel.Tokens
                 default:
                     return false;
             }
+        }
+
+        private bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
+                || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
+            {
+                if (key is RsaSecurityKey)
+                    return true;
+
+                if (key is X509SecurityKey x509Key)
+                {
+#if NETSTANDARD1_4
+                    if (x509Key.PublicKey as RSA == null)
+                        return false;
+#else
+                    if (x509Key.PublicKey as RSACryptoServiceProvider == null)
+                        return false;
+#endif
+                }
+
+                if (key is JsonWebKey jsonWebKey && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                    return true;
+
+                return false;
+            }
+
+            return false;
+        }
+
+        private bool IsSupportedRsaAlgorithm(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RsaOAEP:
+                case SecurityAlgorithms.RsaPKCS1:
+                case SecurityAlgorithms.RsaOaepKeyWrap:
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool IsSupportedSymmetricAlgorithm(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                case SecurityAlgorithms.Aes192CbcHmacSha384:
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
+                case SecurityAlgorithms.Aes128KW:
+                case SecurityAlgorithms.Aes256KW:
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.HmacSha256:
+                case SecurityAlgorithms.HmacSha384:
+                case SecurityAlgorithms.HmacSha512:
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="HashAlgorithm"/> call this method for cleanup. The default behavior is to call <see cref="HashAlgorithm.Dispose()"/>
+        /// </summary>
+        /// <param name="hashAlgorithm"><see cref="HashAlgorithm"/> to be released.</param>
+        public virtual void ReleaseHashAlgorithm(HashAlgorithm hashAlgorithm)
+        {
+            if (hashAlgorithm != null)
+                hashAlgorithm.Dispose();
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="KeyWrapProvider"/> call this method for cleanup."/>
+        /// </summary>
+        /// <param name="provider"><see cref="KeyWrapProvider"/> to be released.</param>
+        public virtual void ReleaseKeyWrapProvider(KeyWrapProvider provider)
+        {
+            if (provider != null)
+                provider.Dispose();
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="RsaKeyWrapProvider"/> call this method for cleanup."/>
+        /// </summary>
+        /// <param name="provider"><see cref="RsaKeyWrapProvider"/> to be released.</param>
+        public virtual void ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider provider)
+        {
+            if (provider != null)
+                provider.Dispose();
+        }
+
+        /// <summary>
+        /// When finished with a <see cref="SignatureProvider"/> call this method for cleanup. The default behavior is to call <see cref="SignatureProvider.Dispose()"/>
+        /// </summary>
+        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be released.</param>
+        public virtual void ReleaseSignatureProvider(SignatureProvider signatureProvider)
+        {
+            if (signatureProvider == null)
+                throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
+
+            if (signatureProvider != null && signatureProvider.CryptoProviderCache == null)
+                signatureProvider.Dispose();
         }
     }
 }

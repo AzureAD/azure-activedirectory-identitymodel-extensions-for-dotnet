@@ -77,11 +77,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var dataset = new TheoryData<ECDsaSecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.ECDsa256Key, SecurityAlgorithms.EcdsaSha256, true);
-                dataset.Add(KeyingMaterial.ECDsa256Key_Public, SecurityAlgorithms.EcdsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.ECDsa384Key, SecurityAlgorithms.Aes128Encryption, false);
-                dataset.Add(KeyingMaterial.ECDsa521Key, SecurityAlgorithms.EcdsaSha384, true);
-                ECDsaSecurityKey testKey = new ECDsaSecurityKey(KeyingMaterial.ECDsa256Key.ECDsa);
+                dataset.Add(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, true);
+                dataset.Add(KeyingMaterial.Ecdsa256Key_Public, SecurityAlgorithms.EcdsaSha256Signature, true);
+                dataset.Add(KeyingMaterial.Ecdsa384Key, SecurityAlgorithms.Aes128Encryption, false);
+                dataset.Add(KeyingMaterial.Ecdsa521Key, SecurityAlgorithms.EcdsaSha384, true);
+                ECDsaSecurityKey testKey = new ECDsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa);
                 testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature });
                 dataset.Add(testKey, SecurityAlgorithms.RsaSsaPssSha256Signature, true);
                 return dataset;

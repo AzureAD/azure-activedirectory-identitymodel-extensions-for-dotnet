@@ -38,28 +38,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     public class JwtHeaderTests
     {
         [Fact]
-        public void Constructors()
+        public void Constructors_Default()
         {
-            var header1 = new JwtHeader();
-            SigningCredentials signingCredentials = null;
-            var header2 = new JwtHeader(signingCredentials);
+            var jwtHeader = new JwtHeader();
 
-            var context = new CompareContext
-            {
-                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-                {
-                    { typeof(JwtHeader), new List<string> { "Item" } },
-                }
-            };
-
-            IdentityComparer.AreEqual(header1, header2, context);
-            TestUtilities.AssertFailIfErrors("JwtHeaderTests.Constructors", context.Diffs);
+            Assert.True(jwtHeader.Typ == null, "jwtHeader.Typ != null");
+            Assert.True(jwtHeader.Alg == null, "jwtHeader.Alg != null");
+            Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
+            Assert.True(jwtHeader.Kid == null, "jwtHeader.Kid == null");
+            Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
         [Fact]
-        public void Defaults()
+        public void Constructors_Null_SigningCredentials()
         {
-            JwtHeader jwtHeader = new JwtHeader();
+            JwtHeader jwtHeader = new JwtHeader((SigningCredentials)null);
             Assert.True(jwtHeader.Typ == JwtConstants.HeaderType, "jwtHeader.ContainsValue( JwtConstants.HeaderType )");
             Assert.True(jwtHeader.Alg == SecurityAlgorithms.None, "jwtHeader.SignatureAlgorithm == null");
             Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
@@ -75,6 +68,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void Publics()
         {
+        }
+
+        [Fact]
+        public void Kid()
+        {
+            var jsonWebKey = new JsonWebKey(DataSets.JsonWebKeyString1);
+            var credentials = new SigningCredentials(jsonWebKey, SecurityAlgorithms.RsaSha256Signature);
+            var token = new JwtSecurityToken(claims: Default.Claims, signingCredentials: credentials);
+            Assert.Equal(jsonWebKey.Kid, token.Header.Kid);
         }
     }
 }

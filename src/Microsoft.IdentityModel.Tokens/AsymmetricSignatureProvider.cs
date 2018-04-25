@@ -117,9 +117,6 @@ namespace Microsoft.IdentityModel.Tokens
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
@@ -130,6 +127,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
             ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            WillCreateSignatures = willCreateSignatures;
         }
 
         /// <summary>
@@ -137,10 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForSigningMap
         {
-            get
-            {
-                return _minimumAsymmetricKeySizeInBitsForSigningMap;
-            }
+            get => _minimumAsymmetricKeySizeInBitsForSigningMap;
         }
 
         /// <summary>
@@ -148,20 +143,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForVerifyingMap
         {
-            get
-            {
-                return _minimumAsymmetricKeySizeInBitsForVerifyingMap;
-            }
+            get => _minimumAsymmetricKeySizeInBitsForVerifyingMap;
         }
 
         private PrivateKeyStatus FoundPrivateKey(SecurityKey key)
         {
-            AsymmetricSecurityKey asymmetricSecurityKey = key as AsymmetricSecurityKey;
-            if (asymmetricSecurityKey != null)
+            if (key is AsymmetricSecurityKey asymmetricSecurityKey)
                 return asymmetricSecurityKey.PrivateKeyStatus;
 
-            JsonWebKey jsonWebKey = key as JsonWebKey;
-            if (jsonWebKey != null)
+            if (key is JsonWebKey jsonWebKey)
                 return jsonWebKey.HasPrivateKey ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
 
             return PrivateKeyStatus.Unknown;
@@ -241,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             switch (algorithm)
             {
@@ -321,65 +311,37 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] Sign(byte[] input)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException("input");
+                throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
 
+            try
+            {
 #if NETSTANDARD1_4
-            if (_rsa != null)
-                return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_ecdsa != null)
-                return _ecdsa.SignData(input, _hashAlgorithm);
+                if (_rsa != null)
+                    return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                else if (_ecdsa != null)
+                    return _ecdsa.SignData(input, _hashAlgorithm);
 #else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
-            else if (_ecdsa != null)
-                return _ecdsa.SignData(input);
+                if (_rsaCryptoServiceProvider != null)
+                    return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
+                else if (_rsaCryptoServiceProviderProxy != null)
+                    return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
+                else if (_ecdsa != null)
+                    return _ecdsa.SignData(input);
 #endif
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
+
             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, _hashAlgorithm)));
-        }
-
-        /// <summary>
-        /// Verifies that a signature over the' input' matches the signature.
-        /// </summary>
-        /// <param name="input">The bytes to generate the signature over.</param>
-        /// <param name="signature">The value to verify against.</param>
-        /// <returns>true if signature matches, false otherwise.</returns>
-        /// <exception cref="ArgumentNullException">'input' is null.</exception>
-        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
-        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
-        /// <exception cref="ArgumentException">'signature.Length' == 0.</exception>
-        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if a derived type does not call the base constructor.</exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
-        public override bool Verify(byte[] input, byte[] signature)
-        {
-            if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException("input");
-
-            if (signature == null || signature.Length == 0)
-                throw LogHelper.LogArgumentNullException("signature");
-
-            if (_disposed)
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
-
-#if NETSTANDARD1_4
-            if (_rsa != null)
-                return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-            else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
-#else
-            if (_rsaCryptoServiceProvider != null)
-                return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
-            else if (_rsaCryptoServiceProviderProxy != null)
-                return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
-            else if (_ecdsa != null)
-                return _ecdsa.VerifyData(input, signature);
-#endif
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
         /// <summary>
@@ -401,6 +363,58 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Verifies that a signature over the' input' matches the signature.
+        /// </summary>
+        /// <param name="input">The bytes to generate the signature over.</param>
+        /// <param name="signature">The value to verify against.</param>
+        /// <returns>true if signature matches, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">'input' is null.</exception>
+        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
+        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
+        /// <exception cref="ArgumentException">'signature.Length' == 0.</exception>
+        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if a derived type does not call the base constructor.</exception>
+        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        public override bool Verify(byte[] input, byte[] signature)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (signature == null || signature.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            try
+            {
+#if NETSTANDARD1_4
+                if (_rsa != null)
+                    return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
+                else if (_ecdsa != null)
+                    return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
+#else
+                if (_rsaCryptoServiceProvider != null)
+                    return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
+                else if (_rsaCryptoServiceProviderProxy != null)
+                    return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
+                else if (_ecdsa != null)
+                    return _ecdsa.VerifyData(input, signature);
+#endif
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
+
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
+        }
+
+        /// <summary>
         /// Calls <see cref="HashAlgorithm.Dispose()"/> to release this managed resources.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
@@ -412,6 +426,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (disposing)
                 {
+                    CryptoProviderCache?.TryRemove(this);
 #if NETSTANDARD1_4
                     if (_rsa != null && _disposeRsa)
                         _rsa.Dispose();

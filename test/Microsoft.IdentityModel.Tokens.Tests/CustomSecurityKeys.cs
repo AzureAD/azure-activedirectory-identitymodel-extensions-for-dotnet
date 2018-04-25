@@ -25,45 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens
-{
-    /// <summary>
-    /// Base class for a Security Key that contains Asymmetric key material.
-    /// </summary>
-    public abstract class AsymmetricSecurityKey : SecurityKey
-    {
-        /// <summary>
-        /// This must be overridden to get a bool indicating if a private key exists.
-        /// </summary>
-        /// <return>true if it has a private key; otherwise, false.</return>
-        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
-        public abstract bool HasPrivateKey { get; }
+using System;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
 
-        /// <summary>
-        /// Gets the status of the private key.
-        /// </summary>
-        /// <return>'Exists' if private key exists for sure; 'DoesNotExist' if private key doesn't exist for sure; 'Unknown' if we cannot determine.</return>
-        public abstract PrivateKeyStatus PrivateKeyStatus { get; }
+/// <summary>
+/// Derived types to simplify testing.
+/// Helpful when throwing
+/// </summary>
+namespace Microsoft.IdentityModel.Tests
+{
+    public class CustomRsaSecurityKey : RsaSecurityKey
+    {
+        private int _keySize;
+        private PrivateKeyStatus _privateKeyStatus;
+
+        public CustomRsaSecurityKey(int keySize, PrivateKeyStatus privateKeyStatus, RSAParameters parameters)
+            : base(parameters)
+        {
+            _keySize = keySize;
+            _privateKeyStatus = privateKeyStatus;
+        }
+
+#pragma warning disable CS0672
+        public override bool HasPrivateKey => true;
+#pragma warning restore CS0672
+
+        public override PrivateKeyStatus PrivateKeyStatus => _privateKeyStatus;
+
+        public override int KeySize => _keySize;
     }
 
-    /// <summary>
-    /// Enum for the existence of private key
-    /// </summary>
-    public enum PrivateKeyStatus
-    {
-        /// <summary>
-        /// private key exists for sure
-        /// </summary>
-        Exists,
-
-        /// <summary>
-        /// private key doesn't exist for sure
-        /// </summary>
-        DoesNotExist,
-
-        /// <summary>
-        /// unable to determine the existence of private key
-        /// </summary>
-        Unknown
-    };
 }

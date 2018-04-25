@@ -153,8 +153,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var dataset = new TheoryData<JsonWebKey, string, bool>();
-                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.EcdsaSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyEcdsa256, SecurityAlgorithms.RsaSha256Signature, false);
+                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256, true);
+                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.RsaSha256Signature, false);
                 dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true);
                 dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
                 dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);

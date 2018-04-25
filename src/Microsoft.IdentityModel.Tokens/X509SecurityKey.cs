@@ -49,10 +49,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="certificate">The cert to use.</param>
         public X509SecurityKey(X509Certificate2 certificate)
         {
-            if (certificate == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("certificate"));
-
-            _certificate = certificate;
+            _certificate = certificate ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificate)));
             KeyId = certificate.Thumbprint;
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
@@ -62,10 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override int KeySize
         {
-            get
-            {
-                return PublicKey.KeySize;
-            }
+            get => PublicKey.KeySize;
         }
 
         /// <summary>
@@ -135,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
-        [System.Obsolete("HasPrivateKey method is deprecated, please use FoundPrivateKey instead.")]
+        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
         public override bool HasPrivateKey
         {
             get { return (PrivateKey != null); }

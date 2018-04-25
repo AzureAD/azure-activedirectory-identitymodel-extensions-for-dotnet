@@ -436,13 +436,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns>A <see cref="HashAlgorithm"/>.</returns>
         public virtual HashAlgorithm GetHashAlgorithm(string algorithm)
         {
-            if (algorithm == null)
-                algorithm = SecurityAlgorithms.RsaSha256;
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21350));
 
             try
             {
-                string hashAlgorithm;
-                if (!HashAlgorithmMap.TryGetValue(algorithm, out hashAlgorithm))
+                if (!HashAlgorithmMap.TryGetValue(algorithm, out string hashAlgorithm))
                     hashAlgorithm = algorithm;
 
                 return CryptoProviderFactory.CreateHashAlgorithm(hashAlgorithm);
@@ -674,7 +673,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, nonceTime.ToString(), utcNow.ToString(), NonceLifetime.ToString())));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, nonceTime.ToString(CultureInfo.InvariantCulture), utcNow.ToString(CultureInfo.InvariantCulture), NonceLifetime.ToString("c", CultureInfo.InvariantCulture))));
             }
         }
 

@@ -4,8 +4,8 @@ Windows Azure Active Directory IdentityModel Extensions for .Net
 IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
 
 ## Versions
-Current version - 5.2.1
-Minimum recommended version - 4.0.3  
+Current version - 5.2.2
+Minimum recommended version - 5.0.0
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/CHANGELOG.md).
 
@@ -49,7 +49,7 @@ All code is licensed under the MIT license and we triage actively on GitHub. We 
 
 * Support for creating and consuming OpenId and WsFederation messages.
 * Support for validating Saml and Saml2 tokens using TokenValidationParameters.
-* Support for dynamic metatdata retreival.
+* Support for dynamic metadata retrieval.
 
 ### 4.x
 #### System.IdentityModel.Tokens.Jwt (version 4.x)

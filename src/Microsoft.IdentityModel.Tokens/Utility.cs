@@ -344,7 +344,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD1_4
                 ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
 #else // net451 windows
-                ecdsaAlgorithm.ecdsaCng = webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.ecdsaCng = (ECDsaCng) webKey.CreateECDsa(algorithm, usePrivateKey);
 #endif
                 return ecdsaAlgorithm;
             }

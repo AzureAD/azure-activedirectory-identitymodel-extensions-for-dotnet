@@ -190,7 +190,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 using (var sr = new StringReader(securityToken))
                 {
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                    var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                    settings.XmlResolver = null;
+#endif
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
                     {
                         return CanReadToken(reader);
                     }
@@ -764,7 +768,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             using (var sr = new StringReader(token))
             {
-                return new SamlSecurityToken(Serializer.ReadAssertion(XmlReader.Create(sr)));
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                settings.XmlResolver = null;
+#endif
+                return new SamlSecurityToken(Serializer.ReadAssertion(XmlReader.Create(sr, settings))); 
             }
         }
 
@@ -1151,7 +1159,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, token, validationParameters);
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);

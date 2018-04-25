@@ -230,6 +230,45 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        // Each TokenReplayValidator in this test checks that the expiration parameter passed into it is equal to the expiration time of the token.
+        // If they're not equal, the test will fail.
+        [Theory, MemberData(nameof(CheckParametersForTokenReplayTheoryData))]
+        public void CheckParametersForTokenReplay(TokenReplayTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.CheckParametersForTokenReplay", theoryData);
+            var context = new CompareContext($"{this}.CheckParametersForTokenReplay, {theoryData.TestId}");
+            var tvp = new TokenValidationParameters();
+            tvp.IssuerSigningKey = theoryData.SigningKey;
+            tvp.TokenReplayValidator = theoryData.TokenReplayValidator;
+            tvp.ValidateTokenReplay = theoryData.ValidateTokenReplay;
+            tvp.ValidateAudience = false;
+            tvp.ValidateIssuer = false;
+            tvp.ValidateLifetime = false;
+            var token = theoryData.SecurityToken;
+            var tokenValidator = theoryData.SecurityTokenHandler;
+
+            try
+            {
+                // TokenReplayValidator should always be provided for these tests.
+                tokenValidator.ValidateToken(token, tvp, out SecurityToken validatedToken);
+                theoryData.ExpectedException.ProcessNoException(context.Diffs);                
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<TokenReplayTheoryData> CheckParametersForTokenReplayTheoryData
+        {
+            get
+            {
+                return TestTheoryData.CheckParametersForTokenReplayTheoryData;
+            }
+        }
+
         class TokenReplayCache : ITokenReplayCache
         {
             public bool AddRetVal { get; set; }

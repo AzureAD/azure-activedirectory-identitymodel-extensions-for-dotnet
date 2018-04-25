@@ -28,6 +28,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
+using System.Reflection;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Logging
@@ -61,7 +62,33 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// String that is used in place of any arguments to log messages if the 'ShowPII' flag is set to false.
         /// </summary>
-        public static string HiddenPIIString { get; } = "[PII is hidden by default. Set the 'ShowPII' flag in IdentityModelEventSource.cs to true to reveal it.]";
+        public static string HiddenPIIString { get; } = "[PII is hidden]";
+
+        /// <summary>
+        /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.
+        /// </summary>
+        public static bool HeaderWritten { get; set; } = false;
+
+        /// <summary>
+        /// The log message that indicates the current library version.
+        /// </summary>
+        private static string _versionLogMessage = "Library version: {0}.";
+
+        /// <summary>
+        /// The log message that indicates the date.
+        /// </summary>
+        private static string _dateLogMessage = "Date: {0}.";
+
+        /// <summary>
+        /// The log message that is shown when PII is off.
+        /// </summary>
+        private static string _piiOffLogMessage = "PII (personally identifiable information) logging is currently turned off. Set IdentityModelEventSource.ShowPII to 'true' to view the full details of exceptions.";
+
+        /// <summary>
+        /// The log message that is shown when PII is off.
+        /// </summary>
+        private static string _piiOnLogMessage = "PII (personally identifiable information) logging is currently turned on. Set IdentityModelEventSource.ShowPII to 'false' to hide PII from log messages.";
+
 
         /// <summary>
         /// Writes an event log by using the provided string argument and current UTC time.
@@ -279,6 +306,20 @@ namespace Microsoft.IdentityModel.Logging
                     message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
             }
 
+            // Logs basic information: library version, date, and whether PII (personally identifiable information) logging is on or off.
+            if (!HeaderWritten)
+            {
+                // Obtain the current library version dynamically.
+                WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version.ToString()));
+                WriteAlways(string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow));
+                if (ShowPII) 
+                    WriteAlways(_piiOnLogMessage);
+                else
+                    WriteAlways(_piiOffLogMessage);
+
+                HeaderWritten = true; // We only want to log this information once before any log messages are written.
+            }
+
             switch (level)
             {
                 case EventLevel.LogAlways:
@@ -319,10 +360,10 @@ namespace Microsoft.IdentityModel.Logging
             if (message == null)
                 return string.Empty;
 
-            if (args != null)
-                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), FormatInvariant(message, args));
+            if (args != null && args.Length > 0)
+                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), FormatInvariant(message, args));
 
-            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(), message);
+            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
         }
     }
 }

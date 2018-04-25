@@ -137,7 +137,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 using (var sr = new StringReader(token))
                 {
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr)))
+                    var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                    settings.XmlResolver = null;
+#endif                 
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings)))
                     {
                         return CanReadToken(reader);
                     }
@@ -236,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            ValidateTokenReplay(samlToken.Assertion.Conditions.NotBefore, token, validationParameters);
+            ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, token, validationParameters);
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
@@ -490,7 +494,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             using (var stringReader = new StringReader(token))
             {
-                return new Saml2SecurityToken(Serializer.ReadAssertion(XmlReader.Create(stringReader)));
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#if NET45 || NET451
+                settings.XmlResolver = null;
+#endif
+                return new Saml2SecurityToken(Serializer.ReadAssertion(XmlReader.Create(stringReader, settings)));
             }
         }
 

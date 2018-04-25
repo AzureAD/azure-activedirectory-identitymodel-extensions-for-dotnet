@@ -90,6 +90,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21347 = "IDX21347: Validating the 'c_hash' failed, see inner exception.";
         internal const string IDX21348 = "IDX21348: Validating the 'at_hash' failed, see inner exception.";
         internal const string IDX21349 = "IDX21349: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was not null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was null or empty. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
+        internal const string IDX21350 = "IDX21350: The algorithm specified in the jwt header is null or empty.";
 
         // configuration retrieval errors
         internal const string IDX21806 = "IDX21806: Deserializing json string into json web keys.";
