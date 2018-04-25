@@ -7,15 +7,15 @@ IdentityModel Extensions for .Net provide assemblies that are interesting for we
 Current version - 5.2.2
 Minimum recommended version - 5.0.0
 
-You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/CHANGELOG.md).
+You can find the release notes for each version [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes).
 
 ## Security Vulnerability in Microsoft.IdentityModel.Tokens 5.1.0
 IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known security vulnerability affecting version 5.1.0. Please update to >= 5.1.1 immediately. An updated package is available on NuGet. For more details, see the [security notice](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/SECURITY_NOTICE.md).
 
 ## Usage
 IdentityModel Extensions for .NET 5 has now been released. If you are using IdentityModel Extensions with ASP.NET, the following combinations are supported:
-* **IdentityModel Extensions for .NET 4.x** and **ASP.NET 4**
-* **IdentityModel Extensions for .NET 5.x**, **ASP.NET Core 1.x** and **ASP.NET Core 2.x**
+* **IdentityModel Extensions for .NET 5.x**, **ASP.NET Core 1.x**, **ASP.NET Core 2.x**, Katana 4.x**
+* **IdentityModel Extensions for .NET 4.x**, **ASP.NET 4**, Katana 3.x**
 All other combinations aren't supported.
 
 ## Samples and Documentation
@@ -38,44 +38,7 @@ All code is licensed under the MIT license and we triage actively on GitHub. We 
 
 ## Assemblies in this repo
 ----
-
-### 3.x
-#### System.IdentityModel.Tokens.Jwt (version 3.x)
-
-* Support for creating, serializing, and validating Json Web Tokens.
-* Provides model for config free validation using TokenValidationParameters.
-
-#### Microsoft.IdentityModel.Protocol.Extensions (version 1.x)
-
-* Support for creating and consuming OpenId and WsFederation messages.
-* Support for validating Saml and Saml2 tokens using TokenValidationParameters.
-* Support for dynamic metadata retrieval.
-
-### 4.x
-#### System.IdentityModel.Tokens.Jwt (version 4.x)
-#### Microsoft.IdentityModel.Protocol.Extensions (version 2.x)
-
-
-### 5.x
-#### Microsoft.IdentityModel.Tokens (version 5.x)
-* Includes types that provide support for cryptographic operations.
-
-#### System.IdentityModel.Tokens.Jwt (version 5.x)
-
-#### System.IdentityModel.Tokens.Saml (version 5.x, currently in beta)
-* Includes types that provide support for Saml tokens.
-
-#### Microsoft.IdentityModel.Protocols (version 2.x)
-* Provides types that are common across OpenIdConnect and WsFed protocols.
-
-#### Microsoft.IdentityModel.Protocols.OpenIdConnect (version 2.x)
-* Includes types that provide support for OpenIdConnect protocol.
-
-#### Microsoft.IdentityModel.Protocols.WsFederation (version 2.x, currently in beta)
-* Includes types that provide support for WsFederation protocol.
-
-#### Microsoft.IdentityModel.Logging (version 1.x)
-* Includes Event Source based logging support.
+See the [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
 
 ## License
 
