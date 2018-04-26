@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             Assert.Null(jwt.Id);
             Assert.Null(jwt.Issuer);
             Assert.Null(jwt.SecurityKey);
-            Assert.Null(jwt.SignatureAlgorithm);
+            Assert.NotNull(jwt.SignatureAlgorithm);
             Assert.Null(jwt.SigningCredentials);
             Assert.Null(jwt.SigningKey);
             Assert.Null(jwt.Subject);

@@ -46,7 +46,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(ActorTheoryData))]
         public void Actor(JwtTheoryData theoryData)
         {
-            var context = new CompareContext();
+            var context = TestUtilities.WriteHeader($"{this}.Actor", theoryData);
+
             try
             {
                 var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
@@ -55,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -522,6 +523,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             Assert.Equal(73, handler.InboundClaimTypeMap.Count);
             // Check to make sure that changing the instance property did not alter the static property.
             Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
+
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = true;
         }
 
         [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData))]
