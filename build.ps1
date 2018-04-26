@@ -150,10 +150,10 @@ if ($build -eq "YES")
         }
     }
 
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $root\$slnFile"
-    Start-Process -wait -NoNewWindow $dotnetexe "restore $root\$slnFile"
-    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'build' -c $buildType $root\$slnFile"
-    Start-Process -wait -NoNewWindow $dotnetexe "build -c $buildType /p:SourceLinkCreate=true /v:n $root\$slnFile"
+    Write-Host ""
+    Write-Host ">>> Start-Process -Wait  -PassThru -NoNewWindow $dotnetexe 'build' -c $buildType -v n /p:SourceLinkCreate=true $root\$slnFile"
+    Write-Host ""
+    Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "build -c $buildType -v n /p:SourceLinkCreate=true $root\$slnFile"
 
     WriteSectionFooter("End Build");
 }
@@ -166,8 +166,8 @@ if ($pack -eq "YES")
     foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
     {
         $name = $project.name;
-        Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build $root\src\$name -c $buildType -o $artifactsRoot -s --include-symbols"
-        Start-Process -wait -NoNewWindow $dotnetexe "pack $root\src\$name\$name.csproj --no-build -c $buildType -o $artifactsRoot -s --include-symbols"
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
+        Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
     }
 
     WriteSectionFooter("End Pack");
@@ -175,30 +175,20 @@ if ($pack -eq "YES")
 
 if ($runTests -eq "YES")
 {
-
     $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
     foreach ($testProject in $testProjects)
     {
-        if ($testProject.test -eq "yes")
+        if ($testProject.test -eq "YES")
         {
             $name = $testProject.name;
             WriteSectionHeader("Test - " + $name);
 
             Write-Host ">>> Set-Location $root\test\$name"
             pushd
+
             Set-Location $root\test\$name
-            if ($build -ne "YES")
-            {
-                Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'restore' $name.csproj"
-                Start-Process -wait -NoNewWindow $dotnetexe "restore $name.csproj"
-                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' -c $buildType"
-                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj -c $buildType"
-            }
-            else
-            {
-                Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj' --no-build -c $buildType"
-                $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --no-build -c $buildType"
-            }
+            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test' --no-build --no-restore -c $buildType -v q '$name.csproj'"
+            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test --no-build --no-restore -c $buildType -v q $name.csproj"
 
             if($p.ExitCode -ne 0)
             {
@@ -211,6 +201,7 @@ if ($runTests -eq "YES")
                     $failedTestProjects = "$failedTestProjects, $name"
                 }
             }
+
             $testExitCode = $p.ExitCode + $testExitCode
 
             popd
