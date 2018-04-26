@@ -164,16 +164,8 @@ if ($pack -eq "YES")
     foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
     {
         $name = $project.name;
-        if ($build -eq "YES")
-        {
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-            Start-Process  -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-        }
-        else
-        {
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-            Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-        }
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
+        Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
     }
 
     WriteSectionFooter("End Pack");
