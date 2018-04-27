@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.IdentityModel.Logging;
+using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {

@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Jwt;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -60,12 +61,12 @@ namespace System.IdentityModel.Tokens.Jwt
             string[] tokenParts = jwtEncodedString.Split(new char[] {'.'}, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                if (!JwtSecurityTokenHandler.RegexJws.IsMatch(jwtEncodedString))
+                if (!JwtTokenUtilities.RegexJws.IsMatch(jwtEncodedString))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, jwtEncodedString)));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                if (!JwtSecurityTokenHandler.RegexJwe.IsMatch(jwtEncodedString))
+                if (!JwtTokenUtilities.RegexJwe.IsMatch(jwtEncodedString))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, jwtEncodedString)));
             }
             else
@@ -279,7 +280,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
         /// </summary>
-        /// <remarks>If the 'JWT ID' claim is not found, null is returned.</remarks>
+        /// <remarks>If the 'JWT ID' claim is not found, an empty string is returned.</remarks>
         public override string Id
         {
             get
@@ -294,7 +295,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
-        /// <remarks>If the 'issuer' claim is not found, null is returned.</remarks>
+        /// <remarks>If the 'issuer' claim is not found, an empty string is returned.</remarks>
         public override string Issuer
         {
             get

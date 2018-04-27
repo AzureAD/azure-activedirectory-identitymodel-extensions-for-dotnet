@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Jwt\Microsoft.IdentityModel.Tokens.Jwt.csproj" />
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
   </ItemGroup>
 

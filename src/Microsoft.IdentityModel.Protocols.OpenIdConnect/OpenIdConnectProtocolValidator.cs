@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (validationContext == null)
                 throw LogHelper.LogArgumentNullException("validationContext");
 
-            // no 'response' is recieved or 'id_token' in the response is null 
+            // no 'response' is received or 'id_token' in the response is null 
             if (validationContext.ProtocolMessage == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21333));
 

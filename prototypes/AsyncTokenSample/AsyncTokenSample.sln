@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2043
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncWebsite", "AsyncWebsite\AsyncWebsite.csproj", "{A0A9FCCA-623E-4D33-A6B8-04D3CDA89AD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncWebAPI", "AsyncWebAPI\AsyncWebAPI.csproj", "{2230FF43-3542-4D3B-A61D-E3E3039BB5F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0A9FCCA-623E-4D33-A6B8-04D3CDA89AD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0A9FCCA-623E-4D33-A6B8-04D3CDA89AD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0A9FCCA-623E-4D33-A6B8-04D3CDA89AD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0A9FCCA-623E-4D33-A6B8-04D3CDA89AD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2230FF43-3542-4D3B-A61D-E3E3039BB5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2230FF43-3542-4D3B-A61D-E3E3039BB5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2230FF43-3542-4D3B-A61D-E3E3039BB5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2230FF43-3542-4D3B-A61D-E3E3039BB5F4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DFEE3375-D74C-4BCF-A924-34391C7530C6}
+	EndGlobalSection
+EndGlobal
