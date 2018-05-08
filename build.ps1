@@ -151,9 +151,9 @@ if ($build -eq "YES")
     }
 
     Write-Host ""
-    Write-Host ">>> Start-Process -Wait  -PassThru -NoNewWindow $dotnetexe 'build' -c $buildType -v n /p:SourceLinkCreate=true $root\$slnFile"
+    Write-Host ">>> Start-Process -Wait  -PassThru $dotnetexe 'build' -c $buildType -v m /p:SourceLinkCreate=true $root\$slnFile"
     Write-Host ""
-    Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "build -c $buildType -v n /p:SourceLinkCreate=true $root\$slnFile"
+    Start-Process -Wait -PassThru $dotnetexe "build -c $buildType -v m /p:SourceLinkCreate=true $root\$slnFile"
 
     WriteSectionFooter("End Build");
 }
