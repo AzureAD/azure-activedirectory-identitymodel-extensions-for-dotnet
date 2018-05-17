@@ -18,6 +18,8 @@ IdentityModel Extensions for .NET 5 has now been released. If you are using Iden
 * **IdentityModel Extensions for .NET 4.x**, **ASP.NET 4**, **Katana 3.x**
 All other combinations aren't supported.
 
+For more details see [Migration notes here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Migrating-from-Katana-(OWIN)-3.x-to-4.x)
+
 ## Samples and Documentation
 
 [We provide a full suite of sample applications and documentation on GitHub](https://github.com/azure-samples?query=active-directory) to help you get started with learning the Azure Identity system. This includes tutorials for native clients such as Windows, Windows Phone, iOS, OSX, Android, and Linux. We also provide full walkthroughs for authentication flows such as OAuth2, OpenID Connect, Graph API, and other awesome features. 
