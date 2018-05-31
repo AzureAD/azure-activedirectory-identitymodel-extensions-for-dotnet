@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (string.IsNullOrWhiteSpace(token))
                 return false;
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 return false;
 
             try
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException"><paramref name="token"/>.Length is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/>.Length * 2 is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">if the <paramref name="token"/> is not well-formed.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> representing the identity contained in the token.</returns>
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var samlToken = ValidateSignature(token, validationParameters);
@@ -482,14 +482,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
         /// <exception cref="ArgumentNullException"> If <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length * 2 $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
         public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw LogArgumentNullException(nameof(token));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             using (var stringReader = new StringReader(token))

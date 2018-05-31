@@ -643,7 +643,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' > <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'token.Length' * 2 $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
@@ -652,7 +652,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (string.IsNullOrEmpty(token))
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             if (!CanReadToken(token))
@@ -698,7 +698,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException"><paramref name="token"/>.Length > MamimumTokenSizeInBytes.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/>.Length * 2 $gt; MamimumTokenSizeInBytes.</exception>
         /// <exception cref="ArgumentException"><paramref name="token"/> does not have 3 or 5 parts.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/> returns false.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException"><paramref name="token"/> was a JWE was not able to be decrypted.</exception>
@@ -726,7 +726,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);

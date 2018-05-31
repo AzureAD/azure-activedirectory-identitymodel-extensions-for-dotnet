@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>'true' if the string has a start element equal <see cref="SamlConstants.Elements.Assertion"/>.</returns>
         public override bool CanReadToken(string securityToken)
         {
-            if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length > MaximumTokenSizeInBytes)
+            if (string.IsNullOrWhiteSpace(securityToken) || securityToken.Length * 2 > MaximumTokenSizeInBytes)
                 return false;
 
             try
@@ -757,13 +757,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="token">a Saml token as a string.</param>
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">If 'token.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">If 'token.Length' * 2 $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public virtual SamlSecurityToken ReadSamlToken(string token)
         {
             if (string.IsNullOrEmpty(token))
                 throw LogArgumentNullException(nameof(token));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             using (var sr = new StringReader(token))
@@ -1144,7 +1144,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">if 'securityToken.Length' * 2 $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -1153,7 +1153,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            if (token.Length > MaximumTokenSizeInBytes)
+            if (token.Length * 2 > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var samlToken = ValidateSignature(token, validationParameters);
