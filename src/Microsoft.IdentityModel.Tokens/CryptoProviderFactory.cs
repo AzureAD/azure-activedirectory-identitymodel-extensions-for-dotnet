@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -40,6 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private CryptoProviderCache _cryptoProviderCache = new InMemoryCryptoProviderCache();
         private static CryptoProviderFactory _default;
+        private static IDictionary<string, string> _typeToAlgorithmMap = new Dictionary<string, string>();
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
@@ -265,6 +267,8 @@ namespace Microsoft.IdentityModel.Tokens
                 var hashAlgorithm = CustomCryptoProvider.Create(algorithm) as HashAlgorithm;
                 if (hashAlgorithm == null)
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, algorithm, typeof(HashAlgorithm))));
+
+                _typeToAlgorithmMap[hashAlgorithm.GetType().ToString()] = algorithm;
 
                 return hashAlgorithm;
             }
@@ -596,7 +600,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="hashAlgorithm"><see cref="HashAlgorithm"/> to be released.</param>
         public virtual void ReleaseHashAlgorithm(HashAlgorithm hashAlgorithm)
         {
-            if (hashAlgorithm != null)
+            if (hashAlgorithm == null)
+                throw LogHelper.LogArgumentNullException(nameof(hashAlgorithm));
+            else if (CustomCryptoProvider != null && _typeToAlgorithmMap.TryGetValue(hashAlgorithm.GetType().ToString(), out var algorithm) && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
+                CustomCryptoProvider.Release(hashAlgorithm);
+            else 
                 hashAlgorithm.Dispose();
         }
 
@@ -606,7 +614,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="provider"><see cref="KeyWrapProvider"/> to be released.</param>
         public virtual void ReleaseKeyWrapProvider(KeyWrapProvider provider)
         {
-            if (provider != null)
+            if (provider == null)
+                throw LogHelper.LogArgumentNullException(nameof(provider));
+            else if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(provider.Algorithm))
+                CustomCryptoProvider.Release(provider);
+            else
                 provider.Dispose();
         }
 
@@ -616,7 +628,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="provider"><see cref="RsaKeyWrapProvider"/> to be released.</param>
         public virtual void ReleaseRsaKeyWrapProvider(RsaKeyWrapProvider provider)
         {
-            if (provider != null)
+            if (provider == null)
+                throw LogHelper.LogArgumentNullException(nameof(provider));
+            else if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(provider.Algorithm))
+                CustomCryptoProvider.Release(provider);
+            else
                 provider.Dispose();
         }
 
@@ -628,8 +644,9 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
-
-            if (signatureProvider != null && signatureProvider.CryptoProviderCache == null)
+            else if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
+                CustomCryptoProvider.Release(signatureProvider);
+            else if (signatureProvider.CryptoProviderCache == null)
                 signatureProvider.Dispose();
         }
     }
