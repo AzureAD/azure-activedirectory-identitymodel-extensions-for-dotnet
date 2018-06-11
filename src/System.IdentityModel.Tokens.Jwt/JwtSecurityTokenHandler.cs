@@ -35,7 +35,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-
+using Microsoft.IdentityModel.Tokens.Jwt;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -45,8 +45,6 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
-        internal static Regex RegexJws;
-        internal static Regex RegexJwe;
 
         private delegate bool CertMatcher(X509Certificate2 cert);
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
@@ -107,9 +105,6 @@ namespace System.IdentityModel.Tokens.Jwt
                  { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
                  { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
             };
-
-            RegexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
-            RegexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
         }
 
         /// <summary>
@@ -346,11 +341,11 @@ namespace System.IdentityModel.Tokens.Jwt
             string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
-                return RegexJws.IsMatch(token);
+                return JwtTokenUtilities.RegexJws.IsMatch(token);
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
-                return RegexJwe.IsMatch(token);
+                return JwtTokenUtilities.RegexJwe.IsMatch(token);
             }
 
             LogHelper.LogInformation(LogMessages.IDX12720);
@@ -535,7 +530,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             string rawHeader = header.Base64UrlEncode();
             string rawPayload = payload.Base64UrlEncode();
-            string rawSignature = signingCredentials == null ? string.Empty : CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
+            string rawSignature = signingCredentials == null ? string.Empty : JwtTokenUtilities.CreateEncodedSignature(string.Concat(rawHeader, ".", rawPayload), signingCredentials);
 
             LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
 
@@ -551,6 +546,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (cryptoProviderFactory == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX12733));
+
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
             // if direct algorithm, look for support
             if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
@@ -589,11 +587,11 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 // only 128, 384 and 512 AesCbcHmac for CEK algorithm
                 if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(256));
+                    symmetricKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(256));
                 else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
+                    symmetricKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(384));
                 else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
-                    symmetricKey = new SymmetricSecurityKey(GenerateKeyBytes(512));
+                    symmetricKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(512));
                 else
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
 
@@ -621,25 +619,6 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                 }
             }
-        }
-
-        private static byte[] GenerateKeyBytes(int sizeInBits)
-        {
-            byte[] key = null;
-            if (sizeInBits != 256 && sizeInBits != 384 && sizeInBits != 512)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10401, nameof(sizeInBits)));
-
-            var aes = Aes.Create();
-            int halfSizeInBytes = sizeInBits >> 4;
-            key = new byte[halfSizeInBytes << 1];
-            aes.KeySize = sizeInBits >> 1;
-            // The design of AuthenticatedEncryption needs two keys of the same size - generate them, each half size of what's required
-            aes.GenerateKey();
-            Array.Copy(aes.Key, key, halfSizeInBytes);
-            aes.GenerateKey();
-            Array.Copy(aes.Key, 0, key, halfSizeInBytes, halfSizeInBytes);
-
-            return key;
         }
 
         private IEnumerable<Claim> OutboundClaimTypeTransform(IEnumerable<Claim> claims)
@@ -841,7 +820,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX12735));
 
                 if (jwtToken.InnerToken.SigningCredentials != null)
-                    encodedSignature = CreateEncodedSignature(string.Concat(jwtToken.InnerToken.EncodedHeader, ".", jwtToken.EncodedPayload), jwtToken.InnerToken.SigningCredentials);
+                    encodedSignature = JwtTokenUtilities.CreateEncodedSignature(string.Concat(jwtToken.InnerToken.EncodedHeader, ".", jwtToken.EncodedPayload), jwtToken.InnerToken.SigningCredentials);
 
                 return EncryptToken(new JwtSecurityToken(jwtToken.InnerToken.Header, jwtToken.InnerToken.Payload, jwtToken.InnerToken.EncodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             }
@@ -851,43 +830,12 @@ namespace System.IdentityModel.Tokens.Jwt
             var header = jwtToken.EncryptingCredentials == null ? jwtToken.Header : new JwtHeader(jwtToken.SigningCredentials);
             encodedHeader = header.Base64UrlEncode();
             if (jwtToken.SigningCredentials != null)
-                encodedSignature =  CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
+                encodedSignature =  JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
             if (jwtToken.EncryptingCredentials != null)
                 return EncryptToken(new JwtSecurityToken(header, jwtToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials).RawData;
             else
                 return string.Concat(encodedHeader, ".", encodedPayload, ".", encodedSignature);
-        }
-
-        /// <summary>
-        /// Produces a signature over the 'input'.
-        /// </summary>
-        /// <param name="input">String to be signed</param>
-        /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
-        /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
-        internal static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
-        {
-            if (input == null)
-                throw LogHelper.LogArgumentNullException(nameof(input));
-
-            if (signingCredentials == null)
-                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
-
-            var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
-            var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
-            if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, (signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()), (signingCredentials.Algorithm ?? "Null"))));
-
-            try
-            {
-                LogHelper.LogVerbose(LogMessages.IDX12645);
-                return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
-            }
-            finally
-            {
-                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
-            }
         }
 
         /// <summary>

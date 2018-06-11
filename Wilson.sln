@@ -23,11 +23,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Log
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IdentityModel.Tokens.Jwt.Tests", "test\System.IdentityModel.Tokens.Jwt.Tests\System.IdentityModel.Tokens.Jwt.Tests.csproj", "{74BA9664-7B6E-4215-914A-6A901327202D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Jwt.Tests", "test\Microsoft.IdentityModel.Tokens.Jwt.Tests\Microsoft.IdentityModel.Tokens.Jwt.Tests.csproj", "{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens", "src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj", "{B682F592-2627-4BF6-91D7-6D6ACCB924D0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IdentityModel.Tokens.Jwt", "src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj", "{8F9882BB-3566-45C4-A144-28A85F51B25E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B} = {DBF58792-25DF-4B6E-866C-77A0BC5AB81B}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Tests", "test\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj", "{602480C3-D5C1-45DA-9B16-B83C7BCF8D5D}"
 EndProject
@@ -59,6 +64,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossVersionTokenValidation
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiChangeTest", "test\ApiChangeTest\ApiChangeTest.csproj", "{3EF9B56A-33C9-423A-A744-80AA102CECEB}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Jwt", "src\Microsoft.IdentityModel.Tokens.Jwt\Microsoft.IdentityModel.Tokens.Jwt.csproj", "{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +84,10 @@ Global
 		{74BA9664-7B6E-4215-914A-6A901327202D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74BA9664-7B6E-4215-914A-6A901327202D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74BA9664-7B6E-4215-914A-6A901327202D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B5416A2F-9918-44C0-9178-D25E89976A75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B5416A2F-9918-44C0-9178-D25E89976A75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5416A2F-9918-44C0-9178-D25E89976A75}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -145,6 +156,10 @@ Global
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -153,6 +168,7 @@ Global
 		{4B448B99-EB37-4A89-9408-6BB3387829F9} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{7BB23627-58D2-41D5-B711-ACC5D7F6654E} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{74BA9664-7B6E-4215-914A-6A901327202D} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{B5416A2F-9918-44C0-9178-D25E89976A75} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{B682F592-2627-4BF6-91D7-6D6ACCB924D0} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{8F9882BB-3566-45C4-A144-28A85F51B25E} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
@@ -171,6 +187,7 @@ Global
 		{310A34D3-8685-4355-8590-84351B5223BC} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{A9FD92FB-E484-4DE6-AB41-0B9862F71BD1} = {310A34D3-8685-4355-8590-84351B5223BC}
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}

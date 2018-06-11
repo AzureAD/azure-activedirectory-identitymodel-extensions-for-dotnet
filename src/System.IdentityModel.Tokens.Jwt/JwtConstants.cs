@@ -35,51 +35,51 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Short header type.
         /// </summary>
-        public const string HeaderType = "JWT";
+        public const string HeaderType = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.HeaderType;
 
         /// <summary>
         /// Long header type.
         /// </summary>
-        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
+        public const string HeaderTypeAlt = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.HeaderTypeAlt;
 
         /// <summary>
         /// Short token type.
         /// </summary>
-        public const string TokenType = "JWT";
+        public const string TokenType = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.TokenType;
 
         /// <summary>
         /// Long token type.
         /// </summary>
-        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
+        public const string TokenTypeAlt = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.TokenTypeAlt;
 
         /// <summary>
         /// JWS - Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
         /// </summary>
-        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
+        public const string JsonCompactSerializationRegex = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JsonCompactSerializationRegex;
 
         /// <summary>
         /// JWE - Token format: 'protectedheader.encryptedkey.iv.cyphertext.authenticationtag'.
         /// </summary>
-        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$";
+        public const string JweCompactSerializationRegex = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JweCompactSerializationRegex;
 
         /// <summary>
         /// The number of parts in a JWE token.
         /// </summary>
-        internal const int JweSegmentCount = 5;
+        internal const int JweSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JweSegmentCount;
 
         /// <summary>
         /// The number of parts in a JWS token.
         /// </summary>
-        internal const int JwsSegmentCount = 3;
+        internal const int JwsSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JwsSegmentCount;
 
         /// <summary>
         /// The maximum number of parts in a JWT.
         /// </summary>
-        internal const int MaxJwtSegmentCount = 5;
+        internal const int MaxJwtSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.MaxJwtSegmentCount;
 
         /// <summary>
         /// JWE header alg indicating a shared symmetric key is directly used as CEK.
         /// </summary>
-        public const string DirectKeyUseAlg = "dir";
+        public const string DirectKeyUseAlg = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.DirectKeyUseAlg;
     }
 }
