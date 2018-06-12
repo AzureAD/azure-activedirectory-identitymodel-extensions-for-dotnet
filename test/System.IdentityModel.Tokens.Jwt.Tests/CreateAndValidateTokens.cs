@@ -137,7 +137,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature);
 
             var header = new JwtHeader(signingCredentials);
-            header.Add(JwtHeaderParameterNames.X5t, Base64UrlEncoder.Encode(KeyingMaterial.CertSelfSigned2048_SHA256.GetCertHash()));
             var payload = new JwtPayload();
             payload.AddClaims(ClaimSets.DefaultClaims);
 
