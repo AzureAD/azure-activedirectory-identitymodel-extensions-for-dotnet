@@ -38,11 +38,12 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
+    /// See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
+    /// Currently only includes support for tokens in JWS format.
     /// </summary>
     public class JsonWebTokenHandler 
     {
-        private JwtTokenUtilities _jwtTokenUtilities = new JwtTokenUtilities();
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
@@ -75,10 +76,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <para>see: http://tools.ietf.org/html/rfc7519 </para>
         /// </summary>
         /// <param name="token">String that should represent a valid JWT.</param>
-        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of:
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching:
         /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
-        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
         /// </remarks>
         /// <returns>
         /// <para>'false' if the token is null or whitespace.</para>
@@ -103,10 +102,6 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 return JwtTokenUtilities.RegexJws.IsMatch(token);
-            }
-            else if (tokenParts.Length == JwtConstants.JweSegmentCount)
-            {
-                return JwtTokenUtilities.RegexJwe.IsMatch(token);
             }
 
             LogHelper.LogInformation(LogMessages.IDX14107);
@@ -134,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Creates a JsonWebToken (JWE or JWS).
+        /// Creates a JsonWebToken (JWS or JWE).
         /// </summary>
         /// <param name="payload">A JObject that represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
@@ -359,12 +354,10 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
-        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.</remarks>
         public JsonWebToken ReadJsonWebToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -379,12 +372,10 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
-        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.</remarks>
         public SecurityToken ReadToken(string token)
         {
             return ReadJsonWebToken(token);
