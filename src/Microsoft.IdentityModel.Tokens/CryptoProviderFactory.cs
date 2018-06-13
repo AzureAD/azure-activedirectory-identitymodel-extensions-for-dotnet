@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Cryptography;
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private CryptoProviderCache _cryptoProviderCache = new InMemoryCryptoProviderCache();
         private static CryptoProviderFactory _default;
-        private static IDictionary<string, string> _typeToAlgorithmMap = new Dictionary<string, string>();
+        private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.

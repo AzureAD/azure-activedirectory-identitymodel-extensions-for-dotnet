@@ -455,7 +455,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData))]
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
-            IdentityModelEventSource.ShowPII = true;
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
             var cryptoProviderFactory = new CryptoProviderFactory();
             try
