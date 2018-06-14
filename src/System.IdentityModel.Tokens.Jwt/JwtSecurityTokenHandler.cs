@@ -331,7 +331,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
-                LogHelper.LogInformation(TokenLogMessages.IDX10209, token.Length * 2, MaximumTokenSizeInBytes);
+                LogHelper.LogInformation(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
                 return false;
             }
 
@@ -653,7 +653,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length * 2, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             if (!CanReadToken(token))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, token)));
@@ -727,7 +727,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length * 2, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)

@@ -764,7 +764,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length * 2, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             using (var sr = new StringReader(token))
             {
@@ -1154,7 +1154,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length * 2, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
             var samlToken = ValidateSignature(token, validationParameters);
             ValidateConditions(samlToken, validationParameters);
