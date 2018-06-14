@@ -362,7 +362,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' * 2 is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.</remarks>
         public JsonWebToken ReadJsonWebToken(string token)
