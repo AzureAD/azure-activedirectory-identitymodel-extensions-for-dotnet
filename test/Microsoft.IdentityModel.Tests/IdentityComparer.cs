@@ -158,6 +158,7 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(WsFederationMessage).ToString(), CompareAllPublicProperties },
                 { typeof(Uri).ToString(), AreUrisEqual },
                 { typeof(X509Data).ToString(), CompareAllPublicProperties },
+                { typeof(X509SigningCredentials).ToString(), CompareAllPublicProperties },
             };
 
 #if !CrossVersionTokenValidation

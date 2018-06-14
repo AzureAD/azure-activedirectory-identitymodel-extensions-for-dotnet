@@ -32,8 +32,6 @@ namespace Microsoft.IdentityModel.Tests
 {
     public class CompareContext
     {
-        List<string> _diffs = new List<string>();
-
         public static CompareContext Default = new CompareContext();
 
         public CompareContext()
@@ -68,7 +66,12 @@ namespace Microsoft.IdentityModel.Tests
             Title = other.Title;
         }
 
-        public List<string> Diffs { get { return _diffs; } }
+        public void AddDiff(string diff)
+        {
+            Diffs.Add(diff);
+        }
+
+        public List<string> Diffs { get; set; } = new List<string>();
 
         public bool ExpectRawData { get; set; }
 
@@ -92,9 +95,9 @@ namespace Microsoft.IdentityModel.Tests
             if (context.Diffs.Count > 0)
             {
                 if (!string.IsNullOrEmpty(title))
-                    _diffs.Add(title);
+                    Diffs.Add(title);
 
-                _diffs.AddRange(context.Diffs);
+                Diffs.AddRange(context.Diffs);
             }
 
             return (context.Diffs.Count == 0);
