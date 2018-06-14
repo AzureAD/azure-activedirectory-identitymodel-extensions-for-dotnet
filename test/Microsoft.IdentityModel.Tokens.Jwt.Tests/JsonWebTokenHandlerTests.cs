@@ -25,40 +25,130 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tests;
 using Newtonsoft.Json.Linq;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt.Tests;
+using System.Security.Claims;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
 {
     public class JsonWebTokenHandlerTests
     {
-        [Fact]
-        public void CreateJWSAsync()
+        [Theory, MemberData(nameof(SegmentTheoryData))]
+        public void SegmentCanRead(JwtTheoryData theoryData)
         {
-            var tokenHandler = new JsonWebTokenHandler();
-            var signingCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials;
-
-            var payload = new JObject()
-            {
-                { JwtRegisteredClaimNames.Email, "Bob@contoso.com"},
-                { JwtRegisteredClaimNames.GivenName, "Bob"},
-                { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com" },
-                { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
-                { JwtRegisteredClaimNames.Nbf, "2017-03-18T18:33:37.080Z" },
-                { JwtRegisteredClaimNames.Exp, "2021-03-17T18:33:37.080Z" }
-            };
-
-            var accessToken = tokenHandler.CreateToken(payload, signingCredentials);
+            Assert.Equal(theoryData.CanRead, theoryData.TokenHandler.CanReadToken(theoryData.Token));
         }
 
-        [Fact]
-        public void ValidateJWSAsync()
+        public static TheoryData<JwtTheoryData> SegmentTheoryData()
         {
-            IdentityModelEventSource.ShowPII = true;
+            var theoryData = new TheoryData<JwtTheoryData>();
+
+            JwtTestData.InvalidRegExSegmentsData(theoryData);
+            JwtTestData.InvalidNumberOfSegmentsData("IDX14110:", theoryData);
+
+            return theoryData;
+        }
+
+        // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the 
+        // token string created by the JwtSecurityTokenHandler.
+        [Theory, MemberData(nameof(CreateTokenTheoryData))]
+        public void CreateToken(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateToken", theoryData);
+            try
+            {
+                string jwtFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                string jwtFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+
+                theoryData.JwtSecurityTokenHandler.ValidateToken(jwtFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.JsonWebTokenHandler.ValidateToken(jwtFromJsonHandler, theoryData.ValidationParameters);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+                var jwtTokenFromBuilder = new JsonWebToken(jwtFromJwtHandler);
+                var jwtTokenFromHandler = new JsonWebToken(jwtFromJsonHandler);
+                IdentityComparer.AreEqual(jwtTokenFromBuilder, jwtTokenFromHandler, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> CreateTokenTheoryData
+        {
+            get
+            {
+                var tokenHandler = new JwtSecurityTokenHandler
+                {
+                    SetDefaultTimesOnTokenCreation = false
+                };
+
+                tokenHandler.InboundClaimTypeMap.Clear();
+
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                    new CreateTokenTheoryData
+                    {
+                        First = true,
+                        Payload = Default.Payload,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims)
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                };
+            }
+        }
+
+        // Test checks to make sure that the token payload retrieved from ValidateToken is the same as the payload
+        // the token was initially created with. 
+        [Fact]
+        public void RoundTripToken()
+        {
+            TestUtilities.WriteHeader($"{this}.RoundTripToken");
+            var context = new CompareContext();
+
             var tokenHandler = new JsonWebTokenHandler();
-            var accessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJKV1QifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwibmJmIjoiMjAxNy0wMy0xOFQxODozMzozNy4wODBaIiwiZXhwIjoiMjAyMS0wMy0xN1QxODozMzozNy4wODBaIn0.JeUhB3r_BBiImzySSQ5qBO0HqE6-mkW5vQDr6Yocfu7pLluAxS854PXMXuIOlbiV9TCQAUDw8UjaxryaCEFRDqfAxl_nfMXn4K7iRc691ft9TL1qw9y40cjc16McBHc-lpu1F0lnXYNW9vGdxkQHpSQLDsVxAzyKXNypLYyNPwlZJp_G1Gx7fuVxOQOyMgZ-wcTx1c-mQmozLVQJ6r8-XC4LLVVotwjTQqZzVRhyPoMFHP_6auPA77P0JaiFnl3KMsASDmE3EMF5iOLBWzR0XqHLB9HNqdp0cVQQroSxvU7YJoE9jVFX6KfHusg5blsudlR0v4vv-1rhL9uFqRDNfw";
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            string jwtString = tokenHandler.CreateToken(Default.Payload, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+            var tokenValidationResult = tokenHandler.ValidateToken(jwtString, tokenValidationParameters);
+            var validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
+            IdentityComparer.AreEqual(Default.Payload, validatedToken.Payload, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test checks to make sure that an access token can be successfully validated by the JsonWebTokenHandler.
+        // Also ensures that a non-standard claim can be successfully retrieved from the payload and validated.
+        [Fact]
+        public void ValidateToken()
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateToken");
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var accessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJKV1QifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwibmJmIjoiMTQ4OTc3NTYxNyIsImV4cCI6IjE2MTYwMDYwMTcifQ.GcIi6FGp1JS5VF70_ULa8g6GTRos9Y7rUZvPAo4hm10bBNfGhdd5uXgsJspiQzS8vwJQyPlq8a_BpL9TVKQyFIRQMnoZWe90htmNWszNYbd7zbLJZ9AuiDqDzqzomEmgcfkIrJ0VfbER57U46XPnUZQNng2XgMXrXmIKUqEph_vLGXYRQ4ndfwtRrR6BxQFd1PS1T5KpEoUTusI4VEsMcutzfXUygLDiRKIcnLFA0kQpeoHllO4Nb_Sxv63GCb0d1076FfSEYtyRxF4YSCz1In-ee5dwEK8Mw3nHscu-1hn0Fe98RBs-4OrUzI0WcV8mq9IIB3i-U-CqCJEP_hVCiA";
             var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudience = "http://Default.Audience.com",
@@ -72,5 +162,20 @@ namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
             if (!email.Equals("Bob@contoso.com"))
                 throw new SecurityTokenException("Token does not contain the correct value for the 'email' claim.");
         }
+    }
+
+    public class CreateTokenTheoryData : TheoryDataBase
+    {
+        public JObject Payload { get; set; } 
+
+        public SigningCredentials SigningCredentials { get; set; }
+
+        public SecurityTokenDescriptor TokenDescriptor { get; set; }
+
+        public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
+
+        public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+
+        public TokenValidationParameters ValidationParameters { get; set; }
     }
 }

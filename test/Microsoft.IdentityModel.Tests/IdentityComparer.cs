@@ -42,6 +42,7 @@ using Microsoft.IdentityModel.Xml;
 using Newtonsoft.Json.Linq;
 #if !CrossVersionTokenValidation
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 #endif
@@ -87,9 +88,12 @@ namespace Microsoft.IdentityModel.Tests
                 { typeof(EnvelopedSignatureTransform).ToString(), CompareAllPublicProperties },
                 { typeof(IssuerSerial).ToString(), CompareAllPublicProperties },
                 { typeof(JArray).ToString(), AreJArraysEqual },
+                { typeof(JObject).ToString(), AreJObjectsEqual },
 #if !CrossVersionTokenValidation
                 { typeof(JsonWebKey).ToString(), CompareAllPublicProperties },
                 { typeof(JsonWebKeySet).ToString(), CompareAllPublicProperties },
+                { typeof(JsonWebToken).ToString(), CompareAllPublicProperties },
+                { typeof(JsonWebTokenHandler).ToString(), CompareAllPublicProperties },
                 { typeof(JwtHeader).ToString(), CompareAllPublicProperties },
                 { typeof(JwtPayload).ToString(), CompareAllPublicProperties },
                 { typeof(JwtSecurityToken).ToString(), CompareAllPublicProperties },
@@ -499,6 +503,22 @@ namespace Microsoft.IdentityModel.Tests
             {
                 localContext.Diffs.Add("Count:");
                 localContext.Diffs.Add($"a1.Count != a2.Count. '{a1.Count}' : '{a2.Count}'");
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreJObjectsEqual(Object object1, Object object2, CompareContext context)
+        {
+            var a1 = (JObject)object1;
+            var a2 = (JObject)object2;
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(a1, a2, localContext))
+                return context.Merge(localContext);
+
+            if (!JToken.DeepEquals(a1,a2))
+            {
+                localContext.Diffs.Add($"JObjects are not equal.");
             }
 
             return context.Merge(localContext);

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json.Linq;
@@ -34,7 +35,8 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
+    /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
+    /// Currently only supports tokens in JWS format.
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
@@ -42,8 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS Compact serialized format.</param>
-        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>
+        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null or empty.</exception>
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
         /// <remarks>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
@@ -53,17 +54,17 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw new ArgumentNullException(nameof(jwtEncodedString));
 
-            int count = 0;
+            int count = 1;
             int next = -1;
             while ((next = jwtEncodedString.IndexOf('.', next + 1)) != -1)
             {
                 count++;
-                if (count > 5)
+                if (count >= JwtConstants.JwsSegmentCount)
                     break;
             }
 
-            // JWS or JWE
-            if (count == 2 || count == 5)
+            // JWS
+            if (count == JwtConstants.JwsSegmentCount)
             {
                 var tokenParts = jwtEncodedString.Split('.');
                 Decode(tokenParts, jwtEncodedString);
@@ -74,8 +75,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload. The jwtEncodedString is the result of those operations.
         /// </summary>
-        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT</param>
-        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }</param>
+        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
+        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
         public JsonWebToken(JObject header, JObject payload)
@@ -107,12 +108,11 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 if (Payload != null)
                 {
                     var value = Payload.GetValue(JwtRegisteredClaimNames.Aud);
-                    var stringValue = value.ToObject<string>();
-                    if (stringValue != null)
-                        return new List<string> { stringValue };
-                    var listValue = value as IEnumerable<string>;
-                    if (listValue != null)
-                        return listValue;
+
+                    if (value.Type is JTokenType.String)
+                        return new List<string> { value.ToObject<string>() };
+                    else if (value.Type is JTokenType.Array)
+                        return value.ToObject<List<string>>();
                 }
 
                 return new List<string>();
@@ -130,25 +130,25 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 string issuer = this.Issuer ?? ClaimsIdentity.DefaultIssuer;
 
                 // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
-                foreach (var jProperty in Payload)
+                foreach (var entry in Payload)
                 {
-                    if (jProperty.Value == null)
+                    if (entry.Value == null)
                     {
-                        claims.Add(new Claim(jProperty.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
+                        claims.Add(new Claim(entry.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
                         continue;
                     }
 
-                    var claimValue = jProperty.Value.ToObject<string>();
-                    if (jProperty.Value.Type.Equals(typeof(string)))
+                    if (entry.Value.Type is JTokenType.String)
                     {
-                        claims.Add(new Claim(jProperty.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
+                        var claimValue = entry.Value.ToObject<string>();
+                        claims.Add(new Claim(entry.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
                         continue;
                     }
 
-                    var jtoken = jProperty.Value;
+                    var jtoken = entry.Value;
                     if (jtoken != null)
                     {
-                        AddClaimsFromJToken(claims, jProperty.Key, jtoken, issuer);
+                        AddClaimsFromJToken(claims, entry.Key, jtoken, issuer);
                         continue;
                     }
 
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'iat' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime IssuedAt => Payload.Value<DateTime?>(JwtRegisteredClaimNames.Iat) ?? DateTime.MinValue;
+        public DateTime IssuedAt => GetDateTime(JwtRegisteredClaimNames.Iat);
 
         /// <summary>
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
@@ -241,13 +241,13 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidFrom => Payload.Value<DateTime?>(JwtRegisteredClaimNames.Nbf) ?? DateTime.MinValue;
+        public override DateTime ValidFrom => GetDateTime(JwtRegisteredClaimNames.Nbf);
 
         /// <summary>
         /// Gets the 'value' of the 'exp' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidTo => Payload.Value<DateTime?>(JwtRegisteredClaimNames.Exp) ?? DateTime.MinValue;
+        public override DateTime ValidTo => GetDateTime(JwtRegisteredClaimNames.Exp);
 
         /// <summary>
         /// Gets the 'value' of the 'x5t' claim { x5t, 'value' }.
@@ -278,19 +278,17 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             else
                 Header = header;
            
-            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
-                DecodeJws(tokenParts);
-                
+            DecodeJws(tokenParts); 
             EncodedToken = rawData;
         }
 
         private void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
-            if (jtoken.Type == JTokenType.Object)
+            if (jtoken.Type is JTokenType.Object)
             {
                 claims.Add(new Claim(claimType, jtoken.ToString(Newtonsoft.Json.Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
             }
-            else if (jtoken.Type == JTokenType.Array)
+            else if (jtoken.Type is JTokenType.Array)
             {
                 var jarray = jtoken as JArray;
                 foreach (var item in jarray)
@@ -325,7 +323,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             {
                 // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
                 // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type == JTokenType.String)
+                if (jvalue.Type is JTokenType.String)
                     claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
                 else
                     claims.Add(new Claim(claimType, jtoken.ToString(Newtonsoft.Json.Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
@@ -390,6 +388,47 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 return JsonClaimValueTypes.JsonArray;
 
             return objType.ToString();
-        }     
+        }
+
+        /// <summary>
+        /// Gets the DateTime using the number of seconds from 1970-01-01T0:0:0Z (UTC)
+        /// </summary>
+        /// <param name="key">Claim in the payload that should map to an integer, float, or string.</param>
+        /// <remarks>If the claim is not found, the function returns: DateTime.MinValue
+        /// </remarks>
+        /// <exception cref="FormatException">If the value of the claim cannot be parsed into a long.</exception>
+        /// <returns>The DateTime representation of a claim.</returns>
+        private DateTime GetDateTime(string key)
+        {
+            JToken jToken;
+            if (!Payload.TryGetValue(key, out jToken))
+                return DateTime.MinValue;
+
+            long dateValue = ParseTimeValue(jToken, key);
+
+            var secondsAfterBaseTime = Convert.ToInt64(Math.Truncate(Convert.ToDouble(dateValue, CultureInfo.InvariantCulture)));
+            return EpochTime.DateTime(secondsAfterBaseTime);
+        }
+
+        private long ParseTimeValue(JToken jToken, string claimName)
+        {
+            if (jToken.Type == JTokenType.Integer || jToken.Type == JTokenType.Float)
+            {
+                return (long)jToken;
+            }
+            else if (jToken.Type == JTokenType.String)
+            {
+                if (long.TryParse((string)jToken, out long resultLong))
+                    return resultLong;
+
+                if (float.TryParse((string)jToken, out float resultFloat))
+                    return (long)resultFloat;
+
+                if (double.TryParse((string)jToken, out double resultDouble))
+                    return (long)resultDouble;
+            }
+
+            throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, claimName, jToken.ToString(), typeof(long))));
+        }
     }
 }
