@@ -837,6 +837,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory{ CacheSignatureProviders = false };
 
+        public ICryptoProvider CustomCryptoProvider { get; set; }
+
+        public HashAlgorithm HashAlgorithm { get; set; }
+
+        public KeyWrapProvider KeyWrapProvider { get; set; }
+
+        public RsaKeyWrapProvider RsaKeyWrapProvider { get; set; }
+
         public bool ShouldFindSignSignatureProvider { get; set; }
 
         public bool ShouldFindVerifySignatureProvider { get; set; }

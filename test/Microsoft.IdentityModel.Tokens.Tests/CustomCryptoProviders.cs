@@ -56,6 +56,10 @@ namespace Microsoft.IdentityModel.Tests
         public IList<string> AdditionalHashAlgorithms { get; private set; } = new List<string>();
 
         public HashAlgorithm HashAlgorithm { get; set; }
+        
+        public KeyWrapProvider KeyWrapProvider { get; set; }
+
+        public RsaKeyWrapProvider RsaKeyWrapProvider { get; set; }
 
         public bool IsSupportedResult { get; set; } = false;
 
@@ -68,6 +72,7 @@ namespace Microsoft.IdentityModel.Tests
         public object Create(string algorithm, params object[] args)
         {
             CreateCalled = true;
+            
             if (IsHashAlgorithm(algorithm))
                 return HashAlgorithm;
             else
