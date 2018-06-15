@@ -455,12 +455,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData))]
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
-            IdentityModelEventSource.ShowPII = true;
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
             var cryptoProviderFactory = new CryptoProviderFactory();
             try
-            {
+            { if (theoryData.CustomCryptoProvider != null)
+                    cryptoProviderFactory.CustomCryptoProvider = theoryData.CustomCryptoProvider;
                 cryptoProviderFactory.ReleaseSignatureProvider(theoryData.SigningSignatureProvider);
+                if (theoryData.CustomCryptoProvider != null && theoryData.SigningSignatureProvider != null && !((CustomCryptoProvider)theoryData.CustomCryptoProvider).ReleaseCalled)
+                    context.Diffs.Add("Release wasn't called on the CustomCryptoProvider.");
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -477,6 +479,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var cache = new InMemoryCryptoProviderCache();
                 var asymmetricSignatureProvider = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
+                var asymmetricSignatureProviderToRelease = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true);
                 var symmetricSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true) { ThrowOnDispose = new InvalidOperationException() };
                 var asymmetricSignatureProviderCached = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
                 var symmetricSignatureProviderCached = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true) { ThrowOnDispose = new InvalidOperationException() };
@@ -507,6 +510,194 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         SigningSignatureProvider = symmetricSignatureProviderCached,
                         TestId = "Release4"
+                    },
+                    new SignatureProviderTheoryData
+                    {
+                       CustomCryptoProvider = new CustomCryptoProvider(new string[] {"RS256"})
+                       {
+                           SignatureProvider = asymmetricSignatureProviderToRelease
+                       },
+                       SigningSignatureProvider = asymmetricSignatureProviderToRelease,
+                       TestId = "CustomCryptoProviderRelease"
+                    },
+                    new SignatureProviderTheoryData
+                    {
+                       ExpectedException = EE.ArgumentNullException(),
+                       CustomCryptoProvider = new CustomCryptoProvider(new string[] {"RS256"})
+                       {
+                           SignatureProvider = asymmetricSignatureProviderToRelease
+                       },
+                       SigningSignatureProvider = null,
+                       TestId = "CustomCryptoProviderRelease - SignatureProvider null"
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReleaseHashAlgorithmsTheoryData))]
+        public void ReleaseHashAlgorithms(CryptoProviderFactoryTheoryData theoryData)
+        {
+            IdentityModelEventSource.ShowPII = true;
+            var context = TestUtilities.WriteHeader($"{this}.ReleaseHashAlgorithms", theoryData);
+            var cryptoProviderFactory = theoryData.CryptoProviderFactory;
+            try
+            {
+                cryptoProviderFactory.ReleaseHashAlgorithm(theoryData.HashAlgorithm);
+                if (theoryData.CustomCryptoProvider != null && theoryData.HashAlgorithm != null && !((CustomCryptoProvider)theoryData.CustomCryptoProvider).ReleaseCalled)
+                    context.Diffs.Add("Release wasn't called on the CustomCryptoProvider.");
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CryptoProviderFactoryTheoryData> ReleaseHashAlgorithmsTheoryData
+        {
+            get
+            {
+                var customCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.Sha256 })
+                {
+                    HashAlgorithm = Default.HashAlgorithm
+                };
+                var cryptoProviderFactory = new CryptoProviderFactory() { CustomCryptoProvider = customCryptoProvider };
+ 
+                var theoryData = new TheoryData<CryptoProviderFactoryTheoryData>
+                {
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       First = true,
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       HashAlgorithm = (HashAlgorithm) cryptoProviderFactory.CreateHashAlgorithm(SecurityAlgorithms.Sha256),
+                       TestId = "CustomCryptoProviderRelease"
+                    },
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       ExpectedException = EE.ArgumentNullException(),
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       HashAlgorithm = null,
+                       TestId = "CustomCryptoProviderRelease - HashAlgorithm null"
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReleaseKeyWrapProvidersTheoryData))]
+        public void ReleaseKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
+        {
+            IdentityModelEventSource.ShowPII = true;
+            var context = TestUtilities.WriteHeader($"{this}.ReleaseKeyWrapProviders", theoryData);
+            var cryptoProviderFactory = theoryData.CryptoProviderFactory;
+            try
+            {
+                cryptoProviderFactory.ReleaseKeyWrapProvider(theoryData.KeyWrapProvider);
+                if (theoryData.CustomCryptoProvider != null && theoryData.KeyWrapProvider != null && !((CustomCryptoProvider)theoryData.CustomCryptoProvider).ReleaseCalled)
+                    context.Diffs.Add("Release wasn't called on the CustomCryptoProvider.");
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CryptoProviderFactoryTheoryData> ReleaseKeyWrapProvidersTheoryData
+        {
+            get
+            {
+                SecurityKey key = Default.SymmetricEncryptionKey128;
+                var provider = key.CryptoProviderFactory.CreateKeyWrapProvider(key, SecurityAlgorithms.Aes128KW);
+                var customCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.Aes128KW })
+                {
+                    KeyWrapProvider = provider
+                };
+                var cryptoProviderFactory = new CryptoProviderFactory() { CustomCryptoProvider = customCryptoProvider };
+
+                var theoryData = new TheoryData<CryptoProviderFactoryTheoryData>
+                {
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       First = true,
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       KeyWrapProvider = provider,
+                       TestId = "CustomCryptoProviderRelease"
+                    },
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       ExpectedException = EE.ArgumentNullException(),
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       KeyWrapProvider = null,
+                       TestId = "CustomCryptoProviderRelease - KeyWrapProvider null"
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReleaseRsaKeyWrapProvidersTheoryData))]
+        public void ReleaseRsaKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
+        {
+            IdentityModelEventSource.ShowPII = true;
+            var context = TestUtilities.WriteHeader($"{this}.ReleaseRsaKeyWrapProviders", theoryData);
+            var cryptoProviderFactory = theoryData.CryptoProviderFactory;
+            try
+            {
+                cryptoProviderFactory.ReleaseKeyWrapProvider(theoryData.RsaKeyWrapProvider);
+                if (theoryData.CustomCryptoProvider != null && theoryData.RsaKeyWrapProvider != null && !((CustomCryptoProvider)theoryData.CustomCryptoProvider).ReleaseCalled)
+                    context.Diffs.Add("Release wasn't called on the CustomCryptoProvider.");
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CryptoProviderFactoryTheoryData> ReleaseRsaKeyWrapProvidersTheoryData
+        {
+            get
+            {
+                SecurityKey key = Default.SymmetricEncryptionKey128;
+                var provider = (RsaKeyWrapProvider) key.CryptoProviderFactory.CreateKeyWrapProvider(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaPKCS1);
+                var customCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.RsaPKCS1 })
+                {
+                    RsaKeyWrapProvider = provider
+                };
+                var cryptoProviderFactory = new CryptoProviderFactory() { CustomCryptoProvider = customCryptoProvider };
+
+                var theoryData = new TheoryData<CryptoProviderFactoryTheoryData>
+                {
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       First = true,
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       RsaKeyWrapProvider = provider,
+                       TestId = "CustomCryptoProviderRelease"
+                    },
+                    new CryptoProviderFactoryTheoryData
+                    {
+                       ExpectedException = EE.ArgumentNullException(),
+                       CustomCryptoProvider = customCryptoProvider,
+                       CryptoProviderFactory = cryptoProviderFactory,
+                       RsaKeyWrapProvider = null,
+                       TestId = "CustomCryptoProviderRelease - RsaKeyWrapProvider null"
                     }
                 };
 

@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// Constants for Json Web Tokens.
     /// </summary>
     public static class JwtConstants
     {

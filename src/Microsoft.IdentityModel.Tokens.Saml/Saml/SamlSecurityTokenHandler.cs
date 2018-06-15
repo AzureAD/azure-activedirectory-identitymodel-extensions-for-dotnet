@@ -1144,7 +1144,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns>A <see cref="ClaimsPrincipal"/> generated from the claims in the Saml securityToken.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">if 'securityToken.Length' $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             if (string.IsNullOrWhiteSpace(token))

@@ -30,23 +30,25 @@ using System.Security.Cryptography;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Crypto operations
+    /// Provides extensibility for cryptographic operators.
+    /// If custom operators are needed for then <see cref="CryptoProviderFactory.CustomCryptoProvider"/> can be set to
+    /// return these operators. <see cref="CryptoProviderFactory.CustomCryptoProvider"/> will be before each creation.
     /// </summary>
     public interface ICryptoProvider
     {
         /// <summary>
-        /// Called to determine if a cryptoType is supported.
+        /// Called to determine if a cryptographic operation is supported.
         /// </summary>
-        /// <param name="algorithm">the algorithm that defines the crypto operator.</param>
-        /// <param name="args">the arguments required by the cryptoType. May be null.</param>
+        /// <param name="algorithm">the algorithm that defines the cryptographic operator.</param>
+        /// <param name="args">the arguments required by the cryptographic operator. May be null.</param>
         /// <returns>true if supported</returns>
         bool IsSupportedAlgorithm(string algorithm, params object[] args);
 
         /// <summary>
-        /// returns an object of cryptoType.
+        /// returns a cryptographic operator that supports the algorithm.
         /// </summary>
-        /// <param name="algorithm">the algorithm that defines the crypto operator.</param>
-        /// <param name="args">the arguments required by the cryptoType. May be null.</param>
+        /// <param name="algorithm">the algorithm that defines the cryptographic operator.</param>
+        /// <param name="args">the arguments required by the cryptographic operator. May be null.</param>
         /// <remarks>call <see cref="ICryptoProvider.Release(object)"/> when finished with the object.</remarks>
         object Create(string algorithm, params object[] args);
 

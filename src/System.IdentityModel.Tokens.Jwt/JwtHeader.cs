@@ -86,14 +86,16 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             else
             {
-                string outboundAlg;
-                if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out outboundAlg))
+                if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out string outboundAlg))
                     Alg = outboundAlg;
                 else
                     Alg = signingCredentials.Algorithm;
 
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
                     Kid = signingCredentials.Key.KeyId;
+
+                if (signingCredentials is X509SigningCredentials x509SigningCredentials)
+                    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
             }
 
             Typ = JwtConstants.HeaderType;

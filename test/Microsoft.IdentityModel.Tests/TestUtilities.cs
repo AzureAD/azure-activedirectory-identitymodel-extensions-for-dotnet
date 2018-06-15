@@ -409,6 +409,14 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static void CheckForArgumentNull(CompareContext context, string name, Exception ex)
+        {
+            if (ex == null)
+                context.Diffs.Add($"expecting ArgumentNullException for parameter {name}. Exception is null.");
+            else if (!(ex is ArgumentNullException) || !ex.Message.Contains(name))
+                context.Diffs.Add($"!(ex is ArgumentNullException) || !ex.Message.Contains({name})");
+        }
+
         public static byte[] HexToByteArray(string hexString)
         {
             byte[] bytes = new byte[hexString.Length / 2];
@@ -444,15 +452,24 @@ namespace Microsoft.IdentityModel.Tests
             Console.WriteLine(">>>> " + testcase);
         }
 
-        public static void WriteHeader(string testcase, string variation, bool first)
-        {
-            WriteHeader($"{testcase} : {variation}", first);
-        }
-
         public static CompareContext WriteHeader(string testcase, TheoryDataBase theoryData)
         {
             WriteHeader($"{testcase} : {theoryData.TestId}", theoryData.First);
+
             return new CompareContext($"{testcase} : {theoryData.TestId}", theoryData);
+        }
+
+        public static CompareContext WriteHeader(string testcase, string testId, bool first)
+        {
+
+            if (first)
+                Console.WriteLine("====================================");
+
+            Console.WriteLine($">>>> {testcase}, Id: {testId}.");
+            return new CompareContext
+            {
+                Title = $"{testcase} : {testId}"
+            };
         }
 
         public static void WriteHeader(string testcase)

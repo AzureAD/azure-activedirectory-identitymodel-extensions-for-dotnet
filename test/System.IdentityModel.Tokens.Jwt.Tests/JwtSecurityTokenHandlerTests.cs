@@ -743,7 +743,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             var theoryData = new TheoryData<JwtTheoryData>();
 
-            JwtTestData.InvalidRegExSegmentsData("IDX12709:", theoryData);
+            JwtTestData.InvalidRegExSegmentsDataForReadToken("IDX12709:", theoryData);
             JwtTestData.InvalidNumberOfSegmentsData("IDX12709:", theoryData);
             JwtTestData.InvalidEncodedSegmentsData("", theoryData);
             JwtTestData.ValidEncodedSegmentsData(theoryData);
@@ -1340,7 +1340,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12709:"),
+                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12741:"),
                         TestId = "Token = Guid().NewGuid().ToString()",
                         Token = Guid.NewGuid().ToString(),
                         ValidationParameters = new TokenValidationParameters()

@@ -815,7 +815,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
+                        ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == 'None'",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
@@ -825,7 +825,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
+                        ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
@@ -835,7 +835,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
+                        ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == string.empty",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {

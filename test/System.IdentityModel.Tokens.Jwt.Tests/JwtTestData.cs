@@ -106,7 +106,113 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        public static TheoryData<JwtTheoryData> InvalidRegExSegmentsData(string errorString, TheoryData<JwtTheoryData> theoryData)
+        public static TheoryData<JwtTheoryData> InvalidRegExSegmentsData(TheoryData<JwtTheoryData> theoryData)
+        {
+            var validRegEx = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9";
+            var invalidRegEx = "eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1Z CI6Imh0";
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: first position'",
+                Token = invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: second position'",
+                Token = validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position'",
+                Token = validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fourth position'",
+                Token = validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position'",
+                Token = validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: first position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (dir)'",
+                Token = validRegEx + ".." + invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fourth position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position (dir)'",
+                Token = invalidRegEx + ".." + validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12740:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: first position (dir, Cipher text missing)'",
+                Token = invalidRegEx + "." + validRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (dir, Cipher text missing)'",
+                Token = validRegEx + "." + invalidRegEx + "." + validRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: third position (four parts)'",
+                Token = validRegEx + "." + invalidRegEx + ".",
+                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'invalidRegEx: fifth position (dir, Cipher text missing)'",
+                Token = validRegEx + "." + validRegEx + "." + invalidRegEx,
+                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
+                TestId = "'Encoding == SignedEncodedJwts.Asymmetric_LocalSts'",
+                Token = "SignedEncodedJwts.Asymmetric_LocalSts",
+                ExpectedException = ExpectedException.ArgumentException("IDX12741:")
+            });
+
+            return theoryData;
+        }
+
+        public static TheoryData<JwtTheoryData> InvalidRegExSegmentsDataForReadToken(string errorString, TheoryData<JwtTheoryData> theoryData)
         {
             var validRegEx = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9";
             var invalidRegEx = "eyJpc3MiOiJodHRwOi8vR290Snd0LmNvbSIsImF1Z CI6Imh0";
