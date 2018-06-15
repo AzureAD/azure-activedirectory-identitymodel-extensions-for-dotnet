@@ -1,29 +1,29 @@
 param(
-    [string]$build="YES",
     [string]$buildType="Debug",
     [string]$dotnetDir="c:\Program Files\dotnet",
-    [string]$clean="YES",
-    [string]$restore="YES",
+    [string]$msbuildDir="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
-    [string]$pack="YES",
-    [string]$updateAssemblyInfo="YES",
     [string]$slnFile="wilson.sln")
 
 ################################################# Functions ############################################################
 
 function WriteSectionHeader($sectionName)
 {
+    $startTime = Get-Date -DisplayHint Time
     Write-Host ""
     Write-Host "============================"
     Write-Host $sectionName
+    Write-Host "Start Time:     "  $startTime
     Write-Host ""
 }
 
 function WriteSectionFooter($sectionName)
 {
+    $startTime = Get-Date -DisplayHint Time
     Write-Host ""
+    Write-Host "End Time:     "  $startTime
     Write-Host $sectionName
     Write-Host "============================"
     Write-Host ""
@@ -38,39 +38,31 @@ function RemoveFolder($folder)
     }
 }
 
-function CreateFolder($path)
+function CreateArtifactsRoot($folder)
 {
-    if (!(Test-Path $path))
-    {
-        Write-Host ">>> mkdir $path | Out-Null"
-        mkdir $path | Out-Null
-    }
+    RemoveFolder($folder)
+    Write-Host ">>> mkdir $folder | Out-Null"
+    mkdir $folder | Out-Null
 }
 
 ################################################# Functions ############################################################
 
 WriteSectionHeader("build.ps1 - parameters");
-Write-Host "build:              " $build;
-Write-Host "buildType:          " $buildType;
-Write-Host "dotnetDir:          " $dotnetDir
-Write-Host "clean:              " $clean;
-Write-Host "restore:            " $restore;
-Write-Host "root:               " $root;
-Write-Host "runTests:           " $runTests;
-Write-Host "failBuildOnTest:    " $failBuildOnTest;
-Write-Host "pack:               " $pack;
-Write-Host "updateAssemblyInfo: " $updateAssemblyInfo
-Write-Host "slnFile:            " $slnFile;
+Write-Host "buildType:       " $buildType;
+Write-Host "dotnetDir:       " $dotnetDir
+Write-Host "root:            " $root;
+Write-Host "runTests:        " $runTests;
+Write-Host "failBuildOnTest: " $failBuildOnTest;
+Write-Host "slnFile:         " $slnFile;
 WriteSectionFooter("End build.ps1 - parameters");
-
 
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $artifactsRoot = "$root\artifacts";
 $dotnetexe = "$dotnetDir\dotnet.exe";
+$msbuildexe = "$msbuildDir\msbuild.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
-$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/releaseVersion").InnerText;
+$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/release").InnerText;
 $nugetPreview = $buildConfiguration.SelectSingleNode("root/nugetPreview").InnerText;
-$rootNode = $buildConfiguration.root
 
 WriteSectionHeader("Environment");
 $startTime = Get-Date
@@ -78,6 +70,7 @@ Write-Host "Start Time:     " $startTime
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "artifactsRoot:  " $artifactsRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
+Write-Host "msbuildexe:     " $msbuildexe;
 Write-Host "nugetVersion:   " $nugetVersion;
 Write-Host "releaseVersion: " $releaseVersion;
 Write-Host "nugetPreview:   " $nugetPreview;
@@ -85,110 +78,59 @@ WriteSectionFooter("End Environment");
 
 $ErrorActionPreference = "Stop"
 
-if ($clean -eq "YES")
-{
-    WriteSectionHeader("Clean");
+WriteSectionHeader("Build");
 
-    $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-    foreach($project in $projects) {
-        $name = $project.name;
-        RemoveFolder("$root\src\$name\bin");
-        RemoveFolder("$root\src\$name\obj");
-    }
-
-    $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects) {
-        $name = $testProject.name;
-        RemoveFolder("$root\test\$name\bin");
-        RemoveFolder("$root\test\$name\obj");
-    }
-
-    RemoveFolder($artifactsRoot);
-
-    WriteSectionFooter("End Clean");
+$projects = $buildConfiguration.SelectNodes("root/projects/src/project");
+foreach($project in $projects) {
+	$name = $project.name;
+	RemoveFolder("$root\src\$name\bin");
+	RemoveFolder("$root\src\$name\obj");
 }
 
-if ($build -eq "YES")
-{
-    WriteSectionHeader("Build");
-    CreateFolder($artifactsRoot);
-
-    $date = Get-Date
-    $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
-    if ($nugetPreview -eq "")
-    {
-        $versionProps = "<Project><PropertyGroup><VersionPrefix>"+$releaseVersion+"</VersionPrefix><VersionSuffix></VersionSuffix></PropertyGroup></Project>"
-    }
-    else
-    {
-        $versionProps = "<Project><PropertyGroup><VersionPrefix>"+$releaseVersion+"</VersionPrefix><VersionSuffix>" + $nugetPreview + "-$dateTimeStamp" + "</VersionSuffix></PropertyGroup></Project>"
-    }
-
-    Set-Content "build\dynamicVersion.props" $versionProps;
-
-    if ($updateAssemblyInfo -eq "YES")
-    {
-        $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-        $additionFileInfo = $releaseVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD);
-        $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
-        $fileVersion = $releaseVersion + "." + $dateTimeStamp;
-        foreach($project in $projects)
-        {
-            $name = $project.name;
-            $assemblyInformationalRegex = "AssemblyInformationalVersion(.*)"
-            $assemblyInformationalVersion = "AssemblyInformationalVersion(""$additionFileInfo"")]"
-            $assemblyFileVersionRegex = "AssemblyFileVersion(.*)"
-            $assemblyFileVersion = "AssemblyFileVersion(""$fileVersion"")]"
-            Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
-            Write-Host "assemblyFileVersion: " $assemblyFileVersion
-
-            $assemblyInfoPath = "$root\src\$name\properties\assemblyinfo.cs";
-            $content = Get-Content $assemblyInfoPath;
-            $content = $content -replace $assemblyInformationalRegex, $assemblyInformationalVersion;
-            $content = $content -replace $assemblyFileVersionRegex, $assemblyFileVersion;
-            Set-Content $assemblyInfoPath $content
-        }
-    }
-
-    Write-Host ""
-    Write-Host ">>> Start-Process -Wait  -PassThru $dotnetexe 'build' -c $buildType -v m /p:SourceLinkCreate=true $root\$slnFile"
-    Write-Host ""
-    Start-Process -Wait -PassThru $dotnetexe "build -c $buildType -v m /p:SourceLinkCreate=true $root\$slnFile"
-
-    WriteSectionFooter("End Build");
+$testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
+foreach ($testProject in $testProjects) {
+	$name = $testProject.name;
+	RemoveFolder("$root\test\$name\bin");
+	RemoveFolder("$root\test\$name\obj");
 }
 
-if ($pack -eq "YES")
+CreateArtifactsRoot($artifactsRoot);
+
+pushd
+Set-Location $root
+Write-Host ""
+Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /verbosity:m /p:Configuration=$buildType $slnFile"
+Write-Host ""
+Write-Host "msbuildexe: " $msbuildexe
+Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /verbosity:m /p:Configuration=$buildType $slnFile"
+popd
+
+foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
-    WriteSectionHeader("Pack");
-    CreateFolder($artifactsRoot);
-
-    foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
-    {
-        $name = $project.name;
-        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-        Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -s --include-symbols -v q $root\src\$name\$name.csproj"
-    }
-
-    WriteSectionFooter("End Pack");
+	$name = $project.name;
+	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+	Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
 }
+
+WriteSectionFooter("End Build");
 
 if ($runTests -eq "YES")
 {
+    WriteSectionHeader("Run Tests");
+
     $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
     foreach ($testProject in $testProjects)
     {
         if ($testProject.test -eq "YES")
         {
-            $name = $testProject.name;
-            WriteSectionHeader("Test - " + $name);
+            WriteSectionHeader("Test");
 
+            $name = $testProject.name;
             Write-Host ">>> Set-Location $root\test\$name"
             pushd
-
             Set-Location $root\test\$name
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test' --no-build --no-restore -c $buildType -v q '$name.csproj'"
-            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test --no-build --no-restore -c $buildType -v q $name.csproj"
+            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj'--no-build --no-restore -v q -c $buildType"
+            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --no-build --no-restore -v q -c $buildType"
 
             if($p.ExitCode -ne 0)
             {
@@ -201,14 +143,15 @@ if ($runTests -eq "YES")
                     $failedTestProjects = "$failedTestProjects, $name"
                 }
             }
-
             $testExitCode = $p.ExitCode + $testExitCode
 
             popd
 
-            WriteSectionFooter("End Test - " + $name);
+            WriteSectionFooter("End Test");
         }
     }
+
+    WriteSectionFooter("End Tests");
 
     if($testExitCode -ne 0)
     {
@@ -221,6 +164,7 @@ if ($runTests -eq "YES")
         }
     }
 }
+
 
 Write-Host "============================"
 Write-Host ""
