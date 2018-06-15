@@ -152,6 +152,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var token = new JwtSecurityToken(claims: Default.Claims, signingCredentials: credentials);
             Assert.Equal(jsonWebKey.Kid, token.Header.Kid);
         }
+
+        // Test checks to make sure that GetStandardClaim() returns null (not "null") if the value associated with the claimType parameter is null.
+        [Fact]
+        public void GetStandardClaimNull()
+        {
+            var jwtHeader = new JwtHeader();
+            jwtHeader[JwtHeaderParameterNames.Kid] = null;
+            var kid = jwtHeader.Kid;
+            Assert.True(kid == null);
+        }
     }
 
     public class JwtHeaderTheoryData : TheoryDataBase

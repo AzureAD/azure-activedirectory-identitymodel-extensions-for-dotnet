@@ -289,20 +289,19 @@ namespace System.IdentityModel.Tokens.Jwt
         }
         /// <summary>
         /// Gets a standard claim from the header.
-        /// A standard cliam is either a string or a value of another type serialized in JSON format.
+        /// A standard claim is either a string or a value of another type serialized in JSON format.
         /// </summary>
         /// <param name="claimType">The key of the claim.</param>
         /// <returns>The standard claim string; or null if not found.</returns>
         internal string GetStandardClaim(string claimType)
         {
-            object value = null;
-            if (TryGetValue(claimType, out value))
+            if (TryGetValue(claimType, out object value))
             {
-                string str = value as string;
-                if (str != null)
-                {
+                if (value == null)
+                    return null;
+
+                if (value is string str)
                     return str;
-                }
 
                 return JsonExtensions.SerializeToJson(value);
             }
