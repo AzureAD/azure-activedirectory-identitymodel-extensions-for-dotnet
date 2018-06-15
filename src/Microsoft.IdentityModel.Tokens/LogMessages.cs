@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
-        public const string IDX10501 = "IDX10501: Signature validation failed. Unable to match keys: '{0}', \ntoken: '{1}'.";
+        public const string IDX10501 = "IDX10501: Signature validation failed. Unable to match keys: \nkid: '{0}', \ntoken: '{1}'.";
         public const string IDX10503 = "IDX10503: Signature validation failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
         public const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
@@ -93,6 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10508 = "IDX10508: Signature validation failed. Signature is improperly formatted.";
         public const string IDX10509 = "IDX10509: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters did not return a '{0}', but returned a '{1}' when reading token: '{2}'.";
         public const string IDX10510 = "IDX10510: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters returned null when reading token: '{0}'.";
+        public const string IDX10511 = "IDX10511: Signature validation failed. Keys tried: '{0}'. \nkid: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'.";
 
         // encryption / decryption
         public const string IDX10600 = "IDX10600: Decryption failed. There are no security keys for decryption.";

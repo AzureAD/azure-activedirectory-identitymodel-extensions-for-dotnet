@@ -931,7 +931,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     return jwtToken;
             }
 
-            bool keyMatched = false;           
+            bool kidMatched = false;           
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -942,7 +942,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 var key = ResolveIssuerSigningKey(token, jwtToken, validationParameters);
                 if (key != null)
                 {
-                    keyMatched = true;
+                    kidMatched = true;
                     keys = new List<SecurityKey> { key };
                 }
             }
@@ -959,7 +959,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
-            bool canMatchKey = !string.IsNullOrEmpty(jwtToken.Header.Kid);
+            bool kidExists = !string.IsNullOrEmpty(jwtToken.Header.Kid);
             byte[] signatureBytes;
 
             try
@@ -990,19 +990,25 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (key != null)
                 {
                     keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (canMatchKey && !keyMatched && key.KeyId != null)
-                        keyMatched = jwtToken.Header.Kid.Equals(key.KeyId, StringComparison.Ordinal);
+                    if (kidExists && !kidMatched && key.KeyId != null)
+                        kidMatched = jwtToken.Header.Kid.Equals(key.KeyId, StringComparison.Ordinal);
                 }
             }
 
-            // if the kid != null and the signature fails, throw SecurityTokenSignatureKeyNotFoundException
-            if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, jwtToken)));
-
-            if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
-
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
+            if (kidExists)
+            {
+                if (kidMatched) 
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                else 
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, jwtToken)));
+            }
+            else
+            {
+                if (keysAttempted.Length > 0) 
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
+                else 
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
+            }
         }
 
         private IEnumerable<SecurityKey> GetAllSigningKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
