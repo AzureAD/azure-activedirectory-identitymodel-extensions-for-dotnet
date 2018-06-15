@@ -401,12 +401,36 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
-                Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
                 DigestValue = _referenceDigestValue,
                 TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
                 Type = ReferenceType,
-                Uri = ReferenceUri
+                Uri = ReferenceUriWithPrefix
+            };
+        }
+
+        public static Reference ReferenceWithId
+        {
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            {
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Id = ReferenceId,
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
+                Uri = ReferenceUriWithPrefix
+            };
+        }
+
+        public static Reference ReferenceWithoutPrefix
+        {
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            {
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
+                Uri = ReferenceUriWithOutPrefix
             };
         }
 
@@ -414,13 +438,12 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
-                Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
                 DigestValue = _referenceDigestValue,
                 Prefix = "ds",
                 TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
                 Type = ReferenceType,
-                Uri = ReferenceUri
+                Uri = ReferenceUriWithPrefix
             };
         }
 
@@ -428,11 +451,21 @@ namespace Microsoft.IdentityModel.Tests
         {
             get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
-                Id = ReferenceId,
                 DigestMethod = ReferenceDigestMethod,
                 DigestValue = _referenceDigestValue,
                 Type = ReferenceType,
-                Uri = ReferenceUri
+                Uri = ReferenceUriWithPrefix
+            };
+        }
+        public static Reference ReferenceWithNullTokenStreamAndId
+        {
+            get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
+            {
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                Id = ReferenceId,
+                Type = ReferenceType,
+                Uri = ReferenceUriWithPrefix
             };
         }
 
@@ -445,7 +478,7 @@ namespace Microsoft.IdentityModel.Tests
                 DigestValue = _referenceDigestValue,
                 Prefix = "ds",
                 Type = ReferenceType,
-                Uri = ReferenceUri
+                Uri = ReferenceUriWithPrefix
             };
         }
 
@@ -475,9 +508,14 @@ namespace Microsoft.IdentityModel.Tests
             get => "http://referenceType";
         }
 
-        public static string ReferenceUri
+        public static string ReferenceUriWithOutPrefix
         {
-            get => "http://referenceUri";
+            get => "004C0989-1E55-4DA8-A5E6-794F7ECF0131";
+        }
+
+        public static string ReferenceUriWithPrefix
+        {
+            get => "#004C0989-1E55-4DA8-A5E6-794F7ECF0131";
         }
 
         public static string RoleClaimType
@@ -650,7 +688,35 @@ namespace Microsoft.IdentityModel.Tests
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfo,
-                    SignatureValue = "biUXAYkV/sx8E7B/0POdk4J5LDkgsRLqHwZDvlJOHSDrsKuGlAlg6+oCfuV14j7uNGu/NSoOFavDSXuS9tJNAxGfeWuy3AOOeXqG+VtJY+cEJtw2WpjSs9xVc3aP58OM/x2phYOZ60Gp4h+mjjG76q7NSAoPrqaVTpw67efbB30pvPSLqTTYdXSOodcKBS25fmEFLraHvWnxAyvFCqbteIOcuOeCDL68dTcqTwVXSZIfeU3Xz8dztA7S4+DuIVuPyEFz9oV3ku8LaNfBO1Zu+v76bZMvLy2iBWhH756UILSLgEndFEOVeAb/PDzXqhwAU4NCUOeNe2WBE6nttNKmXQ=="
+                    SignatureValue = "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA=="
+                };
+                return signature;
+            }
+        }
+
+        public static Signature SignatureReferenceWithoutPrefix
+        {
+            get
+            {
+                var signature = new Signature
+                {
+                    KeyInfo = KeyInfo,
+                    SignedInfo = SignedInfoReferenceWithoutPrefix,
+                    SignatureValue = "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA=="
+                };
+                return signature;
+            }
+        }
+
+        public static Signature SignatureReferenceWithId
+        {
+            get
+            {
+                var signature = new Signature
+                {
+                    KeyInfo = KeyInfo,
+                    SignedInfo = SignedInfoReferenceWithId,
+                    SignatureValue = "fqbb3WVUTLu/ihWXHUYgPWO5rgnm9AuwAT8YeiWiood/z+ObWpTwxs42be4HIDac9U94hR05rfLOR+0WxmlzhJp7/fye50VHMKex5kAAp9aCMAzCvDkfNzhMUN3WOHGEFOs4tmxrR0TBV6j+KNnjyDs3AUtdzZnZB+QmOJAlZubdOzWk/D0CGSXSgMmqYgmvH/GZGQWxQtbGMFuB29VCR7moegGN/9VAo/K7Z22xmfUWNKWVHB0OUC8FI36sadVnnUvcKnUo3M3pnQwbEWYz/+rMSYYrboM4dOKEqxZCgFXKou08Pz0MtNe2VwketLbJrKSmuEJOgVnXrzPTwlVSpw=="
                 };
                 return signature;
             }
@@ -680,6 +746,24 @@ namespace Microsoft.IdentityModel.Tests
         public static SignedInfo SignedInfo
         {
             get => new SignedInfo(Reference)
+            {
+                CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
+                SignatureMethod = SecurityAlgorithms.RsaSha256Signature
+            };
+        }
+
+        public static SignedInfo SignedInfoReferenceWithoutPrefix
+        {
+            get => new SignedInfo(ReferenceWithoutPrefix)
+            {
+                CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
+                SignatureMethod = SecurityAlgorithms.RsaSha256Signature
+            };
+        }
+
+        public static SignedInfo SignedInfoReferenceWithId
+        {
+            get => new SignedInfo(ReferenceWithId)
             {
                 CanonicalizationMethod = SecurityAlgorithms.ExclusiveC14n,
                 SignatureMethod = SecurityAlgorithms.RsaSha256Signature
@@ -956,5 +1040,10 @@ namespace Microsoft.IdentityModel.Tests
             get => (new JwtSecurityTokenHandler()).CreateEncodedJwt(Issuer, Audience, ClaimsIdentity, null, null, null, null);
         }
 #endif
+        public static string Uri
+        {
+            get => "http://referenceUri";
+        }
+
     }
 }

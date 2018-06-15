@@ -887,7 +887,7 @@ namespace Microsoft.IdentityModel.Tests
                                     Default.ReferencePrefix + ":",
                                     Default.ReferenceId,
                                     Default.ReferenceType,
-                                    Default.ReferenceUri,
+                                    Default.ReferenceUriWithPrefix,
                                     SecurityAlgorithms.EnvelopedSignature,
                                     SecurityAlgorithms.ExclusiveC14n,
                                     Default.ReferenceDigestMethod,
@@ -994,7 +994,7 @@ namespace Microsoft.IdentityModel.Tests
                                 "ds:",
                                 Default.ReferenceId,
                                 Default.ReferenceType,
-                                Default.ReferenceUri,
+                                Default.ReferenceUriWithPrefix,
                                 unknownTransform,
                                 SecurityAlgorithms.ExclusiveC14n,
                                 SecurityAlgorithms.Sha256Digest,
@@ -1086,31 +1086,46 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        public static ReferenceTestSet ReferenceWithNoUriIdWithPound
+        public static ReferenceTestSet ReferenceWithId
         {
             get
             {
                 return new ReferenceTestSet
                 {
                     Reference = new Reference() { Id = "#test", DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
-                    TestId = nameof(ReferenceWithNoUriIdWithPound),
-                    Xml = @"<Reference Id=""test"" URI=""#test"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>"
+                    TestId = nameof(ReferenceWithId),
+                    Xml = @"<Reference Id=""#test"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>"
                 };
             }
         }
 
-        public static ReferenceTestSet ReferenceWithNoUriIdWithoutPound
+        public static ReferenceTestSet ReferenceWithIdAndUri
         {
             get
             {
                 return new ReferenceTestSet
                 {
-                    Reference = new Reference() { Id = "test", DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
-                    TestId = nameof(ReferenceWithNoUriIdWithoutPound),
-                    Xml = @"<Reference Id=""test"" URI=""#test"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>"
+                    Reference = new Reference() { Id = Default.ReferenceId, Uri = Default.ReferenceUriWithPrefix, DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
+                    TestId = nameof(ReferenceWithIdAndUri),
+                    Xml = string.Format(@"<Reference Id=""{0}"" URI=""{1}"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>", Default.ReferenceId, Default.ReferenceUriWithPrefix)
                 };
             }
         }
+
+        // The reason for this version, is so that we test outbound URI without a # will be written with the #
+        public static ReferenceTestSet ReferenceWithIdAndUriWithoutPrefix
+        {
+            get
+            {
+                return new ReferenceTestSet
+                {
+                    Reference = new Reference() { Id = Default.ReferenceId, Uri = Default.ReferenceUriWithOutPrefix, DigestMethod = Default.ReferenceDigestMethod, DigestValue = Default.ReferenceDigestValue },
+                    TestId = nameof(ReferenceWithIdAndUri),
+                    Xml = string.Format(@"<Reference Id=""{0}"" URI=""{1}"" xmlns=""http://www.w3.org/2000/09/xmldsig#""><Transforms/><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256""/><DigestValue>rMea6HlsYH8lHYR11ouxgmyzb39HY1YE07J/1Dyqimw=</DigestValue></Reference>", Default.ReferenceId, Default.ReferenceUriWithPrefix)
+                };
+            }
+        }
+
     }
 
     public class TransformsTestSet : XmlTestSet

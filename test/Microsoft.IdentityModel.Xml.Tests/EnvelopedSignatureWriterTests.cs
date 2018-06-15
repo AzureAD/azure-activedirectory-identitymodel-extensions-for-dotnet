@@ -117,8 +117,16 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 {
                     new EnvelopedSignatureTheoryData
                     {
-                        ReferenceId = Default.ReferenceUri,
+                        ReferenceId = Default.ReferenceUriWithPrefix,
                         SigningCredentials = Default.AsymmetricSigningCredentials,
+                        TestId = nameof(ReferenceTokens.Saml2Token_Valid2) + "1",
+                        Xml =  ReferenceTokens.Saml2Token_Valid2
+                    },
+                    new EnvelopedSignatureTheoryData
+                    {
+                        ReferenceId = Default.ReferenceUriWithOutPrefix,
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        TestId = nameof(ReferenceTokens.Saml2Token_Valid2) + "2",
                         Xml =  ReferenceTokens.Saml2Token_Valid2
                     }
                 };

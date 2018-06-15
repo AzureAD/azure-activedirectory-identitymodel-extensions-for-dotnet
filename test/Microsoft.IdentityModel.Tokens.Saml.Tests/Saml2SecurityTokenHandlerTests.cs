@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 theoryData.Add(CreateAttributeTheoryData(attribute, "Name, Value"));
 
                 attribute = Default.Saml2AttributeSingleValue;
-                attribute.NameFormat = new Uri(Default.ReferenceUri);
+                attribute.NameFormat = new Uri(Default.Uri);
                 theoryData.Add(CreateAttributeTheoryData(attribute, "NameFormat"));
 
                 attribute = Default.Saml2AttributeSingleValue;
