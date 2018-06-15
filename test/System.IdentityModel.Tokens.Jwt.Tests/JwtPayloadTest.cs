@@ -479,6 +479,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             jwtPayload2 = JwtPayload.Base64UrlDeserialize(jwtPayload2.Base64UrlEncode());
             IdentityComparer.AreEqual(jwtPayload1, jwtPayload2, context);
         }
+
+        // Test checks to make sure that GetStandardClaim() returns null (not "null") if the value associated with the claimType parameter is null.
+        [Fact]
+        public void GetStandardClaimNull()
+        {
+            var jwtPayload = new JwtPayload();
+            jwtPayload[JwtRegisteredClaimNames.Iss] = null;
+            var issuer = jwtPayload.Iss;
+            Assert.True(issuer == null);
+        }
     }
 }
 
