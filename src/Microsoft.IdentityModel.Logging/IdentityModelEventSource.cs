@@ -357,13 +357,27 @@ namespace Microsoft.IdentityModel.Logging
         
         private string PrepareMessage(EventLevel level, string message, params object[] args)
         {
-            if (message == null)
+           if (message == null)
+            {
                 return string.Empty;
-
-            if (args != null && args.Length > 0)
-                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), FormatInvariant(message, args));
-
-            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
+            }
+            try
+            {
+                if (args != null)
+                    message = LogHelper.FormatInvariant(message, args);
+            }
+            catch (Exception)
+            {
+                //Do nothing
+            }
+            try
+            {
+                return LogHelper.FormatInvariant("[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
+            }
+            catch (Exception)
+            {
+                return level + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + message;
+            }
         }
     }
 }
