@@ -308,14 +308,15 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
             if (!string.IsNullOrEmpty(jwtToken.Kid))
             {
                 string kid = jwtToken.Kid;
-                if (validationParameters.IssuerSigningKey != null && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, StringComparison.Ordinal))
+                if (validationParameters.IssuerSigningKey != null 
+                    && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                     return validationParameters.IssuerSigningKey;
 
                 if (validationParameters.IssuerSigningKeys != null)
                 {
                     foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, StringComparison.Ordinal))
+                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                         {
                             return signingKey;
                         }
@@ -328,11 +329,11 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 string x5t = jwtToken.X5t;
                 if (validationParameters.IssuerSigningKey != null)
                 {
-                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, StringComparison.Ordinal))
+                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                         return validationParameters.IssuerSigningKey;
 
                     X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
-                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.Ordinal))
+                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
                         return validationParameters.IssuerSigningKey;
                 }
 
@@ -340,7 +341,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 {
                     foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
+                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                         {
                             return signingKey;
                         }
@@ -537,7 +538,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 {
                     keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
                     if (kidExists && !kidMatched && key.KeyId != null)
-                        kidMatched = jwtToken.Kid.Equals(key.KeyId, StringComparison.Ordinal);
+                        kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                 }
             }
 
