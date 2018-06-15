@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens
         public CryptoProviderFactory CryptoProviderFactory { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> which used for signature validation.
+        /// Gets the <see cref="SecurityKey"/> used for signature creation or validation.
         /// </summary>
         public SecurityKey Key
         {

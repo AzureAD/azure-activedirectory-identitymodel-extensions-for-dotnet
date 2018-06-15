@@ -35,12 +35,10 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Creates <see cref="SignatureProvider"/>s by specifying a <see cref="SecurityKey"/> and algorithm.
-    /// <para>Supports both <see cref="AsymmetricSecurityKey"/> and <see cref="SymmetricSecurityKey"/>.</para>
+    /// Creates cryptographic operators by specifying a <see cref="SecurityKey"/>'s and algorithms.
     /// </summary>
     public class CryptoProviderFactory
     {
-        private CryptoProviderCache _cryptoProviderCache = new InMemoryCryptoProviderCache();
         private static CryptoProviderFactory _default;
         private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
 
@@ -92,13 +90,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get => _cryptoProviderCache; }
+        public CryptoProviderCache CryptoProviderCache { get; } = new InMemoryCryptoProviderCache();
 
         /// <summary>
-        /// Extensibility point for custom crypto support application wide.
+        /// Extensibility point for creating custom cryptographic operators.
         /// </summary>
-        /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> will be called before crypto operations.
-        /// If true is returned, then this will be called for operations.</remarks>
+        /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> will be called before creating cryptographic operators.
+        /// If true is returned, then <see cref="ICryptoProvider.Create(string, object[])"/> will be called. The <see cref="CryptoProviderFactory"/> will throw if the
+        /// Cryptographic operator returned is not of the correct type.</remarks>
         public ICryptoProvider CustomCryptoProvider { get; set; }
 
         /// <summary>
@@ -167,8 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willUnwrap))
             {
-                KeyWrapProvider keyWrapProvider = CustomCryptoProvider.Create(algorithm, key, willUnwrap) as KeyWrapProvider;
-                if (keyWrapProvider == null)
+                if (!(CustomCryptoProvider.Create(algorithm, key, willUnwrap) is KeyWrapProvider keyWrapProvider))
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10646, algorithm, key, typeof(SignatureProvider))));
 
                 return keyWrapProvider;
@@ -355,7 +353,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return signatureProvider;
             }
 
-            // types are checked in order of expected occurance
+            // types are checked in order of expected occurrence
             string typeofSignatureProvider = null;
             bool createAsymmetric = true;
             if (key is AsymmetricSecurityKey asymmetricSecurityKey)
@@ -387,7 +385,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (CacheSignatureProviders)
             {
-                if (_cryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
                     return signatureProvider;
             }
 
@@ -400,7 +398,7 @@ namespace Microsoft.IdentityModel.Tokens
                 signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
             if (CacheSignatureProviders)
-                _cryptoProviderCache.TryAdd(signatureProvider);
+                CryptoProviderCache.TryAdd(signatureProvider);
 
             return signatureProvider;
         }
@@ -408,7 +406,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Answers if an algorithm is supported
         /// </summary>
-        /// <param name="algorithm">the name of the crypto algorithm</param>
+        /// <param name="algorithm">the name of the cryptographic algorithm</param>
         /// <returns></returns>
         public virtual bool IsSupportedAlgorithm(string algorithm)
         {
