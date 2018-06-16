@@ -366,8 +366,8 @@ namespace Microsoft.IdentityModel.Logging
                 //Handle format exception
                 format = format.Replace("{", "{{").Replace("}", "}}");
                 var regex = new Regex("{{\\d+}}");
-                var matches = regex.Matches(format);
-                format = matches.Cast<Match>().Aggregate(format, (current, match) => current.Replace(match.Value, match.Value.Substring(1, match.Value.Length - 2)));
+                var matches = regex.Matches(format).Cast<Match>().Select(x => x.Value).Distinct().ToList();
+                format = matches.Aggregate(format, (current, match) => current.Replace(match, match.Substring(1, match.Length - 2)));
                 //Handle index out of range exception
                 //Adding extra string.Empty in end, won't be an issue for string.Format
                 if (args == null || args.Length < matches.Count)
