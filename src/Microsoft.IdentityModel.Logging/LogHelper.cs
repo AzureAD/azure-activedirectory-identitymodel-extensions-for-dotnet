@@ -368,16 +368,16 @@ namespace Microsoft.IdentityModel.Logging
                 var regex = new Regex("{{\\d+}}");
                 var matches = regex.Matches(format).Cast<Match>().Select(x => x.Value).Distinct().ToList();
                 format = matches.Aggregate(format, (current, match) => current.Replace(match, match.Substring(1, match.Length - 2)));
-                //Handle index out of range exception
-                //Adding extra string.Empty in end, won't be an issue for string.Format
-                if (args == null || args.Length < matches.Count)
+                //Handle index out of range exception                
+                var argCount = matches.Select(x => { int value; return int.TryParse(x.Trim('{', '}'), out value) ? value : 0; }).Max() + 1;
+                if (args == null || args.Length < argCount)
                 {
-                    var argsList = new List<object>(matches.Count);
+                    var argsList = new List<object>(argCount);
                     if (args != null)
                     {
                         argsList.AddRange(args);
                     }
-                    for (var count = argsList.Count; count < matches.Count; count++)
+                    for (var count = argsList.Count; count < argCount; count++)
                     {
                         argsList.Add(string.Empty);
                     }
