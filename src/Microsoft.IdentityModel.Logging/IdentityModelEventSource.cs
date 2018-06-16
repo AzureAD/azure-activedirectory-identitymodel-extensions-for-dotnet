@@ -360,10 +360,26 @@ namespace Microsoft.IdentityModel.Logging
             if (message == null)
                 return string.Empty;
 
-            if (args != null && args.Length > 0)
-                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), FormatInvariant(message, args));
+            try
+            {
+                if (args != null && args.Length > 0)
+                    return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), FormatInvariant(message, args));
 
-            return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
+                return string.Format(CultureInfo.InvariantCulture, "[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
+            }
+            catch
+            {
+
+            }
+
+            try
+            {
+                return LogHelper.FormatInvariant("[{0}]{1} {2}", level.ToString(), DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), message);
+            }
+            catch (Exception)
+            {
+                return level + DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + message;
+            }
         }
     }
 }

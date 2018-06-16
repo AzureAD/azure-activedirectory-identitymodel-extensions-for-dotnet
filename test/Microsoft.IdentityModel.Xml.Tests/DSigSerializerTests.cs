@@ -208,6 +208,24 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     }
                 };
 
+                signature = Default.SignatureReferenceWithId;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStreamAndId;
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = nameof(Default.SignatureReferenceWithId),
+                    Xml = XmlGenerator.Generate(Default.SignatureReferenceWithId),
+                });
+
+                signature = Default.Signature;
+                signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
+                theoryData.Add(new DSigSerializerTheoryData
+                {
+                    Signature = signature,
+                    TestId = nameof(Default.Signature) + "ReferenceWithoutPrefix",
+                    Xml = XmlGenerator.Generate(Default.SignatureReferenceWithoutPrefix),
+                });
+
                 signature = Default.Signature;
                 signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
                 signature.SignedInfo.References[0].DigestMethod = $"_{SecurityAlgorithms.Sha256Digest}";
@@ -549,13 +567,26 @@ namespace Microsoft.IdentityModel.Xml.Tests
         [Theory, MemberData(nameof(WriteReferenceTheoryData))]
         public void WriteReference(DSigSerializerTheoryData theoryData)
         {
-            var ms = new MemoryStream();
-            var writer = XmlDictionaryWriter.CreateTextWriter(ms);
-            theoryData.Serializer.WriteReference(writer, theoryData.Reference);
-            writer.Flush();
-            var xml = Encoding.UTF8.GetString(ms.ToArray());
+            var context = TestUtilities.WriteHeader($"{this}.WriteReference", theoryData);
 
-            IdentityComparer.AreEqual(theoryData.Xml, xml);
+            try
+            {
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms);
+                theoryData.Serializer.WriteReference(writer, theoryData.Reference);
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+
+                IdentityComparer.AreEqual(theoryData.Xml, xml, context);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch(Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DSigSerializerTheoryData> WriteReferenceTheoryData
@@ -567,8 +598,9 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 return new TheoryData<DSigSerializerTheoryData>
                 {
-                    ReferenceTest(ReferenceTestSet.ReferenceWithNoUriIdWithPound),
-                    ReferenceTest(ReferenceTestSet.ReferenceWithNoUriIdWithoutPound)
+                    ReferenceTest(ReferenceTestSet.ReferenceWithId),
+                    ReferenceTest(ReferenceTestSet.ReferenceWithIdAndUri),
+                    ReferenceTest(ReferenceTestSet.ReferenceWithIdAndUriWithoutPrefix)
                 };
             }
         }

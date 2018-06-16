@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Xml
         private int _elementCount;
         private string _inclusiveNamespacesPrefixList;
         private XmlWriter _originalWriter;
-        private string _referenceId;
+        private string _referenceUri;
         private long _signaturePosition;
         private SigningCredentials _signingCredentials;
         private MemoryStream _writerStream;
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(referenceId));
 
             _inclusiveNamespacesPrefixList = inclusivePrefixList;
-            _referenceId = referenceId;
+            _referenceUri = referenceId;
             _writerStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
             InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
                 {
-                    Id = _referenceId,
+                    Uri = _referenceUri,
                     DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
                     DigestMethod = _signingCredentials.Digest
                 };

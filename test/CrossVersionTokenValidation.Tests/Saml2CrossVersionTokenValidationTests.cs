@@ -275,10 +275,10 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                 {
                     SigningCredentials = signingCredentials
                 };
-                samlAssertion_AuthorizationDecision.Statements.Add(new Saml2AuthorizationDecisionStatement4x(new Uri(Default.ReferenceUri), System.IdentityModel.Tokens.SamlAccessDecision.Permit));
+                samlAssertion_AuthorizationDecision.Statements.Add(new Saml2AuthorizationDecisionStatement4x(new Uri(Default.Uri), System.IdentityModel.Tokens.SamlAccessDecision.Permit));
 
                 var token4x_AuthorizationDecisionStatement = CrossVersionUtility.CreateSaml2Token4x(tokenDescriptor4x) as Saml2SecurityToken4x;
-                token4x_AuthorizationDecisionStatement.Assertion.Statements.Add(new Saml2AuthorizationDecisionStatement4x(new Uri(Default.ReferenceUri), System.IdentityModel.Tokens.SamlAccessDecision.Permit, new List<Saml2Action4x> { new Saml2Action4x("value", new Uri(Default.ReferenceUri)) }));
+                token4x_AuthorizationDecisionStatement.Assertion.Statements.Add(new Saml2AuthorizationDecisionStatement4x(new Uri(Default.Uri), System.IdentityModel.Tokens.SamlAccessDecision.Permit, new List<Saml2Action4x> { new Saml2Action4x("value", new Uri(Default.Uri)) }));
                 var samlToken = CrossVersionUtility.WriteSaml2Token(token4x_AuthorizationDecisionStatement);
 
                 var validationParameters4x = new TokenValidationParameters4x

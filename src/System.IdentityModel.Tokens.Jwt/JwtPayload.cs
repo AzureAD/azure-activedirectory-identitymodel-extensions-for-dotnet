@@ -583,14 +583,13 @@ namespace System.IdentityModel.Tokens.Jwt
 
         internal string GetStandardClaim(string claimType)
         {
-            object value = null;
-            if (TryGetValue(claimType, out value))
+            if (TryGetValue(claimType, out object value))
             {
-                string str = value as string;
-                if (str != null)
-                {
+                if (value == null)
+                    return null;
+
+                if (value is string str)
                     return str;
-                }
 
                 return JsonExtensions.SerializeToJson(value);
             }

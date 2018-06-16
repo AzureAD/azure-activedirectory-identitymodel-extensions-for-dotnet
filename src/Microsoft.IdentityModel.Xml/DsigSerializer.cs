@@ -742,12 +742,12 @@ namespace Microsoft.IdentityModel.Xml
 
             // @Uri
             if (reference.Uri != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Uri);
-            else if (reference.Id != null)
-                if (reference.Id.StartsWith("#", StringComparison.Ordinal))
-                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Id);
+            {
+                if (reference.Uri.StartsWith("#", StringComparison.Ordinal))
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, reference.Uri);
                 else
-                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, "#" + reference.Id);
+                    writer.WriteAttributeString(XmlSignatureConstants.Attributes.URI, null, "#" + reference.Uri);
+            }
 
             // @Type
             if (reference.Type != null)

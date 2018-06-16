@@ -1156,14 +1156,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10500:"),
                         TestId = "SigningKey and SigningKeys both null",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(null, null)
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10500:"),
                         TestId = "SigningKeys empty",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(null, new List<SecurityKey>())
@@ -1269,7 +1269,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 validationParameters.CryptoProviderFactory = new CustomCryptoProviderFactory() { SigningSignatureProvider = new CustomSignatureProvider(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256) { VerifyResult = false } };
                 theoryData.Add(new JwtTheoryData
                 {
-                    ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                    ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
                     TestId = $"{nameof(validationParameters.CryptoProviderFactory)} : returns false",
                     Token = Default.AsymmetricJwt,
                     ValidationParameters = validationParameters
