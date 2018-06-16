@@ -336,10 +336,59 @@ namespace Microsoft.IdentityModel.Logging
         /// <returns>Formatted string.</returns>
         public static string FormatInvariant(string format, params object[] args)
         {
-            if (!IdentityModelEventSource.ShowPII)
-                return string.Format(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray()); 
-
-            return string.Format(CultureInfo.InvariantCulture, format, args);
+            try
+            {
+                if (!IdentityModelEventSource.ShowPII)
+                    return string.Format(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray());
+                return string.Format(CultureInfo.InvariantCulture, format, args);
+            }
+            catch (Exception)
+            {
+                if (!IdentityModelEventSource.ShowPII)
+                    return SafeStringFormat(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray());
+                return SafeStringFormat(CultureInfo.InvariantCulture, format, args);
+            }
+        }
+        
+        public static string SafeStringFormat(CultureInfo cultureInfo, string format, params object[] args)
+        {
+            try
+            {
+                if (!IdentityModelEventSource.ShowPII && args!=null)
+                {
+                    args = args.Select(RemovePII).ToArray();
+                }
+                cultureInfo = cultureInfo ?? CultureInfo.InvariantCulture;
+                if (format == null)
+                {
+                    return string.Empty;
+                }
+                //Handle format exception
+                format = format.Replace("{", "{{").Replace("}", "}}");
+                var regex = new Regex("{{\\d+}}");
+                var matches = regex.Matches(format);
+                format = matches.Cast<Match>().Aggregate(format, (current, match) => current.Replace(match.Value, match.Value.Substring(1, match.Value.Length - 2)));
+                //Handle index out of range exception
+                //Adding extra string.Empty in end, won't be an issue for string.Format
+                if (args == null || args.Length < matches.Count)
+                {
+                    var argsList = new List<object>(matches.Count);
+                    if (args != null)
+                    {
+                        argsList.AddRange(args);
+                    }
+                    for (var count = argsList.Count; count < matches.Count; count++)
+                    {
+                        argsList.Add(string.Empty);
+                    }
+                    args = argsList.ToArray();
+                }
+                return string.Format(cultureInfo, format, args);
+            }
+            catch (Exception)
+            {
+                return format;
+            }
         }
 
         private static string RemovePII(object arg)
