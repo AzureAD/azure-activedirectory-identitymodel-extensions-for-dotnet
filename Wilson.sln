@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Log
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.IdentityModel.Tokens.Jwt.Tests", "test\System.IdentityModel.Tokens.Jwt.Tests\System.IdentityModel.Tokens.Jwt.Tests.csproj", "{74BA9664-7B6E-4215-914A-6A901327202D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Jwt.Tests", "test\Microsoft.IdentityModel.Tokens.Jwt.Tests\Microsoft.IdentityModel.Tokens.Jwt.Tests.csproj", "{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.JsonWebTokens.Tests", "test\Microsoft.IdentityModel.JsonWebTokens.Tests\Microsoft.IdentityModel.JsonWebTokens.Tests.csproj", "{C17B04FB-2BB2-4189-BEFD-1CC81A0DF697}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols", "src\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj", "{B5416A2F-9918-44C0-9178-D25E89976A75}"
 EndProject
@@ -62,9 +62,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrossVersionTokenValidation
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiChangeTest", "test\ApiChangeTest\ApiChangeTest.csproj", "{3EF9B56A-33C9-423A-A744-80AA102CECEB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Jwt", "src\Microsoft.IdentityModel.Tokens.Jwt\Microsoft.IdentityModel.Tokens.Jwt.csproj", "{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.JsonWebTokens", "src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj", "{DBF58792-25DF-4B6E-866C-77A0BC5AB81B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Tokens461.Tests", "test\Microsoft.IdentityModel.Tokens461.Tests\Microsoft.IdentityModel.Tokens461.Tests.csproj", "{9E037DAD-79BB-4163-AE11-2F6DD941C977}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens461.Tests", "test\Microsoft.IdentityModel.Tokens461.Tests\Microsoft.IdentityModel.Tokens461.Tests.csproj", "{9E037DAD-79BB-4163-AE11-2F6DD941C977}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossVersionTokenValidation.Tests", "test\CrossVersionTokenValidation.Tests\CrossVersionTokenValidation.Tests.csproj", "{7E7CCB59-541E-48DA-9044-2D6C4AD8E509}"
 EndProject

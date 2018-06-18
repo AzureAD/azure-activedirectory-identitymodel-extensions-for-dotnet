@@ -25,73 +25,61 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// List of header parameter names see: http://tools.ietf.org/html/rfc7519#section-5.
+    /// Constants for Json Web Tokens.
     /// </summary>
-    public struct JwtHeaderParameterNames
+    public static class JwtConstants
     {
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.1
+        /// Short header type.
         /// </summary>
-        public const string Alg = "alg";
+        public const string HeaderType = "JWT";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.10
-        /// also:https://tools.ietf.org/html/rfc7519#section-5.2
+        /// Long header type.
         /// </summary>
-        public const string Cty = "cty";
+        public const string HeaderTypeAlt = "http://openid.net/specs/jwt/1.0";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7516#section-4.1.2
+        /// Short token type.
         /// </summary>
-        public const string Enc = "enc";
+        public const string TokenType = "JWT";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7518#section-4.7.1.1
+        /// Long token type.
         /// </summary>
-        public const string IV = "iv";
+        public const string TokenTypeAlt = "urn:ietf:params:oauth:token-type:jwt";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.2
+        /// JWS - Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
         /// </summary>
-        public const string Jku = "jku";
+        public const string JsonCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.3
+        /// JWE - Token format: 'protectedheader.encryptedkey.iv.cyphertext.authenticationtag'.
         /// </summary>
-        public const string Jwk = "jwk";
+        public const string JweCompactSerializationRegex = @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$";
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.4
+        /// The number of parts in a JWE token.
         /// </summary>
-        public const string Kid = "kid";
+        public const int JweSegmentCount = 5;
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.9
-        /// also:https://tools.ietf.org/html/rfc7519#section-5.1
+        /// The number of parts in a JWS token.
         /// </summary>
-        public const string Typ = "typ";
+        public const int JwsSegmentCount = 3;
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.6
+        /// The maximum number of parts in a JWT.
         /// </summary>
-        public const string X5c = "x5c";
+        public const int MaxJwtSegmentCount = 5;
 
         /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#page-12
+        /// JWE header alg indicating a shared symmetric key is directly used as CEK.
         /// </summary>
-        public const string X5t = "x5t";
-
-        /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7515#section-4.1.5
-        /// </summary>
-        public const string X5u = "x5u";
-
-        /// <summary>
-        /// see:https://tools.ietf.org/html/rfc7516#section-4.1.3
-        /// </summary>
-        public const string Zip = "zip";
+        public const string DirectKeyUseAlg = "dir";
     }
 }

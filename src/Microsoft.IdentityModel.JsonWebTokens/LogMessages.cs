@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-// Microsoft.IdentityModel.Tokens.Jwt
+// Microsoft.IdentityModel.JsonWebTokens
 // Range: 14000 - 14999
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// Log messages and codes

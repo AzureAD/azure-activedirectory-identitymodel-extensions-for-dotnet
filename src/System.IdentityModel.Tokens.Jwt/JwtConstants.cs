@@ -35,51 +35,51 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Short header type.
         /// </summary>
-        public const string HeaderType = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.HeaderType;
+        public const string HeaderType = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.HeaderType;
 
         /// <summary>
         /// Long header type.
         /// </summary>
-        public const string HeaderTypeAlt = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.HeaderTypeAlt;
+        public const string HeaderTypeAlt = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.HeaderTypeAlt;
 
         /// <summary>
         /// Short token type.
         /// </summary>
-        public const string TokenType = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.TokenType;
+        public const string TokenType = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.TokenType;
 
         /// <summary>
         /// Long token type.
         /// </summary>
-        public const string TokenTypeAlt = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.TokenTypeAlt;
+        public const string TokenTypeAlt = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.TokenTypeAlt;
 
         /// <summary>
         /// JWS - Token format: 'header.payload.signature'. Signature is optional, but '.' is required.
         /// </summary>
-        public const string JsonCompactSerializationRegex = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JsonCompactSerializationRegex;
+        public const string JsonCompactSerializationRegex = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.JsonCompactSerializationRegex;
 
         /// <summary>
         /// JWE - Token format: 'protectedheader.encryptedkey.iv.cyphertext.authenticationtag'.
         /// </summary>
-        public const string JweCompactSerializationRegex = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JweCompactSerializationRegex;
+        public const string JweCompactSerializationRegex = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.JweCompactSerializationRegex;
 
         /// <summary>
         /// The number of parts in a JWE token.
         /// </summary>
-        internal const int JweSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JweSegmentCount;
+        internal const int JweSegmentCount = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.JweSegmentCount;
 
         /// <summary>
         /// The number of parts in a JWS token.
         /// </summary>
-        internal const int JwsSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.JwsSegmentCount;
+        internal const int JwsSegmentCount = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.JwsSegmentCount;
 
         /// <summary>
         /// The maximum number of parts in a JWT.
         /// </summary>
-        internal const int MaxJwtSegmentCount = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.MaxJwtSegmentCount;
+        internal const int MaxJwtSegmentCount = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.MaxJwtSegmentCount;
 
         /// <summary>
         /// JWE header alg indicating a shared symmetric key is directly used as CEK.
         /// </summary>
-        public const string DirectKeyUseAlg = Microsoft.IdentityModel.Tokens.Jwt.JwtConstants.DirectKeyUseAlg;
+        public const string DirectKeyUseAlg = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.DirectKeyUseAlg;
     }
 }
