@@ -46,7 +46,9 @@ namespace Microsoft.IdentityModel.Tokens
         private string _hashAlgorithm;
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
+        private RsaCngAdapter _rsaCngAdapter;
 #endif
+
         private bool _disposeRsa;
         private bool _disposeEcdsa;
         private bool _disposed;
@@ -203,9 +205,9 @@ namespace Microsoft.IdentityModel.Tokens
             var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
             if (rsaAlgorithm != null)
             {
-                if (rsaAlgorithm.rsa != null)
+                if (rsaAlgorithm.Rsa != null)
                 {
-                    _rsa = rsaAlgorithm.rsa;
+                    _rsa = rsaAlgorithm.Rsa;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
@@ -259,25 +261,25 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
-
             _hashAlgorithm = GetHashAlgorithmString(algorithm);
-            RsaAlgorithm rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
+            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
             if (rsaAlgorithm != null)
             {
-                if (rsaAlgorithm.rsaCryptoServiceProvider != null)
+                if (rsaAlgorithm.RsaCryptoServiceProvider != null)
                 {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
+                    _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
-                else if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
+                else if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
                 {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
+                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
+                    _disposeRsa = rsaAlgorithm.dispose;
+                    return;
+                }
+                if (rsaAlgorithm.RsaCngAdapter != null)
+                {
+                    _rsaCngAdapter = rsaAlgorithm.RsaCngAdapter;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
@@ -286,9 +288,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsaCng != null)
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
             {
-                _ecdsa = ecdsaAlgorithm.ecdsaCng;
+                _ecdsa = ecdsaAlgorithm.ecdsa as ECDsaCng;
                 _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
                 _disposeEcdsa = ecdsaAlgorithm.dispose;
                 return;
@@ -331,6 +333,8 @@ namespace Microsoft.IdentityModel.Tokens
                     return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
                 else if (_rsaCryptoServiceProviderProxy != null)
                     return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
+                else if (_rsaCngAdapter != null)
+                    return _rsaCngAdapter.Pkcs1SignData(input, _hashAlgorithm);
                 else if (_ecdsa != null)
                     return _ecdsa.SignData(input);
 #endif
@@ -341,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw;
             }
 
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, _hashAlgorithm)));
+            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10678, Algorithm, Key)));
         }
 
         /// <summary>
@@ -401,6 +405,8 @@ namespace Microsoft.IdentityModel.Tokens
                     return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
                 else if (_rsaCryptoServiceProviderProxy != null)
                     return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
+                else if (_rsaCngAdapter != null)
+                    return _rsaCngAdapter.Pkcs1VerifyData(input, signature, _hashAlgorithm);
                 else if (_ecdsa != null)
                     return _ecdsa.VerifyData(input, signature);
 #endif

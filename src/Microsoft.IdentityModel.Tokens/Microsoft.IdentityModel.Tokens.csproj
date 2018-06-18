@@ -41,6 +41,7 @@
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.3.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0-*" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0-*" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="4.3.0-*">
@@ -56,6 +57,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Refernece Include="System.Core" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">

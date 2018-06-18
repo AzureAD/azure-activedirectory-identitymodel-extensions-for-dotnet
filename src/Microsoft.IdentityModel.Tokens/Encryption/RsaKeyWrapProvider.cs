@@ -73,25 +73,25 @@ namespace Microsoft.IdentityModel.Tokens
             var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
 
 #if NETSTANDARD1_4
-            if (rsaAlgorithm != null && rsaAlgorithm.rsa != null)
+            if (rsaAlgorithm != null && rsaAlgorithm.Rsa != null)
             {
-                _rsa = rsaAlgorithm.rsa;
+                _rsa = rsaAlgorithm.Rsa;
                 _disposeRsa = rsaAlgorithm.dispose;
                 return;
             }
 #else
             if (rsaAlgorithm != null)
             {
-                if (rsaAlgorithm.rsaCryptoServiceProvider != null)
+                if (rsaAlgorithm.RsaCryptoServiceProvider != null)
                 {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.rsaCryptoServiceProvider;
+                    _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
 
-                if (rsaAlgorithm.rsaCryptoServiceProviderProxy != null)
+                if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
                 {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.rsaCryptoServiceProviderProxy;
+                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
                     _disposeRsa = rsaAlgorithm.dispose;
                     return;
                 }
