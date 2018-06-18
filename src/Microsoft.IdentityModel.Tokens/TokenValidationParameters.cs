@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for signature validation.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -520,7 +520,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a boolean to control if the original token should be saved after the security token is validated.
         /// </summary>
-        /// <remarks>The runtime will consult this value and save the orginal token that was validated.</remarks>
+        /// <remarks>The runtime will consult this value and save the original token that was validated.</remarks>
         [DefaultValue(false)]
         public bool SaveSigninToken
         {
@@ -552,7 +552,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that store tokens that can be checked to help detect token replay.
         /// </summary>
-        /// <remarks>If set, then tokens must have an expriation time or the runtime will fault.</remarks>
+        /// <remarks>If set, then tokens must have an expiration time or the runtime will fault.</remarks>
         public ITokenReplayCache TokenReplayCache
         {
             get;

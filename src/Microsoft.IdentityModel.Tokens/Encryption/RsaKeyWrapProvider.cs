@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         private RSACryptoServiceProvider _rsaCryptoServiceProvider;
         private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
 #endif
-        private bool _disposeRsa;
+        private bool _shouldDisposeRsa;
         private bool _disposed = false;
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (rsaAlgorithm != null && rsaAlgorithm.Rsa != null)
             {
                 _rsa = rsaAlgorithm.Rsa;
-                _disposeRsa = rsaAlgorithm.dispose;
+                _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                 return;
             }
 #else
@@ -85,14 +85,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (rsaAlgorithm.RsaCryptoServiceProvider != null)
                 {
                     _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
 
                 if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
                 {
                     _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
             }
@@ -127,10 +127,10 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
 #if NETSTANDARD1_4
-                    if (_rsa != null && _disposeRsa)
+                    if (_rsa != null && _shouldDisposeRsa)
                         _rsa.Dispose();
 #else
-                    if (_rsaCryptoServiceProvider != null && _disposeRsa)
+                    if (_rsaCryptoServiceProvider != null && _shouldDisposeRsa)
                         _rsaCryptoServiceProvider.Dispose();
 
                     if (_rsaCryptoServiceProviderProxy != null)

@@ -181,6 +181,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'input.Length' == 0. </exception>
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         /// <exception cref="InvalidOperationException"><see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <remarks>Sign is thread safe.</remarks>
         public override byte[] Sign(byte[] input)
         {
             if (input == null || input.Length == 0)
@@ -216,6 +217,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'signature.Length' == 0. </exception>
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         /// <exception cref="InvalidOperationException">If the internal <see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <remarks>Verify is thread safe.</remarks>
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null || input.Length == 0)

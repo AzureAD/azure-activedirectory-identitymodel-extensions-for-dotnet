@@ -49,8 +49,8 @@ namespace Microsoft.IdentityModel.Tokens
         private RsaCngAdapter _rsaCngAdapter;
 #endif
 
-        private bool _disposeRsa;
-        private bool _disposeEcdsa;
+        private bool _shouldDisposeRsa;
+        private bool _shouldDisposeEcdsa;
         private bool _disposed;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (rsaAlgorithm.Rsa != null)
                 {
                     _rsa = rsaAlgorithm.Rsa;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
 
@@ -216,10 +216,10 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             var ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ECDsa != null)
             {
-                _ecdsa = ecdsaAlgorithm.ecdsa;
-                _disposeEcdsa = ecdsaAlgorithm.dispose;
+                _ecdsa = ecdsaAlgorithm.ECDsa;
+                _shouldDisposeEcdsa = ecdsaAlgorithm.ShouldDispose;
                 return;
             }
 
@@ -268,19 +268,19 @@ namespace Microsoft.IdentityModel.Tokens
                 if (rsaAlgorithm.RsaCryptoServiceProvider != null)
                 {
                     _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
                 else if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
                 {
                     _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
                 if (rsaAlgorithm.RsaCngAdapter != null)
                 {
                     _rsaCngAdapter = rsaAlgorithm.RsaCngAdapter;
-                    _disposeRsa = rsaAlgorithm.dispose;
+                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
                     return;
                 }
                 else
@@ -288,11 +288,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ecdsa != null)
+            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ECDsa != null)
             {
-                _ecdsa = ecdsaAlgorithm.ecdsa as ECDsaCng;
+                _ecdsa = ecdsaAlgorithm.ECDsa as ECDsaCng;
                 _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
-                _disposeEcdsa = ecdsaAlgorithm.dispose;
+                _shouldDisposeEcdsa = ecdsaAlgorithm.ShouldDispose;
                 return;
             }
 
@@ -310,6 +310,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
         /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if the constructor parameter 'willBeUsedforSigning' was not 'true'.</exception>
         /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <remarks>Sign is thread safe.</remarks>
         public override byte[] Sign(byte[] input)
         {
             if (input == null || input.Length == 0)
@@ -379,6 +380,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
         /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if a derived type does not call the base constructor.</exception>
         /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
+        /// <remarks>Verify is thread safe.</remarks>
         public override bool Verify(byte[] input, byte[] signature)
         {
             if (input == null || input.Length == 0)
@@ -434,16 +436,16 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     CryptoProviderCache?.TryRemove(this);
 #if NETSTANDARD1_4
-                    if (_rsa != null && _disposeRsa)
+                    if (_rsa != null && _shouldDisposeRsa)
                         _rsa.Dispose();
 #else
-                    if (_rsaCryptoServiceProvider != null && _disposeRsa)
+                    if (_rsaCryptoServiceProvider != null && _shouldDisposeRsa)
                         _rsaCryptoServiceProvider.Dispose();
 
                     if (_rsaCryptoServiceProviderProxy != null)
                         _rsaCryptoServiceProviderProxy.Dispose();
 #endif
-                    if (_ecdsa != null && _disposeEcdsa)
+                    if (_ecdsa != null && _shouldDisposeEcdsa)
                         _ecdsa.Dispose();
                 }
             }

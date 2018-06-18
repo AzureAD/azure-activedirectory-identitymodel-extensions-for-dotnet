@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
         /// Gets and sets the maximum token size in bytes that will be processed.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public virtual int MaximumTokenSizeInBytes
+        internal virtual int MaximumTokenSizeInBytes
         {
             get { return _maximumTokenSizeInBytes; }
             set

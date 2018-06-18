@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -37,12 +36,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class ECDsaAlgorithm
     {
-//#if NETSTANDARD1_4
-//        public ECDsa ecdsa;
-//#else
-        public ECDsa ecdsa;
-//#endif
-        public bool dispose;
+        public ECDsa ECDsa;
+        public bool ShouldDispose;
 
         public static readonly Dictionary<string, int> DefaultECDsaKeySizeInBitsMap = new Dictionary<string, int>()
         {
@@ -57,6 +52,8 @@ namespace Microsoft.IdentityModel.Tokens
 
     internal class RsaAlgorithm
     {
+        public bool ShouldDispose;
+
 #if NETSTANDARD1_4
         public RsaAlgorithm(RSA rsa)
         {
@@ -86,7 +83,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         public RsaCngAdapter RsaCngAdapter { get; private set; }
 #endif
-        public bool dispose;
     }
 
     /// <summary>
@@ -345,21 +341,21 @@ namespace Microsoft.IdentityModel.Tokens
             {
 #if NETSTANDARD1_4
                 if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
-                    ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa;
+                    ecdsaAlgorithm.ECDsa = ecdsaKey.ECDsa;
 #else // net451 windows
                 if (ecdsaKey.ECDsa != null && ValidateECDSAKeySize(ecdsaKey.ECDsa.KeySize, algorithm))
-                    ecdsaAlgorithm.ecdsa = ecdsaKey.ECDsa as ECDsaCng;
+                    ecdsaAlgorithm.ECDsa = ecdsaKey.ECDsa as ECDsaCng;
 #endif
                 return ecdsaAlgorithm;
             }
 
             if (key is JsonWebKey webKey && webKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                ecdsaAlgorithm.dispose = true;
+                ecdsaAlgorithm.ShouldDispose = true;
 #if NETSTANDARD1_4
-                ecdsaAlgorithm.ecdsa = webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.ECDsa = webKey.CreateECDsa(algorithm, usePrivateKey);
 #else // net451 windows
-                ecdsaAlgorithm.ecdsa = (ECDsaCng)webKey.CreateECDsa(algorithm, usePrivateKey);
+                ecdsaAlgorithm.ECDsa = (ECDsaCng)webKey.CreateECDsa(algorithm, usePrivateKey);
 #endif
                 return ecdsaAlgorithm;
             }
@@ -396,7 +392,7 @@ namespace Microsoft.IdentityModel.Tokens
                     rsaCapiProvider.ImportParameters(rsaKey.Parameters);
                     var rsaAlgorithm = new RsaAlgorithm(new RSACryptoServiceProviderProxy(rsaCapiProvider));
 #endif
-                    rsaAlgorithm.dispose = true;
+                    rsaAlgorithm.ShouldDispose = true;
                     return rsaAlgorithm;
                 }
             }
@@ -426,7 +422,7 @@ namespace Microsoft.IdentityModel.Tokens
                 rsaCapiProvider.ImportParameters(webKey.CreateRsaParameters());
                 var rsaAlgorithm = new RsaAlgorithm(new RSACryptoServiceProviderProxy(rsaCapiProvider));
 #endif
-                rsaAlgorithm.dispose = true;
+                rsaAlgorithm.ShouldDispose = true;
                 return rsaAlgorithm;
             }
 
