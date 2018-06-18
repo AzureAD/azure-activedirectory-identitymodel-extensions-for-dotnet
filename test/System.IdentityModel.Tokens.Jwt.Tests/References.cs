@@ -513,6 +513,27 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 return (new JwtSecurityTokenHandler()).WriteToken(jwtToken);
             }
         }
+
+        public static string JwsKidLowercase
+        {
+            get
+            {
+                var jwtToken = new JwtSecurityToken
+                (
+                    Default.Issuer,
+                    Default.Audience,
+                    ClaimSets.Simple(Default.Issuer, Default.Issuer),
+                    DateTime.UtcNow,
+                    DateTime.UtcNow + TimeSpan.FromHours(10),
+                    KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2
+                );
+
+                jwtToken.Header[JwtHeaderParameterNames.Kid] = jwtToken.Header.Kid.ToLower();
+                jwtToken.Header[JwtHeaderParameterNames.X5t] = KeyingMaterial.DefaultCert_2048.Thumbprint;
+
+                return (new JwtSecurityTokenHandler()).WriteToken(jwtToken);
+            }
+        }
     }
 
     public static class Saml2SignedTokens

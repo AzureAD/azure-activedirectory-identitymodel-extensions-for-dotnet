@@ -1249,7 +1249,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         TestId = nameof(ValidationDelegates.IssuerSecurityKeyValidatorReturnsTrue),
                         Token = Default.AsymmetricJwt,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
-                    }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "TVP.IssuerSigningKey.KeyId is uppercase and the kid found in the token is lowercase",
+                        Token = EncodedJwts.JwsKidLowercase,
+                        ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultX509Key_2048, null)
+                    },
                 };
 
                 var expectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232:");
