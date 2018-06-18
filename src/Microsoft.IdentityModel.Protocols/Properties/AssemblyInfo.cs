@@ -29,9 +29,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyInformationalVersion("5.2.3.50508153617.6235ef34da5e31a65b7803d83a43667eca96b60b")]
-[assembly: AssemblyFileVersion("5.2.3.50508")]
+[assembly: AssemblyInformationalVersion("5.2.3")]
+[assembly: AssemblyFileVersion("5.2.3")]
 [assembly: AssemblyMetadata("Serviceable", "True")]
-[assembly: AssemblyVersion("5.2.2")]
+[assembly: AssemblyVersion("5.2.3")]
 [assembly: CLSCompliant(true)]
 [assembly: ComVisible(false)]
