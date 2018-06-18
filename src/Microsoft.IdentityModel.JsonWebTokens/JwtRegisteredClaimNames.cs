@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// List of registered claims from different sources

@@ -34,7 +34,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt

@@ -25,28 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json.Linq;
-using System.Collections.Concurrent;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
-    internal static class JsonWebTokenManager
+    /// <summary>
+    /// A class which contains the result of a token validation operation.
+    /// </summary>
+    public class TokenValidationResult
     {
-        internal static ConcurrentDictionary<string, string> KeyToHeaderCache = new ConcurrentDictionary<string, string>();
-        internal static ConcurrentDictionary<string, JObject> RawHeaderToJObjectCache = new ConcurrentDictionary<string, JObject>();
-
-        internal static string GetHeaderCacheKey(SecurityKey securityKey, string algorithm)
-        {
-            return $"{securityKey.GetType()}-{securityKey.KeyId}-{algorithm}";
-        }
-
-        internal static string GetHeaderCacheKey(SigningCredentials signingCredentials)
-        {
-            if (signingCredentials == null)
-                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
-
-            return GetHeaderCacheKey(signingCredentials.Key, signingCredentials.Algorithm);
-        }
+        /// <summary>
+        /// The validated security token.
+        /// </summary>
+        public SecurityToken SecurityToken { get; set; }
     }
 }

@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace System.IdentityModel.Tokens.Jwt
 {

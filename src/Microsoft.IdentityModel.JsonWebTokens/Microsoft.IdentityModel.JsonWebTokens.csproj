@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <AssemblyName>Microsoft.IdentityModel.Tokens.Jwt</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.JsonWebTokens</AssemblyName>
     <Description>Includes types that provide support for creating, serializing and validating JSON Web Tokens.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageId>Microsoft.IdentityModel.Tokens.Jwt</PackageId>
-    <TargetFrameworks>net45;net451;netstandard1.4</TargetFrameworks>
+    <PackageId>Microsoft.IdentityModel.JsonWebTokens</PackageId>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;Json Web Token</PackageTags>
   </PropertyGroup>

@@ -9,7 +9,7 @@
       <project name="Microsoft.IdentityModel.Logging" />
       <project name="Microsoft.IdentityModel.Tokens" />
       <project name="Microsoft.IdentityModel.Xml" />
-      <project name="Microsoft.IdentityModel.Tokens.Jwt" />
+      <project name="Microsoft.IdentityModel.JsonWebTokens" />
       <project name="System.IdentityModel.Tokens.Jwt" />
       <project name="Microsoft.IdentityModel.Tokens.Saml" />
       <project name="Microsoft.IdentityModel.Protocols" />
@@ -21,10 +21,9 @@
       <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
       <project name="Microsoft.IdentityModel.Tests" test="no" />
       <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.JsonWebTokens.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Tokens461.Tests" test="yes" />
       <project name="System.IdentityModel.Tokens.Jwt.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Tokens.Jwt.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Xml.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />

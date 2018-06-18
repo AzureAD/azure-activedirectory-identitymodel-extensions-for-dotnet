@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -33,7 +34,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// A class which contains useful methods for processing JWT tokens.

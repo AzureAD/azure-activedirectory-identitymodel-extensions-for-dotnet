@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
 using System.IdentityModel.Tokens.Jwt;
@@ -35,14 +36,20 @@ using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.Jwt.Tests
+namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
         [Theory, MemberData(nameof(SegmentTheoryData))]
         public void SegmentCanRead(JwtTheoryData theoryData)
         {
-            Assert.Equal(theoryData.CanRead, theoryData.TokenHandler.CanReadToken(theoryData.Token));
+            var context = TestUtilities.WriteHeader($"{this}.SegmentCanRead", theoryData);
+
+            var handler = new JsonWebTokenHandler();
+            if (theoryData.CanRead != handler.CanReadToken(theoryData.Token))
+                context.Diffs.Add($"theoryData.CanRead != handler.CanReadToken(theoryData.Token))");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<JwtTheoryData> SegmentTheoryData()

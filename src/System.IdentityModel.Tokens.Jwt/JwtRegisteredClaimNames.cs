@@ -37,131 +37,131 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Actort = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Actort;
+        public const string Actort = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Actort;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
         /// </summary>
-        public const string Acr = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Acr;
+        public const string Acr = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Acr;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
         /// </summary>
-        public const string Amr = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Amr;
+        public const string Amr = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Amr;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Aud = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Aud;
+        public const string Aud = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Aud;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
         /// </summary>
-        public const string AuthTime = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.AuthTime;
+        public const string AuthTime = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.AuthTime;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
         /// </summary>
-        public const string Azp = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Azp;
+        public const string Azp = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Azp;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Birthdate = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Birthdate;
+        public const string Birthdate = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Birthdate;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string CHash = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.CHash;
+        public const string CHash = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.CHash;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken
         /// </summary>
-        public const string AtHash = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.AtHash;
+        public const string AtHash = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.AtHash;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Email = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Email;
+        public const string Email = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Exp = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Exp;
+        public const string Exp = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Exp;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Gender = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Gender;
+        public const string Gender = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Gender;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string FamilyName = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.FamilyName;
+        public const string FamilyName = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.FamilyName;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string GivenName = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.GivenName;
+        public const string GivenName = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.GivenName;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Iat = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat;
+        public const string Iat = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Iss = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iss;
+        public const string Iss = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iss;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Jti = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti;
+        public const string Jti = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string NameId = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.NameId;
+        public const string NameId = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.NameId;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Nonce = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Nonce;
+        public const string Nonce = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Nonce;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Nbf = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Nbf;
+        public const string Nbf = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Nbf;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Prn = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Prn;
+        public const string Prn = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Prn;
 
         /// <summary>
         /// http://openid.net/specs/openid-connect-frontchannel-1_0.html#OPLogout
         /// </summary>
-        public const string Sid = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sid;
+        public const string Sid = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sid;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Sub = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub;
+        public const string Sub = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Typ = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Typ;
+        public const string Typ = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Typ;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string UniqueName = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.UniqueName;
+        public const string UniqueName = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.UniqueName;
 
         /// <summary>
         /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
-        public const string Website = Microsoft.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Website;
+        public const string Website = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Website;
     }
 }

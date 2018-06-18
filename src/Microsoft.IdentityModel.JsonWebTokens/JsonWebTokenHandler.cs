@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 
-namespace Microsoft.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
