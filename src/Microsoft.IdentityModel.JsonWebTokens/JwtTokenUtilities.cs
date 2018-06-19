@@ -28,10 +28,11 @@
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -102,6 +103,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             Array.Copy(aes.Key, 0, key, halfSizeInBytes, halfSizeInBytes);
 
             return key;
+        }
+
+        /// <summary>
+        /// Gets all decryption keys.
+        /// </summary>
+        public static IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
+        {
+            var decryptionKeys = new Collection<SecurityKey>();
+            if (validationParameters.TokenDecryptionKey != null)
+                decryptionKeys.Add(validationParameters.TokenDecryptionKey);
+
+            if (validationParameters.TokenDecryptionKeys != null)
+                foreach (SecurityKey key in validationParameters.TokenDecryptionKeys)
+                    decryptionKeys.Add(key);
+
+            return decryptionKeys;
         }
     }
 }

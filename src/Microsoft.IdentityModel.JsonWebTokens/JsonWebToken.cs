@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -37,16 +38,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
-    /// Currently only supports tokens in JWS format.
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS Compact serialized format.
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
-        /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS Compact serialized format.</param>
+        /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
         /// <exception cref="ArgumentNullException">'jwtEncodedString' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
+        /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS or JWE Compact serialization format.</exception>
         /// <remarks>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </remarks>
@@ -64,8 +64,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             }
 
-            // JWS
-            if (count == JwtConstants.JwsSegmentCount)
+            // JWS or JWE
+            if (count == JwtConstants.JwsSegmentCount || count == JwtConstants.JweSegmentCount)
             {
                 var tokenParts = jwtEncodedString.Split('.');
                 Decode(tokenParts, jwtEncodedString);
@@ -87,9 +87,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'actor' claim { actort, 'value' }.
+        /// Gets the 'value' of the 'actort' claim { actort, 'value' }.
         /// </summary>
-        /// <remarks>If the 'actor' claim is not found, an empty string is returned.</remarks> 
+        /// <remarks>If the 'actort' claim is not found, an empty string is returned.</remarks> 
         public string Actor => Payload.Value<string>(JwtRegisteredClaimNames.Actort) ?? String.Empty;
 
         /// <summary>
@@ -99,26 +99,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string Alg => Header.Value<string>(JwtHeaderParameterNames.Alg) ?? String.Empty;
 
         /// <summary>
-        /// Gets the list of 'audience' claim { aud, 'value' }.
+        /// Gets the list of 'aud' claim { aud, 'value' }.
         /// </summary>
-        /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
+        /// <remarks>If the 'aud' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
             get
             {
-                if (Payload != null)
+                if (Payload.GetValue(JwtRegisteredClaimNames.Aud) is JToken value)
                 {
-                    var value = Payload.GetValue(JwtRegisteredClaimNames.Aud);
-
                     if (value.Type is JTokenType.String)
                         return new List<string> { value.ToObject<string>() };
                     else if (value.Type is JTokenType.Array)
                         return value.ToObject<List<string>>();
                 }
 
-                return new List<string>();
+                return Enumerable.Empty<string>();
             }
         }
+
+        /// <summary>
+        /// Gets the AuthenticationTag from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string AuthenticationTag { get; private set; }
+
+        /// <summary>
+        /// Gets the Ciphertext from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string Ciphertext { get; private set; }
 
         /// <summary>
         /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
@@ -127,7 +137,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                List<Claim> claims = new List<Claim>();
+                if (InnerToken != null)
+                    return InnerToken.Claims;
+
+                if (!Payload.HasValues)
+                    return Enumerable.Empty<Claim>();
+
+                var claims = new List<Claim>();
                 string issuer = this.Issuer ?? ClaimsIdentity.DefaultIssuer;
 
                 // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
@@ -166,30 +182,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string Cty => Header.Value<string>(JwtHeaderParameterNames.Cty) ?? String.Empty;
 
         /// <summary>
-        /// Represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
+        /// Gets the 'value' of the 'enc' claim { enc, 'value' }.
         /// </summary>
-        public JObject Header
-        {
-            get;
-            private set;
-        }
+        /// <remarks>If the 'enc' value is not found, an empty string is returned.</remarks>   
+        public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? String.Empty;
 
         /// <summary>
-        /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
+        /// Gets the EncryptedKey from the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>If the 'JWT ID' claim is not found, an empty string is returned.</remarks>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string EncryptedKey { get; private set; }
+
+        /// <summary>
+        /// Represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
+        /// </summary>
+        public JObject Header { get; private set; } = new JObject();
+
+        /// <summary>
+        /// Gets the 'value' of the 'jti' claim { jti, ''value' }.
+        /// </summary>
+        /// <remarks>If the 'jti' claim is not found, an empty string is returned.</remarks>
         public override string Id => Payload.Value<string>(JwtRegisteredClaimNames.Jti) ?? String.Empty;
+
+        /// <summary>
+        /// Gets the InitializationVector from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string InitializationVector { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="JsonWebToken"/> associated with this instance.
+        /// </summary>
+        public JsonWebToken InnerToken { get; internal set; }
 
         /// <summary>
         /// Gets the 'value' of the 'iat' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
-        /// <remarks>If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
+        /// <remarks>If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public DateTime IssuedAt => GetDateTime(JwtRegisteredClaimNames.Iat);
 
         /// <summary>
-        /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
+        /// Gets the 'value' of the 'iss' claim { iss, 'value' }.
         /// </summary>
-        /// <remarks>If the 'issuer' claim is not found, an empty string is returned.</remarks>   
+        /// <remarks>If the 'iss' claim is not found, an empty string is returned.</remarks>   
         public override string Issuer => Payload.Value<string>(JwtRegisteredClaimNames.Iss) ?? String.Empty;
 
         /// <summary>
@@ -201,11 +236,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Represents the JSON payload.
         /// </summary>
-        public JObject Payload
-        {
-            get;
-            private set;
-        }
+        public JObject Payload { get; private set; } = new JObject();
+
+        /// <summary>
+        /// Gets the EncodedHeader from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string EncodedHeader { get; internal set; }
+
+        /// <summary>
+        /// Gets the EncodedPayload from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string EncodedPayload { get; internal set; }
+
+        /// <summary>
+        /// Gets the EncodedSignature from the original raw data of this instance when it was created.
+        /// </summary>
+        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
+        public string EncodedSignature { get; internal set; }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -239,9 +288,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string Typ => Header.Value<string>(JwtHeaderParameterNames.Typ) ?? String.Empty;
 
         /// <summary>
-        /// Gets the 'value' of the 'notbefore' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// Gets the 'value' of the 'nbf' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
-        /// <remarks>If the 'notbefore' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
+        /// <remarks>If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
         public override DateTime ValidFrom => GetDateTime(JwtRegisteredClaimNames.Nbf);
 
         /// <summary>
@@ -278,8 +327,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
                 Header = header;
-           
-            DecodeJws(tokenParts); 
+
+            if (tokenParts.Length == JwtConstants.JweSegmentCount)
+                DecodeJwe(tokenParts);
+            else
+                DecodeJws(tokenParts);
+                
             EncodedToken = rawData;
         }
 
@@ -319,8 +372,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
-            JValue jvalue = jtoken as JValue;
-            if (jvalue != null)
+            if (jtoken is JValue jvalue)
             {
                 // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
                 // Boolean needs item.ToString otherwise 'true' => 'True'
@@ -331,6 +383,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
                 claims.Add(new Claim(claimType, jtoken.ToString(Newtonsoft.Json.Formatting.None), GetClaimValueType(jtoken), issuer, issuer));
+        }
+
+        /// <summary>
+        /// Decodes the payload and signature from the JWE parts.
+        /// </summary>
+        /// <param name="tokenParts">Parts of the JWE including the header.</param>
+        /// <remarks>Assumes Header has already been set.</remarks>
+        private void DecodeJwe(string[] tokenParts)
+        {
+            EncodedHeader = tokenParts[0];
+            EncryptedKey = tokenParts[1];
+            InitializationVector = tokenParts[2];
+            Ciphertext = tokenParts[3];
+            AuthenticationTag = tokenParts[4];
         }
 
         /// <summary>
@@ -352,6 +418,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, tokenParts[1], EncodedToken), ex));
             }
+
+            EncodedHeader = tokenParts[0];
+            EncodedPayload = tokenParts[1];
+            EncodedSignature = tokenParts[2];
         }
 
         private static string GetClaimValueType(object obj)
@@ -401,11 +471,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>The DateTime representation of a claim.</returns>
         private DateTime GetDateTime(string key)
         {
-            JToken jToken;
-            if (!Payload.TryGetValue(key, out jToken))
+            if (!Payload.TryGetValue(key, out var jToken))
                 return DateTime.MinValue;
 
-            long dateValue = ParseTimeValue(jToken, key);
+            var dateValue = ParseTimeValue(jToken, key);
 
             var secondsAfterBaseTime = Convert.ToInt64(Math.Truncate(Convert.ToDouble(dateValue, CultureInfo.InvariantCulture)));
             return EpochTime.DateTime(secondsAfterBaseTime);
