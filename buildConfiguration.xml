@@ -2,7 +2,7 @@
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
   <runtimes>netstandard1.4,net451,net45</runtimes>
-  <release>5.2.4</release>
+  <release>5.2.5</release>
   <nugetPreview>preview</nugetPreview>
   <projects>
     <src>
