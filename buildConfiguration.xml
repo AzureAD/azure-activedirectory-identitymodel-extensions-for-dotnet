@@ -15,6 +15,7 @@
       <project name="Microsoft.IdentityModel.Protocols" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+      <project name="Microsoft.IdentityModel.Tokens.Extensions" />
     </src>
     <test>
       <project name="CrossVersionTokenValidation.Tests" test="yes"/>
@@ -29,6 +30,7 @@
       <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Tokens.Extensions.Tests" test="yes" />
     </test>
   </projects>
 </root>
