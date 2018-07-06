@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         }
 
         /// <summary>
-        /// Gets or sets 'Wct'.
+        /// Gets or sets 'wct'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wct
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         }
 
         /// <summary>
-        /// Gets or sets 'wa'.
+        /// Gets or sets 'wctx'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
         public string Wctx
