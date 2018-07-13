@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                if (Payload.GetValue(JwtRegisteredClaimNames.Aud) is JToken value)
+                if (Payload.GetValue(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal) is JToken value)
                 {
                     if (value.Type is JTokenType.String)
                         return new List<string> { value.ToObject<string>() };
