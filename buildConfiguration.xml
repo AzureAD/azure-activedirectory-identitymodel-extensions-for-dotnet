@@ -1,7 +1,7 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
-  <runtimes>netstandard1.4,net451,net45</runtimes>
+  <runtimes>net45,net451,net461,netstandard1.4,netstandard2.0</runtimes>
   <release>5.2.5</release>
   <nugetPreview>preview</nugetPreview>
   <projects>
@@ -23,7 +23,7 @@
       <project name="Microsoft.IdentityModel.Tests" test="no" />
       <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.JsonWebTokens.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.Tokens461.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />
       <project name="System.IdentityModel.Tokens.Jwt.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Xml.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Tokens.Saml.Tests" test="yes" />

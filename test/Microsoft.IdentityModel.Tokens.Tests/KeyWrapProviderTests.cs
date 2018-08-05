@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     ///     - positive tests for keys (128, 256) X Algorithms supported.
     ///     - parameter validation for WrapKey
     /// UnwrapKey
-    ///     - parameter validataion for UnwrapKey
+    ///     - parameter validation for UnwrapKey
     /// UnwrapKeyMismatch
     ///     - negative tests for switching (keys, algorithms)
     /// WrapKeyVirtual
@@ -121,27 +121,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Theory, MemberData(nameof(WrapUnwrapTheoryData))]
-        public void WrapUnwrapKey(KeyWrapTestParams theoryParams)
+        public void WrapUnwrapKey(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.WrapUnwrapKey", theoryData);
             try
             {
-                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                var wrappedKey = provider.WrapKey(theoryParams.KeyToWrap);
+                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
+                var wrappedKey = provider.WrapKey(theoryData.KeyToWrap);
                 byte[] unwrappedKey = provider.UnwrapKey(wrappedKey);
 
-                Assert.True(Utility.AreEqual(unwrappedKey, theoryParams.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
+                Assert.True(Utility.AreEqual(unwrappedKey, theoryData.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
 
-                theoryParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<KeyWrapTestParams> WrapUnwrapTheoryData()
+        public static TheoryData<KeyWrapTheoryData> WrapUnwrapTheoryData()
         {
-            var theoryData = new TheoryData<KeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             // round trip positive tests
             AddWrapUnwrapTheoryData("Test1", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, theoryData);
@@ -156,47 +159,49 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        private static void AddWrapUnwrapTheoryData(string testId, string algorithm, SecurityKey key, TheoryData<KeyWrapTestParams> theoryData)
+        private static void AddWrapUnwrapTheoryData(string testId, string algorithm, SecurityKey key, TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new KeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
                 KeyToWrap = Guid.NewGuid().ToByteArray(),
-                EE = ExpectedException.NoExceptionExpected,
-                EncryptKey = key,
-                TestId = "AddWrapUnwrapTheoryData_" + testId
+                WrapAlgorithm = algorithm,
+                WrapKey = key,
+                TestId = "AddWrapUnwrapTheoryData" + testId
             });
         }
 
-        private static void AddWrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] keyToWrap, ExpectedException ee, TheoryData<KeyWrapTestParams> theoryData)
+        private static void AddWrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] keyToWrap, ExpectedException ee, TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new KeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
-                EncryptKey = key,
+                WrapAlgorithm = algorithm,
+                WrapKey = key,
                 KeyToWrap = keyToWrap,
-                EE = ee,
+                ExpectedException = ee,
                 TestId = testId
             });
         }
 
         [Theory, MemberData(nameof(UnwrapTamperedTheoryData))]
-        public void UnwrapTamperedData(KeyWrapTestParams theoryParams)
+        public void UnwrapTamperedData(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.UnwrapTamperedData", theoryData);
             try
             {
-                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
-                theoryParams.EE.ProcessNoException();
+                theoryData.Provider.UnwrapKey(theoryData.WrappedKey);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<KeyWrapTestParams> UnwrapTamperedTheoryData()
+        public static TheoryData<KeyWrapTheoryData> UnwrapTamperedTheoryData()
         {
-            var theoryData = new TheoryData<KeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             // tampering: wrapped key
             AddUnwrapTamperedTheoryData("Test1", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW, theoryData);
@@ -205,44 +210,47 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        private static void AddUnwrapTamperedTheoryData(string testId, SecurityKey key, string algorithm, TheoryData<KeyWrapTestParams> theoryData)
+        private static void AddUnwrapTamperedTheoryData(string testId, SecurityKey key, string algorithm, TheoryData<KeyWrapTheoryData> theoryData)
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(key, algorithm);
             var wrappedKey = provider.WrapKey(keyToWrap);
 
             TestUtilities.XORBytes(wrappedKey);
-            theoryData.Add(new KeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
-                EncryptKey = key,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
+                ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
+                WrapAlgorithm = algorithm,
+                WrapKey = key,
                 WrappedKey = wrappedKey
             });
         }
 
         [Theory, MemberData(nameof(UnwrapMismatchTheoryData))]
-        public void UnwrapMismatch(KeyWrapTestParams theoryParams)
+        public void UnwrapMismatch(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.UnwrapMismatch", theoryData);
             try
             {
-                var encryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
+                var encryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
                 var wrappedKey = encryptProvider.WrapKey(keyToWrap);
-                var decryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm);
+                var decryptProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm);
                 byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
-                theoryParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<KeyWrapTestParams> UnwrapMismatchTheoryData()
+        public static TheoryData<KeyWrapTheoryData> UnwrapMismatchTheoryData()
         {
-            var theoryData = new TheoryData<KeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             AddUnwrapMismatchTheoryData("Test1", Default.SymmetricEncryptionKey128, Default.SymmetricEncryptionKey128_2, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128KW, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
             AddUnwrapMismatchTheoryData("Test2", Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey256_2, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256KW, ExpectedException.KeyWrapException("IDX10659:"), theoryData);
@@ -251,38 +259,40 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        private static void AddUnwrapMismatchTheoryData(string testId, SecurityKey encryptKey, SecurityKey decryptKey, string encryptAlg, string decryptAlg, ExpectedException ee, TheoryData<KeyWrapTestParams> theoryData)
+        private static void AddUnwrapMismatchTheoryData(string testId, SecurityKey encryptKey, SecurityKey decryptKey, string encryptAlg, string decryptAlg, ExpectedException ee, TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new KeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = encryptAlg,
-                EncryptKey = encryptKey,
-                DecryptAlgorithm = decryptAlg,
-                DecryptKey = decryptKey,
-                EE = ee,
-                TestId = testId
+                ExpectedException = ee,
+                TestId = testId,
+                UnwrapAlgorithm = decryptAlg,
+                UnwrapKey = decryptKey,
+                WrapAlgorithm = encryptAlg,
+                WrapKey = encryptKey
             });
         }
 
-
         [Theory, MemberData(nameof(UnwrapTheoryData))]
-        public void UnwrapParameterCheck(KeyWrapTestParams theoryParams)
+        public void UnwrapParameterCheck(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.UnwrapParameterCheck", theoryData);
             try
             {
-                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm);
-                byte[] unwrappedKey = provider.UnwrapKey(theoryParams.WrappedKey);
-                theoryParams.EE.ProcessNoException();
+                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm);
+                byte[] unwrappedKey = provider.UnwrapKey(theoryData.WrappedKey);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<KeyWrapTestParams> UnwrapTheoryData()
+        public static TheoryData<KeyWrapTheoryData> UnwrapTheoryData()
         {
-            var theoryData = new TheoryData<KeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             // Unwrap parameter checking
             AddUnwrapParameterCheckTheoryData("Test1", SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, null, ExpectedException.ArgumentNullException(), theoryData);
@@ -294,29 +304,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        private static void AddUnwrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] wrappedKey, ExpectedException ee, TheoryData<KeyWrapTestParams> theoryData)
+        private static void AddUnwrapParameterCheckTheoryData(string testId, string algorithm, SecurityKey key, byte[] wrappedKey, ExpectedException ee, TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new KeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
-                EncryptKey = key,
-                WrappedKey = wrappedKey,
-                EE = ee,
-                TestId = testId
+                ExpectedException = ee,
+                TestId = testId,
+                WrapAlgorithm = algorithm,
+                WrapKey = key,
+                WrappedKey = wrappedKey
             });
-        }
-
-        public class KeyWrapTestParams
-        {
-            public string DecryptAlgorithm { get; set; }
-            public SecurityKey DecryptKey { get; set; }
-            public string EncryptAlgorithm { get; set; }
-            public ExpectedException EE { get; set; }
-            public SecurityKey EncryptKey { get; set; }
-            public byte[] KeyToWrap { get; set; }
-            public byte[] WrappedKey { get; set; }
-            public KeyWrapProvider Provider { get; set; }
-            public string TestId { get; set; }
         }
     }
 }

@@ -11,7 +11,7 @@
     <PackageId>Microsoft.IdentityModel.Tokens.Tests</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <SignAssembly>true</SignAssembly>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net452;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
@@ -36,12 +36,12 @@
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="System.Security.Cryptography.Cng" Version="$(CoreFxVersion)" />
     <PackageReference Include="System.Security.Claims" Version="$(CoreFxVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
     <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Threading.Tasks" />

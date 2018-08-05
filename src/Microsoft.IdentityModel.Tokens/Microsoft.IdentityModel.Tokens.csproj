@@ -7,8 +7,8 @@
     <Description>Includes types that provide support for SecurityTokens, Cryptographic operations: Signing, Verifying Signatures, Encryption.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Tokens</PackageId>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net451;netstandard1.4</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(SrcTargets)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets)</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;SecurityTokens;Cryptographic operations;Signing;Verifying Signatures;Encryption</PackageTags>
   </PropertyGroup>
   
@@ -33,7 +33,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Collections" Version="4.3.0-*" />
     <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime" Version="4.3.0-*" />
@@ -41,7 +41,7 @@
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.3.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0-*" />
     <PackageReference Include="System.Security.Claims" Version="4.3.0-*" />
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0-*" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="4.3.0-*">
@@ -52,19 +52,12 @@
     <PackageReference Include="System.Threading" Version="4.3.0-*" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or  '$(TargetFramework)' == 'net451' Or  '$(TargetFramework)' == 'net461'">
     <Reference Include="System.Xml" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Refernece Include="System.Core" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup>

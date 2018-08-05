@@ -1,5 +1,6 @@
 <Project>
   <Import Project="dependenciesTest.props" />
+  <Import Project="targetsTest.props" />
   <Import Project="version.props" />
 
   <PropertyGroup>

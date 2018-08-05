@@ -821,12 +821,6 @@ namespace System.IdentityModel.Tokens.Jwt
         private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-            if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
-            {
-                LogHelper.LogInformation(LogMessages.IDX12508, algorithm, key);
-                return false;
-            }
-
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10647, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm))));

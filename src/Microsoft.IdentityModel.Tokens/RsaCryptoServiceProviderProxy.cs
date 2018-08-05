@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET451 || NET45
+#if NET45 || NET451 || NET461 || NETSTANDARD2_0
 
 using System;
 using System.Security.Cryptography;
@@ -37,37 +37,49 @@ namespace Microsoft.IdentityModel.Tokens
     /// The purpose of this class is to ensure that we obtain an RsaCryptoServiceProvider that supports SHA-256 signatures.
     /// If the original RsaCryptoServiceProvider doesn't support SHA-256, we create a new one using the same KeyContainer.
     /// </summary>
-    public class RSACryptoServiceProviderProxy : IDisposable
+    public class RSACryptoServiceProviderProxy : RSA
     {
-        private const int PROV_RSA_AES = 24;    // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
+        // CryptoApi provider type for an RSA provider supporting sha-256 digital signatures
+        private const int PROV_RSA_AES = 24;
 
         // CryptoApi provider type for an RSA provider only supporting sha1 digital signatures
         private const int PROV_RSA_FULL = 1;
         private const int PROV_RSA_SCHANNEL = 12;
 
-        private bool _disposed;
+        private bool _disposed = false;
+        private bool _disposeRsa = false;
 
         // Only dispose of the RsaCryptoServiceProvider object if we created a new instance that supports SHA-256,
         // otherwise do not disposed of the referenced RsaCryptoServiceProvider
-        private bool _disposeRsa;
+        //private bool _disposeRsa;
         private RSACryptoServiceProvider _rsa;
+
+        /// <summary>
+        /// Gets the SignatureAlgorithm
+        /// </summary>
+        public override string SignatureAlgorithm => _rsa.SignatureAlgorithm;
+
+        /// <summary>
+        /// Gets the KeyExchangeAlgorithm
+        /// </summary>
+        public override string KeyExchangeAlgorithm => _rsa.KeyExchangeAlgorithm;
 
         /// <summary>
         /// Initializes an new instance of <see cref="RSACryptoServiceProviderProxy"/>.
         /// </summary>
         /// <param name="rsa"><see cref="RSACryptoServiceProvider"/></param>
+        /// <exception cref="ArgumentNullException">if <paramref name="rsa"/> is null.</exception>
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
             if (rsa == null)
-                throw LogHelper.LogArgumentNullException("rsa");
+                throw LogHelper.LogArgumentNullException(nameof(rsa));
 
-            //
             // Level up the provider type only if:
             // 1. it is PROV_RSA_FULL or PROV_RSA_SCHANNEL which denote CSPs that only understand Sha1 algorithms
             // 2. it is not associated with a hardware key
             if ((rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_FULL || rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_SCHANNEL) && !rsa.CspKeyContainerInfo.HardwareDevice)
             {
-                CspParameters csp = new CspParameters();
+                var csp = new CspParameters();
                 csp.ProviderType = PROV_RSA_AES;
                 csp.KeyContainerName = rsa.CspKeyContainerInfo.KeyContainerName;
                 csp.KeyNumber = (int)rsa.CspKeyContainerInfo.KeyNumber;
@@ -91,32 +103,33 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Destructs the <see cref="RSACryptoServiceProviderProxy"/> instance.
-        /// </summary>
-        ~RSACryptoServiceProviderProxy()
-        {
-            Dispose(false);
-        }
-
-        /// <summary>
-        /// Releases all resources used by the current instance of the <see cref="RSACryptoServiceProviderProxy"/> class.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
         /// Decrypts data with the System.Security.Cryptography.RSA algorithm.
         /// </summary>
         /// <param name="input">The data to be decrypted.</param>
-        /// <param name="fOAEP">true to perform direct System.Security.Cryptography.RSA decryption using OAEP padding (only available on a computer running Microsoft Windows XP or later);o
-        /// therwise, false to use PKCS#1 v1.5 padding.</param>
-        /// <returns></returns>
+        /// <param name="fOAEP">true to perform direct System.Security.Cryptography.RSA decryption using OAEP padding
+        /// (only available on a computer running Microsoft Windows XP or later) otherwise, false to use PKCS#1 v1.5 padding.</param>
+        /// <returns>decrypted bytes.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or has Length == 0.</exception>
         public byte[] Decrypt(byte[] input, bool fOAEP)
         {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
             return _rsa.Decrypt(input, fOAEP);
+        }
+
+        /// <summary>
+        /// Decrypts the input.
+        /// </summary>
+        /// <param name="input">the bytes to decrypt.</param>
+        /// <returns>decrypted bytes</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or Length == 0.</exception>
+        public override byte[] DecryptValue(byte[] input)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            return _rsa.DecryptValue(input);
         }
 
         /// <summary>
@@ -125,51 +138,112 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="input">The data to be encrypted.</param>
         /// <param name="fOAEP">true to perform direct System.Security.Cryptography.RSA encryption using OAEP padding (only available on a computer running Microsoft Windows XP or later); 
         /// otherwise, false to use PKCS#1 v1.5 padding.</param>
-        /// <returns></returns>
+        /// <returns>encrypted bytes.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or has Length == 0.</exception>
         public byte[] Encrypt(byte[] input, bool fOAEP)
         {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
             return _rsa.Encrypt(input, fOAEP);
+        }
+
+        /// <summary>
+        /// Encrypts the input.
+        /// </summary>
+        /// <param name="input">the bytes to encrypt.</param>
+        /// <returns>encrypted bytes.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or Length == 0.</exception>
+        public override byte[] EncryptValue(byte[] input)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            return _rsa.EncryptValue(input);
         }
 
         /// <summary>
         /// Computes the hash value of the specified byte array using the specified hash algorithm, and signs the resulting hash value.
         /// </summary>
-        /// <param name="signingInput">The input byte array for which to compute the hash.</param>
+        /// <param name="input">The input byte array for which to compute the hash.</param>
         /// <param name="hash">The hash algorithm to use to create the hash value. </param>
         /// <returns>The <see cref="RSA"/> Signature for the specified data.</returns>
-        public byte[] SignData(byte[] signingInput, object hash)
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or Length == 0.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="hash"/> is null.</exception>
+        public byte[] SignData(byte[] input, object hash)
         {
-            return _rsa.SignData(signingInput, hash);
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (hash == null)
+                throw LogHelper.LogArgumentNullException(nameof(hash));
+
+            return _rsa.SignData(input, hash);
         }
 
         /// <summary>
         /// Verifies that a digital signature is valid by determining the hash value in the signature using the provided public key and comparing it to the hash value of the provided data.
         /// </summary>
-        /// <param name="signingInput">The input byte array.</param>
+        /// <param name="input">The input byte array.</param>
         /// <param name="hash">The hash algorithm to use to create the hash value.</param>
         /// <param name="signature">The signature byte array to be verified.</param>
         /// <returns>true if the signature is valid; otherwise, false.</returns>
-        public bool VerifyData(byte[] signingInput, object hash, byte[] signature)
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null or Length == 0.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="hash"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="signature"/> is null or Length == 0.</exception>
+        public bool VerifyData(byte[] input, object hash, byte[] signature)
         {
-            return _rsa.VerifyData(signingInput, hash, signature);
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (hash == null)
+                throw LogHelper.LogArgumentNullException(nameof(hash));
+
+            if (signature == null || signature.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            return _rsa.VerifyData(input, hash, signature);
         }
 
-        private void Dispose(bool disposing)
+        /// <summary>
+        /// Exports rsa parameters as <see cref="RSAParameters"/>
+        /// </summary>
+        /// <param name="includePrivateParameters">flag to control is private parameters are included.</param>
+        /// <returns><see cref="RSAParameters"/></returns>
+        public override RSAParameters ExportParameters(bool includePrivateParameters)
+        {
+            return _rsa.ExportParameters(includePrivateParameters);
+        }
+
+        /// <summary>
+        /// Imports rsa parameters as <see cref="RSAParameters"/>
+        /// </summary>
+        /// <param name="parameters">to import.</param>
+        public override void ImportParameters(RSAParameters parameters)
+        {
+            _rsa.ImportParameters(parameters);
+        }
+
+        /// <summary>
+        /// Calls to release managed resources.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected override void Dispose(bool disposing)
         {
             if (!_disposed)
             {
+                _disposed = true;
                 if (disposing)
                 {
-                    if (_disposeRsa && _rsa != null)
+                    if (_disposeRsa)
                     {
                         _rsa.Dispose();
-                        _rsa = null;
+
                     }
                 }
-
-                _disposed = true;
             }
         }
     }
 }
+
 #endif

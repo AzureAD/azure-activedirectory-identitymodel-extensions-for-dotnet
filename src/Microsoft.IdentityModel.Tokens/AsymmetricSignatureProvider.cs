@@ -33,25 +33,13 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Provides signing and verifying operations when working with an <see cref="AsymmetricSecurityKey"/>
+    /// Provides signature and verification operations for Asymmetric Algorithms using a <see cref="SecurityKey"/>.
     /// </summary>
     public class AsymmetricSignatureProvider : SignatureProvider
     {
-#if NETSTANDARD1_4
-        private ECDsa _ecdsa;
-        private HashAlgorithmName _hashAlgorithm;
-        private RSA _rsa;
-#else
-        private ECDsaCng _ecdsa;
-        private string _hashAlgorithm;
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
-        private RsaCngAdapter _rsaCngAdapter;
-#endif
-
-        private bool _shouldDisposeRsa;
-        private bool _shouldDisposeEcdsa;
         private bool _disposed;
+        private AsymmetricAdapter _asymmetricAdapter;
+        private CryptoProviderFactory _cryptoProviderFactory;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
@@ -87,6 +75,18 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512Signature, 1024 }
         };
 
+        internal AsymmetricSignatureProvider(SecurityKey key, string algorithm, CryptoProviderFactory cryptoProviderFactory)
+            : this(key, algorithm)
+        {
+            _cryptoProviderFactory = cryptoProviderFactory;
+        }
+
+        internal AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, CryptoProviderFactory cryptoProviderFactory)
+            : this(key, algorithm, willCreateSignatures)
+        {
+            _cryptoProviderFactory = cryptoProviderFactory;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
@@ -102,33 +102,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
-        /// <param name="willCreateSignatures">Whether this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.</param>
+        /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.</param>
         /// <para>
         /// Creating signatures requires that the <see cref="SecurityKey"/> has access to a private key.
         /// Verifying signatures (the default), does not require access to the private key.
         /// </para>
-        /// <exception cref="ArgumentNullException">'key' is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/>is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="algorithm"/>is null or empty.</exception>
+        /// <exception cref="InvalidOperationException"><paramref name="willCreateSignatures"/>is true and there is no private key.</exception>
+        /// <exception cref="NotSupportedException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// willCreateSignatures is true and <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
         /// </exception>
-        /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">If the runtime is unable to create a suitable cryptographic provider.</exception>
+        /// <exception cref="InvalidOperationException">If the runtime is unable to create a suitable cryptographic provider.</exception>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
+            _cryptoProviderFactory = key.CryptoProviderFactory;
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10638, key)));
 
-            if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
+            if (!_cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            ResolveAsymmetricAlgorithm(key, algorithm, willCreateSignatures);
+            _asymmetricAdapter = ResolveAsymmetricAdapter(key, algorithm, willCreateSignatures);
             WillCreateSignatures = willCreateSignatures;
         }
 
@@ -159,15 +162,20 @@ namespace Microsoft.IdentityModel.Tokens
             return PrivateKeyStatus.Unknown;
         }
 
-#if NETSTANDARD1_4
+#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         /// <summary>
-        /// Returns the <see cref="HashAlgorithmName"/> instance.
+        /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
+        /// This method returns the <see cref="HashAlgorithmName"/>
+        /// that describes the <see cref="HashAlgorithm"/>to use when generating a Signature.
         /// </summary>
-        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
+        /// <param name="algorithm">The SignatureAlgorithm in use.</param>
+        /// <returns>The <see cref="HashAlgorithmName"/> to use.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="algorithm"/> is not supported.</exception>
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             switch (algorithm)
             {
@@ -193,43 +201,22 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
         }
 
-        private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
+        private AsymmetricAdapter ResolveAsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
         {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException("key");
-
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException("algorithm");
-
-            _hashAlgorithm = GetHashAlgorithmName(algorithm);
-            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (rsaAlgorithm != null)
-            {
-                if (rsaAlgorithm.Rsa != null)
-                {
-                    _rsa = rsaAlgorithm.Rsa;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
-            }
-
-            var ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ECDsa != null)
-            {
-                _ecdsa = ecdsaAlgorithm.ECDsa;
-                _shouldDisposeEcdsa = ecdsaAlgorithm.ShouldDispose;
-                return;
-            }
-
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+            var hashAlgoritmName = GetHashAlgorithmName(algorithm);
+            return new AsymmetricAdapter(key, algorithm, _cryptoProviderFactory.CreateHashAlgorithm(hashAlgoritmName), hashAlgoritmName, requirePrivateKey);
         }
-#else
+#endif
+
+#if NET45 || NET451
         /// <summary>
-        /// Returns the algorithm name.
+        /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
+        /// This method returns the type of the HashAlgorithm (as a string)
+        /// that describes the <see cref="HashAlgorithm"/>to use when generating a Signature.
         /// </summary>
-        /// <param name="algorithm">The hash algorithm to use to create the hash value.</param>
+        /// <param name="algorithm">The SignatureAlgorithm in use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/>is null or whitespace.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="algorithm"/> is not supported.</exception>
         protected virtual string GetHashAlgorithmString(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -259,44 +246,16 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
         }
 
-        private void ResolveAsymmetricAlgorithm(SecurityKey key, string algorithm, bool willCreateSignatures)
+        /// <summary>
+        /// This method is here, just to keep the #if out of the constructor.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="algorithm"></param>
+        /// <param name="requirePrivateKey"></param>
+        /// <returns></returns>
+        private AsymmetricAdapter ResolveAsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
         {
-            _hashAlgorithm = GetHashAlgorithmString(algorithm);
-            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (rsaAlgorithm != null)
-            {
-                if (rsaAlgorithm.RsaCryptoServiceProvider != null)
-                {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-                else if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
-                {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-                if (rsaAlgorithm.RsaCngAdapter != null)
-                {
-                    _rsaCngAdapter = rsaAlgorithm.RsaCngAdapter;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-                else
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
-            }
-
-            ECDsaAlgorithm ecdsaAlgorithm = Utility.ResolveECDsaAlgorithm(key, algorithm, willCreateSignatures);
-            if (ecdsaAlgorithm != null && ecdsaAlgorithm.ECDsa != null)
-            {
-                _ecdsa = ecdsaAlgorithm.ECDsa as ECDsaCng;
-                _ecdsa.HashAlgorithm = new CngAlgorithm(_hashAlgorithm);
-                _shouldDisposeEcdsa = ecdsaAlgorithm.ShouldDispose;
-                return;
-            }
-
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10641, key)));
+            return new AsymmetricAdapter(key, algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(algorithm)), requirePrivateKey);
         }
 #endif
 
@@ -305,11 +264,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="input">The bytes to be signed.</param>
         /// <returns>A signature over the input.</returns>
-        /// <exception cref="ArgumentNullException">'input' is null. </exception>
-        /// <exception cref="ArgumentException">'input.Length' == 0. </exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/>.Length == 0.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if the constructor parameter 'willBeUsedforSigning' was not 'true'.</exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         /// <remarks>Sign is thread safe.</remarks>
         public override byte[] Sign(byte[] input)
         {
@@ -324,62 +281,61 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-#if NETSTANDARD1_4
-                if (_rsa != null)
-                    return _rsa.SignData(input, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-                else if (_ecdsa != null)
-                    return _ecdsa.SignData(input, _hashAlgorithm);
-#else
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.SignData(input, _hashAlgorithm);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.SignData(input, _hashAlgorithm);
-                else if (_rsaCngAdapter != null)
-                    return _rsaCngAdapter.Pkcs1SignData(input, _hashAlgorithm);
-                else if (_ecdsa != null)
-                    return _ecdsa.SignData(input);
-#endif
+                return _asymmetricAdapter.Sign(input);
             }
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
                 throw;
             }
-
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10678, Algorithm, Key)));
         }
 
         /// <summary>
-        /// Validates that the asymmetric key size is more than the allowed minimum
+        /// Validates that an asymmetric key size is of sufficient size for a SignatureAlgorithm.
         /// </summary>
-        /// <param name="key">The asymmetric key to validate</param>
-        /// <param name="algorithm">Algorithm for which this key will be used</param>
-        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures</param>
+        /// <param name="key">The asymmetric key to validate.</param>
+        /// <param name="algorithm">Algorithm for which this key will be used.</param>
+        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/>is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="key"/>.KeySize is less than the minimum
+        /// acceptable size.</exception>
+        /// <remarks>
+        /// <seealso cref="MinimumAsymmetricKeySizeInBitsForSigningMap"/> for minimum signing sizes.
+        /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
+        /// </remarks>
         public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
             if (willCreateSignatures)
             {
-                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm)
+                && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
             }
-
-            if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm) && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+            else if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm)
+                 && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+            {
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
+            }
         }
 
         /// <summary>
-        /// Verifies that a signature over the' input' matches the signature.
+        /// Verifies that the <paramref name="signature"/> over <paramref name="input"/> using the
+        /// <see cref="SecurityKey"/> and <see cref="SignatureProvider.Algorithm"/> specified by this
+        /// <see cref="SignatureProvider"/> are consistent.
         /// </summary>
         /// <param name="input">The bytes to generate the signature over.</param>
         /// <param name="signature">The value to verify against.</param>
         /// <returns>true if signature matches, false otherwise.</returns>
-        /// <exception cref="ArgumentNullException">'input' is null.</exception>
-        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
-        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
-        /// <exception cref="ArgumentException">'signature.Length' == 0.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null or has length == 0.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="signature"/> is null or has length == 0.</exception>
         /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="AsymmetricSignatureProvider"/> is null. This can occur if a derived type does not call the base constructor.</exception>
-        /// <exception cref="InvalidOperationException">If the internal <see cref="HashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         /// <remarks>Verify is thread safe.</remarks>
         public override bool Verify(byte[] input, byte[] signature)
         {
@@ -397,33 +353,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-#if NETSTANDARD1_4
-                if (_rsa != null)
-                    return _rsa.VerifyData(input, signature, _hashAlgorithm, RSASignaturePadding.Pkcs1);
-                else if (_ecdsa != null)
-                    return _ecdsa.VerifyData(input, signature, _hashAlgorithm);
-#else
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.VerifyData(input, _hashAlgorithm, signature);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.VerifyData(input, _hashAlgorithm, signature);
-                else if (_rsaCngAdapter != null)
-                    return _rsaCngAdapter.Pkcs1VerifyData(input, signature, _hashAlgorithm);
-                else if (_ecdsa != null)
-                    return _ecdsa.VerifyData(input, signature);
-#endif
+                return _asymmetricAdapter.Verify(input, signature);
             }
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
                 throw;
             }
-
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogMessages.IDX10644));
         }
 
         /// <summary>
-        /// Calls <see cref="HashAlgorithm.Dispose()"/> to release this managed resources.
+        /// Calls to release managed resources.
         /// </summary>
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected override void Dispose(bool disposing)
@@ -435,18 +375,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     CryptoProviderCache?.TryRemove(this);
-#if NETSTANDARD1_4
-                    if (_rsa != null && _shouldDisposeRsa)
-                        _rsa.Dispose();
-#else
-                    if (_rsaCryptoServiceProvider != null && _shouldDisposeRsa)
-                        _rsaCryptoServiceProvider.Dispose();
-
-                    if (_rsaCryptoServiceProviderProxy != null)
-                        _rsaCryptoServiceProviderProxy.Dispose();
-#endif
-                    if (_ecdsa != null && _shouldDisposeEcdsa)
-                        _ecdsa.Dispose();
+                    _asymmetricAdapter.Dispose();
                 }
             }
         }

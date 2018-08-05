@@ -193,8 +193,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (key is SymmetricSecurityKey)
                     return true;
 
-                var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                     return true;
             }
 
@@ -202,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Unwrap a key using Symmmetric decryption.
+        /// Unwrap a key using Symmetric decryption.
         /// </summary>
         /// <param name="keyBytes">bytes to unwrap</param>
         /// <returns>Unwraped key</returns>

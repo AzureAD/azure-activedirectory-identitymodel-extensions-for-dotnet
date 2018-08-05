@@ -176,6 +176,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10680 = "IDX10680: Failed to compress using algorithm '{0}'.";
         public const string IDX10681 = "IDX10681: Unable to create the CompressionProvider.\nAlgorithm: '{0}' is not supported.";
         public const string IDX10682 = "IDX10682: Compression algorithm '{0}' is not supported.";
+        public const string IDX10683 = "IDX10683: Unable to create a AsymmetricSignatureProvider Algorithm: '{0}', Key: '{1}'.";
+        public const string IDX10684 = "IDX10684: Unable to create a AsymmetricAdapter, Algorithm: '{0}', Key: '{1}'.";
+        public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
+        public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
+        public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 or NET451 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";

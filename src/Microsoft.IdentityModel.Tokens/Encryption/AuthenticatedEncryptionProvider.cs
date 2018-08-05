@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         private AuthenticatedKeys _authenticatedkeys;
-        private string _hashAlgorithm;
+        private string _hmacAlgorithm;
         private SymmetricSignatureProvider _symmetricSignatureProvider;
 
         /// <summary>
@@ -69,8 +70,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             ValidateKeySize(key, algorithm);
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
-            _hashAlgorithm = GetHashAlgorithm(algorithm);
-            _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hashAlgorithm) as SymmetricSignatureProvider;
+            _hmacAlgorithm = GetHmacAlgorithm(algorithm);
+            _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
             if (_symmetricSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
 
@@ -86,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a user context for a <see cref="AuthenticatedEncryptionProvider"/>.
         /// </summary>
-        /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
+        /// <remarks>This is null by default. This can be used by applications for extensibility scenarios.</remarks>
         public string Context { get; set; }
 
         /// <summary>
@@ -115,8 +116,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="authenticatedData">will be combined with iv and ciphertext to create an authenticationtag.</param>
         /// <param name="iv">initialization vector for encryption.</param>
         /// <returns><see cref="AuthenticatedEncryptionResult"/>containing ciphertext, iv, authenticationtag.</returns>
-        /// <exception cref="ArgumentNullException">plaintext is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">authenticationData is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="plaintext"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
@@ -136,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] ciphertext;
             try
             {
-                ciphertext = Utility.Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+                ciphertext = Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
             }
             catch(Exception ex)
             {
@@ -164,10 +165,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="iv">the initialization vector used when creating the ciphertext.</param>
         /// <param name="authenticationTag">the authenticationTag that was created during the encyption.</param>
         /// <returns>decrypted ciphertext</returns>
-        /// <exception cref="ArgumentNullException">'ciphertext' is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">'authenticatedData' is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">'iv' is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">'authenticationTag' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="ciphertext"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="iv"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="authenticationTag"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">signature over authenticationTag fails to verify.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">AES crypto operation threw. See inner exception.</exception>
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
@@ -201,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens
             aes.IV = iv;
             try
             {
-                return Utility.Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
+                return Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
             }
             catch (Exception ex)
             {
@@ -217,24 +218,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if 'key, algorithm' pair is supported.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
-                return false;
-
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            if (key is JsonWebKey jsonWebKey)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
-
-            return false;
+            return SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key);
         }
 
         private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)
@@ -261,7 +245,13 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-        private string GetHashAlgorithm(string algorithm)
+        /// <summary>
+        /// The algorithm parameter logically defines a HMAC algorithm.
+        /// This method returns the HMAC to use.
+        /// </summary>
+        /// <param name="algorithm"></param>
+        /// <returns></returns>
+        private static string GetHmacAlgorithm(string algorithm)
         {
             if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
                     return SecurityAlgorithms.HmacSha256;
@@ -280,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key"><see cref="SecurityKey"/>that will be used to obtain the byte[].</param>
         /// <returns><see cref="byte"/>[] that is used to populated the KeyedHashAlgorithm.</returns>
-        /// <exception cref="ArgumentNullException">if key is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentException">if a byte[] can not be obtained from SecurityKey.</exception>
         /// <remarks><see cref="SymmetricSecurityKey"/> and <see cref="JsonWebKey"/> are supported.
         /// <para>For a <see cref="SymmetricSecurityKey"/> .Key is returned</para>
@@ -300,13 +290,30 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));
         }
 
+        internal static byte[] Transform(ICryptoTransform transform, byte[] input, int inputOffset, int inputLength)
+        {
+            if (transform.CanTransformMultipleBlocks)
+                return transform.TransformFinalBlock(input, inputOffset, inputLength);
+
+            using (var messageStream = new MemoryStream())
+            {
+                using (var cryptoStream = new CryptoStream(messageStream, transform, CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(input, inputOffset, inputLength);
+                    cryptoStream.FlushFinalBlock();
+                    return messageStream.ToArray();
+                }
+            }
+        }
+
         /// <summary>
         /// Checks that the key has sufficient length
         /// </summary>
         /// <param name="key"><see cref="SecurityKey"/> that contains bytes.</param>
         /// <param name="algorithm">the algorithm to apply.</param>
-        /// <exception cref="ArgumentNullException">if 'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="algorithm"/> is not a supported algorithm.</exception>
         protected virtual void ValidateKeySize(SecurityKey key, string algorithm)
         {
             if (key == null)
