@@ -540,8 +540,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "ID_NET45";
 #elif NET451
             "ID_NET451";
+#elif NET461
+            "ID_NET461";
 #elif NETSTANDARD1_4
             "ID_NETSTANDARD1_4";
+#elif NETSTANDARD2_0
+            "ID_NETSTANDARD2_0";
 #endif
 
         /// <summary>

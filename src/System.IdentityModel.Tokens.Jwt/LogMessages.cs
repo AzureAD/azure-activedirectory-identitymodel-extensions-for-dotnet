@@ -39,9 +39,6 @@ namespace System.IdentityModel.Tokens.Jwt
         // token creation
         internal const string IDX12401 = "IDX12401: Expires: '{0}' must be after NotBefore: '{1}'.";
 
-        // signature creation / validation
-        internal const string IDX12508 = "IDX12508: Signing JWT is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
-
         // JWT messages
         internal const string IDX12700 = "IDX12700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
         internal const string IDX12701 = "IDX12701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";

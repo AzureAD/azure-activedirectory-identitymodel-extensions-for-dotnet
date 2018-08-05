@@ -54,87 +54,110 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class RsaKeyWrapProviderTests
     {
         [Theory, MemberData(nameof(RsaKeyWrapConstructorTheoryData))]
-        public void Constructors(string testId, SecurityKey key, string algorithm, bool isDecrypt, ExpectedException ee)
+        public void Constructors(KeyWrapTheoryData theoryData)
         {
-            TestUtilities.WriteHeader("Constructors - " + testId, true);
+            var context = TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
             try
             {
-                var context = Guid.NewGuid().ToString();
-                var provider = new RsaKeyWrapProvider(key, algorithm, isDecrypt) { Context = context };
+                RsaKeyWrapProvider provider = null;
+                var keyWrapContext = Guid.NewGuid().ToString();
+                if (theoryData.WillUnwrap)
+                {
+                    provider = new RsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+                    if (!provider.Algorithm.Equals(theoryData.UnwrapAlgorithm))
+                        context.AddDiff($"provider.Algorithm != theoryData.UnwrapAlgorithm: {provider.Algorithm} : {theoryData.UnwrapAlgorithm}.");
 
-                ee.ProcessNoException();
+                    if (!ReferenceEquals(provider.Key, theoryData.UnwrapKey))
+                        context.AddDiff($"!ReferenceEquals(provider.key, theoryData.UnwrapKey)");
+                }
+                else
+                {
+                    provider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+                    if (!provider.Algorithm.Equals(theoryData.WrapAlgorithm))
+                        context.AddDiff($"provider.Algorithm != theoryData.WrapAlgorithm: {provider.Algorithm} : {theoryData.WrapAlgorithm}.");
 
-                Assert.Equal(provider.Algorithm, algorithm);
-                Assert.Equal(provider.Context, context);
-                Assert.True(ReferenceEquals(provider.Key, key));
+                    if (!ReferenceEquals(provider.Key, theoryData.WrapKey))
+                        context.AddDiff($"!ReferenceEquals(provider.key, theoryData.WrapKey)");
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+                if (!provider.Context.Equals(keyWrapContext))
+                    context.AddDiff($"provider.Context != keyWrapContext: {provider.Context} : {keyWrapContext}.");
             }
             catch (Exception ex)
             {
-                ee.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, SecurityKey, string, bool, ExpectedException> RsaKeyWrapConstructorTheoryData()
+        public static TheoryData<KeyWrapTheoryData> RsaKeyWrapConstructorTheoryData()
         {
-            var theoryData = new TheoryData<string, SecurityKey, string, bool, ExpectedException>();
-
-            theoryData.Add(
-                "SecurityKey_NULL",
-                null,
-                null,
-                false,
-                ExpectedException.ArgumentNullException());
-
-            theoryData.Add(
-                "Algorithm_NULL",
-                KeyingMaterial.RsaSecurityKey_2048,
-                null,
-                false,
-                ExpectedException.ArgumentNullException());
-
-            theoryData.Add(
-                "KeyTooSmall_1024",
-                KeyingMaterial.RsaSecurityKey_1024,
-                SecurityAlgorithms.RsaOAEP,
-                false,
-                ExpectedException.NotSupportedException("IDX10661:"));
-
-            theoryData.Add(
-                "KeyDoesNotRightType",
-                KeyingMaterial.RsaSecurityKey_2048,
-                SecurityAlgorithms.Aes128KW,
-                false,
-                ExpectedException.NotSupportedException("IDX10661:"));
-
-            theoryData.Add(
-                "KeyAlgorithmMatch",
-                KeyingMaterial.RsaSecurityKey_2048,
-                SecurityAlgorithms.RsaPKCS1,
-                false,
-                ExpectedException.NoExceptionExpected);
-
-            theoryData.Add(
-                "X509AlorithmMatch",
-                KeyingMaterial.X509SecurityKey2,
-                SecurityAlgorithms.RsaPKCS1,
-                false,
-                ExpectedException.NoExceptionExpected);
-
-            theoryData.Add(
-                "JWK_RSA",
-                KeyingMaterial.JsonWebKeyRsa256,
-                SecurityAlgorithms.RsaPKCS1,
-                true,
-                ExpectedException.NoExceptionExpected);
-
-            theoryData.Add(
-                "OnlyRSAPublicKeyProvided",
-                KeyingMaterial.JsonWebKeyRsa256Public,
-                SecurityAlgorithms.RsaPKCS1,
-                true,
-                ExpectedException.NoExceptionExpected);
-
-            return theoryData;
+            return new TheoryData<KeyWrapTheoryData>
+            {
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("key"),
+                    First = true,
+                    TestId = "SecurityKeyNULL",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.Aes128KeyWrap,
+                    WrapKey = null
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("algorithm"),
+                    TestId = "AlgorithmNULL",
+                    WillUnwrap = false,
+                    WrapAlgorithm = null,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    TestId = "KeyTooSmall1024",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_1024
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    TestId = "KeyDoesNotMatchAlgorithm",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "RsaAlgorithmMatch",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "X509AlgorithmMatch",
+                    WillUnwrap = false,
+                    WrapKey = KeyingMaterial.X509SecurityKey2,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "JwkRSA",
+                    WillUnwrap = false,
+                    WrapKey = KeyingMaterial.JsonWebKeyRsa256,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "RsaPublicKey",
+                    UnwrapKey = KeyingMaterial.JsonWebKeyRsa256Public,
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WillUnwrap = true
+                }
+            };
         }
 
         [Fact]
@@ -156,77 +179,80 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Theory, MemberData(nameof(RsaUnwrapMismatchTheoryData))]
-        public void RsaUnwrapMismatch(RsaKeyWrapTestParams theoryParams)
+        public void RsaUnwrapMismatch(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.RsaUnwrapParameterCheck", theoryData);
             try
             {
-                var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
+                var encryptProvider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, false);
                 byte[] keyToWrap = Guid.NewGuid().ToByteArray();
                 var wrappedKey = encryptProvider.WrapKey(keyToWrap);
-                var decryptProvider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
+                var decryptProvider = new RsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, true);
                 byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
-                theoryParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapMismatchTheoryData()
+        public static TheoryData<KeyWrapTheoryData> RsaUnwrapMismatchTheoryData()
         {
-            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
-
-            theoryData.Add(new RsaKeyWrapTestParams
+            return new TheoryData<KeyWrapTheoryData>
             {
-                EncryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
-                EncryptKey = KeyingMaterial.RsaSecurityKey_2048_Public,
-                DecryptAlgorithm = SecurityAlgorithms.RsaOAEP,
-                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
-                TestId = "RSAUnwrapAlgorithmMismatch_RsaPKCS1_RsaOAEP"
-            });
-
-            theoryData.Add(new RsaKeyWrapTestParams
-            {
-                EncryptAlgorithm = SecurityAlgorithms.RsaOAEP,
-                EncryptKey = KeyingMaterial.RsaSecurityKey_4096_Public,
-                DecryptAlgorithm = SecurityAlgorithms.RsaOAEP,
-                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
-                TestId = "RSAUnwrapKeyMismatch_RsaSecurityKey_4096_RsaSecurityKey_2048"
-            });
-
-            theoryData.Add(new RsaKeyWrapTestParams
-            {
-                EncryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
-                EncryptKey = KeyingMaterial.RsaSecurityKey_4096_Public,
-                DecryptAlgorithm = SecurityAlgorithms.RsaOAEP,
-                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
-                TestId = "RSAUnwrapAlgorithmAndKeyMismatch_RsaPKCS1_RsaOAEP_RsaSecurityKey_4096_RsaSecurityKey_2048"
-            });
-
-            return theoryData;
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "AlgorithmMismatchRsaPKCS1RsaOAEP",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048_Public
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "KeyMismatchRsa4096Rsa2048",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "AlgorithmAndKeyMismatchRsaPKCS1Bits4096RsaOAEKey2048",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
+                }
+            };
         }
 
         [Theory, MemberData(nameof(RsaUnwrapTamperedTheoryData))]
-        public void RsaUnwrapTamperedData(RsaKeyWrapTestParams theoryParams)
+        public void RsaUnwrapTamperedData(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.RsaUnwrapParameterCheck", theoryData);
             try
             {
-                theoryParams.Provider.UnwrapKey(theoryParams.WrappedKey);
-                theoryParams.EE.ProcessNoException();
+                theoryData.Provider.UnwrapKey(theoryData.WrappedKey);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTamperedTheoryData()
+        public static TheoryData<KeyWrapTheoryData> RsaUnwrapTamperedTheoryData()
         {
-            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             // tampering: wrapped key
             AddUnwrapTamperedTheoryData(
@@ -249,87 +275,92 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             SecurityKey encrtyptKey,
             SecurityKey decryptKey,
             string algorithm,
-            TheoryData<RsaKeyWrapTestParams> theoryData)
+            TheoryData<KeyWrapTheoryData> theoryData)
         {
             var keyToWrap = Guid.NewGuid().ToByteArray();
             var provider = new RsaKeyWrapProvider(encrtyptKey, algorithm, false);
             var wrappedKey = provider.WrapKey(keyToWrap);
 
             TestUtilities.XORBytes(wrappedKey);
-            theoryData.Add(new RsaKeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                DecryptAlgorithm = algorithm,
-                DecryptKey = decryptKey,
-                EE = ExpectedException.KeyWrapException("IDX10659:"),
+                UnwrapAlgorithm = algorithm,
+                UnwrapKey = decryptKey,
+                ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
                 WrappedKey = wrappedKey
             });
         }
 
         [Theory, MemberData(nameof(RsaUnwrapTheoryData))]
-        public void RsaUnwrapParameterCheck(RsaKeyWrapTestParams theoryParams)
+        public void RsaUnwrapParameterCheck(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.RsaUnwrapParameterCheck", theoryData);
             try
             {
-                var provider = new RsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
-                provider.UnwrapKey(theoryParams.WrappedKey);
+                var provider = new RsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, true);
+                provider.UnwrapKey(theoryData.WrappedKey);
 
-                theoryParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<RsaKeyWrapTestParams> RsaUnwrapTheoryData()
+        public static TheoryData<KeyWrapTheoryData> RsaUnwrapTheoryData()
         {
-            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
-
-            theoryData.Add(new RsaKeyWrapTestParams
+            return new TheoryData<KeyWrapTheoryData>
             {
-                DecryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
-                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
-                WrappedKey = null,
-                EE = ExpectedException.ArgumentNullException(),
-                TestId = "NullKey"
-            });
-
-            theoryData.Add(new RsaKeyWrapTestParams
-            {
-                DecryptAlgorithm = SecurityAlgorithms.RsaPKCS1,
-                DecryptKey = KeyingMaterial.RsaSecurityKey_2048,
-                WrappedKey = new byte[0],
-                EE = ExpectedException.ArgumentNullException(),
-                TestId = "ZeroByteLength"
-            });
-
-            return theoryData;
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException(),
+                    TestId = "NullKey",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrappedKey = null
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException(),
+                    TestId = "ZeroByteLength",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrappedKey = new byte[0]
+                }
+            };
         }
 
         [Theory, MemberData(nameof(RsaWrapUnwrapTheoryData))]
-        public void RsaWrapUnwrapKey(RsaKeyWrapTestParams theoryParams)
+        public void RsaWrapUnwrapKey(KeyWrapTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.RsaWrapUnwrapKey", theoryData);
             try
             {
-                var encryptProvider = new RsaKeyWrapProvider(theoryParams.EncryptKey, theoryParams.EncryptAlgorithm, false);
-                var wrappedKey = encryptProvider.WrapKey(theoryParams.KeyToWrap);
-                var decryptProvider = new DerivedRsaKeyWrapProvider(theoryParams.DecryptKey, theoryParams.DecryptAlgorithm, true);
+                var encryptProvider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, false);
+                var wrappedKey = encryptProvider.WrapKey(theoryData.KeyToWrap);
+                var decryptProvider = new DerivedRsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, true);
                 byte[] unwrappedKey = decryptProvider.UnwrapKey(wrappedKey);
 
-                Assert.True(Utility.AreEqual(unwrappedKey, theoryParams.KeyToWrap), "theoryParams.KeyToWrap != unwrappedKey");
+                if (!Utility.AreEqual(unwrappedKey, theoryData.KeyToWrap))
+                    context.AddDiff("theoryParams.KeyToWrap != unwrappedKey");
 
-                theoryParams.EE.ProcessNoException();
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryParams.EE.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<RsaKeyWrapTestParams> RsaWrapUnwrapTheoryData()
+        public static TheoryData<KeyWrapTheoryData> RsaWrapUnwrapTheoryData()
         {
-            var theoryData = new TheoryData<RsaKeyWrapTestParams>();
+            var theoryData = new TheoryData<KeyWrapTheoryData>();
 
             // round trip positive tests
             AddWrapUnwrapTheoryData(
@@ -363,17 +394,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             string testId,
             string algorithm,
             SecurityKey encryptKey,
-            SecurityKey decryptKey, TheoryData<RsaKeyWrapTestParams> theoryData)
+            SecurityKey decryptKey, TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new RsaKeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
-                DecryptAlgorithm = algorithm,
                 KeyToWrap = Guid.NewGuid().ToByteArray(),
-                EE = ExpectedException.NoExceptionExpected,
-                EncryptKey = encryptKey,
-                DecryptKey = decryptKey,
-                TestId = "AddWrapUnwrapTheoryData_" + testId
+                TestId = "AddWrapUnwrapTheoryData" + testId,
+                UnwrapAlgorithm = algorithm,
+                UnwrapKey = decryptKey,
+                WrapAlgorithm = algorithm,
+                WrapKey = encryptKey
             });
         }
 
@@ -384,31 +414,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             SecurityKey decryptKey,
             byte[] keyToWrap,
             ExpectedException ee,
-            TheoryData<RsaKeyWrapTestParams> theoryData)
+            TheoryData<KeyWrapTheoryData> theoryData)
         {
-            theoryData.Add(new RsaKeyWrapTestParams
+            theoryData.Add(new KeyWrapTheoryData
             {
-                EncryptAlgorithm = algorithm,
-                DecryptAlgorithm = algorithm,
-                EncryptKey = encryptKey,
-                DecryptKey = decryptKey,
+                ExpectedException = ee,
                 KeyToWrap = keyToWrap,
-                EE = ee,
-                TestId = testId
+                TestId = testId,
+                UnwrapAlgorithm = algorithm,
+                UnwrapKey = decryptKey,
+                WrapAlgorithm = algorithm,
+                WrapKey = encryptKey
             });
-        }
-
-        public class RsaKeyWrapTestParams
-        {
-            public string DecryptAlgorithm { get; set; }
-            public SecurityKey DecryptKey { get; set; }
-            public string EncryptAlgorithm { get; set; }
-            public ExpectedException EE { get; set; }
-            public SecurityKey EncryptKey { get; set; }
-            public byte[] KeyToWrap { get; set; }
-            public byte[] WrappedKey { get; set; }
-            public RsaKeyWrapProvider Provider { get; set; }
-            public string TestId { get; set; }
         }
     }
 }

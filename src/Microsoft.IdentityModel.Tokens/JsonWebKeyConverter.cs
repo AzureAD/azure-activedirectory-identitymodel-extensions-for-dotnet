@@ -32,34 +32,45 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Json web key converter
+    /// Converts a <see cref="SecurityKey"/> into a <see cref="JsonWebKey"/>
+    /// Supports: <see cref="RsaSecurityKey"/>, <see cref="X509SecurityKey"/> and <see cref=" SymmetricSecurityKey"/>.
     /// </summary>
     public class JsonWebKeyConverter
     {
         /// <summary>
-        /// Convert security key into json web key.
+        /// Converts a <see cref="SecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
-        /// <param name="key">Security Key</param>
-        /// <returns>json web key</returns>
+        /// <param name="key">a <see cref="SecurityKey"/> to convert.</param>
+        /// <returns>a <see cref="JsonWebKey"/></returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
+        /// <exception cref="NotSupportedException">if <paramref name="key"/>is not a supported type.</exception>
+        /// <remarks>Supports: <see cref="RsaSecurityKey"/>, <see cref="X509SecurityKey"/> and <see cref=" SymmetricSecurityKey"/>.</remarks>
         public static JsonWebKey ConvertFromSecurityKey(SecurityKey key)
         {
-            if (key.GetType() == typeof(RsaSecurityKey))
-                return ConvertFromRSASecurityKey(key as RsaSecurityKey);
-            else if (key.GetType() == typeof(SymmetricSecurityKey))
-                return ConvertFromSymmetricSecurityKey(key as SymmetricSecurityKey);
-            else if (key.GetType() == typeof(X509SecurityKey))
-                return ConvertFromX509SecurityKey(key as X509SecurityKey);
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (key is RsaSecurityKey rsaKey)
+                return ConvertFromRSASecurityKey(rsaKey);
+            else if (key is SymmetricSecurityKey symmetricKey)
+                return ConvertFromSymmetricSecurityKey(symmetricKey);
+            else if (key is X509SecurityKey x509Key)
+                return ConvertFromX509SecurityKey(x509Key);
             else
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, key.GetType().FullName)));
         }
 
         /// <summary>
-        /// Convert RSA security key into json web key.
+        /// Converts a <see cref="RsaSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
-        /// <param name="key">RSA security key</param>
-        /// <returns>json web key</returns>
+        /// <param name="key">a <see cref="RsaSecurityKey"/> to convert.</param>
+        /// <returns>a <see cref="JsonWebKey"/></returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromRSASecurityKey(RsaSecurityKey key)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             var jsonWebKey = new JsonWebKey();
             var parameters = new RSAParameters();
             jsonWebKey.Kty = JsonWebAlgorithmsKeyTypes.RSA;
@@ -84,33 +95,43 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Convert X509 security key into json web key.
+        /// Converts a <see cref="X509SecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
-        /// <param name="key">X509 security key</param>
-        /// <returns>json web key</returns>
+        /// <param name="key">a <see cref="X509SecurityKey"/> to convert.</param>
+        /// <returns>a <see cref="JsonWebKey"/></returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             var jsonWebKey = new JsonWebKey();
             jsonWebKey.Kty = JsonWebAlgorithmsKeyTypes.RSA;
             jsonWebKey.Kid = key.KeyId;
             jsonWebKey.X5t = key.X5t;
             if (key.Certificate.RawData != null)
                 jsonWebKey.X5c.Add(Convert.ToBase64String(key.Certificate.RawData));
+
             return jsonWebKey;
         }
 
         /// <summary>
-        /// Convert Symmetric security key into json web key.
+        /// Converts a <see cref="SymmetricSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
-        /// <param name="key">Symmetric security key</param>
-        /// <returns>json web key</returns>
+        /// <param name="key">a <see cref="SymmetricSecurityKey"/> to convert.</param>
+        /// <returns>a <see cref="JsonWebKey"/></returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromSymmetricSecurityKey(SymmetricSecurityKey key)
         {
-            var jsonWebKey = new JsonWebKey();
-            jsonWebKey.K = Base64UrlEncoder.Encode(key.Key);
-            jsonWebKey.Kid = key.KeyId;
-            jsonWebKey.Kty = JsonWebAlgorithmsKeyTypes.Octet;
-            return jsonWebKey;
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            return new JsonWebKey
+            {
+                K = Base64UrlEncoder.Encode(key.Key),
+                Kid = key.KeyId,
+                Kty = JsonWebAlgorithmsKeyTypes.Octet
+            };
         }
     }
 }

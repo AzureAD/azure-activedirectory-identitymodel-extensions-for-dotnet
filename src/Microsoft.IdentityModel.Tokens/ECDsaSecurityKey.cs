@@ -43,10 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="ecdsa"><see cref="System.Security.Cryptography.ECDsa"/></param>
         public ECDsaSecurityKey(ECDsa ecdsa)
         {
-            if (ecdsa == null)
-                throw LogHelper.LogArgumentNullException("ecdsa");
-
-            ECDsa = ecdsa;
+            ECDsa = ecdsa ?? throw LogHelper.LogArgumentNullException(nameof(ecdsa));
         }
 
         /// <summary>
@@ -68,12 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                     try
                     {
                         // imitate signing
-                        byte[] hash = new byte[20];
-#if NETSTANDARD1_4
-                        ECDsa.SignData(hash, HashAlgorithmName.SHA256);
-#else
-                        ECDsa.SignHash(hash);
-#endif
+                        ECDsa.SignHash(new byte[20]);
                         _hasPrivateKey = true;
                     }
                     catch (CryptographicException)
@@ -81,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
                         _hasPrivateKey = false;
                     }
                 }
+
                 return _hasPrivateKey.Value;
             }
         }

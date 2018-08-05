@@ -48,23 +48,6 @@ namespace Microsoft.IdentityModel.Tests
         public object Object { get; set; }
     }
 
-    public class TokenReplayCache : ITokenReplayCache
-    {
-        public bool OnAddReturnValue { get; set; }
-        
-        public bool OnFindReturnValue { get; set; }
-
-        public bool TryAdd(string nonce, DateTime expiresAt)
-        {
-            return OnAddReturnValue;
-        }
-
-        public bool TryFind(string nonce)
-        {
-            return OnFindReturnValue;
-        }
-    }
-
     public static class TestUtilities
     {
         /// <summary>
@@ -440,7 +423,7 @@ namespace Microsoft.IdentityModel.Tests
 
         public static void XORBytes(byte[] bytes)
         {
-            for (int i=0; i < bytes.Length-1; i++)
+            for (int i = 0; i < bytes.Length - 1; i++)
             {
                 bytes[i] = (byte)(bytes[i] ^ bytes[i + 1]);
             }
@@ -491,6 +474,38 @@ namespace Microsoft.IdentityModel.Tests
                 Console.WriteLine("====================================");
 
             Console.WriteLine(">>>> " + testcase);
+        }
+    }
+
+    public class TokenReplayCache : ITokenReplayCache
+    {
+        public bool OnAddReturnValue { get; set; }
+
+        public bool OnFindReturnValue { get; set; }
+
+        public bool TryAdd(string nonce, DateTime expiresAt)
+        {
+            return OnAddReturnValue;
+        }
+
+        public bool TryFind(string nonce)
+        {
+            return OnFindReturnValue;
+        }
+    }
+
+    public static class TupleListExtensions
+    {
+        public static void Add<T1, T2>(this IList<Tuple<T1, T2>> list,
+                T1 item1, T2 item2)
+        {
+            list.Add(Tuple.Create(item1, item2));
+        }
+
+        public static void Add<T1, T2, T3>(this IList<Tuple<T1, T2, T3>> list,
+                T1 item1, T2 item2, T3 item3)
+        {
+            list.Add(Tuple.Create(item1, item2, item3));
         }
     }
 }

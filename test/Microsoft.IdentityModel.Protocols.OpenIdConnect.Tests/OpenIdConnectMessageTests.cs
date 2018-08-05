@@ -238,12 +238,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
             var context = new CompareContext();
+// there is no net452 target, we bind to net451
 #if NET452
             if(!message.SkuTelemetryValue.Equals("ID_NET451"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NET461
+            if (!message.SkuTelemetryValue.Equals("ID_NET461"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
+
 #elif NETCOREAPP2_0
-            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
 #endif
             IdentityComparer.AreEqual(message.CreateAuthenticationRequestUrl(), expectedMessage, context);
             TestUtilities.AssertFailIfErrors(context);
@@ -500,13 +505,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
 
-            var context = new CompareContext();     
+            var context = new CompareContext();
+// there is no net452 target, we bind to net451
 #if NET452
-            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
+            if (!message.SkuTelemetryValue.Equals("ID_NET451"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+#elif NET461
+            if (!message.SkuTelemetryValue.Equals("ID_NET461"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
+
 #elif NETCOREAPP2_0
-            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD1_4"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD1_4");
+            if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
 #endif
             IdentityComparer.AreEqual(message.CreateLogoutRequestUrl(), expectedMessage, context);
             TestUtilities.AssertFailIfErrors(context);

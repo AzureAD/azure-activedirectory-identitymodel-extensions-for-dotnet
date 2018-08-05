@@ -170,11 +170,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get => new TheoryData<SignatureProviderTheoryData>
             {
                 new SignatureProviderTheoryData("ECDsa1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
-                new SignatureProviderTheoryData("ECDsa2", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public, EE.NotSupportedException("IDX10641:")),
-                new SignatureProviderTheoryData("ECDsa3", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public, EE.NotSupportedException("IDX10641:")),
+                new SignatureProviderTheoryData("ECDsa2", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
+                new SignatureProviderTheoryData("ECDsa3", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
                 new SignatureProviderTheoryData("ECDsa4", ALG.EcdsaSha256Signature, ALG.EcdsaSha256Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
-                new SignatureProviderTheoryData("ECDsa5", ALG.EcdsaSha384Signature, ALG.EcdsaSha384Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public, EE.NotSupportedException("IDX10641:")),
-                new SignatureProviderTheoryData("ECDsa6", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public, EE.NotSupportedException("IDX10641:")),
+                new SignatureProviderTheoryData("ECDsa5", ALG.EcdsaSha384Signature, ALG.EcdsaSha384Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
+                new SignatureProviderTheoryData("ECDsa6", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public),
                 new SignatureProviderTheoryData("ECDsa7", ALG.Aes128Encryption, ALG.EcdsaSha256Signature, KEY.Ecdsa256Key, KEY.Ecdsa256Key_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("ECDsa8", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.Ecdsa384Key, KEY.Ecdsa384Key_Public),
                 new SignatureProviderTheoryData("ECDsa9", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key, KEY.Ecdsa521Key_Public),
@@ -206,7 +206,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("X509SecurityKey6", ALG.RsaSha512Signature, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey7", ALG.Aes128Encryption, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, EE.SecurityTokenInvalidSignatureException()),
-
 #if NET452
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
@@ -225,7 +224,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // .Net Core throws some funky inner exception that GetType() reports as: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
                 new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, new EE(typeof(Exception)){IgnoreExceptionType = true}),
 #endif
-
                 // BadKeys
                 new SignatureProviderTheoryData("BadKeys1", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongX_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),
                 new SignatureProviderTheoryData("BadKeys2", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongY_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),

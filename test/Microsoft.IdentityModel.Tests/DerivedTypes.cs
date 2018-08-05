@@ -165,6 +165,46 @@ namespace Microsoft.IdentityModel.Tests
         }
     }
 
+    public class DerivedRsa : RSA
+    {
+        int _keySize;
+
+        public DerivedRsa(int keySize)
+        {
+            _keySize = keySize;
+        }
+
+        public override int KeySize
+        {
+            get => _keySize;
+            set => _keySize = value;
+        }
+
+        public override string SignatureAlgorithm => throw new NotImplementedException();
+
+        public override string KeyExchangeAlgorithm => throw new NotImplementedException();
+
+        public override byte[] DecryptValue(byte[] rgb)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override byte[] EncryptValue(byte[] rgb)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override RSAParameters ExportParameters(bool includePrivateParameters)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ImportParameters(RSAParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class DerivedRsaKeyWrapProvider : RsaKeyWrapProvider
     {
         public DerivedRsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)

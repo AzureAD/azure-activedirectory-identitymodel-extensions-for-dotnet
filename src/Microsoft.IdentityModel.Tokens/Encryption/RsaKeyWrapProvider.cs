@@ -36,25 +36,20 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
-#if NETSTANDARD1_4
-        private RSA _rsa;
-#else
-        private RSACryptoServiceProvider _rsaCryptoServiceProvider;
-        private RSACryptoServiceProviderProxy _rsaCryptoServiceProviderProxy;
-#endif
-        private bool _shouldDisposeRsa;
+        private AsymmetricAdapter _asymmetricAdapter;
         private bool _disposed = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RsaKeyWrapProvider"/> class used for wrap key and unwrap key.
-        /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
+        /// Initializes a new instance of <see cref="RsaKeyWrapProvider"/> used for wrapping and un-wrappping keys.
+        /// These keys are usually symmetric session keys that are wrapped using the recipients public key.
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
         /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
-        /// <param name="willUnwrap">Whether this <see cref="RsaKeyWrapProvider"/> is required to create decrypts then set this to true.</param>
+        /// <param name="willUnwrap">Whether this <see cref="RsaKeyWrapProvider"/> is required to un-wrap keys. If true, the private key is required.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null.</exception>
-        /// <exception cref="ArgumentException">The keysize doesn't match the algorithm.</exception>
+        /// <exception cref="ArgumentException">The key size doesn't match the algorithm.</exception>
         /// <exception cref="ArgumentException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="InvalidOperationException">Failed to create RSA algorithm with provided key and algorithm.</exception>
+        /// <exception cref="NotSupportedException">Failed to create RSA algorithm with provided key and algorithm.</exception>
         /// </summary>
         public RsaKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
         {
@@ -70,34 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
             Algorithm = algorithm;
             Key = key;
 
-            var rsaAlgorithm = Utility.ResolveRsaAlgorithm(key, algorithm, willUnwrap);
-
-#if NETSTANDARD1_4
-            if (rsaAlgorithm != null && rsaAlgorithm.Rsa != null)
-            {
-                _rsa = rsaAlgorithm.Rsa;
-                _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                return;
-            }
-#else
-            if (rsaAlgorithm != null)
-            {
-                if (rsaAlgorithm.RsaCryptoServiceProvider != null)
-                {
-                    _rsaCryptoServiceProvider = rsaAlgorithm.RsaCryptoServiceProvider;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-
-                if (rsaAlgorithm.RsaCryptoServiceProviderProxy != null)
-                {
-                    _rsaCryptoServiceProviderProxy = rsaAlgorithm.RsaCryptoServiceProviderProxy;
-                    _shouldDisposeRsa = rsaAlgorithm.ShouldDispose;
-                    return;
-                }
-            }
-#endif
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
+            _asymmetricAdapter = new AsymmetricAdapter(key, algorithm, willUnwrap);
         }
 
         /// <summary>
@@ -108,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
-        /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
+        /// <remarks>This is null by default. This is for use by the application and not used by this SDK.</remarks>
         public override string Context { get; set; }
 
         /// <summary>
@@ -126,17 +94,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (disposing)
                 {
-#if NETSTANDARD1_4
-                    if (_rsa != null && _shouldDisposeRsa)
-                        _rsa.Dispose();
-#else
-                    if (_rsaCryptoServiceProvider != null && _shouldDisposeRsa)
-                        _rsaCryptoServiceProvider.Dispose();
-
-                    if (_rsaCryptoServiceProviderProxy != null)
-                        _rsaCryptoServiceProviderProxy.Dispose();
-#endif
                     _disposed = true;
+                    _asymmetricAdapter.Dispose();
                 }
             }
         }
@@ -156,36 +115,9 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             if (key.KeySize < 2048)
-            {
                 return false;
-            }
 
-            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-             || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-             || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
-            {
-                if (key as RsaSecurityKey != null)
-                    return true;
-
-                var x509Key = key as X509SecurityKey;
-                if (x509Key != null)
-                {
-#if NETSTANDARD1_4
-                    if (x509Key.PublicKey as RSA != null)
-                        return true;
-#else
-                    if (x509Key.PublicKey as RSACryptoServiceProvider != null)
-                        return true;
-#endif
-                    return false;
-                }
-
-                var jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return true;
-            }
-
-            return false;
+            return SupportedAlgorithms.IsSupportedKeyWrapAlgorithm(algorithm, key);
         }
 
         /// <summary>
@@ -200,41 +132,19 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] UnwrapKey(byte[] keyBytes)
         {
             if (keyBytes == null || keyBytes.Length == 0)
-                throw LogHelper.LogArgumentNullException("wrappedKey");
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
-            var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
-                        ? RSAEncryptionPadding.OaepSHA1
-                        : RSAEncryptionPadding.Pkcs1;
             try
             {
-                if (_rsa != null)
-                    return _rsa.Decrypt(keyBytes, padding);
+                return _asymmetricAdapter.Decrypt(keyBytes);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10659, ex)));
             }
-#else
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                      || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
-            try
-            {
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Decrypt(keyBytes, fOAEP);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Decrypt(keyBytes, fOAEP);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10659, ex)));
-            }
-#endif
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, Algorithm)));
         }
 
         /// <summary>
@@ -254,36 +164,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-#if NETSTANDARD1_4
-            var padding = (Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                        || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
-                        ? RSAEncryptionPadding.OaepSHA1
-                        : RSAEncryptionPadding.Pkcs1;
             try
             {
-                if (_rsa != null)
-                    return _rsa.Encrypt(keyBytes, padding);
+                return _asymmetricAdapter.Encrypt(keyBytes);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex)));
             }
-#else
-            bool fOAEP = Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                      || Algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
-            try
-            {
-                if (_rsaCryptoServiceProvider != null)
-                    return _rsaCryptoServiceProvider.Encrypt(keyBytes, fOAEP);
-                else if (_rsaCryptoServiceProviderProxy != null)
-                    return _rsaCryptoServiceProviderProxy.Encrypt(keyBytes, fOAEP);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex)));
-            }
-#endif
-            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10644, Algorithm)));
         }
     }
 }

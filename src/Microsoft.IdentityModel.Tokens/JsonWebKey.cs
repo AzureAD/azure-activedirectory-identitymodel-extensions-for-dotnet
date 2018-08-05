@@ -333,10 +333,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (Y == null)
                 throw LogHelper.LogArgumentNullException(nameof(Y));
 
-            int keySize = GetKeySize(Crv);
-            if (!Utility.ValidateECDSAKeySize(keySize, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("keySize", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(keySize), ECDsaAlgorithm.DefaultECDsaKeySizeInBitsMap[algorithm], keySize)));
-
             GCHandle keyBlobHandle = new GCHandle();
             try
             {

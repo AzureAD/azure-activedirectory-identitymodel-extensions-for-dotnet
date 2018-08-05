@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return cryptoProvider;
             }
 
-            if (IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
+            if (SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
                 return new AuthenticatedEncryptionProvider(key, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
@@ -173,25 +173,25 @@ namespace Microsoft.IdentityModel.Tokens
                 return keyWrapProvider;
             }
 
-            if (key is RsaSecurityKey rsaKey && IsSupportedRsaAlgorithm(algorithm))
+            if (key is RsaSecurityKey rsaKey && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
                 return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
-            if (key is X509SecurityKey x509Key && IsSupportedRsaAlgorithm(algorithm))
+            if (key is X509SecurityKey x509Key && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
                 return new RsaKeyWrapProvider(x509Key, algorithm, willUnwrap);
 
             if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA && IsSupportedRsaAlgorithm(algorithm))
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
                 {
                     return new RsaKeyWrapProvider(jsonWebKey, algorithm, willUnwrap);
                 }
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet && IsSupportedSymmetricAlgorithm(algorithm))
+                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet && SupportedAlgorithms.IsSupportedSymmetricAlgorithm(algorithm))
                 {
                     return new SymmetricKeyWrapProvider(jsonWebKey, algorithm);
                 }
             }
 
-            if (key is SymmetricSecurityKey symmetricKey && IsSupportedSymmetricAlgorithm(algorithm))
+            if (key is SymmetricSecurityKey symmetricKey && SupportedAlgorithms.IsSupportedSymmetricAlgorithm(algorithm))
                 return new SymmetricKeyWrapProvider(symmetricKey, algorithm);
 
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
@@ -249,6 +249,40 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateSignatureProvider(key, algorithm, false);
         }
 
+#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
+        /// <summary>
+        /// Returns a <see cref="HashAlgorithm"/> for a specific algorithm.
+        /// </summary>
+        /// <param name="algorithm">the name of the hash algorithm to create.</param>
+        /// <returns>A <see cref="HashAlgorithm"/></returns>
+        /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.</remarks>
+        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">'algorithm' is not supported.</exception>
+        public virtual HashAlgorithm CreateHashAlgorithm(HashAlgorithmName algorithm)
+        {
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm.Name))
+            {
+                if (!(CustomCryptoProvider.Create(algorithm.Name) is HashAlgorithm hashAlgorithm))
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, algorithm, typeof(HashAlgorithm))));
+
+                _typeToAlgorithmMap[hashAlgorithm.GetType().ToString()] = algorithm.Name;
+
+                return hashAlgorithm;
+            }
+
+            if (algorithm == HashAlgorithmName.SHA256)
+                    return SHA256.Create();
+
+            if (algorithm == HashAlgorithmName.SHA384)
+                return SHA384.Create();
+
+            if (algorithm == HashAlgorithmName.SHA512)
+                return SHA512.Create();
+
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10640, algorithm)));
+        }
+#endif
+
         /// <summary>
         /// Returns a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>
@@ -264,8 +298,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
             {
-                var hashAlgorithm = CustomCryptoProvider.Create(algorithm) as HashAlgorithm;
-                if (hashAlgorithm == null)
+                if (!(CustomCryptoProvider.Create(algorithm) is HashAlgorithm hashAlgorithm))
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, algorithm, typeof(HashAlgorithm))));
 
                 _typeToAlgorithmMap[hashAlgorithm.GetType().ToString()] = algorithm;
@@ -310,8 +343,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, keyBytes))
             {
-                var keyedHashAlgorithm = CustomCryptoProvider.Create(algorithm, keyBytes) as KeyedHashAlgorithm;
-                if (keyedHashAlgorithm == null)
+                if (!(CustomCryptoProvider.Create(algorithm, keyBytes) is KeyedHashAlgorithm keyedHashAlgorithm))
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, algorithm, typeof(KeyedHashAlgorithm))));
 
                 return keyedHashAlgorithm;
@@ -398,7 +430,7 @@ namespace Microsoft.IdentityModel.Tokens
                         return signatureProvider;
 
                     if (createAsymmetric)
-                        signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+                        signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
                     else
                         signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
@@ -427,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm))
                 return true;
 
-            return IsSupportedHashAlgorithm(algorithm);
+            return SupportedAlgorithms.IsSupportedHashAlgorithm(algorithm);
         }
 
         /// <summary>
@@ -441,170 +473,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
                 return true;
 
-            if (key as RsaSecurityKey != null)
-                return IsSupportedRsaAlgorithm(algorithm);
-
-            if (key is X509SecurityKey x509Key)
-            {
-#if NETSTANDARD1_4
-                if (x509Key.PublicKey as RSA == null)
-                    return false;
-#else
-                if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                    return false;
-#endif
-                return IsSupportedRsaAlgorithm(algorithm);
-            }
-
-            if (key is JsonWebKey jsonWebKey)
-            {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return IsSupportedRsaAlgorithm(algorithm);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                    return IsSupportedEcdsaAlgorithm(algorithm);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return IsSupportedSymmetricAlgorithm(algorithm);
-
-                return false;
-            }
-
-            if (key is ECDsaSecurityKey ecdsaSecurityKey)
-                return IsSupportedEcdsaAlgorithm(algorithm);
-
-            if (key as SymmetricSecurityKey != null)
-                return IsSupportedSymmetricAlgorithm(algorithm);
-
-            return false;
-        }
-
-        private bool IsSupportedAuthenticatedEncryptionAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
-                return false;
-
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            if (key is JsonWebKey jsonWebKey)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
-
-            return false;
-        }
-
-        private bool IsSupportedEcdsaAlgorithm(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsSupportedHashAlgorithm(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Sha256:
-                case SecurityAlgorithms.Sha256Digest:
-                case SecurityAlgorithms.Sha384:
-                case SecurityAlgorithms.Sha384Digest:
-                case SecurityAlgorithms.Sha512:
-                case SecurityAlgorithms.Sha512Digest:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        private bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
-            {
-                if (key is RsaSecurityKey)
-                    return true;
-
-                if (key is X509SecurityKey x509Key)
-                {
-#if NETSTANDARD1_4
-                    if (x509Key.PublicKey as RSA == null)
-                        return false;
-#else
-                    if (x509Key.PublicKey as RSACryptoServiceProvider == null)
-                        return false;
-#endif
-                }
-
-                if (key is JsonWebKey jsonWebKey && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return true;
-
-                return false;
-            }
-
-            return false;
-        }
-
-        private bool IsSupportedRsaAlgorithm(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                case SecurityAlgorithms.RsaOAEP:
-                case SecurityAlgorithms.RsaPKCS1:
-                case SecurityAlgorithms.RsaOaepKeyWrap:
-                    return true;
-            }
-
-            return false;
-        }
-
-        private bool IsSupportedSymmetricAlgorithm(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                case SecurityAlgorithms.Aes192CbcHmacSha384:
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                case SecurityAlgorithms.Aes128KW:
-                case SecurityAlgorithms.Aes256KW:
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha256:
-                case SecurityAlgorithms.HmacSha384:
-                case SecurityAlgorithms.HmacSha512:
-                    return true;
-            }
-
-            return false;
+            return SupportedAlgorithms.IsSupportedAlgorithm(algorithm, key);
         }
 
         /// <summary>

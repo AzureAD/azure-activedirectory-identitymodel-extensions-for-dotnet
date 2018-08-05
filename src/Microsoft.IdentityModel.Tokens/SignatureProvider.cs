@@ -40,8 +40,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
-        /// <exception cref="ArgumentNullException">'key' is null.</exception>
-        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="algorithm"/> is null or empty.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)
         {
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
         /// </summary>
+        /// <remarks>This is null by default. This is for use by the application and not used by this SDK.</remarks>
         public string Context { get; set; }
 
         /// <summary>
@@ -90,10 +91,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>signed bytes</returns>
         public abstract byte[] Sign(byte[] input);
 
-        /// <summary>
-        /// This must be overridden to verify a signature created over the 'input'.
-        /// </summary>
-        /// <param name="input">bytes to verify.</param>
+        /// Verifies that the <paramref name="signature"/> over <paramref name="input"/> using the
+        /// <see cref="SecurityKey"/> and <see cref="SignatureProvider.Algorithm"/> specified by this
+        /// <see cref="SignatureProvider"/> are consistent.
+        /// <param name="input">the bytes that were signed.</param>
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
         public abstract bool Verify(byte[] input, byte[] signature);
