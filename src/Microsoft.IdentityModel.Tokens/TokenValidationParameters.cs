@@ -163,6 +163,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReplayValidator = other.TokenReplayValidator;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
+            PropertyBag = other.PropertyBag;
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
             RoleClaimType = other.RoleClaimType;
@@ -498,6 +499,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// after validating a token.
         /// </summary>
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of parameters that could be used in custom token validation scenarios.
+        /// </summary>
+        public IDictionary<string, Object> PropertyBag
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether tokens must have an 'expiration' value.
