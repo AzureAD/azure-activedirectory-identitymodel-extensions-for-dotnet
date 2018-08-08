@@ -60,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.AudienceValidator != null)
             {
-                validationParameters.AudienceValidator(audiences, securityToken, validationParameters);
                 if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken))
                     {
