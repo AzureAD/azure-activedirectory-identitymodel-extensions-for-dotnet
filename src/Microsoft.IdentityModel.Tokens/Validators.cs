@@ -28,6 +28,7 @@
 using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -206,16 +207,21 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
-            if (x509SecurityKey != null)
+            if (x509SecurityKey?.Certificate is X509Certificate2 cert)
             {
-                var cert = x509SecurityKey.Certificate;
                 DateTime utcNow = DateTime.UtcNow;
+                var notBeforeUtc = cert.NotBefore.ToUniversalTime();
+                var notAfterUtc = cert.NotAfter.ToUniversalTime();
 
-                if (cert.NotBefore != null && (cert.NotBefore > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10248, cert.NotBefore, utcNow)));
+                if (notBeforeUtc > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10248, notBeforeUtc, utcNow)));
 
-                if (cert.NotAfter != null && (cert.NotAfter < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10249, cert.NotAfter, utcNow)));
+                LogHelper.LogInformation(LogMessages.IDX10250, notBeforeUtc, utcNow);
+
+                if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10249, notAfterUtc, utcNow)));
+
+                LogHelper.LogInformation(LogMessages.IDX10251, notAfterUtc, utcNow);
             }
         }
 
