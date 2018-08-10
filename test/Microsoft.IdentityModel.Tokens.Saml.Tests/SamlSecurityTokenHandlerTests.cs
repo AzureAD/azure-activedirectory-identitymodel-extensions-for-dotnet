@@ -326,6 +326,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
         }
 
+        // Test checks to make sure that default times are correctly added to the token
+        // upon token creation.
+        [Fact]
+        public void SetDefaultTimesOnTokenCreation()
+        {
+            TestUtilities.WriteHeader($"{this}.SetDefaultTimesOnTokenCreation");
+            var context = new CompareContext();
+
+            var tokenHandler = new SamlSecurityTokenHandler();
+            var descriptorNoTimeValues = new SecurityTokenDescriptor()
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = Default.AsymmetricSigningCredentials
+            };
+
+            var token = tokenHandler.CreateToken(descriptorNoTimeValues);
+            var samlSecurityToken = token as SamlSecurityToken;
+
+            Assert.NotEqual(DateTime.MinValue, samlSecurityToken.ValidFrom);
+            Assert.NotEqual(DateTime.MinValue, samlSecurityToken.ValidTo);
+        }
+
         [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
         public void ValidateAudience(SamlTheoryData theoryData)
         {
