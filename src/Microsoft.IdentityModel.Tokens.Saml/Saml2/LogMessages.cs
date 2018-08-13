@@ -80,7 +80,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13139 = "IDX13139: Uri must be an AbsoluteUri is: '{0}'";
         internal const string IDX13140 = "IDX13140: EncryptedId is not supported. You will need to override ReadEncryptedId and provide support.";
         internal const string IDX13141 = "IDX13141: EncryptedAssertion is not supported. You will need to override ReadAssertion and provide support.";
-        internal const string IDX13311 = "IDX13311: 'Saml2Action' must have a value.";
         internal const string IDX13313 = "IDX13313: 'AuthnStatement' cannot be empty.";
         internal const string IDX13312 = "IDX13312: 'AuthnContext' cannot be empty.";
         internal const string IDX13314 = "IDX13314: 'AuthzDecisionStatement' cannot be empty (must have at least one 'Subject').";
@@ -91,15 +90,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13150 = "IDX13150: The Saml2SecurityTokenHandler can only write a token was of type: '{0}'.";
         internal const string IDX13151 = "IDX13151: Cannot write '{0}' because '{1}' is null or empty.";
         internal const string IDX13300 = "IDX13300: '{0}' must be an absolute Uri, was: '{1}'";
-        internal const string IDX13301 = "IDX13301: Encryption is not supported in writing saml2 assertion.";
         internal const string IDX13302 = "IDX13302: An assertion with no statements must contain a 'Subject' element.";
         internal const string IDX13303 = "IDX13303: 'Subject' is required in Saml2Assertion for built-in statement type.";
         internal const string IDX13304 = "IDX13304: Encryption is not supported in writing saml2 nameIdentifier.";
         internal const string IDX13305 = "IDX13305: Both id and subjectconfirmation are null in saml2 subject: '{0}'.";
         internal const string IDX13306 = "IDX13306: Multiple name identifier claim is not allowed in tokenDescriptor.Subject.Claims.";
-        internal const string IDX13307 = "IDX13307: Authentication method is null when creating AuthenticationStatement for SamlSecurityToken.";
-        internal const string IDX13308 = "IDX13308: Authentication instant is null when creating AuthenticationInstant for SamlSecurityToken.";
-        internal const string IDX13309 = "IDX13309: Encrypting key cannot be a AsymmetricSecurityKey.";
         internal const string IDX13310 = "IDX13310: SAML2 AuthorizationDecision DecisionType must be 'Permit', 'Deny' or 'Indeterminate'.";
 
         // IDX11900 - AuthorizationDecisionStatement

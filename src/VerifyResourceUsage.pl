@@ -27,6 +27,7 @@ my $THERE_ARE_ERRORS = (1==0);
 my $ERROR = "verify_resource_usage.pl(): error";
 my $WARN = "verify_resource_usage.pl(): warning";
 my $TELL = "BUILDMSG:";
+my $EXITCODE = 0;
 
 my $CROP_FILE_PATH_AT = "src";
 
@@ -34,6 +35,7 @@ my $CROP_FILE_PATH_AT = "src";
 sub PrintError($)
 {
     my $s = shift;
+    $EXITCODE = -1;
     if ($ERRORS_ONLY_MODE)
     {
         print "$ERROR $s";
@@ -180,6 +182,32 @@ sub PrintBadArgCount($$$$$$)
     PrintError("And by the way, $id=\"$resource\"\n");
 }
 
+sub VerifyNumBraces($$)
+{
+    my $id = shift;
+    my $formatString = shift;
+    my @braces;
+
+    foreach my $char (split //, $formatString) {
+        if($char eq "{") {
+            push @braces, $char
+        } elsif ($char eq "}") {
+            if (@braces == 0) {
+                PrintError("The following format string has mismatching braces.\n");
+                PrintError("$id =$formatString\n");
+                return;
+            } else {
+                pop @braces
+            }
+        }
+    }
+
+    if (@braces != 0) {
+          PrintError("The following format string has mismatching braces.\n");
+          PrintError("$id = $formatString\n");
+    }
+}
+
 ######################################################################
 
 sub EnsureArgCountCorrect($$$$$$)
@@ -251,6 +279,7 @@ foreach my $directory (@directories)
         my $value = $2;  # rest is actual resource string value
 
         my $numArgs = CountArgs($id, $value);
+        VerifyNumBraces($id, $value);
         $ids{$id} = [0,$numArgs,$value];
         # go through each directory that we've processed so far
         foreach my $directory2 (keys(%dirhash))
@@ -354,3 +383,5 @@ foreach my $directory (@directories)
 
     Print("--------------\n\n");
 }
+
+exit $EXITCODE;
