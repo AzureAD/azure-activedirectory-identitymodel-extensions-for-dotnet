@@ -504,6 +504,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 
         private class Saml2SerializerPublic : Saml2Serializer
         {
+            public Saml2SerializerPublic() : base(new EncryptedAssertionHandler())
+            {
+
+            }
+
             public Saml2Action ReadActionPublic(XmlDictionaryReader reader)
             {
                 return base.ReadAction(reader);

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -429,6 +430,35 @@ namespace Microsoft.IdentityModel.Xml
                 Array.Copy(prefixes, result, count);
                 return result;
             }
+        }
+
+#if NET45 || NET451
+        private static readonly XmlReaderSettings SafeXmlReaderSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit };
+#else
+        private static readonly XmlReaderSettings SafeXmlReaderSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
+#endif
+
+        /// <summary>
+        /// Creates an instance of a default <see cref="XmlReader"/>.
+        /// The caller is responsible for disposing of the returned XmlDictionaryReader.
+        /// </summary>
+        /// <param name="input">The string to which the underlying <see cref="StringReader"/> should be initialized.</param>
+        /// <returns>An instance of <see cref="XmlReader"/>.</returns>
+        public static XmlReader CreateDefaultXmlReader(string input)
+        {
+            var stringReader = new StringReader(input);
+            return XmlReader.Create(stringReader, SafeXmlReaderSettings);
+        }
+
+        /// <summary>
+        /// Creates an instance of a default <see cref="XmlDictionaryReader"/>.
+        /// The caller is responsible for disposing of the returned XmlDictionaryReader.
+        /// </summary>
+        /// <param name="input">The string to which the underlying <see cref="StringReader"/> should be initialized.</param>
+        /// <returns>An instance of <see cref="XmlDictionaryReader"/>.</returns>
+        public static XmlDictionaryReader CreateDefaultXmlDictionaryReader(string input)
+        {
+            return XmlDictionaryReader.CreateDictionaryReader(CreateDefaultXmlReader(input));
         }
     }
 }

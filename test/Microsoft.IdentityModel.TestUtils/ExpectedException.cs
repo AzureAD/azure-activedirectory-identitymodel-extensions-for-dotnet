@@ -31,6 +31,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -102,6 +103,21 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 return new ExpectedException(typeof(ObjectDisposedException)); 
             } 
+        }
+
+        public static ExpectedException Saml2SecurityTokenEncryptedAssertionEncryptionException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(Saml2SecurityTokenEncryptedAssertionEncryptionException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException Saml2SecurityTokenEncryptedAssertionDecryptionException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(Saml2SecurityTokenEncryptedAssertionDecryptionException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException Saml2SecurityTokenEncryptedAssertionException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(Saml2SecurityTokenEncryptedAssertionException), substringExpected, innerTypeExpected);
         }
 
         public void ProcessException(Exception exception, CompareContext context)

@@ -195,6 +195,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData))]
         public void RoundTripTokensUsingCache(JwtTheoryData theoryData)
         {
+#pragma warning disable 0618
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
             var encodedJwt1 = handler.CreateEncodedJwt(theoryData.TokenDescriptor);
@@ -227,6 +228,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 theoryData.TokenDescriptor.IssuedAt,
                 theoryData.TokenDescriptor.SigningCredentials,
                 theoryData.TokenDescriptor.EncryptingCredentials);
+#pragma warning restore 0618
             var encodedJwt3 = handler.WriteToken(jwtToken3);
             var encodedJwt4 = handler.WriteToken(jwtToken4);
             var encodedJwt5 = handler.WriteToken(jwtToken5);
@@ -417,6 +419,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
         public void RoundTripTokens(JwtTheoryData theoryData)
         {
+#pragma warning disable 0618
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
             var encodedJwt1 = handler.CreateEncodedJwt(theoryData.TokenDescriptor);
@@ -449,6 +452,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 theoryData.TokenDescriptor.IssuedAt,
                 theoryData.TokenDescriptor.SigningCredentials,
                 theoryData.TokenDescriptor.EncryptingCredentials);
+#pragma warning restore 0618
             var encodedJwt3 = handler.WriteToken(jwtToken3);
             var encodedJwt4 = handler.WriteToken(jwtToken4);
             var encodedJwt5 = handler.WriteToken(jwtToken5);
@@ -713,7 +717,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 (
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
+#pragma warning disable 0618
                 tokenDescriptor.Subject,
+#pragma warning restore 0618
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
@@ -823,7 +829,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
                 "RsaOaepKeyWrap-Aes128CbcHmacSha256",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
@@ -831,7 +837,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
+            theoryData.Add(
+                "WrongRsaOaepKeyWrapIdentifier-Aes128CbcHmacSha256",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
             theoryData.Add(
                 "RsaOaepKeyWrap-Aes192CbcHmacSha384",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
@@ -839,9 +853,25 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512);
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            theoryData.Add(
+                "WrongRsaOaepKeyWrapIdentifier-Aes192CbcHmacSha384",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512);
             theoryData.Add(
                 "RsaOaepKeyWrap-Aes256CbcHmacSha512",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512);
+            theoryData.Add(
+                "WrongRsaOaepKeyWrapIdentifier-Aes256CbcHmacSha512",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -888,9 +918,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
             theoryData.Add(
                 "RsaOaepKeyWrap-Aes192CbcHmacSha384",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384);
+            theoryData.Add(
+                "WrongRsaOaepKeyWrapIdentifier-Aes192CbcHmacSha384",
                 Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
@@ -1144,7 +1182,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256),
                 SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256),
+#pragma warning disable 0618
                 Subject = ClaimSets.DefaultClaimsIdentity
+#pragma warning restore 0618
             };
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.CreateJwtSecurityToken(tokenDescriptor);

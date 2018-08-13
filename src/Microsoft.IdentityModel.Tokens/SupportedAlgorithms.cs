@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens
             // RSA-PSS is not available on .NET 4.5
             LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
-#elif NET461 || NETSTANDARD2_0
+#elif NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
             // RSACryptoServiceProvider doesn't support RSA-PSS
             if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
             {

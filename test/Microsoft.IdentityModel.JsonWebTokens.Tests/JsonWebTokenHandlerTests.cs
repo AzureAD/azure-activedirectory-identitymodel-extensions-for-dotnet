@@ -268,7 +268,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            #pragma warning disable 0618
                             Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            #pragma warning restore 0618
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         JwtSecurityTokenHandler = tokenHandler,
@@ -692,7 +694,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            #pragma warning disable 0618
                             Subject = new ClaimsIdentity(Default.PayloadClaims)
+                            #pragma warning restore 0618
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         JwtSecurityTokenHandler = tokenHandler,
@@ -1708,6 +1712,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
+                    },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "WrongRsaOaepKeyWrapIdentifier-Aes128CbcHmacSha256",
+                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
                     new CreateTokenTheoryData()
@@ -1716,11 +1728,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
+                    },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "WrongRsaOaepKeyWrapIdentifier-Aes192CbcHmacSha384",
+                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes256CbcHmacSha512",
+                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512)
+                    },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "WrongRsaOaepKeyWrapIdentifier-Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
@@ -1745,6 +1773,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
+                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepMgf1pKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
+                    },
+                     new CreateTokenTheoryData()
+                    {
+                        TestId = "WrongRsaOaepKeyWrapIdentifier-Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,

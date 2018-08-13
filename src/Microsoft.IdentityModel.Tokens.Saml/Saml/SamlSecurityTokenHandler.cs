@@ -34,6 +34,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -150,16 +151,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             try
             {
-                using (var sr = new StringReader(securityToken))
+                using (var reader = XmlUtil.CreateDefaultXmlDictionaryReader(securityToken))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
 #if NET45
                     settings.XmlResolver = null;
 #endif
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
-                    {
-                        return CanReadToken(reader);
-                    }
+                    return CanReadToken(reader);
                 }
             }
             catch (Exception)

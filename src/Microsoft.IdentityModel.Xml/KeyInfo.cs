@@ -30,7 +30,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens;
+using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -96,6 +98,15 @@ namespace Microsoft.IdentityModel.Xml
         /// Gets or sets the Uri associated with the RetrievalMethod
         /// </summary>
         public string RetrievalMethodUri
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the Type associated with the RetrievalMethod
+        /// </summary>
+        public string RetrievalMethodType
         {
             get;
             set;
@@ -228,6 +239,144 @@ namespace Microsoft.IdentityModel.Xml
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writer"></param>
+        internal void WriteXml(XmlWriter writer)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            if (!AnythingToWrite())
+                return;
+
+            writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
+
+            if (!string.IsNullOrEmpty(KeyName))
+            {
+                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.KeyName, null);
+                writer.WriteValue(KeyName);
+                writer.WriteEndElement();
+            }
+
+            if (!string.IsNullOrEmpty(RetrievalMethodUri))
+            {
+                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.RetrievalMethod, null);
+                writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Uri, null, RetrievalMethodUri);
+                if (!string.IsNullOrEmpty(RetrievalMethodType))
+                    writer.WriteAttributeString(XmlEncryptionConstants.Attributes.Type, null, RetrievalMethodType);
+                writer.WriteEndElement();
+            }
+
+            if (X509Data.Count != 0)
+            {
+                writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509Data, null);
+
+                // use only first element from the collection
+                var enumerator = X509Data.GetEnumerator();
+                enumerator.MoveNext();
+                var _x509Data = enumerator.Current;
+
+                if (_x509Data.Certificates.Count != 0)
+                {
+                    foreach (var certificate in _x509Data.Certificates)
+                    {
+                        writer.WriteStartElement(XmlSignatureConstants.PreferredPrefix, XmlSignatureConstants.Elements.X509Certificate, null);
+                        writer.WriteValue(certificate);
+                        writer.WriteEndElement();
+                    }
+                }
+
+                writer.WriteEndElement(); // </X509Data>
+            }
+
+            writer.WriteEndElement(); // </KeyInfo>
+        }
+
+        internal void ReadXml(XmlDictionaryReader reader)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace))
+            {
+                if (reader.IsEmptyElement)
+                {
+                    reader.Skip();
+                    return;
+                }
+
+                reader.ReadStartElement(XmlSignatureConstants.Elements.KeyInfo, XmlSignatureConstants.Namespace);
+
+                while (reader.IsStartElement())
+                {
+                    if (reader.IsStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace))
+                    {
+                        reader.ReadStartElement(XmlSignatureConstants.Elements.KeyName, XmlSignatureConstants.Namespace);
+                        string __keyName = reader.ReadContentAsString();
+                        if (!string.IsNullOrEmpty(__keyName))
+                        {
+                            KeyName = __keyName;
+                        }
+
+                        reader.Skip();
+                    }
+                    else if (reader.IsStartElement(XmlSignatureConstants.Elements.RetrievalMethod, XmlSignatureConstants.Namespace))
+                    {
+                        string __uri = reader.GetAttribute(XmlEncryptionConstants.Attributes.Uri);
+                        if (!string.IsNullOrEmpty(__uri))
+                        {
+                            RetrievalMethodUri = __uri;
+                        }
+
+                        string __type = reader.GetAttribute(XmlEncryptionConstants.Attributes.Type);
+                        if (!string.IsNullOrEmpty(__type))
+                        {
+                            RetrievalMethodType = __type;
+                        }
+
+                        reader.Skip();
+                    }
+                    else if (reader.IsStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace))
+                    {
+                        reader.ReadStartElement(XmlSignatureConstants.Elements.X509Data, XmlSignatureConstants.Namespace);
+                        while (reader.IsStartElement(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace))
+                        {
+                            reader.ReadStartElement(XmlSignatureConstants.Elements.X509Certificate, XmlSignatureConstants.Namespace);
+                            string __x509Cert = reader.ReadContentAsString();
+                            if (!string.IsNullOrEmpty(__x509Cert))
+                            {
+                                var __x509Data = new X509Data();
+                                __x509Data.Certificates.Add(__x509Cert);
+                                X509Data.Add(__x509Data);
+                            }
+
+                            reader.ReadEndElement();
+                        }
+
+                        reader.Skip();
+                    }
+                    else if (reader.IsStartElement(XmlEncryptionConstants.Elements.EncryptedKey, XmlEncryptionConstants.Namespace))
+                    {
+                        throw XmlUtil.LogReadException(LogMessages.IDX30030);
+                    }
+                    else if (reader.IsStartElement()) // skipped an unknown element (no support for now)
+                    {
+                        LogInformation(LogMessages.IDX30302, reader.LocalName, XmlSignatureConstants.Elements.KeyInfo);
+                        reader.Skip();
+                    }
+                }
+
+                reader.ReadEndElement();
+            }
+        }
+
+        private bool AnythingToWrite()
+        {
+            return !(string.IsNullOrEmpty(KeyName) && string.IsNullOrEmpty(RetrievalMethodUri) && X509Data.Count == 0);
         }
     }
 }

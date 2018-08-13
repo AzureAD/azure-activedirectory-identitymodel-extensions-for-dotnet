@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 
         public string InclusiveNamespacesPrefixList { get; set; }
 
-        public Saml2Serializer Saml2Serializer { get; set; } = new Saml2Serializer();
+        public Saml2Serializer Saml2Serializer { get; set; } = new Saml2Serializer(new EncryptedAssertionHandler());
 
         public Saml2Subject Subject { get; set; }
     }

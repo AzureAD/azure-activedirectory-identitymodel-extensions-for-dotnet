@@ -547,6 +547,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "ID_NET461";
 #elif NETSTANDARD2_0
             "ID_NETSTANDARD2_0";
+#elif NETSTANDARD2_1
+            "ID_NETSTANDARD2_1";
 #endif
 
         /// <summary>

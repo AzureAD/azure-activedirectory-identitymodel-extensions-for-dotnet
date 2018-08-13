@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30027 = "IDX30027: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
         internal const string IDX30028 = "IDX30028: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
         internal const string IDX30029 = "IDX30029: The Reference '{0}' has exceeded the number of Transforms that will be processed: '{1}'. If there is a need to increase the number of Transforms, the DSigSerializer.MaximumReferenceTransforms can be increased. The default value is 10.";
+        internal const string IDX30030 = "IDX30030: EncryptedKey element is embedded withing EncryptedData element. This is currently not supported. Place EncryptedKey element next to associated EncryptedData element, within the enclosing Saml parent element.";
 
         // XML structure, supported exceptions
         internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}'.";
@@ -76,6 +77,9 @@ namespace Microsoft.IdentityModel.Xml
 
         // logging messages
         internal const string IDX30300 = "IDX30300: KeyInfo skipped unknown element: '{0}'.";
+        internal const string IDX30301 = "IDX30301: Skipped loading element: '{0}'. Currently not supported.";
+        internal const string IDX30302 = "IDX30302: Skipped loading element: '{0}' under node: '{1}'. Currently not supported.";
+        internal const string IDX30303 = "IDX30303: Skipped loading unknown reference element: '{0}'.";
 
         // XML writing
         internal const string IDX30401 = "IDX30401: Unable to write XML. {0}.{1} is null or empty.";

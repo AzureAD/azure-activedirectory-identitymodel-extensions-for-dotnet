@@ -43,9 +43,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2Assertion
     {
         private string _canonicalString;
+        private EncryptingCredentials _encryptingCredentials;
         private Saml2Id _id;
         private DateTime _issueInstant;
         private Saml2NameIdentifier _issuer;
+        private Signature _signature;
+        private Saml2Advice _advice;
+        private Saml2Conditions _conditions;
+        private string _inclusiveNamespacesPrefixList;
+        private SigningCredentials _signingCredentials;
+        private Saml2Subject _subject;
+        private List<Saml2Statement> _statements;
 
         /// <summary>
         /// Creates an instance of a Saml2Assertion.
@@ -56,37 +64,58 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             Id = new Saml2Id();
             IssueInstant = DateTime.UtcNow;
             Issuer = issuer;
-            Statements = new List<Saml2Statement>();
+            _statements = new List<Saml2Statement>();
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Signature"/> on the Assertion.
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public Signature Signature
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _signature;
+            }
+            set => _signature = value;
         }
 
         /// <summary>
         /// Gets or sets additional information related to the assertion that assists processing in certain
         /// situations but which may be ignored by applications that do not understand the 
         /// advice or do not wish to make use of it. [Saml2Core, 2.3.3]
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public Saml2Advice Advice
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _advice;
+            }
+            set => _advice = value;
         }
 
         /// <summary>
         /// Gets or sets conditions that must be evaluated when assessing the validity of and/or
         /// when using the assertion. [Saml2Core 2.3.3]
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public Saml2Conditions Conditions
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _conditions;
+            }
+            set => _conditions = value;
         }
 
         /// <summary>
@@ -130,67 +159,140 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
+        /// Gets or sets the credentials used for encrypting the assertion.
+        /// </summary>
+        /// <exception cref="Saml2SecurityTokenEncryptedAssertionException"> If this assertion is encrypted.</exception>
+        public EncryptingCredentials EncryptingCredentials
+        {
+            get
+            {
+                if (Encrypted)
+                    throw LogExceptionMessage(new Saml2SecurityTokenEncryptedAssertionException(FormatInvariant(LogMessages.IDX13608, nameof(EncryptingCredentials))));
+
+                return _encryptingCredentials;
+            }
+            set => _encryptingCredentials = value;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="Saml2Id"/> identifier for this assertion. [Saml2Core, 2.3.3]
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' if null.</exception>
         public Saml2Id Id
         {
-            get => _id;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _id;
+            }
             set => _id = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
         /// Gets or sets the time instant of issue in UTC. [Saml2Core, 2.3.3]
+        /// Returns <see cref="DateTime.MinValue"/> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if 'value' if null.</exception>
         public DateTime IssueInstant
         {
-            get => _issueInstant;
-            set => _issueInstant = DateTimeUtil.ToUniversalTime(value);
+            get
+            {
+                if (Encrypted)
+                    return DateTime.MinValue;
+
+                return _issueInstant;
+            }
+            set
+            {
+                if (value == null)
+                    throw LogArgumentNullException(nameof(value));
+                else
+                    _issueInstant = DateTimeUtil.ToUniversalTime(value);
+            }
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Saml2NameIdentifier"/> as the authority that is making the claim(s) in the assertion. [Saml2Core, 2.3.3]
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'value' if null.</exception>
         public Saml2NameIdentifier Issuer
         {
-            get => _issuer;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _issuer;
+            }
             set => _issuer = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
         /// Gets or sets the a PrefixList to use when there is a need to include InclusiveNamespaces writing token.
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public string InclusiveNamespacesPrefixList
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _inclusiveNamespacesPrefixList;
+            }
+            set => _inclusiveNamespacesPrefixList = value;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used by the issuer to protect the integrity of the assertion.
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public SigningCredentials SigningCredentials
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _signingCredentials;
+            }
+            set => _signingCredentials = value;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="Saml2Subject"/> of the statement(s) in the assertion. [Saml2Core, 2.3.3]
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public Saml2Subject Subject
         {
-            get;
-            set;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _subject;
+            }
+
+            set => _subject = value;
         }
 
         /// <summary>
         /// Gets the <see cref="Saml2Statement"/>(s) regarding the subject.
+        /// Returns <c>null</c> if the <see cref="Saml2Assertion"/> is encrypted.
         /// </summary>
         public ICollection<Saml2Statement> Statements
         {
-            get;
+            get
+            {
+                if (Encrypted)
+                    return null;
+
+                return _statements;
+            }
         }
 
         /// <summary>
@@ -202,5 +304,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         internal XmlTokenStream XmlTokenStream { get; set; }
+
+        /// <summary>
+        /// Indicates if this assertion is Encrypted
+        /// </summary>
+        public bool Encrypted { get; internal set; } = false;
+
+        /// <summary>
+        /// String representation of this EncryptedAssertion
+        /// </summary>
+        public string EncryptedAssertion { get; internal set; }
     }
 }

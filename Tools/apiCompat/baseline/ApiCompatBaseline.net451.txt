@@ -5,3 +5,5 @@ MembersMustExist : Member 'Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenI
 TypesMustExist : Type 'Microsoft.IdentityModel.JsonWebTokens.TokenValidationResult' does not exist in the implementation but it does exist in the contract. 
 MembersMustExist : Member 'Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateToken(System.String, Microsoft.IdentityModel.Tokens.TokenValidationParameters)' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'Microsoft.IdentityModel.Tokens.TokenContext' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer..ctor()' does not exist in the implementation but it does exist in the contract.
+
