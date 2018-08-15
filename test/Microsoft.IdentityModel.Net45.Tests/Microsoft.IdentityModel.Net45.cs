@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Net45.Tests
         [TestMethod]
         public void TestJwtTokenCreationAndValidation()
         {
+            IdentityModelEventSource.ShowPII = true;
             var handler = new JwtSecurityTokenHandler();
             handler.InboundClaimTypeMap.Clear();
             var jwt = handler.CreateEncodedJwt(Default.AsymmetricSignSecurityTokenDescriptor(null));
