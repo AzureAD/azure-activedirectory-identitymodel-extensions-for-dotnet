@@ -113,6 +113,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";
         public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
 
+        internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepKeyWrap;
+        internal const string DefaultSymmetricEncryptionAlgorithm = Aes128CbcHmacSha256;
+
 #pragma warning restore 1591
     }
 }
