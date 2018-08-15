@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     new DelegatingXmlDictionaryReaderTheoryData
                     {
                         DelegatingReader = new DelegatingXmlDictionaryReaderPublic(),
-                        ExpectedException = ExpectedException.InvalidOperationException("IDX14208:"),
+                        ExpectedException = ExpectedException.InvalidOperationException("IDX30027:"),
                         First = true,
                         TestId = "InnerReader-Null"
                     },
