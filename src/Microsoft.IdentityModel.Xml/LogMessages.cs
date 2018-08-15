@@ -49,8 +49,8 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30024 = "IDX30024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX30025 = "IDX30025: Unable to read XML. Expecting XmlReader to be at EndElement: '{0}'. Found XmlNode 'type.name': '{1}.{2}'.";
         internal const string IDX30026 = "IDX30026: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
-        internal const string IDX30027 = "IDX14208: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
-        internal const string IDX30028 = "IDX14209: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
+        internal const string IDX30027 = "IDX30027: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
+        internal const string IDX30028 = "IDX30028: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
 
         // XML structure, supported exceptions
         internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";
@@ -72,7 +72,6 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30211 = "IDX30211: The TransfromFactory does not support the canonicalizing transform: '{0}'.";
         internal const string IDX30212 = "IDX30212: Unable to verify Signature as Signature.SignedInfo is null.";
         internal const string IDX30213 = "IDX30213: The CryptoProviderFactory: '{0}', CreateForSigning returned null for key: '{1}', SignatureMethod: '{2}'.";
-        internal const string IDX30214 = "IDX30214: The CryptoProviderFactory: '{0}', CreateHashAlgorithm returned null for Digest: '{1}'.";
 
         // logging messages
         internal const string IDX30300 = "IDX30300: KeyInfo skipped unknown element: '{0}'.";
@@ -82,7 +81,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30403 = "IDX30403: Unable to write XML. One of the values in Reference.Transforms is null or empty.";
         internal const string IDX30404 = "IDX30404: Unable to write XML. Signature.SignedInfo is null.";
         internal const string IDX30405 = "IDX30405: Unable to write XML. SignedInfo.Reference is null.";
-        internal const string IDX30406 = "IDX14023: Unsupported NodeType: {0}.";
+        internal const string IDX30406 = "IDX30406: Unsupported NodeType: {0}.";
 
         // XML validation
         internal const string IDX30500 = "IDX30500: xsi:type attribute was not found. Expected: '{0}':'{1}'.";
