@@ -417,6 +417,14 @@ namespace Microsoft.IdentityModel.Tests
                 context.Diffs.Add($"!(ex is ArgumentNullException) || !ex.Message.Contains({name})");
         }
 
+        public static void CheckForArgumentException(CompareContext context, string name, Exception ex)
+        {
+            if (ex == null)
+                context.Diffs.Add($"expecting ArgumentException for parameter {name}. Exception is null.");
+            else if (!(ex is ArgumentException) || !ex.Message.Contains(name))
+                context.Diffs.Add($"!(ex is ArgumentException) || !ex.Message.Contains({name})");
+        }
+
         public static byte[] HexToByteArray(string hexString)
         {
             byte[] bytes = new byte[hexString.Length / 2];

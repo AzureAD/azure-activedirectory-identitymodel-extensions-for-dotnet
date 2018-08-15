@@ -117,6 +117,11 @@ namespace Microsoft.IdentityModel.Tests
             get => new X509SecurityKey(KeyingMaterial.DefaultCert_2048_Public);
         }
 
+        public static SecurityKey AsymmetricEncryptionKeyPublic
+        {
+            get => new X509SecurityKey(KeyingMaterial.DefaultCert_2048_Public);
+        }
+
 #if !CrossVersionTokenValidation
         public static TokenValidationParameters AsymmetricEncryptSignTokenValidationParameters
         {
