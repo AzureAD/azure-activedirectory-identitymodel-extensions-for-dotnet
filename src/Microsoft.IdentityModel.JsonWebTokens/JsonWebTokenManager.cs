@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static string GetHeaderCacheKey(SecurityKey securityKey, string algorithm)
         {
-            return $"{securityKey.GetType()}-{securityKey.KeyId}-{algorithm}";
+            return string.Format(CultureInfo.InvariantCulture, "{0}-{1}-{2}", securityKey.GetType(), securityKey.KeyId, algorithm);
         }
 
         internal static string GetHeaderCacheKey(SigningCredentials signingCredentials)

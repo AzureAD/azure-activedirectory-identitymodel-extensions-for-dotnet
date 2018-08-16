@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Globalization;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -80,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
-            return $"{securityKey.GetType()}-{securityKey.KeyId}-{algorithm}-{typeofProvider}";
+            return string.Format(CultureInfo.InvariantCulture, "{0}-{1}-{2}-{3}", securityKey.GetType(), securityKey.KeyId, algorithm, typeofProvider);
         }
 
         /// <summary>
