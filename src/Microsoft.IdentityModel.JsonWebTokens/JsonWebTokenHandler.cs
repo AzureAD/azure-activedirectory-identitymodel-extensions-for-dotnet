@@ -34,33 +34,14 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
-
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
     /// See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
-    public class JsonWebTokenHandler 
+    public class JsonWebTokenHandler : TokenHandler
     {
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-
-        /// <summary>
-        /// Gets and sets the maximum token size in bytes that will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        internal virtual int MaximumTokenSizeInBytes
-        {
-            get { return _maximumTokenSizeInBytes; }
-            set
-            {
-                if (value < 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
-            }
-        }
-
         /// <summary>
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
@@ -82,7 +63,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         /// <returns>
         /// <para>'false' if the token is null or whitespace.</para>
-        /// <para>'false' if token.Length is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</para>
+        /// <para>'false' if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
         /// <para>'true' if the token is in JSON compact serialization format.</para>
         /// </returns>
         public bool CanReadToken(string token)
@@ -171,9 +152,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
             }
 
+            if (SetDefaultTimesOnTokenCreation)
+            {
+                var now = DateTime.UtcNow;
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, out _))
+                    payload.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(now + TimeSpan.FromMinutes(TokenLifetimeInMinutes)).ToString());
+
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, out _))
+                    payload.Add(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(now).ToString());
+
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out _))
+                    payload.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(now).ToString());
+            }
+       
             var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload.ToString(Newtonsoft.Json.Formatting.None)));
             var message = rawHeader + "." + rawPayload;
             var rawSignature = JwtTokenUtilities.CreateEncodedSignature(message, signingCredentials);
+
             if (encryptingCredentials != null)
                 return EncryptToken(message + "." + rawSignature, encryptingCredentials);
             else
@@ -524,7 +519,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.</remarks>
         public JsonWebToken ReadJsonWebToken(string token)
@@ -544,7 +539,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         public SecurityToken ReadToken(string token)
         {
             return ReadJsonWebToken(token);

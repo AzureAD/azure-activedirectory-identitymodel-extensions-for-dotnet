@@ -28,18 +28,14 @@
 using System;
 using System.Security.Claims;
 using System.Xml;
-using static Microsoft.IdentityModel.Logging.LogHelper;
-
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Defines the interface for a Security Token Handler.
     /// </summary>
-    public abstract class SecurityTokenHandler : ISecurityTokenValidator
+    public abstract class SecurityTokenHandler : TokenHandler, ISecurityTokenValidator
     {
-        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
         /// Creates an instance of <see cref="SecurityTokenHandler"/>
@@ -105,22 +101,6 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual bool CanReadToken(string tokenString)
         {
             return false;
-        }
-
-        /// <summary>
-        /// Gets and sets the maximum token size in bytes that will be processed.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public virtual int MaximumTokenSizeInBytes
-        {
-            get { return _maximumTokenSizeInBytes; }
-            set
-            {
-                if (value < 1)
-                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10101, value)));
-
-                _maximumTokenSizeInBytes = value;
-            }
         }
 
         /// <summary>

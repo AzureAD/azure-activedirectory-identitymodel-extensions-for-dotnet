@@ -458,6 +458,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        // Test checks to make sure that default times are correctly added to the token
+        // upon token creation.
+        [Fact]
+        public void SetDefaultTimesOnTokenCreation()
+        {
+            TestUtilities.WriteHeader($"{this}.SetDefaultTimesOnTokenCreation");
+            var context = new CompareContext();
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var payloadWithoutTimeValues = new JObject()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+            };
+
+            var jwtString = tokenHandler.CreateToken(payloadWithoutTimeValues, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+            var jwt = new JsonWebToken(jwtString);
+
+            // DateTime.MinValue is returned if the value of a DateTime claim is not found in the payload
+            Assert.NotEqual(DateTime.MinValue, jwt.IssuedAt);
+            Assert.NotEqual(DateTime.MinValue, jwt.ValidFrom);
+            Assert.NotEqual(DateTime.MinValue, jwt.ValidTo);
+        }
+
         // Test checks to make sure that an access token can be successfully validated by the JsonWebTokenHandler.
         // Also ensures that a non-standard claim can be successfully retrieved from the payload and validated.
         [Fact]

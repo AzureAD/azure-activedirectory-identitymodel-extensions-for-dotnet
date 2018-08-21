@@ -412,7 +412,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets teh <see cref="EncryptingCredentials"/> to use when writing this token.
+        /// Gets the <see cref="EncryptingCredentials"/> to use when writing this token.
         /// </summary>
         public EncryptingCredentials EncryptingCredentials
         {
