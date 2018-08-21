@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'iat' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime IssuedAt => GetDateTime(JwtRegisteredClaimNames.Iat);
+        public DateTime IssuedAt => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Iat, Payload);
 
         /// <summary>
         /// Gets the 'value' of the 'iss' claim { iss, 'value' }.
@@ -291,13 +291,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'nbf' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidFrom => GetDateTime(JwtRegisteredClaimNames.Nbf);
+        public override DateTime ValidFrom => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Nbf, Payload);
 
         /// <summary>
         /// Gets the 'value' of the 'exp' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidTo => GetDateTime(JwtRegisteredClaimNames.Exp);
+        public override DateTime ValidTo => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Exp, Payload);
 
         /// <summary>
         /// Gets the 'value' of the 'x5t' claim { x5t, 'value' }.
@@ -459,46 +459,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return JsonClaimValueTypes.JsonArray;
 
             return objType.ToString();
-        }
-
-        /// <summary>
-        /// Gets the DateTime using the number of seconds from 1970-01-01T0:0:0Z (UTC)
-        /// </summary>
-        /// <param name="key">Claim in the payload that should map to an integer, float, or string.</param>
-        /// <remarks>If the claim is not found, the function returns: DateTime.MinValue
-        /// </remarks>
-        /// <exception cref="FormatException">If the value of the claim cannot be parsed into a long.</exception>
-        /// <returns>The DateTime representation of a claim.</returns>
-        private DateTime GetDateTime(string key)
-        {
-            if (!Payload.TryGetValue(key, out var jToken))
-                return DateTime.MinValue;
-
-            var dateValue = ParseTimeValue(jToken, key);
-
-            var secondsAfterBaseTime = Convert.ToInt64(Math.Truncate(Convert.ToDouble(dateValue, CultureInfo.InvariantCulture)));
-            return EpochTime.DateTime(secondsAfterBaseTime);
-        }
-
-        private long ParseTimeValue(JToken jToken, string claimName)
-        {
-            if (jToken.Type == JTokenType.Integer || jToken.Type == JTokenType.Float)
-            {
-                return (long)jToken;
-            }
-            else if (jToken.Type == JTokenType.String)
-            {
-                if (long.TryParse((string)jToken, out long resultLong))
-                    return resultLong;
-
-                if (float.TryParse((string)jToken, out float resultFloat))
-                    return (long)resultFloat;
-
-                if (double.TryParse((string)jToken, out double resultDouble))
-                    return (long)resultDouble;
-            }
-
-            throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, claimName, jToken.ToString(), typeof(long))));
         }
     }
 }

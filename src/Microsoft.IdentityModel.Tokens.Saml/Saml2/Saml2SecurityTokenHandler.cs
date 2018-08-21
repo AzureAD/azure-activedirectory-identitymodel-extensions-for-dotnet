@@ -46,19 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         private const string _actor = "Actor";
-        private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private Saml2Serializer _serializer = new Saml2Serializer();
-
-        /// <summary>
-        /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
-        /// </summary>
-        public static readonly int DefaultTokenLifetimeInMinutes = 60;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Saml2SecurityTokenHandler"/>.
-        /// </summary>
-        public Saml2SecurityTokenHandler()
-        { }
 
         /// <summary>
         /// Gets or set the <see cref="Saml2Serializer"/> that will be used to read and write a <see cref="Saml2SecurityToken"/>.
@@ -68,30 +56,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get { return _serializer; }
             set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
-        }
-
-        /// <summary>
-        /// Gets or sets a bool that controls if token creation will set default 'NotBefore', 'NotOnOrAfter' and 'IssueInstant' if not specified.
-        /// </summary>
-        /// <remarks>See: <see cref="DefaultTokenLifetimeInMinutes"/>, <see cref="TokenLifetimeInMinutes"/> for defaults and configuration.</remarks>
-        [DefaultValue(true)]
-        public bool SetDefaultTimesOnTokenCreation { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the token lifetime in minutes.
-        /// </summary>
-        /// <remarks>Used by <see cref="CreateToken(SecurityTokenDescriptor)"/> to set the default expiration ('exp'). <see cref="DefaultTokenLifetimeInMinutes"/> for the default.</remarks>
-        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
-        public int TokenLifetimeInMinutes
-        {
-            get { return _defaultTokenLifetimeInMinutes; }
-            set
-            {
-                if (value < 1)
-                    throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(TokenLogMessages.IDX10104, value)));
-
-                _defaultTokenLifetimeInMinutes = value;
-            }
         }
 
         /// <summary>
@@ -222,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validatedToken">The <see cref="Saml2SecurityToken"/> that was validated.</param>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentException"><paramref name="token"/>.Length is greater than <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/>.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">if the <paramref name="token"/> is not well-formed.</exception>
         /// <returns>A <see cref="ClaimsPrincipal"/> representing the identity contained in the token.</returns>
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
@@ -482,7 +446,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
         /// <exception cref="ArgumentNullException"> If <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length $gt; <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
         public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
@@ -507,7 +471,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="token">a Saml2 token as a string.</param>
         /// <exception cref="ArgumentNullException"> If <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length $gt; <see cref="SecurityTokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"> If <paramref name="token"/>.Length $gt; <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
         public override SecurityToken ReadToken(string token)
         {
@@ -654,6 +618,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
+
+            if (tokenDescriptor.Subject == null)
+                throw LogArgumentNullException(nameof(tokenDescriptor.Subject));
 
             var attributes = new List<Saml2Attribute>();
             foreach (Claim claim in tokenDescriptor.Subject.Claims)

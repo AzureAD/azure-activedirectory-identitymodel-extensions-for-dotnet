@@ -710,6 +710,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
+        // Test checks to make sure that default times are correctly added to the token
+        // upon token creation.
+        [Fact]
+        public void SetDefaultTimesOnTokenCreation()
+        {
+            TestUtilities.WriteHeader($"{this}.SetDefaultTimesOnTokenCreation");
+            var context = new CompareContext();
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var descriptorNoTimeValues = new SecurityTokenDescriptor()
+            {
+                Issuer = Default.Issuer,
+                Audience = Default.Audience,
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials
+            };
+
+            var token = tokenHandler.CreateJwtSecurityToken(descriptorNoTimeValues);
+            var jwt = token as JwtSecurityToken;
+
+            Assert.NotNull(jwt.Payload.Iat);
+            Assert.NotNull(jwt.Payload.Nbf);
+            Assert.NotNull(jwt.Payload.Exp);
+        }
+
         [Fact]
         public void ValidateTokenReplay()
         {
