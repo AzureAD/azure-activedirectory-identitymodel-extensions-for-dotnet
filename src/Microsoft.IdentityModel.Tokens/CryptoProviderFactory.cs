@@ -41,6 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
         private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
+        private static object _cacheLock = new object();
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
@@ -383,22 +384,35 @@ namespace Microsoft.IdentityModel.Tokens
             if (typeofSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10621, typeof(SymmetricSignatureProvider), typeof(SecurityKey), typeof(AsymmetricSecurityKey), typeof(SymmetricSecurityKey), key.GetType())));
 
+            if (!IsSupportedAlgorithm(algorithm, key))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
+
             if (CacheSignatureProviders)
             {
                 if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
                     return signatureProvider;
+
+                lock (_cacheLock)
+                {
+                    if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                        return signatureProvider;
+
+                    if (createAsymmetric)
+                        signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+                    else
+                        signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+
+                    CryptoProviderCache.TryAdd(signatureProvider);
+                }
             }
-
-            if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, algorithm, key)));
-
-            if (createAsymmetric)
+            else if (createAsymmetric)
+            {
                 signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+            }
             else
+            { 
                 signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
-
-            if (CacheSignatureProviders)
-                CryptoProviderCache.TryAdd(signatureProvider);
+            }
 
             return signatureProvider;
         }
