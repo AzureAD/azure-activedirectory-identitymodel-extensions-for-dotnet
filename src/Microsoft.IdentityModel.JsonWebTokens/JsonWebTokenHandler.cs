@@ -102,10 +102,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Creates a JWS (Json Web Signature).
         /// </summary>
-        /// <param name="payload">A JObject that represents the JWT token payload.</param>
+        /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWS.</param>
         /// <returns>A JWS in Compact Serialization Format.</returns>
-        public string CreateToken(JObject payload, SigningCredentials signingCredentials)
+        public string CreateToken(string payload, SigningCredentials signingCredentials)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -113,17 +113,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (signingCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
 
-            return CreateTokenPrivate(payload, signingCredentials, null);
+            return CreateTokenPrivate(JObject.Parse(payload), signingCredentials, null);
         }
 
         /// <summary>
         /// Creates a JWE (Json Web Encryption).
         /// </summary>
-        /// <param name="payload">A JObject that represents the JWT token payload.</param>
+        /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
         /// <returns>A JWE in compact serialization format.</returns>
-        public string CreateToken(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
+        public string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (encryptingCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
-            return CreateTokenPrivate(payload, signingCredentials, encryptingCredentials);
+            return CreateTokenPrivate(JObject.Parse(payload), signingCredentials, encryptingCredentials);
         }
 
         private string CreateTokenPrivate(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)

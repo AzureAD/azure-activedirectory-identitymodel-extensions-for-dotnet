@@ -388,6 +388,11 @@ namespace Microsoft.IdentityModel.Tests
             };
         }
 
+        public static string PayloadString 
+        {
+            get => Payload.ToString();
+        }
+
         public static List<Claim> PayloadClaims
         {
            get => new List<Claim>()

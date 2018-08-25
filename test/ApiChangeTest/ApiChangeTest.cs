@@ -48,7 +48,6 @@ namespace ApiChangeTest
 
         private static List<string> _packagesToCheck = new List<string>()
         {
-            "Microsoft.IdentityModel.JsonWebTokens",
             "Microsoft.IdentityModel.Logging",
             "Microsoft.IdentityModel.Protocols",
             "Microsoft.IdentityModel.Protocols.OpenIdConnect",
