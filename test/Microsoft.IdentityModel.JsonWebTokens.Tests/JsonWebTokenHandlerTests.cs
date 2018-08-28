@@ -554,7 +554,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         CompressionAlgorithm = CompressionAlgorithms.Deflate,
                         CompressionProviderFactory = new CompressionProviderFactory(),
                         ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -564,10 +564,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         CompressionAlgorithm = "UNSUPPORTED",
                         CompressionProviderFactory = new CompressionProviderFactory(),
                         ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = ExpectedException.SecurityTokenException("IDX10680:", typeof(NotSupportedException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenCompressionFailedException), "IDX10680:", typeof(NotSupportedException))
                     },
                     new CreateTokenTheoryData()
                     {
@@ -575,7 +575,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         CompressionAlgorithm = CompressionAlgorithms.Deflate,
                         CompressionProviderFactory = null,
                         ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
@@ -586,7 +586,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         CompressionAlgorithm = CompressionAlgorithms.Deflate,
                         CompressionProviderFactory = compressionProviderFactoryForCustom,
                         ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
                     },
@@ -596,10 +596,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         CompressionAlgorithm = CompressionAlgorithms.Deflate,
                         CompressionProviderFactory = compressionProviderFactoryForCustom2,
                         ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = ExpectedException.SecurityTokenException("IDX10680:", typeof(InvalidOperationException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenCompressionFailedException), "IDX10680:", typeof(InvalidOperationException))
                     },
                 };
             }
@@ -653,7 +653,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     JWECompressionString = ReferenceTokens.JWECompressionTokenWithUnsupportedAlgorithm,
                     CompressionProviderFactory = CompressionProviderFactory.Default,
                     TestId = "InvalidAlgorithm",
-                    ExpectedException = ExpectedException.SecurityTokenException("IDX10679:", typeof(NotSupportedException))
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(NotSupportedException))
                 },
                 new JWEDecompressionTheoryData
                 {
@@ -661,7 +661,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     JWECompressionString = ReferenceTokens.JWEInvalidCompressionTokenWithDEF,
                     CompressionProviderFactory = CompressionProviderFactory.Default,
                     TestId = "InvalidToken",
-                    ExpectedException = ExpectedException.SecurityTokenException("IDX10679:", typeof(InvalidDataException))
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidDataException))
                 },
                 new JWEDecompressionTheoryData
                 {
@@ -684,7 +684,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     JWECompressionString = ReferenceTokens.JWEInvalidCompressionTokenWithDEF,
                     CompressionProviderFactory = compressionProviderFactoryForCustom2,
                     TestId = "CustomCompressionProviderFails",
-                    ExpectedException = ExpectedException.SecurityTokenException("IDX10679:", typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidOperationException))
                 }
             };
         }
@@ -719,60 +719,66 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     }
 
     /// <summary>
-    /// A custom compression provider class implementing CompressionProvider.
+    /// A custom compression provider class implementing <see cref="ICompressionProvider"/>.
     /// </summary>
-    public class SampleCustomCompressionProvider : CompressionProvider
+    public class SampleCustomCompressionProvider : ICompressionProvider
     {
         public SampleCustomCompressionProvider(string algorithm)
-            : base(algorithm)
         {
+            Algorithm = algorithm;
+
             if (!IsSupportedAlgorithm(algorithm))
                 throw new NotSupportedException($"Algorithm '{algorithm}' is not supported.");
         }
-        public override byte[] Compress(string value)
+
+        public string Algorithm { get; set; }
+
+        public byte[] Compress(byte[] value)
         {
-            // just encode the string to bytes
-            return Encoding.UTF8.GetBytes(value);
+            // just return the same bytes that were passed in
+            return value;
         }
 
-        public override string Decompress(byte[] value)
+        public byte[] Decompress(byte[] value)
         {
-            // just encode the bytes to string
-            return Encoding.UTF8.GetString(value);
+            // just return the same bytes that were passed in
+            return value;
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
+        public bool IsSupportedAlgorithm(string algorithm)
         {
-            return algorithm != null && algorithm.Equals("MyAlgorithm");
+            return algorithm != null && algorithm.Equals(Algorithm);
         }
     }
 
     /// <summary>
-    /// A custom compression provider class implementing CompressionProvider, 
+    /// A custom compression provider class implementing <see cref="ICompressionProvider"/>, 
     /// which accepts any algorithm but always return null for decompression and compression.
     /// </summary>
-    public class SampleCustomCompressionProviderDecompressAndCompressAlwaysFail : CompressionProvider
+    public class SampleCustomCompressionProviderDecompressAndCompressAlwaysFail : ICompressionProvider
     {
         public SampleCustomCompressionProviderDecompressAndCompressAlwaysFail(string algorithm)
-            : base(algorithm)
         {
+            Algorithm = algorithm;
         }
 
-        public override byte[] Compress(string value)
-        {
-            return null;
-        }
+        public string Algorithm { get; set; }
 
-        public override string Decompress(byte[] value)
+        public byte[] Compress(byte[] value)
         {
             return null;
         }
 
-        public override bool IsSupportedAlgorithm(string algorithm)
+        public byte[] Decompress(byte[] value)
+        {
+            return null;
+        }
+
+        public bool IsSupportedAlgorithm(string algorithm)
         {
             return true;
         }
     }
 }
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

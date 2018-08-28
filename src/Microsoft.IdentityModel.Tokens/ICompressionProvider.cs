@@ -25,18 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Constants for compression algorithms.
+    /// Compression provider interface.
     /// </summary>
-    public class CompressionAlgorithms
+    public interface ICompressionProvider
     {
-        // See: https://tools.ietf.org/html/rfc1951
-        public const string Deflate = "DEF";
+        /// <summary>
+        /// Gets the compression algorithm.
+        /// </summary>
+        string Algorithm { get; }
+
+        /// <summary>
+        /// Called to determine if an algorithm is supported.
+        /// </summary>
+        /// <param name="algorithm">the algorithm that defines the compression method.</param>
+        /// <returns>true if supported</returns>
+        bool IsSupportedAlgorithm(string algorithm);
+
+        /// <summary>
+        /// Decompress.
+        /// </summary>
+        /// <param name="value">the value to decompress.</param>
+        byte[] Decompress(byte[] value);
+
+        /// <summary>
+        /// Compress.
+        /// </summary>
+        /// <param name="value">the value to decompress.</param>
+        byte[] Compress(byte[] value);
     }
 }
-
-#pragma warning restore 1591

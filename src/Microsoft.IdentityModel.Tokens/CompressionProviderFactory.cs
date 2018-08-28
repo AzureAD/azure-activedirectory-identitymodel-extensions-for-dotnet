@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Extensibility point for custom compression support application wide.
         /// </summary>
-        public CompressionProvider CustomCompressionProvider { get; set; }
+        public ICompressionProvider CustomCompressionProvider { get; set; }
 
         /// <summary>
         /// Answers if an algorithm is supported.
@@ -93,15 +93,15 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool IsSupportedCompressionAlgorithm(string algorithm)
         {
-            return CompressionAlgorithms.Deflate.Equals(algorithm);
+            return CompressionAlgorithms.Deflate.Equals(algorithm, StringComparison.Ordinal);
         }
 
         /// <summary>
-        /// Returns a <see cref="CompressionProvider"/> for a specific algorithm.
+        /// Returns a <see cref="ICompressionProvider"/> for a specific algorithm.
         /// </summary>
         /// <param name="algorithm">the decompression algorithm.</param>
-        /// <returns>a <see cref="CompressionProvider"/>.</returns>
-        public CompressionProvider CreateCompressionProvider(string algorithm)
+        /// <returns>a <see cref="ICompressionProvider"/>.</returns>
+        public ICompressionProvider CreateCompressionProvider(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
