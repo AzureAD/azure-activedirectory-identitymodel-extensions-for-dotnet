@@ -14,7 +14,7 @@
 //
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+//SecurityTokenDecompressionFailedException
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -25,54 +25,53 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+#if DESKTOPNET45
+        [Serializable]
+#endif
     /// <summary>
-    /// Compression provider abstract class.
+    /// Thrown when JWE decompression fails.
     /// </summary>
-    public abstract class CompressionProvider
+    public class SecurityTokenDecompressionFailedException : SecurityTokenException
     {
-        private string _algorithm;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompressionProvider"/> class used for compression and decompression.
+        /// Initializes a new instance of  <see cref="SecurityTokenDecompressionFailedException"/>
         /// </summary>
-        /// <param name="algorithm">The compression algorithm to apply.</param>
-        /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
-        protected CompressionProvider(string algorithm)
+        public SecurityTokenDecompressionFailedException()
+            : base("SecurityToken decompression failed.")
         {
-            Algorithm = algorithm;
         }
 
         /// <summary>
-        /// Gets the compression algorithm.
+        /// Initializes a new instance of  <see cref="SecurityTokenDecompressionFailedException"/>
         /// </summary>
-        public string Algorithm
+        public SecurityTokenDecompressionFailedException(string message)
+            : base(message)
         {
-            get => _algorithm;
-            private set => _algorithm = value ?? throw LogHelper.LogArgumentNullException("algorithm");
         }
 
         /// <summary>
-        /// Called to determine if an algorithm is supported.
+        /// Initializes a new instance of  <see cref="SecurityTokenDecompressionFailedException"/>
         /// </summary>
-        /// <param name="algorithm">the algorithm that defines the compression method.</param>
-        /// <returns>true if supported</returns>
-        public abstract bool IsSupportedAlgorithm(string algorithm);
+        public SecurityTokenDecompressionFailedException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
 
+#if DESKTOPNET45
         /// <summary>
-        /// Decompress.
+        /// Initializes a new instance of the <see cref="SecurityTokenDecompressionFailedException"/> class.
         /// </summary>
-        /// <param name="value">the value to decompress.</param>
-        public abstract string Decompress(byte[] value);
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SecurityTokenDecompressionFailedException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+#endif
 
-        /// <summary>
-        /// Compress.
-        /// </summary>
-        /// <param name="value">the value to decompress.</param>
-        public abstract byte[] Compress(string value);
     }
 }
