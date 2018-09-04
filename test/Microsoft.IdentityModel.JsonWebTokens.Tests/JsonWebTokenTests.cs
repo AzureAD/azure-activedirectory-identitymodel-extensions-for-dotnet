@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = new CompareContext();
             var jsonWebTokenHandler = new JsonWebTokenHandler();
-            var jsonWebTokenString = jsonWebTokenHandler.CreateToken(Default.Payload, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+            var jsonWebTokenString = jsonWebTokenHandler.CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
             var jsonWebToken = new JsonWebToken(jsonWebTokenString);
             var claims = jsonWebToken.Claims;
             IdentityComparer.AreEqual(Default.PayloadClaims, claims, context);
@@ -95,13 +95,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new ParseTimeValuesTheoryData
                     {
                         First = true,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         Header = new JObject
                         {
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }
+                        }.ToString()
                     },
                     // Dates as longs
                     new ParseTimeValuesTheoryData
@@ -115,13 +115,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore)},
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) }
-                        },
+                        }.ToString(),
                         Header = new JObject
                         {
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }
+                        }.ToString()
                     },
                     // Dates as integers
                     new ParseTimeValuesTheoryData
@@ -135,13 +135,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Nbf, (float) EpochTime.GetIntDate(Default.NotBefore)},
                             { JwtRegisteredClaimNames.Exp, (float) EpochTime.GetIntDate(Default.Expires) }
-                        },
+                        }.ToString(),
                         Header = new JObject
                         {
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }
+                        }.ToString()
                     },
                 };
             }
@@ -150,8 +150,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class ParseTimeValuesTheoryData : TheoryDataBase
     {
-        public JObject Payload { get; set; }
+        public string Payload { get; set; }
 
-        public JObject Header { get; set; }
+        public string Header { get; set; }
     }
 }

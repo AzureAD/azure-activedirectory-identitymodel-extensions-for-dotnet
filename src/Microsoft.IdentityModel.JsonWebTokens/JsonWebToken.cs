@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
@@ -74,29 +73,50 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload. The jwtEncodedString is the result of those operations.
+        /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload.
         /// </summary>
-        /// <param name="header">Contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
-        /// <param name="payload">Contains JSON objects representing the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
+        /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
+        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
-        public JsonWebToken(JObject header, JObject payload)
+        public JsonWebToken(string header, string payload)
         {
-            Header = header ?? throw LogHelper.LogArgumentNullException(nameof(header));
-            Payload = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
+            if (string.IsNullOrEmpty(header))
+                throw LogHelper.LogArgumentNullException(nameof(header));
+
+            if (string.IsNullOrEmpty(payload))
+                throw LogHelper.LogArgumentNullException(nameof(payload));
+
+            try
+            {
+                Header = JObject.Parse(header);
+            } 
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14301, header), ex));
+            }
+
+            try
+            {
+                Payload = JObject.Parse(payload);
+            } 
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
+            }
         }
 
         /// <summary>
         /// Gets the 'value' of the 'actort' claim { actort, 'value' }.
         /// </summary>
         /// <remarks>If the 'actort' claim is not found, an empty string is returned.</remarks> 
-        public string Actor => Payload.Value<string>(JwtRegisteredClaimNames.Actort) ?? String.Empty;
+        public string Actor => Payload.Value<string>(JwtRegisteredClaimNames.Actort) ?? string.Empty;
 
         /// <summary>
         /// Gets the 'value' of the 'alg' claim { alg, 'value' }.
         /// </summary>
         /// <remarks>If the 'alg' claim is not found, an empty string is returned.</remarks>   
-        public string Alg => Header.Value<string>(JwtHeaderParameterNames.Alg) ?? String.Empty;
+        public string Alg => Header.Value<string>(JwtHeaderParameterNames.Alg) ?? string.Empty;
 
         /// <summary>
         /// Gets the list of 'aud' claim { aud, 'value' }.
@@ -179,13 +199,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'cty' claim { cty, 'value' }.
         /// </summary>
         /// <remarks>If the 'cty' claim is not found, an empty string is returned.</remarks>   
-        public string Cty => Header.Value<string>(JwtHeaderParameterNames.Cty) ?? String.Empty;
+        public string Cty => Header.Value<string>(JwtHeaderParameterNames.Cty) ?? string.Empty;
 
         /// <summary>
         /// Gets the 'value' of the 'enc' claim { enc, 'value' }.
         /// </summary>
         /// <remarks>If the 'enc' value is not found, an empty string is returned.</remarks>   
-        public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? String.Empty;
+        public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? string.Empty;
 
         /// <summary>
         /// Gets the EncryptedKey from the original raw data of this instance when it was created.
@@ -196,13 +216,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
         /// </summary>
-        public JObject Header { get; private set; } = new JObject();
+        internal JObject Header { get; private set; } = new JObject();
 
         /// <summary>
         /// Gets the 'value' of the 'jti' claim { jti, ''value' }.
         /// </summary>
         /// <remarks>If the 'jti' claim is not found, an empty string is returned.</remarks>
-        public override string Id => Payload.Value<string>(JwtRegisteredClaimNames.Jti) ?? String.Empty;
+        public override string Id => Payload.Value<string>(JwtRegisteredClaimNames.Jti) ?? string.Empty;
 
         /// <summary>
         /// Gets the InitializationVector from the original raw data of this instance when it was created.
@@ -225,18 +245,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'iss' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'iss' claim is not found, an empty string is returned.</remarks>   
-        public override string Issuer => Payload.Value<string>(JwtRegisteredClaimNames.Iss) ?? String.Empty;
+        public override string Issuer => Payload.Value<string>(JwtRegisteredClaimNames.Iss) ?? string.Empty;
 
         /// <summary>
         /// Gets the 'value' of the 'kid' claim { kid, 'value' }.
         /// </summary>
         /// <remarks>If the 'kid' claim is not found, an empty string is returned.</remarks>   
-        public string Kid => Header.Value<string>(JwtHeaderParameterNames.Kid) ?? String.Empty;
+        public string Kid => Header.Value<string>(JwtHeaderParameterNames.Kid) ?? string.Empty;
 
         /// <summary>
         /// Represents the JSON payload.
         /// </summary>
-        public JObject Payload { get; private set; } = new JObject();
+        internal JObject Payload { get; private set; } = new JObject();
 
         /// <summary>
         /// Gets the EncodedHeader from the original raw data of this instance when it was created.
@@ -279,13 +299,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'sub' claim { sub, 'value' }.
         /// </summary>
         /// <remarks>If the 'sub' claim is not found, an empty string is returned.</remarks>   
-        public string Subject => Payload.Value<string>(JwtRegisteredClaimNames.Sub) ?? String.Empty;
+        public string Subject => Payload.Value<string>(JwtRegisteredClaimNames.Sub) ?? string.Empty;
 
         /// <summary>
         /// Gets the 'value' of the 'typ' claim { typ, 'value' }.
         /// </summary>
         /// <remarks>If the 'typ' claim is not found, an empty string is returned.</remarks>   
-        public string Typ => Header.Value<string>(JwtHeaderParameterNames.Typ) ?? String.Empty;
+        public string Typ => Header.Value<string>(JwtHeaderParameterNames.Typ) ?? string.Empty;
 
         /// <summary>
         /// Gets the 'value' of the 'nbf' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
@@ -303,7 +323,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'x5t' claim { x5t, 'value' }.
         /// </summary>
         /// <remarks>If the 'x5t' claim is not found, an empty string is returned.</remarks>   
-        public string X5t => Header.Value<string>(JwtHeaderParameterNames.X5t) ?? String.Empty;
+        public string X5t => Header.Value<string>(JwtHeaderParameterNames.X5t) ?? string.Empty;
 
         /// <summary>
         /// Decodes the string into the header, payload and signature.
@@ -407,7 +427,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private void DecodeJws(string[] tokenParts)
         {
             // Log if CTY is set, assume compact JWS
-            if (Cty != String.Empty)
+            if (Cty != string.Empty)
                 LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14105, Payload.Value<string>(JwtHeaderParameterNames.Cty)));
 
             try
@@ -459,6 +479,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return JsonClaimValueTypes.JsonArray;
 
             return objType.ToString();
+        }
+
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        public T GetPayloadValue<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            return Payload.Value<T>(key);
+        }
+
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key from the JWT header { key, 'value' }.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        public T GetHeaderValue<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            return Header.Value<T>(key);
         }
     }
 }
