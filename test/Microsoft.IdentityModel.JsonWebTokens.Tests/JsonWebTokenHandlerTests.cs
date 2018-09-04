@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                         First = true,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                         First = true,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
 
-            string jwtString = tokenHandler.CreateToken(Default.Payload, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+            string jwtString = tokenHandler.CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
             var tokenValidationResult = tokenHandler.ValidateToken(jwtString, tokenValidationParameters);
             var validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
             IdentityComparer.AreEqual(Default.Payload, validatedToken.Payload, context);
@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         First = true,
                         TestId = "RoundTripJWEValid",
                         ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials
                     },
@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                             TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                         },
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
@@ -300,7 +300,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = Default.SymmetricSigningKey256,
                             TokenDecryptionKey = NotDefault.SymmetricEncryptionKey,
                         },
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
@@ -362,7 +362,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         First = true,
                         TestId = "RsaPKCS1-Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaPKCS1-Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaPKCS1-Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOAEP-Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOAEP-Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
@@ -402,7 +402,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOAEP-Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOaepKeyWrap-Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOaepKeyWrap-Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
@@ -434,7 +434,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "SymmetricSecurityKey2_128-Aes128KW-Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -442,7 +442,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "SymmetricEncryptionKey256-Aes256KW-Aes128CbcHmacSha256",
                         ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
@@ -450,7 +450,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.Payload,
+                        Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
                     }
@@ -473,7 +473,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, Default.Issuer },
                 { JwtRegisteredClaimNames.Aud, Default.Audience },
-            };
+            }.ToString();
 
             var jwtString = tokenHandler.CreateToken(payloadWithoutTimeValues, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
             var jwt = new JsonWebToken(jwtString);
@@ -501,7 +501,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
             var jsonWebToken = tokenValidationResult.SecurityToken as JsonWebToken;
-            var email = jsonWebToken.Payload.Value<string>(JwtRegisteredClaimNames.Email);
+            var email = jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Email);
 
             if (!email.Equals("Bob@contoso.com"))
                 throw new SecurityTokenException("Token does not contain the correct value for the 'email' claim.");
@@ -510,7 +510,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class CreateTokenTheoryData : TheoryDataBase
     {
-        public JObject Payload { get; set; }
+        public string Payload { get; set; }
 
         public EncryptingCredentials EncryptingCredentials { get; set; }
 
