@@ -4,10 +4,13 @@
 
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Tests</AssemblyName>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
     <Description>Contains test utilities and data that are shared across Microsoft.IdentityModel.xys.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Tests</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
+    <SignAssembly>true</SignAssembly>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net45;net452;netcoreapp2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
