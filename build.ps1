@@ -99,17 +99,19 @@ CreateArtifactsRoot($artifactsRoot);
 pushd
 Set-Location $root
 Write-Host ""
-Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /verbosity:m /p:Configuration=$buildType $slnFile"
+Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /verbosity:m /p:Configuration=$buildType $slnFile"
+Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
 popd
 
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
 	$name = $project.name;
-	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
-	Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+	$p = Start-Process -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+	Write-Host ">>> Waiting for dotnet pack to exit"
+	$p.WaitForExit()
 }
 
 WriteSectionFooter("End Build");
