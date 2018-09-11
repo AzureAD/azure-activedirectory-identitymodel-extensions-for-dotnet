@@ -6,7 +6,7 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <Authors>Microsoft</Authors>
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation.</Company>
     <DelaySign>true</DelaySign>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>

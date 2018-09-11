@@ -3,7 +3,7 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <DelaySign>false</DelaySign>
     <DotNetCoreAppRuntimeVersion>2.0.0</DotNetCoreAppRuntimeVersion>
     <OutputTypeEx>library</OutputTypeEx>
