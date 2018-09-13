@@ -108,10 +108,8 @@ popd
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
 	$name = $project.name;
-	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-	$p = Start-Process -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-	Write-Host ">>> Waiting for dotnet pack to exit"
-	$p.WaitForExit()
+	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
 }
 
 WriteSectionFooter("End Build");
@@ -131,8 +129,8 @@ if ($runTests -eq "YES")
             Write-Host ">>> Set-Location $root\test\$name"
             pushd
             Set-Location $root\test\$name
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj'--no-build --no-restore -v q -c $buildType"
-            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --no-build --no-restore -v q -c $buildType"
+            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj'--no-build --no-restore -nodereuse:false -v q -c $buildType"
+            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --no-build --no-restore -nodereuse:false -v q -c $buildType"
 
             if($p.ExitCode -ne 0)
             {
