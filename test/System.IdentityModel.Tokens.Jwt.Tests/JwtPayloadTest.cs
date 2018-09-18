@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
+using System.Security.Claims;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -159,7 +159,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.True(EpochTime.DateTime(time.Value) == jwtPayload.ValidTo, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
 
-            int? expirationTime = jwtPayload.Exp;
+            long? expirationTime = jwtPayload.Exp;
             Assert.True(expirationTime == time, "expirationTime != time");
 
             TestUtilities.AssertFailIfErrors(GetType().ToString() + ".Claims", context.Diffs);

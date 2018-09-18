@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Security.Claims;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -156,11 +156,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'auth_time' claim { auth_time, 'value' }.
         /// </summary>
         /// <remarks>If the 'auth_time' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? AuthTime
+        public long? AuthTime
         {
             get
             {
-                return this.GetIntClaim(JwtRegisteredClaimNames.AuthTime);
+                return this.GetInt64Claim(JwtRegisteredClaimNames.AuthTime);
             }
         }
 
@@ -204,9 +204,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'expiration' claim { exp, 'value' }.
         /// </summary>
         /// <remarks>If the 'expiration' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Exp
+        public long? Exp
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Exp); }
+            get { return this.GetInt64Claim(JwtRegisteredClaimNames.Exp); }
         }
 
         /// <summary>
@@ -225,9 +225,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'Issued At' claim { iat, 'value' }.
         /// </summary>
         /// <remarks>If the 'Issued At' claim is not found OR cannot be converted to <see cref="Int32"/> null is returned.</remarks>
-        public int? Iat
+        public long? Iat
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Iat); }
+            get { return this.GetInt64Claim(JwtRegisteredClaimNames.Iat); }
         }
 
         /// <summary>
@@ -246,9 +246,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the 'value' of the 'expiration' claim { nbf, 'value' }.
         /// </summary>
         /// <remarks>If the 'notbefore' claim is not found OR could not be converted to <see cref="Int32"/>, null is returned.</remarks>
-        public int? Nbf
+        public long? Nbf
         {
-            get { return this.GetIntClaim(JwtRegisteredClaimNames.Nbf); }
+            get { return this.GetInt64Claim(JwtRegisteredClaimNames.Nbf); }
         }
 
         /// <summary>
@@ -597,9 +597,9 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        internal int? GetIntClaim(string claimType)
+        internal long? GetInt64Claim(string claimType)
         {
-            int? retval = null;
+            long? retval = null;
 
             object value;
             if (TryGetValue(claimType, out value))
@@ -617,7 +617,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         try
                         {
-                            retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(obj, CultureInfo.InvariantCulture)));
+                            retval = Convert.ToInt64(Math.Truncate(Convert.ToDouble(obj, CultureInfo.InvariantCulture)));
                         }
                         catch (System.FormatException)
                         {
@@ -642,7 +642,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     try
                     {
-                        retval = Convert.ToInt32(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
+                        retval = Convert.ToInt64(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
                     }
                     catch (System.FormatException)
                     {
