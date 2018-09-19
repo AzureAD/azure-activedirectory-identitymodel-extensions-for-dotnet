@@ -27,7 +27,7 @@
 
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultSecurityKeyAuthenticationCallbackTheoryData : KeyVaultSecurityKeyTheoryData
     {

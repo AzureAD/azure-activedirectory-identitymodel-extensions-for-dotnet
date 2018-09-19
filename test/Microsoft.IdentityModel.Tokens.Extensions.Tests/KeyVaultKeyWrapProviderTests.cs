@@ -32,11 +32,11 @@ using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultKeyWrapProviderTests
     {
-        private readonly IKeyVaultClient _client;
+        private readonly MockKeyVaultClient _client;
         private readonly SecurityKey _key;
 
         public KeyVaultKeyWrapProviderTests()
@@ -93,17 +93,25 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
             try
             {
                 var provider = new KeyVaultKeyWrapProvider(_key, theoryData.Algorithm, _client);
-                Assert.NotNull(provider);
+                if (provider == null)
+                    context.AddDiff("(provider == null)");
 
                 var keyBytes = Guid.NewGuid().ToByteArray();
                 var wrappedKey = provider.WrapKey(keyBytes);
-                Assert.NotNull(wrappedKey);
-                Assert.Equal(128, wrappedKey.Length);
-                Assert.False(Utility.AreEqual(keyBytes, wrappedKey), "keyBytes == wrappedKey");
+                if (wrappedKey == null)
+                    context.AddDiff("(wrappedKey == null)");
+
+                if (_client.ExpectedKeyWrapLength != wrappedKey.Length)
+                    context.AddDiff($"_client.ExpectedKeyWrapLength != wrappedKey.Length. {_client.ExpectedKeyWrapLength} != {wrappedKey.Length}");
+
+                if (Utility.AreEqual(keyBytes, wrappedKey))
+                    context.AddDiff("Utility.AreEqual(keyBytes, wrappedKey)");
 
                 var unwrappedKey = provider.UnwrapKey(wrappedKey);
-                Assert.NotNull(unwrappedKey);
-                Assert.True(IdentityComparer.AreBytesEqual(keyBytes, unwrappedKey, context), "keyBytes != unwrappedKey");
+                if (unwrappedKey == null)
+                    context.AddDiff("(unwrappedKey == null)");
+
+                IdentityComparer.AreBytesEqual(keyBytes, unwrappedKey, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -135,13 +143,11 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
                 new KeyWrapProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaPKCS1,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaPKCS1),
                 },
                 new KeyWrapProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaOAEP,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaOAEP),
                 },
             };

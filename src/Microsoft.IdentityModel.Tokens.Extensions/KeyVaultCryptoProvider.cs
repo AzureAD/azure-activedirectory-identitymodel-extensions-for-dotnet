@@ -30,7 +30,7 @@ using System.Linq;
 using Microsoft.Azure.KeyVault.WebKey;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions
+namespace Microsoft.IdentityModel.Tokens.KeyVault
 {
     /// <summary>
     /// Provides cryptographic operators based on Azure Key Vault.
@@ -52,9 +52,18 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="algorithm">the algorithm that defines the cryptographic operator.</param>
         /// <param name="args">the arguments required by the cryptographic operator. May be null.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="args"/> is null.</exception>
+        /// <exception cref="NotSupportedException">if <paramref name="args"/> does not contain a <see cref="KeyVaultSecurityKey"/>.</exception>
         /// <remarks>call <see cref="ICryptoProvider.Release(object)"/> when finished with the object.</remarks>
         public object Create(string algorithm, params object[] args)
         {
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (args == null)
+                throw LogHelper.LogArgumentNullException(nameof(args));
+
             if (args.FirstOrDefault() is KeyVaultSecurityKey key)
             {
                 if (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal))
@@ -83,6 +92,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// <returns>true if supported</returns>
         public bool IsSupportedAlgorithm(string algorithm, params object[] args)
         {
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            if (args == null)
+                throw LogHelper.LogArgumentNullException(nameof(args));
+
             return args.FirstOrDefault() is KeyVaultSecurityKey
                 && (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal) || JsonWebKeySignatureAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal));
         }

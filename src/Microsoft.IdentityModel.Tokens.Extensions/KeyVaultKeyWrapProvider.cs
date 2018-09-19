@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions
+namespace Microsoft.IdentityModel.Tokens.KeyVault
 {
     /// <summary>
     /// Provides wrap and unwrap operations using Azure Key Vault.
@@ -47,6 +48,9 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for key wrap operations.</param>
         /// <param name="algorithm">The key wrap algorithm to apply.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/> is null.</exception>
+        /// <exception cref="NotSupportedException">if <paramref name="key"/> is not a <see cref="KeyVaultSecurityKey"/>.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
         public KeyVaultKeyWrapProvider(SecurityKey key, string algorithm)
             : this(key, algorithm, null)
         {
@@ -61,7 +65,10 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         internal KeyVaultKeyWrapProvider(SecurityKey key, string algorithm, IKeyVaultClient client)
         {
             _algorithm = string.IsNullOrEmpty(algorithm) ? throw LogHelper.LogArgumentNullException(nameof(algorithm)) : algorithm;
-            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogArgumentNullException(nameof(key));
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogExceptionMessage(new NotSupportedException(key.GetType().ToString()));
             _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback));
         }
 
@@ -85,6 +92,8 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// Unwrap a key.
         /// </summary>
         /// <param name="keyBytes">key to unwrap.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/>.Length == 0.</exception>
         /// <returns>Unwrapped key.</returns>
         public override byte[] UnwrapKey(byte[] keyBytes)
         {
@@ -95,6 +104,8 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// Wrap a key.
         /// </summary>
         /// <param name="keyBytes">the key to be wrapped</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/>.Length == 0.</exception>
         /// <returns>wrapped key.</returns>
         public override byte[] WrapKey(byte[] keyBytes)
         {
@@ -122,10 +133,15 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="keyBytes">key to unwrap.</param>
         /// <param name="cancellation">Propagates notification that operations should be canceled.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/>.Length == 0.</exception>
         /// <returns>Unwrapped key.</returns>
         private async Task<byte[]> UnwrapKeyAsync(byte[] keyBytes, CancellationToken cancellation)
         {
-            return (await _client.UnwrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation)).Result;
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
+
+            return (await _client.UnwrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
         }
 
         /// <summary>
@@ -133,10 +149,15 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="keyBytes">the key to be wrapped</param>
         /// <param name="cancellation">Propagates notification that operations should be canceled.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyBytes"/>.Length == 0.</exception>
         /// <returns>wrapped key.</returns>
         private async Task<byte[]> WrapKeyAsync(byte[] keyBytes, CancellationToken cancellation)
         {
-            return (await _client.WrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation)).Result;
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
+
+            return (await _client.WrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
         }
     }
 }

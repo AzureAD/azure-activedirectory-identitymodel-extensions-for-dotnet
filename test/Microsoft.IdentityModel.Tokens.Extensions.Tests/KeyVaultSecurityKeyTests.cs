@@ -34,7 +34,7 @@ using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultSecurityKeyTests
     {
@@ -181,7 +181,6 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
                 {
                     // ClientId = default,
                     // ClientSecret = default,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     // KeyIdentifier = default,
                     TestId = typeof(KeyVaultSecurityKey).FullName,
                     Type = typeof(KeyVaultSecurityKey),

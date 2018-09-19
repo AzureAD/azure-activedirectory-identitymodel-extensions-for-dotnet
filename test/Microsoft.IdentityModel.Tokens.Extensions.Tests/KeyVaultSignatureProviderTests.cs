@@ -33,11 +33,11 @@ using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultSignatureProviderTests
     {
-        private readonly IKeyVaultClient _client;
+        private readonly MockKeyVaultClient _client;
         private readonly SecurityKey _key;
 
         public KeyVaultSignatureProviderTests()
@@ -100,13 +100,20 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
             try
             {
                 var provider = new KeyVaultSignatureProvider(_key, theoryData.Algorithm, willCreateSignatures: true, _client);
-                Assert.NotNull(provider);
+                if (provider == null)
+                    context.AddDiff("(provider == null)");
 
                 var input = Guid.NewGuid().ToByteArray();
                 var signature = provider.Sign(input);
-                Assert.NotNull(signature);
-                Assert.Equal(128, signature.Length);
-                Assert.True(provider.Verify(input, signature));
+
+                if (signature == null)
+                    context.AddDiff("(signature == null)");
+
+                if (_client.ExpectedSignatureLength != signature.Length)
+                    context.AddDiff($"_client.ExpectedSignatureLength != signature.Length. == {_client.ExpectedSignatureLength}, {signature.Length}.");
+
+                if (!provider.Verify(input, signature))
+                    context.AddDiff("!provider.Verify(input, signature)");
 
                 var tamperedInput = new byte[input.Length];
                 input.CopyTo(tamperedInput, 0);
@@ -115,7 +122,8 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
                 else
                     tamperedInput[0]++;
 
-                Assert.False(provider.Verify(tamperedInput, signature));
+                if (provider.Verify(tamperedInput, signature))
+                    context.AddDiff("provider.Verify(tamperedInput, signature)");
 
                 foreach (var data in SignatureProviderTheoryData)
                 {
@@ -126,9 +134,12 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
                     // Check that a given Security Key will only validate a signature using the same hash algorithm.
                     var isValidSignature = new KeyVaultSignatureProvider(_key, newAlgorithm, willCreateSignatures: false, _client).Verify(input, signature);
                     if (StringComparer.Ordinal.Equals(theoryData.Algorithm, newAlgorithm))
-                        Assert.True(isValidSignature);
-                    else
-                        Assert.False(isValidSignature);
+                    {
+                        if (!isValidSignature)
+                            context.AddDiff("Signature should have been valid, isValidSignature == false");
+                    }
+                    else if (isValidSignature)
+                        context.AddDiff("Signature should NOT have been valid, isValidSignature == true");
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -161,19 +172,16 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
                 new SignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaSha256),
                 },
                 new SignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha384,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaSha384),
                 },
                 new SignatureProviderTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha512,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaSha512),
                 },
             };
