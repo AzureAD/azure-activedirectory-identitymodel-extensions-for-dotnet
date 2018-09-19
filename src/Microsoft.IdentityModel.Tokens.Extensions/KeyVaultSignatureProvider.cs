@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions
+namespace Microsoft.IdentityModel.Tokens.KeyVault
 {
     /// <summary>
     /// Provides signing and verifying operations using Azure Key Vault.
@@ -50,6 +50,8 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">Whether this <see cref="KeyVaultSignatureProvider"/> is required to create signatures then set this to true.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="key"/>is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="algorithm"/>is null or empty.</exception>
         public KeyVaultSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : this(key, algorithm, willCreateSignatures, null)
         {
@@ -88,19 +90,24 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// <summary>
         /// Produces a signature over the 'input' using Azure Key Vault.
         /// </summary>
-        /// <param name="input">bytes to sign.</param>
-        /// <returns>signed bytes</returns>
+        /// <param name="input">The bytes to sign.</param>
+        /// <returns>A signature over the input.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="input"/>.Length == 0.</exception>
         public override byte[] Sign(byte[] input)
         {
             return SignAsync(input, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
-        /// Verifies that signature created over the 'input' using Azure Key Vault.
+        /// Verifies that the <paramref name="signature"/> is over <paramref name="input"/> using Azure Key Vault.
         /// </summary>
         /// <param name="input">bytes to verify.</param>
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null or has length == 0.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="signature"/> is null or has length == 0.</exception>
+        /// <exception cref="ObjectDisposedException">If Dispose has been called.</exception>
         public override bool Verify(byte[] input, byte[] signature)
         {
             return VerifyAsync(input, signature, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -117,6 +124,7 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
                 if (disposing)
                 {
                     _disposed = true;
+                    _hash.Dispose();
                     _client.Dispose();
                 }
             }
@@ -127,9 +135,17 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="input">bytes to sign.</param>
         /// <param name="cancellation">Propagates notification that operations should be canceled.</param>
-        /// <returns>signed bytes</returns>
+        /// <returns>A signature over the input.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null or has length == 0.</exception>
+        /// <exception cref="ObjectDisposedException">If Dispose has been called.</exception>
         private async Task<byte[]> SignAsync(byte[] input, CancellationToken cancellation)
         {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+
             return (await _client.SignAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), cancellation)).Result;
         }
 
@@ -140,8 +156,20 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// <param name="signature">signature to compare against.</param>
         /// <param name="cancellation">Propagates notification that operations should be canceled.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null or has length == 0.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="signature"/> is null or has length == 0.</exception>
+        /// <exception cref="ObjectDisposedException">If Dispose has been called.</exception>
         private async Task<bool> VerifyAsync(byte[] input, byte[] signature, CancellationToken cancellation)
         {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (signature == null || signature.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+
             return await _client.VerifyAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), signature, cancellation);
         }
     }

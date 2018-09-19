@@ -32,11 +32,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
+using Microsoft.IdentityModel.Tests;
 using Microsoft.Rest;
 using Microsoft.Rest.Azure;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     [CLSCompliant(false)]
     public class MockKeyVaultClient : IKeyVaultClient
@@ -46,14 +47,14 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
 
         public MockKeyVaultClient()
         {
-            var rsa = RSA.Create();
-            var rsaParameters = rsa.ExportParameters(includePrivateParameters: true);
-
             _rsa = new RSACryptoServiceProvider();
-            _rsa.ImportParameters(rsaParameters);
-
-            _key = new Microsoft.Azure.KeyVault.WebKey.JsonWebKey(rsa, includePrivateParameters: false);
+            _rsa.ImportParameters(KeyingMaterial.RsaParameters_2048);
+            _key = new Microsoft.Azure.KeyVault.WebKey.JsonWebKey(_rsa, includePrivateParameters: false);
         }
+
+        public int ExpectedKeyWrapLength => 256;
+
+        public int ExpectedSignatureLength => 256;
 
         public JsonSerializerSettings SerializationSettings => throw new NotImplementedException();
 
@@ -523,9 +524,10 @@ namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
             else
                 throw new NotImplementedException($"The mock key vault is not configured to unwrap keys using the {algorithm} security algorithm.");
 
+            var result = _rsa.Decrypt(value, fOAEP);
             var response = new AzureOperationResponse<KeyOperationResult>
             {
-                Body = new KeyOperationResult(GetKeyIdentifier(vaultBaseUrl, keyName, keyVersion), _rsa.Decrypt(value, fOAEP)),
+                Body = new KeyOperationResult(GetKeyIdentifier(vaultBaseUrl, keyName, keyVersion), result),
             };
 
             return Task.FromResult(response);

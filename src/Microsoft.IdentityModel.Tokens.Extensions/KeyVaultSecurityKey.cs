@@ -34,7 +34,7 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions
+namespace Microsoft.IdentityModel.Tokens.KeyVault
 {
     /// <summary>
     /// Provides signing and verifying operations using Azure Key Vault.
@@ -68,13 +68,21 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// <param name="keyIdentifier">The key identifier.</param>
         /// <param name="clientId">Identifier of the client.</param>
         /// <param name="clientSecret">Secret of the client identity.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="clientId"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="clientSecret"/> if null of empty.</exception>
         public KeyVaultSecurityKey(string keyIdentifier, string clientId, string clientSecret)
-            : this(keyIdentifier, new AuthenticationCallback(async (string authority, string resource, string scope) => (await (new AuthenticationContext(authority, TokenCache.DefaultShared)).AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret)).ConfigureAwait(false)).AccessToken))
         {
             if (string.IsNullOrEmpty(clientId))
                 throw LogHelper.LogArgumentNullException(nameof(clientId));
-            else if (string.IsNullOrEmpty(clientSecret))
+
+            if (string.IsNullOrEmpty(clientSecret))
                 throw LogHelper.LogArgumentNullException(nameof(clientSecret));
+
+            KeyId = keyIdentifier;
+
+            Callback = new AuthenticationCallback(async (string authority, string resource, string scope) =>
+                (await (new AuthenticationContext(authority, TokenCache.DefaultShared)).AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret)).ConfigureAwait(false)).AccessToken);
         }
 
         /// <summary>
@@ -82,6 +90,8 @@ namespace Microsoft.IdentityModel.Tokens.Extensions
         /// </summary>
         /// <param name="keyIdentifier">The key identifier.</param>
         /// <param name="callback">The authentication callback.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="callback"/>is null.</exception>
         public KeyVaultSecurityKey(string keyIdentifier, AuthenticationCallback callback)
         {
             Callback = callback ?? throw LogHelper.LogArgumentNullException(nameof(callback));

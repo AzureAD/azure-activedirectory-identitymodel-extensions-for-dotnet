@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultSecurityKeyManagedServiceIdentityTheoryData : KeyVaultSecurityKeyTheoryData
     {

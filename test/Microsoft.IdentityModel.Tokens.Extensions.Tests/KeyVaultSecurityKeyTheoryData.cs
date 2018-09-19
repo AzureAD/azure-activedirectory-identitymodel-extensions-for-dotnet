@@ -28,7 +28,7 @@
 using System;
 using Microsoft.IdentityModel.Tests;
 
-namespace Microsoft.IdentityModel.Tokens.Extensions.Tests
+namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public abstract class KeyVaultSecurityKeyTheoryData : TheoryDataBase
     {
