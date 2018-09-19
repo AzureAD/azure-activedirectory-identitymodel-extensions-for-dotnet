@@ -28,7 +28,6 @@
 using System;
 using System.Reflection;
 using Microsoft.Azure.KeyVault.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Tests;
 using Xunit;
 
@@ -38,7 +37,6 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
 {
     public class KeyVaultSecurityKeyTests
     {
-        private static ExpectedException AdalServiceExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(AdalServiceException));
         private static ExpectedException ArgumentNullExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(ArgumentNullException));
         private static ExpectedException KeyVaultErrorExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(KeyVaultErrorException));
 
@@ -89,142 +87,6 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
                 new KeyVaultSecurityKeyAuthenticationCallbackTheoryData
                 {
                     // Callback = default,
-                    ExpectedException = KeyVaultErrorExceptionExpected,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-            };
-        }
-
-
-        [Theory, MemberData(nameof(KeyVaultSecurityKeyConfidentialClientTheoryData))]
-        public void ConfidentialClientConstructorParams(KeyVaultSecurityKeyConfidentialClientTheoryData theoryData)
-        {
-            var context = TestUtilities.WriteHeader($"{this}.ConfidentialClientConstructorParams", theoryData);
-
-            try
-            {
-                _ = Activator.CreateInstance(theoryData.Type, new object[] { theoryData.KeyIdentifier, theoryData.ClientId, theoryData.ClientSecret });
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<KeyVaultSecurityKeyConfidentialClientTheoryData> KeyVaultSecurityKeyConfidentialClientTheoryData
-        {
-            get => new TheoryData<KeyVaultSecurityKeyConfidentialClientTheoryData>
-            {
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    // ClientId = default,
-                    // ClientSecret = default,
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    First = true,
-                    KeyIdentifier = null,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    // ClientId = default,
-                    // ClientSecret = default,
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    KeyIdentifier = string.Empty,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    ClientId = null,
-                    // ClientSecret = default,
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    ClientId = string.Empty,
-                    /*
-                    ClientSecret = default,
-                    */
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    // ClientId = default,
-                    ClientSecret = null,
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    // ClientId = default,
-                    ClientSecret = string.Empty,
-                    ExpectedException = ArgumentNullExceptionExpected,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyConfidentialClientTheoryData
-                {
-                    // ClientId = default,
-                    // ClientSecret = default,
-                    // KeyIdentifier = default,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-            };
-        }
-
-        [Theory, MemberData(nameof(KeyVaultSecurityKeyManagedServiceIdentityTheoryData))]
-        public void ManagedServiceIdentityConstructorParams(KeyVaultSecurityKeyTheoryData theoryData)
-        {
-            var context = TestUtilities.WriteHeader($"{this}.ManagedServiceIdentityConstructorParams", theoryData);
-
-            try
-            {
-                _ = Activator.CreateInstance(theoryData.Type, new object[] { theoryData.KeyIdentifier });
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-        }
-
-        public static TheoryData<KeyVaultSecurityKeyManagedServiceIdentityTheoryData> KeyVaultSecurityKeyManagedServiceIdentityTheoryData
-        {
-            get => new TheoryData<KeyVaultSecurityKeyManagedServiceIdentityTheoryData>
-            {
-                new KeyVaultSecurityKeyManagedServiceIdentityTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException(),
-                    First = true,
-                    KeyIdentifier = null,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyManagedServiceIdentityTheoryData
-                {
-                    ExpectedException = ExpectedException.ArgumentNullException(),
-                    KeyIdentifier = string.Empty,
-                    TestId = typeof(KeyVaultSecurityKey).FullName,
-                    Type = typeof(KeyVaultSecurityKey),
-                },
-                new KeyVaultSecurityKeyManagedServiceIdentityTheoryData
-                {
                     ExpectedException = KeyVaultErrorExceptionExpected,
                     // KeyIdentifier = default,
                     TestId = typeof(KeyVaultSecurityKey).FullName,

@@ -30,8 +30,6 @@ using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.KeyVault
@@ -52,38 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault
         /// <param name="scope">The scope of the authentication request.</param>
         /// <returns>An access token for Azure Key Vault.</returns>
         public delegate Task<string> AuthenticationCallback(string authority, string resource, string scope);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
-        /// </summary>
-        /// <param name="keyIdentifier">The key identifier.</param>
-        public KeyVaultSecurityKey(string keyIdentifier)
-            : this(keyIdentifier, new AuthenticationCallback((new AzureServiceTokenProvider()).KeyVaultTokenCallback))
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
-        /// </summary>
-        /// <param name="keyIdentifier">The key identifier.</param>
-        /// <param name="clientId">Identifier of the client.</param>
-        /// <param name="clientSecret">Secret of the client identity.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="clientId"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="clientSecret"/> if null of empty.</exception>
-        public KeyVaultSecurityKey(string keyIdentifier, string clientId, string clientSecret)
-        {
-            if (string.IsNullOrEmpty(clientId))
-                throw LogHelper.LogArgumentNullException(nameof(clientId));
-
-            if (string.IsNullOrEmpty(clientSecret))
-                throw LogHelper.LogArgumentNullException(nameof(clientSecret));
-
-            KeyId = keyIdentifier;
-
-            Callback = new AuthenticationCallback(async (string authority, string resource, string scope) =>
-                (await (new AuthenticationContext(authority, TokenCache.DefaultShared)).AcquireTokenAsync(resource, new ClientCredential(clientId, clientSecret)).ConfigureAwait(false)).AccessToken);
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
