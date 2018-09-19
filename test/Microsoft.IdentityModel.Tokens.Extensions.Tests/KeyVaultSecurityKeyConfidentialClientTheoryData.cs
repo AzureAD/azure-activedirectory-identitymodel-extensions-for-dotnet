@@ -32,6 +32,6 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
     public class KeyVaultSecurityKeyConfidentialClientTheoryData : KeyVaultSecurityKeyTheoryData
     {
         public string ClientId { get; set; } = $"{Guid.NewGuid():D}";
-        public string ClientSecret { get; set; } = "AwCuL6DFNwaIHv7fRKsPQw2RXfbSTEF5Z+5YiM1J9S4=";
+        public string ClientSecret { get; set; } = Guid.NewGuid().ToString();
     }
 }
