@@ -3,7 +3,7 @@
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
   <runtimes>net45,net451,net461,netstandard1.4,netstandard2.0</runtimes>
   <release>5.3.0</release>
-  <nugetPreview>preview</nugetPreview>
+  <nugetPreview></nugetPreview>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging" />
