@@ -31,8 +31,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault
+namespace Microsoft.IdentityModel.KeyVaultExtensions
 {
     /// <summary>
     /// Provides signing and verifying operations using Azure Key Vault.
@@ -94,6 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault
         /// <returns>A signature over the input.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="input"/>.Length == 0.</exception>
+        /// <exception cref="ObjectDisposedException">If Dispose has been called.</exception>
         public override byte[] Sign(byte[] input)
         {
             return SignAsync(input, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();

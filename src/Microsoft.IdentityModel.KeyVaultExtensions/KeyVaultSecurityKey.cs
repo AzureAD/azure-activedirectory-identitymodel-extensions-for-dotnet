@@ -31,8 +31,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault
+namespace Microsoft.IdentityModel.KeyVaultExtensions
 {
     /// <summary>
     /// Provides signing and verifying operations using Azure Key Vault.
@@ -54,8 +55,16 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
         /// </summary>
-        /// <param name="keyIdentifier">The key identifier.</param>
-        /// <param name="callback">The authentication callback.</param>
+        protected KeyVaultSecurityKey()
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
+        /// </summary>
+        /// <param name="keyIdentifier">The key identifier that is recognized by KeyVault.</param>
+        /// <param name="callback">The authentication callback that will obtain the access_token for KeyVault.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="callback"/>is null.</exception>
         public KeyVaultSecurityKey(string keyIdentifier, AuthenticationCallback callback)
@@ -71,9 +80,9 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault
         }
 
         /// <summary>
-        /// The authentication callback delegate that retrieves an access token for the Key Vault.
+        /// The authentication callback delegate that retrieves an access token for the KeyVault.
         /// </summary>
-        public AuthenticationCallback Callback { get; }
+        public AuthenticationCallback Callback { get; protected set; }
 
         /// <summary>
         /// The uniform resource identifier of the security key.
@@ -90,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault
 
                 _keyId = value;
 
-                // Reset the properties so they can be retrieved from Azure Key Vault the next time they are accessed.
+                // Reset the properties so they can be retrieved from Azure KeyVault the next time they are accessed.
                 _keySize = null;
             }
         }

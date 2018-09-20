@@ -3,11 +3,12 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <AssemblyName>Microsoft.IdentityModel.Tokens.Extensions</AssemblyName>
-    <Description>Includes types that provide support for signing and encrypting tokens with Azure Key Vault.</Description>
+    <AssemblyName>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</AssemblyName>
+    <Description>Includes types that provide support for signing and encrypting tokens with Azure Key Vault for 
+    Applications that are using Managed identities for Azure resources.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>latest</LangVersion>
-    <PackageId>Microsoft.IdentityModel.Tokens.Extensions</PackageId>
+    <PackageId>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</PackageId>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net452;netstandard1.4</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.4</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;Azure;Key;Vault;Extensions</PackageTags>
@@ -20,16 +21,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Azure.Services.AppAuthentication" Version="1.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.KeyVaultExtensions\Microsoft.IdentityModel.KeyVaultExtensions.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">

@@ -66,9 +66,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Jso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrossVersionTokenValidation.Tests", "test\CrossVersionTokenValidation.Tests\CrossVersionTokenValidation.Tests.csproj", "{7E7CCB59-541E-48DA-9044-2D6C4AD8E509}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Extensions", "src\Microsoft.IdentityModel.Tokens.Extensions\Microsoft.IdentityModel.Tokens.Extensions.csproj", "{E078D159-E412-4CDB-BD07-035E97C7A7E0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{EB14B99B-2255-45BC-BF14-E488DCD4A4BA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens.Extensions.Tests", "test\Microsoft.IdentityModel.Tokens.Extensions.Tests\Microsoft.IdentityModel.Tokens.Extensions.Tests.csproj", "{859E2F48-7932-4BC7-8A60-18954533356E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{B961CF69-0DE6-4B9F-9473-9F669365BD62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.KeyVaultExtensions.Tests", "test\Microsoft.IdentityModel.KeyVaultExtensions.Tests\Microsoft.IdentityModel.KeyVaultExtensions.Tests.csproj", "{987772FA-BA24-4EF4-9B58-3DA78FFD61DD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests", "test\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests.csproj", "{97315A25-B694-4BD0-8DF5-C339884A6D26}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.KeyVaultExtensions", "src\Microsoft.IdentityModel.KeyVaultExtensions\Microsoft.IdentityModel.KeyVaultExtensions.csproj", "{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.ManagedKeyVaultSecurityKey", "src\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.csproj", "{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -164,14 +172,22 @@ Global
 		{7E7CCB59-541E-48DA-9044-2D6C4AD8E509}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E7CCB59-541E-48DA-9044-2D6C4AD8E509}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E7CCB59-541E-48DA-9044-2D6C4AD8E509}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E078D159-E412-4CDB-BD07-035E97C7A7E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E078D159-E412-4CDB-BD07-035E97C7A7E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E078D159-E412-4CDB-BD07-035E97C7A7E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E078D159-E412-4CDB-BD07-035E97C7A7E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{859E2F48-7932-4BC7-8A60-18954533356E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{859E2F48-7932-4BC7-8A60-18954533356E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{859E2F48-7932-4BC7-8A60-18954533356E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{859E2F48-7932-4BC7-8A60-18954533356E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987772FA-BA24-4EF4-9B58-3DA78FFD61DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987772FA-BA24-4EF4-9B58-3DA78FFD61DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987772FA-BA24-4EF4-9B58-3DA78FFD61DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987772FA-BA24-4EF4-9B58-3DA78FFD61DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97315A25-B694-4BD0-8DF5-C339884A6D26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97315A25-B694-4BD0-8DF5-C339884A6D26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97315A25-B694-4BD0-8DF5-C339884A6D26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97315A25-B694-4BD0-8DF5-C339884A6D26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -200,8 +216,12 @@ Global
 		{3EF9B56A-33C9-423A-A744-80AA102CECEB} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{DBF58792-25DF-4B6E-866C-77A0BC5AB81B} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{7E7CCB59-541E-48DA-9044-2D6C4AD8E509} = {310A34D3-8685-4355-8590-84351B5223BC}
-		{E078D159-E412-4CDB-BD07-035E97C7A7E0} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
-		{859E2F48-7932-4BC7-8A60-18954533356E} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{EB14B99B-2255-45BC-BF14-E488DCD4A4BA} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
+		{B961CF69-0DE6-4B9F-9473-9F669365BD62} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{987772FA-BA24-4EF4-9B58-3DA78FFD61DD} = {B961CF69-0DE6-4B9F-9473-9F669365BD62}
+		{97315A25-B694-4BD0-8DF5-C339884A6D26} = {B961CF69-0DE6-4B9F-9473-9F669365BD62}
+		{F5636C24-D6D5-4F6A-8A21-7C78FC1FC6C6} = {EB14B99B-2255-45BC-BF14-E488DCD4A4BA}
+		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F} = {EB14B99B-2255-45BC-BF14-E488DCD4A4BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}

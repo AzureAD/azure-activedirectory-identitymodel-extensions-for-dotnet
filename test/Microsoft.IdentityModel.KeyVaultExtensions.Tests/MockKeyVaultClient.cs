@@ -33,17 +33,19 @@ using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Rest;
 using Microsoft.Rest.Azure;
 using Newtonsoft.Json;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
+namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 {
     [CLSCompliant(false)]
     public class MockKeyVaultClient : IKeyVaultClient
     {
         private readonly Microsoft.Azure.KeyVault.WebKey.JsonWebKey _key;
         private readonly RSACryptoServiceProvider _rsa;
+        private bool _disposed = false;
 
         public MockKeyVaultClient()
         {
@@ -145,9 +147,25 @@ namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
         public void Dispose()
         {
-            _rsa.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                if (disposing)
+                {
+                    _rsa.Dispose();
+                }
+            }
         }
 
         public Task<AzureOperationResponse<KeyOperationResult>> EncryptWithHttpMessagesAsync(string vaultBaseUrl, string keyName, string keyVersion, string algorithm, byte[] value, Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default)

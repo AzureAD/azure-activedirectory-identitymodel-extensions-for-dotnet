@@ -30,8 +30,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault
+namespace Microsoft.IdentityModel.KeyVaultExtensions
 {
     /// <summary>
     /// Provides wrap and unwrap operations using Azure Key Vault.

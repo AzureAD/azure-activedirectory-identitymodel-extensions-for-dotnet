@@ -26,12 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
-{
-    public class KeyVaultSecurityKeyConfidentialClientTheoryData : KeyVaultSecurityKeyTheoryData
-    {
-        public string ClientId { get; set; } = $"{Guid.NewGuid():D}";
-        public string ClientSecret { get; set; } = Guid.NewGuid().ToString();
-    }
-}
+[assembly: AssemblyInformationalVersion("5.2.5")]
+[assembly: AssemblyFileVersion("5.2.5")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
+[assembly: AssemblyVersion("5.2.5")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]

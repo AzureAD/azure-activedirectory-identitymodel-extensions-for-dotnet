@@ -29,11 +29,13 @@ using System;
 using System.Linq;
 using Microsoft.Azure.KeyVault;
 using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.KeyVaultExtensions;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
+namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 {
     public class KeyVaultSignatureProviderTests
     {
