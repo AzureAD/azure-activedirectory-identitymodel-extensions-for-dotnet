@@ -3,13 +3,13 @@
   <Import Project="..\..\build\commonTest.props" />
 
   <PropertyGroup>
-    <AssemblyName>Microsoft.IdentityModel.Tokens.Extensions.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
-    <Description>Microsoft.IdentityModel.Tokens.Extensions.Tests</Description>
+    <Description>Tests for Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <LangVersion>latest</LangVersion>
-    <PackageId>Microsoft.IdentityModel.Tokens.Extensions.Tests</PackageId>
+    <PackageId>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net452;netcoreapp2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
@@ -17,8 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Extensions\Microsoft.IdentityModel.Tokens.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.KeyVaultExtensions.Tests\Microsoft.IdentityModel.KeyVaultExtensions.Tests.csproj" />    
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
   </ItemGroup>
 

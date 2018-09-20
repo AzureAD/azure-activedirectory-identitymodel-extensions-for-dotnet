@@ -29,8 +29,9 @@ using System;
 using System.Linq;
 using Microsoft.Azure.KeyVault.WebKey;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault
+namespace Microsoft.IdentityModel.KeyVaultExtensions
 {
     /// <summary>
     /// Provides cryptographic operators based on Azure Key Vault.

@@ -25,14 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.IdentityModel.Tests;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
+namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 {
-    public abstract class KeyVaultSecurityKeyTheoryData : TheoryDataBase
+    public class KeyWrapProviderTheoryData : TheoryDataBase
     {
-        public string KeyIdentifier { get; set; } = KeyVaultUtilities.CreateKeyIdentifier();
-        public Type Type { get; set; }
+        public string Algorithm { get; set; }
     }
 }

@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
+using System;
 
-namespace Microsoft.IdentityModel.Tokens.KeyVault.Tests
+namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 {
-    public class SignatureProviderTheoryData : TheoryDataBase
+    public class KeyVaultSecurityKeyConfidentialClientTheoryData : KeyVaultSecurityKeyTheoryData
     {
-        public string Algorithm { get; set; }
+        public string ClientId { get; set; } = $"{Guid.NewGuid():D}";
+        public string ClientSecret { get; set; } = Guid.NewGuid().ToString();
     }
 }

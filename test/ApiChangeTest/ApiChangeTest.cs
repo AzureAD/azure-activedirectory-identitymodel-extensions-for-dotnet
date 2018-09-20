@@ -62,6 +62,7 @@ namespace ApiChangeTest
         // Full name must be provided, i.e. namespace.className.propertyName
         private static List<string> _allowedApiBreakingChanges = new List<string>()
         {
+            "Microsoft.IdentityModel.Tokens.RSACryptoServiceProviderProxy.Dispose",
             "Microsoft.IdentityModel.Tokens.SecurityTokenHandler.MaximumTokenSizeInBytes",
             "Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.DefaultTokenLifetimeInMinutes",
             "Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.SetDefaultTimesOnTokenCreation",
