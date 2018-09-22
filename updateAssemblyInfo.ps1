@@ -41,7 +41,10 @@ $nugetVersion = $dateTimeStamp;
 $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
 $fileVersion = $releaseVersion + "." + $dateTimeStamp;
 $versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
-Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $nugetVersion));
+if ("" -ne ("{0}" -f $nugetPreview).Trim())
+{
+    Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $nugetVersion));
+}
 
 foreach($project in $projects)
 {
