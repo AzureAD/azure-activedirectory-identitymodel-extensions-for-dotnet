@@ -653,7 +653,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void ValidateIssuer(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
-            var context = new CompareContext($"{this}.ValidateAudience, {theoryData}");
+            var context = new CompareContext($"{this}.ValidateIssuer, {theoryData}");
             try
             {
                 (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateIssuerPublic(theoryData.Issuer, null, theoryData.ValidationParameters);
@@ -682,6 +682,123 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     });
 
                 return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ValidateConfirmationDataTheoryData))]
+        public void ValidateConfirmationData(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateConfirmationData", theoryData);
+            try
+            {
+                foreach (var subjectConfirmation in theoryData.Subject.SubjectConfirmations)
+                {
+                    (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateConfirmationDataPublic((Saml2SecurityToken)theoryData.SecurityToken, theoryData.ValidationParameters, subjectConfirmation.SubjectConfirmationData);
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> ValidateConfirmationDataTheoryData
+        {
+            get
+            {
+
+                var tokenHandler = new Saml2SecurityTokenHandler();
+                var tokenDescriptor = new SecurityTokenDescriptor()
+                {
+                    Issuer = Default.Issuer,
+                    Audience = Default.Audience,
+                    Subject = new ClaimsIdentity()
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var saml2SecurityToken = token as Saml2SecurityToken;
+
+                return new TheoryData<Saml2TheoryData>
+                {
+                    new Saml2TheoryData
+                    {
+                        First = true,
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(null, null),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            RequireExpirationTime = true,
+                            ValidateLifetime = true,
+                        },
+                        TestId = "no_lifetime_information"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(DateTime.UtcNow.AddDays(-1), null),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            RequireExpirationTime = true,
+                            ValidateLifetime = true,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenNoExpirationException), "IDX10225"),
+                        TestId = "expires_value_not_present_require_expiration"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(DateTime.UtcNow.AddDays(-1), null),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            RequireExpirationTime = false,
+                            ValidateLifetime = true,
+                        },
+                        TestId = "expires_value_not_present_dont_require_expiration"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(null, DateTime.UtcNow.AddDays(1)),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            ValidateLifetime = true,
+                        },
+                        TestId = "notOnOrAfter_is_present"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(DateTime.UtcNow.AddDays(-1), DateTime.UtcNow.AddDays(1)),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            RequireExpirationTime = true,
+                            ValidateLifetime = true,
+                        },
+                        TestId = "lifetime_information_is_present"
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic(),
+                        SecurityToken = saml2SecurityToken,
+                        Subject = ValidateConfirmationDataHelper.GenerateSubjectWithConfirmationData(null, DateTime.UtcNow.AddDays(-10)),
+                        ValidationParameters = new TokenValidationParameters()
+                        {
+                            RequireExpirationTime = true,
+                            ValidateLifetime = true,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenExpiredException), "IDX10223"),
+                        TestId = "subjectExpired_can_not_be_confirmed"
+                    }
+                };
             }
         }
 
@@ -981,6 +1098,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             base.ValidateAudience(audiences, token, validationParameters);
         }
+
+        public void ValidateConfirmationDataPublic(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters, Saml2SubjectConfirmationData confirmationData)
+        {
+            base.ValidateConfirmationData(samlToken, validationParameters, confirmationData);
+        }
     }
 
     public class Saml2SecurityTokenPublic : Saml2SecurityToken
@@ -988,6 +1110,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public Saml2SecurityTokenPublic(Saml2Assertion assertion)
             : base(assertion)
         {
+        }
+    }
+
+    class ValidateConfirmationDataHelper
+    {
+        public static Saml2Subject GenerateSubjectWithConfirmationData(DateTime? NotBefore, DateTime? NotOnOrAfter)
+        {
+            var subject = new Saml2Subject(new Saml2NameIdentifier("samlSubjectId", new Uri("urn:oasis:names:tc:SAML:2.0:nameid-format:entity")));
+            var saml2SubjectConfirmation = new Saml2SubjectConfirmation(new Uri("urn:oasis:names:tc:SAML:2.0:cm:bearer"));
+            var subjectConfirmationData = new Saml2SubjectConfirmationData();
+
+            subjectConfirmationData.NotBefore = NotBefore;
+            subjectConfirmationData.NotOnOrAfter = NotOnOrAfter;
+
+            saml2SubjectConfirmation.SubjectConfirmationData = subjectConfirmationData;
+            subject.SubjectConfirmations.Add(saml2SubjectConfirmation);
+
+            return subject;
         }
     }
 }

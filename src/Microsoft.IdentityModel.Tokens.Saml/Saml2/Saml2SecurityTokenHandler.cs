@@ -284,7 +284,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            Validators.ValidateLifetime(confirmationData.NotBefore, confirmationData.NotOnOrAfter, samlToken, validationParameters);
+            // NotBefore and NotOnOrAfter are optional elements (saml-core-2.0 - 2.4.1.2)
+            // validate lifetime only if lifetime information is present in the SubjectConfirmationData
+            if (confirmationData.NotBefore.HasValue || confirmationData.NotOnOrAfter.HasValue)
+                Validators.ValidateLifetime(confirmationData.NotBefore, confirmationData.NotOnOrAfter, samlToken, validationParameters);
         }
 
         /// <summary>
