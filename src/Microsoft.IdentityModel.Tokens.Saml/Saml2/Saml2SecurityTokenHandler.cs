@@ -235,12 +235,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (samlToken.Assertion.Subject == null)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13509));
-
-            foreach (var subjectConfirmation in samlToken.Assertion.Subject.SubjectConfirmations)
-            {
-                if (subjectConfirmation != null && subjectConfirmation.SubjectConfirmationData != null)
-                    ValidateConfirmationData(samlToken, validationParameters, subjectConfirmation.SubjectConfirmationData);
-            }
         }
 
         /// <summary>
@@ -265,26 +259,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ValidateTokenReplay(DateTime? expirationTime, string securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateTokenReplay(expirationTime, securityToken, validationParameters);
-        }
-
-        /// <summary>
-        /// Validates <see cref="Saml2SubjectConfirmationData"/> object for lifetime.
-        /// </summary>
-        /// <param name="samlToken">the <see cref="Saml2SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">the <see cref="TokenValidationParameters"/> that will be used during validation.</param>
-        /// <param name="confirmationData">The <see cref="Saml2SubjectConfirmationData"/> to validate.</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="confirmationData"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
-        /// <remarks>calls <see cref="Validators.ValidateLifetime(DateTime?, DateTime?, SecurityToken, TokenValidationParameters)"/></remarks>
-        protected virtual void ValidateConfirmationData(Saml2SecurityToken samlToken, TokenValidationParameters validationParameters, Saml2SubjectConfirmationData confirmationData)
-        {
-            if (confirmationData == null)
-                throw LogArgumentNullException(nameof(confirmationData));
-
-            if (validationParameters == null)
-                throw LogArgumentNullException(nameof(validationParameters));
-
-            Validators.ValidateLifetime(confirmationData.NotBefore, confirmationData.NotOnOrAfter, samlToken, validationParameters);
         }
 
         /// <summary>
