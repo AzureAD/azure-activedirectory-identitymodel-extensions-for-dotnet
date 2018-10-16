@@ -898,7 +898,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 Validators.ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
 
                 if (samlToken.Assertion.Conditions.OneTimeUse)
-                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13510));
+                    ValidateOneTimeUseCondition(samlToken, validationParameters);
 
                 if (samlToken.Assertion.Conditions.ProxyRestriction != null)
                     throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
@@ -908,6 +908,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 Validators.ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
             }
+        }
+
+        /// <summary>
+        /// Validates the OneTimeUse condition.
+        /// </summary>
+        /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        protected virtual void ValidateOneTimeUseCondition(Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13510));
         }
 
         /// <summary>

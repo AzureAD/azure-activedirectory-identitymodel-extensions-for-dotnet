@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         // signature creation / validation
         internal const string IDX13509 = "IDX13509: Unable to validate token, Subject is null.";
-        internal const string IDX13510 = "IDX13510: The Saml2SecurityToken cannot be validated because the Assertion specifies a OneTimeUse condition.Enforcement of the OneTimeUse condition is not supported by default.To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
+        internal const string IDX13510 = "IDX13510: The Saml2SecurityToken cannot be validated because the Assertion specifies a OneTimeUse condition.Enforcement of the OneTimeUse condition is not supported by default.To customize the enforcement of OneTimeUse condition, extend Saml2SecurityTokenHandler and override ValidateOneTimeUseCondition.";
         internal const string IDX13511 = "IDX13511: The Saml2SecurityToken cannot be validated because the Assertion specifies a ProxyRestriction condition.Enforcement of the ProxyRestriction condition is not supported by default. To customize the enforcement of Saml2Conditions, extend Saml2SecurityTokenHandler and override ValidateConditions.";
         internal const string IDX13512 = "IDX13512: Unable to validate token. A Saml2SamlAttributeStatement can only have one Saml2Attribute of type 'Actor'. This special Saml2Attribute is used in delegation scenarios.";
         internal const string IDX13513 = "IDX13513: NotBefore '{0}', is after NotOnOrAfter '{1}'.";
