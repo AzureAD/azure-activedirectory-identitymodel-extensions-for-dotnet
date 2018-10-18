@@ -46,6 +46,7 @@ namespace ApiChangeTest
     {
         private static bool _readyToRunTests = false;
 
+
         private static List<string> _packagesToCheck = new List<string>()
         {
             "Microsoft.IdentityModel.Logging",
@@ -55,7 +56,11 @@ namespace ApiChangeTest
             "Microsoft.IdentityModel.Tokens",
             "Microsoft.IdentityModel.Tokens.Saml",
             "Microsoft.IdentityModel.Xml",
+#if System
             "System.IdentityModel.Tokens.Jwt"
+#else
+            "Microsoft.IdentityModel.Tokens.Jwt"
+#endif
         };
 
         // Add the list of allowed breaking changes here
@@ -70,9 +75,15 @@ namespace ApiChangeTest
             "Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.DefaultTokenLifetimeInMinutes",
             "Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.SetDefaultTimesOnTokenCreation",
             "Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.TokenLifetimeInMinutes",
+#if System
             "System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultTokenLifetimeInMinutes",
             "System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.SetDefaultTimesOnTokenCreation",
             "System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.TokenLifetimeInMinutes"
+#else
+            "Microsoft.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultTokenLifetimeInMinutes",
+            "Microsoft.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.SetDefaultTimesOnTokenCreation",
+            "Microsoft.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.TokenLifetimeInMinutes"
+#endif
         };
 
         /// <summary>
@@ -90,12 +101,19 @@ namespace ApiChangeTest
             // create the directory for reports
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\Resource\reports"));
 
-            var srcPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\{0}\bin\Debug\net451\{0}.dll");
+            var srcPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\{0}\bin\Debug\net451\{1}.dll");
             var destPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\Resource\devAssemblies\{0}.dll");
 
-            foreach(var package in _packagesToCheck)
+            foreach (var package in _packagesToCheck)
             {
-                File.Copy(string.Format(srcPath, package), string.Format(destPath, package), true);
+#if System
+                File.Copy(string.Format(srcPath, package, package), string.Format(destPath, package), true);
+#else
+                if (package.Equals("Microsoft.IdentityModel.Tokens.Jwt"))
+                    File.Copy(string.Format(srcPath, "System.IdentityModel.Tokens.Jwt", "Microsoft.IdentityModel.Tokens.Jwt"), string.Format(destPath, package), true);
+                else
+                    File.Copy(string.Format(srcPath, package, package), string.Format(destPath, package), true);
+#endif
             }
 
             File.Copy(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\System.IdentityModel.Tokens.Jwt\bin\Debug\net451\Newtonsoft.Json.dll"), string.Format(destPath, "Newtonsoft.Json"), true);
@@ -172,7 +190,7 @@ namespace ApiChangeTest
                 throw new ApiChangeException($"The following breaking changes are found: {Environment.NewLine} {sb.ToString()}");
         }
 
-        [Theory(Skip ="assembly namespace change"), MemberData(nameof(ApiBreakingChangeTestTheoryData)) ]
+        [Theory, MemberData(nameof(ApiBreakingChangeTestTheoryData))]
         public void ApiBreakingChangeTest(ApiChangeTestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ApiBreakingChangeTest", theoryData);
