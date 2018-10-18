@@ -7,6 +7,10 @@
     <JsonNetVersion>6.0.1</JsonNetVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0'">
     <CoreFxVersion>4.3.0-*</CoreFxVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
