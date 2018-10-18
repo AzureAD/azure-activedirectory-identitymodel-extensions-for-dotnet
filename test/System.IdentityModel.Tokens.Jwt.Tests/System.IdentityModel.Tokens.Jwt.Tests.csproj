@@ -5,6 +5,8 @@
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Tokens.Jwt.Tests</AssemblyName>
     <Description>Microsoft.IdentityModel.Tokens.Jwt.Tests</Description>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Tokens.Jwt.Tests</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
