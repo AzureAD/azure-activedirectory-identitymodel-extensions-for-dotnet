@@ -31,8 +31,13 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if System
 using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
+#else
+using Microsoft.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens.Jwt.Tests;
+#endif
 using System.IO;
 using System.Security.Claims;
 using System.Text;
