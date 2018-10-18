@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(nameof(DataSets.JsonWebKeyString1), DataSets.JsonWebKeyString1, DataSets.JsonWebKey1, ExpectedException.NoExceptionExpected);
                 dataset.Add(nameof(DataSets.JsonWebKeyString2), DataSets.JsonWebKeyString2, DataSets.JsonWebKey2, ExpectedException.NoExceptionExpected);
                 dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString1), DataSets.JsonWebKeyBadFormatString1, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
-#if NET452
+#if NET452 || NET461
                 dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString2), DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonReaderException)));
 #else
                 dataset.Add(nameof(DataSets.JsonWebKeyBadFormatString2), DataSets.JsonWebKeyBadFormatString2, null, ExpectedException.ArgumentException(inner: typeof(Newtonsoft.Json.JsonSerializationException)));
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         // Tests to make sure conditional property serialization for JsonWebKeys is working properly.
-#if NET452
+#if NET452 || NET461
         [Fact(Skip ="Writing not supported")]
 #else
         [Fact]

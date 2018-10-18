@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
-#if NET45 || NET451
+#if NET45 || NET451 || NET461
                 SetJsonParameters(json);
 #else
                 if (jsonSerializerSettings != null)

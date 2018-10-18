@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors("OpenIdConnectConfiguration_GetSets", errors);
         }
 
-#if NET452
+#if NET452 || NET461
         [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
 #else
         [Fact]
@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-#if NET452
+#if NET452 || NET461
         [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
 #else
         [Fact]
@@ -242,7 +242,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-#if NET452
+#if NET452 || NET461
         [Fact(Skip = "Writing OpenIdConnectConfig not supported")]
 #else
         [Fact]

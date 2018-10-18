@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX21806, json, this);
-#if NET45 || NET451
+#if NET45 || NET451 || NET461
                 SetJsonParameters(json);
 #else
                 JsonConvert.PopulateObject(json, this);
