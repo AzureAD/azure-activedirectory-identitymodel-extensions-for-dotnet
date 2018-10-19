@@ -99,8 +99,8 @@ namespace Microsoft.IdentityModel.Tokens.Jwt
                 if (!string.IsNullOrEmpty(signingCredentials.Key.KeyId))
                     Kid = signingCredentials.Key.KeyId;
 
-                if (signingCredentials is X509SigningCredentials x509SigningCredentials)
-                    this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
+                if (signingCredentials.Key is X509SecurityKey x509Key)
+                    this[JwtHeaderParameterNames.X5t] = x509Key.X5t;
             }
 
             Typ = JwtConstants.HeaderType;
