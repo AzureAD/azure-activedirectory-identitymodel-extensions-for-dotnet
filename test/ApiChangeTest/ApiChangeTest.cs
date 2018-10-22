@@ -90,17 +90,37 @@ namespace ApiChangeTest
             // create the directory for reports
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\Resource\reports"));
 
-            var srcPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\{0}\bin\Debug\net451\{0}.dll");
+            var configuration = ResolveConfiguration();
+            var srcPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\{0}\bin\{1}\net451\{0}.dll");
             var destPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\Resource\devAssemblies\{0}.dll");
 
             foreach(var package in _packagesToCheck)
             {
-                File.Copy(string.Format(srcPath, package), string.Format(destPath, package), true);
+                File.Copy(string.Format(srcPath, package, configuration), string.Format(destPath, package), true);
             }
 
-            File.Copy(Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\..\..\src\System.IdentityModel.Tokens.Jwt\bin\Debug\net451\Newtonsoft.Json.dll"), string.Format(destPath, "Newtonsoft.Json"), true);
+            File.Copy(Path.Combine(Directory.GetCurrentDirectory(), string.Format(@"..\..\..\..\..\src\System.IdentityModel.Tokens.Jwt\bin\{0}\net451\Newtonsoft.Json.dll", configuration)), string.Format(destPath, "Newtonsoft.Json"), true);
 
             _readyToRunTests = true;
+        }
+
+        string ResolveConfiguration()
+        {
+            var path = Directory.GetCurrentDirectory();
+            var debugDll = new FileInfo(path + @"\..\..\debug\net452\ApiChangeTest.dll");
+            var relDll = new FileInfo(path + @"\..\..\release\net452\ApiChangeTest.dll");
+
+            if (debugDll.Exists && !relDll.Exists)
+                return "debug";
+            else if (!debugDll.Exists && relDll.Exists)
+                return "release";
+            else
+            {
+                if (debugDll.LastWriteTime > relDll.LastWriteTime)
+                    return "debug";
+                else
+                    return "release";
+            }
         }
 
         void RunApiCheck(string packageName)
