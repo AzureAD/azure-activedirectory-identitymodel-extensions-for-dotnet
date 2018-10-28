@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30029 = "IDX30029: The Reference '{0}' has exceeded the number of Transforms that will be processed: '{1}'. If there is a need to increase the number of Transforms, the DSigSerializer.MaximumReferenceTransforms can be increased. The default value is 10.";
 
         // XML structure, supported exceptions
-        internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";
+        internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}'.";
         internal const string IDX30105 = "IDX30105: Transform must specify an algorithm none was found.";
         internal const string IDX30107 = "IDX30107: 'InclusiveNamespaces' is not supported.";
         internal const string IDX30108 = "IDX30108: 'X509Data' cannot be empty.";
