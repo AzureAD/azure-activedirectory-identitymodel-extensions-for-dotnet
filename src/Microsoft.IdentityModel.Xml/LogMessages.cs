@@ -43,7 +43,6 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30015 = "IDX30015: Only a single '{0}' element is supported. Found more than one.";
         internal const string IDX30016 = "IDX30016: Exception thrown while reading '{0}'. See inner exception for more details.";
         internal const string IDX30017 = "IDX30017: Exception thrown while reading '{0}'. Caught exception: '{1}'.";
-        internal const string IDX30019 = "IDX30019: Unable to read XML. A second <Signature> element was found. The EnvelopedSignatureReader can only process one <Signature>.";
         internal const string IDX30020 = "IDX30020: Unable to read XML. A second <Reference> element was found. The EnvelopedSignatures can only have one <Reference>.";
         internal const string IDX30022 = "IDX30022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
         internal const string IDX30024 = "IDX30024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";

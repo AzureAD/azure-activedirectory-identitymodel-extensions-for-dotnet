@@ -99,11 +99,9 @@ namespace Microsoft.IdentityModel.Xml
             bool result = InnerReader.Read();
             if (result
                 && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
-                && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
+                && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace)
+                && Signature == null)
             {
-                if (Signature != null)
-                    throw XmlUtil.LogReadException(LogMessages.IDX30019);
-
                 Signature = Serializer.ReadSignature(InnerReader);
             }
 

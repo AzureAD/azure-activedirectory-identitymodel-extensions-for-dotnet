@@ -148,6 +148,7 @@ namespace Microsoft.IdentityModel.Xml
             int depth = 0;
             int recordedDepth = -1;
             bool include = true;
+            bool hasExcluded = false;
             do
             {
                 switch (NodeType)
@@ -157,10 +158,12 @@ namespace Microsoft.IdentityModel.Xml
                         depth++;
                         if (include
                             && LocalName == ExcludedElement
-                            && Namespace == ExcludedNamespace)
+                            && Namespace == ExcludedNamespace
+                            && !hasExcluded)
                         {
                             include = false;
                             recordedDepth = depth;
+                            hasExcluded = true;
                         }
                         if (include)
                         {

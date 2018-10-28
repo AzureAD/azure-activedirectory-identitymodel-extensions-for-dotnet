@@ -177,6 +177,13 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         TestId = nameof(ReferenceXml.Saml2Token_Valid_Formated),
                         Xml = ReferenceXml.Saml2Token_Valid_Formated
+                    },
+                    new EnvelopedSignatureTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public,
+                        TestId = nameof(ReferenceXml.Xml_Valid_Signature_Containing_Nested_Signature),
+                        Xml = ReferenceXml.Xml_Valid_Signature_Containing_Nested_Signature,
+                        ExpectSignature = true
                     }
                 };
             }
