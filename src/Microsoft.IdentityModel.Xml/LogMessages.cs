@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30028 = "IDX30028: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
 
         // XML structure, supported exceptions
-        internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";
+        internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}'.";
         internal const string IDX30105 = "IDX30105: Transform must specify an algorithm none was found.";
         internal const string IDX30107 = "IDX30107: 'InclusiveNamespaces' is not supported.";
         internal const string IDX30108 = "IDX30108: 'X509Data' cannot be empty.";
