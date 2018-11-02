@@ -32,7 +32,7 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Wraps a <see cref="XmlDictionaryWriter"/> delegates to InnerReader.
+    /// Wraps a <see cref="XmlDictionaryReader"/> delegates to InnerReader.
     /// </summary>
     public class DelegatingXmlDictionaryReader : XmlDictionaryReader, IXmlLineInfo
     {
