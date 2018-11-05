@@ -76,6 +76,7 @@ namespace Microsoft.IdentityModel.Xml
             if (hash == null)
                 throw LogArgumentNullException(nameof(hash));
 
+#error Move this to XmlTokenStream and create a caching mechanism for the array!
             using (var stream = new MemoryStream())
             {
                 using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))

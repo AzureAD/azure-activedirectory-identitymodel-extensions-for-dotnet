@@ -41,6 +41,7 @@ namespace Microsoft.IdentityModel.Xml
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
         private XmlTokenStreamReader _tokenStreamReader;
+        private XmlTokenStream _tokenStream;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
@@ -76,6 +77,8 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (Signature != null)
                 Signature.SignedInfo.References[0].TokenStream = _tokenStreamReader.TokenStream;
+
+            _tokenStream = _tokenStreamReader.TokenStream;
         }
 
         /// <summary>
@@ -118,6 +121,16 @@ namespace Microsoft.IdentityModel.Xml
         {
             get;
             protected set;
+        }
+
+        public string GetCanonicalizedXml()
+        {
+            if (_tokenStream == null)
+                throw new InvalidOperationException("Can only get canonical Xml after reading is completed");
+
+#error Reuse code to write to stream from XmlTokenStream. Let it cache the array!
+
+            return null;
         }
     }
 }
