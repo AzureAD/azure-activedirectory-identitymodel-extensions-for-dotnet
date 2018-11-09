@@ -103,6 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal const string IDX13902 = "IDX13902: Unable to write Saml2Assertion: Saml2Evidence must have at least one assertion or assertion reference.";
 
         internal const string IDX13950 = "IDX13950: API is not supported";
+        internal const string IDX13951 = "IDX13951: Validation of confirmation data is currently not supported by default. To customize SubjectConfirmationData processing, extend Saml2SecurityTokenHandler and override ValidateConfirmationData.";
 #pragma warning restore 1591
     }
 }
