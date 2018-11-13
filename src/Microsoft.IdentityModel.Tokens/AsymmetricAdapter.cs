@@ -296,7 +296,8 @@ namespace Microsoft.IdentityModel.Tokens
             // X509Certificate2.GetPrivateKey OR X509Certificate2.GetPublicKey.Key
             // These calls return an AsymmetricAlgorithm which doesn't have API's to do much and need to be cast.
             // RSACryptoServiceProvider is wrapped to support SHA2
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+            // RSACryptoServiceProviderProxy is only supported on Windows platform
+#if WINDOWS && (NET45 || NET451 || NET461 || NETSTANDARD2_0)
             _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                               || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
 
@@ -338,7 +339,7 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureFunction = SignWithRsa;
             VerifyFunction = VerifyWithRsa;
 #endif
-            }
+        }
 
         private RSA RSA { get; set; }
 
