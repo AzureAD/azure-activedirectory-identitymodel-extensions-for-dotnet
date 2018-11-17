@@ -168,8 +168,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10672 = "IDX10672: GetKeyedHashAlgorithm returned null, key: {0}, algorithm {1}.";
         public const string IDX10673 = "IDX10673: CryptoProviderFactory.GetHashAlgorithm returned null, factory: {0}, algorithm: {1}.";
         public const string IDX10674 = "IDX10674: JsonWebKeyConverter does not support SecurityKey of type: {0}";
-        public const string IDX10675 = "IDX10675: The value of '{0}' must be '{1}' bits, but was {2}.";
-        public const string IDX10676 = "IDX10676: ECDsa creation is currently only supported for the Windows operating system.";
+        public const string IDX10675 = "IDX10675: The byte count of '{0}' must be less than or equal to '{1}', but was {2}.";
+        //public const string IDX10676 = "IDX10676:"
         public const string IDX10677 = "IDX10677: GetKeyedHashAlgorithm threw, key: {0}, algorithm {1}.";
         public const string IDX10678 = "IDX10678: Unable to Sign, provider is not available, Algorithm, Key: '{0}', '{1}'.";
         public const string IDX10679 = "IDX10679: Failed to decompress using algorithm '{0}'.";
@@ -181,7 +181,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
         public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 or NET451 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
-        public const string IDX10688 = "IDX10688: RSACryptoServiceProviderProxy creation is only supported on Windows.";
+        //public const string IDX10688 = "IDX10688:";
+        public const string IDX10689 = "IDX10689: Unable to create an ECDsa object. See inner exception for more details.";
+        public const string IDX10690 = "IDX10690: ECDsa creation is not supported by NETSTANDARD1.4, when running on platforms other than Windows. For more details, see https://aka.ms/IdentityModel/create-ecdsa";
+        public const string IDX10691 = "IDX10691: Unable to create an ECDsa object, internal CreateECDsaFunction is not available.";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
