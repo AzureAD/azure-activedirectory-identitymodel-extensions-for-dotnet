@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net451' OR '$(TargetFramework)' == 'net461' ">
-    <DefineConstants>DESKTOP</DefineConstants>
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
