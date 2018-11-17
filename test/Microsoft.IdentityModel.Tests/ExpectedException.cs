@@ -40,9 +40,9 @@ namespace Microsoft.IdentityModel.Tests
     /// </summary>
     public class ExpectedException
     {
-        public ExpectedException(Type typeExpected = null, string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
+        public ExpectedException(Type typeExpected = null, string substringExpected = null, Type innerTypeExpected = null, bool ignoreInnerException = false, Dictionary<string, object> propertiesExpected = null)
         {
-            IgnoreInnerException = false;
+            IgnoreInnerException = ignoreInnerException;
             InnerTypeExpected = innerTypeExpected;
             SubstringExpected = substringExpected;
             TypeExpected = typeExpected;
@@ -66,9 +66,9 @@ namespace Microsoft.IdentityModel.Tests
             return new ExpectedException(typeof(ArgumentNullException), substringExpected, inner); 
         }
 
-        public static ExpectedException CryptographicException(string substringExpected = null, Type inner = null)
+        public static ExpectedException CryptographicException(string substringExpected = null, Type inner = null, bool ignoreInnerException = false)
         {
-            return new ExpectedException(typeof(CryptographicException), substringExpected, inner);
+            return new ExpectedException(typeof(CryptographicException), substringExpected, inner, ignoreInnerException);
         }
 
         public static ExpectedException SecurityTokenDecryptionFailedException(string substringExpected = null, Type innerTypeExpected = null)
@@ -143,15 +143,15 @@ namespace Microsoft.IdentityModel.Tests
                     return;
                 }
 
-                if (exception.InnerException != null && InnerTypeExpected == null)
+                if (exception.InnerException != null && InnerTypeExpected == null && !IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null.\nexception.InnerException: " + exception.InnerException, errors);
+                    HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null && !IgnoreInnerException.\nexception.InnerException: " + exception.InnerException, errors);
                     return;
                 }
 
-                if (exception.InnerException == null && InnerTypeExpected != null)
+                if (exception.InnerException == null && InnerTypeExpected != null && !IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException == null, expectedException.InnerTypeExpected != null.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors);
+                    HandleError("exception.InnerException == null && expectedException.InnerTypeExpected != null && !IgnoreInnerException.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors);
                     return;
                 }
 

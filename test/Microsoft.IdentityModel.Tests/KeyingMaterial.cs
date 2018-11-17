@@ -431,6 +431,7 @@ namespace Microsoft.IdentityModel.Tests
             RsaSigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
             RsaSigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
+#if !NETCOREAPP2_0
             //ecdsa
             byte[] ecdsa256KeyBlob = TestUtilities.HexToByteArray("454353322000000096e476f7473cb17c5b38684daae437277ae1efadceb380fad3d7072be2ffe5f0b54a94c2d6951f073bfc25e7b81ac2a4c41317904929d167c3dfc99122175a9438e5fb3e7625493138d4149c9438f91a2fecc7f48f804a92b6363776892ee134");
             byte[] ecdsa384KeyBlob = TestUtilities.HexToByteArray("45435334300000009dc6bb9cdc8dac31e3db6e6b5f58f8e3a304e5c08e632705ca9a236f1134646dca526b89f7ea98653962f4a781f2fc9bf479a2d627561b1269548050e6d2c388018b837f4ceba8ee7fe2eefea67c8418ad1e84f60c1309385e573ea5183e9ae8b6d5308a78da207c6e556af2053983321a5f8ac057b787089ee783c99093b9f2afb2f9a1e9a560ad3095b9667aa699fa");
@@ -449,7 +450,22 @@ namespace Microsoft.IdentityModel.Tests
             Ecdsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public)) { KeyId = "ECDsa256Key_Public" };
             Ecdsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public)) { KeyId = "ECDsa384Key_Public" };
             Ecdsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public)) { KeyId = "ECDsa521Key_Public" };
+#else
+            var Ecdsa256 = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+            var Ecdsa384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
+            var Ecdsa521 = ECDsa.Create(ECCurve.NamedCurves.nistP521);
 
+            var Ecdsa256_Public = ECDsa.Create(Ecdsa256.ExportParameters(false));
+            var Ecdsa384_Public = ECDsa.Create(Ecdsa384.ExportParameters(false));
+            var Ecdsa521_Public = ECDsa.Create(Ecdsa521.ExportParameters(false));
+
+            Ecdsa256Key = new ECDsaSecurityKey(Ecdsa256) { KeyId = "ECDsa256Key" };
+            Ecdsa384Key = new ECDsaSecurityKey(Ecdsa384) { KeyId = "ECDsa384Key" };
+            Ecdsa521Key = new ECDsaSecurityKey(Ecdsa521) { KeyId = "ECDsa521Key" };
+            Ecdsa256Key_Public = new ECDsaSecurityKey(Ecdsa256_Public) { KeyId = "ECDsa256Key_Public" };
+            Ecdsa384Key_Public = new ECDsaSecurityKey(Ecdsa384_Public) { KeyId = "ECDsa384Key_Public" };
+            Ecdsa521Key_Public = new ECDsaSecurityKey(Ecdsa521_Public) { KeyId = "ECDsa521Key_Public" };
+#endif
         }
 
 #if  NET45 || NET452 || NET461
@@ -519,7 +535,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var rsa = new RSACng();
+                var rsa = RSA.Create();
                 rsa.ImportParameters(RsaParameters_2048);
                 return new RsaSecurityKey(rsa) { KeyId = "RsaSecurityKey_FromRsa_2048" };
             }
@@ -529,7 +545,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             get
             {
-                var rsa = new RSACng();
+                var rsa = RSA.Create();
                 rsa.ImportParameters(RsaParameters_2048_Public);
                 return new RsaSecurityKey(rsa) { KeyId = "RsaSecurityKey_FromRsa_2048_Public" };
             }
@@ -870,6 +886,25 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
+        public static JsonWebKey JsonWebKeyP256_BadPrivateKey
+        {
+            get
+            {
+                var badPrivateKey = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4QA";
+
+                return new JsonWebKey
+                {
+                    Crv = "P-256",
+                    X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
+                    Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
+                    D = badPrivateKey,
+                    KeyId = "JsonWebKeyP256_BadPrivateKey",
+                    Kid = "JsonWebKeyP256_BadPrivateKey",
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                };
+            }
+        }
+
         public static JsonWebKey JsonWebKeyP256_Public
         {
             get
@@ -881,6 +916,72 @@ namespace Microsoft.IdentityModel.Tests
                     Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
                     KeyId = "JsonWebKeyEcdsa256_Public",
                     Kid = "JsonWebKeyEcdsa256_Public",
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                };
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyP384
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-384",
+                    X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg",
+                    Y = "Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l",
+                    D = "lJ44FtBCW4DyyGmRwAwFqjrpuet3BiL_VdYqOsywNjvoMDAVvgQ6SGTwIh4Qi7Yl",
+                    KeyId = "JsonWebKeyEcdsa384",
+                    Kid = "JsonWebKeyEcdsa384",
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                };
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyP384_Public
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-384",
+                    X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg",
+                    Y = "Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l",
+                    KeyId = "JsonWebKeyP384_Public",
+                    Kid = "JsonWebKeyP384_Public",
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                };
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyP521
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-521",
+                    X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
+                    Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
+                    D = "AWAduQ9Eu0fw2X_jBfYcSCc3jLfUuQY9Un3pQXHay4BlIhRObnNZAWPWOZccbP0ApfQLPHEAuByMtHv5D6sMVbCz",
+                    KeyId = "JsonWebKeyP521",
+                    Kid = "JsonWebKeyP521",
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                };
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyP521_Public
+        {
+            get
+            {
+                return new JsonWebKey
+                {
+                    Crv = "P-521",
+                    X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
+                    Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
+                    KeyId = "JsonWebKeyP521_Public",
+                    Kid = "JsonWebKeyP521_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
