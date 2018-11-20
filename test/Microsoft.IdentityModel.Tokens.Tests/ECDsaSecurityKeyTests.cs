@@ -39,10 +39,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Constructor()
         {
+
             // testing constructor that takes ECDsa instance
             ECDsaSecurityKeyConstructorWithEcdsa(null, ExpectedException.ArgumentNullException("ecdsa"));
+#if !NETCOREAPP2_0
             ECDsaSecurityKeyConstructorWithEcdsa(new ECDsaCng(), ExpectedException.NoExceptionExpected);
             var ecdsaSecurityKey = new ECDsaSecurityKey(new ECDsaCng());
+#elif NETCOREAPP2_0
+            ECDsaSecurityKeyConstructorWithEcdsa(ECDsa.Create(), ExpectedException.NoExceptionExpected);
+            var ecdsaSecurityKey = new ECDsaSecurityKey(ECDsa.Create());
+#endif
             Assert.True(ecdsaSecurityKey.PrivateKeyStatus == PrivateKeyStatus.Unknown, "ecdsaSecurityKey.FoundPrivateKey is unknown");
         }
 

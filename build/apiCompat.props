@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ResolvedMatchingContract Include="$(SolutionDir)Tools\apiCompat\contractAssemblies\$(TargetFramework)\$(TargetName).dll " />
+		<ResolvedMatchingContract Include="$(SolutionDir)Tools/apiCompat/contractAssemblies/$(TargetFramework)/$(TargetName).dll " />
 	</ItemGroup>
 
 	<Target Name="CheckIfContractAssemblyExists" Condition="'$(RunApiCompat)' == 'true' AND !Exists('@(ResolvedMatchingContract)')" BeforeTargets="ValidateApiCompatForSrc">
