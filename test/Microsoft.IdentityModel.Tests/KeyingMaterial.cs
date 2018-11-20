@@ -450,7 +450,7 @@ namespace Microsoft.IdentityModel.Tests
             Ecdsa256Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa256Public)) { KeyId = "ECDsa256Key_Public" };
             Ecdsa384Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa384Public)) { KeyId = "ECDsa384Key_Public" };
             Ecdsa521Key_Public = new ECDsaSecurityKey(new ECDsaCng(ecdsa512Public)) { KeyId = "ECDsa521Key_Public" };
-#else
+#elif NETCOREAPP2_0
             var Ecdsa256 = ECDsa.Create(ECCurve.NamedCurves.nistP256);
             var Ecdsa384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
             var Ecdsa521 = ECDsa.Create(ECCurve.NamedCurves.nistP521);
@@ -466,9 +466,10 @@ namespace Microsoft.IdentityModel.Tests
             Ecdsa384Key_Public = new ECDsaSecurityKey(Ecdsa384_Public) { KeyId = "ECDsa384Key_Public" };
             Ecdsa521Key_Public = new ECDsaSecurityKey(Ecdsa521_Public) { KeyId = "ECDsa521Key_Public" };
 #endif
+
         }
 
-#if  NET45 || NET452 || NET461
+#if NET45 || NET452 || NET461
         public static RsaSecurityKey RsaSecurityKeyWithCspProvider_2048
         {
             get
@@ -510,7 +511,7 @@ namespace Microsoft.IdentityModel.Tests
         }
 #endif
 
-#if NETCOREAPP2_0
+#if NET461
         public static RsaSecurityKey RsaSecurityKeyWithCngProvider_2048
         {
             get
@@ -530,7 +531,9 @@ namespace Microsoft.IdentityModel.Tests
                 return new RsaSecurityKey(rsaCng) { KeyId = "RsaSecurityKeyWithCngProvider_2048" };
             }
         }
+#endif
 
+#if NETCOREAPP2_0
         public static RsaSecurityKey RsaSecurityKey_2048_FromRsa
         {
             get

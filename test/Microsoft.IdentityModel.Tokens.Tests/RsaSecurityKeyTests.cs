@@ -112,8 +112,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 false
             );
 #endif
+#if NET461
 
-#if NETCOREAPP2_0
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCngProvider_2048,
@@ -126,6 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 false
             );
 #endif
+
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKey_2048",
                 KeyingMaterial.RsaSecurityKey_2048,
@@ -135,6 +136,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKey_2048_Public",
                 KeyingMaterial.RsaSecurityKey_2048_Public,
+                false
+            );
+
+            theoryData.Add(
+               "KeyingMaterial.RsaSecurityKey_2048_FromRsa",
+               KeyingMaterial.RsaSecurityKey_2048_FromRsa,
+               true
+           );
+
+            theoryData.Add(
+                "KeyingMaterial.RsaSecurityKey_2048_FromRsa_Public",
+                KeyingMaterial.RsaSecurityKey_2048_FromRsa_Public,
                 false
             );
 

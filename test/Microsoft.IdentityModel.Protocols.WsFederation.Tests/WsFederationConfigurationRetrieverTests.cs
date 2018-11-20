@@ -240,21 +240,21 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v2-metadata.xml"),
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), "../../../adfs-v2-metadata.xml"),
                         SigingKey = ReferenceMetadata.AdfsV2MetadataSigningKey,
                         Configuration = ReferenceMetadata.AdfsV2Endpoint,
                         TestId = "AdfsV2Metadata from xml file"
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v3-metadata.xml"),
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), "../../../adfs-v3-metadata.xml"),
                         SigingKey = ReferenceMetadata.AdfsV3MetadataSigningKey,
                         Configuration = ReferenceMetadata.AdfsV3Endpoint,
                         TestId = "AdfsV3Metadata from xml file"
                     },
                     new WsFederationMetadataTheoryData
                     {
-                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\..\adfs-v4-metadata.xml"),
+                        MetadataPath = Path.Combine(Directory.GetCurrentDirectory(), "../../../adfs-v4-metadata.xml"),
                         SigingKey = ReferenceMetadata.AdfsV4MetadataSigningKey,
                         Configuration = ReferenceMetadata.AdfsV4Endpoint,
                         TestId = "AdfsV4Metadata from xml file"
