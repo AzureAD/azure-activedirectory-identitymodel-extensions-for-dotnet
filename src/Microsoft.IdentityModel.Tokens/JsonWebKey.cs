@@ -321,9 +321,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal ECDsa CreateECDsa(string algorithm, bool usePrivateKey)
         {
-#if !WINDOWS
-            throw new NotImplementedException(LogMessages.IDX10676);
-#endif
             if (Crv == null)
                 throw LogHelper.LogArgumentNullException(nameof(Crv));
 
