@@ -58,6 +58,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14300 = "IDX14300: Could not parse '{0}' : '{1}' as a '{2}'.";
         internal const string IDX14301 = "IDX14301: Unable to parse the header into a JSON object. \nHeader: '{0}'.";
         internal const string IDX14302 = "IDX14302: Unable to parse the payload into a JSON object. \nPayload: '{0}'.";
+        internal const string IDX14303 = "IDX14303: Claim with name '{0}' does not exist in the header.";
+        internal const string IDX14304 = "IDX14304: Claim with name '{0}' does not exist in the payload.";
+        internal const string IDX14305 = "IDX14305: Unable to convert the '{0}' claim to the following type: '{1}'. Claim type was: '{2}'.";
 #pragma warning restore 1591
     }
 }

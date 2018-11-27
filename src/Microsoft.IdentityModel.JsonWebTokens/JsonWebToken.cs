@@ -31,6 +31,7 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -496,7 +497,51 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            return Payload.Value<T>(key);
+            if (!Payload.TryGetValue(key, out var jTokenValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
+
+            T value;
+            try
+            {
+                value = jTokenValue.ToObject<T>();
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Tries to get the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        public bool TryGetPayloadValue<T>(string key, out T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = default(T);
+                return false;
+            }
+
+            if (!Payload.TryGetValue(key, out var jTokenValue))
+            {
+                value = default(T);
+                return false;
+            }
+
+            try
+            {
+                value = jTokenValue.ToObject<T>();
+            }
+            catch (Exception)
+            {
+                value = default(T);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -508,7 +553,51 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            return Header.Value<T>(key);
+            if (!Header.TryGetValue(key, out var jTokenValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14303, key)));
+
+            T value;
+            try
+            {
+                value =  jTokenValue.ToObject<T>();
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Tries to get the value corresponding to the provided key from the JWT header { key, 'value' }.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        public bool TryGetHeaderValue<T>(string key, out T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = default(T);
+                return false;
+            }
+
+            if (!Header.TryGetValue(key, out var jTokenValue))
+            {
+                value = default(T);
+                return false;
+            }
+
+            try
+            {
+                value = jTokenValue.ToObject<T>();
+            }
+            catch (Exception)
+            {
+                value = default(T);
+                return false;
+            }
+
+            return true;
         }
     }
 }
