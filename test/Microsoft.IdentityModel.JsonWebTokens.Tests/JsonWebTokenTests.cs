@@ -43,6 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenTests
     {
+        private string jObject = @"{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true}";
 
         // Test checks to make sure that the JsonWebToken payload is correctly converted to IEnumerable<Claim>.
         [Fact]
@@ -71,6 +72,204 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Test checks to make sure that claim values of various types can be successfully retrieved from the header.
+        [Fact]
+        public void GetHeaderValues()
+        {
+            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.GetHeaderValues");
+
+            var token = new JsonWebToken(jObject, "{}");
+
+            var intarray = token.GetHeaderValue<int[]>("intarray");
+            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
+
+            var array = token.GetHeaderValue<object[]>("array");
+            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L}, array, context);
+
+            var name = token.GetHeaderValue<string>("string");
+            IdentityComparer.AreEqual("bob", name, context);
+
+            var floatingPoint = token.GetHeaderValue<float>("float");
+            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+
+            var integer = token.GetHeaderValue<int>("integer");
+            IdentityComparer.AreEqual(42, integer, context);
+
+            var nill = token.GetHeaderValue <object> ("nill");
+            IdentityComparer.AreEqual(nill, null, context);
+
+            var boolean = token.GetHeaderValue<bool>("bool");
+            IdentityComparer.AreEqual(boolean, true, context);
+
+            try // Try to retrieve a value that doesn't exist in the header.
+            {
+                token.GetHeaderValue<int>("doesnotexist");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14303:").ProcessException(ex, context);
+            }
+
+            try // Try to retrieve an integer when the value is actually a string.
+            {
+                token.GetHeaderValue<int>("string");
+            } 
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test checks to make sure that claim values of various types can be successfully retrieved from the header.
+        [Fact]
+        public void TryGetHeaderValues()
+        {
+            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.TryGetHeaderValues");
+
+            var token = new JsonWebToken(jObject, "{}");
+
+            var success = token.TryGetHeaderValue("intarray", out int[] intarray);
+            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("array", out object[] array);
+            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("string", out string name);
+            IdentityComparer.AreEqual("bob", name, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("float", out float floatingPoint);
+            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("integer", out int integer);
+            IdentityComparer.AreEqual(42, integer, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("nill", out object nill);
+            IdentityComparer.AreEqual(nill, null, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("bool", out bool boolean);
+            IdentityComparer.AreEqual(boolean, true, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetHeaderValue("doesnotexist", out int doesNotExist);
+            IdentityComparer.AreEqual(0, doesNotExist, context);
+            IdentityComparer.AreEqual(false, success, context);
+
+            success = token.TryGetHeaderValue("string", out int cannotConvert);
+            IdentityComparer.AreEqual(0, cannotConvert, context);
+            IdentityComparer.AreEqual(false, success, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test checks to make sure that claim values of various types can be successfully retrieved from the payload.
+        [Fact]
+        public void GetPayloadValues()
+        {
+            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.GetPayloadValues");
+
+            var token = new JsonWebToken("{}", jObject);
+
+            var intarray = token.GetPayloadValue<int[]>("intarray");
+            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
+
+            var array = token.GetPayloadValue<object[]>("array");
+            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
+
+            var name = token.GetPayloadValue<string>("string");
+            IdentityComparer.AreEqual("bob", name, context);
+
+            var floatingPoint = token.GetPayloadValue<float>("float");
+            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+
+            var integer = token.GetPayloadValue<int>("integer");
+            IdentityComparer.AreEqual(42, integer, context);
+
+            var nill = token.GetPayloadValue<object>("nill");
+            IdentityComparer.AreEqual(nill, null, context);
+
+            var boolean = token.GetPayloadValue<bool>("bool");
+            IdentityComparer.AreEqual(boolean, true, context);
+
+            try // Try to retrieve a value that doesn't exist in the header.
+            {
+                token.GetPayloadValue<int>("doesnotexist");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
+            }
+
+            try // Try to retrieve an integer when the value is actually a string.
+            {
+                token.GetPayloadValue<int>("string");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test checks to make sure that claim values of various types can be successfully retrieved from the payload.
+        [Fact]
+        public void TryGetPayloadValues()
+        {
+            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.TryGetPayloadValues");
+
+            var token = new JsonWebToken("{}", jObject);
+
+            var success = token.TryGetPayloadValue("intarray", out int[] intarray);
+            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("array", out object[] array);
+            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("string", out string name);
+            IdentityComparer.AreEqual("bob", name, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("float", out float floatingPoint);
+            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("integer", out int integer);
+            IdentityComparer.AreEqual(42, integer, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("nill", out object nill);
+            IdentityComparer.AreEqual(nill, null, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("bool", out bool boolean);
+            IdentityComparer.AreEqual(boolean, true, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            success = token.TryGetPayloadValue("doesnotexist", out int doesNotExist);
+            IdentityComparer.AreEqual(0, doesNotExist, context);
+            IdentityComparer.AreEqual(false, success, context);
+
+            success = token.TryGetPayloadValue("string", out int cannotConvert);
+            IdentityComparer.AreEqual(0, cannotConvert, context);
+            IdentityComparer.AreEqual(false, success, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         // Time values can be floats, ints, or strings.
         // This test checks to make sure that parsing does not fault in any of the above cases.
         [Theory, MemberData(nameof(ParseTimeValuesTheoryData))]
@@ -88,6 +287,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<ParseTimeValuesTheoryData> ParseTimeValuesTheoryData
