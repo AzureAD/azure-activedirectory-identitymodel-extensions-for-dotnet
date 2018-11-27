@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
         private const string _dsaCngTypeName = "System.Security.Cryptography.DSACng";
 #endif
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
         private bool _useRSAOeapPadding = false;
 #endif
 
@@ -210,16 +210,16 @@ namespace Microsoft.IdentityModel.Tokens
                 return RSA.DecryptValue(data);
 #endif
 
-            // NET461 or NETSTANDARD2_0 could have been passed RSACryptoServiceProvider
-#if NET461 || NETSTANDARD2_0
+            // NET461 could have been passed RSACryptoServiceProvider
+#if NET461
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Decrypt(data, _useRSAOeapPadding);
             else
                 return RSA.Decrypt(data, _rsaEncryptionPadding);
 #endif
 
-            // NETSTANDARD1_4 doesn't know anything about RSACryptoServiceProvider
-#if NETSTANDARD1_4
+            // NETSTANDARD1_4 and NETSTANDARD2_0 don't use RSACryptoServiceProviderProxy
+#if NETSTANDARD1_4 || NETSTANDARD2_0
             return RSA.Decrypt(data, _rsaEncryptionPadding);
 #endif
         }
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
                         if (ECDsa != null)
                             ECDsa.Dispose();
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
 #endif
@@ -270,16 +270,16 @@ namespace Microsoft.IdentityModel.Tokens
                 return RSA.EncryptValue(data);
 #endif
 
-            // NET461 or NETSTANDARD2_0 could have been passed RSACryptoServiceProvider
-#if NET461 || NETSTANDARD2_0
+            // NET461 could have been passed RSACryptoServiceProvider
+#if NET461
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Encrypt(data, _useRSAOeapPadding);
 
             return RSA.Encrypt(data, _rsaEncryptionPadding);
 #endif
 
-            // NETSTANDARD1_4 doesn't know anything about RSACryptoServiceProvider
-#if NETSTANDARD1_4
+            // NETSTANDARD1_4 and NETSTANDARD2_0 don't use RSACryptoServiceProviderProxy
+#if NETSTANDARD1_4 || NETSTANDARD2_0
             return RSA.Encrypt(data, _rsaEncryptionPadding);
 #endif
         }
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
             // These calls return an AsymmetricAlgorithm which doesn't have API's to do much and need to be cast.
             // RSACryptoServiceProvider is wrapped to support SHA2
             // RSACryptoServiceProviderProxy is only supported on Windows platform
-#if WINDOWS && (NET45 || NET451 || NET461 || NETSTANDARD2_0)
+#if DESKTOP
             _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                               || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
 
@@ -343,7 +343,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private RSA RSA { get; set; }
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
         private RSACryptoServiceProviderProxy RsaCryptoServiceProviderProxy { get; set; }
 #endif
 
@@ -368,7 +368,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
         internal byte[] SignWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
             return RsaCryptoServiceProviderProxy.SignData(bytes, HashAlgorithm);
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
         private bool VerifyWithRsaCryptoServiceProviderProxy(byte[] bytes, byte[] signature)
         {
             return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);

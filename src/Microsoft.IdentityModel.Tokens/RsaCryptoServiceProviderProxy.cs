@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if NET45 || NET451 || NET461 || NETSTANDARD2_0
+#if DESKTOP
 
 using System;
 using System.Security.Cryptography;
@@ -67,18 +67,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override string KeyExchangeAlgorithm => _rsa.KeyExchangeAlgorithm;
 
-#pragma warning disable CS0162 // Disable warning on non-Windows platforms - CS0162: Unreachable code detected
         /// <summary>
         /// Initializes an new instance of <see cref="RSACryptoServiceProviderProxy"/>.
         /// </summary>
         /// <param name="rsa"><see cref="RSACryptoServiceProvider"/></param>
         /// <exception cref="ArgumentNullException">if <paramref name="rsa"/> is null.</exception>
-        /// <exception cref="PlatformNotSupportedException">RSACryptoServiceProviderProxy creation is only supported on Windows.</exception>
         public RSACryptoServiceProviderProxy(RSACryptoServiceProvider rsa)
         {
-#if !WINDOWS
-            throw new PlatformNotSupportedException(LogMessages.IDX10688);
-#endif
             if (rsa == null)
                 throw LogHelper.LogArgumentNullException(nameof(rsa));
 
@@ -109,7 +104,6 @@ namespace Microsoft.IdentityModel.Tokens
                 _rsa = rsa;
             }
         }
-#pragma warning restore CS0162
 
         /// <summary>
         /// Decrypts data with the System.Security.Cryptography.RSA algorithm.
