@@ -406,6 +406,11 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer),
             };
         }
+
+        public static ClaimsIdentity PayloadClaimsIdentity
+        {
+            get => new ClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
+        }
 #endif
 
 #if !CrossVersionTokenValidation
