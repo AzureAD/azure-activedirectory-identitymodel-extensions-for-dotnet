@@ -325,7 +325,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.SigningKey.KeyId, validationParameters);
+                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
             else
             {
                 var key = ResolveIssuerSigningKey(token, samlToken, validationParameters);
