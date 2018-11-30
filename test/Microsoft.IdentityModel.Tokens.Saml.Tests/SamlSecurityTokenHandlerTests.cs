@@ -689,6 +689,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                         }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}IssuerSigningKeyResolver",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { KeyingMaterial.DefaultJsonWebKeyWithCertificate1 }; },
+                        }
                     }
                 };
             }
