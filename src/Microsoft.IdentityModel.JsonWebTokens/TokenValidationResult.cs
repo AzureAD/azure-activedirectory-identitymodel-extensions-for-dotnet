@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -34,6 +35,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class TokenValidationResult
     {
+        /// <summary>
+        /// The <see cref="ClaimsIdentity"/> created from the validated security token.
+        /// </summary>
+        public ClaimsIdentity ClaimsIdentity { get; set; }
+
         /// <summary>
         /// The validated security token.
         /// </summary>

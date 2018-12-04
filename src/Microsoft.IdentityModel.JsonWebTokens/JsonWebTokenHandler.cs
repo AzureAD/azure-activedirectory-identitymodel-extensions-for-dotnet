@@ -30,6 +30,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -223,6 +224,67 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm);
         
             return compressionProvider.Compress(Encoding.UTF8.GetBytes(token)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, algorithm)));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters"> Contains parameters for validating the token.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
+        protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        {
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            var actualIssuer = jwtToken.Issuer;
+            if (string.IsNullOrWhiteSpace(actualIssuer))
+            {
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                actualIssuer = ClaimsIdentity.DefaultIssuer;
+            }
+
+            return CreateClaimsIdentity(jwtToken, validationParameters, actualIssuer);
+        }
+
+        private ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string actualIssuer)
+        {
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            foreach (Claim jwtClaim in jwtToken.Claims)
+            {
+                string claimType = jwtClaim.Type;
+                if (claimType == ClaimTypes.Actor)
+                {
+                    if (identity.Actor != null)
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
+
+                    if (CanReadToken(jwtClaim.Value))
+                    {
+                        JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
+                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, actualIssuer);
+                    }
+                }
+
+                if (jwtClaim.Properties.Count == 0)
+                {
+                    identity.AddClaim(new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity));
+                }
+                else
+                {
+                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity);
+
+                    foreach (var kv in jwtClaim.Properties)
+                        claim.Properties[kv.Key] = kv.Value;
+
+                    identity.AddClaim(claim);
+                }
+                
+            }
+
+            return identity;
         }
 
         /// <summary>
@@ -706,7 +768,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateTokenPayload(innerToken, validationParameters);
                 return new TokenValidationResult
                 {
-                    SecurityToken = jwtToken
+                    SecurityToken = jwtToken,
+                    ClaimsIdentity = CreateClaimsIdentity(jwtToken, validationParameters)
                 };
             }
             else
@@ -734,7 +797,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return new TokenValidationResult
             {
-                SecurityToken = jsonWebToken
+                SecurityToken = jsonWebToken,
+                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters)
             };
         }
 

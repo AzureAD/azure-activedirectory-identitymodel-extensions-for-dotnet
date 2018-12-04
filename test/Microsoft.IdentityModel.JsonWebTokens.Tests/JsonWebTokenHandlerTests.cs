@@ -221,6 +221,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string jwtString = tokenHandler.CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
             var tokenValidationResult = tokenHandler.ValidateToken(jwtString, tokenValidationParameters);
             var validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
+            var claimsIdentity = tokenValidationResult.ClaimsIdentity;
+            IdentityComparer.AreEqual(Default.PayloadClaimsIdentity, claimsIdentity, context);
             IdentityComparer.AreEqual(Default.Payload, validatedToken.Payload, context);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -237,9 +239,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
-                jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
+                var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
                 IdentityComparer.AreEqual((validatedTokenFromJwtHandler as JwtSecurityToken).Claims, outerToken.Claims, context);
+                IdentityComparer.AreEqual(claimsPrincipal.Identity, tokenValidationResult.ClaimsIdentity, context);
 
                 Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, theoryData.TestId);
@@ -324,9 +327,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
-                jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
+                var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
                 IdentityComparer.AreEqual((validatedTokenFromJwtHandler as JwtSecurityToken).Claims, outerToken.Claims, context);
+                IdentityComparer.AreEqual(claimsPrincipal.Identity, tokenValidationResult.ClaimsIdentity, context);
 
                 Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, theoryData.TestId);
