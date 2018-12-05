@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -85,7 +86,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 int num = 0;
                 foreach (var str in list)
                 {
-                    var value = str as Newtonsoft.Json.Linq.JValue;
+                    var value = str as JValue;
                     if (value != null)
                     {
                         string aud = value.Value as string;

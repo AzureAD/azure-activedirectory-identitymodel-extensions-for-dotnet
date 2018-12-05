@@ -34,11 +34,11 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -374,7 +374,7 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "<OuterXml></OuterXml>";
         }
 #if !CrossVersionTokenValidation
-        public static JObject Payload
+        public static string PayloadString
         {
             get => new JObject()
             {
@@ -385,12 +385,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-            };
-        }
-
-        public static string PayloadString 
-        {
-            get => Payload.ToString();
+            }.ToString();
         }
 
         public static List<Claim> PayloadClaims

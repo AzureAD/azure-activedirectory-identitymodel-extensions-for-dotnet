@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <CoreFxVersion>4.3.0-*</CoreFxVersion>
-    <JsonNetVersion>10.0.1</JsonNetVersion>
     <MicrosoftNETTestSdkVersion>15.9.0</MicrosoftNETTestSdkVersion>
     <XunitVersion>2.4.0</XunitVersion>
     <NetStandardVersion>1.6.1</NetStandardVersion>

@@ -29,8 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -63,27 +63,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing values.</param>
         /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
-        public JsonWebKeySet(string json) : this(json, null)
-        {
-        }
-#pragma warning restore CS0618 // Type or member is obsolete
-
-        /// <summary>
-        /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
-        /// </summary>
-        /// <param name="json">a json string containing values.</param>
-        /// <param name="jsonSerializerSettings">jsonSerializerSettings</param>
-        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
-        [Obsolete("This constructor is obsolete and will be removed in a future release.")]
-        public JsonWebKeySet(string json, JsonSerializerSettings jsonSerializerSettings)
+        public JsonWebKeySet(string json)
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
@@ -91,14 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
-                if (jsonSerializerSettings != null)
-                {
-                    JsonConvert.PopulateObject(json, this, jsonSerializerSettings);
-                }
-                else
-                {
-                    JsonConvert.PopulateObject(json, this);
-                }
+                JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {

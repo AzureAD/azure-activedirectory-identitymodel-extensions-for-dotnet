@@ -4,11 +4,15 @@
 
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
+    <AssemblyName>CrossVersionTokenValidation.Tests</AssemblyName>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
     <UpgradeBackupLocation />
     <DefineConstants>CrossVersionTokenValidation</DefineConstants>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Microsoft.IdentityModel.TestUtils\ClaimSets.cs" Link="ClaimSets.cs" />

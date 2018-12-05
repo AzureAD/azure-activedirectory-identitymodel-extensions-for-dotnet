@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {

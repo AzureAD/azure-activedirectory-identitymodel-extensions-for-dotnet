@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <CoreFxVersion>4.3.0</CoreFxVersion>
-    <JsonNetVersion>10.0.1</JsonNetVersion>
     <NetStandardVersion>1.6.0</NetStandardVersion>
   </PropertyGroup>
 </Project>

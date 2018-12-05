@@ -29,8 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -53,9 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
-#pragma warning disable CS0618 // Type or member is obsolete
-                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
-#pragma warning restore CS0618 // Type or member is obsolete
+                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject?.ToString());
                 IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
                 IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();
@@ -638,7 +636,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             
             public string Json { get; set; }
 
-            public JObject JObject { get; set; }
+            internal JObject JObject { get; set; }
         }
     }
 }

@@ -31,7 +31,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
-    <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
     <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="2.0.5-*" />
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>

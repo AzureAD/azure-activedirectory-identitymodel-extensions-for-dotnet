@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt
 {

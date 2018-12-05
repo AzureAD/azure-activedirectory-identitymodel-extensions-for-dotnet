@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Json;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -50,7 +51,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void MalformedJson()
         {
-            Assert.Throws<Newtonsoft.Json.JsonReaderException>(() => JsonExtensions.DeserializeFromJson<object>(@"{""tag"":""value""}ABCD"));
+            Assert.Throws<JsonReaderException>(() => JsonExtensions.DeserializeFromJson<object>(@"{""tag"":""value""}ABCD"));
         }
     }
 }

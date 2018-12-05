@@ -29,8 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -126,16 +126,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
-        /// </summary>
-        /// <param name="json">the json object from which the instance is created.</param>
-        [Obsolete("This constructor is obsolete and will be removed in a future release. Please use OpenIdConnectMessage(string json) instead.")]
-        public OpenIdConnectMessage(JObject json)
-        {
-            SetJsonParameters(json);
         }
 
         private void SetJsonParameters(JObject json)
