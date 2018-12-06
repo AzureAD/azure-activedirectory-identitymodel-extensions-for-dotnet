@@ -64,6 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
         /// </summary>
@@ -73,6 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
         public JsonWebKeySet(string json) : this(json, null)
         {
         }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKeySet"/> from a json string.
@@ -81,6 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="jsonSerializerSettings">jsonSerializerSettings</param>
         /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
+        [Obsolete("This constructor is obsolete and will be removed in a future release.")]
         public JsonWebKeySet(string json, JsonSerializerSettings jsonSerializerSettings)
         {
             if (string.IsNullOrEmpty(json))
