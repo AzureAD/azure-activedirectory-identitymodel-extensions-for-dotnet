@@ -1,4 +1,5 @@
-param([string]$root=$PSScriptRoot)
+param([string]$root=$PSScriptRoot,
+      [string]$packageType="preview")
 
 ################################################# Functions ############################################################
 
@@ -22,42 +23,53 @@ function WriteSectionFooter($sectionName)
     Write-Host ""
 }
 
-
 ################################################# Functions ############################################################
 
 WriteSectionHeader("updateAssemblyInfo.ps1");
-
 Write-Host "root:           " $root;
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 
-[xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
-$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/release").InnerText;
-$nugetPreview = $buildConfiguration.SelectSingleNode("root/nugetPreview").InnerText;
 $date = Get-Date
 $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
-$projects = $buildConfiguration.SelectNodes("root/projects/src/project");
-$additionFileInfo = $releaseVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD);
-$nugetVersion = $dateTimeStamp;
-$dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
-$fileVersion = $releaseVersion + "." + $dateTimeStamp;
-$versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
-Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $nugetVersion));
+[xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 
-foreach($project in $projects)
+$assemblyVersion = [string]$buildConfiguration.SelectSingleNode("root/assemblyVersion").InnerText
+$assemblyFileVersion = $assemblyVersion + "." + ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd")
+$assemblyInformationalVersion = $assemblyVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD)
+Write-Host "assemblyVersion: "  $assemblyVersion
+Write-Host "assemblyFileVersion: " $assemblyFileVersion
+Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
+
+$nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
+if ( $packageType -eq "release")
 {
-    $name = $project.name;
-    $assemblyInformationalRegex = "AssemblyInformationalVersion(.*)"
-    $assemblyInformationalVersion = "AssemblyInformationalVersion(""$additionFileInfo"")]"
-    $assemblyFileVersionRegex = "AssemblyFileVersion(.*)"
-    $assemblyFileVersion = "AssemblyFileVersion(""$fileVersion"")]"
-    Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
-    Write-Host "assemblyFileVersion: " $assemblyFileVersion
-
-    $assemblyInfoPath = "$root\src\$name\properties\assemblyinfo.cs";
-    $content = Get-Content $assemblyInfoPath;
-    $content = $content -replace $assemblyInformationalRegex, $assemblyInformationalVersion;
-    $content = $content -replace $assemblyFileVersionRegex, $assemblyFileVersion;
-    Set-Content $assemblyInfoPath $content
+    $versionSuffix = ""
+}
+else
+{
+    $versionSuffix = $nugetSuffix + "-" + $dateTimeStamp
 }
 
-WriteSectionFooter("updateAssemblyInfo.ps1");
+Write-Host "nugetSuffix: " $nugetSuffix
+Write-Host "versionSuffix: " $versionSuffix
+
+$versionPath = $PSScriptRoot + "/build/version.props"
+$version = Get-Content $versionPath
+$version = $version -replace "<VersionPrefix>(.*)</VersionPrefix>", "<VersionPrefix>$assemblyVersion</VersionPrefix>"
+$version = $version -replace "<VersionSuffix>(.*)</VersionSuffix>", "<VersionSuffix>$versionSuffix</VersionSuffix>"
+Set-Content $versionPath $version
+
+foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
+{
+    $name = $project.name
+    $assemblyInfoPath = "$root\src\$name\properties\AssemblyInfo.cs"
+    Write-Host "assemblyInfoPath: " $assemblyInfoPath
+
+    $assemblyInfo = Get-Content $assemblyInfoPath
+    $assemblyInfo = $assemblyInfo -replace "AssemblyVersion(.*)", "AssemblyVersion(""$assemblyVersion"")]"
+    $assemblyInfo = $assemblyInfo -replace "AssemblyFileVersion(.*)", "AssemblyFileVersion(""$assemblyFileVersion"")]"
+    $assemblyInfo = $assemblyInfo -replace "AssemblyInformationalVersion(.*)", "AssemblyInformationalVersion(""$assemblyInformationalVersion"")]"
+    Set-Content $assemblyInfoPath $assemblyInfo
+}
+
+WriteSectionFooter("updateAssemblyInfo.ps1")
