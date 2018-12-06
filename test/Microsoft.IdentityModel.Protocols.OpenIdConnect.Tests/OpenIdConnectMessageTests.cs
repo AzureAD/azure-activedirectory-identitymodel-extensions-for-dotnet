@@ -53,7 +53,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
+#pragma warning disable CS0618 // Type or member is obsolete
                 messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
+#pragma warning restore CS0618 // Type or member is obsolete
                 IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
                 IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();
