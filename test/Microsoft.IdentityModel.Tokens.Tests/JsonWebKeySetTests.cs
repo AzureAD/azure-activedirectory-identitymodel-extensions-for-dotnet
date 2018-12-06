@@ -52,7 +52,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext();
             try
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var jsonWebKeys = new JsonWebKeySet(json, settings);
+#pragma warning restore CS0618 // Type or member is obsolete
                 var keys = jsonWebKeys.GetSigningKeys();
                 ee.ProcessNoException(context);
                 if (compareTo != null)
