@@ -11,15 +11,15 @@
     <DefineConstants>CrossVersionTokenValidation</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Microsoft.IdentityModel.Tests\ClaimSets.cs" Link="ClaimSets.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\CompareContext.cs" Link="CompareContext.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\Default.cs" Link="Default.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\ExpectedException.cs" Link="ExpectedException.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\IdentityComparer.cs" Link="IdentityComparer.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\KeyingMaterial.cs" Link="KeyingMaterial.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\TestException.cs" Link="TestException.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\TestUtilities.cs" Link="TestUtilities.cs" />
-    <Compile Include="..\Microsoft.IdentityModel.Tests\TheoryDataBase.cs" Link="TheoryDataBase.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\ClaimSets.cs" Link="ClaimSets.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\CompareContext.cs" Link="CompareContext.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\Default.cs" Link="Default.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\ExpectedException.cs" Link="ExpectedException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\IdentityComparer.cs" Link="IdentityComparer.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\KeyingMaterial.cs" Link="KeyingMaterial.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\TestException.cs" Link="TestException.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\TestUtilities.cs" Link="TestUtilities.cs" />
+    <Compile Include="..\Microsoft.IdentityModel.TestUtils\TheoryDataBase.cs" Link="TheoryDataBase.cs" />
   </ItemGroup>
 
   <ItemGroup>

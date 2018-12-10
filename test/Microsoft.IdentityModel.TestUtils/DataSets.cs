@@ -30,7 +30,7 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Data sets for testing 
 /// </summary>
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class DataSets
     {

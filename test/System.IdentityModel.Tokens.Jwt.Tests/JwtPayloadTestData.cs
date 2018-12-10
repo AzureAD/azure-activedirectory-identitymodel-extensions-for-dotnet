@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests

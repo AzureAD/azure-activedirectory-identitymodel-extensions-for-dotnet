@@ -30,7 +30,7 @@ using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class TokenTheoryData : TheoryDataBase
     {

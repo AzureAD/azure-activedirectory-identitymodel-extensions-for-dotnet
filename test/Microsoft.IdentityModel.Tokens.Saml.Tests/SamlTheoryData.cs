@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests

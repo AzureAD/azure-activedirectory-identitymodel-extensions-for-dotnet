@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Returns NON default token creation / validation artifacts:

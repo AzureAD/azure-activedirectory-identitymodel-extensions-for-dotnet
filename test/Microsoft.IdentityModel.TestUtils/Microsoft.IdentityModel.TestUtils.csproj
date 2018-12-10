@@ -3,12 +3,12 @@
   <Import Project="..\..\build\commonTest.props" />
 
   <PropertyGroup>
-    <AssemblyName>Microsoft.IdentityModel.Tests</AssemblyName>
+    <AssemblyName>Microsoft.IdentityModel.TestUtils</AssemblyName>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <DelaySign>true</DelaySign>
     <Description>Contains test utilities and data that are shared across Microsoft.IdentityModel.xys.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <PackageId>Microsoft.IdentityModel.Tests</PackageId>
+    <PackageId>Microsoft.IdentityModel.TestUtils</PackageId>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <SignAssembly>true</SignAssembly>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>

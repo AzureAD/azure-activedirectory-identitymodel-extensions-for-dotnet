@@ -30,7 +30,7 @@ using System.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 
 using Saml2SecurityTokenHandler4x = Microsoft.IdentityModel.Tokens.Saml2SecurityTokenHandler;
 using SamlSecurityTokenHandler4x = Microsoft.IdentityModel.Tokens.SamlSecurityTokenHandler;

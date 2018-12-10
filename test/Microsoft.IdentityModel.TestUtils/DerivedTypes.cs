@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// Contains derived types that are useful across multiple handlers / protocols.
 /// </summary>
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class DerivedAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
     {

@@ -27,7 +27,7 @@
 
 using System;
 using Microsoft.Azure.KeyVault;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
