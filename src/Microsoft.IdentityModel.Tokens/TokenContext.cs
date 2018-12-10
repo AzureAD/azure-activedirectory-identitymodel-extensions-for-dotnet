@@ -25,24 +25,49 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-namespace Microsoft.IdentityModel.JsonWebTokens
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// A class which contains the result of a token validation operation.
+    /// An opaque context used to store work when working with authentication artifacts.
     /// </summary>
-    public class TokenValidationResult
+    public class TokenContext
     {
         /// <summary>
-        /// The <see cref="ClaimsIdentity"/> created from the validated security token.
+        /// Instantiates a new <see cref="TokenContext"/> with a default activityId.
         /// </summary>
-        public ClaimsIdentity ClaimsIdentity { get; set; }
+        public TokenContext()
+        {
+        }
 
         /// <summary>
-        /// The validated security token.
+        /// Instantiates a new <see cref="TokenContext"/> with an activityId.
         /// </summary>
-        public SecurityToken SecurityToken { get; set; }
+        public TokenContext(Guid activityId)
+        {
+            if (activityId == null)
+                throw new ArgumentNullException(nameof(activityId));
+
+            ActivityId = activityId;
+        }
+
+        /// <summary>
+        /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
+        /// </summary>
+        public Guid ActivityId { get; set; } = Guid.Empty;
+
+        /// <summary>
+        /// Gets or sets a boolean controlling if logs are written into the context.
+        /// Useful when debugging.
+        /// </summary>
+        public bool CaptureLogs { get; set; } = false;
+
+        /// <summary>
+        /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
+        /// </summary>
+        public ICollection<string> Logs { get; private set; } = new Collection<string>();
     }
 }
