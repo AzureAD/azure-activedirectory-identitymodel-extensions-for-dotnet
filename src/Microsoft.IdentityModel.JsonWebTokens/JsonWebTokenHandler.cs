@@ -308,8 +308,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10682, algorithm)));
 
             var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm);
-          
-            return Encoding.UTF8.GetString(compressionProvider.Decompress(tokenBytes)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, algorithm)));
+
+            var decompressedBytes = compressionProvider.Decompress(tokenBytes);
+
+            return decompressedBytes != null ? Encoding.UTF8.GetString(decompressedBytes) : throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, algorithm)));
         }
 
         /// <summary>
@@ -661,36 +663,47 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrEmpty(token))
-                throw LogHelper.LogArgumentNullException(nameof(token));
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(token)) };
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)) };
 
-            if (token.Length> MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+            if (token.Length > MaximumTokenSizeInBytes)
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes))) };
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token)));
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token))) };
 
-            if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            try
             {
-                var jwtToken = new JsonWebToken(token);
-                var decryptedJwt = DecryptToken(jwtToken, validationParameters);
-                var innerToken = ValidateSignature(decryptedJwt, validationParameters);
-                jwtToken.InnerToken = innerToken;
-                ValidateTokenPayload(innerToken, validationParameters);
+                if (tokenParts.Length == JwtConstants.JweSegmentCount)
+                {
+                    var jwtToken = new JsonWebToken(token);
+                    var decryptedJwt = DecryptToken(jwtToken, validationParameters);
+                    var innerToken = ValidateSignature(decryptedJwt, validationParameters);
+                    jwtToken.InnerToken = innerToken;
+                    var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParameters);
+                    return new TokenValidationResult
+                    {
+                        SecurityToken = jwtToken,
+                        ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
+                        IsValid = true
+                    };
+                }
+                else
+                {
+                    var jsonWebToken = ValidateSignature(token, validationParameters);
+                    return ValidateTokenPayload(jsonWebToken, validationParameters);
+                }
+            } 
+            catch (Exception ex)
+            {
                 return new TokenValidationResult
                 {
-                    SecurityToken = jwtToken,
-                    ClaimsIdentity = CreateClaimsIdentity(jwtToken, validationParameters)
+                    Exception = ex
                 };
-            }
-            else
-            {
-                var jsonWebToken = ValidateSignature(token, validationParameters);
-                return ValidateTokenPayload(jsonWebToken, validationParameters);
-            }
+            }     
         }
 
         private TokenValidationResult ValidateTokenPayload(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
@@ -712,7 +725,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return new TokenValidationResult
             {
                 SecurityToken = jsonWebToken,
-                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters)
+                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters),
+                IsValid = true
             };
         }
 
