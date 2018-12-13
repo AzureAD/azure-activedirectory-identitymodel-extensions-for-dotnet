@@ -901,8 +901,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
                     Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
                     D = badPrivateKey,
-                    KeyId = "JsonWebKeyP256_BadPrivateKey",
-                    Kid = "JsonWebKeyP256_BadPrivateKey",
+                    KeyId = "JsonWebKeyEcdsa256_BadPrivateKey",
+                    Kid = "JsonWebKeyEcdsa256_BadPrivateKey",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -950,8 +950,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     Crv = "P-384",
                     X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg",
                     Y = "Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l",
-                    KeyId = "JsonWebKeyP384_Public",
-                    Kid = "JsonWebKeyP384_Public",
+                    KeyId = "JsonWebKeyEcdsa384_Public",
+                    Kid = "JsonWebKeyEcdsa384_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -967,8 +967,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
                     Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
                     D = "AWAduQ9Eu0fw2X_jBfYcSCc3jLfUuQY9Un3pQXHay4BlIhRObnNZAWPWOZccbP0ApfQLPHEAuByMtHv5D6sMVbCz",
-                    KeyId = "JsonWebKeyP521",
-                    Kid = "JsonWebKeyP521",
+                    KeyId = "JsonWebKeyEcdsa521",
+                    Kid = "JsonWebKeyEcdsa521",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -983,8 +983,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     Crv = "P-521",
                     X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
                     Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
-                    KeyId = "JsonWebKeyP521_Public",
-                    Kid = "JsonWebKeyP521_Public",
+                    KeyId = "JsonWebKeyEcdsa521_Public",
+                    Kid = "JsonWebKeyEcdsa521_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }

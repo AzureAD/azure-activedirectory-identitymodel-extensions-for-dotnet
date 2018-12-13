@@ -123,68 +123,100 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IList<SecurityKey> GetSigningKeys()
         {
-            List<SecurityKey> keys = new List<SecurityKey>();
-            for (int i = 0; i < Keys.Count; i++)
+            var keys = new List<SecurityKey>();
+
+            foreach (var webKey in Keys)
             {
-                JsonWebKey webKey = Keys[i];
-
-                if (!StringComparer.Ordinal.Equals(webKey.Kty, JsonWebAlgorithmsKeyTypes.RSA))
+                // skip if "use" (Public Key Use) parameter is not empty or "sig"
+                if (!(string.IsNullOrWhiteSpace(webKey.Use) || webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal)))
+                {
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.Use));
                     continue;
+                }
 
-                if ((string.IsNullOrWhiteSpace(webKey.Use) || (StringComparer.Ordinal.Equals(webKey.Use, JsonWebKeyUseNames.Sig))))
+                if (webKey.Kty.Equals(JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
                 {
                     if (webKey.X5c != null)
-                    {
-                        foreach (var certString in webKey.X5c)
-                        {
-                            try
-                            {
-                                // Add chaining
-                                SecurityKey key = new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(certString)));
-                                key.KeyId = webKey.Kid;
-                                keys.Add(key);
-                            }
-                            catch (CryptographicException ex)
-                            {
-                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, webKey.X5c[0]), ex));
-                            }
-                            catch (FormatException fex)
-                            {
-                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, webKey.X5c[0]), fex));
-                            }
-                        }
-                    }
+                        keys.AddRange(CreateX509SecurityKeys(webKey));
 
                     if (!string.IsNullOrWhiteSpace(webKey.E) && !string.IsNullOrWhiteSpace(webKey.N))
-                    {
-                        try
-                        {
-                            SecurityKey key =
-                                 new RsaSecurityKey
-                                 (
-                                    new RSAParameters
-                                    {
-                                        Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
-                                        Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
-                                    }
-
-                                );
-                            key.KeyId = webKey.Kid;
-                            keys.Add(key);
-                        }
-                        catch (CryptographicException ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, webKey.E, webKey.N), ex));
-                        }
-                        catch (FormatException ex)
-                        {
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, webKey.E, webKey.N), ex));
-                        }
-                    }
+                        keys.Add(CreateRsaSecurityKey(webKey));
+                }
+                else if (webKey.Kty.Equals(JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+                {
+                    keys.Add(CreateECDsaSecurityKey(webKey));
+                }
+                else
+                {
+                    //kty is not 'EC' or 'RSA'
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10809, webKey.Kty));
                 }
             }
 
             return keys;
+        }
+
+        private IList<SecurityKey> CreateX509SecurityKeys(JsonWebKey jsonWebKey)
+        {
+            try
+            {
+                var keys = new List<SecurityKey>();
+
+                foreach (var certString in jsonWebKey.X5c)
+                {
+                    var key = new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(certString)))
+                    {
+                        KeyId = jsonWebKey.Kid
+                    };
+
+                    keys.Add(key);
+                }
+
+                return keys;
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, jsonWebKey.X5c[0]), ex));
+            }
+        }
+
+        private SecurityKey CreateRsaSecurityKey(JsonWebKey jsonWebKey)
+        {
+            try
+            {
+                var rsaParams = new RSAParameters
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(jsonWebKey.E),
+                    Modulus = Base64UrlEncoder.DecodeBytes(jsonWebKey.N),
+                };
+
+                return new RsaSecurityKey(rsaParams)
+                {
+                    KeyId = jsonWebKey.Kid
+                };
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, jsonWebKey.E, jsonWebKey.N), ex));
+            }
+        }
+
+        private SecurityKey CreateECDsaSecurityKey(JsonWebKey jsonWebKey)
+        {
+            try
+            {
+                var ecdsaAdapter = new ECDsaAdapter();
+                var ecdsa = ecdsaAdapter.CreateECDsa(jsonWebKey, false);
+
+                return new ECDsaSecurityKey(ecdsa)
+                {
+                    KeyId = jsonWebKey.Kid
+                };
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10807), ex));
+            }
         }
     }
 }

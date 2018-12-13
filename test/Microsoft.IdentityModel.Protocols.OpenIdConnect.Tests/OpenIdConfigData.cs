@@ -80,6 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public static string JsonFile = @"OpenIdConnectMetadata.json";
         public static string OpenIdConnectMetadataFileEnd2End = @"OpenIdConnectMetadataEnd2End.json";
+        public static string OpenIdConnectMetadataFileEnd2EndEC = @"OpenIdConnectMetadataEnd2EndEC.json";
         public static string JsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
