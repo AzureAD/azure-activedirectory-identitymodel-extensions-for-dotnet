@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IList<SecurityKey> GetSigningKeys()
         {
-            var keys = new List<SecurityKey>();
+            var signingKeys = new List<SecurityKey>();
 
             foreach (var webKey in Keys)
             {
@@ -137,14 +137,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (webKey.Kty.Equals(JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
                 {
                     if (webKey.X5c != null)
-                        keys.AddRange(CreateX509SecurityKeys(webKey));
+                        signingKeys.AddRange(CreateX509SecurityKeys(webKey));
 
                     if (!string.IsNullOrWhiteSpace(webKey.E) && !string.IsNullOrWhiteSpace(webKey.N))
-                        keys.Add(CreateRsaSecurityKey(webKey));
+                        signingKeys.Add(CreateRsaSecurityKey(webKey));
                 }
                 else if (webKey.Kty.Equals(JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
                 {
-                    keys.Add(CreateECDsaSecurityKey(webKey));
+                    signingKeys.Add(CreateECDsaSecurityKey(webKey));
                 }
                 else
                 {
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            return keys;
+            return signingKeys;
         }
 
         private IList<SecurityKey> CreateX509SecurityKeys(JsonWebKey jsonWebKey)
