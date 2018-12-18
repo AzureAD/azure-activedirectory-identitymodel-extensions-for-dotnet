@@ -395,6 +395,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
+#pragma warning disable 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
@@ -404,6 +405,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials);
+#pragma warning restore 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
         }
 
         /// <summary>
@@ -466,6 +468,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
+#pragma warning disable 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
@@ -475,6 +478,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials);
+#pragma warning restore 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)

@@ -411,6 +411,20 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new ClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
         }
+
+        public static Dictionary<string, object> PayloadDictionary
+        {
+            get => new Dictionary<string, object>()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
+            };
+        }
 #endif
 
 #if !CrossVersionTokenValidation
