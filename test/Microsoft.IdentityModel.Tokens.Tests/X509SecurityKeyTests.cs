@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void Constructor()
         {
             X509SecurityKey x509SecurityKey;
+            var context = new CompareContext();
             ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
             try
             {
@@ -56,12 +57,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 x509SecurityKey = new X509SecurityKey(x509Certificate2);
-                Assert.Same(x509Certificate2, x509SecurityKey.Certificate);
+                IdentityComparer.AreEqual(x509SecurityKey.X5t, x509SecurityKey.KeyId);
+                IdentityComparer.AreEqual(x509Certificate2, x509SecurityKey.Certificate, context);
             }
             catch (Exception exception)
             {
                 expectedException.ProcessException(exception);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
