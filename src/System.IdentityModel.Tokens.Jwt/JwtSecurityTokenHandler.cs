@@ -1217,51 +1217,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
-            {
-                string kid = jwtToken.Header.Kid;
-                if (validationParameters.IssuerSigningKey != null 
-                    && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                    return validationParameters.IssuerSigningKey;
-
-                if (validationParameters.IssuerSigningKeys != null)
-                {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                        {
-                            return signingKey;
-                        }
-                    }
-                }
-            }
-
-            if (!string.IsNullOrEmpty(jwtToken.Header.X5t))
-            {
-                string x5t = jwtToken.Header.X5t;
-                if (validationParameters.IssuerSigningKey != null)
-                {
-                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                        return validationParameters.IssuerSigningKey;
-
-                    X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
-                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
-                        return validationParameters.IssuerSigningKey;
-                }
-
-                if (validationParameters.IssuerSigningKeys != null)
-                {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
-                        {
-                            return signingKey;
-                        }
-                    }
-                }
-            }
-
-            return null;
+            return JwtTokenUtilities.FindKeyMatch(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters.IssuerSigningKey, validationParameters.IssuerSigningKeys);
         }
 
         /// <summary>
@@ -1280,49 +1236,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
-            {
-                if (validationParameters.TokenDecryptionKey != null 
-                    && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Header.Kid, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                    return validationParameters.TokenDecryptionKey;
-
-                if (validationParameters.TokenDecryptionKeys != null)
-                {
-                    foreach (var key in validationParameters.TokenDecryptionKeys)
-                    {
-                        if (key != null && string.Equals(key.KeyId, jwtToken.Header.Kid, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return key;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(jwtToken.Header.X5t))
-                {
-                    if (validationParameters.TokenDecryptionKey != null)
-                    {
-                        if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Header.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return validationParameters.TokenDecryptionKey;
-
-                        X509SecurityKey x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
-                        if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.Header.X5t, StringComparison.OrdinalIgnoreCase))
-                            return validationParameters.TokenDecryptionKey;
-                    }
-
-                    if (validationParameters.TokenDecryptionKeys != null)
-                    {
-                        foreach (var key in validationParameters.TokenDecryptionKeys)
-                        {
-                            if (key != null && string.Equals(key.KeyId, jwtToken.Header.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                                return key;
-
-                            X509SecurityKey x509Key = key as X509SecurityKey;
-                            if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.Header.X5t, StringComparison.OrdinalIgnoreCase))
-                                return key;
-                        }
-                    }
-                }
-            }
-
-            return null;
+            return JwtTokenUtilities.FindKeyMatch(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters.TokenDecryptionKey, validationParameters.TokenDecryptionKeys);
         }
 
         private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
