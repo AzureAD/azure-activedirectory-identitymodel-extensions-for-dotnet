@@ -86,6 +86,55 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Has extra code for X509SecurityKey keys where the kid or x5t match in a case insensitive manner.
+        /// </summary>
+        /// <param name="kid"></param>
+        /// <param name="x5t"></param>
+        /// <param name="securityKey"></param>
+        /// <param name="keys"></param>
+        /// <returns>a key if found, null otherwise.</returns>
+        internal static SecurityKey FindKeyMatch(string kid, string x5t, SecurityKey securityKey, IEnumerable<SecurityKey> keys)
+        {
+            // the code could be in a routine, but I chose to have duplicate code instead for performance
+            if (keys == null && securityKey == null)
+                return null;
+
+            if (securityKey is X509SecurityKey x509SecurityKey1)
+            {
+                if (string.Equals(x5t, x509SecurityKey1.X5t, StringComparison.OrdinalIgnoreCase)
+                ||  string.Equals(x5t, x509SecurityKey1.KeyId, StringComparison.OrdinalIgnoreCase)
+                ||  string.Equals(kid, x509SecurityKey1.X5t, StringComparison.OrdinalIgnoreCase)
+                ||  string.Equals(kid, x509SecurityKey1.KeyId, StringComparison.OrdinalIgnoreCase))
+                    return securityKey;
+            }
+            else if (string.Equals(securityKey?.KeyId, kid, StringComparison.Ordinal))
+            {
+                return securityKey;
+            }
+
+            if (keys != null)
+            {
+                foreach (var key in keys)
+                {
+                    if (key is X509SecurityKey x509SecurityKey2)
+                    {
+                        if (string.Equals(x5t, x509SecurityKey2.X5t, StringComparison.OrdinalIgnoreCase)
+                        ||  string.Equals(x5t, x509SecurityKey2.KeyId, StringComparison.OrdinalIgnoreCase)
+                        ||  string.Equals(kid, x509SecurityKey2.X5t, StringComparison.OrdinalIgnoreCase)
+                        ||  string.Equals(kid, x509SecurityKey2.KeyId, StringComparison.OrdinalIgnoreCase))
+                            return key;
+                    }
+                    else if (string.Equals(key?.KeyId, kid, StringComparison.Ordinal))
+                    {
+                        return key;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Generates key bytes.
         /// </summary>
         public static byte[] GenerateKeyBytes(int sizeInBits)
