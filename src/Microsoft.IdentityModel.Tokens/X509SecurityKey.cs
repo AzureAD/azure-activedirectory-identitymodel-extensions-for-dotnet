@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         public X509SecurityKey(X509Certificate2 certificate)
         {
             _certificate = certificate ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificate)));
-            KeyId = certificate.Thumbprint;
+            KeyId = Base64UrlEncoder.Encode(certificate.GetCertHash());
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
 

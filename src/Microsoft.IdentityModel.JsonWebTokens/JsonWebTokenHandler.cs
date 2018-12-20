@@ -240,6 +240,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
                 };
 
+                if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
+                    header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
+
                 rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                 JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
             }

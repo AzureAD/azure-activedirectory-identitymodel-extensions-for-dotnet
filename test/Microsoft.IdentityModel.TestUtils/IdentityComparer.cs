@@ -59,6 +59,7 @@ namespace Microsoft.IdentityModel.TestUtils
         private static readonly Dictionary<string, Func<object, object, CompareContext, bool>> _equalityDict =
             new Dictionary<string, Func<object, object, CompareContext, bool>>
             {
+                { typeof(bool).ToString(), AreBoolsEqual },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
                 { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
@@ -165,6 +166,28 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(X509Data).ToString(), CompareAllPublicProperties },
                 { typeof(X509SigningCredentials).ToString(), CompareAllPublicProperties },
             };
+
+        public static bool AreBoolsEqual(object object1, object object2, CompareContext context)
+        {
+            var bool1 = (bool)object1;
+            var bool2 = (bool)object2;
+
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(bool1, bool2, localContext))
+                return context.Merge(localContext);
+
+            if (bool1 == bool2)
+                return true;
+
+            if (bool1 != bool2)
+            {
+                localContext.Diffs.Add($"'{bool1}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{bool2}'");
+            }
+
+            return context.Merge(localContext);
+        }
 
 #if !CrossVersionTokenValidation
         public static bool AreJsonWebKeyEnumsEqual(object object1, object object2, CompareContext context)
