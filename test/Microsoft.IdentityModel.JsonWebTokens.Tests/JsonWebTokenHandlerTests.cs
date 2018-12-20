@@ -160,12 +160,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 IdentityComparer.AreEqual(validationResultFromSecurityTokenDescriptor.IsValid, theoryData.IsValid, context);
                 IdentityComparer.AreEqual(validationResultFromString.IsValid, theoryData.IsValid, context);
 
+                var jweTokenFromSecurityTokenDescriptor = validationResultFromSecurityTokenDescriptor.SecurityToken as JsonWebToken;
+                var jweTokenFromString = validationResultFromString.SecurityToken as JsonWebToken;
+
+                // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
+                // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
+                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
+                {
+                    var innerTokenFromSecurityTokenDescriptor = jweTokenFromSecurityTokenDescriptor.InnerToken as JsonWebToken;
+                    var innerTokenFromString = jweTokenFromString.InnerToken as JsonWebToken;
+
+                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
+                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, innerTokenFromSecurityTokenDescriptor.Kid, context);
+                    IdentityComparer.AreEqual(innerTokenFromString.X5t, x509SecurityKey.X5t, context);
+                    IdentityComparer.AreEqual(innerTokenFromString.X5t, innerTokenFromString.Kid, context);
+                }
+
                 context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
                     { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector" } },
                 };
 
-                IdentityComparer.AreEqual(validationResultFromSecurityTokenDescriptor.SecurityToken as JsonWebToken, validationResultFromString.SecurityToken as JsonWebToken, context);
+                IdentityComparer.AreEqual(jweTokenFromSecurityTokenDescriptor, jweTokenFromString, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -197,6 +213,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidUsingX509SecurityKey",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
@@ -237,7 +272,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidateIssuer = false
                         }
                     },
                     new CreateTokenTheoryData
@@ -260,7 +295,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidateIssuer = false,
                         }
                     },
                     new CreateTokenTheoryData
@@ -391,6 +426,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 var jwsTokenFromSecurityTokenDescriptor = new JsonWebToken(jwtFromSecurityTokenDescriptor);
                 var jwsTokenFromString = new JsonWebToken(jwtFromString);
+
+                // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
+                // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
+                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
+                {
+                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
+                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, jwsTokenFromSecurityTokenDescriptor.Kid, context);
+                    IdentityComparer.AreEqual(jwsTokenFromString.X5t, x509SecurityKey.X5t, context);
+                    IdentityComparer.AreEqual(jwsTokenFromString.X5t, jwsTokenFromString.Kid, context);
+                }
+
                 IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor, jwsTokenFromString, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -429,6 +475,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new CreateTokenTheoryData
                     {
+                        TestId = "ValidUsingX509SecurityKey",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
                         TestId = "TokenDescriptorNull",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  null,
@@ -459,7 +522,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidateIssuer = false
                         }
                     },
                     new CreateTokenTheoryData
@@ -480,7 +543,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidateIssuer = false
                         }
                     },
                     new CreateTokenTheoryData
@@ -547,8 +610,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = "Audience",
+                            ValidIssuer = "Issuer"
                         }
                     }
                 };
