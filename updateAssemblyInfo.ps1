@@ -41,7 +41,7 @@ $nugetVersion = $dateTimeStamp;
 $dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd");
 $fileVersion = $releaseVersion + "." + $dateTimeStamp;
 $versionProps = Get-Content ($PSScriptRoot + "/build/version.props");
-if ("preview" -eq ("{0}" -f $nugetPreview).Trim())
+if ("internal-preview" -eq ("{0}" -f $nugetPreview).Trim())
 {
     Set-Content "build\dynamicVersion.props" ($versionProps -replace $nugetPreview, ($nugetPreview + "-" + $nugetVersion));
 }
