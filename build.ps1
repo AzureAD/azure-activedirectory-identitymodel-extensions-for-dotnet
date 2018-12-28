@@ -6,6 +6,7 @@ param(
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
     [string]$slnFile="wilson.sln",
+    [switch]$runApiCompat,
     [switch]$generateContractAssemblies)
 
 ################################################# Functions ############################################################
@@ -46,21 +47,32 @@ function CreateArtifactsRoot($folder)
     mkdir $folder | Out-Null
 }
 
-function GenerateContractAssemblies()
+function GenerateContractAssemblies($root)
 {
-	# execute generateContractAssemblies script
-	& "$PSScriptRoot\generateContractAssemblies.ps1".
+    # clear content of baseline files as it is not relevant for the next version
+    ClearBaselineFiles($root)
+
+    # execute generateContractAssemblies script
+    & "$root\generateContractAssemblies.ps1".
+}
+
+function ClearBaselineFiles($root)
+{
+    Write-Host ">>> Clear-Content $root\Tools\apiCompat\baseline\*.txt"
+    Clear-Content $root\Tools\apiCompat\baseline\*.txt
 }
 
 ################################################# Functions ############################################################
 
 WriteSectionHeader("build.ps1 - parameters");
-Write-Host "buildType:       " $buildType;
-Write-Host "dotnetDir:       " $dotnetDir
-Write-Host "root:            " $root;
-Write-Host "runTests:        " $runTests;
-Write-Host "failBuildOnTest: " $failBuildOnTest;
-Write-Host "slnFile:         " $slnFile;
+Write-Host "buildType:                  " $buildType;
+Write-Host "dotnetDir:                  " $dotnetDir
+Write-Host "root:                       " $root;
+Write-Host "runTests:                   " $runTests;
+Write-Host "failBuildOnTest:            " $failBuildOnTest;
+Write-Host "slnFile:                    " $slnFile;
+Write-Host "runApiCompat:               " $runApiCompat;
+Write-Host "generateContractAssemblies: " $generateContractAssemblies;
 WriteSectionFooter("End build.ps1 - parameters");
 
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
@@ -106,10 +118,10 @@ CreateArtifactsRoot($artifactsRoot);
 pushd
 Set-Location $root
 Write-Host ""
-Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 
 if($p.ExitCode -ne 0)
 {
@@ -120,7 +132,7 @@ popd
 if ($generateContractAssemblies.IsPresent)
 {
 	WriteSectionHeader("Generating Contract Assemblies");
-	GenerateContractAssemblies;
+	GenerateContractAssemblies($root);
 	WriteSectionFooter("End Generating Contract Assemblies");
 }
 

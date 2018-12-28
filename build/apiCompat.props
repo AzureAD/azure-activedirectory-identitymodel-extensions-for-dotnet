@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<RunApiCompat>true</RunApiCompat>
+		<RunApiCompat>false</RunApiCompat>
 		<RunApiCompatForSrc>true</RunApiCompatForSrc>
 		<RunMatchingRefApiCompat>false</RunMatchingRefApiCompat>
 		<ApiCompatEnforceOptionalRules>true</ApiCompatEnforceOptionalRules>
@@ -12,11 +12,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ResolvedMatchingContract Include="$(SolutionDir)Tools/apiCompat/contractAssemblies/$(TargetFramework)/$(TargetName).dll " />
+		<ResolvedMatchingContract Include="$(SolutionDir)Tools\apiCompat\contractAssemblies\$(TargetFramework)\$(TargetName).dll " />
 	</ItemGroup>
 
+	<Target Name="WarnIfApiCompatIsDisabled" Condition="'$(RunApiCompat)' == 'false'" BeforeTargets="BeforeBuild">
+		<Message Importance="High"
+			Text=">>> ApiCompat is disabled and it will not run for the assembly: $(TargetFramework)\$(TargetName).dll. To enable ApiCompat include '-runApiCompat' flag when building, or set the 'RunApiCompat' property to true."
+		/>
+	</Target>
+
+	<Target Name="EchoApiCompat" Condition="'$(RunApiCompat)' == 'true'" BeforeTargets="CheckIfContractAssemblyExists">
+		<Message Importance="High" Text=">>> Running ApiCompat for the assembly: $(TargetFramework)\$(TargetName).dll"/>
+	</Target>
+
 	<Target Name="CheckIfContractAssemblyExists" Condition="'$(RunApiCompat)' == 'true' AND !Exists('@(ResolvedMatchingContract)')" BeforeTargets="ValidateApiCompatForSrc">
-		<Warning Text="Contract assembly doesn't exist. ApiCompat will not run for the assembly: @(ResolvedMatchingContract)."/>
+		<Warning Text=">>> Contract assembly doesn't exist. ApiCompat will not run for the assembly: @(ResolvedMatchingContract)"/>
 	</Target>
 
 	<Target Name="ResolveContractDependencyDirectories" BeforeTargets="ValidateApiCompatForSrc">
