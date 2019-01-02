@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Creates a query string using the using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// Creates a query string using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
         public virtual string CreateLogoutRequestUrl()
