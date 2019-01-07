@@ -34,19 +34,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// An opaque context used to store work when working with authentication artifacts.
     /// </summary>
-    public class TokenContext
+    public class CallContext
     {
         /// <summary>
-        /// Instantiates a new <see cref="TokenContext"/> with a default activityId.
+        /// Instantiates a new <see cref="CallContext"/> with a default activityId.
         /// </summary>
-        public TokenContext()
+        public CallContext()
         {
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="TokenContext"/> with an activityId.
+        /// Instantiates a new <see cref="CallContext"/> with an activityId.
         /// </summary>
-        public TokenContext(Guid activityId)
+        public CallContext(Guid activityId)
         {
             if (activityId == null)
                 throw new ArgumentNullException(nameof(activityId));
