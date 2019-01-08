@@ -729,14 +729,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            using (var sr = new StringReader(token))
+#if NETSTANDARD1_4
+            return new SamlSecurityToken(Serializer.ReadAssertion(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))); 
+#else
+            using (var stringReader = new StringReader(token))
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45 || NET451
-                settings.XmlResolver = null;
-#endif
-                return new SamlSecurityToken(Serializer.ReadAssertion(XmlReader.Create(sr, settings))); 
+                return new SamlSecurityToken(Serializer.ReadAssertion(new XmlTextReader(stringReader)));
             }
+#endif
         }
 
         /// <summary>

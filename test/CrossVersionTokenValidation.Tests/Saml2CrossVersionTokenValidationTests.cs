@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             Expires = Default.Expires,
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF)
                         },
                         ValidationParameters4x = new TokenValidationParameters4x
                         {
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                     AppliesToAddress = Default.Audience,
                     Lifetime = new LifeTime4x(notBefore, expires),
                     SigningCredentials = signingCredentials,
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF),
                     TokenIssuerName = Default.Issuer,
                 };
 
@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
         private static ClaimsIdentity AuthenticationClaimsIdentity
         {
-            get => new ClaimsIdentity(new List<Claim>(Default.SamlClaims)
+            get => new ClaimsIdentity(new List<Claim>(Default.SamlClaimsWithoutCRLF)
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
                 new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
@@ -339,7 +339,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             {
                 var authorizationDecisionClaims = new List<Claim>
                 {
-                    Default.SamlClaims.Find(x => x.Type == ClaimTypes.NameIdentifier)
+                    Default.SamlClaimsWithoutCRLF.Find(x => x.Type == ClaimTypes.NameIdentifier)
                 };
 
                 return new ClaimsIdentity(authorizationDecisionClaims);

@@ -456,14 +456,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
+#if NETSTANDARD1_4
+            return new Saml2SecurityToken(Serializer.ReadAssertion(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))); 
+#else
             using (var stringReader = new StringReader(token))
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45 || NET451
-                settings.XmlResolver = null;
-#endif
-                return new Saml2SecurityToken(Serializer.ReadAssertion(XmlReader.Create(stringReader, settings)));
+                return new Saml2SecurityToken(Serializer.ReadAssertion(new XmlTextReader(stringReader)));
             }
+#endif
         }
 
         /// <summary>
