@@ -42,8 +42,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         // wsfederation messages
         internal const string IDX22900 = "IDX22900: Building wsfederation message from query string: '{0}'.";
         internal const string IDX22901 = "IDX22901: Building wsfederation message from uri: '{0}'.";
-        internal const string IDX22902 = "IDX22902: Token is not found in wresult";
+        internal const string IDX22902 = "IDX22902: Token is not found in Wresult";
         internal const string IDX22903 = "IDX22903: Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.";
+        internal const string IDX22904 = "IDX22904: Wresult does not contain a 'RequestedSecurityToken' element.";
 
         // xml metadata messages
         internal const string IDX22800 = "IDX22800: Exception thrown while reading WsFedereationMetadata. Element '{0}'. Caught exception: '{1}'.";

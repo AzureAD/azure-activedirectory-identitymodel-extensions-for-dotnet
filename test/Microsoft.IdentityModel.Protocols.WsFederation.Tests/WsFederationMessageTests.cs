@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
@@ -114,8 +115,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
 
         [Theory, MemberData(nameof(WaSignInTheoryData))]
-
-        public void WaSignIn(WsFederationMessageTheoryData theoryData)
+        public void WaSignIn(WsFederationSigninMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WaSignIn", theoryData);
             try
@@ -128,6 +128,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     if (theoryData.SecurityToken != null)
                         IdentityComparer.AreEqual(theoryData.SecurityToken, validatedToken, context);
                 }
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -138,128 +139,185 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsFederationMessageTheoryData> WaSignInTheoryData
+        public static TheoryData<WsFederationSigninMessageTheoryData> WaSignInTheoryData
         {
             get
             {
-                var key = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
-                var saml2TokenHandler = new Saml2SecurityTokenHandler();
-                var saml2Token = saml2TokenHandler.CreateToken(
-                        new SecurityTokenDescriptor
-                        {
-                            Audience = Default.Audience,
-                            NotBefore = Default.NotBefore,
-                            Expires = Default.Expires,
-                            IssuedAt = Default.IssueInstant,
-                            Issuer = Default.Issuer,
-                            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
-                        }
-                );
+                var theoryData = new TheoryData<WsFederationSigninMessageTheoryData>();
 
-                saml2Token.SigningKey = key;
-
-                var samlTokenHandler = new SamlSecurityTokenHandler();
-                var samlToken = samlTokenHandler.CreateToken(
-                        new SecurityTokenDescriptor
-                        {
-                            Audience = Default.Audience,
-                            NotBefore = Default.NotBefore,
-                            Expires = Default.Expires,
-                            IssuedAt = Default.IssueInstant,
-                            Issuer = Default.Issuer,
-                            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
-                        }
-                );
-
-                samlToken.SigningKey = key;
-
-                return new TheoryData<WsFederationMessageTheoryData>
+                // Wa-Signin hand crafted with a token from by AAD
+                theoryData.Add(new WsFederationSigninMessageTheoryData
                 {
-                    new WsFederationMessageTheoryData
+                    First = true,
+                    TokenValidationParameters = new TokenValidationParameters
                     {
-                        First = true,
-                        TokenValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
-                            ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
-                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
-                            ValidateLifetime = false,
-                        },
-                        QueryString = ReferenceXml.WaSignIn_Valid,
-                        SecurityTokenHandler = new Saml2SecurityTokenHandler(),
-                        TestId = nameof(ReferenceXml.WaSignIn_Valid)
+                        IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                        ValidIssuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                        ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                        ValidateLifetime = false,
                     },
-                    new WsFederationMessageTheoryData
+                    QueryString = ReferenceXml.WaSignInValid,
+                    SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                    TestId = nameof(ReferenceXml.WaSignInValid)
+                });
+
+                // customer data
+                string _x509DataADFS = "MIIDCDCCAfCgAwIBAgIQNz4YVbYAIJVFCc47HFD3RzANBgkqhkiG9w0BAQsFADBAMT4wPAYDVQQDEzVBREZTIFNpZ25pbmcgLSBzdHMuc3ViMi5mcmFjYXMzNjUubXNmdG9ubGluZXJlcHJvLmNvbTAeFw0xNTAzMzExMDQyMTNaFw0zNDA1MzAxMDQyMTNaMEAxPjA8BgNVBAMTNUFERlMgU2lnbmluZyAtIHN0cy5zdWIyLmZyYWNhczM2NS5tc2Z0b25saW5lcmVwcm8uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxdjzB+wGV6hYekOvWwKoL/DFNBiLQsLx6w02FzcFnpGwR38gVTn/glg9CNSsOT0riRM3/MwU8o2fwseQyVtv9Kee/yvia8cB6GD0CARlYizb6GkJJzMvWkPSas1zpn10Bs3SBBgn0pvAKZCWWir5WJ7DRY32X2yo2do8mQftsoLGYsEU8+jj9AMYQWaR3A86AEWjXoQY3AodfMMzdVFX+O/kjsvKcBfPqGRT6jUSGBOOaqzMOJBT39SueD8zePDW7SejBl7fRi4TLx5H6xuMldOAAH6oD70yIrobqosGG9X/LdijHajMSoaYzZIlG7fl4PCVvAjh1Dytw/y8K70flQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQBy08dAsSTKd2YlNE8bM4O5C2bFKR1YakR8L/zLEy8g+RNsKN5V/cIll0b/tf9iQ5464nc+nM///U+UVxqT8ipeR7ThIPwuWX98cFZFQNNGkha4PaYap/osquEpRAJOcTqZf2K95ipeQ+5Hhw00mK0hcV1QT/7maTUqCHDfBCaD+uYAFvaNBXOYpdoIGM9cMk7Qjc/yowLDm+DpmJek54MWmN+iZ0YtDEhMSh//QPFMLPT5Ucat+qRTen1HZNGdxfZ7NIIDL3dNKVDN+vDUbW7rjvPyxA8Rtj4JplI9ENqpzRq4m1sDWUTk2hJYw9Ec1kGo7AFKRmOS6DRbwUn5Ptdc";
+                theoryData.Add(new WsFederationSigninMessageTheoryData
+                {
+                    TokenValidationParameters = new TokenValidationParameters
                     {
-                        PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>{ { typeof(Saml2Assertion), new List<string> { "Signature", "SigningCredentials" } }},
-                        QueryString = WsFederationTestUtilities.BuildWaSignInMessage(saml2Token, saml2TokenHandler, "saml2"),
-                        SecurityToken = saml2Token,
-                        SecurityTokenHandler = new Saml2SecurityTokenHandler(),
-                        TokenValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = key,
-                            ValidIssuer = Default.Issuer,
-                            ValidAudience = Default.Audience,
-                        },
-                        TestId = "SignInWithSaml2"
+                        IssuerSigningKey = new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(_x509DataADFS))),
+                        ValidIssuer = "http://sts.sub2.fracas365.msftonlinerepro.com/adfs/services/trust",
+                        ValidAudience = "https://app1.sub2.fracas365.msftonlinerepro.com/sampapp/",
+                        ValidateLifetime = false,
                     },
-                    new WsFederationMessageTheoryData
-                    {
-                        PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>{ { typeof(SamlAssertion), new List<string> { "Signature", "SigningCredentials" } }},
-                        QueryString = WsFederationTestUtilities.BuildWaSignInMessage(samlToken, samlTokenHandler, "saml1"),
-                        SecurityToken = samlToken,
-                        SecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        TokenValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = key,
-                            ValidIssuer = Default.Issuer,
-                            ValidAudience = Default.Audience,
-                        },
-                        TestId = "SignInWithSaml"
-                    }
-                };
+                    QueryString = ReferenceXml.WaSignInWithCRLF,
+                    SecurityTokenHandler = new SamlSecurityTokenHandler(),
+                    TestId = "WaSignInCustomerData",
+                });
+
+                // Default SamlClaims
+                AddWaSignInVariation(Default.SamlClaims, "DefaultSamlClaims", theoryData);
+
+                // %0A
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress, "123\n456\n789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeValueHas%0A", theoryData);
+
+                // %0D
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress, "123\r456\r789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeValueHas%0D", theoryData);
+
+                // %0A%0D
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress, "123\n\r456\n\r789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeValueHas%0A%0D", theoryData);
+
+                // %0A%0D%0A
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress, "123\n\r\n456\n\r\n789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeValueHas%0A%0D%0A", theoryData);
+
+                // %0D%0A
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress, "123\r\n456\r\n789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeValueHas%0D%0A", theoryData);
+
+                // %0D%0A in attribute name
+                AddWaSignInVariation(new List<Claim> { new Claim(ClaimTypes.StreetAddress + "\r\n123", "123\r\n456\r\n789", ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer) }, "AttributeNameHas%0D%0A", theoryData);
+
+                return theoryData;
             }
         }
 
-        [Theory, MemberData(nameof(GetTokenTheoryData))]
-
-        public void GetTokenTest2(WsFederationMessageTheoryData theoryData)
+        private static void AddWaSignInVariation(IList<Claim> claims, string variation, TheoryData<WsFederationSigninMessageTheoryData> theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.GetTokenTest2", theoryData);
-            try
+            var samlToken = CreateSamlToken(claims);
+            var samlSecurityTokenHandler = new SamlSecurityTokenHandler();
+            theoryData.Add(new WsFederationSigninMessageTheoryData
             {
-                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetTokenUsingXmlReader();
-                //Assert.Equal(theoryData.Token, token);
-                if (theoryData.TokenValidationParameters != null)
-                {
-                    var tokenHandler = new Saml2SecurityTokenHandler();
-                    tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
-                }
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(samlToken, samlSecurityTokenHandler, "saml1" + variation),
+                SecurityToken = samlToken,
+                SecurityTokenHandler = samlSecurityTokenHandler,
+                TestId = "Saml1WriteToken"+variation
+            });
 
-            TestUtilities.AssertFailIfErrors(context);
+            theoryData.Add(new WsFederationSigninMessageTheoryData
+            {
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(samlSecurityTokenHandler.WriteToken(samlToken), "saml1" + variation),
+                SecurityToken = samlToken,
+                SecurityTokenHandler = samlSecurityTokenHandler,
+                TestId = "Saml1SetToken" + variation
+            });
+
+            // this results in %0D in the query string
+            var saml = samlSecurityTokenHandler.WriteToken(samlToken).Replace("&#xD;", "\r");
+            theoryData.Add(new WsFederationSigninMessageTheoryData
+            {
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(saml, "saml1" + variation),
+                SecurityToken = samlToken,
+                SecurityTokenHandler = samlSecurityTokenHandler,
+                TestId = "Saml1SetTokenReplace" + variation
+            });
+
+            var saml2Token = CreateSaml2Token(claims);
+            var saml2SecurityTokenHandler = new Saml2SecurityTokenHandler();
+            theoryData.Add(new WsFederationSigninMessageTheoryData
+            {
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(saml2Token, saml2SecurityTokenHandler, "saml2" + variation),
+                SecurityToken = saml2Token,
+                SecurityTokenHandler = saml2SecurityTokenHandler,
+                TestId = "Saml2WriteToken" + variation
+            });
+
+            theoryData.Add(new WsFederationSigninMessageTheoryData
+            {
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(saml2SecurityTokenHandler.WriteToken(saml2Token), "saml2" + variation),
+                SecurityToken = saml2Token,
+                SecurityTokenHandler = saml2SecurityTokenHandler,
+                TestId = "Saml2SetToken" + variation
+            });
+
+            // this results in %0D in the query string
+            var saml2 = saml2SecurityTokenHandler.WriteToken(saml2Token).Replace("&#xD;", "\r");
+            theoryData.Add(new WsFederationSigninMessageTheoryData
+            {
+                QueryString = WsFederationTestUtilities.BuildWaSignInMessage(saml2, "saml2" + variation),
+                SecurityToken = saml2Token,
+                SecurityTokenHandler = saml2SecurityTokenHandler,
+                TestId = "Saml2SetTokenReplace" + variation
+            });
+        }
+
+        private static SamlSecurityToken CreateSamlToken(IList<Claim> claims)
+        {
+            var samlTokenHandler = new SamlSecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Audience = Default.Audience,
+                NotBefore = Default.NotBefore,
+                Expires = Default.Expires,
+                IssuedAt = Default.IssueInstant,
+                Issuer = Default.Issuer,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = new ClaimsIdentity(claims)
+            };
+
+            var token = samlTokenHandler.CreateToken(tokenDescriptor) as SamlSecurityToken;
+            token.SigningKey = Default.AsymmetricSigningKey;
+            return token;
+        }
+
+        private static Saml2SecurityToken CreateSaml2Token(IList<Claim> claims)
+        {
+            var saml2TokenHandler = new Saml2SecurityTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Audience = Default.Audience,
+                NotBefore = Default.NotBefore,
+                Expires = Default.Expires,
+                IssuedAt = Default.IssueInstant,
+                Issuer = Default.Issuer,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Subject = new ClaimsIdentity(claims)
+            };
+
+            var token = saml2TokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;
+            token.SigningKey = Default.AsymmetricSigningKey;
+            return token;
+
         }
 
         [Theory, MemberData(nameof(GetTokenTheoryData))]
-
         public void GetTokenTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenTest", theoryData);
             try
             {
-                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
-                //Assert.Equal(theoryData.Token, token);
+                // GetToken (for other than NETSTANDARD 1.4) uses XmlReaders to obtain token from Wresult.
+                // GetToken(string) {internal} uses string manipulation to obtain token.
+                // The result should be the same token.
+                var tokenUsingReader = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
+                var tokenFromString = WsFederationMessage.GetToken(theoryData.WsFederationMessageTestSet.WsFederationMessage.Wresult);
+                if (string.Compare(tokenUsingReader, tokenFromString) != 0)
+                    context.AddDiff("string.Compare(tokenUsingReader, tokenFromString) != 0");
+
                 if (theoryData.TokenValidationParameters != null)
                 {
                     var tokenHandler = new Saml2SecurityTokenHandler();
-                    tokenHandler.ValidateToken(token, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
+                    tokenHandler.ValidateToken(tokenUsingReader, theoryData.TokenValidationParameters, out SecurityToken validatedToken);
                 }
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -293,11 +351,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Saml2_Valid
+                                Wresult = ReferenceXml.WresultSaml2Valid
                             }
                         },
-                        Token = ReferenceXml.Token_Saml2_Valid,
-                        TestId = nameof(ReferenceXml.WResult_Saml2_Valid)
+                        Token = ReferenceXml.Saml2Valid,
+                        TestId = nameof(ReferenceXml.WresultSaml2Valid)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -314,11 +372,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Saml2_Valid_With_Spaces
+                                Wresult = ReferenceXml.WresultSaml2ValidWithWhitespace
                             }
                         },
-                        Token = ReferenceXml.Token_Saml2_Valid,
-                        TestId = nameof(ReferenceXml.WResult_Saml2_Valid_With_Spaces)
+                        Token = ReferenceXml.Saml2Valid,
+                        TestId = nameof(ReferenceXml.WresultSaml2ValidWithWhitespace)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -326,11 +384,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_3
+                                Wresult = ReferenceXml.WresultWsTrust13
                             }
                         },
-                        Token = ReferenceXml.Token_Dummy,
-                        TestId = nameof(ReferenceXml.WResult_Dummy_WsTrust1_3)
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust13)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -338,18 +396,143 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_4
+                                Wresult = ReferenceXml.WresultWsTrust14
                             }
                         },
-                        Token = ReferenceXml.Token_Dummy,
-                        TestId = nameof(ReferenceXml.WResult_Dummy_WsTrust1_4)
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14)
+                    }
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(GetTokenParsingStringData))]
+        public void GetTokenParsingString(WsFederationMessageTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetTokenParsingString", theoryData);
+            try
+            {
+                var token = WsFederationMessage.GetToken(theoryData.Wresult);
+                if (token == null && theoryData.Token != null)
+                    context.AddDiff("(token == null && theoryData.Token != null)");
+                else if (token != null && theoryData.Token == null)
+                    context.AddDiff("(token != null && theoryData.Token == null)");
+                else if (string.Compare(token, theoryData.Token) != 0)
+                    context.AddDiff("string.Compare(token, token2) != 0");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> GetTokenParsingStringData
+        {
+            get
+            {
+                return new TheoryData<WsFederationMessageTheoryData>
+                {
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        Wresult = ReferenceXml.WresultSaml2ValidWithWhitespace,
+                        Token = ReferenceXml.Saml2Valid,
+                        TestId = nameof(ReferenceXml.WresultSaml2Valid)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultSaml2ValidWithWhitespace,
+                        Token = ReferenceXml.Saml2Valid,
+                        TestId = nameof(ReferenceXml.WresultSaml2ValidWithWhitespace)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust13,
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust13)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust14,
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultSaml2MissingRequestedSecurityToken,
+                        Token = null,
+                        TestId = nameof(ReferenceXml.WresultSaml2MissingRequestedSecurityToken)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultMissingRequestedSecurityTokenStartElement,
+                        Token = null,
+                        TestId = nameof(ReferenceXml.WresultMissingRequestedSecurityTokenStartElement)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultMissingRequestedSecurityTokenEndElement,
+                        Token = null,
+                        TestId = nameof(ReferenceXml.WresultMissingRequestedSecurityTokenEndElement)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust14WithoutNamespace,
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14WithoutNamespace)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust14UnusualSpacing,
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14UnusualSpacing)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust14WithoutNamespaceUnusualSpacing,
+                        Token = ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14WithoutNamespaceUnusualSpacing)
+                    },
+                    // these tests show that one shouldn't rely on parsing the Wresult alone as
+                    // the following Wresult's should error. The correct pattern is to call GetToken() or GetTokenUsingXmlReader() to ensure 
+                    // the Wresult is well formed.
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultInvalidNamespace,
+                        Token =  ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultInvalidNamespace)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust13MultipleTokens,
+                        Token =  ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust13MultipleTokens)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = ReferenceXml.WresultWsTrust14MultipleTokens,
+                        Token =  ReferenceXml.TokenDummy,
+                        TestId = nameof(ReferenceXml.WresultWsTrust14MultipleTokens)
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = null,
+                        TestId = "WresultNull"
+                    },
+                    new WsFederationMessageTheoryData
+                    {
+                        Wresult = string.Empty,
+                        TestId = "WresultEmptyString"
                     }
                 };
             }
         }
 
         [Theory, MemberData(nameof(GetTokenNegativeTestTheoryData))]
-
         public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
@@ -379,11 +562,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityTokenResponse
+                                Wresult = ReferenceXml.WresultSaml2MissingRequestedSecurityTokenResponse
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
-                        TestId = nameof(ReferenceXml.WResult_Saml2_Missing_RequestedSecurityTokenResponse)
+                        TestId = nameof(ReferenceXml.WresultSaml2MissingRequestedSecurityTokenResponse)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -391,11 +574,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Saml2_Missing_RequestedSecurityToken
+                                Wresult = ReferenceXml.WresultSaml2MissingRequestedSecurityToken
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
-                        TestId = nameof(ReferenceXml.WResult_Saml2_Missing_RequestedSecurityToken)
+                        TestId = nameof(ReferenceXml.WresultSaml2MissingRequestedSecurityToken)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -403,11 +586,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Dummy_Invalid_Namespace
+                                Wresult = ReferenceXml.WresultInvalidNamespace
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22902:"),
-                        TestId = nameof( ReferenceXml.WResult_Dummy_Invalid_Namespace)
+                        TestId = nameof( ReferenceXml.WresultInvalidNamespace)
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -415,11 +598,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_3_multiple_tokens
+                                Wresult = ReferenceXml.WresultWsTrust13MultipleTokens
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22903:"),
-                        TestId = nameof(ReferenceXml.WResult_Dummy_WsTrust1_3_multiple_tokens),
+                        TestId = nameof(ReferenceXml.WresultWsTrust13MultipleTokens),
                     },
                     new WsFederationMessageTheoryData
                     {
@@ -427,18 +610,17 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         {
                             WsFederationMessage = new WsFederationMessage
                             {
-                                Wresult = ReferenceXml.WResult_Dummy_WsTrust1_4_multiple_tokens
+                                Wresult = ReferenceXml.WresultWsTrust14MultipleTokens
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(WsFederationException), "IDX22903:"),
-                        TestId = nameof(ReferenceXml.WResult_Dummy_WsTrust1_4_multiple_tokens)
+                        TestId = nameof(ReferenceXml.WresultWsTrust14MultipleTokens)
                     }
                 };
             }
         }
 
         [Theory, MemberData(nameof(MessageTheoryData))]
-
         public void ParametersTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
@@ -518,7 +700,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         }
 
         [Theory, MemberData(nameof(QueryStringTheoryData))]
-
         public void QueryStringTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);
@@ -548,6 +729,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         WsFederationMessageTestSet = ReferenceXml.WsSignInTestSet,
                         TestId = nameof(ReferenceXml.WsSignInTestSet)
                     }
+                };
+            }
+        }
+
+        public class WsFederationSigninMessageTheoryData : WsFederationMessageTheoryData
+        {
+            public WsFederationSigninMessageTheoryData()
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>> { { typeof(SamlAssertion), new List<string> { "Signature", "SigningCredentials" } }, { typeof(Saml2Assertion), new List<string> { "Signature", "SigningCredentials" } } };
+                TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer
                 };
             }
         }
