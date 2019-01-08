@@ -25,15 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
 using System.IO;
 using System.Text;
 using System.Xml;
-
 using Microsoft.IdentityModel.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
@@ -97,6 +94,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 }
             }
         }
-    }
 
+        public static string BuildWaSignInMessage(string securityToken, string tokenType)
+        {
+            var rstrTemplate = @"<t:RequestSecurityTokenResponse xmlns:t=""http://docs.oasis-open.org/ws-sx/ws-trust/200512""><t:Lifetime><wsu:Created xmlns:wsu=""http://www.w3.org/2005/08/addressing"">2017-03-17T18:33:37.095Z</wsu:Created><wsu:Expires xmlns:wsu=""http://www.w3.org/2005/08/addressing"">2021-03-17T18:33:37.080Z</wsu:Expires></t:Lifetime><wsp:AppliesTo xmlns:wsp=""http://schemas.xmlsoap.org/ws/2004/09/policy""><wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing""><wsa:Address>http://Default.Audience.com</wsa:Address></wsa:EndpointReference></wsp:AppliesTo><t:RequestedSecurityToken>{0}</t:RequestedSecurityToken><t:TokenType>{1}</t:TokenType><t:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</t:RequestType><t:KeyType>http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey</t:KeyType></t:RequestSecurityTokenResponse>";
+            var rstr = string.Format(rstrTemplate, securityToken, tokenType);
+
+            return "wa=wsignin1.0&wresult=" + Uri.EscapeDataString(rstr);
+        }
+    }
 }

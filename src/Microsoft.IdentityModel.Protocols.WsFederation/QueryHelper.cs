@@ -89,11 +89,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (equalIndex < delimiterIndex)
                 {
                     while (scanIndex != equalIndex && char.IsWhiteSpace(queryString[scanIndex]))
-                    {
                         ++scanIndex;
-                    }
+
                     string name = queryString.Substring(scanIndex, equalIndex - scanIndex);
                     string value = queryString.Substring(equalIndex + 1, delimiterIndex - equalIndex - 1);
+
                     accumulator.Append(
                         Uri.UnescapeDataString(name.Replace('+', ' ')),
                         Uri.UnescapeDataString(value.Replace('+', ' ')));
