@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="TokenContext"/> that contains call information.
         /// </summary>
-        public TokenContext TokenContext { get; set; }
+        public CallContext TokenContext { get; set; }
 
         /// <summary>
         /// Gets or sets the token type of the <see cref="SecurityToken"/> that was validated.
