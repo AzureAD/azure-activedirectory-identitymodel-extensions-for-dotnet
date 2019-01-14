@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             get
             {
                 var certificate = KeyingMaterial.CertSelfSigned2048_SHA256;
-                var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaims);
+                var defaultClaimsIdentity = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF);
                 var notBefore = DateTime.UtcNow;
                 var expires = notBefore + TimeSpan.FromDays(1);
                 var key = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             Expires = expires,
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF)
                         },
                         ValidationParameters4x = new TokenValidationParameters4x
                         {
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                             Expires = expires,
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF)
                         },
                         ValidationParameters4x = new TokenValidationParameters4x
                         {
@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
                     AppliesToAddress = Default.Audience,
                     Lifetime = new LifeTime4x(notBefore, expires),
                     SigningCredentials = signingCredentials,
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new ClaimsIdentity(Default.SamlClaimsWithoutCRLF),
                     TokenIssuerName = Default.Issuer,
                 };
 
@@ -332,7 +332,7 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
         private static ClaimsIdentity AuthenticationClaimsIdentity
         {
-            get => new ClaimsIdentity(new List<Claim>(Default.SamlClaims)
+            get => new ClaimsIdentity(new List<Claim>(Default.SamlClaimsWithoutCRLF)
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
                 new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)

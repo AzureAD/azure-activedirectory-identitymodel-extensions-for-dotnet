@@ -155,7 +155,86 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }).BuildRedirectUrl();
         }
 
-        // TODO much faster than using XmlDocument, explore if we should us this by default
+        /// <summary>
+        /// Reads the 'wresult' and returns the embedded security token.
+        /// </summary>
+        /// <returns>the 'SecurityToken'.</returns>
+        /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
+        public virtual string GetToken()
+        {
+            return GetTokenUsingXmlReader();
+        }
+
+        /// <summary>
+        /// Processes the 'Wresult' and returns the first 'RequestedSecurityToken' found.
+        /// This method is called only for netstandard 1.4 targets as XmlTextReader is not available and
+        /// XmlDictionaryReader.CreateTextReader normalizes the XML causing signature failures.
+        /// This is only called after it is determined the Wresult is well formed xml. A successful call the GetTokenUsingXmlReader should be made first.
+        /// </summary>
+        /// <returns>the string version of the security token.</returns>
+        internal static string GetToken(string wresult)
+        {
+            if (string.IsNullOrEmpty(wresult))
+            {
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(wresult)));
+                return null;
+            }
+
+            // find first <RequestedSecurityToken>
+            var tokenStartIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken);
+            if (tokenStartIndex == -1)
+            {
+                LogHelper.LogWarning(LogMessages.IDX22904);
+                return null;
+            }
+
+            // skip ahead for known string
+            tokenStartIndex += WsTrustConstants.Elements.RequestedSecurityToken.Length;
+
+            // move forward until start element, assume its the token
+            while (tokenStartIndex < wresult.Length)
+            {
+                if (wresult[tokenStartIndex] == '<')
+                    break;
+
+                tokenStartIndex++;
+            }
+
+            // sanity check
+            if (tokenStartIndex >= wresult.Length)
+            {
+                LogHelper.LogWarning(LogMessages.IDX22904);
+                return null;
+            }
+
+            // find matching </RequestedSecurityToken>
+            var tokenEndIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, tokenStartIndex);
+            if (tokenEndIndex == -1)
+            {
+                LogHelper.LogWarning(LogMessages.IDX22904);
+                return null;
+            }
+
+            // move backwards until hitting the end element for token
+            while (tokenEndIndex > tokenStartIndex)
+            {
+                if (wresult[tokenEndIndex] == '>')
+                    break;
+
+                tokenEndIndex--;
+            }
+
+            // sanity check
+            if (tokenEndIndex <= tokenStartIndex)
+            {
+                LogHelper.LogWarning(LogMessages.IDX22904);
+                return null;
+            }
+
+            // +1 to account for zero index
+            return wresult.Substring(tokenStartIndex, tokenEndIndex - tokenStartIndex + 1);
+        }
+
         /// <summary>
         /// Reads the 'wresult' and returns the embedded security token.
         /// </summary>
@@ -176,146 +255,76 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 #if NET45 || NET451
                 settings.XmlResolver = null;
 #endif
-                XmlReader xmlReader = XmlReader.Create(sr, settings);
-                xmlReader.MoveToContent();
 
-                // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
+#if NETSTANDARD1_4
+                var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max);
+#else
+                var xmlReader = new XmlTextReader(sr);
+#endif
+
+                // Read StartElement <RequestSecurityTokenResponseCollection> this is possible for wstrust 1.3 and 1.4
                 if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))
                     xmlReader.ReadStartElement();
 
                 while (xmlReader.IsStartElement())
                 {
                     // Read <RequestSecurityTokenResponse>
-                    if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustNamespaceList))
+                    if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustNamespaceList))
                     {
-                        xmlReader.Skip();
-                        continue;
-                    }
-
-                    xmlReader.ReadStartElement();
-                    while (xmlReader.IsStartElement())
-                    {
-                        if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestedSecurityToken, WsTrustNamespaceList))
-                        {
-                            xmlReader.Skip();
-                            continue;
-                        }
-
-                        // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
-                        if (token != null)
-                            throw new WsFederationException(LogMessages.IDX22903);
-
-                        // <RequestedSecurityToken>
+                        // <RequestSecurityTokenResponse>
                         xmlReader.ReadStartElement();
-                        using (var ms = new MemoryStream())
-                        {
-                            using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
-                            {
-                                writer.WriteNode(xmlReader, true);
-                                writer.Flush();
-                            }
 
-                            ms.Seek(0, SeekOrigin.Begin);
-                            var tokenBytes = ms.ToArray();
-                            token = Encoding.UTF8.GetString(tokenBytes);
+                        // while we are not on <RequestedSecurityToken> skip
+                        while (xmlReader.IsStartElement())
+                        {
+                            if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestedSecurityToken, WsTrustNamespaceList))
+                            {
+                                // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
+                                if (token != null)
+                                    throw new WsFederationException(LogMessages.IDX22903);
+
+                                // <RequestedSecurityToken>
+                                xmlReader.ReadStartElement();
+                                using (var ms = new MemoryStream())
+                                {
+                                    using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                                    {
+                                        writer.WriteNode(xmlReader, true);
+                                        writer.Flush();
+                                    }
+                                    ms.Seek(0, SeekOrigin.Begin);
+                                    var tokenBytes = ms.ToArray();
+                                    token = Encoding.UTF8.GetString(tokenBytes);
+                                }
+
+                                // </RequestedSecurityToken>
+                                xmlReader.ReadEndElement();
+                            }
+                            else
+                            {
+                                // skip over everything but <RequestedSecurityToken>
+                                xmlReader.Skip();
+                            }
                         }
 
-                        // </RequestedSecurityToken>
+                        // <RequestSecurityTokenResponse>
                         xmlReader.ReadEndElement();
                     }
-
-                    // Read </RequestSecurityTokenResponse>
-                    xmlReader.ReadEndElement();
-                }
-            }
-
-            if (token == null)
-                throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
-
-            return token;
-        }
-
-        /// <summary>
-        /// Reads the 'wresult' and returns the embedded security token.
-        /// </summary>
-        /// <returns>the 'SecurityToken'.</returns>
-        /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetToken()
-        {
-            if (Wresult == null)
-            {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(Wresult)));
-                return null;
-            }
-
-            string token = null;
-            using (var sr = new StringReader(Wresult))
-            {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45 || NET451
-                settings.XmlResolver = null;
-#endif
-                XmlReader xmlReader = XmlReader.Create(sr, settings);
-                xmlReader.MoveToContent();
-
-                // Read <RequestSecurityTokenResponseCollection> for wstrust 1.3 and 1.4
-                if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))
-                    xmlReader.ReadStartElement();
-
-                while (xmlReader.IsStartElement())
-                {
-                    // <RequestSecurityTokenResponse>
-                    if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustNamespaceList))
+                    else
                     {
                         xmlReader.Skip();
-                        continue;
                     }
-
-                    xmlReader.ReadStartElement();
-                    while (xmlReader.IsStartElement())
-                    {
-                        if (!XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestedSecurityToken, WsTrustNamespaceList))
-                        {
-                            xmlReader.Skip();
-                            continue;
-                        }
-                        
-                        // Multiple tokens were found in the RequestSecurityTokenCollection. Only a single token is supported.
-                        if (token != null)
-                            throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22903));
-
-                        using (var ms = new MemoryStream())
-                        {
-                            using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
-                            {
-                                writer.WriteNode(xmlReader, true);
-                                writer.Flush();
-                            }
-
-                            ms.Seek(0, SeekOrigin.Begin);
-                            var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
-                            var dom = new XmlDocument()
-                            {
-                                PreserveWhitespace = true,
-#if NET45 || NET451
-                                XmlResolver = null
-#endif
-                            };
-
-                            dom.Load(memoryReader);
-                            token = dom.DocumentElement.InnerXml;
-                        }
-                    }
-
-                    // Read </RequestSecurityTokenResponse>
-                    xmlReader.ReadEndElement();
                 }
+
+                if (token == null)
+                    throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
+
+#if NETSTANDARD1_4
+                return Wresult.Contains("%0D") ? GetToken(Wresult) : token;
+#else
+                return token;
+#endif
             }
-
-            if (token == null)
-                throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
-
-            return token;
         }
 
         /// <summary>

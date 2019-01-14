@@ -140,43 +140,43 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         First = true,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed) + ":SecurityKey==null",
-                        Xml = ReferenceXml.Saml2Token_Valid_Signed
+                        TestId = nameof(ReferenceXml.Saml2TokenValidSigned) + ":SecurityKey==null",
+                        Xml = ReferenceXml.Saml2TokenValidSigned
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
                         CryptoProviderFactory = null,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed) + ":CryptoProviderFactory==null",
-                        Xml = ReferenceXml.Saml2Token_Valid_Signed
+                        TestId = nameof(ReferenceXml.Saml2TokenValidSigned) + ":CryptoProviderFactory==null",
+                        Xml = ReferenceXml.Saml2TokenValidSigned
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Signed),
-                        Xml = ReferenceXml.Saml2Token_Valid_Signed
+                        TestId = nameof(ReferenceXml.Saml2TokenValidSigned),
+                        Xml = ReferenceXml.Saml2TokenValidSigned
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30019:"),
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
-                        TestId = nameof(ReferenceXml.Saml2Token_TwoSignatures),
-                        Xml = ReferenceXml.Saml2Token_TwoSignatures
+                        TestId = nameof(ReferenceXml.Saml2TokenTwoSignatures),
+                        Xml = ReferenceXml.Saml2TokenTwoSignatures
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException)),
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_SignatureNOTFormated),
-                        Xml = ReferenceXml.Saml2Token_Valid_SignatureNOTFormated
+                        TestId = nameof(ReferenceXml.Saml2TokenValidSignatureNOTFormated),
+                        Xml = ReferenceXml.Saml2TokenValidSignatureNOTFormated
                     },
                     new EnvelopedSignatureTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlValidationException)),
                         SecurityKey = KeyingMaterial.DefaultAADSigningKey,
-                        TestId = nameof(ReferenceXml.Saml2Token_Valid_Formated),
-                        Xml = ReferenceXml.Saml2Token_Valid_Formated
+                        TestId = nameof(ReferenceXml.Saml2TokenValidFormated),
+                        Xml = ReferenceXml.Saml2TokenValidFormated
                     }
                 };
             }
