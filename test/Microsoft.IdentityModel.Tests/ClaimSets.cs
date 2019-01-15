@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, Default.Issuer),
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Default.Issuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Default.Issuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-SÃ©bastien", ClaimValueTypes.String, Default.Issuer),
                 new Claim("role", "role1", ClaimValueTypes.String, Default.Issuer),
                 new Claim("roles", "roles1", ClaimValueTypes.String, Default.Issuer),
             };
@@ -90,8 +90,8 @@ namespace Microsoft.IdentityModel.Tests
             DerivedGlobalClaims = new List<Claim>()
             {
                 new Claim("Arabic", @"?????", ClaimValueTypes.String, Default.Issuer),
-                new Claim("Turkish1", @"??I?i???çöÇÖ", ClaimValueTypes.String, Default.Issuer),
-                new Claim("Turkish2", @"???Ö", ClaimValueTypes.String, Default.Issuer),
+                new Claim("Turkish1", @"??I?i???Ã§Ã¶Ã‡Ã–", ClaimValueTypes.String, Default.Issuer),
+                new Claim("Turkish2", @"???Ã–", ClaimValueTypes.String, Default.Issuer),
                 new Claim("Chinese1", @"???", ClaimValueTypes.String, Default.Issuer),
                 new Claim("Chinese2", @"??", ClaimValueTypes.String, Default.Issuer),
                 new Claim("Japanese1", @"???", ClaimValueTypes.String, Default.Issuer),
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim("CommonSurrogates3", @"??????????", ClaimValueTypes.String, Default.Issuer),
                 new Claim("CommonSurrogates4", @"??????????", ClaimValueTypes.String, Default.Issuer),
                 new Claim("STBSample1", @"!#)6=@Aa}~<", ClaimValueTypes.String, Default.Issuer),
-                new Claim("STBSample2", @"????????????????????????????€????????????????????????????????????????€", ClaimValueTypes.String, Default.Issuer),
+                new Claim("STBSample2", @"????????????????????????????â‚¬????????????????????????????????????????â‚¬", ClaimValueTypes.String, Default.Issuer),
                 new Claim("STBSample3", @"??????????", ClaimValueTypes.String, Default.Issuer),
                 new Claim("STBSample4", @"????????????????????", ClaimValueTypes.String, Default.Issuer),
                 new Claim("STBSample5", @"??????????", ClaimValueTypes.String, Default.Issuer),
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim( ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
                 new Claim( ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer),
                 new Claim( ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
-                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
+                new Claim( ClaimsIdentity.DefaultNameClaimType, "Jean-SÃ©bastien", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
             };
         }
 
@@ -323,7 +323,7 @@ namespace Microsoft.IdentityModel.Tests
                 NewClaimWithShortType(ClaimTypes.GivenName, "Tony", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
                 NewClaimWithShortType(ClaimTypes.HomePhone, "555.1212", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer),
                 NewClaimWithShortType(ClaimTypes.Role, "Sales", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
-                NewClaimWithShortType(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
+                NewClaimWithShortType(ClaimsIdentity.DefaultNameClaimType, "Jean-SÃ©bastien", ClaimValueTypes.String, issuer ?? Default.Issuer, originalIssuer ?? Default.OriginalIssuer ),
             };
         }
 
@@ -352,7 +352,7 @@ namespace Microsoft.IdentityModel.Tests
                 new Claim("email", "Bob@contoso.com"),
                 new Claim("given_name", "Bob"),
                 new Claim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/homephone", "555.1212"),
-                new Claim("unique_name", "Jean-Sébastien"),
+                new Claim("unique_name", "Jean-SÃ©bastien"),
                 new Claim("iss", Default.Issuer),
                 new Claim("aud", Default.Audience)
             };

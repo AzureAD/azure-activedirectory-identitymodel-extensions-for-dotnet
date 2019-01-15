@@ -12,10 +12,15 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="2.4.0-prerelease-63213-02" />
   </ItemGroup>
 
 </Project>

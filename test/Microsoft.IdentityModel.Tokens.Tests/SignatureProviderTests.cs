@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
                 var signature = signatureProviderSign.Sign(bytes);
                 if (!signatureProviderVerify.Verify(bytes, signature))
-                    throw new SecurityTokenInvalidSignatureException("SignatureProvider.Verify.Failed");
+                    throw new CryptographicException();
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa4", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa5", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.JsonWebKeyP384, KEY.JsonWebKeyP384_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa6", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521, KEY.JsonWebKeyP521_Public),
-                new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_BadPrivateKey, KEY.JsonWebKeyP256_Public, EE.SecurityTokenInvalidSignatureException("SignatureProvider.Verify.Failed")),
+                new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_BadPrivateKey, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
                 new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
                 new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
                 new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("X509SecurityKey5", ALG.RsaSha512, ALG.RsaSha512, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey6", ALG.RsaSha512Signature, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey7", ALG.Aes128Encryption, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, EE.SecurityTokenInvalidSignatureException()),
+                new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, EE.CryptographicException()),
 #if NET452
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
@@ -730,7 +730,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-
+#if NETCOREAPP2_0
+        // Excluding OSX as SignatureTampering test is slow on OSX (~6 minutes)
+        // especially tests with IDs RS256 and ES256
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
+#endif
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
@@ -756,6 +760,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
+#if NETCOREAPP2_0
+        // Excluding OSX as SignatureTruncation test throws an exception only on OSX
+        // This behavior should be fixed with netcore3.0
+        // Exceptions is thrown somewhere in System/Security/Cryptography/DerEncoder.cs class which is removed in netcore3.0
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
+#endif
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {

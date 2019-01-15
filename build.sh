@@ -12,7 +12,7 @@ restore() {
   echo -e "Restore ...... "
   echo -e "===========================================================\n"
 
-  dotnet restore WilsonLinux.sln
+  dotnet restore WilsonUnix.sln
   echo -e "\n"
 }
 
@@ -21,7 +21,7 @@ build() {
   echo -e "Build ...... "
   echo -e "===========================================================\n"
 
-  dotnet build WilsonLinux.sln
+  dotnet build WilsonUnix.sln
   echo -e "\n"
 }
 
@@ -30,7 +30,7 @@ pack() {
   echo -e "Pack ...... "
   echo -e "===========================================================\n"
 
-  dotnet pack WilsonLinux.sln
+  dotnet pack WilsonUnix.sln
   
   echo -e "\n"
   echo -e "==========================================================="

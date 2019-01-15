@@ -13,6 +13,7 @@
     <SignAssembly>true</SignAssembly>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
