@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #pragma warning disable 1591
         // general
-        public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.";
+        // public const string IDX10000 = "IDX10000:";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10244 = "IDX10244: Issuer is null or empty. Using runtime default for creating claims '{0}'.";
         public const string IDX10245 = "IDX10245: Creating claims identity from the validated token: '{0}'.";
         public const string IDX10246 = "IDX10246: ValidateTokenReplay property on ValidationParameters is set to false. Exiting without validating the token replay.";
-        public const string IDX10247 = "IDX10247: The current issuer value in ValidateIssuers property on ValidationParameters is null or emptry, skipping it for issuer validation.";
+        // public const string IDX10247 = "IDX10247:";
         public const string IDX10248 = "IDX10248: X509SecurityKey validation failed. The associated certificate is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10249 = "IDX10249: X509SecurityKey validation failed. The associated certificate has expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10250 = "IDX10250: The associated certificate is valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
@@ -91,27 +91,27 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10504 = "IDX10504: Unable to validate signature, token does not have a signature: '{0}'.";
         public const string IDX10505 = "IDX10505: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters returned null when validating token: '{0}'.";
         public const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'.";
-        public const string IDX10507 = "IDX10507: Signature validation failed. ValidateSignature returned null when validating token: '{0}'.";
+        // public const string IDX10507 = "IDX10507:";
         public const string IDX10508 = "IDX10508: Signature validation failed. Signature is improperly formatted.";
         public const string IDX10509 = "IDX10509: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters did not return a '{0}', but returned a '{1}' when reading token: '{2}'.";
         public const string IDX10510 = "IDX10510: Signature validation failed. The user defined 'Delegate' specified in TokenValidationParameters returned null when reading token: '{0}'.";
         public const string IDX10511 = "IDX10511: Signature validation failed. Keys tried: '{0}'. \nkid: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'.";
 
         // encryption / decryption
-        public const string IDX10600 = "IDX10600: Decryption failed. There are no security keys for decryption.";
-        public const string IDX10601 = "IDX10601: Decryption failed. Unable to match 'kid': '{0}', \ntoken: '{1}'.";
+        // public const string IDX10600 = "IDX10600:";
+        // public const string IDX10601 = "IDX10601:";
         public const string IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
-        public const string IDX10604 = "IDX10604: Decryption failed. Exception: '{0}'.";
-        public const string IDX10605 = "IDX10605: Decryption failed. Only 'dir' is currently supported. JWE alg is: '{0}'.";
-        public const string IDX10606 = "IDX10606: Decryption failed. To decrypt a JWE there must be 5 parts. 'tokenParts' is of length: '{0}'.";
+        // public const string IDX10604 = "IDX10604:";
+        // public const string IDX10605 = "IDX10605:";
+        // public const string IDX10606 = "IDX10606:";
         public const string IDX10607 = "IDX10607: Decryption skipping key: '{0}', both validationParameters.CryptoProviderFactory and key.CryptoProviderFactory are null.";
-        public const string IDX10608 = "IDX10608: Decryption skipping key: '{0}', it is not a '{1}'.";
+        // public const string IDX10608 = "IDX10608:";
         public const string IDX10609 = "IDX10609: Decryption failed. No Keys tried: token: '{0}'.";
         public const string IDX10610 = "IDX10610: Decryption failed. Could not create decryption provider. Key: '{0}', Algorithm: '{1}'.";
         public const string IDX10611 = "IDX10611: Decryption failed. Encryption is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
         public const string IDX10612 = "IDX10612: Decryption failed. Header.Enc is null or empty, it must be specified.";
-        //public const string IDX10613 = "IDX10613: Decryption failed. JwtHeader (tokenParts[0]) is null or empty.";
-        public const string IDX10614 = "IDX10614: Decryption failed. JwtHeader.Base64UrlDeserialize(tokenParts[0]): '{0}'. Inner exception: '{1}'.";
+        // public const string IDX10613 = "IDX10613:";
+        // public const string IDX10614 = "IDX10614:";
         public const string IDX10615 = "IDX10615: Encryption failed. No support for: Algorithm: '{0}', SecurityKey: '{1}'.";
         public const string IDX10616 = "IDX10616: Encryption failed. EncryptionProvider failed for: Algorithm: '{0}', SecurityKey: '{1}'. See inner exception.";
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
@@ -122,38 +122,38 @@ namespace Microsoft.IdentityModel.Tokens
 
         // Crypto Errors
         public const string IDX10621 = "IDX10621: '{0}' supports: '{1}' of types: '{2}' or '{3}'. SecurityKey received was of type '{4}'.";
-        public const string IDX10622 = "IDX10622: The algorithm: '{0}' requires the SecurityKey.KeySize to be greater than '{1}' bits. KeySize reported: '{2}'.";
-        public const string IDX10623 = "IDX10623: Cannot sign data because the KeyedHashAlgorithm is null.";
-        public const string IDX10624 = "IDX10624: Cannot verify data because the KeyedHashAlgorithm is null.";
-        public const string IDX10627 = "IDX10627: Cannot set the MinimumAsymmetricKeySizeInBitsForVerifying to less than '{0}'.";
+        // public const string IDX10622 = "IDX10622:";
+        // public const string IDX10623 = "IDX10623:";
+        // public const string IDX10624 = "IDX10624:";
+        // public const string IDX10627 = "IDX10627:";
         public const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than '{0}'.";
         public const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         public const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         public const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
-        public const string IDX10635 = "IDX10635: Unable to create signature. '{0}' returned a null '{1}'. SecurityKey: '{2}', Algorithm: '{3}'";
+        // public const string IDX10635 = "IDX10635:";
         public const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX10638 = "IDX10638: Cannot create the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
-        public const string IDX10641 = "IDX10641: Key is not supported: '{0}'.";
+        // public const string IDX10641 = "IDX10641:";
         public const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
         public const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
-        public const string IDX10644 = "IDX10644: UnwrapKey failed. Algorithm: '{0}'.";
+        // public const string IDX10644 = "IDX10644:";
         public const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
         public const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}', Key: '{1}'), but Create.(algorithm, args) as '{2}' == NULL.";
         public const string IDX10647 = "IDX10647: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}'), but Create.(algorithm, args) as '{1}' == NULL.";
-        public const string IDX10648 = "IDX10648: The SecurityKey provided for AuthenticatedEncryption must be a SymmetricSecurityKey. Type is: '{0}'.";
+        // public const string IDX10648 = "IDX10648:";
         public const string IDX10649 = "IDX10649: Failed to create a SymmetricSignatureProvider for the algorithm '{0}'.";
         public const string IDX10650 = "IDX10650: Failed to verify ciphertext with aad '{0}'; iv '{1}'; and authenticationTag '{2}'.";
-        public const string IDX10651 = "IDX10651: The key length for the algorithm '{0]' cannot be less than '{1}'.";
+        // public const string IDX10651 = "IDX10651:";
         public const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
         public const string IDX10653 = "IDX10653: The encryption algorithm '{0}' requires a key size of at least '{1}' bits. Key '{2}', is of size: '{3}'.";
         public const string IDX10654 = "IDX10654: Decryption failed. Cryptographic operation exception: '{0}'.";
         public const string IDX10655 = "IDX10655: 'length' must be greater than 1: '{0}'";
-        public const string IDX10656 = "IDX10656: 'length' cannot be greater than signature.Length. length: '{0}', signature.Length: '{1}'.";
+        // public const string IDX10656 = "IDX10656:";
         public const string IDX10657 = "IDX10657: The SecurityKey provided for the symmetric key wrap algorithm cannot be converted to byte array. Type is: '{0}'.";
         public const string IDX10658 = "IDX10658: WrapKey failed, exception from cryptographic operation: '{0}'";
         public const string IDX10659 = "IDX10659: UnwrapKey failed, exception from cryptographic operation: '{0}'";
-        public const string IDX10660 = "IDX10660: The Key: '{0}' and algorithm: '{1}' pair are not supported.";
+        // public const string IDX10660 = "IDX10660:";
         public const string IDX10661 = "IDX10661: Unable to create the KeyWrapProvider.\nKeyWrapAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         public const string IDX10662 = "IDX10662: The KeyWrap algorithm '{0}' requires a key size of '{1}' bits. Key '{2}', is of size:'{3}'.";
         public const string IDX10663 = "IDX10663: Failed to create symmetric algorithm with SecurityKey: '{0}', KeyWrapAlgorithm: '{1}'.";
@@ -163,20 +163,20 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10667 = "IDX10667: Unable to obtain required byte array for KeyHashAlgorithm from SecurityKey: '{0}'.";
         public const string IDX10668 = "IDX10668: Unable to create '{0}', algorithm '{1}'; key: '{2}' is not supported.";
         public const string IDX10669 = "IDX10669: Failed to create symmetric algorithm.";
-        public const string IDX10670 = "IDX10670: The lengths of the two byte arrays do not match. The first one has: '{0}' bytes, the second one has: '{1}' bytes.";
-        public const string IDX10671 = "IDX10671: The ECDsa Key: '{0}' must be '{1}' bits. KeySize: '{2}'.";
-        public const string IDX10672 = "IDX10672: GetKeyedHashAlgorithm returned null, key: {0}, algorithm {1}.";
-        public const string IDX10673 = "IDX10673: CryptoProviderFactory.GetHashAlgorithm returned null, factory: {0}, algorithm: {1}.";
+        // public const string IDX10670 = "IDX10670:";
+        // public const string IDX10671 = "IDX10671:";
+        // public const string IDX10672 = "IDX10672:";
+        // public const string IDX10673 = "IDX10673:";
         public const string IDX10674 = "IDX10674: JsonWebKeyConverter does not support SecurityKey of type: {0}";
         public const string IDX10675 = "IDX10675: The byte count of '{0}' must be less than or equal to '{1}', but was {2}.";
-        //public const string IDX10676 = "IDX10676:"
+        // public const string IDX10676 = "IDX10676:";
         public const string IDX10677 = "IDX10677: GetKeyedHashAlgorithm threw, key: {0}, algorithm {1}.";
-        public const string IDX10678 = "IDX10678: Unable to Sign, provider is not available, Algorithm, Key: '{0}', '{1}'.";
+        // public const string IDX10678 = "IDX10678:";
         public const string IDX10679 = "IDX10679: Failed to decompress using algorithm '{0}'.";
         public const string IDX10680 = "IDX10680: Failed to compress using algorithm '{0}'.";
-        public const string IDX10681 = "IDX10681: Unable to create the CompressionProvider.\nAlgorithm: '{0}' is not supported.";
+        // public const string IDX10681 = "IDX10681:";
         public const string IDX10682 = "IDX10682: Compression algorithm '{0}' is not supported.";
-        public const string IDX10683 = "IDX10683: Unable to create a AsymmetricSignatureProvider Algorithm: '{0}', Key: '{1}'.";
+        // public const string IDX10683 = "IDX10683:";
         public const string IDX10684 = "IDX10684: Unable to create a AsymmetricAdapter, Algorithm: '{0}', Key: '{1}'.";
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
@@ -188,14 +188,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
-        public const string IDX10701 = "IDX10701: Invalid JsonWebKey rsa keying material: '{0}'. Both modulus and exponent should be present";
-        public const string IDX10702 = "IDX10702: One or more private RSA key parts are null in the JsonWebKey: '{0}'";
+        // public const string IDX10701 = "IDX10701:";
+        // public const string IDX10702 = "IDX10702:";
         public const string IDX10703 = "IDX10703: Cannot create symmetric security key. Key length is zero.";
 
         // Json specific errors
         public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
         public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
-        public const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
+        // public const string IDX10804 = "IDX10804:";
         public const string IDX10805 = "IDX10805: Error deserializing json: '{0}' into '{1}'.";
         public const string IDX10806 = "IDX10806: Deserializing json: '{0}' into '{1}'.";
 #pragma warning restore 1591
