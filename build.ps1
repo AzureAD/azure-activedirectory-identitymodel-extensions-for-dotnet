@@ -5,7 +5,8 @@ param(
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
-    [string]$slnFile="wilson.sln")
+    [string]$slnFile="wilson.sln",
+    [switch]$generateContractAssemblies)
 
 ################################################# Functions ############################################################
 
@@ -43,6 +44,12 @@ function CreateArtifactsRoot($folder)
     RemoveFolder($folder)
     Write-Host ">>> mkdir $folder | Out-Null"
     mkdir $folder | Out-Null
+}
+
+function GenerateContractAssemblies()
+{
+	# execute generateContractAssemblies script
+	& "$PSScriptRoot\generateContractAssemblies.ps1".
 }
 
 ################################################# Functions ############################################################
@@ -102,8 +109,20 @@ Write-Host ""
 Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType $slnFile"
+
+if($p.ExitCode -ne 0)
+{
+	throw "Build failed."
+}
 popd
+
+if ($generateContractAssemblies.IsPresent)
+{
+	WriteSectionHeader("Generating Contract Assemblies");
+	GenerateContractAssemblies;
+	WriteSectionFooter("End Generating Contract Assemblies");
+}
 
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
