@@ -43,7 +43,7 @@ Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
 $nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 if ( $packageType -eq "release")
 {
-    $versionSuffix = ""
+    $versionSuffix = "internal"
 }
 else
 {
@@ -63,12 +63,26 @@ foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project")
 {
     $name = $project.name
     $assemblyInfoPath = "$root\src\$name\properties\AssemblyInfo.cs"
+    Write-Host "name: " $name
     Write-Host "assemblyInfoPath: " $assemblyInfoPath
 
     $assemblyInfo = Get-Content $assemblyInfoPath
     $assemblyInfo = $assemblyInfo -replace "AssemblyVersion(.*)", "AssemblyVersion(""$assemblyVersion"")]"
     $assemblyInfo = $assemblyInfo -replace "AssemblyFileVersion(.*)", "AssemblyFileVersion(""$assemblyFileVersion"")]"
-    $assemblyInfo = $assemblyInfo -replace "AssemblyInformationalVersion(.*)", "AssemblyInformationalVersion(""$assemblyInformationalVersion"")]"
+
+    # put special marker into M.IM.P.OpenIdConnect so we can identify
+    if ($name -eq "Microsoft.IdentityModel.Protocols.OpenIdConnect")
+    {
+       $infoVersion = $assemblyInformationalVersion + "-i"
+       $assemblyInfo = $assemblyInfo -replace "AssemblyInformationalVersion(.*)", "AssemblyInformationalVersion(""$infoVersion"")]"
+       Write-Host "AssemblyInformationalVersion: " $infoVersion
+    }
+    else
+    {
+	    $assemblyInfo = $assemblyInfo -replace "AssemblyInformationalVersion(.*)","AssemblyInformationalVersion(""$assemblyInformationalVersion"") ]"
+        Write-Host "AssemblyInformationalVersion: " $assemblyInformationalVersion
+    }
+
     Set-Content $assemblyInfoPath $assemblyInfo
 }
 
