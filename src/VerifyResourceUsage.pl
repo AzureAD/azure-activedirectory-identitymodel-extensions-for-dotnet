@@ -1,13 +1,13 @@
-#!/usr/bin/perl
 ######################################################################
-# verify_resource_usage.pl
+# VerifyResourceUsage.pl
 ######################################################################
-# run like this:
+# Run like this:
 #    perl VerifyResourceUsage.pl
-# to discover 
+# To discover 
 #    1) what LogMessages.cs strings are unused
 #    2) whether any of the string IDs and string value prefixes don't match
 #    3) whether any LogMessages.cs files contain duplicate IDs
+#    4) whether any commented out IDs have been accidentally reused
 
 use strict;
 use strict 'subs';
@@ -18,15 +18,12 @@ use Data::Dumper;
 use File::Find;
 use File::Basename;
 
-# TODO the script doesn't know about comments and #if, so it can have false-positives on commented-out code...
-
-my $PERF_DEBUG = (1==0); # print debug info to screen, so a human watching output in real time can see where time spent
+my $PERF_DEBUG = (1==0); # print debug info to screen
 my $ERRORS_ONLY_MODE = (1==0);  # only print serious errors
-my $THERE_ARE_ERRORS = (1==0);
-# prefix strings so build won't filter messages
-my $ERROR = "verify_resource_usage.pl(): error";
-my $WARN = "verify_resource_usage.pl(): warning";
-my $TELL = "BUILDMSG:";
+
+# prefix strings
+my $ERROR = "VerifyResourceUsage.pl: error";
+my $WARN = "VerifyResourceUsage.pl: warning";
 my $EXITCODE = 0;
 
 my $CROP_FILE_PATH_AT = "src";
@@ -39,7 +36,6 @@ sub PrintError($)
     if ($ERRORS_ONLY_MODE)
     {
         print "$ERROR $s";
-        $THERE_ARE_ERRORS = 1;
     }
     else
     {
@@ -95,7 +91,7 @@ sub PrintPerf($)
 
 my $FORMAT_STR_ARG = qr/
                         (?<!{)         # not preceded by {
-                        \{              # {
+                        \{             # {
                         (\d+)          # arg# SAVED IN $1
                         (?:,-?\d+)?    # optional alignment (signed integer)
                         (?::[^}]*)?    # optional formatString
@@ -112,9 +108,9 @@ sub CountArgs($$)
         while ($formatStr =~ /$FORMAT_STR_ARG/g)
         {
             my $argNum = $1;
-#print "argNum=$argNum\n";
             $argNums{$argNum} = 1;
         }
+
         my @argNums = sort keys %argNums;
         my $numArgs = scalar(@argNums);
         if ($argNums[-1] != ($numArgs-1))
@@ -122,64 +118,13 @@ sub CountArgs($$)
             PrintError("\n");
             PrintError("$id doesn't use arguments properly: $formatStr\n");
         }
-#print "$id has $numArgs\n";
+
         return $numArgs;
     }
     else
     {
-#print "$id has 0\n";
         return 0;
     }
-}
-
-######################################################################
-
-sub CountActualArgs($)
-{
-    my $args = shift;
-    my $origArgs = $args;
-    return 0 if $args =~ /^\s*\)/;
-    my $count = 1;   # there's at least one arg
-    my $depth = 0;
-    for(;;)
-    {
-        $args =~ s/^[^(),]*(.)//;  # strip off chars we don't care about
-        my $interestingChar = $1;
-        if ($interestingChar eq "(")
-        {
-            $depth++;
-        }
-        elsif ($interestingChar eq ")")
-        {
-            return $count if ($depth == 0);
-            $depth--;
-        }
-        elsif ($interestingChar eq ",")
-        {
-            $count++ if ($depth == 0);   # each time we see a ',' at the top level, there's one more arg
-        }
-        else
-        {
-            print "\nuh oh, about to die, input was '$origArgs'\n";
-            die "you can never get here";
-        }
-    }
-}
-
-sub PrintBadArgCount($$$$$$)
-{
-    my $fileName = shift;
-    my $id = shift;
-    my $numArgsExpected = shift;
-    my $numArgsFound = shift;
-    my $getstringCall = shift;
-    my $resource = shift;
-    PrintError("\n");
-    PrintError("\n");
-    PrintError("In file $fileName,\n");
-    PrintError("    GetString call with $id has wrong # of args (expected $numArgsExpected, found $numArgsFound)\n");
-    PrintError("Here is the call: $getstringCall\n");
-    PrintError("And by the way, $id=\"$resource\"\n");
 }
 
 sub VerifyNumBraces($$)
@@ -194,7 +139,7 @@ sub VerifyNumBraces($$)
         } elsif ($char eq "}") {
             if (@braces == 0) {
                 PrintError("The following format string has mismatching braces.\n");
-                PrintError("$id =$formatString\n");
+                PrintError("$id =$formatString\n\n");
                 return;
             } else {
                 pop @braces
@@ -204,45 +149,30 @@ sub VerifyNumBraces($$)
 
     if (@braces != 0) {
           PrintError("The following format string has mismatching braces.\n");
-          PrintError("$id = $formatString\n");
-    }
-}
-
-######################################################################
-
-sub EnsureArgCountCorrect($$$$$$)
-{
-    my $prefix = shift;
-    my $getstringCall = shift;
-    my $numArgsExpected = shift;
-    my $id = shift;
-    my $fileName = shift;
-    my $resource = shift;
-
-#print "\nID = $id  GSC = $getstringCall\n";
-    $getstringCall =~ /$prefix$id\s*,?((?:.|\n)*)/;
-    my $restArgs = $1;
-    my $count = CountActualArgs($restArgs);
-#print "\n$count in $restArgs\n";
-    if ($numArgsExpected != $count)
-    {
-        PrintBadArgCount($fileName, $id, $numArgsExpected, $count, $getstringCall, $resource);
+          PrintError("$id = $formatString\n\n");
     }
 }
 
 ######################################################################
 # Main 
 
-#get all the directories that we need to check LogMessages.cs for
-my $dir = getcwd;
-
-# will store the file names for each directory
+# stores the file names for each directory
 my @filenames;
 
-# will store the ids for each directory
+# stores the log message ids for each directory
 my %dirhash;
 
+# stores all directories that contain a LogMessages.cs file
 my @directories;
+
+# stores all used log message ids across every directory
+my %allids; 
+
+# stores commented out log message ids
+my %commentedids;
+
+# get all the directories that we need to check LogMessages.cs for
+my $dir = getcwd;
 
 sub FindDirs {
     my $file = $_;
@@ -256,59 +186,33 @@ sub FindDirs {
 
 find(\&FindDirs, $dir);
 
+# first we need to go through each directory and find all log message ids
 foreach my $directory (@directories) 
 {
     my $resources_txt = $directory . "/LogMessages.cs";
-    PrintPerf("\nPERF: starting script\n");
-    PrintPerf("\nPERF: Analyzing file: $resources_txt\n");
 
-    Print("$resources_txt\n\n");
     open(RES, "< $resources_txt") or die "can't open $resources_txt: $!";
-
-    my %ids;   # key is identifier, value is a tuple: [# references in code, number of formatString args, the resource string itself]
-
-    PrintPerf("\nPERF: reading resources\n");
 
     while (<RES>)
     {
         next if /^;/;    # lines starting with ';' are comments
         next if /^#/;    # lines starting with '#' are comments
-        next if /\/\//;  # lines starting with '//' are comments
-        next if not /internal const string (\w*?)\s*=(.*)/;   
-        my $id = $1;     # identifier is everything up to '='
-        my $value = $2;  # rest is actual resource string value
+        next if not /(\/\/)?\s*(internal|public) const string (\w*?)\s*=(.*)/;
+        my $comment = $1; # whether or not this log message has been commented out   
+        my $scope = $2; # whether the identifier is public or internal
+        my $id = $3;     # identifier is everything up to '='
+        my $value = $4;  # rest is actual resource string value
 
-        my $numArgs = CountArgs($id, $value);
-        VerifyNumBraces($id, $value);
-        $ids{$id} = [0,$numArgs,$value];
-        # go through each directory that we've processed so far
-        foreach my $directory2 (keys(%dirhash))
+        if ($comment eq "") # the id is not commented out
         {
-            # checking for duplicate ids in the same directory is unnecessary
-            if (not $directory eq $directory2) {
-                if (grep {$_ eq $id} @{$dirhash{$directory2}}) 
-                {
-                    PrintError("\nSame id ($id) is reused in the LogMessages.cs file of both: \n $directory \n and \n $directory2 \n \n");  
-                } 
-            }
+            $dirhash{$directory}{$id} = [0, $value];
+        } 
+        else {
+            $commentedids{$id} = 1;
         }
-        push @{$dirhash{$directory}}, $id;
+        
     }
-
-    PrintPerf("\nPERF: checking string id values\n");
-    foreach my $id (keys(%ids))
-        {
-            my $length = length($id); # get length of the id
-            my $stringvalue = substr ($ids{$id}[2], 2); # remove quote char at start of string
-            my $stringid = substr($stringvalue, 0, $length); # get prefix of string value
-            if (not $id eq $stringid) 
-            {
-                PrintError("string name ($id) is not the same as it's value: $stringid \n \n");
-            }
-            
-        }
-
-    PrintPerf("\nPERF: done reading resources\n");
+    
     close(RES) or die "can't close $resources_txt: $!";
 
     PrintPerf("\nPERF: Open Files\n");
@@ -324,9 +228,9 @@ foreach my $directory (@directories)
         }
     }
 
+    # find all the files in the current directory
     find(\&FindFilenames, $directory);
 
-    PrintPerf("\nPERF: reading and processing source files\n");
     foreach my $file (@filenames)
     {
         $file =~ /$CROP_FILE_PATH_AT(.*)/;
@@ -341,45 +245,87 @@ foreach my $directory (@directories)
         }
         close(FIL) or die "can't close $file: $!";
 
-        # find all call sites and EnsureArgCountCorrect
+        # find all call sites
         my $rest = $filestring;
 
         while ($rest =~ /LogMessages\.(\w+)/g)
         {   
             my $id = $1;
 
-            if (defined $ids{$id})   # sometimes there will be commented-out code with LogMessages.ThisIDDoesntExistAnymore
+            if (defined $allids{$id})
             {
-                $ids{$id}[0]++;   # increment number-references-to-this-id
+                $allids{$id}++;   # increment the number of references to this id
+            }
+            else
+            {
+                $allids{$id} = 1;
             }
         }
     }
-
     PrintPerf("\nPERF: done reading and processing source files\n");
-    {
-        PrintPerf("\nDone processing files\n");
+}
 
-        my $numUnreferencedIds = 0;
-        foreach my $id (keys(%ids))
+# go through all the directories again to discover unused, mismatching, and/or duplicate log message ids
+foreach my $directory (keys(%dirhash)) 
+{
+    my $resources_txt = $directory . "/LogMessages.cs";
+    PrintPerf("\nPERF: starting script\n");
+    PrintPerf("\nPERF: Analyzing file: $resources_txt\n");
+
+    Print("$resources_txt\n\n");
+    PrintPerf("\nPERF: reading resources\n");
+    
+    PrintPerf("\nPERF: checking string id values\n");
+
+    # go through all log ids in this directory
+    foreach my $id(keys %{ $dirhash{$directory} }) 
+    {
+        # if we found a commented out log message with the same id
+        if (defined($commentedids{$id}))
         {
-            my $n = $ids{$id}[0];
-            if ($n == 0)
-            {
-                PrintError("$id was referenced in $n files\n");
-                $numUnreferencedIds++;
-            }
+            PrintError("\nSame id ($id) is reused. \n\n");  
         }
-        Print("\n$numUnreferencedIds identifiers were unreferenced\n\n");
+        
+        # go through each directory that we've processed so far and check for duplicates and reused log messages
+        foreach my $directory2 (keys(%dirhash))
+        {
+            if (grep {$_ eq $id} keys %{ $dirhash{$directory2}} ) 
+            {
+                if (not $directory eq $directory2) 
+                {
+                    PrintError("\nSame id ($id) is reused in the LogMessages.cs file of both: \n $directory \n and \n $directory2 \n \n");  
+                }
+            } 
+        } 
+
+        CountArgs($id, $dirhash{$directory}{$id}[1]);
+        VerifyNumBraces($id, $dirhash{$directory}{$id}[1]);
+        my $length = length($id); # get length of the log message id
+        my $stringvalue = substr ($dirhash{$directory}{$id}[1], 2); # remove quote char at start of string
+        my $stringid = substr($stringvalue, 0, $length); # get prefix of string value
+        if (not $id eq $stringid) 
+        {
+            PrintError("string name ($id) is not the same as it's value: $stringid \n \n");
+        } 
+
     }
 
-    if ($ERRORS_ONLY_MODE and $THERE_ARE_ERRORS)
-    {
-        PrintError("\n");
-        PrintError("There were errors checking ProperUsage of resources.txt!\n");
-        PrintError("You must fix the above errors before you can build.\n");
-        PrintError("See ndp\\indigo\\tools\\Resources\\ProperUsage\\README.txt for details if you need help.\n");
-        exit 1;
+    PrintPerf("\nPERF: done reading resources\n");
+
+    PrintPerf("\nDone processing files\n");
+
+    my $numUnreferencedIds = 0;
+    foreach my $id(sort keys %{ $dirhash{$directory} }) 
+    { 
+        # if the log message id has not been referenced anywhere
+        if (not defined($allids{$id}))
+        {
+            PrintError("$id was referenced in 0 files\n");
+            $numUnreferencedIds++;
+        }
     }
+        
+    Print("\n$numUnreferencedIds identifiers were unreferenced\n\n");
 
     Print("--------------\n\n");
 }
