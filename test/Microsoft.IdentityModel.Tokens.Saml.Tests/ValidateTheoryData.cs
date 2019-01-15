@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests

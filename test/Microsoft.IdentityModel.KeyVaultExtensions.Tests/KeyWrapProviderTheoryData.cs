@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 
 namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
 {

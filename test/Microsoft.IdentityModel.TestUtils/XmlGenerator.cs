@@ -32,7 +32,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class XmlEement
     {

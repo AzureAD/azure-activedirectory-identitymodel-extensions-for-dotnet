@@ -28,7 +28,7 @@
 using System;
 using System.Linq;
 using Microsoft.Azure.KeyVault;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.KeyVaultExtensions;
 using Xunit;

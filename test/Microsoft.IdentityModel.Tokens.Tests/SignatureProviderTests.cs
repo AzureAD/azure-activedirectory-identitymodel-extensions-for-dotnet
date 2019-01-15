@@ -30,12 +30,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
-using EE = Microsoft.IdentityModel.Tests.ExpectedException;
-using KEY = Microsoft.IdentityModel.Tests.KeyingMaterial;
+using EE = Microsoft.IdentityModel.TestUtils.ExpectedException;
+using KEY = Microsoft.IdentityModel.TestUtils.KeyingMaterial;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 

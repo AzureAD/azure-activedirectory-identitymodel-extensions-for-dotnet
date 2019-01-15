@@ -21,7 +21,7 @@
     <test>
       <project name="CrossVersionTokenValidation.Tests" test="yes"/>
       <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
-      <project name="Microsoft.IdentityModel.Tests" test="no" />
+      <project name="Microsoft.IdentityModel.TestUtils" test="no" />
       <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.JsonWebTokens.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />

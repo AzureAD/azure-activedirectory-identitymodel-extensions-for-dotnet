@@ -26,32 +26,17 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
-    /// Set defaults for TheoryData
+    /// Throw this exception instead of Assert(false, ...) so we know we threw it.
     /// </summary>
-    public class TheoryDataBase
+    public class TestException : Exception
     {
-        public TheoryDataBase()
+        public TestException(string message)
+            : base(message)
         {
-            IdentityModelEventSource.ShowPII = true;
-        }
-
-        public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
-
-        public bool First { get; set; } = false;
-
-        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; }
-
-        public string TestId { get; set; }
-
-        public override string ToString()
-        {
-            return $"{TestId}, {ExpectedException}";
         }
     }
 }

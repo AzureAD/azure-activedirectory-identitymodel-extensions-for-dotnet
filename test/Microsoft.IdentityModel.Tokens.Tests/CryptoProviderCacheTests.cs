@@ -26,11 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
-using EE = Microsoft.IdentityModel.Tests.ExpectedException;
+using EE = Microsoft.IdentityModel.TestUtils.ExpectedException;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 

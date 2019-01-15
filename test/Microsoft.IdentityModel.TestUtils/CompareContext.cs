@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class CompareContext
     {

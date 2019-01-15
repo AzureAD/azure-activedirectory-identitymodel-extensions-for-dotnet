@@ -32,7 +32,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// When a test case throws an exception, this class helps to determine if the exception is as expected.
