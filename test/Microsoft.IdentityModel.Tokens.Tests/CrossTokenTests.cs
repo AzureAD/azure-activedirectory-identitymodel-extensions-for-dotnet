@@ -31,7 +31,7 @@ using System.IdentityModel.Tokens.Jwt;
 #else
 using Microsoft.IdentityModel.Tokens.Jwt;
 #endif
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;

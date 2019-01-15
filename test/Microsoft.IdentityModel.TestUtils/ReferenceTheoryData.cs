@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens.Jwt;
 
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class TestTheoryData
     {

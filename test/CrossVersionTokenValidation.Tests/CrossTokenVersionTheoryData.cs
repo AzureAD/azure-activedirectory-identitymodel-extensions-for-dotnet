@@ -27,7 +27,7 @@
 
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Tokens.Saml;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 
 using SecurityTokenDescriptor4x = System.IdentityModel.Tokens.SecurityTokenDescriptor;

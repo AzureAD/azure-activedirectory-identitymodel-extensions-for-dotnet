@@ -36,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Main purpose of this code is to serve up ValidationDelegates for TokenValidatationParameters

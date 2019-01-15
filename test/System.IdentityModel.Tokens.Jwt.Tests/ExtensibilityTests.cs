@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 // since we are in the System ns, we need to map to M.IM.Tokens

@@ -29,7 +29,7 @@ using Microsoft.Azure.KeyVault.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.KeyVaultExtensions;
 using Microsoft.IdentityModel.KeyVaultExtensions.Tests;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using System;
 using System.Reflection;
 using Xunit;

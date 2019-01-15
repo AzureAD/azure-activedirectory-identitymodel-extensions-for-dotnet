@@ -32,7 +32,7 @@ using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public static class ReferenceMetadata
     {

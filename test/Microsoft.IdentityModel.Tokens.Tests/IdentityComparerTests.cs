@@ -45,7 +45,7 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using ClaimProperties = Microsoft.IdentityModel.Tokens.Saml.ClaimProperties;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class IdentityComparerTests
     {

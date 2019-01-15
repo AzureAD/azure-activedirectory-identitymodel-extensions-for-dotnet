@@ -33,7 +33,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens.Jwt;
 #endif
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

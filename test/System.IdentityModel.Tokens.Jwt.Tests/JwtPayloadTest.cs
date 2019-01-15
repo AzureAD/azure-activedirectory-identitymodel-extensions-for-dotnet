@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

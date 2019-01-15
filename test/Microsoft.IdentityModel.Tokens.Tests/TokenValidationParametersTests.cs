@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests

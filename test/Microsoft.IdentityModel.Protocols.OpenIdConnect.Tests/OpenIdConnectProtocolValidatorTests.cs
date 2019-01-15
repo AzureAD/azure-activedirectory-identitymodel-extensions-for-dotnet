@@ -37,7 +37,7 @@ using Microsoft.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Xunit;

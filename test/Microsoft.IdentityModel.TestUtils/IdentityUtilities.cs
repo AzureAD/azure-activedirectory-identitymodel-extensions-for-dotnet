@@ -43,7 +43,7 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Tokens.Saml;
 #endif
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Main purpose of this code is to serve up Identities

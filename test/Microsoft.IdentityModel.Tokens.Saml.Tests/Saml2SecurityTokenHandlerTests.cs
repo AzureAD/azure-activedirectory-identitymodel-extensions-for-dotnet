@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Xunit;

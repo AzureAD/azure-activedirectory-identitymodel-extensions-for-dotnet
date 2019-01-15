@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant

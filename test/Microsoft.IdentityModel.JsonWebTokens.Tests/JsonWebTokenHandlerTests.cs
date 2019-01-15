@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;

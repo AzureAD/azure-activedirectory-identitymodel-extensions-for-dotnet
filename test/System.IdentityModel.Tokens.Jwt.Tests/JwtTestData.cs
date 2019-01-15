@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
 

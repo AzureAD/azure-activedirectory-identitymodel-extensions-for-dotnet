@@ -52,7 +52,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Xml
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Xml.Tests", "test\Microsoft.IdentityModel.Xml.Tests\Microsoft.IdentityModel.Xml.Tests.csproj", "{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tests", "test\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.csproj", "{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.TestUtils", "test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj", "{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Logging", "src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj", "{E4E6D0ED-12CB-4C01-A4C1-4F60D10E2304}"
 EndProject

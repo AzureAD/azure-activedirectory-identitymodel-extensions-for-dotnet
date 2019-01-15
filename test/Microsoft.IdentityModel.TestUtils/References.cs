@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     // https://tools.ietf.org/html/rfc7518#appendix-A.3
     // B.1.  Test Cases for AES_128_CBC_HMAC_SHA_256

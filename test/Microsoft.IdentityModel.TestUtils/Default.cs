@@ -44,7 +44,7 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Returns default token creation / validation artifacts:

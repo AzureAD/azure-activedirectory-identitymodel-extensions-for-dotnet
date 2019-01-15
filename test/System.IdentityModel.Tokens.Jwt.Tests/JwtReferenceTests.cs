@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Text;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
