@@ -611,6 +611,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
+#pragma warning disable 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
             if (tokenDescriptor.Subject == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor.Subject));
 
@@ -635,6 +636,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (tokenDescriptor.Subject.Actor != null)
                 attributes.Add(CreateAttribute(new Claim(ClaimTypes.Actor, CreateActorString(tokenDescriptor.Subject.Actor), ClaimValueTypes.String)));
+#pragma warning restore 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
 
             return new Saml2AttributeStatement(ConsolidateAttributes(attributes));
         }
@@ -829,10 +831,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             string nameIdentifierSpProviderId = null;
             string nameIdentifierSpNameQualifier = null;
 
+#pragma warning disable 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
             if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Claims != null)
             {
                 foreach (var claim in tokenDescriptor.Subject.Claims)
                 {
+#pragma warning restore 0618 // 'SecurityTokenDescriptor.Subject' is obsolete.
                     if (claim.Type == ClaimTypes.NameIdentifier)
                     {
                         // Do not allow multiple name identifier claim.

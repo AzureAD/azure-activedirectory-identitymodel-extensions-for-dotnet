@@ -25,16 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Newtonsoft.Json.Linq;
 using System;
 #if System
 using System.IdentityModel.Tokens.Jwt;
 #else
 using Microsoft.IdentityModel.Tokens.Jwt;
 #endif
+using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -307,7 +308,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }.ToString()
+                        }.ToString(Formatting.None)
                     },
                     // Dates as longs
                     new ParseTimeValuesTheoryData
@@ -321,13 +322,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore)},
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) }
-                        }.ToString(),
+                        }.ToString(Formatting.None),
                         Header = new JObject
                         {
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }.ToString()
+                        }.ToString(Formatting.None)
                     },
                     // Dates as integers
                     new ParseTimeValuesTheoryData
@@ -341,13 +342,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Nbf, (float) EpochTime.GetIntDate(Default.NotBefore)},
                             { JwtRegisteredClaimNames.Exp, (float) EpochTime.GetIntDate(Default.Expires) }
-                        }.ToString(),
+                        }.ToString(Formatting.None),
                         Header = new JObject
                         {
                             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Sha512  },
                             { JwtHeaderParameterNames.Kid, Default.AsymmetricSigningKey.KeyId },
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                        }.ToString()
+                        }.ToString(Formatting.None)
                     },
                 };
             }

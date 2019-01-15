@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -39,6 +40,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the value of the 'audience' claim.
         /// </summary>
         public string Audience { get; set; }
+
+        /// <summary>
+        /// Defines the compression algorithm that will be used to compress the JWT token payload.
+        /// </summary>
+        public string CompressionAlgorithm { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EncryptingCredentials"/> used to create a encrypted security token.
@@ -66,6 +72,11 @@ namespace Microsoft.IdentityModel.Tokens
         public DateTime? NotBefore { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which represents the claims that will be used when creating a security token.
+        /// </summary>
+        public IDictionary<string, object> Claims { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used to create a security token.
         /// </summary>
         public SigningCredentials SigningCredentials { get; set; }
@@ -73,6 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="ClaimsIdentity"/>.
         /// </summary>
+        [Obsolete("SecurityTokenDescriptor.Subject is obsolete, please use SecurityTokenDescriptor.Payload instead.")]
         public ClaimsIdentity Subject { get; set; }
     }
 }

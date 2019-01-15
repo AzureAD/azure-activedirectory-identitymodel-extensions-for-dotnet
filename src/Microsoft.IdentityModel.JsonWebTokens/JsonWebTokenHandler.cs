@@ -25,14 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -118,6 +120,70 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Creates a JWS(Json Web Signature).
+        /// </summary>
+        /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <returns>A JWS in Compact Serialization Format.</returns>
+        public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
+        {
+            if (tokenDescriptor == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
+
+            if (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any())
+                LogHelper.LogWarning(LogMessages.IDX14114);
+
+            if (tokenDescriptor.SigningCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor.SigningCredentials));
+
+            var payload = tokenDescriptor.Claims == null ? new Dictionary<string, object>() : new Dictionary<string, object>(tokenDescriptor.Claims);
+
+            if (tokenDescriptor.Audience != null)
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Audience)));
+
+                payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
+            }
+
+            if (tokenDescriptor.Expires.HasValue)
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Exp))
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Expires)));
+
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(tokenDescriptor.Expires.Value).ToString();
+            }
+
+            if (tokenDescriptor.Issuer != null)
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Iss))
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Issuer)));
+
+                payload[JwtRegisteredClaimNames.Iss] = tokenDescriptor.Issuer;
+            }
+
+            if (tokenDescriptor.IssuedAt.HasValue)
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Iat))
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.IssuedAt)));
+
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(tokenDescriptor.IssuedAt.Value).ToString();
+            }
+
+            if (tokenDescriptor.NotBefore.HasValue)
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Nbf))
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.NotBefore)));
+
+                payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value).ToString();
+            }
+
+            if (!payload.Any())
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14115));
+
+            return CreateTokenPrivate(JObject.FromObject(payload), tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
+        }
+
+        /// <summary>
         /// Creates a JWE (Json Web Encryption).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
@@ -174,7 +240,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
                 };
 
-                rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Newtonsoft.Json.Formatting.None)));
+                rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                 JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
             }
 
@@ -191,7 +257,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     payload.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(now).ToString());
             }
        
-            var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload.ToString(Newtonsoft.Json.Formatting.None)));
+            var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload.ToString(Formatting.None)));
             var message = rawHeader + "." + rawPayload;
             var rawSignature = JwtTokenUtilities.CreateEncodedSignature(message, signingCredentials);
 
