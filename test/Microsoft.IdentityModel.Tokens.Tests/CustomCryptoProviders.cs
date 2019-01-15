@@ -36,7 +36,7 @@ using Microsoft.IdentityModel.Tokens;
 /// Derived types to simplify testing.
 /// Helpful when throwing
 /// </summary>
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public class CustomCryptoProvider : ICryptoProvider
     {

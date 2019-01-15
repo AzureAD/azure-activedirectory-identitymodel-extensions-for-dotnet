@@ -31,7 +31,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.Extensions.OldVersion;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Xunit;

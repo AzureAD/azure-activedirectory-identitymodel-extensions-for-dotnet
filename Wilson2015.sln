@@ -49,7 +49,7 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Xml
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Xml.Tests", "test\Microsoft.IdentityModel.Xml.Tests\Microsoft.IdentityModel.Xml.Tests.xproj", "{BDB0A526-FA17-44CF-80D6-4A64F7E6CD7E}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.Tests", "test\Microsoft.IdentityModel.Tests\Microsoft.IdentityModel.Tests.xproj", "{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.IdentityModel.TestUtils", "test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.xproj", "{3C338E2D-C1D8-4517-8C52-A86A9F0C8281}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

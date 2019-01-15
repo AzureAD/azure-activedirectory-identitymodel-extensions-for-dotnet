@@ -28,7 +28,7 @@
 using System;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 
-namespace Microsoft.IdentityModel.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     public static class ReferenceXml
     {

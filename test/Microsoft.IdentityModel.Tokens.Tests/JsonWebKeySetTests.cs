@@ -27,7 +27,7 @@
 
 using System;
 using System.IO;
-using Microsoft.IdentityModel.Tests;
+using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
 
