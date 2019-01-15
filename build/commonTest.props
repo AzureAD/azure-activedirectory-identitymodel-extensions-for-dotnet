@@ -15,7 +15,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework' AND '$(OutputType)'=='library'">
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
   </ItemGroup>
 
