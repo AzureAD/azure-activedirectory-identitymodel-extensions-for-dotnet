@@ -2,8 +2,7 @@
   <Import Project="apiCompat.props" />
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
-  <Import Project="version.props" Condition="!Exists('dynamicVersion.props')" />
-  <Import Project="dynamicVersion.props" Condition="Exists('dynamicVersion.props')" />
+  <Import Project="version.props" />
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -18,7 +17,7 @@
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageLicense>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/LICENSE.txt</PackageLicense>
     <SignAssembly>true</SignAssembly>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
