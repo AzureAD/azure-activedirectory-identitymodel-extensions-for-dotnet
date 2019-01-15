@@ -25,9 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -39,8 +36,11 @@ using Microsoft.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens.Jwt.Tests;
 #endif
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
-using System.Text;
+using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -86,8 +86,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 theoryData.JwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
                 var validationResult = theoryData.JsonWebTokenHandler.ValidateToken(jweFromJsonHandler, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(validationResult.IsValid, theoryData.IsValid, context);
                 var validatedTokenFromJsonHandler = validationResult.SecurityToken;
                 var validationResult2 = theoryData.JsonWebTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(validationResult.IsValid, theoryData.IsValid, context);
                 IdentityComparer.AreEqual((validatedTokenFromJwtHandler as JwtSecurityToken).Claims, (validatedTokenFromJsonHandler as JsonWebToken).Claims, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -97,6 +99,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
 
                 IdentityComparer.AreEqual(validationResult2.SecurityToken as JsonWebToken, validationResult.SecurityToken as JsonWebToken, context);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
@@ -156,12 +159,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 string jwsFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
 
                 theoryData.JwtSecurityTokenHandler.ValidateToken(jwsFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedToken);
-                theoryData.JsonWebTokenHandler.ValidateToken(jwsFromJsonHandler, theoryData.ValidationParameters);
+                var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateToken(jwsFromJsonHandler, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
                 var jwsTokenFromJwtHandler = new JsonWebToken(jwsFromJwtHandler);
                 var jwsTokenFromHandler = new JsonWebToken(jwsFromJsonHandler);
                 IdentityComparer.AreEqual(jwsTokenFromJwtHandler, jwsTokenFromHandler, context);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
@@ -238,11 +243,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.RoundTripJWE", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
-            var jweCreatedInMemoryToken = new JsonWebToken(jweCreatedInMemory);
             try
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
                 var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
@@ -255,23 +261,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, theoryData.TestId);
 
-                context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-                {
-                    { typeof(JsonWebToken), new List<string> { "EncodedToken" } },
-                };
-
-                if (!IdentityComparer.AreEqual(jweCreatedInMemoryToken.Payload, outerToken.Payload, context))
-                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
-
-                if (!IdentityComparer.AreEqual(jweCreatedInMemoryToken.Payload, outerToken.InnerToken.Payload, context))
-                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.InnerToken.Payload");
-
-                TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWE: "), context.Diffs);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<CreateTokenTheoryData> RoundTripJWEDirectEncryptionTheoryData
@@ -292,6 +289,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId =  "SigningKey-Not-Found",
+                        IsValid = false,
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = NotDefault.SymmetricSigningKey256,
@@ -305,6 +303,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData()
                     {
                         TestId = "EncryptionKey-Not-Found",
+                        IsValid = false,
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = Default.SymmetricSigningKey256,
@@ -326,11 +325,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.RoundTripJWE", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
-            var jweCreatedInMemoryToken = new JsonWebToken(jweCreatedInMemory);
             try
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
                 var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
@@ -343,23 +343,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
                 TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, theoryData.TestId);
 
-                context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-                {
-                    { typeof(JsonWebToken), new List<string> { "EncodedToken" } },
-                };
-
-                if (!IdentityComparer.AreEqual(jweCreatedInMemoryToken.Payload, outerToken.Payload, context))
-                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.Payload");
-
-                if (!IdentityComparer.AreEqual(jweCreatedInMemoryToken.Payload, outerToken.InnerToken.Payload, context))
-                    context.Diffs.Add("jweCreatedInMemory.Payload != jweValidated.InnerToken.Payload");
-
-                TestUtilities.AssertFailIfErrors(string.Format(CultureInfo.InvariantCulture, "RoundTripJWE: "), context.Diffs);
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<CreateTokenTheoryData> RoundTripJWEKeyWrappingTheoryData
@@ -530,7 +521,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var jwtToken = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
                 var validationResult = handler.ValidateToken(jwtToken, theoryData.ValidationParameters);
 
-                IdentityComparer.AreEqual(theoryData.Payload, (validationResult.SecurityToken as JsonWebToken).Payload, context);
+                IdentityComparer.AreEqual(theoryData.Payload, (validationResult.SecurityToken as JsonWebToken).InnerToken.Payload.ToString(), context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -538,6 +529,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<CreateTokenTheoryData> JWECompressionTheoryData
@@ -626,14 +619,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var validationResult = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters);
                 var validatedToken = validationResult.SecurityToken as JsonWebToken;
 
-                Assert.NotEmpty(validatedToken.Claims);
-
-                theoryData.ExpectedException.ProcessNoException(context);
+                if (validationResult.IsValid)
+                {
+                    if (!validatedToken.Claims.Any())
+                        context.Diffs.Add("validatedToken.Claims is empty");
+                }
+                else
+                {
+                    theoryData.ExpectedException.ProcessException(validationResult.Exception, context);
+                }
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<JWEDecompressionTheoryData> JWEDecompressionTheoryData()
@@ -690,7 +691,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 new JWEDecompressionTheoryData
                 {
                     ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                    JWECompressionString = ReferenceTokens.JWEInvalidCompressionTokenWithDEF,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
                     CompressionProviderFactory = compressionProviderFactoryForCustom2,
                     TestId = "CustomCompressionProviderFails",
                     ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidOperationException))
@@ -708,6 +709,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public CompressionProviderFactory CompressionProviderFactory { get; set; }
 
         public EncryptingCredentials EncryptingCredentials { get; set; }
+
+        public bool IsValid { get; set; } = true;
 
         public SigningCredentials SigningCredentials { get; set; }
 
