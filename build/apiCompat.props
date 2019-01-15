@@ -1,0 +1,28 @@
+<Project>
+	<PropertyGroup>
+		<RunApiCompat>true</RunApiCompat>
+		<RunApiCompatForSrc>true</RunApiCompatForSrc>
+		<RunMatchingRefApiCompat>false</RunMatchingRefApiCompat>
+		<ApiCompatEnforceOptionalRules>true</ApiCompatEnforceOptionalRules>
+		<ApiCompatBaseline>$(SolutionDir)Tools\apiCompat\baseline\ApiCompatBaseline.$(TargetFramework).txt</ApiCompatBaseline>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.DotNet.ApiCompat" Version="1.0.0-beta.18557.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ResolvedMatchingContract Include="$(SolutionDir)Tools\apiCompat\contractAssemblies\$(TargetFramework)\$(TargetName).dll " />
+	</ItemGroup>
+
+	<Target Name="CheckIfContractAssemblyExists" Condition="'$(RunApiCompat)' == 'true' AND !Exists('@(ResolvedMatchingContract)')" BeforeTargets="ValidateApiCompatForSrc">
+		<Warning Text="Contract assembly doesn't exist. ApiCompat will not run for the assembly: @(ResolvedMatchingContract)."/>
+	</Target>
+
+	<Target Name="ResolveContractDependencyDirectories" BeforeTargets="ValidateApiCompatForSrc">
+		<ItemGroup>
+			<_DependencyDirectoriesTemp Include="@(ReferencePath->'%(RootDir)%(Directory)')" />
+			<_ContractDependencyDirectories Include="%(_DependencyDirectoriesTemp.Identity)" />
+		</ItemGroup>
+	</Target>
+</Project>

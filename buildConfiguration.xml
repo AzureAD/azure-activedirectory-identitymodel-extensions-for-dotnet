@@ -19,7 +19,6 @@
     </src>
     <test>
       <project name="CrossVersionTokenValidation.Tests" test="yes"/>
-      <project name="ApiChangeTest" test="yes" />
       <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
       <project name="Microsoft.IdentityModel.Tests" test="no" />
       <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
