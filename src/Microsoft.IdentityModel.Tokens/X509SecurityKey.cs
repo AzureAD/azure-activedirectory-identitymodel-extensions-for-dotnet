@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
-        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
+        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey
         {
             get { return (PrivateKey != null); }
