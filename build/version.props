@@ -1,7 +1,7 @@
 <!-- This file may be overwritten by automation. Only values allowed here are VersionPrefix and VersionSuffix.  -->
 <Project>
     <PropertyGroup>
-        <VersionPrefix>5.3.1</VersionPrefix>
+        <VersionPrefix>0.0.1</VersionPrefix>
         <VersionSuffix>internal-preview</VersionSuffix>
     </PropertyGroup>
 </Project>

@@ -1,9 +1,24 @@
 <Project>
-    <PropertyGroup>
-        <CoreFxVersion>4.3.0-*</CoreFxVersion>
-        <JsonNetVersion>10.0.1</JsonNetVersion>
-        <MicrosoftNETTestSdkVersion>15.9.0</MicrosoftNETTestSdkVersion>
-        <XunitVersion>2.4.0</XunitVersion>
-        <NetStandardVersion>1.6.1</NetStandardVersion>
-    </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net452'">
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461'">
+    <JsonNetVersion>6.0.1</JsonNetVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0'">
+    <CoreFxVersion>4.3.0-*</CoreFxVersion>
+    <JsonNetVersion>10.0.1</JsonNetVersion>
+    <NetStandardVersion>2.0.0</NetStandardVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MicrosoftNETTestSdkVersion>15.5.0</MicrosoftNETTestSdkVersion>
+    <XunitVersion>2.4.0</XunitVersion>
+  </PropertyGroup>
 </Project>
