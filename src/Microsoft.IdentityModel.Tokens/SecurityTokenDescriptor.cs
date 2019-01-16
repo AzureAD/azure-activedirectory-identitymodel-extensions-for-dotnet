@@ -84,7 +84,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="ClaimsIdentity"/>.
         /// </summary>
-        [Obsolete("SecurityTokenDescriptor.Subject is obsolete, please use SecurityTokenDescriptor.Payload instead.")]
         public ClaimsIdentity Subject { get; set; }
     }
 }
