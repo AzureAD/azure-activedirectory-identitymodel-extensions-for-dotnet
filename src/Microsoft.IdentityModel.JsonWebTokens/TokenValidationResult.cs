@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Security.Claims;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// Contains artifacts obtained when a SecurityToken is validated.
