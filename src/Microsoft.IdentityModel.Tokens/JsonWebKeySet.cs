@@ -82,7 +82,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="jsonSerializerSettings">jsonSerializerSettings</param>
         /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
-        [Obsolete("This constructor is obsolete and will be removed in a future release.")]
         public JsonWebKeySet(string json, JsonSerializerSettings jsonSerializerSettings)
         {
             if (string.IsNullOrEmpty(json))
