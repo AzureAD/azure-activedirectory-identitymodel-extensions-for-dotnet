@@ -17,7 +17,7 @@
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet</PackageProjectUrl>
-    <PackageLicense>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/LICENSE.txt</PackageLicense>
+    <PackageLicenseUrl>https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/LICENSE.txt</PackageLicenseUrl>
     <SignAssembly>true</SignAssembly>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
