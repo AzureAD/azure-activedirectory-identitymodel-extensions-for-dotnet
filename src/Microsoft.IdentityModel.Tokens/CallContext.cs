@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -69,5 +70,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
         /// </summary>
         public ICollection<string> Logs { get; private set; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
+        /// </summary>
+        public IDictionary<string, object> PropertyBag { get; set; }
     }
 }
