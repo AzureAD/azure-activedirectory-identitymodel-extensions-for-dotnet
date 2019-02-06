@@ -97,6 +97,18 @@ WriteSectionFooter("End Environment");
 
 $ErrorActionPreference = "Stop"
 
+WriteSectionHeader("VerifyResourceUsage.pl");
+
+Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl"
+$verifyResourceUsageResult = Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl
+
+if($verifyResourceUsageResult.ExitCode -ne 0)
+{
+	throw "VerifyResourceUsage.pl failed."
+}
+
+WriteSectionFooter("End VerifyResourceUsage.pl");
+
 WriteSectionHeader("Build");
 
 $projects = $buildConfiguration.SelectNodes("root/projects/src/project");
