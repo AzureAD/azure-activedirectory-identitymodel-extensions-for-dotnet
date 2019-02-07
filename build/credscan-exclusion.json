@@ -21,14 +21,17 @@
       "file": "SelfSigned2048_SHA512.pfx",
       "_justification": "Self-signed certificate used by unit tests"
     },
-	{
+    {
       "file": "KeyingMaterial.cs",
       "_justification": "Test contains password to load the two dummy valid_cert files excluded above"
     },
     {
       "file": "JsonWebTokenHandlerTests.cs",
       "_justification": "Test contains an access token that's used only for testing purposes."
+    },
+    {
+      "file": "OpenIdConnectParameterNames.cs",
+      "_justification": "One of the constants has value: 'client_secret' which triggers a CredScan issue."
     }
-
   ]
 }
