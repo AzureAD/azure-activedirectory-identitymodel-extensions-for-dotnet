@@ -249,6 +249,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public override string Issuer => Payload.Value<string>(JwtRegisteredClaimNames.Iss) ?? string.Empty;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public virtual IJsonConvertible JsonAdapter { get; set; }
+
+        /// <summary>
         /// Gets the 'value' of the 'kid' claim { kid, 'value' }.
         /// </summary>
         /// <remarks>If the 'kid' claim is not found, an empty string is returned.</remarks>   
@@ -491,7 +496,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        /// <remarks>If the key has no corresponding value, returns null.</remarks>
         public T GetPayloadValue<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -503,7 +508,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             T value;
             try
             {
-                value = jTokenValue.ToObject<T>();
+                if (JsonAdapter != null)
+                    value = JsonAdapter.Convert<T>(jTokenValue);
+                else
+                    value = jTokenValue.ToObject<T>();
             }
             catch (Exception ex)
             {
@@ -513,10 +521,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return value;
         }
 
+
         /// <summary>
         /// Tries to get the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true.</remarks>
         public bool TryGetPayloadValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
@@ -529,6 +538,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 value = default(T);
                 return false;
+            }
+
+            if (JsonAdapter != null)
+            {
+                return JsonAdapter.TryConvert<T>(jTokenValue, out value);
             }
 
             try
@@ -544,10 +558,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return true;
         }
 
+
         /// <summary>
         /// Gets the 'value' corresponding to the provided key from the JWT header { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        /// <remarks>If the key has no corresponding value, returns null.</remarks>
         public T GetHeaderValue<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -559,7 +574,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             T value;
             try
             {
-                value =  jTokenValue.ToObject<T>();
+                if (JsonAdapter != null)
+                    value = JsonAdapter.Convert<T>(jTokenValue);
+                else
+                    value = jTokenValue.ToObject<T>();
             }
             catch (Exception ex)
             {
@@ -572,7 +590,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Tries to get the value corresponding to the provided key from the JWT header { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true.</remarks>
         public bool TryGetHeaderValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
@@ -585,6 +603,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 value = default(T);
                 return false;
+            }
+
+            if (JsonAdapter != null)
+            {
+                return JsonAdapter.TryConvert(jTokenValue, out value);
             }
 
             try
