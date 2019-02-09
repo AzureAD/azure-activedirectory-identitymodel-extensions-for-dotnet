@@ -496,8 +496,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns null.</remarks>
-        public T GetPayloadValue<T>(string key)
+        public T? GetPayloadValue<T>(string key) where T : struct
         {
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -505,65 +504,115 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!Payload.TryGetValue(key, out var jTokenValue))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
 
-            T value;
             try
             {
-                if (JsonAdapter != null)
-                    value = JsonAdapter.Convert<T>(jTokenValue);
+                if (jTokenValue.Type == JTokenType.Null)
+                    return null;
                 else
-                    value = jTokenValue.ToObject<T>();
+                    return jTokenValue.ToObject<T>();
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
             }
-
-            return value;
         }
 
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// </summary>
+        public string GetPayloadValue(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!Payload.TryGetValue(key, out var jTokenValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
+
+            try
+            {
+                if (jTokenValue.Type == JTokenType.Null)
+                    return null;
+                else
+                    return jTokenValue.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(string), jTokenValue.Type), ex));
+            }
+        }
 
         /// <summary>
         /// Tries to get the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true.</remarks>
-        public bool TryGetPayloadValue<T>(string key, out T value)
+        /// <returns><c>false</c> if the key is not found, otherwise <c>true</c>.</returns>
+        public bool TryGetPayloadValue<T>(string key, out T? value) where T : struct
         {
             if (string.IsNullOrEmpty(key))
             {
-                value = default(T);
+                value = null;
                 return false;
             }
 
             if (!Payload.TryGetValue(key, out var jTokenValue))
             {
-                value = default(T);
+                value = null;
                 return false;
-            }
-
-            if (JsonAdapter != null)
-            {
-                return JsonAdapter.TryConvert<T>(jTokenValue, out value);
             }
 
             try
             {
-                value = jTokenValue.ToObject<T>();
+                if (jTokenValue.Type == JTokenType.Null)
+                    value = null;
+                else
+                    value = jTokenValue.ToObject<T>();
             }
             catch (Exception)
             {
-                value = default(T);
+                value = null;
                 return false;
             }
 
             return true;
         }
 
+        /// <summary>
+        /// Tries to get the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// </summary>
+        /// <returns><c>false</c> if the key is not found, otherwise <c>true</c>.</returns>
+        public bool TryGetPayloadValue(string key, out string value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = null;
+                return false;
+            }
+
+            if (!Payload.TryGetValue(key, out var jTokenValue))
+            {
+                value = null;
+                return false;
+            }
+
+            try
+            {
+                if (jTokenValue.Type == JTokenType.Null)
+                    value = null;
+                else
+                    value = jTokenValue.ToString();
+            }
+            catch (Exception)
+            {
+                value = null;
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Gets the 'value' corresponding to the provided key from the JWT header { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns null.</remarks>
-        public T GetHeaderValue<T>(string key)
+        public T? GetHeaderValue<T>(string key) where T : struct
         {
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -571,52 +620,105 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!Header.TryGetValue(key, out var jTokenValue))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14303, key)));
 
-            T value;
             try
             {
-                if (JsonAdapter != null)
-                    value = JsonAdapter.Convert<T>(jTokenValue);
+                if (jTokenValue.Type == JTokenType.Null)
+                    return null;
                 else
-                    value = jTokenValue.ToObject<T>();
+                    return jTokenValue.ToObject<T>();
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
             }
+        }
 
-            return value;
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key from the JWT header { key, 'value' }.
+        /// </summary>
+        public string GetHeaderValue(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!Header.TryGetValue(key, out var jTokenValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14303, key)));
+
+            try
+            {
+                if (jTokenValue.Type == JTokenType.Null)
+                    return null;
+                else
+                    return jTokenValue.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(string), jTokenValue.Type), ex));
+            }
         }
 
         /// <summary>
         /// Tries to get the value corresponding to the provided key from the JWT header { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true.</remarks>
-        public bool TryGetHeaderValue<T>(string key, out T value)
+        /// <returns><c>false</c> if the key is not found, otherwise <c>true</c>.</returns>
+        public bool TryGetHeaderValue<T>(string key, out T? value) where T : struct
         {
             if (string.IsNullOrEmpty(key))
             {
-                value = default(T);
+                value = null;
                 return false;
             }
 
             if (!Header.TryGetValue(key, out var jTokenValue))
             {
-                value = default(T);
+                value = null;
                 return false;
-            }
-
-            if (JsonAdapter != null)
-            {
-                return JsonAdapter.TryConvert(jTokenValue, out value);
             }
 
             try
             {
-                value = jTokenValue.ToObject<T>();
+                if (jTokenValue.Type == JTokenType.Null)
+                    value = null;
+                else
+                    value = jTokenValue.ToObject<T>();
             }
             catch (Exception)
             {
-                value = default(T);
+                value = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Tries to get the value corresponding to the provided key from the JWT header { key, 'value' }.
+        /// </summary>
+        /// <returns><c>false</c> if the key is not found, otherwise <c>true</c>.</returns>
+        public bool TryGetHeaderValue(string key, out string value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = null;
+                return false;
+            }
+
+            if (!Header.TryGetValue(key, out var jTokenValue))
+            {
+                value = null;
+                return false;
+            }
+
+            try
+            {
+                if (jTokenValue.Type == JTokenType.Null)
+                    value = null;
+                else
+                    value = jTokenValue.ToString();
+            }
+            catch (Exception)
+            {
+                value = null;
                 return false;
             }
 

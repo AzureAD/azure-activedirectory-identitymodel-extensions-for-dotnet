@@ -910,7 +910,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
             var jsonWebToken = tokenValidationResult.SecurityToken as JsonWebToken;
-            var email = jsonWebToken.GetPayloadValue<string>(JwtRegisteredClaimNames.Email);
+            var email = jsonWebToken.GetPayloadValue(JwtRegisteredClaimNames.Email);
 
             if (!email.Equals("Bob@contoso.com"))
                 throw new SecurityTokenException("Token does not contain the correct value for the 'email' claim.");
