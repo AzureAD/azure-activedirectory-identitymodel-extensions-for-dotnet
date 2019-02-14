@@ -302,9 +302,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("UnknownKeyType2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
 
                 // Key size checks
-                new SignatureProviderTheoryData("KeySize1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.DefaultSymmetricSecurityKey_56, KEY.DefaultSymmetricSecurityKey_56, EE.ArgumentOutOfRangeException("IDX10603:")),
-                new SignatureProviderTheoryData("KeySize2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, Default.SymmetricSigningKey56, Default.SymmetricSigningKey56, EE.ArgumentOutOfRangeException("IDX10603:")),
-                new SignatureProviderTheoryData("KeySize3", ALG.HmacSha256Signature, ALG.HmacSha256Signature, Default.SymmetricSigningKey64, Default.SymmetricSigningKey64, EE.ArgumentOutOfRangeException("IDX10603:")),
+                new SignatureProviderTheoryData("KeySize1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.DefaultSymmetricSecurityKey_56, KEY.DefaultSymmetricSecurityKey_56, EE.ArgumentOutOfRangeException("IDX10653:")),
+                new SignatureProviderTheoryData("KeySize2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, Default.SymmetricSigningKey56, Default.SymmetricSigningKey56, EE.ArgumentOutOfRangeException("IDX10653:")),
+                new SignatureProviderTheoryData("KeySize3", ALG.HmacSha256Signature, ALG.HmacSha256Signature, Default.SymmetricSigningKey64, Default.SymmetricSigningKey64, EE.ArgumentOutOfRangeException("IDX10653:")),
 
                 // signing and verifying with different keys
                 new SignatureProviderTheoryData("DifferentKey1", ALG.HmacSha256, ALG.HmacSha256, Default.SymmetricSigningKey256, NotDefault.SymmetricSigningKey256, EE.SecurityTokenInvalidSignatureException()),
