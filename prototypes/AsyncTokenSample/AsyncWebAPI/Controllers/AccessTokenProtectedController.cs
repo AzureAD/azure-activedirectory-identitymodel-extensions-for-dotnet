@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 using AsyncCommon;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.S2S.Tokens;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Jwt;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
