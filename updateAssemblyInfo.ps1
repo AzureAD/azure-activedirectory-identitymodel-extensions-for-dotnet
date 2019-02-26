@@ -1,5 +1,5 @@
 param([string]$root=$PSScriptRoot,
-      [string]$packageType="preview")
+      [string]$packageType="release")
 
 ################################################# Functions ############################################################
 
@@ -43,7 +43,7 @@ Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
 $nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 if ( $packageType -eq "release")
 {
-    $versionSuffix = ""
+    $versionSuffix = "sal"
 }
 else
 {
