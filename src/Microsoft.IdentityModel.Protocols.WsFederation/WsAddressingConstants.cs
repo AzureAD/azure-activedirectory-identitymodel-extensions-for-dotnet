@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Constants for WsTrust.
+    /// Constants for WsAddressing.
     /// </summary>
     public static class WsAddressing
     {
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
         public const string PreferredPrefix = "wsa";
 
         /// <summary>
-        /// Elements that can be in a WsTrust message
+        /// Elements that can be in a WsAddressing ns
         /// </summary>
         public static class Elements
         {
