@@ -510,11 +510,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsNull",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             Claims = null
                         },
@@ -531,13 +537,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsEmpty",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            Claims = new Dictionary<string, object>()
+                            Claims = new Dictionary<string, object>()                   
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
