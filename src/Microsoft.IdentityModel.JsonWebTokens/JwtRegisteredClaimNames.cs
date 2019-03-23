@@ -35,7 +35,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public struct JwtRegisteredClaimNames
     {
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Actort = "actort";
 
@@ -65,12 +64,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Azp = "azp";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string Birthdate = "birthdate";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken
         /// </summary>
         public const string CHash = "c_hash";
 
@@ -80,7 +79,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string AtHash = "at_hash";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string Email = "email";
 
@@ -90,17 +89,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Exp = "exp";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string Gender = "gender";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string FamilyName = "family_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string GivenName = "given_name";
 
@@ -120,12 +119,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Jti = "jti";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string NameId = "nameid";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest
         /// </summary>
         public const string Nonce = "nonce";
 
@@ -135,7 +133,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Nbf = "nbf";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Prn = "prn";
 
@@ -150,17 +147,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Sub = "sub";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://tools.ietf.org/html/rfc7519#section-5
         /// </summary>
         public const string Typ = "typ";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string UniqueName = "unique_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
         /// </summary>
         public const string Website = "website";
     }
