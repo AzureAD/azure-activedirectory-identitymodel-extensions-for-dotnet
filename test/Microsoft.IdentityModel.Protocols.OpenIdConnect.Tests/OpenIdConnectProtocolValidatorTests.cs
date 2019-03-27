@@ -31,12 +31,16 @@ using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+using JwtHeaderParameterNames = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -47,36 +51,80 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectProtocolValidatorTests
     {
-        private static JwtSecurityToken CreateValidatedIdToken()
+        private static JsonWebToken CreateValidatedIdToken()
         {
-            return CreateValidatedIdToken(null, null);
+            return CreateValidatedIdToken(null);
         }
 
-        private static JwtSecurityToken CreateValidatedIdToken(string claimType, object claimValue)
+        private static JsonWebToken CreateValidatedIdToken(JProperty jProperty)
         {
-            return CreateValidatedIdToken(claimType, claimValue, SecurityAlgorithms.RsaSha256);
+            return CreateValidatedIdToken(jProperty, SecurityAlgorithms.RsaSha256);
         }
 
-        private static JwtSecurityToken CreateValidatedIdToken(string claimType, object claimValue, string alg)
+        private static JsonWebToken CreateValidatedIdToken(JProperty jProperty, string alg)
         {
-            var payload = new JwtPayload
+            var payload = new JObject()
             {
-                [JwtRegisteredClaimNames.Aud] = Default.Audience,
-                [JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iss] = Default.Issuer,
-                [JwtRegisteredClaimNames.Nonce] = Default.Nonce,
-                [JwtRegisteredClaimNames.Sub] = Default.Subject
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
             };
 
-            if (!string.IsNullOrEmpty(claimType))
-                payload[claimType] = claimValue;
-
-            var header = new JwtHeader();
+            if (jProperty != null)
+            {
+                if (payload.ContainsKey(jProperty.Name))
+                {
+                    payload.Remove(jProperty.Name);
+                }
+                payload.Add(jProperty);
+            }
+          
+            var header = new JObject();
             if (alg != null)
                 header[JwtHeaderParameterNames.Alg] = alg;
 
-            return new JwtSecurityToken(header, payload);
+            return new JsonWebToken(header.ToString(), payload.ToString());
+        }
+
+        private static JsonWebToken CreateValidatedIdTokenWithoutNonce()
+        {
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
+            };
+
+            var header = new JObject()
+            {
+                {JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 }
+            };
+
+            return new JsonWebToken(header.ToString(), payload.ToString());
+        }
+
+        private static JsonWebToken CreateValidatedIdTokenWithoutSub()
+        {
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+            };
+
+            var header = new JObject()
+            {
+                {JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 }
+            };
+
+            return new JsonWebToken(header.ToString(), payload.ToString());
         }
 
         [Fact]
@@ -239,7 +287,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             IdToken = Guid.NewGuid().ToString(),
                             RefreshToken = Guid.NewGuid().ToString()
                         },
-                        ValidatedIdToken = new JwtSecurityToken()
+                        ValidatedIdToken = new JsonWebToken("{}","{}")
                     }
                 });
 
@@ -377,6 +425,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
+                theoryData.Add(new OidcProtocolValidatorTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21351:"),
+                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    {
+                        RequireNonce = false,
+                        RequireTimeStampInNonce = false
+                    },
+                    TestId = "validationContext.ValidatedIdToken.GetType()!=typeof(JsonWebToken)",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    {
+                        Nonce = Default.Nonce,
+                        ProtocolMessage = new OpenIdConnectMessage
+                        {
+                            AccessToken = Guid.NewGuid().ToString(),
+                            IdToken = Guid.NewGuid().ToString()
+                        },
+                        ValidatedIdToken = new JwtSecurityToken()
+                    }
+                });
+
                 return theoryData;
             }
         }
@@ -450,8 +519,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                var jwtWithoutSub = CreateValidatedIdToken();
-                jwtWithoutSub.Payload.Remove(JwtRegisteredClaimNames.Sub);
+                var jwtWithoutSub = CreateValidatedIdTokenWithoutSub();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21346:"),
@@ -483,9 +551,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         UserInfoEndpointResponse =  @"{ ""sub"": ""sub""}",
-                        ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty("sub", "sub"))
                     }
                 });
+
+                var payload = new JObject()
+                {
+                    { JwtRegisteredClaimNames.Aud, Default.Audience },
+                    { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                    { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                    { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                    { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                    { JwtRegisteredClaimNames.Sub, "sub" }
+                }.ToString();
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
@@ -493,8 +571,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "(JWT) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse =  (new JwtSecurityTokenHandler()).WriteToken(CreateValidatedIdToken("sub", "sub")),
-                        ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
+                        UserInfoEndpointResponse = new JsonWebTokenHandler().CreateToken(payload, Default.AsymmetricSigningCredentials),
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty("sub", "sub"))
+                    }
+                });
+
+                theoryData.Add(new OidcProtocolValidatorTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21351:"),
+                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    TestId = "validationContext.ValidatedIdToken.GetType()!=typeof(JsonWebToken)",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext
+                    {
+                        UserInfoEndpointResponse = @"{ ""sub"": ""sub""}",
+                        ValidatedIdToken = new JwtSecurityToken()
                     }
                 });
 
@@ -508,7 +598,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.ValidateIdToken", theoryData);
 
             // should put this in ValidationContext
-            theoryData.ValidationContext.ValidatedIdToken = theoryData.JwtSecurityToken;
+            theoryData.ValidationContext.ValidatedIdToken = theoryData.SecurityToken;
 
             try
             {
@@ -534,61 +624,70 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ProtocolMessage = new OpenIdConnectMessage()
                 };
 
-                var jwt = new JwtSecurityToken();
+                var payload = new JObject();
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                var jwt = new JsonWebToken("{}", payload.ToString());
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     First = true,
-                    JwtSecurityToken = new JwtSecurityToken(),
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "aud == null",
                     ValidationContext = validationContext,
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                jwt = new JsonWebToken("{}", payload.ToString());
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "exp == null",
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                jwt = new JsonWebToken("{}", payload.ToString());
+
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "iat == null",
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                jwt = new JsonWebToken("{}", payload.ToString());
+
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "iss == null",
                     ValidationContext = validationContext,
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
+
+                jwt = new JsonWebToken("{}", payload.ToString());
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    JwtSecurityToken = jwt,
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
                         RequireSub = false
@@ -597,15 +696,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
+                    SecurityToken = jwt,
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "sub == null, RequireSub == true",
                     ValidationContext = validationContext
@@ -619,7 +713,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21315:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
+                    SecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAcr = true },
                     TestId = "'acr' == null, RequireAcr == true",
                     ValidationContext = validationContext
@@ -628,7 +722,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21316:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
+                    SecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAmr = true },
                     TestId = "amr == null, RequireAmr == true",
                     ValidationContext = validationContext
@@ -637,7 +731,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21317:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
+                    SecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAuthTime = true },
                     TestId = "auth_time == null, RequireAuthTime == true",
                     ValidationContext = validationContext
@@ -645,7 +739,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Aud, Default.Audiences),
+                    SecurityToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Aud, Default.Audiences)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "multiple 'aud' no 'azp' warning only",
                     ValidationContext = validationContext
@@ -654,7 +748,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21318:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
+                    SecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "azp == null",
                     ValidationContext = validationContext
@@ -663,7 +757,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21308:"),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
+                    SecurityToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "'azp' != null, validationContext.ClientId == null",
                     ValidationContext = validationContext
@@ -672,7 +766,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21340:"),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
+                    SecurityToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "azp claim != validationContext.ClientId",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ClientId = Default.ClientId }
@@ -680,7 +774,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
+                    SecurityToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
                     TestId = "azp claim == validationContext.ClientId",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ClientId = Default.Azp },
@@ -689,7 +783,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
-                    JwtSecurityToken = CreateValidatedIdToken(),
+                    SecurityToken = CreateValidatedIdToken(),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
                         IdTokenValidator = ((jwtToken, context) => { throw new InvalidOperationException("Validator"); })
@@ -700,7 +794,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    JwtSecurityToken = new JwtSecurityToken(),
+                    SecurityToken = new JsonWebToken("{}","{}"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
                         IdTokenValidator = ((jwtToken, context) => { return; })
@@ -712,19 +806,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Acr, Default.Acr),
+                    SecurityToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Acr, Default.Acr)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator
                     {
                         IdTokenValidator = ((jwtToken, context) =>
                        {
-                           var jwtSecurityToken = jwtToken as JwtSecurityToken;
-                           if (jwtSecurityToken.Payload.Acr != "acr")
+                           var JsonWebToken = jwtToken as JsonWebToken;
+                           if (JsonWebToken.TryGetPayloadValue(JwtRegisteredClaimNames.Acr, out string acr) && acr != "acr")
                                throw new InvalidOperationException();
                        })
                     },
                     TestId = "IdTokenValidator throws if no acr",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
+
+                theoryData.Add(new OidcProtocolValidatorTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21351:"),
+                    SecurityToken = new JwtSecurityToken(),
+                    TestId = "validationContext.ValidatedIdToken.GetType()!=typeof(JsonWebToken)",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                }); 
 
                 return theoryData;
             }
@@ -753,6 +855,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             get
             {
+                var jsonWebTokenHandler = new JsonWebTokenHandler();
                 string code = Guid.NewGuid().ToString();
                 string chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
                 string chash384 = IdentityUtilities.CreateHashClaim(code, "SHA384");
@@ -810,7 +913,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, string.Empty)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, string.Empty))
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -820,7 +923,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.None)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.None)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -830,7 +933,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, null)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), null)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -840,7 +943,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, "")
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), "")
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -849,7 +952,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -858,7 +961,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha384)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha384)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -867,7 +970,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha512)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha512)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -877,7 +980,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -887,7 +990,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -897,7 +1000,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -907,7 +1010,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -917,7 +1020,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha256)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha256)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -927,7 +1030,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha384)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha384)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -937,29 +1040,43 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha384)
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha384)
                         }
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                         TestId = "ValidatedIdToken.chash is not a string, but array",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, new List<string> { "chash1", "chash2" })
+                            ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, new List<string> { "chash1", "chash2" }))
                         }
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
-                        TestId = "Multiple chashes",
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21351:"),
+                        TestId = "validationContext.ValidatedIdToken.GetType()!=typeof(JsonWebToken)",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-                            ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash256), new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: Default.AsymmetricSigningCredentials)
+                            ValidatedIdToken = new JwtSecurityToken()
                         }
                     }
+
+                    // The test case below cannot be recreated using the Microsoft.IdentityModel.JsonWebTokens library, as it is impossible to add a duplicate property
+                    // to a JObject.
+
+                    //new OidcProtocolValidatorTheoryData
+                    //{
+                    //    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                    //    TestId = "Multiple chashes",
+                    //    ValidationContext = new OpenIdConnectProtocolValidationContext
+                    //    {
+                    //        ProtocolMessage = new OpenIdConnectMessage { Code = code },
+                    //        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { JwtRegisteredClaimNames.CHash, chash256 }, { JwtRegisteredClaimNames.CHash, chash512 } }.ToString(), Default.AsymmetricSigningCredentials))
+                    //    }
+                    //}
                 };
             }
         }
@@ -1000,8 +1117,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "validationContext.ValidatedToken == null",
                 });
 
-                var jwtWithoutNonce = CreateValidatedIdToken();
-                jwtWithoutNonce.Payload.Remove(JwtRegisteredClaimNames.Nonce);
+                var jwtWithoutNonce = CreateValidatedIdTokenWithoutNonce();
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21320:"),
@@ -1078,7 +1194,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonce,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonce)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonce))
                     }
                 });
 
@@ -1092,7 +1208,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceWithoutTimestamp,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp )
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp ))
                     }
                 });
 
@@ -1104,7 +1220,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = protocolValidatorRequiresTimeStamp.GenerateNonce(),
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, protocolValidatorRequiresTimeStamp.GenerateNonce())
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, protocolValidatorRequiresTimeStamp.GenerateNonce()))
                     }
                 });
 
@@ -1116,7 +1232,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = "abc.abc",
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, "abc.abc")
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, "abc.abc"))
                     }
                 });
 
@@ -1129,7 +1245,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceExpired,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceExpired)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceExpired))
                     }
                 });
 
@@ -1142,7 +1258,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMaxTicks,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMaxTicks)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceMaxTicks))
                     }
                 });
 
@@ -1155,7 +1271,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMinTicks,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMinTicks)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceMinTicks))
                     }
                 });
 
@@ -1168,7 +1284,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksNegative,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksNegative)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceTicksNegative))
                     }
                 });
 
@@ -1181,7 +1297,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksZero,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksZero)
+                        ValidatedIdToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceTicksZero))
                     }
                 });
 
@@ -1208,6 +1324,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             get
             {
+                var jsonWebTokenHandler = new JsonWebTokenHandler();
                 var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
@@ -1243,7 +1360,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+                        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
@@ -1256,7 +1373,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage{ AccessToken = token},
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue512) }, signingCredentials: Default.AsymmetricSigningCredentials)
+                        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue512 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
@@ -1268,21 +1385,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+                        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "multiple at_hash claims",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
-                    {
-                        ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256), new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
-                    }
-                });
+                // The test case below cannot be recreated using the Microsoft.IdentityModel.JsonWebTokens library, as it is impossible to add a duplicate property
+                // to a JObject.
+
+                //theoryData.Add(new OidcProtocolValidatorTheoryData
+                //{
+                //    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
+                //    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                //    TestId = "multiple at_hash claims",
+                //    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                //    {
+                //        ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+                //        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 }, { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
+                //    }
+                //});
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
@@ -1293,6 +1413,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
                         ValidatedIdToken = CreateValidatedIdToken()
+                    }
+                });
+
+                theoryData.Add(new OidcProtocolValidatorTheoryData
+                {
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21351:"),
+                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    TestId = "validationContext.ValidatedIdToken.GetType()!=typeof(JsonWebToken)",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    {
+                        ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+                        ValidatedIdToken = new JwtSecurityToken()
                     }
                 });
 
@@ -1585,7 +1717,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
     public class OidcProtocolValidatorTheoryData : TheoryDataBase
     {
-        public JwtSecurityToken JwtSecurityToken { get; set; }
+        public SecurityToken SecurityToken { get; set; }
 
         public OpenIdConnectProtocolValidationContext ValidationContext { get; set; }
 
