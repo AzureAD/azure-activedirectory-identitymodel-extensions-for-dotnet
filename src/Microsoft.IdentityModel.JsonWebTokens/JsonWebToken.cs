@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
     /// </summary>
-    public class JsonWebToken : SecurityToken
+    public class JsonWebToken : SecurityToken, IJsonWebToken
     {
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
         /// </summary>
-        public virtual IEnumerable<Claim> Claims
+        public IEnumerable<Claim> Claims
         {
             get
             {

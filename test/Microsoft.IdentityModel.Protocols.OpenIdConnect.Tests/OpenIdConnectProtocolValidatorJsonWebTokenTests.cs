@@ -29,14 +29,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using JwtHeaderParameterNames = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -45,60 +47,113 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// <summary>
     /// Tests for OpenIdConnectProtocolValidator
     /// </summary>
-    public class OpenIdConnectProtocolValidatorTests
+    public class OpenIdConnectProtocolValidatorJsonWebTokenTests
     {
-        private static JwtSecurityToken CreateValidatedIdToken()
+        private static JsonWebToken CreateValidatedIdToken()
         {
-            return CreateValidatedIdToken(null, null);
+            return CreateValidatedIdToken(null);
         }
 
-        private static JwtSecurityToken CreateValidatedIdToken(string claimType, object claimValue)
+        private static JsonWebToken CreateValidatedIdToken(JProperty jProperty)
         {
-            return CreateValidatedIdToken(claimType, claimValue, SecurityAlgorithms.RsaSha256);
+            return CreateValidatedIdToken(jProperty, SecurityAlgorithms.RsaSha256);
         }
 
-        private static JwtSecurityToken CreateValidatedIdToken(string claimType, object claimValue, string alg)
+        private static JsonWebToken CreateValidatedIdToken(JProperty jProperty, string alg)
         {
-            var payload = new JwtPayload
+            var payload = new JObject()
             {
-                [JwtRegisteredClaimNames.Aud] = Default.Audience,
-                [JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iss] = Default.Issuer,
-                [JwtRegisteredClaimNames.Nonce] = Default.Nonce,
-                [JwtRegisteredClaimNames.Sub] = Default.Subject
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
             };
 
-            if (!string.IsNullOrEmpty(claimType))
-                payload[claimType] = claimValue;
-
-            var header = new JwtHeader();
+            if (jProperty != null)
+            {
+                if (payload.ContainsKey(jProperty.Name))
+                {
+                    payload.Remove(jProperty.Name);
+                }
+                payload.Add(jProperty);
+            }
+          
+            var header = new JObject();
             if (alg != null)
                 header[JwtHeaderParameterNames.Alg] = alg;
 
-            return new JwtSecurityToken(header, payload);
+            return new JsonWebToken(header.ToString(), payload.ToString());
         }
 
-        private static JwtSecurityToken CreateValidatedIdToken(List<string> claimTypes, List<object> claimValues, string alg)
+        private static JsonWebToken CreateValidatedIdToken(List<JProperty> jProperties, string alg)
         {
-            var header = new JwtHeader();
-            var payload = new JwtPayload
+            var payload = new JObject()
             {
-                [JwtRegisteredClaimNames.Aud] = Default.Audience,
-                [JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow),
-                [JwtRegisteredClaimNames.Iss] = Default.Issuer,
-                [JwtRegisteredClaimNames.Nonce] = Default.Nonce,
-                [JwtRegisteredClaimNames.Sub] = Default.Subject
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
             };
 
+            if (jProperties != null)
+            {
+                foreach(var jProperty in jProperties)
+                {
+                    if (payload.ContainsKey(jProperty.Name))
+                    {
+                        payload.Remove(jProperty.Name);
+                    }
+                    payload.Add(jProperty);
+                }            
+            }
+
+            var header = new JObject();
             if (alg != null)
                 header[JwtHeaderParameterNames.Alg] = alg;
 
-            for (var i = 0; i < claimTypes.Count; i++)
-                payload[claimTypes[i]] = claimValues[i];
+            return new JsonWebToken(header.ToString(), payload.ToString());
+        }
 
-            return new JwtSecurityToken(header, payload);
+        private static JsonWebToken CreateValidatedIdTokenWithoutNonce()
+        {
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
+            };
+
+            var header = new JObject()
+            {
+                {JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 }
+            };
+
+            return new JsonWebToken(header.ToString(), payload.ToString());
+        }
+
+        private static JsonWebToken CreateValidatedIdTokenWithoutSub()
+        {
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+            };
+
+            var header = new JObject()
+            {
+                {JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 }
+            };
+
+            return new JsonWebToken(header.ToString(), payload.ToString());
         }
 
         [Fact]
@@ -176,7 +231,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
 
         [Theory, MemberData(nameof(ValidateAuthenticationResponseTheoryData))]
-        public void ValidateAuthenticationResponse(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateAuthenticationResponse(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAuthenticationResponse", theoryData);
             try
@@ -190,40 +245,40 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateAuthenticationResponseTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateAuthenticationResponseTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException(),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null"
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "'id_token' == null, 'code' == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "'id_token' == string.Empty, 'code' == string.Empty",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
@@ -235,11 +290,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "'id_token' != null, validationContext.validatedIdToken == null",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId = "'id_token' != null, validationContext.ValidatedJsonWebToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage
@@ -249,10 +304,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21335:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "'refresh_token' should not be returned from AuthorizationEndpoint",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
@@ -261,15 +316,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             IdToken = Guid.NewGuid().ToString(),
                             RefreshToken = Guid.NewGuid().ToString()
                         },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = new JwtSecurityToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = new JsonWebToken("{}","{}")
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
                         RequireState = false
                     },
@@ -284,10 +337,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21334:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
                         RequireState = false
                     },
@@ -303,15 +356,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                var protocolValidator = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = true, RequireState = true};
+                var protocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireTimeStampInNonce = true, RequireState = true };
                 var nonce = protocolValidator.GenerateNonce();
                 var state = Guid.NewGuid().ToString();
                 var code = Guid.NewGuid().ToString();
                 var accessToken = Guid.NewGuid().ToString();
                 var chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
                 var athash256 = IdentityUtilities.CreateHashClaim(accessToken, "SHA256");
-                var token = CreateValidatedIdToken(new List<string> { JwtRegisteredClaimNames.Nonce, JwtRegisteredClaimNames.CHash, JwtRegisteredClaimNames.AtHash }, new List<object> { nonce, chash256, athash256 }, SecurityAlgorithms.RsaSha256);
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                var token = CreateValidatedIdToken(new List<JProperty> { new JProperty(JwtRegisteredClaimNames.Nonce,nonce), new JProperty(JwtRegisteredClaimNames.CHash, chash256), new JProperty(JwtRegisteredClaimNames.AtHash, athash256) }, SecurityAlgorithms.RsaSha256);
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ProtocolValidator = protocolValidator,
                     TestId = "ValidateAll",
@@ -319,9 +372,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     {
                         State = state,
                         Nonce = nonce,
-                        ProtocolMessage = new OpenIdConnectMessage { State = state, Code = code , IdToken = token.ToString(), AccessToken = accessToken},
+                        ProtocolMessage = new OpenIdConnectMessage { State = state, Code = code, IdToken = Guid.NewGuid().ToString(), AccessToken = accessToken },
 #pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = token
+                        ValidatedJsonWebToken = token
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
@@ -331,7 +384,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateTokenResponseTheoryData))]
-        public void ValidateTokenResponse(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateTokenResponse(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateTokenResponse", theoryData);
             try
@@ -345,32 +398,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateTokenResponseTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateTokenResponseTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException(),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null"
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21336:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage.IdToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
@@ -378,10 +431,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21336:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage.AccessToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
@@ -389,11 +442,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "validationContext.ValidatedIdToken == null",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId = "validationContext.ValidatedJsonWebToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage
@@ -404,14 +457,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
                         RequireNonce = false,
                         RequireTimeStampInNonce = false
                     },
-                    TestId = "validationContext.ValidatedIdToken.AtHash == null (Optional)",
+                    TestId = "validationContext.ValidatedJsonWebToken.AtHash == null (Optional)",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         Nonce = Default.Nonce,
@@ -420,9 +473,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             AccessToken = Guid.NewGuid().ToString(),
                             IdToken = Guid.NewGuid().ToString()
                         },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken()
                     }
                 });
 
@@ -431,7 +482,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateUserInfoResponseTheoryData))]
-        public void ValidateUserInfoResponse(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateUserInfoResponse(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateUserInfoResponse", theoryData);
             try
@@ -445,117 +496,114 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateUserInfoResponseTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateUserInfoResponseTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException(),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null"
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21337:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.UserInfoEndpointResponse == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "validationContext.validatedIdToken == null",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId = "validationContext.ValidatedJsonWebToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { UserInfoEndpointResponse = "response" }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21343:", typeof(JsonReaderException)),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "UserInfoEndpointResponse is not valid JSON",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         UserInfoEndpointResponse = "response",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(),
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(),
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21345:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "UserInfoEndpointResponse.sub == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         UserInfoEndpointResponse = @"{ ""tid"":""42"",""name"":""bob""}",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(),
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(),
                     }
                 });
 
-                var jwtWithoutSub = CreateValidatedIdToken();
-                jwtWithoutSub.Payload.Remove(JwtRegisteredClaimNames.Sub);
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                var jwtWithoutSub = CreateValidatedIdTokenWithoutSub();
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21346:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "ValidatedIdToken.sub == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse = @"{ ""sub"": ""sub1""}",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = jwtWithoutSub
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub1""}",
+                        ValidatedJsonWebToken = jwtWithoutSub
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21338:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "UserInfoEndpointResponse.sub != ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse = @"{ ""sub"": ""sub1""}",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub1""}",
+                        ValidatedJsonWebToken = CreateValidatedIdToken()
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "(JSON) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse = @"{ ""sub"": ""sub""}",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub""}",
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty("sub", "sub"))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                var payload = new JObject()
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    { JwtRegisteredClaimNames.Aud, Default.Audience },
+                    { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                    { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                    { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                    { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                    { JwtRegisteredClaimNames.Sub, "sub" }
+                }.ToString();
+
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
+                {
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "(JWT) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse = (new JwtSecurityTokenHandler()).WriteToken(CreateValidatedIdToken("sub", "sub")),
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        UserInfoEndpointResponse = new JsonWebTokenHandler().CreateToken(payload, Default.AsymmetricSigningCredentials),
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty("sub", "sub"))
                     }
                 });
 
@@ -564,14 +612,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateIdTokenTheoryData))]
-        public void ValidateIdToken(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateIdToken(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIdToken", theoryData);
 
             // should put this in ValidationContext
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-            theoryData.ValidationContext.ValidatedIdToken = theoryData.JwtSecurityToken;
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            theoryData.ValidationContext.ValidatedJsonWebToken = theoryData.JsonWebToken;
+
             try
             {
                 theoryData.ProtocolValidator.PublicValidateIdToken(theoryData.ValidationContext);
@@ -585,73 +632,83 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateIdTokenTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateIdTokenTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
                 var validationContext = new OpenIdConnectProtocolValidationContext
                 {
                     ProtocolMessage = new OpenIdConnectMessage()
                 };
 
-                var jwt = new JwtSecurityToken();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                var payload = new JObject();
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                var jwt = new JsonWebToken("{}", payload.ToString());
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
                     First = true,
-                    JwtSecurityToken = new JwtSecurityToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "aud == null",
                     ValidationContext = validationContext,
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                jwt = new JsonWebToken("{}", payload.ToString());
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "exp == null",
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                jwt = new JsonWebToken("{}", payload.ToString());
+
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "iat == null",
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Sub] = Default.Subject;
+                jwt = new JsonWebToken("{}", payload.ToString());
+
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "iss == null",
                     ValidationContext = validationContext,
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                payload = new JObject();
+                payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
+
+                jwt = new JsonWebToken("{}", payload.ToString());
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    JwtSecurityToken = jwt,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
                         RequireSub = false
                     },
@@ -659,128 +716,123 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = validationContext
                 });
 
-                jwt = new JwtSecurityToken();
-                jwt.Payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
-                jwt.Payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
-                jwt.Payload[JwtRegisteredClaimNames.Iss] = Default.Issuer;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21314:"),
-                    JwtSecurityToken = jwt,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = jwt,
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "sub == null, RequireSub == true",
                     ValidationContext = validationContext
                 });
 
-                new PublicOpenIdConnectProtocolValidator
+                new PublicOpenIdConnectJsonWebTokenProtocolValidator
                 {
                     RequireAcr = true,
                 };
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21315:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAcr = true },
+                    JsonWebToken = CreateValidatedIdToken(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAcr = true },
                     TestId = "'acr' == null, RequireAcr == true",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21316:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAmr = true },
+                    JsonWebToken = CreateValidatedIdToken(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAmr = true },
                     TestId = "amr == null, RequireAmr == true",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21317:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAuthTime = true },
+                    JsonWebToken = CreateValidatedIdToken(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAuthTime = true },
                     TestId = "auth_time == null, RequireAuthTime == true",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Aud, Default.Audiences),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    JsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Aud, Default.Audiences)),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "multiple 'aud' no 'azp' warning only",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21318:"),
-                    JwtSecurityToken = CreateValidatedIdToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
+                    JsonWebToken = CreateValidatedIdToken(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAzp = true },
                     TestId = "azp == null",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21308:"),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
+                    JsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAzp = true },
                     TestId = "'azp' != null, validationContext.ClientId == null",
                     ValidationContext = validationContext
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21340:"),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
+                    JsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAzp = true },
                     TestId = "azp claim != validationContext.ClientId",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ClientId = Default.ClientId }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Azp, Default.Azp),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireAzp = true },
+                    JsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Azp, Default.Azp)),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireAzp = true },
                     TestId = "azp claim == validationContext.ClientId",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ClientId = Default.Azp },
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
-                    JwtSecurityToken = CreateValidatedIdToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    JsonWebToken = CreateValidatedIdToken(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
-                        IdTokenValidator = ((jwtToken, context) => { throw new InvalidOperationException("Validator"); })
+                        JsonWebTokenValidator = ((jwtToken, context) => { throw new InvalidOperationException("Validator"); })
                     },
                     TestId = "IdTokenValidator throws InvalidOperation",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    JwtSecurityToken = new JwtSecurityToken(),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    JsonWebToken = new JsonWebToken("{}","{}"),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
-                        IdTokenValidator = ((jwtToken, context) => { return; })
+                        JsonWebTokenValidator = ((jwtToken, context) => { return; })
                     },
                     TestId = "IdTokenValidator returns",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21313:", typeof(InvalidOperationException)),
-                    JwtSecurityToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Acr, Default.Acr),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator
+                    JsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Acr, Default.Acr)),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator
                     {
-                        IdTokenValidator = ((jwtToken, context) =>
+                        JsonWebTokenValidator = ((jwtToken, context) =>
                        {
-                           var jwtSecurityToken = jwtToken as JwtSecurityToken;
-                           if (jwtSecurityToken.Payload.Acr != "acr")
+                           var JsonWebToken = jwtToken as JsonWebToken;
+                           if (JsonWebToken.TryGetPayloadValue(JwtRegisteredClaimNames.Acr, out string acr) && acr != "acr")
                                throw new InvalidOperationException();
                        })
                     },
@@ -793,7 +845,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateCHashTheoryData))]
-        private void ValidateCHash(OidcProtocolValidatorTheoryData theoryData)
+        private void ValidateCHash(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateCHash", theoryData);
             try
@@ -811,262 +863,227 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return;
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateCHashTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateCHashTheoryData
         {
             get
             {
+                var jsonWebTokenHandler = new JsonWebTokenHandler();
                 string code = Guid.NewGuid().ToString();
                 string chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
                 string chash384 = IdentityUtilities.CreateHashClaim(code, "SHA384");
                 string chash512 = IdentityUtilities.CreateHashClaim(code, "SHA512");
 
-                return new TheoryData<OidcProtocolValidatorTheoryData>
+                return new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>
                 {
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         First = true,
                         TestId = "validationContext == null"
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                        TestId = "validationContext.ValidatedIdToken == null",
+                        TestId = "validationContext.ValidatedJsonWebToken == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage()
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                         TestId = "validationContext.ProtocolMessage == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken()
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         TestId = "ProtocolMessage.Code == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage(),
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-
+                            ValidatedJsonWebToken = CreateValidatedIdToken()
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                         TestId = "ValidatedIdToken.chash == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken()
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "ValidatedIdToken.chash == string.Empty",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, string.Empty)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, string.Empty))
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == 'None'",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.None)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.None)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, null)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), null)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
                         TestId = "ValidatedIdToken.Header.alg == string.empty",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, "")
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), "")
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         TestId = "alg==256, hash(code)==256",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         TestId = "alg==384, hash(code)==384",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha384)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha384)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         TestId = "alg==512, hash(code)==512",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha512)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha512)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "ValidatedIdToken.chash != ProtocolMessage.Code",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==256, hash(code)==384",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==256, hash(code)==384",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==256, hash(code)==384",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash384), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==256, hash(code)==512",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha256)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha256)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==384, hash(code)==512",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha384)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.          
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash512), SecurityAlgorithms.RsaSha384)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21347:", typeof(OpenIdConnectProtocolException)),
                         TestId = "alg==384, hash(code)==256",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha384)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, chash256), SecurityAlgorithms.RsaSha384)
                         }
                     },
-                    new OidcProtocolValidatorTheoryData
+                    new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                         TestId = "ValidatedIdToken.chash is not a string, but array",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, new List<string> { "chash1", "chash2" })
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        }
-                    },
-                    new OidcProtocolValidatorTheoryData
-                    {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
-                        TestId = "Multiple chashes",
-                        ValidationContext = new OpenIdConnectProtocolValidationContext
-                        {
-                            ProtocolMessage = new OpenIdConnectMessage { Code = code },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                            ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash256), new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: Default.AsymmetricSigningCredentials)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                            ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.CHash, new List<string> { "chash1", "chash2" }))
                         }
                     }
+                    // The test case below cannot be recreated using the Microsoft.IdentityModel.JsonWebTokens library, as it is impossible to add a duplicate property
+                    // to a JObject.
+
+                    //new OidcProtocolValidatorTheoryData
+                    //{
+                    //    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                    //    TestId = "Multiple chashes",
+                    //    ValidationContext = new OpenIdConnectProtocolValidationContext
+                    //    {
+                    //        ProtocolMessage = new OpenIdConnectMessage { Code = code },
+                    //        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { JwtRegisteredClaimNames.CHash, chash256 }, { JwtRegisteredClaimNames.CHash, chash512 } }.ToString(), Default.AsymmetricSigningCredentials))
+                    //    }
+                    //}
                 };
             }
         }
 
         [Theory, MemberData(nameof(ValidateNonceTheoryData))]
-        private void ValidateNonce(OidcProtocolValidatorTheoryData theoryData)
+        private void ValidateNonce(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateNonce", theoryData);
             try
@@ -1080,243 +1097,211 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateNonceTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateNonceTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException(),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null",
                 });
-
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "validationContext.ValidatedToken == null",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId = "validationContext.ValidatedJsonWebToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage()
                     }
                 });
 
-                var jwtWithoutNonce = CreateValidatedIdToken();
-                jwtWithoutNonce.Payload.Remove(JwtRegisteredClaimNames.Nonce);
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                var jwtWithoutNonce = CreateValidatedIdTokenWithoutNonce();
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21320:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce == null, jwt.Nonce == null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = jwtWithoutNonce
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = jwtWithoutNonce
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21323:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken()
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21349:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = true },
                     TestId = "validationContext.Nonce != null, jwt.Nonce == null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = Default.Nonce,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = jwtWithoutNonce
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = jwtWithoutNonce
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false },
                     TestId = "validationContext.Nonce == null, jwt.Nonce == null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = jwtWithoutNonce
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = jwtWithoutNonce
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21323:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false },
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken()
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21349:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false },
                     TestId = "validationContext.Nonce != null, jwt.Nonce == null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = Default.Nonce,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = jwtWithoutNonce
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = jwtWithoutNonce
                     }
                 });
 
-                var protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = true };
+                var protocolValidatorRequiresTimeStamp = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireTimeStampInNonce = true };
                 var nonce = protocolValidatorRequiresTimeStamp.GenerateNonce();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false },
                     TestId = "nonce.timestamp == true, RequireTimeStampInNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonce,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonce)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonce))
                     }
                 });
 
-                var protocolValidatorDoesNotRequireTimeStamp = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = false };
+                var protocolValidatorDoesNotRequireTimeStamp = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireTimeStampInNonce = false };
                 var nonceWithoutTimestamp = protocolValidatorDoesNotRequireTimeStamp.GenerateNonce();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21325:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "nonce.timestamp == false, RequireTimeStampInNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceWithoutTimestamp,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp ))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21321:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "ValidationContext.Nonce != Jwt.Nonce",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = protocolValidatorRequiresTimeStamp.GenerateNonce(),
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, protocolValidatorRequiresTimeStamp.GenerateNonce())
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, protocolValidatorRequiresTimeStamp.GenerateNonce()))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:", typeof(FormatException)),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce timestamp is not formated as a int",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = "abc.abc",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, "abc.abc")
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, "abc.abc"))
                     }
                 });
 
-                string nonceExpired = (DateTime.UtcNow - TimeSpan.FromDays(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonceWithoutTimestamp;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                string nonceExpired = (DateTime.UtcNow-TimeSpan.FromDays(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonceWithoutTimestamp;
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21324:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireTimeStampInNonce = true },
                     TestId = "Nonce is expired",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceExpired,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceExpired)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceExpired))
                     }
                 });
 
                 string nonceMaxTicks = Int64.MaxValue.ToString() + "." + nonceWithoutTimestamp;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21327:", typeof(ArgumentException)),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == Int64.MaxValue",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMaxTicks,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMaxTicks)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceMaxTicks))
                     }
                 });
 
                 string nonceMinTicks = Int64.MinValue.ToString() + "." + nonceWithoutTimestamp;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == Int64.MinValue",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMinTicks,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMinTicks)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceMinTicks))
                     }
                 });
 
                 string nonceTicksNegative = ((Int64)(-1)).ToString() + "." + nonceWithoutTimestamp;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks == ((Int64)(-1))",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksNegative,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksNegative)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceTicksNegative))
                     }
                 });
 
                 string nonceTicksZero = ((Int64)(0)).ToString() + "." + nonceWithoutTimestamp;
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21326:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireNonce = false, RequireTimeStampInNonce = true },
                     TestId = "Nonce ticks ==  ((Int64)(0))",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksZero,
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksZero)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken(new JProperty(JwtRegisteredClaimNames.Nonce, nonceTicksZero))
                     }
                 });
 
@@ -1325,7 +1310,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateAtHashTheoryData))]
-        public void ValidateAtHash(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateAtHash(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAtHash", theoryData);
             try
@@ -1339,107 +1324,99 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateAtHashTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateAtHashTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var jsonWebTokenHandler = new JsonWebTokenHandler();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException(),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null"
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21332:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "validationContext.ValidatedIdToken == null",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId = "validationContext.ValidatedJsonWebToken == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                    ValidationContext = new OpenIdConnectProtocolValidationContext { ValidatedIdToken = CreateValidatedIdToken() }
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                    ValidationContext = new OpenIdConnectProtocolValidationContext { ValidatedJsonWebToken = CreateValidatedIdToken() }
                 });
 
                 var token = Guid.NewGuid().ToString();
                 var hashClaimValue256 = IdentityUtilities.CreateHashClaim(token, "SHA256");
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "Jwt.at_hash == hash(access_token)",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
                 var hashClaimValue512 = IdentityUtilities.CreateHashClaim(token, "SHA512");
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21348:", typeof(OpenIdConnectProtocolException)),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "Jwt.at_hash != hash(access_token) - 256 - 512",
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
+                    TestId ="Jwt.at_hash != hash(access_token) - 256 - 512",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
-                        ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue512) }, signingCredentials: Default.AsymmetricSigningCredentials)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ProtocolMessage = new OpenIdConnectMessage{ AccessToken = token},
+                        ValidatedJsonWebToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue512 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21348:", typeof(OpenIdConnectProtocolException)),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "Jwt.at_hash != hash(access_token)",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
-                {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId = "multiple at_hash claims",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
-                    {
-                        ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256), new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                    }
-                });
+                // The test case below cannot be recreated using the Microsoft.IdentityModel.JsonWebTokens library, as it is impossible to add a duplicate property
+                // to a JObject.
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                //theoryData.Add(new OidcProtocolValidatorTheoryData
+                //{
+                //    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
+                //    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                //    TestId = "multiple at_hash claims",
+                //    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                //    {
+                //        ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+                //        ValidatedIdToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(new JObject() { { "at_hash", hashClaimValue256 }, { "at_hash", hashClaimValue256 } }.ToString(), Default.AsymmetricSigningCredentials))
+                //    }
+                //});
+
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21312:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "Jwt.at_hash == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
-#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                        ValidatedIdToken = CreateValidatedIdToken()
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = CreateValidatedIdToken()
                     }
                 });
 
@@ -1448,7 +1425,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateStateTheoryData))]
-        public void ValidateState(OidcProtocolValidatorTheoryData theoryData)
+        public void ValidateState(OidcProtocolValidatorJsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateState", theoryData);
             try
@@ -1462,39 +1439,39 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
-        public static TheoryData<OidcProtocolValidatorTheoryData> ValidateStateTheoryData
+        public static TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData> ValidateStateTheoryData
         {
             get
             {
-                var theoryData = new TheoryData<OidcProtocolValidatorTheoryData>();
+                var theoryData = new TheoryData<OidcProtocolValidatorJsonWebTokenTheoryData>();
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     First = true,
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator(),
                     TestId = "validationContext == null"
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21329:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = true },
                     TestId = "validationContext.State == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = false },
                     TestId = "validationContext.State == null, RequireState == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ProtocolMessage = new OpenIdConnectMessage() }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21330:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = true },
                     TestId = "validationContext.state != null, protocolMessage.state == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
@@ -1504,9 +1481,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 });
 
                 var state = Guid.NewGuid().ToString();
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = true },
                     TestId = "validationContext.state == protocolMessage.state",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
@@ -1515,10 +1492,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     }
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21331:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = true },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = true },
                     TestId = "validationContext.state != protocolMessage.state, RequireState = true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
@@ -1527,45 +1504,45 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireStateValidation = false },
                     TestId = "validationContext.state != protocolMessage.state, RequireStateValidation = false",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
                     {
                         State = Guid.NewGuid().ToString(),
                         ProtocolMessage = new OpenIdConnectMessage { State = Guid.NewGuid().ToString() },
                     },
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = false },
                     TestId = "validationContext.state == null, protocolMessage.state == null, RequireState = false",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage(),
                     },
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21330:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = false },
                     TestId = "validationContext.state != null, protocolMessage.state == null, RequireState = false",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage(),
                         State = Guid.NewGuid().ToString()
                     },
                 });
 
-                theoryData.Add(new OidcProtocolValidatorTheoryData
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21329:"),
-                    ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
+                    ProtocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireState = false },
                     TestId = "validationContext.state == null, protocolMessage.state != null, RequireState = false",
-                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { State = Guid.NewGuid().ToString() }
                     },
@@ -1686,7 +1663,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 ee.ProcessNoException();
                 Assert.True(hash.GetType() == algorithmType);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 ee.ProcessException(ex);
             }
@@ -1730,16 +1707,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
     }
 
-    public class OidcProtocolValidatorTheoryData : TheoryDataBase
+    public class OidcProtocolValidatorJsonWebTokenTheoryData : TheoryDataBase
     {
-        public JwtSecurityToken JwtSecurityToken { get; set; }
+        public JsonWebToken JsonWebToken { get; set; }
 
         public OpenIdConnectProtocolValidationContext ValidationContext { get; set; }
 
-        public PublicOpenIdConnectProtocolValidator ProtocolValidator { get; set; } = new PublicOpenIdConnectProtocolValidator();
+        public PublicOpenIdConnectJsonWebTokenProtocolValidator ProtocolValidator { get; set; } = new PublicOpenIdConnectJsonWebTokenProtocolValidator();
     }
 
-    public class PublicOpenIdConnectProtocolValidator : OpenIdConnectProtocolValidator
+    public class PublicOpenIdConnectJsonWebTokenProtocolValidator : OpenIdConnectProtocolValidator
     {
         public void PublicValidateIdToken(OpenIdConnectProtocolValidationContext context)
         {

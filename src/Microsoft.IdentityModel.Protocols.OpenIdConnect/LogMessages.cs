@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21329 = "IDX21329: RequireState is '{0}' but the OpenIdConnectProtocolValidationContext.State is null. State cannot be validated.";
         internal const string IDX21330 = "IDX21330: RequireState is '{0}', the OpenIdConnect Request contained 'state', but the Response does not contain 'state'.";
         internal const string IDX21331 = "IDX21331: The 'state' parameter in the message: '{0}', does not equal the 'state' in the context: '{1}'.";
-        internal const string IDX21332 = "IDX21332: OpenIdConnectProtocolValidationContext.ValidatedIdToken is null. There is no 'id_token' to validate against.";
+        internal const string IDX21332 = "IDX21332: OpenIdConnectProtocolValidationContext.ValidatedJsonWebToken and OpenIdConnectProtocolValidationContext.ValidatedIdToken are both null. There is no 'id_token' to validate against.";
         internal const string IDX21333 = "IDX21333: OpenIdConnectProtocolValidationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.";
         internal const string IDX21334 = "IDX21334: Both 'id_token' and 'code' are null in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Authorization Endpoint. Cannot process the message.";
         internal const string IDX21335 = "IDX21335: 'refresh_token' cannot be present in a response message received from Authorization Endpoint.";
