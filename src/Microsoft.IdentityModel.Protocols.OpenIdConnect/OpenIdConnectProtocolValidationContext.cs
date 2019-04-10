@@ -25,6 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
@@ -68,6 +71,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// This id_token is assumed to have audience, issuer, lifetime and signature validated.
         /// </summary>
-        public SecurityToken ValidatedIdToken { get; set; }
+        [Obsolete("The 'ValidatedIdToken' property is obsolete. Please use 'ValidatedJsonWebToken' instead.")]
+        public JwtSecurityToken ValidatedIdToken { get; set; }
+
+        /// <summary>
+        /// This JWT security token is assumed to have audience, issuer, lifetime and signature validated.
+        /// </summary>
+        public JsonWebToken ValidatedJsonWebToken { get; set; }
     }
 }

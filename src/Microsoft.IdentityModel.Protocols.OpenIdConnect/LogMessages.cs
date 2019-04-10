@@ -47,12 +47,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21303 = "IDX21303: Validating hash of OIDC protocol message. Expected: '{0}'.";
         internal const string IDX21304 = "IDX21304: Validating 'c_hash' using id_token and code.";
         internal const string IDX21305 = "IDX21305: OpenIdConnectProtocolValidationContext.ProtocolMessage.Code is null, there is no 'code' in the OpenIdConnect Response to validate.";
-        // internal const string IDX21306 = "IDX21306:";
+        internal const string IDX21306 = "IDX21306: The 'c_hash' claim was not a string in the 'id_token', but a 'code' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX21307 = "IDX21307: The 'c_hash' claim was not found in the id_token, but a 'code' was in the OpenIdConnectMessage, id_token: '{0}'";
         internal const string IDX21308 = "IDX21308: 'Azp' claim exists in the 'id_token' but 'ciient_id' is null. Cannot validate the 'azp' claim.";
         internal const string IDX21309 = "IDX21309: Validating 'at_hash' using id_token and access_token.";
         internal const string IDX21310 = "IDX21310: OpenIdConnectProtocolValidationContext.ProtocolMessage.AccessToken is null, there is no 'token' in the OpenIdConnect Response to validate.";
-        // internal const string IDX21311 = "IDX21311:";
+        internal const string IDX21311 = "IDX21311: The 'at_hash' claim was not a string in the 'id_token', but an 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX21312 = "IDX21312: The 'at_hash' claim was not found in the 'id_token', but a 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX21313 = "IDX21313: The id_token: '{0}' is not valid. Delegate threw exception, see inner exception for more details.";
         internal const string IDX21314 = "IDX21314: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21329 = "IDX21329: RequireState is '{0}' but the OpenIdConnectProtocolValidationContext.State is null. State cannot be validated.";
         internal const string IDX21330 = "IDX21330: RequireState is '{0}', the OpenIdConnect Request contained 'state', but the Response does not contain 'state'.";
         internal const string IDX21331 = "IDX21331: The 'state' parameter in the message: '{0}', does not equal the 'state' in the context: '{1}'.";
-        internal const string IDX21332 = "IDX21332: OpenIdConnectProtocolValidationContext.ValidatedIdToken is null. There is no 'id_token' to validate against.";
+        internal const string IDX21332 = "IDX21332: OpenIdConnectProtocolValidationContext.ValidatedJsonWebToken and OpenIdConnectProtocolValidationContext.ValidatedIdToken are both null. There is no 'id_token' to validate against.";
         internal const string IDX21333 = "IDX21333: OpenIdConnectProtocolValidationContext.ProtocolMessage is null, there is no OpenIdConnect Response to validate.";
         internal const string IDX21334 = "IDX21334: Both 'id_token' and 'code' are null in OpenIdConnectProtocolValidationContext.ProtocolMessage received from Authorization Endpoint. Cannot process the message.";
         internal const string IDX21335 = "IDX21335: 'refresh_token' cannot be present in a response message received from Authorization Endpoint.";
@@ -91,7 +91,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21348 = "IDX21348: Validating the 'at_hash' failed, see inner exception.";
         internal const string IDX21349 = "IDX21349: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was not null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was null or empty. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
         internal const string IDX21350 = "IDX21350: The algorithm specified in the jwt header is null or empty.";
-        internal const string IDX21351 = "IDX21351: OpenIdConnectProtocolValidationContext.ValidatedIdToken is is not a '{0}' but rather a '{1}'.";
 
         // configuration retrieval errors
         internal const string IDX21806 = "IDX21806: Deserializing json string into json web keys.";
