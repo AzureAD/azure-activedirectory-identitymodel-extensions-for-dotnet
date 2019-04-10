@@ -53,6 +53,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// </summary>
     /// <param name="idToken"><see cref="JwtSecurityToken"/> to validate</param>
     /// <param name="context"><see cref="OpenIdConnectProtocolValidationContext"/> used for validation</param>
+    [Obsolete("The 'IdTokenValidator' is used for validating 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' which is now obsolete. " +
+        "Please use the 'OpenIdConnectProtocolValidationContext.ValidatedJsonWebToken' and the corresponding 'JsonWebTokenValidator'.")]
     public delegate void IdTokenValidator(JwtSecurityToken idToken, OpenIdConnectProtocolValidationContext context);
 
     /// <summary>
@@ -230,7 +232,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets the delegate for validating 'id_token' (of type <see cref="JwtSecurityToken"/>).
         /// </summary>
+#pragma warning disable 0618 // 'IdTokenValidator' is obsolete.
         public IdTokenValidator IdTokenValidator { get; set; }
+#pragma warning restore 0618 // 'IdTokenValidator' is obsolete.
 
         /// <summary>
         /// Gets or sets the delegate for validating 'id_token' (of type <see cref="JsonWebToken"/>).
