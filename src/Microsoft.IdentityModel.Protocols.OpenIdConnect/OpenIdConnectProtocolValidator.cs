@@ -441,7 +441,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 if (idToken.IssuedAt.Equals(DateTime.MinValue))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
 
-                if (idToken.Issuer == null)
+                if (idToken.Issuer.Equals(string.Empty))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
                 // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
@@ -665,8 +665,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else // validationContext.ValidatedIdToken != null
             {
-                object cHashClaim;
-                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out cHashClaim))
+                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out var cHashClaim))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedIdToken)));
                 chash = cHashClaim as string;
                 if (chash == null)
@@ -725,8 +724,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else // validationContext.ValidatedIdToken != null
             {
-                object atHashClaim;
-                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out atHashClaim))
+                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out var atHashClaim))
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validationContext.ValidatedIdToken)));
 
                 atHash = atHashClaim as string;

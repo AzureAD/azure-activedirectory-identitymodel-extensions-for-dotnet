@@ -87,6 +87,37 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return new JsonWebToken(header.ToString(), payload.ToString());
         }
 
+        private static JsonWebToken CreateValidatedIdToken(List<JProperty> jProperties, string alg)
+        {
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow) },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { JwtRegisteredClaimNames.Nonce, Default.Nonce },
+                { JwtRegisteredClaimNames.Sub, Default.Subject }
+            };
+
+            if (jProperties != null)
+            {
+                foreach(var jProperty in jProperties)
+                {
+                    if (payload.ContainsKey(jProperty.Name))
+                    {
+                        payload.Remove(jProperty.Name);
+                    }
+                    payload.Add(jProperty);
+                }            
+            }
+
+            var header = new JObject();
+            if (alg != null)
+                header[JwtHeaderParameterNames.Alg] = alg;
+
+            return new JsonWebToken(header.ToString(), payload.ToString());
+        }
+
         private static JsonWebToken CreateValidatedIdTokenWithoutNonce()
         {
             var payload = new JObject()
@@ -322,6 +353,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             Code = string.Empty,
                             IdToken = string.Empty,
                         }
+                    }
+                });
+
+                var protocolValidator = new PublicOpenIdConnectJsonWebTokenProtocolValidator { RequireTimeStampInNonce = true, RequireState = true };
+                var nonce = protocolValidator.GenerateNonce();
+                var state = Guid.NewGuid().ToString();
+                var code = Guid.NewGuid().ToString();
+                var accessToken = Guid.NewGuid().ToString();
+                var chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
+                var athash256 = IdentityUtilities.CreateHashClaim(accessToken, "SHA256");
+                var token = CreateValidatedIdToken(new List<JProperty> { new JProperty(JwtRegisteredClaimNames.Nonce,nonce), new JProperty(JwtRegisteredClaimNames.CHash, chash256), new JProperty(JwtRegisteredClaimNames.AtHash, athash256) }, SecurityAlgorithms.RsaSha256);
+                theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData
+                {
+                    ProtocolValidator = protocolValidator,
+                    TestId = "ValidateAll",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    {
+                        State = state,
+                        Nonce = nonce,
+                        ProtocolMessage = new OpenIdConnectMessage { State = state, Code = code, IdToken = Guid.NewGuid().ToString(), AccessToken = accessToken },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedJsonWebToken = token
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -632,6 +686,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 payload[JwtRegisteredClaimNames.Aud] = Default.Audience;
                 payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
                 payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow).ToString();
+                payload[JwtRegisteredClaimNames.Sub] = Default.Subject;
                 jwt = new JsonWebToken("{}", payload.ToString());
 
                 theoryData.Add(new OidcProtocolValidatorJsonWebTokenTheoryData

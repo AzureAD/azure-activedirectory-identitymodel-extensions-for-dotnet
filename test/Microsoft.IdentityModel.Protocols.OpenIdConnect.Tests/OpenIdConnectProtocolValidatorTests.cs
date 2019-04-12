@@ -79,6 +79,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return new JwtSecurityToken(header, payload);
         }
 
+        private static JwtSecurityToken CreateValidatedIdToken(List<string> claimTypes, List<object> claimValues, string alg)
+        {
+            var header = new JwtHeader();
+            var payload = new JwtPayload
+            {
+                [JwtRegisteredClaimNames.Aud] = Default.Audience,
+                [JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(DateTime.UtcNow),
+                [JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(DateTime.UtcNow),
+                [JwtRegisteredClaimNames.Iss] = Default.Issuer,
+                [JwtRegisteredClaimNames.Nonce] = Default.Nonce,
+                [JwtRegisteredClaimNames.Sub] = Default.Subject
+            };
+
+            if (alg != null)
+                header[JwtHeaderParameterNames.Alg] = alg;
+
+            for (var i = 0; i < claimTypes.Count; i++)
+                payload[claimTypes[i]] = claimValues[i];
+
+            return new JwtSecurityToken(header, payload);
+        }
+
         [Fact]
         public void GenerateNonce()
         {
@@ -226,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         }
                     }
                 });
-                
+
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21335:"),
@@ -239,7 +261,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             IdToken = Guid.NewGuid().ToString(),
                             RefreshToken = Guid.NewGuid().ToString()
                         },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = new JwtSecurityToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -276,6 +300,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             Code = string.Empty,
                             IdToken = string.Empty,
                         }
+                    }
+                });
+
+                var protocolValidator = new PublicOpenIdConnectProtocolValidator { RequireTimeStampInNonce = true, RequireState = true};
+                var nonce = protocolValidator.GenerateNonce();
+                var state = Guid.NewGuid().ToString();
+                var code = Guid.NewGuid().ToString();
+                var accessToken = Guid.NewGuid().ToString();
+                var chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
+                var athash256 = IdentityUtilities.CreateHashClaim(accessToken, "SHA256");
+                var token = CreateValidatedIdToken(new List<string> { JwtRegisteredClaimNames.Nonce, JwtRegisteredClaimNames.CHash, JwtRegisteredClaimNames.AtHash }, new List<object> { nonce, chash256, athash256 }, SecurityAlgorithms.RsaSha256);
+                theoryData.Add(new OidcProtocolValidatorTheoryData
+                {
+                    ProtocolValidator = protocolValidator,
+                    TestId = "ValidateAll",
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
+                    {
+                        State = state,
+                        Nonce = nonce,
+                        ProtocolMessage = new OpenIdConnectMessage { State = state, Code = code , IdToken = token.ToString(), AccessToken = accessToken},
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedIdToken = token
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -373,7 +420,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             AccessToken = Guid.NewGuid().ToString(),
                             IdToken = Guid.NewGuid().ToString()
                         },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -434,7 +483,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         UserInfoEndpointResponse = "response",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(),
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -446,7 +497,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         UserInfoEndpointResponse = @"{ ""tid"":""42"",""name"":""bob""}",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(),
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -459,8 +512,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "ValidatedIdToken.sub == null",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub1""}",
+                        UserInfoEndpointResponse = @"{ ""sub"": ""sub1""}",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = jwtWithoutSub
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -471,8 +526,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "UserInfoEndpointResponse.sub != ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub1""}",
+                        UserInfoEndpointResponse = @"{ ""sub"": ""sub1""}",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -482,8 +539,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "(JSON) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse =  @"{ ""sub"": ""sub""}",
+                        UserInfoEndpointResponse = @"{ ""sub"": ""sub""}",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -493,8 +552,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "(JWT) UserInfoResponse.sub == ValidatedIdToken.sub",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
-                        UserInfoEndpointResponse =  (new JwtSecurityTokenHandler()).WriteToken(CreateValidatedIdToken("sub", "sub")),
+                        UserInfoEndpointResponse = (new JwtSecurityTokenHandler()).WriteToken(CreateValidatedIdToken("sub", "sub")),
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken("sub", "sub")
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -508,8 +569,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.ValidateIdToken", theoryData);
 
             // should put this in ValidationContext
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
             theoryData.ValidationContext.ValidatedIdToken = theoryData.JwtSecurityToken;
-
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
             try
             {
                 theoryData.ProtocolValidator.PublicValidateIdToken(theoryData.ValidationContext);
@@ -781,7 +843,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         TestId = "validationContext.ProtocolMessage == null",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -790,7 +854,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage(),
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -800,7 +867,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -810,7 +879,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, string.Empty)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -820,7 +891,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.None)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -830,7 +903,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, null)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -840,7 +915,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, "")
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -849,7 +926,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -858,7 +937,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha384)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -867,7 +948,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha512)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -877,7 +960,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -887,7 +972,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -897,7 +984,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -907,7 +996,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash384, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -917,7 +1008,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha256)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -927,7 +1020,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash512, SecurityAlgorithms.RsaSha384)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.          
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -937,7 +1032,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha384)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -947,7 +1044,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, new List<string> { "chash1", "chash2" })
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     },
                     new OidcProtocolValidatorTheoryData
@@ -957,7 +1056,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                             ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim(JwtRegisteredClaimNames.CHash, chash256), new Claim(JwtRegisteredClaimNames.CHash, chash512) }, signingCredentials: Default.AsymmetricSigningCredentials)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         }
                     }
                 };
@@ -1013,7 +1114,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "validationContext.Nonce == null, jwt.Nonce == null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = jwtWithoutNonce
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1024,7 +1127,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == true",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1036,7 +1141,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = Default.Nonce,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = jwtWithoutNonce
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1046,7 +1153,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "validationContext.Nonce == null, jwt.Nonce == null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = jwtWithoutNonce
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1057,7 +1166,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     TestId = "validationContext.Nonce == null, jwt.Nonce != null, RequireNonce == false",
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1069,7 +1180,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = Default.Nonce,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = jwtWithoutNonce
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1082,7 +1195,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonce,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonce)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1096,7 +1211,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceWithoutTimestamp,
-                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp )
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                        ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceWithoutTimestamp)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1108,7 +1225,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = protocolValidatorRequiresTimeStamp.GenerateNonce(),
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, protocolValidatorRequiresTimeStamp.GenerateNonce())
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1120,11 +1239,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = "abc.abc",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, "abc.abc")
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
-                string nonceExpired = (DateTime.UtcNow-TimeSpan.FromDays(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonceWithoutTimestamp;
+                string nonceExpired = (DateTime.UtcNow - TimeSpan.FromDays(20)).Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonceWithoutTimestamp;
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidNonceException), "IDX21324:"),
@@ -1133,7 +1254,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceExpired,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceExpired)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1146,7 +1269,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMaxTicks,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMaxTicks)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1159,7 +1284,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceMinTicks,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceMinTicks)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1172,7 +1299,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksNegative,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksNegative)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1185,7 +1314,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         Nonce = nonceTicksZero,
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.Nonce, nonceTicksZero)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1235,7 +1366,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21333:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "validationContext.ProtocolMessage == null",
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     ValidationContext = new OpenIdConnectProtocolValidationContext { ValidatedIdToken = CreateValidatedIdToken() }
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                 });
 
                 var token = Guid.NewGuid().ToString();
@@ -1247,7 +1380,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1256,11 +1391,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21348:", typeof(OpenIdConnectProtocolException)),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
-                    TestId ="Jwt.at_hash != hash(access_token) - 256 - 512",
+                    TestId = "Jwt.at_hash != hash(access_token) - 256 - 512",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
-                        ProtocolMessage = new OpenIdConnectMessage{ AccessToken = token},
+                        ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue512) }, signingCredentials: Default.AsymmetricSigningCredentials)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1272,7 +1409,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1284,7 +1423,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256), new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1296,7 +1437,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ValidationContext = new OpenIdConnectProtocolValidationContext
                     {
                         ProtocolMessage = new OpenIdConnectMessage { AccessToken = Guid.NewGuid().ToString() },
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                         ValidatedIdToken = CreateValidatedIdToken()
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
                     }
                 });
 
@@ -1388,7 +1531,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireStateValidation = false },
                     TestId = "validationContext.state != protocolMessage.state, RequireStateValidation = false",
-                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         State = Guid.NewGuid().ToString(),
                         ProtocolMessage = new OpenIdConnectMessage { State = Guid.NewGuid().ToString() },
@@ -1399,7 +1542,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
                     TestId = "validationContext.state == null, protocolMessage.state == null, RequireState = false",
-                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage(),
                     },
@@ -1410,7 +1553,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21330:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
                     TestId = "validationContext.state != null, protocolMessage.state == null, RequireState = false",
-                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage(),
                         State = Guid.NewGuid().ToString()
@@ -1422,7 +1565,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidStateException), "IDX21329:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator { RequireState = false },
                     TestId = "validationContext.state == null, protocolMessage.state != null, RequireState = false",
-                    ValidationContext =  new OpenIdConnectProtocolValidationContext()
+                    ValidationContext = new OpenIdConnectProtocolValidationContext()
                     {
                         ProtocolMessage = new OpenIdConnectMessage { State = Guid.NewGuid().ToString() }
                     },
@@ -1543,7 +1686,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 ee.ProcessNoException();
                 Assert.True(hash.GetType() == algorithmType);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }
