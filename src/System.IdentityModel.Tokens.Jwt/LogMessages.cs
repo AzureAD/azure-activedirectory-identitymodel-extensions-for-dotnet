@@ -65,6 +65,11 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12739 = "IDX12739: JWT: '{0}' has three segments but is not in proper JWS format.";
         internal const string IDX12740 = "IDX12740: JWT: '{0}' has five segments but is not in proper JWE format.";
         internal const string IDX12741 = "IDX12741: JWT: '{0}' must have three segments (JWS) or five segments (JWE).";
+
+        //parsing
+        internal const string IDX12800 = "IDX12800: Claim with name '{0}' does not exist in the header.";
+        internal const string IDX12801 = "IDX12801: Claim with name '{0}' does not exist in the payload.";
+        internal const string IDX12802 = "IDX12802: Unable to convert the '{0}' claim to the following type: '{1}'. Claim type was: '{2}'.";
 #pragma warning restore 1591
     }
 }

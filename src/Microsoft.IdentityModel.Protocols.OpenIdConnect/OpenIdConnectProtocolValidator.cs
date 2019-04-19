@@ -42,11 +42,11 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Delegate for validating additional claims in 'id_token' (of type <see cref="JsonWebToken"/>).
+    /// Delegate for validating additional claims in 'id_token' (of type <see cref="IJsonWebToken"/>).
     /// </summary>
-    /// <param name="idToken"><see cref="JsonWebToken"/> to validate</param>
+    /// <param name="idToken"><see cref="IJsonWebToken"/> to validate</param>
     /// <param name="context"><see cref="OpenIdConnectProtocolValidationContext"/> used for validation</param>
-    public delegate void JsonWebTokenValidator(JsonWebToken idToken, OpenIdConnectProtocolValidationContext context);
+    public delegate void JsonWebTokenValidator(IJsonWebToken idToken, OpenIdConnectProtocolValidationContext context);
 
     /// <summary>
     /// Delegate for validating additional claims in 'id_token' (of type <see cref="JwtSecurityToken"/>).

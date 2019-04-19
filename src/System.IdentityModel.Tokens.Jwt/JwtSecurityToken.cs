@@ -25,18 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Security.Claims;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
-    public class JwtSecurityToken : SecurityToken
+    public class JwtSecurityToken : SecurityToken, IJsonWebToken
     {
         private JwtPayload _payload;
 
@@ -58,7 +59,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
             // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
             // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            string[] tokenParts = jwtEncodedString.Split(new char[] {'.'}, JwtConstants.MaxJwtSegmentCount + 1);
+            string[] tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJws.IsMatch(jwtEncodedString))
@@ -212,7 +213,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the 'value' of the 'actor' claim { actort, 'value' }.
         /// </summary>
-        /// <remarks>If the 'actor' claim is not found, null is returned.</remarks> 
+        /// <remarks>If the 'actor' claim is not found, an empty string is returned.</remarks> 
         public string Actor
         {
             get
@@ -223,13 +224,29 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+
+        /// <summary>
+        /// Gets the 'value' of the 'alg' claim { alg, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the 'alg' claim is not found, an empty string is returned.</remarks> 
+        public string Alg
+        {
+            get
+            {
+                if (Header != null)
+                    return Header.Alg;
+                return String.Empty;
+            }
+        }
+
         /// <summary>
         /// Gets the list of 'audience' claim { aud, 'value' }.
         /// </summary>
         /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
-            get {
+            get
+            {
                 if (Payload != null)
                     return Payload.Aud;
                 return new List<string>();
@@ -244,13 +261,41 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get {
+            get
+            {
                 if (Payload != null)
                     return Payload.Claims;
                 return new List<Claim>();
             }
         }
 
+        /// <summary>
+        /// Gets the 'value' of the 'cty' claim { cty, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the 'cty' claim is not found, an empty string is returned.</remarks> 
+        public string Cty
+        {
+            get
+            {
+                if (Header != null)
+                    return Header.Cty;
+                return String.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'enc' claim { enc, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the 'enc' claim is not found, an empty string is returned.</remarks> 
+        public string Enc
+        {
+            get
+            {
+                if (Header != null)
+                    return Header.Enc;
+                return String.Empty;
+            }
+        }
         /// <summary>
         /// Gets the Base64UrlEncoded <see cref="JwtHeader"/> associated with this instance.
         /// </summary>
@@ -293,6 +338,21 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets the 'value' of the 'iat' claim { iat, 'value' } from the <see cref="JwtPayload"/>.
+        /// This value is converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// </summary>
+        /// <remarks>If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
+        public DateTime IssuedAt
+        {
+            get
+            {
+                if (Payload != null)
+                    return EpochTime.DateTime(Convert.ToInt64(Math.Truncate(Convert.ToDouble(Payload.Iat)), CultureInfo.InvariantCulture));
+                return DateTime.MinValue;
+            }
+        }
+
+        /// <summary>
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'issuer' claim is not found, an empty string is returned.</remarks>
@@ -312,7 +372,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
-        public JwtPayload Payload {
+        public JwtPayload Payload
+        {
             get
             {
                 if (InnerToken != null)
@@ -329,6 +390,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Gets the <see cref="JwtSecurityToken"/> associated with this instance.
         /// </summary>
         public JwtSecurityToken InnerToken { get; internal set; }
+
+        /// <summary>
+        /// Gets the 'value' of the 'kid' claim { kid, 'value' } from the <see cref="JwtHeader"/>.  
+        /// </summary>
+        /// <remarks>If the 'kid' claim is not found, an empty string is returned.</remarks>
+        public string Kid
+        {
+            get
+            { 
+                if (Header != null)
+                    return Header.Kid;
+                return String.Empty;
+            }
+        }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -412,6 +487,20 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets the 'value' of the 'typ' claim { typ, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the 'typ' claim is not found, an empty string is returned.</remarks>
+        public string Typ
+        {
+            get
+            {
+                if (Header != null)
+                    return Header.Typ;
+                return String.Empty;
+            }
+        }
+
+        /// <summary>
         /// Gets the <see cref="EncryptingCredentials"/> to use when writing this token.
         /// </summary>
         public EncryptingCredentials EncryptingCredentials
@@ -428,7 +517,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Gets the "value" of the 'subject' claim { sub, 'value' }.
         /// </summary>
-        /// <remarks>If the 'subject' claim is not found, null is returned.</remarks>
+        /// <remarks>If the 'subject' claim is not found, an empty string is returned.</remarks>
         public string Subject
         {
             get
@@ -478,6 +567,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (Payload != null)
                     return Payload.IssuedAt;
                 return DateTime.MinValue;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'x5t' claim { x5t, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the 'x5t' claim is not found, an empty string is returned.</remarks>
+        public string X5t
+        {
+            get
+            {
+                if (Header != null)
+                    return Header.X5t;
+                return String.Empty;
             }
         }
 
@@ -555,6 +658,118 @@ namespace System.IdentityModel.Tokens.Jwt
             RawInitializationVector = tokenParts[2];
             RawCiphertext = tokenParts[3];
             RawAuthenticationTag = tokenParts[4];
+        }
+
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key { key, 'value' } from the <see cref="JwtPayload"/>.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        public T GetPayloadValue<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!Payload.TryGetValue(key, out var payloadValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12801, key)));
+
+            T value;
+            try
+            {
+                value = (T)payloadValue;
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12802, key, typeof(T), payloadValue.GetType()), ex));
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Tries to get the 'value' corresponding to the provided key { key, 'value' } from the <see cref="JwtPayload"/>. 
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        public bool TryGetPayloadValue<T>(string key, out T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = default(T);
+                return false;
+            }
+
+            if (!Payload.TryGetValue(key, out var payloadValue))
+            {
+                value = default(T);
+                return false;
+            }
+
+            try
+            {
+                value = (T)payloadValue;
+            }
+            catch (Exception)
+            {
+                value = default(T);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the 'value' corresponding to the provided key { key, 'value' } from the <see cref="JwtHeader"/>.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns null. </remarks>   
+        public T GetHeaderValue<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!Header.TryGetValue(key, out var headerValue))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12800, key)));
+
+            T value;
+            try
+            {
+                value = (T)headerValue;
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12802, key, typeof(T), headerValue.GetType()), ex));
+            }
+
+            return value; 
+        }
+
+        /// <summary>
+        /// Tries to get the value corresponding to the provided key from the <see cref="JwtHeader"/> { key, 'value' }.
+        /// </summary>
+        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        public bool TryGetHeaderValue<T>(string key, out T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = default(T);
+                return false;
+            }
+
+            if (!Header.TryGetValue(key, out var headerValue))
+            {
+                value = default(T);
+                return false;
+            }
+
+            try
+            {
+                value = (T)headerValue;
+            }
+            catch (Exception)
+            {
+                value = default(T);
+                return false;
+            }
+
+            return true;
         }
     }
 }
