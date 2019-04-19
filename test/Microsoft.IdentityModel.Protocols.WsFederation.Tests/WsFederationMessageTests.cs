@@ -532,6 +532,45 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
+        [Theory, MemberData(nameof(GetTokenAspWsFedHandlerTestTheoryData))]
+        public void GetTokenAspWsFedHandlerTest(WsFederationMessageTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetTokenAspWsFedHandlerTest", theoryData);
+            try
+            {
+                var token = theoryData.WsFederationMessageTestSet.WsFederationMessage.GetToken();
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsFederationMessageTheoryData> GetTokenAspWsFedHandlerTestTheoryData
+        {
+            get
+            {
+                return new TheoryData<WsFederationMessageTheoryData>
+                {
+                    new WsFederationMessageTheoryData
+                    {
+                        First = true,
+                        WsFederationMessageTestSet = new WsFederationMessageTestSet
+                        {
+                            WsFederationMessage = new WsFederationMessage
+                            {
+                                Wresult = ReferenceXml.WresultAspWsFedHandlerValidToken
+                            }
+                        },
+                        TestId = "AspWSFedHandlerValidTokenTest"
+                    }
+                };
+            }
+        }
+
         [Theory, MemberData(nameof(GetTokenNegativeTestTheoryData))]
         public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
         {
