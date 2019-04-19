@@ -285,6 +285,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
                                 // <RequestedSecurityToken>
                                 xmlReader.ReadStartElement();
+
+                                // once RequestedSecurityToken element is found, it's written into a token.
+                                // as the current node might not be a content node, the reader should skip ahead to the next content node.
+                                xmlReader.MoveToContent();
+
                                 using (var ms = new MemoryStream())
                                 {
                                     using (var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
