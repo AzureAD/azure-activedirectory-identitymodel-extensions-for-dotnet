@@ -163,19 +163,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var jweTokenFromSecurityTokenDescriptor = validationResultFromSecurityTokenDescriptor.SecurityToken as JsonWebToken;
                 var jweTokenFromString = validationResultFromString.SecurityToken as JsonWebToken;
 
-                // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
-                // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
-                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
-                {
-                    var innerTokenFromSecurityTokenDescriptor = jweTokenFromSecurityTokenDescriptor.InnerToken as JsonWebToken;
-                    var innerTokenFromString = jweTokenFromString.InnerToken as JsonWebToken;
-
-                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, innerTokenFromSecurityTokenDescriptor.Kid, context);
-                    IdentityComparer.AreEqual(innerTokenFromString.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(innerTokenFromString.X5t, innerTokenFromString.Kid, context);
-                }
-
                 context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
                     { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector" } },
@@ -422,21 +409,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 IdentityComparer.AreEqual(tokenValidationResultFromSecurityTokenDescriptor.IsValid, theoryData.IsValid, context);
                 IdentityComparer.AreEqual(tokenValidationResultFromString.IsValid, theoryData.IsValid, context);
+                IdentityComparer.AreEqual(new JsonWebToken(jwtFromSecurityTokenDescriptor), new JsonWebToken(jwtFromString), context);
 
-                var jwsTokenFromSecurityTokenDescriptor = new JsonWebToken(jwtFromSecurityTokenDescriptor);
-                var jwsTokenFromString = new JsonWebToken(jwtFromString);
-
-                // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
-                // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
-                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
-                {
-                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, jwsTokenFromSecurityTokenDescriptor.Kid, context);
-                    IdentityComparer.AreEqual(jwsTokenFromString.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(jwsTokenFromString.X5t, jwsTokenFromString.Kid, context);
-                }
-
-                IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor, jwsTokenFromString, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
