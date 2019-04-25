@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var rawSignature = JwtTokenUtilities.CreateEncodedSignature(message, signingCredentials);
 
             if (encryptingCredentials != null)
-                return EncryptToken(message + "." + rawSignature, encryptingCredentials, algorithm);
+                return EncryptTokenPrivate(message + "." + rawSignature, encryptingCredentials, algorithm);
             else
                 return message + "." + rawSignature;
         }
@@ -475,7 +475,59 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     Base64UrlEncoder.DecodeBytes(jwtToken.AuthenticationTag));
         }
 
-        private string EncryptToken(string innerJwt, EncryptingCredentials encryptingCredentials, string algorithm)
+        /// <summary>
+        /// Encrypts a JWS.
+        /// </summary>
+        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        public string EncryptToken(string innerJwt, EncryptingCredentials encryptingCredentials)
+        {
+            if (string.IsNullOrEmpty(innerJwt))
+                throw LogHelper.LogArgumentNullException(nameof(innerJwt));
+
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
+
+            return EncryptTokenPrivate(innerJwt, encryptingCredentials, null);
+        }
+
+        /// <summary>
+        /// Encrypts a JWS.
+        /// </summary>
+        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
+        /// <param name="algorithm">Defines the compression algorithm that will be used to compress the 'innerJwt'.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if 'algorithm' is null or empty.</exception>
+        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenCompressionFailedException">if compression using 'algorithm' fails.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        public string EncryptToken(string innerJwt, EncryptingCredentials encryptingCredentials, string algorithm)
+        {
+            if (string.IsNullOrEmpty(innerJwt))
+                throw LogHelper.LogArgumentNullException(nameof(innerJwt));
+
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
+
+            if (string.IsNullOrEmpty(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            return EncryptTokenPrivate(innerJwt, encryptingCredentials, algorithm);
+        }
+
+        private string EncryptTokenPrivate(string innerJwt, EncryptingCredentials encryptingCredentials, string algorithm)
         {
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 

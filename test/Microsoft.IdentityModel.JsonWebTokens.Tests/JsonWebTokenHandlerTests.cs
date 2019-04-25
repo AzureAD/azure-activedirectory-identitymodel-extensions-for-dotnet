@@ -372,7 +372,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-
         public static TheoryData<CreateTokenTheoryData> CreateJWSTheoryData
         {
             get
@@ -657,9 +656,41 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Theory, MemberData(nameof(RoundTripJWEDirectEncryptionTheoryData))]
+        public void RoundTripEncryptExistingJWSUsingDirectEncryption(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripEncryptExistingJWSUsingDirectEncryption", theoryData);
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var innerJwt = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+            var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJwt, theoryData.EncryptingCredentials);
+            try
+            {
+                var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
+                if (tokenValidationResult.Exception != null)
+                    throw tokenValidationResult.Exception;
+
+                var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
+
+                Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, theoryData.TestId);
+
+                Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, theoryData.TestId);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(RoundTripJWEDirectEncryptionTheoryData))]
         public void RoundTripJWEDirectEncryption(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWE", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEDirectEncryption", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
@@ -668,6 +699,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
+                if (tokenValidationResult.Exception != null)
+                    throw tokenValidationResult.Exception;
+
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
                 var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
@@ -737,11 +771,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        [Theory, MemberData(nameof(RoundTripJWEKeyWrappingTheoryData))]
+        public void RoundTripEncryptExistingJWSUsingKeyWrapping(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripEncryptExistingJWSUsingKeyWrapping", theoryData);
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var innerJws = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+            var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJws, theoryData.EncryptingCredentials);
+            try
+            {
+                var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
+                if (tokenValidationResult.Exception != null)
+                    throw tokenValidationResult.Exception;
+
+                var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
+
+                Assert.True(outerToken != null, "ValidateToken should not return a null token for the JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken, theoryData.TestId);
+
+                Assert.True(outerToken.InnerToken != null, "ValidateToken should not return a null token for the inner JWE token.");
+                TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(outerToken.InnerToken, theoryData.TestId);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         [Theory, MemberData(nameof(RoundTripJWEKeyWrappingTheoryData))]
         public void RoundTripJWEKeyWrapping(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWE", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEKeyWrapping", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
@@ -750,6 +815,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
+                if (tokenValidationResult.Exception != null)
+                    throw tokenValidationResult.Exception;
+
                 var outerToken = tokenValidationResult.SecurityToken as JsonWebToken;
                 var claimsPrincipal = jwtSecurityTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
 
@@ -926,6 +994,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             if (!email.Equals("Bob@contoso.com"))
                 throw new SecurityTokenException("Token does not contain the correct value for the 'email' claim.");
+        }
+
+        [Theory, MemberData(nameof(JWECompressionTheoryData))]
+        public void EncryptExistingJWSWithCompressionTest(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.EncryptExistingJWSWithCompressionTest", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                var innerJwt = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+                var jwtToken = handler.EncryptToken(innerJwt, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
+                var validationResult = handler.ValidateToken(jwtToken, theoryData.ValidationParameters);
+                if (validationResult.Exception != null)
+                    throw validationResult.Exception;
+
+                IdentityComparer.AreEqual(theoryData.Payload, (validationResult.SecurityToken as JsonWebToken).InnerToken.Payload.ToString(), context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
