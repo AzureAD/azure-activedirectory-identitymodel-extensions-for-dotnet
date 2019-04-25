@@ -33,24 +33,38 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Security key that allows access to cert
+    /// An <see cref="AsymmetricSecurityKey"/> that is backed by a <see cref="X509Certificate2"/>
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
-        X509Certificate2 _certificate;
         AsymmetricAlgorithm _privateKey;
         bool _privateKeyAvailabilityDetermined;
         AsymmetricAlgorithm _publicKey;
         object _thisLock = new Object();
 
         /// <summary>
-        /// Instantiates a <see cref="SecurityKey"/> using a <see cref="X509Certificate2"/>
+        /// Instantiates a <see cref="X509SecurityKey"/> using a <see cref="X509Certificate2"/>
         /// </summary>
-        /// <param name="certificate">The cert to use.</param>
+        /// <param name="certificate">The <see cref="X509Certificate2"/> to use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="certificate"/> is null.</exception>
         public X509SecurityKey(X509Certificate2 certificate)
         {
-            _certificate = certificate ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificate)));
-            KeyId = Base64UrlEncoder.Encode(certificate.GetCertHash());
+            Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
+            KeyId = certificate.Thumbprint;
+            X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
+        }
+
+        /// <summary>
+        /// Instantiates a <see cref="X509SecurityKey"/> using a <see cref="X509Certificate2"/>.
+        /// </summary>
+        /// <param name="certificate">The <see cref="X509Certificate2"/> to use.</param>
+        /// <param name="keyId">The value to set for the KeyId</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="certificate"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyId"/> is null or empty.</exception>
+        public X509SecurityKey(X509Certificate2 certificate, string keyId)
+        {
+            Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
+            KeyId = string.IsNullOrEmpty(keyId) ? throw LogHelper.LogArgumentNullException(nameof(keyId)) : keyId;
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
 
@@ -81,9 +95,9 @@ namespace Microsoft.IdentityModel.Tokens
                         if (!_privateKeyAvailabilityDetermined)
                         {
 #if NETSTANDARD1_4 || NET461
-                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
+                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(Certificate);
 #else
-                            _privateKey = _certificate.PrivateKey;
+                            _privateKey = Certificate.PrivateKey;
 #endif
                             _privateKeyAvailabilityDetermined = true;
                         }
@@ -108,9 +122,9 @@ namespace Microsoft.IdentityModel.Tokens
                         if (_publicKey == null)
                         {
 #if NETSTANDARD1_4 || NET461
-                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(_certificate);
+                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(Certificate);
 #else
-                            _publicKey = _certificate.PublicKey.Key;
+                            _publicKey = Certificate.PublicKey.Key;
 #endif
                         }
                     }
@@ -152,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public X509Certificate2 Certificate
         {
-            get { return _certificate; }
+            get; private set;
         }
 
         /// <summary>
@@ -161,11 +175,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <return>true if the keys are equal; otherwise, false.</return>
         public override bool Equals(object obj)
         {
-            X509SecurityKey other = obj as X509SecurityKey;
-            if (other == null)
+            if (!(obj is X509SecurityKey other))
                 return false;
 
-            return other.Certificate.Thumbprint.ToString() == _certificate.Thumbprint.ToString();
+            return other.Certificate.Thumbprint.ToString() == Certificate.Thumbprint.ToString();
         }
 
         /// <summary>
@@ -174,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <return>An int hash code</return>
         public override int GetHashCode()
         {
-            return _certificate.GetHashCode();
+            return Certificate.GetHashCode();
         }
     }
 }
