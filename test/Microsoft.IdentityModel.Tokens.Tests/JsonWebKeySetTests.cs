@@ -27,6 +27,7 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
@@ -87,6 +88,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     dataset.Add(DataSets.JsonWebKeySetKtyNotRsaString, null, setting, ExpectedException.NoExceptionExpected);
                     dataset.Add(DataSets.JsonWebKeySetUseNotSigString, null, setting, ExpectedException.NoExceptionExpected);
                     dataset.Add(DataSets.JsonWebKeySetBadX509String, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
+                    dataset.Add(DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add(DataSets.JsonWebKeySetBadECCurveString, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10807:", inner: typeof(CryptographicException)));
                 }
 
                 return dataset;

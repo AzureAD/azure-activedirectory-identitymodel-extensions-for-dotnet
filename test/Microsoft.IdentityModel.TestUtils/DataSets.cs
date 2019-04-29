@@ -41,11 +41,15 @@ namespace Microsoft.IdentityModel.TestUtils
         public static JsonWebKey JsonWebKey2;
         public static JsonWebKey JsonWebKeyAdditionalData1;
         public static JsonWebKey JsonWebKeyBadX509Data;
+        public static JsonWebKey JsonWebKeyES256;
+        public static JsonWebKey JsonWebKeyES384;
+        public static JsonWebKey JsonWebKeyES512;
 
         public static JsonWebKeySet JsonWebKeySet1;
         public static JsonWebKeySet JsonWebKeySet2;
         public static JsonWebKeySet JsonWebKeySetX509Data;
         public static JsonWebKeySet JsonWebKeySetAdditionalData1;
+        public static JsonWebKeySet JsonWebKeySetEC;
 
         // interop
         public static string GoogleCertsFile = "google-certs.json";
@@ -167,6 +171,49 @@ namespace Microsoft.IdentityModel.TestUtils
                                             ""use"":""sig""
                                         }";
 
+        public static string JsonWebKeyBadECCurveString =
+                                       @"{
+                                            ""kty"": ""EC"",
+                                            ""alg"": ""ES521"",
+                                            ""use"": ""sig"",
+                                            ""crv"": ""P-999"",
+                                            ""kid"": ""unknownCrv"",
+                                            ""x"": ""AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr"",
+                                            ""y"": ""AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW""
+                                        }";
+
+        public static string JsonWebKeyES256String =
+                                        @"{
+                                            ""kty"": ""EC"",
+                                            ""alg"": ""ES256"",
+                                            ""use"": ""sig"",
+                                            ""crv"": ""P-256"",
+                                            ""kid"": ""JsonWebKeyEcdsa256"",
+                                            ""x"": ""luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA"",
+                                            ""y"": ""tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ""
+                                        }";
+
+        public static string JsonWebKeyES384String =
+                                        @"{
+                                            ""kty"": ""EC"",
+                                            ""alg"": ""ES384"",
+                                            ""use"": ""sig"",
+                                            ""crv"": ""P-384"",
+                                            ""kid"": ""JsonWebKeyEcdsa384"",
+                                            ""x"": ""5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg"",
+                                            ""y"": ""Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l""
+                                        }";
+
+        public static string JsonWebKeyES512String =
+                                        @"{
+                                            ""kty"": ""EC"",
+                                            ""alg"": ""ES512"",
+                                            ""use"": ""sig"",
+                                            ""crv"": ""P-521"",
+                                            ""kid"": ""JsonWebKeyEcdsa521"",
+                                            ""x"": ""AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr"",
+                                            ""y"": ""AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW""
+                                        }";
 
         public static string JsonWebKeySetBadRsaExponentString = @"{ ""keys"":[" + JsonWebKeyBadRsaExponentString + "]}";
         public static string JsonWebKeySetBadRsaModulusString = @"{ ""keys"":[" + JsonWebKeyBadRsaModulusString + "]}";
@@ -174,11 +221,13 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string JsonWebKeySetKtyNotRsaString = @"{ ""keys"":[" + JsonWebKeyKtyNotRsaString + "]}";
         public static string JsonWebKeySetUseNotSigString = @"{ ""keys"":[" + JsonWebKeyUseNotSigString + "]}";
         public static string JsonWebKeySetBadX509String = @"{ ""keys"":[" + JsonWebKeyBadX509String + "]}";
+        public static string JsonWebKeySetBadECCurveString = @"{ ""keys"":[" + JsonWebKeyBadECCurveString + "]}";
 
         // Key Sets
         public static string JsonWebKeySet = "JsonWebKeySet.json";
         public static string JsonWebKeySetString1 = @"{ ""keys"":[" + JsonWebKeyString1 + "," + JsonWebKeyString2 + "]}";
         public static string JsonWebKeySetString2 = @"{ ""keys"":[" + JsonWebKeyString2 + "]}";
+        public static string JsonWebKeySetECCString = @"{ ""keys"":[" + JsonWebKeyES256String + "," + JsonWebKeyES384String + "," + JsonWebKeyES512String + "]}";
         public static string JsonWebKeySetAdditionalDataString1 = @"{ ""keys"":[" + JsonWebKeyAdditionalDataString1 + "]" + @", ""additionalProperty"":""additionalValue""}";
         public static string JsonWebKeySetBadFormatingString =
                                             @"{ ""keys"":[
@@ -260,9 +309,47 @@ namespace Microsoft.IdentityModel.TestUtils
 
             JsonWebKey2.X5c.Add(JsonWebKey_X5c_2);
 
+            JsonWebKeyES256 = new JsonWebKey
+            {
+                Alg = "ES256",
+                Crv = "P-256",
+                Kid = "JsonWebKeyEcdsa256",
+                Kty = "EC",
+                Use = "sig",
+                X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
+                Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ"
+            };
+
+            JsonWebKeyES384 = new JsonWebKey
+            {
+                Alg = "ES384",
+                Crv = "P-384",
+                Kid = "JsonWebKeyEcdsa384",
+                Kty = "EC",
+                Use = "sig",
+                X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg",
+                Y = "Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l"
+            };
+
+            JsonWebKeyES512 = new JsonWebKey
+            {
+                Alg = "ES512",
+                Crv = "P-521",
+                Kid = "JsonWebKeyEcdsa521",
+                Kty = "EC",
+                Use = "sig",
+                X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
+                Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW"
+            };
+
             JsonWebKeySet1 = new JsonWebKeySet();
             JsonWebKeySet1.Keys.Add(JsonWebKey1);
             JsonWebKeySet1.Keys.Add(JsonWebKey2);
+
+            JsonWebKeySetEC = new JsonWebKeySet();
+            JsonWebKeySetEC.Keys.Add(JsonWebKeyES256);
+            JsonWebKeySetEC.Keys.Add(JsonWebKeyES384);
+            JsonWebKeySetEC.Keys.Add(JsonWebKeyES512);
 
             var jwk = new JsonWebKey
             {
