@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30026 = "IDX30026: The reader must be pointing to a StartElement. NodeType is: '{0}'.";
         internal const string IDX30027 = "IDX30027: InnerReader is null. It is necessary to set InnerReader before making calls to DelegatingXmlDictionaryReader.";
         internal const string IDX30028 = "IDX30028: InnerWriter is null. It is necessary to set InnerWriter before making calls to DelegatingXmlDictionaryWriter.";
+        internal const string IDX30029 = "IDX30029: The Reference '{0}' has exceeded the number of Transforms that will be processed: '{1}'. If there is a need to increase the number of Transforms, the DSigSerializer.MaximumReferenceTransforms can be increased. The default value is 10.";
 
         // XML structure, supported exceptions
         internal const string IDX30100 = "IDX30100: Unable to process the {0} element. This canonicalization method is not supported: '{1}'. Supported methods are: '{2}', '{3}', '{4}'.";
@@ -86,6 +87,10 @@ namespace Microsoft.IdentityModel.Xml
         // XML validation
         internal const string IDX30500 = "IDX30500: xsi:type attribute was not found. Expected: '{0}':'{1}'.";
         internal const string IDX30501 = "IDX30501: xsi:type attribute was did not match. Expected: '{0}':'{1}', Found: '{2}':'{3}'.";
+
+        // Setting values on types
+        internal const string IDX30600 = "IDX30600: MaximumReferenceTransforms can not be a negative value. value: '{0}'.";
+
 #pragma warning restore 1591
     }
 }

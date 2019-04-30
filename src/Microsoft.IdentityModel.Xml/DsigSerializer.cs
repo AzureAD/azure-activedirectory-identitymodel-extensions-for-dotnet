@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -36,11 +37,12 @@ using static Microsoft.IdentityModel.Logging.LogHelper;
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
-    /// Reads and writes XML associated with XML DSig https://www.w3.org/TR/2001/PR-xmldsig-core-20010820
+    /// Reads and writes XML conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820
     /// </summary>
     public class DSigSerializer
     {
         private static DSigSerializer _default;
+        private int _maximumReferenceTransforms = 5;
         private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
@@ -48,18 +50,12 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public static DSigSerializer Default
         {
-            get
-            {
-                return _default;
-            }
-            set
-            {
-                _default = value ?? throw LogArgumentNullException(nameof(value));
-            }
+            get => _default;
+            set => _default = value ?? throw LogArgumentNullException(nameof(value));
         }
 
         /// <summary>
-        /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
+        /// Static constructor that initializes the default <see cref="DSigSerializer"/>.
         /// </summary>
         static DSigSerializer()
         {
@@ -71,6 +67,18 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public DSigSerializer()
         {
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum number of Transforms that are allowed on a Reference
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">if value is less than 1.</exception>
+        /// <remarks>Default value is: 10.</remarks>
+        [DefaultValue(10)]
+        public int MaximumReferenceTransforms
+        {
+            get => _maximumReferenceTransforms;
+            set => _maximumReferenceTransforms = value < 0 ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX30600, value))) : value;
         }
 
         /// <summary>
@@ -481,7 +489,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 reader.Read();
                 // <Transform> - unbounded
-
+                int numberOfTransforms = 0;
                 while (reader.IsStartElement(XmlSignatureConstants.Elements.Transform, XmlSignatureConstants.Namespace))
                 {
                     var isEmptyElement = reader.IsEmptyElement;
@@ -510,6 +518,9 @@ namespace Microsoft.IdentityModel.Xml
                     }
                     else
                         throw XmlUtil.LogReadException(LogMessages.IDX30210, algorithm);
+
+                    if (++numberOfTransforms > MaximumReferenceTransforms)
+                        throw LogHelper.LogExceptionMessage(new XmlReadException(FormatInvariant(LogMessages.IDX30029, !string.IsNullOrEmpty(reference.Id) ? reference.Id : (!string.IsNullOrEmpty(reference.Uri) ? reference.Uri : reference.GetType().ToString()), MaximumReferenceTransforms)));
 
                     reader.MoveToContent();
                     if (!isEmptyElement)
