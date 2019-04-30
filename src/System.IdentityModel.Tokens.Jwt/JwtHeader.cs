@@ -45,6 +45,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtHeader()
             : base(StringComparer.Ordinal)
         {
+            // Since this constructor is used by JsonConvert.DeserializeObject, it is possible that the serialization order of the JwtHeader
+            // will be different from the original JSON that was used for deserialization. This can occur because setting the 'Alg' property
+            // explicitly results in it being the first to be serialized, even though it may not necessarily be the first claim present in the 
+            // original JWT header.
+            Alg = SecurityAlgorithms.None;
         }
 
         /// <summary>

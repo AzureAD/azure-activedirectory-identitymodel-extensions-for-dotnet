@@ -45,7 +45,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var jwtHeader = new JwtHeader();
 
             Assert.True(jwtHeader.Typ == null, "jwtHeader.Typ != null");
-            Assert.True(jwtHeader.Alg == null, "jwtHeader.Alg != null");
+            Assert.True(jwtHeader.Alg.Equals(SecurityAlgorithms.None), "!jwtHeader.Alg.Equals(SecurityAlgorithms.None)");
             Assert.True(jwtHeader.SigningCredentials == null, "jwtHeader.SigningCredentials != null");
             Assert.True(jwtHeader.Kid == null, "jwtHeader.Kid == null");
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
