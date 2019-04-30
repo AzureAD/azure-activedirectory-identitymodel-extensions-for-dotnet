@@ -45,17 +45,20 @@ namespace Microsoft.IdentityModel.Xml.Tests
         [Fact]
         public void GetSets()
         {
-            var dsigSerializer = new DSigSerializer();
             var context = new GetSetContext
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
                     new KeyValuePair<string, List<object>>("TransformFactory", new List<object>{TransformFactory.Default}),
+                    new KeyValuePair<string, List<object>>("MaximumReferenceTransforms", new List<object>{5, 11, 1 })
                 },
-                Object = dsigSerializer
+                Object = new DSigSerializer()
             };
 
             TestUtilities.GetSet(context);
+            TestUtilities.SetGet(new DSigSerializer(), "MaximumReferenceTransforms", 0, ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(new DSigSerializer(), "MaximumReferenceTransforms", -1, ExpectedException.ArgumentOutOfRangeException("IDX30600:"), context);
+
             TestUtilities.AssertFailIfErrors("DSigSerializerTests_GetSets", context.Errors);
         }
 
@@ -191,7 +194,6 @@ namespace Microsoft.IdentityModel.Xml.Tests
         {
             get
             {
-
                 var signature = Default.Signature;
                 signature.SignedInfo.References[0] = Default.ReferenceWithNullTokenStream;
 
@@ -483,7 +485,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // uncomment to view exception displayed to user
                 ExpectedException.DefaultVerbose = true;
 
-                return new TheoryData<DSigSerializerTheoryData>
+                var theoryData = new TheoryData<DSigSerializerTheoryData>
                 {
                     TransformsTest(TransformTestSet.AlgorithmNull, new ExpectedException(typeof(XmlReadException), "IDX30105:"), true),
                     TransformsTest(TransformTestSet.AlgorithmUnknown, new ExpectedException(typeof(XmlReadException), "IDX30210:")),
@@ -498,8 +500,19 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     TransformsTest(TransformTestSet.Enveloped_AlgorithmAttributeMissing, new ExpectedException(typeof(XmlReadException), "IDX30105:")),
                     TransformsTest(TransformTestSet.Enveloped_WithNS),
                     TransformsTest(TransformTestSet.Enveloped_WithoutPrefix, new ExpectedException(typeof(XmlReadException), "IDX30016:", typeof(System.Xml.XmlException))),
-                    TransformsTest(TransformTestSet.TransformNull, new ExpectedException(typeof(XmlReadException), "IDX30105:"))
+                    TransformsTest(TransformTestSet.TransformNull, new ExpectedException(typeof(XmlReadException), "IDX30105:")),
+                    TransformsTest(TransformTestSet.MultipleTransforms(6, "6-" + SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14n, null), new ExpectedException(typeof(XmlReadException), "IDX30029:")),
+                    TransformsTest(TransformTestSet.MultipleTransforms(5, "5-" + SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14n, new ExclusiveCanonicalizationTransform())),
+                    TransformsTest(TransformTestSet.MultipleTransforms(6, "6-" + SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.EnvelopedSignature, null), new ExpectedException(typeof(XmlReadException), "IDX30029:")),
+                    TransformsTest(TransformTestSet.MultipleTransforms(5, "5-" + SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.EnvelopedSignature, null))
                 };
+
+                // check that upping the min works
+                var test = TransformsTest(TransformTestSet.MultipleTransforms(16, "16-" + SecurityAlgorithms.EnvelopedSignature, SecurityAlgorithms.EnvelopedSignature, null));
+                test.Serializer.MaximumReferenceTransforms = 16;
+                theoryData.Add(test);
+
+                return theoryData;
             }
         }
 

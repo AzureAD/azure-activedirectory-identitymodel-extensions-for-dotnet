@@ -281,6 +281,20 @@ namespace Microsoft.IdentityModel.TestUtils
                 Xml = XmlGenerator.TransformsXml(DSigPrefix, new List<string> { XmlGenerator.TransformXml(DSigPrefix, "Algorithm", null, "") }, DSigNS)
             };
         }
+
+        public static TransformTestSet MultipleTransforms(int numberOfTransforms, string testVariation, string transform, CanonicalizingTransfrom canonicalizingTransfrom)
+        {
+            var transforms = new List<string>();
+            for (int i = 0; i < numberOfTransforms; i++)
+                transforms.Add(XmlGenerator.TransformXml(DSigPrefix, "Algorithm", transform, DSigNS));
+
+            return  new TransformTestSet
+            {
+                CanonicalizingTransfrom = canonicalizingTransfrom,
+                TestId = testVariation,
+                Xml = XmlGenerator.TransformsXml(DSigPrefix, transforms, DSigNS)
+            };
+        }
     }
 
     public class KeyInfoTestSet : XmlTestSet
