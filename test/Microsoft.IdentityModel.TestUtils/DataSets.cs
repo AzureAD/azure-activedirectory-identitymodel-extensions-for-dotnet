@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static JsonWebKeySet JsonWebKeySetX509Data;
         public static JsonWebKeySet JsonWebKeySetAdditionalData1;
         public static JsonWebKeySet JsonWebKeySetEC;
+        public static JsonWebKeySet JsonWebKeySetOnlyX5t;
 
         // interop
         public static string GoogleCertsFile = "google-certs.json";
@@ -215,6 +216,21 @@ namespace Microsoft.IdentityModel.TestUtils
                                             ""y"": ""AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW""
                                         }";
 
+        public static string JsonWebKeyOnlyX5tString =
+                                        @"{
+                                            ""kty"": ""RSA"",
+                                            ""use"": ""sig"",
+                                            ""kid"":""pqoeamb2e5YVzR6_rqFpiCrFZgw"",
+                                            ""x5t"":""pqoeamb2e5YVzR6_rqFpiCrFZgw""
+                                        }";
+
+        public static string JsonWebKeyNoKtyString =
+                                        @"{ ""e"":""AQAB"",
+                                            ""kid"":""20am7"",
+                                            ""n"":""mhupHfUtg_gHIqwu2wm8CprXY-gKqbPMV6tEYVqkyYrHugzQ_YDYAHr7vWo5Pe_3gIujSFwpqIfXaP8-Fl3O5fQhMo1lMv4DdRabyDLEpv7YO9qoVKTmDOZqYZx-AYBr5x1Zh2xWByI6_0dsPtCjD1pFZfg_SxNEcLPyH1aY6dT8CWYu32qG4O0WF4EihZzMkzSn8fyh8RXbMf5U9Wm2kgb0g8jK62S7MoF4IlhFaJreq898wgUohhPwR8P3X-gk0XQJAFcogEf04Fw4UmKo3z1B6mcNbPRfImhWw4wtLkhp_KIqKNOkMsSpYGSLrCvqQpgK56EJZExrmb7WozjwHw"",
+                                            ""use"":""sig""
+                                        }";
+
         public static string JsonWebKeySetBadRsaExponentString = @"{ ""keys"":[" + JsonWebKeyBadRsaExponentString + "]}";
         public static string JsonWebKeySetBadRsaModulusString = @"{ ""keys"":[" + JsonWebKeyBadRsaModulusString + "]}";
         public static string JsonWebKeySetUseNoKidString = @"{ ""keys"":[" + JsonWebKeyRsaNoKidString + "]}";
@@ -222,6 +238,8 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string JsonWebKeySetUseNotSigString = @"{ ""keys"":[" + JsonWebKeyUseNotSigString + "]}";
         public static string JsonWebKeySetBadX509String = @"{ ""keys"":[" + JsonWebKeyBadX509String + "]}";
         public static string JsonWebKeySetBadECCurveString = @"{ ""keys"":[" + JsonWebKeyBadECCurveString + "]}";
+        public static string JsonWebKeySetOnlyX5tString = @"{ ""keys"":[" + JsonWebKeyOnlyX5tString + "]}";
+        public static string JsonWebKeySetUseNoKtyString = @"{ ""keys"":[" + JsonWebKeyNoKtyString + "]}";
 
         // Key Sets
         public static string JsonWebKeySet = "JsonWebKeySet.json";
@@ -229,6 +247,9 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string JsonWebKeySetString2 = @"{ ""keys"":[" + JsonWebKeyString2 + "]}";
         public static string JsonWebKeySetECCString = @"{ ""keys"":[" + JsonWebKeyES256String + "," + JsonWebKeyES384String + "," + JsonWebKeyES512String + "]}";
         public static string JsonWebKeySetAdditionalDataString1 = @"{ ""keys"":[" + JsonWebKeyAdditionalDataString1 + "]" + @", ""additionalProperty"":""additionalValue""}";
+        public static string JsonWebKeySetOneValidRsaOneInvalidRsaString = @"{ ""keys"":[" + JsonWebKeyFromPingString1 + "," + JsonWebKeyBadRsaExponentString + "]}";
+        public static string JsonWebKeySetOneInvalidEcOneValidEcString = @"{ ""keys"":[" + JsonWebKeyBadECCurveString + "," + JsonWebKeyES256String + "]}";
+        public static string JsonWebKeySetOneValidRsaOneInvalidEcString = @"{ ""keys"":[" + JsonWebKeyFromPingString1 + "," + JsonWebKeyBadECCurveString + "]}";
         public static string JsonWebKeySetBadFormatingString =
                                             @"{ ""keys"":[
                                                 {   ""e"":""AQAB"",
@@ -252,6 +273,22 @@ namespace Microsoft.IdentityModel.TestUtils
                                                     ""use"":""sig""
                                                }
                                             ]}";
+
+        public static string JsonWebKeySetEvoString =
+                                           @"{ ""keys"":[
+                                               {
+                                                   ""kty"":""RSA"",
+                                                   ""use"":""sig"",
+                                                   ""kid"":""HBxl9mAe6gxavCkcoOU2THsDNa0"",
+                                                   ""x5t"":""HBxl9mAe6gxavCkcoOU2THsDNa0"",
+                                                   ""n"":""0afCaiPd_xl_ewZGfOkxKwYPfI4Efu0COfzajK_gnviWk7w3R-88Dmb0j24DSn1qVR3ptCnA1-QUfUMyhvl8pT5-t7oRkLNPzp0hVV-dAG3ZoMaSEMW0wapshA6LVGROpBncDmc66hx5-t3eOFA24fiKfQiv2TJth3Y9jhHnLe7GBOoomWYx_pJiEG3mhYFIt7shaEwNcEjo34vr1WWzRm8D8gogjrJWd1moyeGftWLzvfp9e79QwHYJv907vQbFrT7LYuy8g7-Rpxujgumw2mx7CewcCZXwPiZ-raM3Ap1FhINiGpd5mbbYrFDDFIWAjWPUY6KNvXtc24yUfZr4MQ"",
+                                                   ""e"":""AQAB"",
+                                                   ""x5c"":[
+                                                      ""MIIDBTCCAe2gAwIBAgIQWcq84CdVhKVEcKbZdMOMGjANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE5MDMxNDAwMDAwMFoXDTIxMDMxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANGnwmoj3f8Zf3sGRnzpMSsGD3yOBH7tAjn82oyv4J74lpO8N0fvPA5m9I9uA0p9alUd6bQpwNfkFH1DMob5fKU+fre6EZCzT86dIVVfnQBt2aDGkhDFtMGqbIQOi1RkTqQZ3A5nOuocefrd3jhQNuH4in0Ir9kybYd2PY4R5y3uxgTqKJlmMf6SYhBt5oWBSLe7IWhMDXBI6N+L69Vls0ZvA/IKII6yVndZqMnhn7Vi8736fXu/UMB2Cb/dO70Gxa0+y2LsvIO/kacbo4LpsNpsewnsHAmV8D4mfq2jNwKdRYSDYhqXeZm22KxQwxSFgI1j1GOijb17XNuMlH2a+DECAwEAAaMhMB8wHQYDVR0OBBYEFIkZ5wrSV8lohIsreOmig7h5wQDkMA0GCSqGSIb3DQEBCwUAA4IBAQAd8sKZLwZBocM4pMIRKarK60907jQCOi1m449WyToUcYPXmU7wrjy9fkYwJdC5sniItVBJ3RIQbF/hyjwnRoIaEcWYMAftBnH+c19WIuiWjR3EHnIdxmSopezl/9FaTNghbKjZtrKK+jL/RdkMY9uWxwUFLjTAtMm24QOt2+CGntBA9ohQUgiML/mlUpf4qEqa2/Lh+bjiHl3smg4TwuIl0i/TMN9Rg7UgQ6BnqfgiuMl6BtBiatNollwgGNI2zJEi47MjdeMf8+C3tXs//asqqlqJCyVLwN7AN47ynYmkl89MleOfKIojhrGRxryZG2nRjD9u/kZbPJ8e3JE9px67""
+                                                   ],
+                                                   ""issuer"":""https://login.microsoftonline.com/{tenantid}/v2.0""
+                                               }
+                                           ]}";
 
         static DataSets()
         {
@@ -415,6 +452,16 @@ namespace Microsoft.IdentityModel.TestUtils
                      N = "ANLFuJO6EoKczde+YP3b1yuz2b46D7Rd7CjrbvKrzbjkH29iRFLBagT7nojwdMOPrsV+WLp/C8lfkRT7UJ38lnQh3m4oEy98HdRRMZh5Vtpbotgt4S/ugh5ansJdHSXSBTxk+X1ZnTzMOUH7ZROpxw3NcX/IFl0sshFlTbebPrDj",
                      Use = "sig",
                  });
+
+            var JsonWebKeyOnlyX5t = new JsonWebKey
+            {
+                Kid = "pqoeamb2e5YVzR6_rqFpiCrFZgw",
+                Kty = "RSA",
+                Use = "sig",
+                X5t = "pqoeamb2e5YVzR6_rqFpiCrFZgw"
+            };
+            JsonWebKeySetOnlyX5t = new JsonWebKeySet();
+            JsonWebKeySetOnlyX5t.Keys.Add(JsonWebKeyOnlyX5t);
         }
     }
 }

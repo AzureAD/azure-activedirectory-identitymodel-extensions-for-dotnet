@@ -195,14 +195,15 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10703 = "IDX10703: Cannot create symmetric security key. Key length is zero.";
 
         // Json specific errors
-        public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. See inner exception for additional details.";
-        public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. See inner exception for additional details.";
+        public const string IDX10801 = "IDX10801: Unable to create an RSA public key from the Exponent and Modulus found in the JsonWebKey: E: '{0}', N: '{1}'. Inner exception: '{2}'.";
+        public const string IDX10802 = "IDX10802: Unable to create an X509Certificate2 from the X509Data: '{0}'. Inner exception '{1}'.";
         public const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
         public const string IDX10805 = "IDX10805: Error deserializing json: '{0}' into '{1}'.";
         public const string IDX10806 = "IDX10806: Deserializing json: '{0}' into '{1}'.";
-        public const string IDX10807 = "IDX10807: Unable to create an ECDsa from the parameters found in the JsonWebKey. See inner exception for additional details.";
-        public const string IDX10808 = "IDX10808: The 'use' parameter should be 'sig' or empty, but was '{0}'.";
+        public const string IDX10807 = "IDX10807: Unable to create an ECDsa from the parameters found in the JsonWebKey. Inner exception: '{0}'.";
+        public const string IDX10808 = "IDX10808: The 'use' parameter of a JsonWebKey with a 'kid': '{0}' should be 'sig' or empty, but was '{1}'.";
         public const string IDX10809 = "IDX10809: The 'kty' parameter '{0}' is not supported. Supported 'kty' parameters are 'RSA' and 'EC'.";
+        public const string IDX10810 = "IDX10810: JsonWebKey with a 'kid': '{0}' was not resolved into an X509SecurityKey or into an RsaSecurityKey.";
 #pragma warning restore 1591
     }
 }

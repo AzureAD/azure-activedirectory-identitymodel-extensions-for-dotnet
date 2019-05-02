@@ -26,8 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
@@ -43,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             ObjectCreationHandling = ObjectCreationHandling.Replace,
         };
 
-        [Theory, MemberData(nameof(JsonWekKeySetDataSet))]
+        [Theory, MemberData(nameof(JsonWebKeySetDataSet))]
         public void Constructors(
             string json,
             JsonWebKeySet compareTo,
@@ -70,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, JsonWebKeySet, JsonSerializerSettings, ExpectedException> JsonWekKeySetDataSet
+        public static TheoryData<string, JsonWebKeySet, JsonSerializerSettings, ExpectedException> JsonWebKeySetDataSet
         {
             get
             {
@@ -90,6 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     dataset.Add(DataSets.JsonWebKeySetBadX509String, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)));
                     dataset.Add(DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, setting, ExpectedException.NoExceptionExpected);
                     dataset.Add(DataSets.JsonWebKeySetBadECCurveString, null, setting, ExpectedException.InvalidOperationException(substringExpected: "IDX10807:", inner: typeof(CryptographicException)));
+                    dataset.Add(DataSets.JsonWebKeySetOnlyX5tString, DataSets.JsonWebKeySetOnlyX5t, setting, ExpectedException.NoExceptionExpected);
                 }
 
                 return dataset;
@@ -123,6 +126,220 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Publics()
         {
+        }
+
+        [Theory, MemberData(nameof(GetSigningKeysTheoryData))]
+        public void GetSigningKeys(JsonWebKeySetTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetSigningKeys", theoryData);
+            try
+            {
+                JsonWebKeySet.IgnoreInvalidSigningKeys = theoryData.IgnoreInvalidSigningKeys;
+                var signingKeys = theoryData.JsonWebKeySet.GetSigningKeys();
+
+                IdentityComparer.AreEqual(signingKeys, theoryData.ExpectedSigningKeys, context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            // revert to default
+            JsonWebKeySet.IgnoreInvalidSigningKeys = false;
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonWebKeySetTheoryData> GetSigningKeysTheoryData
+        {
+            get
+            {
+                var ecdsaAdapter = new ECDsaAdapter();
+                var theoryData = new TheoryData<JsonWebKeySetTheoryData>();
+
+                var jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    First = true,
+                    JsonWebKeySet = jsonWebKeySet,
+                    ExpectedSigningKeys = new List<SecurityKey>(),
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "ZeroKeysWithSigAsUse",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    First = true,
+                    JsonWebKeySet = jsonWebKeySet,
+                    ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
+                    TestId = "KeysWithoutKty",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetEvoString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0), CreateX509SecurityKey(jsonWebKeySet, 0) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "EvoSigningKey",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetKtyNotRsaString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "NonRsaNonEcKey",
+                });
+
+                jsonWebKeySet = DataSets.JsonWebKeySetOnlyX5t;
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "JsonWebKeyNotInvalidNotResolved"
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedException = ExpectedException.InvalidOperationException(substringExpected: "IDX10801:", inner: typeof(FormatException)),
+                    TestId = "OneValidAndOneInvalidRsa",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = true,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "OneValidAndOneInvalidRsaIgnoreInvalid",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), substringExpected: "IDX10807:", ignoreInnerException: true),
+                    TestId = "OneValidAndOneInvalidEc",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = true,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateEcdsaSecurityKey(jsonWebKeySet, 1, ecdsaAdapter) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "OneValidAndOneInvalidECIgnoreInvalid",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), substringExpected: "IDX10807:", ignoreInnerException: true),
+                    TestId = "ValidRsaInvalidEc",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = true,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "ValidRsaInvalidEcIgnoreInvalid",
+                });
+
+                jsonWebKeySet = DataSets.JsonWebKeySetX509Data;
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateX509SecurityKey(jsonWebKeySet, 0) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "ValidX5c",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = false,
+                    ExpectedException = ExpectedException.InvalidOperationException(substringExpected: "IDX10802:", inner: typeof(FormatException)),
+                    TestId = "InvalidX5c",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    IgnoreInvalidSigningKeys = true,
+                    ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "InvalidX5cIgnoreInvalidAddRsa",
+                });
+
+                return theoryData;
+            }
+        }
+
+        private static X509SecurityKey CreateX509SecurityKey(JsonWebKeySet webKeySet, int keyIndex)
+        {
+            var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
+
+            return new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(webKey.X5c[0])))
+            {
+                KeyId = webKey.KeyId
+            };
+        }
+
+        private static RsaSecurityKey CreateRsaSecurityKey(JsonWebKeySet webKeySet, int keyIndex)
+        {
+            var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
+
+            var rsaParams = new RSAParameters()
+            {
+                Exponent = Base64UrlEncoder.DecodeBytes(webKey.E),
+                Modulus = Base64UrlEncoder.DecodeBytes(webKey.N),
+            };
+
+            return new RsaSecurityKey(rsaParams)
+            {
+                KeyId = webKey.KeyId,
+            };
+        }
+
+        private static ECDsaSecurityKey CreateEcdsaSecurityKey(JsonWebKeySet webKeySet, int keyIndex, ECDsaAdapter ecdsaAdapter)
+        {
+            var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
+
+            return new ECDsaSecurityKey(ecdsaAdapter.CreateECDsa(webKey, false))
+            {
+                KeyId = webKey.KeyId
+            };
+        }
+
+        public class JsonWebKeySetTheoryData : TheoryDataBase
+        {
+            public JsonWebKeySet JsonWebKeySet { get; set; }
+
+            public bool IgnoreInvalidSigningKeys { get; set; } = false;
+
+            public List<SecurityKey> ExpectedSigningKeys { get; set; }
         }
     }
 }
