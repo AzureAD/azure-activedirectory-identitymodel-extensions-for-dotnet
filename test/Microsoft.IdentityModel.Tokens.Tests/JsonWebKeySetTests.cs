@@ -172,9 +172,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString);
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
-                    First = true,
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
+                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "KeysWithoutKty",
                 });
 
