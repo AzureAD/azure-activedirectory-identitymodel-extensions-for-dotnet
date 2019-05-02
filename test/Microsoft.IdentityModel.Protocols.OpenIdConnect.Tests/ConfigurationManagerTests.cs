@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -224,6 +225,57 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     return true;
                 });
             }
+
+            // get configuration from https address, should throw
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://someaddress.com", new OpenIdConnectConfigurationRetriever());
+            ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
+            try
+            {
+                configuration = configManager.GetConfigurationAsync().Result;
+                ee.ProcessNoException(context);
+            }
+            catch (AggregateException ex)
+            {
+                // this should throw, because last configuration retrived was null
+                Assert.Throws<AggregateException>(() => configuration = configManager.GetConfigurationAsync().Result);
+
+                ex.Handle((x) =>
+                {
+                    ee.ProcessException(x, context);
+                    return true;
+                });
+            }
+
+            // get configuration with unsuccessful HTTP response status code
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://httpstat.us/429", new OpenIdConnectConfigurationRetriever());
+            ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
+            try
+            {
+                configuration = configManager.GetConfigurationAsync().Result;
+                ee.ProcessNoException(context);
+            }
+            catch (AggregateException ex)
+            {
+                // this should throw, because last configuration retrived was null
+                Assert.Throws<AggregateException>(() => configuration = configManager.GetConfigurationAsync().Result);
+
+                ex.Handle((x) =>
+                {
+                    ee.ProcessException(x, context);
+                    return true;
+                });
+            }
+
+            // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            configuration = configManager.GetConfigurationAsync().Result;
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            configManager.RequestRefresh();
+            TestUtilities.SetField(configManager, "_metadataAddress", "http://someaddress.com");
+            configuration2 = configManager.GetConfigurationAsync().Result;
+            IdentityComparer.AreEqual(configuration, configuration2, context);
+            if (!object.ReferenceEquals(configuration, configuration2))
+                context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
