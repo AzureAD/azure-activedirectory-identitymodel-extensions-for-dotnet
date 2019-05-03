@@ -23,7 +23,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0-*" />
   </ItemGroup>
 

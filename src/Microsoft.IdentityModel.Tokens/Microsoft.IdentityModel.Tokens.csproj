@@ -33,7 +33,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(JsonNetVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
     <PackageReference Include="System.Collections" Version="4.3.0-*" />
     <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0-*" />
     <PackageReference Include="System.Runtime" Version="4.3.0-*" />
@@ -50,6 +50,10 @@
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0-*" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0-*" />
     <PackageReference Include="System.Threading" Version="4.3.0-*" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or  '$(TargetFramework)' == 'net451' Or  '$(TargetFramework)' == 'net461'">
