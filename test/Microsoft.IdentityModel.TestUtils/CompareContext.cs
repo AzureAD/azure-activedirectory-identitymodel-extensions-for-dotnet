@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public bool ExpectRawData { get; set; }
 
-        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; }
+        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; } = new Dictionary<Type, List<string>>();
 
         /// <summary>
         /// Adds diffs and returns if any diffs were added.

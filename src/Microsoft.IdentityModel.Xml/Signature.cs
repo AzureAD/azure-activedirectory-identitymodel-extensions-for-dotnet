@@ -91,6 +91,22 @@ namespace Microsoft.IdentityModel.Xml
         /// Verifies the signature over the SignedInfo.
         /// </summary>
         /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
+        /// <exception cref="ArgumentNullException"> if <paramref name="key"/> is null.</exception>
+        /// <exception cref="XmlValidationException"> if <see cref="SignedInfo"/> null.</exception>
+        /// <exception cref="XmlValidationException"> if <see cref="SignedInfo.SignatureMethod"/> is not supported.</exception>
+        /// <exception cref="XmlValidationException"> if signature does not validate.</exception>
+        public void Verify(SecurityKey key)
+        {
+            if (key == null)
+                throw LogArgumentNullException(nameof(key));
+
+            Verify(key, key.CryptoProviderFactory);
+        }
+
+        /// <summary>
+        /// Verifies the signature over the SignedInfo.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use for cryptographic operations.</param>
         /// <param name="cryptoProviderFactory">the <see cref="CryptoProviderFactory"/> to obtain cryptographic operators.</param>
         /// <exception cref="ArgumentNullException"> if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="cryptoProviderFactory"/> is null.</exception>

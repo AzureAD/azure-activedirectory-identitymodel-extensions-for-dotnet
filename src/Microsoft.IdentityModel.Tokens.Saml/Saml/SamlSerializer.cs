@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets or sets the <see cref="DSigSerializer"/> to use for reading / writing the <see cref="Xml.Signature"/>
         /// </summary>
         /// <exception cref="ArgumentNullException">if value is null.</exception>
-        /// <remarks>Passed to <see cref="EnvelopedSignatureReader"/> and <see cref="EnvelopedSignatureWriter"/>.</remarks>
+        /// <remarks>Will be passed to readers that process xmlDsig such as <see cref="EnvelopedSignatureReader"/> and <see cref="EnvelopedSignatureWriter"/>.</remarks>
         public DSigSerializer DSigSerializer
         {
             get => _dsigSerializer;
@@ -215,15 +215,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Reads a &lt;saml:Assertion> element.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAssertion"/> element.</param>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a 'saml:assertion' element.</param>
         /// <returns>A <see cref="SamlAssertion"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null.</exception>
         public virtual SamlAssertion ReadAssertion(XmlReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
             try
             {
-                var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
+                var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(envelopeReader, SamlConstants.Types.AssertionType, SamlConstants.Namespace);
@@ -303,8 +304,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 return new SamlAssertion(assertionId, issuer, issueInstant, conditions, advice, statements)
                 {
-                    // attach signedXml for validation of signature
-                    Signature = envelopeReader.Signature
+                    // attach signature for verification
+                    Signature = envelopeReader.Signature,
+                    XmlTokenStream = envelopeReader.XmlTokenStream
                 };
             }
             catch (Exception ex)

@@ -153,17 +153,11 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                using (var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
-                {
-                    using (var c14nStream = new MemoryStream())
-                    {
-                        signedInfoWriter.StartCanonicalization(c14nStream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal), null);
-                        _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
-                        signedInfoWriter.Flush();
-                        signedInfoWriter.EndCanonicalization();
-                        c14nStream.WriteTo(stream);
-                    }
-                }
+                var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+                signedInfoWriter.StartCanonicalization(stream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal), null);
+                _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
+                signedInfoWriter.Flush();
+                signedInfoWriter.EndCanonicalization();
             }
         }
     }

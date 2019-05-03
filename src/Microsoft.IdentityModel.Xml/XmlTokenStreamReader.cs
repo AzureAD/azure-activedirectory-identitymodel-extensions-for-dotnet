@@ -38,6 +38,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private int _depth;
         private bool _recordDone;
+        private XmlTokenStreamReader _innerTokenStreamReader = null;
 
         /// <summary>
         /// Initializes a new instance of <see cref="XmlTokenStreamReader"/> for creating a <see cref="XmlTokenStream"/>.
@@ -53,6 +54,12 @@ namespace Microsoft.IdentityModel.Xml
             if (!reader.IsStartElement())
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX30026, reader.NodeType)));
 
+            // When multiple signed elements are being processed, the EnvelopedSignatureReader always creates a new XmlTokenStreamReader.
+            // This creates a chain of readers.
+            // The outer reader need to record the position of its 'Signature' element.
+            // When calculating the digest all inner 'Signatures' are considered as inner text.
+            // This allows for embedded signed elements.
+            _innerTokenStreamReader = reader as XmlTokenStreamReader;
             TokenStream = new XmlTokenStream();
             InnerReader = reader;
             Record();
@@ -66,28 +73,68 @@ namespace Microsoft.IdentityModel.Xml
             get;
         }
 
+        internal XmlDictionaryReader XmlDictionaryReader => InnerReader;
+
+        /// <summary>
+        /// Delegates to InnerReader, then calls Record()
+        /// </summary>
+        /// <remarks>When multiple signed elements are being processed, the EnvelopedSignatureReader always creates a new XmlTokenStreamReader.
+        /// The outer reader need to record the position of its 'Signature' element and ignore any inner 'Signatures'.
+        /// This allows for embedded signed elements.</remarks>
+        internal bool Read(bool recordSignaturePosition)
+        {
+            if (_innerTokenStreamReader != null)
+            {
+                // if the inner reader is a XmlTokenStreamReader tell it to skip recording the signature position
+                if (!_innerTokenStreamReader.Read(false))
+                    return false;
+            }
+            else if (!InnerReader.Read())
+                return false;
+
+            if (!_recordDone)
+                Record(recordSignaturePosition);
+
+            return true;
+        }
+
         /// <summary>
         /// Delegates to InnerReader, then calls Record()
         /// </summary>
         public override bool Read()
         {
-            if (!InnerReader.Read())
+            if (_innerTokenStreamReader != null)
+            {
+                if (!_innerTokenStreamReader.Read(false))
+                    return false;
+            }
+            else if (!InnerReader.Read())
                 return false;
 
             if (!_recordDone)
-                Record();
+                Record(true);
+
 
             return true;
         }
 
         private void Record()
         {
+            Record(true);
+        }
+
+        private void Record(bool recordSignaturePosition)
+        {
             switch (InnerReader.NodeType)
             {
                 case XmlNodeType.Element:
                 {
                     bool isEmpty = InnerReader.IsEmptyElement;
+                    if (recordSignaturePosition && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature) && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
+                        TokenStream.SignatureElement = TokenStream.XmlTokens.Count;
+
                     TokenStream.AddElement(InnerReader.Prefix, InnerReader.LocalName, InnerReader.NamespaceURI, isEmpty);
+
                     if (InnerReader.MoveToFirstAttribute())
                     {
                         do

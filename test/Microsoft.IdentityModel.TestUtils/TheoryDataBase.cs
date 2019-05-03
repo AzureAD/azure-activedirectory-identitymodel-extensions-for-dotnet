@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public bool First { get; set; } = false;
 
-        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; }
+        public Dictionary<Type, List<string>> PropertiesToIgnoreWhenComparing { get; set; } = new Dictionary<Type, List<string>>();
 
         public string TestId { get; set; }
 

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,41 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Xml;
+using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Xml.Tests
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+
+namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
-    public class EnvelopedSignatureTheoryData : TheoryDataBase
+    public class SamlAssertionTests
     {
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = CryptoProviderFactory.Default;
-
-        public bool ExpectSignature { get; set; } = true;
-
-        public string ReferenceId { get; set; }
-
-        public string InclusiveNamespacesPrefixList { get; set; }
-
-        public SecurityKey SecurityKey { get; set; }
-
-        public SecurityKey TokenSecurityKey { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public Signature Signature { get; set; }
-
-        public string Xml { get; set; }
-
-        public XmlReader XmlReader { get; set; }
-
-        public XmlWriter XmlWriter { get; set; }
-
-        public IXmlElementReader XmlElementReader { get; set; }
-
-        public override string ToString()
+        [Fact]
+        public void CanonicalString()
         {
-            return TestId + ", ExpectSignature: " + ExpectSignature;
+            var context = new CompareContext($"{this}.CanonicalString");
+
+            var assertion = ReferenceSaml.SamlAssertion;
+            var canonicalString = assertion.CanonicalString;
+            var canonicalString2 = assertion.CanonicalString;
+
+            IdentityComparer.AreStringsEqual(canonicalString, canonicalString2, context);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
     }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

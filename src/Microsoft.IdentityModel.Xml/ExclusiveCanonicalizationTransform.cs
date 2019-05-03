@@ -78,14 +78,11 @@ namespace Microsoft.IdentityModel.Xml
 
             using (var stream = new MemoryStream())
             {
-                using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
-                {
-                    writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusiveNamespacesPrefixList(InclusiveNamespacesPrefixList));
-                    tokenStream.WriteTo(writer);
-                    writer.EndCanonicalization();
-                    writer.Flush();
-                }
-                stream.Flush();
+                var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+                writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusiveNamespacesPrefixList(InclusiveNamespacesPrefixList));
+                tokenStream.WriteTo(writer);
+                writer.EndCanonicalization();
+                writer.Flush();
                 return hash.ComputeHash(stream.ToArray());
             }
         }

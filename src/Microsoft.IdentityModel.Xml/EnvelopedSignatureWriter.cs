@@ -27,7 +27,6 @@
 
 using System;
 using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
@@ -169,30 +168,32 @@ namespace Microsoft.IdentityModel.Xml
                 SignatureMethod = _signingCredentials.Algorithm
             };
 
-            var canonicalSignedInfoStream = new MemoryStream();
-            var signedInfoWriter = CreateTextWriter(Stream.Null);
-            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
-            DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
-            signedInfoWriter.EndCanonicalization();
-            signedInfoWriter.Flush();
-
-            var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
-            if (provider == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
-
-            try
+            using (var canonicalSignedInfoStream = new MemoryStream())
             {
-                return new Signature
+                var signedInfoWriter = CreateTextWriter(Stream.Null);
+                signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
+                DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
+                signedInfoWriter.EndCanonicalization();
+                signedInfoWriter.Flush();
+
+                var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
+                if (provider == null)
+                    throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
+
+                try
                 {
-                    KeyInfo = new KeyInfo(_signingCredentials.Key),
-                    SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
-                    SignedInfo = signedInfo,
-                };
-            }
-            finally
-            {
-                if (provider != null)
-                    cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                    return new Signature
+                    {
+                        KeyInfo = new KeyInfo(_signingCredentials.Key),
+                        SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
+                        SignedInfo = signedInfo,
+                    };
+                }
+                finally
+                {
+                    if (provider != null)
+                        cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                }
             }
         }
 

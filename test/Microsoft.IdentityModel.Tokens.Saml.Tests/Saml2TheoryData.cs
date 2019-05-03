@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
-namespace Microsoft.IdentityModel.Tokens.Saml.Tests
+namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
     public class Saml2TheoryData : TokenTheoryData
     {
