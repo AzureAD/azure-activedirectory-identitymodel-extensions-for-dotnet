@@ -834,14 +834,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
             Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
-            var issuer = Validators.ValidateIssuer(jsonWebToken.Issuer, jsonWebToken, validationParameters);
+            Validators.ValidateIssuer(jsonWebToken.Issuer, jsonWebToken, validationParameters);
             Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
-                var actorValidationResult =  ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
+                ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
-
-            Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
+            if (validationParameters.RequireSignedTokens || jsonWebToken.SigningKey != null)
+            {
+                Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
+            }
 
             return new TokenValidationResult
             {

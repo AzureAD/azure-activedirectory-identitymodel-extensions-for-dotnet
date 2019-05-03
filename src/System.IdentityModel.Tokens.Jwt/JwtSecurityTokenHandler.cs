@@ -742,11 +742,13 @@ namespace System.IdentityModel.Tokens.Jwt
             ValidateTokenReplay(expires, jwtToken.RawData, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jwtToken.Actor))
             {
-                SecurityToken actor = null;
-                ValidateToken(jwtToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out actor);
+                ValidateToken(jwtToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out var _);
+            }
+            if (validationParameters.RequireSignedTokens || jwtToken.SigningKey != null)
+            {
+                ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
             }
 
-            ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
             var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;

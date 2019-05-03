@@ -423,11 +423,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void ValidateToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
-
-            ClaimsPrincipal retVal = null;
             try
             {
-                retVal = (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                var retVal = (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -697,6 +695,67 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { KeyingMaterial.DefaultJsonWebKeyWithCertificate1 }; },
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}RequireSignedTokens",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}RequireSignedTokensNullSigningKey",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}DontRequireSignedTokens",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData
+                    {
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_SignatureMissing)}DontRequireSignedTokensNullSigningKey",
+                        Token = ReferenceTokens.SamlToken_SignatureMissing,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
                         }
                     }
                 };
