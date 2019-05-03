@@ -195,6 +195,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 var assertion = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAssertionPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
 
+                context.PropertiesToIgnoreWhenComparing.Add(typeof(SamlAssertion), new List<string> { "CanonicalString" });
                 IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
             }
             catch (Exception ex)
@@ -350,6 +351,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);
+                context.PropertiesToIgnoreWhenComparing.Add(typeof(SamlAssertion), new List<string> { "CanonicalString" });
                 IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
             }
             catch (Exception ex)

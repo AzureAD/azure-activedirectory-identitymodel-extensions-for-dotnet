@@ -34,78 +34,61 @@ namespace Microsoft.IdentityModel.Xml
 {
     internal class XmlTokenStreamWriter
     {
-        IList<XmlTokenEntry> _entries;
-        int _position;
-
-        public XmlTokenStreamWriter(IList<XmlTokenEntry> entries, string excludedElement, string excludedNamespace)
+        public XmlTokenStreamWriter(XmlTokenStream tokenStream)
         {
-            _entries = entries ?? throw LogArgumentNullException(nameof(entries));
-            Count = entries.Count;
-            ExcludedElement = excludedElement;
-            ExcludedNamespace = excludedNamespace;
+            Position = 0;
+            TokenStream = tokenStream;
         }
 
-        public int Count
-        {
-            get;
-        }
+        public int Count => TokenStream.XmlTokens.Count;
 
-        public int Position
-        {
-            get { return _position; }
-        }
+        public int Position { get; private set; }
+
+        public IList<XmlToken> Tokens => TokenStream.XmlTokens;
+
+        public XmlTokenStream TokenStream { get; private set; }
 
         public XmlNodeType NodeType
         {
-            get { return _entries[_position].NodeType; }
+            get { return Tokens[Position].NodeType; }
         }
 
         public bool IsEmptyElement
         {
-            get { return _entries[_position].IsEmptyElement; }
+            get { return Tokens[Position].IsEmptyElement; }
         }
 
         public string Prefix
         {
-            get { return _entries[_position]._prefix; }
+            get { return Tokens[Position].Prefix; }
         }
 
         public string LocalName
         {
-            get { return _entries[_position]._localName; }
+            get { return Tokens[Position].LocalName; }
         }
 
         public string Namespace
         {
-            get { return _entries[_position]._namespace; }
+            get { return Tokens[Position].Namespace; }
         }
 
         public string Value
         {
-            get { return _entries[_position].Value; }
-        }
-
-        public string ExcludedElement
-        {
-            get;
-        }
-
-        public string ExcludedNamespace
-        {
-            get;
+            get { return Tokens[Position].Value; }
         }
 
         public bool MoveToFirst()
         {
-            _position = 0;
+            Position = 0;
             return Count > 0;
         }
 
         public bool MoveToFirstAttribute()
         {
-            if (_position < Count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
+            if (Position < Count - 1 && Tokens[Position + 1].NodeType == XmlNodeType.Attribute)
             {
-                _position++;
+                Position++;
                 return true;
             }
             else
@@ -116,9 +99,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToNext()
         {
-            if (_position < Count - 1)
+            if (Position < Count - 1)
             {
-                _position++;
+                Position++;
                 return true;
             }
             return false;
@@ -126,9 +109,9 @@ namespace Microsoft.IdentityModel.Xml
 
         public bool MoveToNextAttribute()
         {
-            if (_position < Count - 1 && _entries[_position + 1].NodeType == XmlNodeType.Attribute)
+            if (Position < Count - 1 && Tokens[Position + 1].NodeType == XmlNodeType.Attribute)
             {
-                _position++;
+                Position++;
                 return true;
             }
             else
@@ -139,11 +122,18 @@ namespace Microsoft.IdentityModel.Xml
 
         public void WriteTo(XmlWriter writer)
         {
+            WriteTo(writer, null, null);
+        }
+
+        public void WriteTo(XmlWriter writer, string excludedElement, string excludedNamespace)
+        {
             if (writer == null)
                 throw LogExceptionMessage(new ArgumentNullException(nameof(writer)));
 
             if (!MoveToFirst())
                 throw LogExceptionMessage(new ArgumentException("XmlTokenBufferIsEmpty"));
+
+            bool excluedSignatureElement = (XmlSignatureConstants.Elements.Signature == excludedElement && XmlSignatureConstants.Namespace == excludedNamespace);
 
             int depth = 0;
             int recordedDepth = -1;
@@ -156,11 +146,15 @@ namespace Microsoft.IdentityModel.Xml
                         bool isEmpty = IsEmptyElement;
                         depth++;
                         if (include
-                            && LocalName == ExcludedElement
-                            && Namespace == ExcludedNamespace)
+                            && LocalName == excludedElement
+                            && Namespace == excludedNamespace
+                            )
                         {
-                            include = false;
-                            recordedDepth = depth;
+                            if (excluedSignatureElement && Position == TokenStream.SignatureElement)
+                            {
+                                include = false;
+                                recordedDepth = depth;
+                            }
                         }
                         if (include)
                         {

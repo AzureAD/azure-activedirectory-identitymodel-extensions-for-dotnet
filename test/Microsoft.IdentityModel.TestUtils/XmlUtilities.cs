@@ -29,27 +29,47 @@ using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
     public static class XmlUtilities
     {
+
+        /// <summary>
+        /// This XmlReader when wrapped as an XmlDictionaryReader will not be able to Canonicalize.
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <returns></returns>
+        public static XmlReader CreateXmlReader(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
+            return new XmlTextReader(new StringReader(xml));
+        }
+
+        /// <summary>
+        /// This XmlReader will be able to Canonicalize.
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         public static XmlDictionaryReader CreateDictionaryReader(string xml)
         {
             if (string.IsNullOrEmpty(xml))
                 return null;
 
-            return XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml)));
+            return XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(xml), XmlDictionaryReaderQuotas.Max);
         }
 
         public static EnvelopedSignatureReader CreateEnvelopedSignatureReader(string xml)
         {
-            return new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            return new EnvelopedSignatureReader(CreateDictionaryReader(xml));
         }
 
         public static XmlTokenStream CreateXmlTokenStream(string xml)
         {
-            var xmlTokenStreamReader = new XmlTokenStreamReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            var xmlTokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(xml));
             while (xmlTokenStreamReader.Read());
             return xmlTokenStreamReader.TokenStream;
         }

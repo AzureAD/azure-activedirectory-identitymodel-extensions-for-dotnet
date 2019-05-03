@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
@@ -41,6 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void SamlSecurityTokenReadFrom(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SamlSecurityTokenReadFrom", theoryData);
+            context.PropertiesToIgnoreWhenComparing.Add(typeof(SamlAssertion), new List<string> { "CanonicalString" });
             try
             {
                 var sr = new StringReader(theoryData.SamlTokenTestSet.Xml);

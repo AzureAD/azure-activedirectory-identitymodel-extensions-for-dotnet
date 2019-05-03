@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class XmlTokenStream
     {
-        private List<XmlTokenEntry> _entries = new List<XmlTokenEntry>();
+        private List<XmlToken> _xmlTokens = new List<XmlToken>();
         private string _excludedElement;
         private string _excludedElementNamespace;
 
@@ -48,6 +49,8 @@ namespace Microsoft.IdentityModel.Xml
         {
         }
 
+        internal int SignatureElement { get; set; } = -1;
+
         /// <summary>
         /// Adds a XML node to the collection.
         /// </summary>
@@ -56,7 +59,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null.</exception>
         public void Add(XmlNodeType type, string value)
         {
-            _entries.Add(new XmlTokenEntry(type, value));
+            _xmlTokens.Add(new XmlToken(type, value));
         }
 
         /// <summary>
@@ -72,7 +75,7 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(localName))
                 throw LogArgumentNullException(nameof(localName));
 
-            _entries.Add(new XmlTokenEntry(XmlNodeType.Attribute, prefix, localName, @namespace, value));
+            _xmlTokens.Add(new XmlToken(XmlNodeType.Attribute, prefix, localName, @namespace, value));
         }
 
         /// <summary>
@@ -88,7 +91,7 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(localName))
                 throw LogArgumentNullException(nameof(localName));
 
-            _entries.Add(new XmlTokenEntry(XmlNodeType.Element, prefix, localName, @namespace, isEmptyElement));
+            _xmlTokens.Add(new XmlToken(XmlNodeType.Element, prefix, localName, @namespace, isEmptyElement));
         }
 
         /// <summary>
@@ -116,8 +119,10 @@ namespace Microsoft.IdentityModel.Xml
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
-            var streamWriter = new XmlTokenStreamWriter(_entries, _excludedElement, _excludedElementNamespace);
-            streamWriter.WriteTo(writer);
+            var streamWriter = new XmlTokenStreamWriter(this);
+            streamWriter.WriteTo(writer, _excludedElement, _excludedElementNamespace);
         }
+
+        internal ReadOnlyCollection<XmlToken> XmlTokens => _xmlTokens.AsReadOnly();
     }
 }
