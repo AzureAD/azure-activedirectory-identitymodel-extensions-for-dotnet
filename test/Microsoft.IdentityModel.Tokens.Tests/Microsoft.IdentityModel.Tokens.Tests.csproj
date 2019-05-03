@@ -35,11 +35,6 @@
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Security.Claims" Version="$(CoreFxVersion)" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
     <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
     <Reference Include="System.Runtime" />

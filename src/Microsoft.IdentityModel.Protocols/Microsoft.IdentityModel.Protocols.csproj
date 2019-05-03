@@ -22,7 +22,7 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
     <PackageReference Include="System.Collections.Specialized" Version="4.3.0-*" />
     <PackageReference Include="System.Diagnostics.Contracts" Version="4.3.0-*" />
     <PackageReference Include="System.Net.Http" Version="4.3.0-*" />

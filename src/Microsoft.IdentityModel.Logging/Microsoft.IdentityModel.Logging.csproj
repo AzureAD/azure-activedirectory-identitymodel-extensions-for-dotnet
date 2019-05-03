@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
     <PackageReference Include="System.Diagnostics.Tracing" Version="4.3.0-*" />
     <PackageReference Include="System.Globalization" Version="4.3.0-*" />
     <PackageReference Include="System.IO" Version="4.3.0-*" />
