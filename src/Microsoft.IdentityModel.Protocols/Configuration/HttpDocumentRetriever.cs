@@ -82,19 +82,25 @@ namespace Microsoft.IdentityModel.Protocols
             if (!Utility.IsHttps(address) && RequireHttps)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
 
+            Exception unsuccessfulHttpResponseException;
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
-                HttpResponseMessage response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
+                var response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
+                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (response.IsSuccessStatusCode)
+                    return responseContent;
+
+                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
             }
+
+            throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
         }
     }
 }
