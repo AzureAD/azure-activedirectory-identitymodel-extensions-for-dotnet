@@ -1097,7 +1097,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 if (validationResult.IsValid)
                 {
                     if (!validatedToken.Claims.Any())
-                        context.Diffs.Add("validatedToken.Claims is empty");
+                        context.Diffs.Add("validatedToken.Claims is empty.");
                 }
                 else
                 {
@@ -1169,7 +1169,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
                     CompressionProviderFactory = compressionProviderFactoryForCustom2,
                     TestId = "CustomCompressionProviderFails",
-                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(SecurityTokenDecompressionFailedException))
                 }
             };
         }
@@ -1196,75 +1196,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
 
         public TokenValidationParameters ValidationParameters { get; set; }
-    }
-
-    public class JWEDecompressionTheoryData : TheoryDataBase
-    {
-        public CompressionProviderFactory CompressionProviderFactory;
-        public TokenValidationParameters ValidationParameters;
-        public string JWECompressionString;
-    }
-
-    /// <summary>
-    /// A custom compression provider class implementing <see cref="ICompressionProvider"/>.
-    /// </summary>
-    public class SampleCustomCompressionProvider : ICompressionProvider
-    {
-        public SampleCustomCompressionProvider(string algorithm)
-        {
-            Algorithm = algorithm;
-
-            if (!IsSupportedAlgorithm(algorithm))
-                throw new NotSupportedException($"Algorithm '{algorithm}' is not supported.");
-        }
-
-        public string Algorithm { get; set; }
-
-        public byte[] Compress(byte[] value)
-        {
-            // just return the same bytes that were passed in
-            return value;
-        }
-
-        public byte[] Decompress(byte[] value)
-        {
-            // just return the same bytes that were passed in
-            return value;
-        }
-
-        public bool IsSupportedAlgorithm(string algorithm)
-        {
-            return algorithm != null && algorithm.Equals(Algorithm);
-        }
-    }
-
-    /// <summary>
-    /// A custom compression provider class implementing <see cref="ICompressionProvider"/>, 
-    /// which accepts any algorithm but always return null for decompression and compression.
-    /// </summary>
-    public class SampleCustomCompressionProviderDecompressAndCompressAlwaysFail : ICompressionProvider
-    {
-        public SampleCustomCompressionProviderDecompressAndCompressAlwaysFail(string algorithm)
-        {
-            Algorithm = algorithm;
-        }
-
-        public string Algorithm { get; set; }
-
-        public byte[] Compress(byte[] value)
-        {
-            return null;
-        }
-
-        public byte[] Decompress(byte[] value)
-        {
-            return null;
-        }
-
-        public bool IsSupportedAlgorithm(string algorithm)
-        {
-            return true;
-        }
     }
 }
 

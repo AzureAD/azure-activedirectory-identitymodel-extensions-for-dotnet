@@ -1243,19 +1243,18 @@ namespace System.IdentityModel.Tokens.Jwt
             return JwtTokenUtilities.FindKeyMatch(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters.TokenDecryptionKey, validationParameters.TokenDecryptionKeys);
         }
 
-        private string DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
+        private byte[] DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
             var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc);
             if (decryptionProvider == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, jwtToken.Header.Enc)));
 
-            return UTF8Encoding.UTF8.GetString(
-                decryptionProvider.Decrypt(
+            return decryptionProvider.Decrypt(
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
                     Encoding.ASCII.GetBytes(jwtToken.RawHeader),
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
                     Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
-                ));
+                );
         }
 
         /// <summary>
@@ -1281,10 +1280,12 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
+            var decryptionSucceeded = false;
+            byte[] decryptedTokenBytes = null;
 
             // keep track of exceptions thrown, keys that were tried
-            StringBuilder exceptionStrings = new StringBuilder();
-            StringBuilder keysAttempted = new StringBuilder();
+            var exceptionStrings = new StringBuilder();
+            var keysAttempted = new StringBuilder();
             foreach (SecurityKey key in keys)
             {
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
@@ -1302,7 +1303,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 try
                 {
-                    return DecryptToken(jwtToken, cryptoProviderFactory, key);
+                    decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
+                    decryptionSucceeded = true;
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -1313,10 +1316,23 @@ namespace System.IdentityModel.Tokens.Jwt
                     keysAttempted.AppendLine(key.ToString());
             }
 
-            if (keysAttempted.Length > 0)
+            if (!decryptionSucceeded && keysAttempted.Length > 0)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, jwtToken.RawData)));
 
-            throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, jwtToken.RawData)));
+            if (!decryptionSucceeded)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, jwtToken.RawData)));
+
+            if (string.IsNullOrEmpty(jwtToken.Header.Zip))
+                return Encoding.UTF8.GetString(decryptedTokenBytes);
+
+            try
+            {
+                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Header.Zip);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, jwtToken.Header.Zip), ex));
+            }
         }
 
         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
