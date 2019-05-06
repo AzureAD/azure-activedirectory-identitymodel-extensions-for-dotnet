@@ -840,10 +840,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
-            if (validationParameters.RequireSignedTokens || jsonWebToken.SigningKey != null)
-            {
-                Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
-            }
+            Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
 
             return new TokenValidationResult
             {

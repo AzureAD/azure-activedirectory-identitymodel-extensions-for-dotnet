@@ -425,7 +425,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
             try
             {
-                var retVal = (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                (theoryData.Handler as SamlSecurityTokenHandler).ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)

@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -1128,10 +1127,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
             ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, token, validationParameters);
-            if (validationParameters.RequireSignedTokens || samlToken.SigningKey != null)
-            {
-                ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
-            }
+            ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)

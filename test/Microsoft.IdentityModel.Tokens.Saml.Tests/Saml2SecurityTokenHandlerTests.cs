@@ -692,7 +692,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = new CompareContext($"{this}.ValidateToken, {theoryData}");
             try
             {
-                var retVal = theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
