@@ -935,19 +935,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (securityToken.Assertion == null)
                 throw LogArgumentNullException(nameof(securityToken.Assertion));
 
-            if (securityToken.Assertion.Conditions == null || securityToken.Assertion.Conditions.Conditions.Count() == 0)
-                return;
-
-            Validators.ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
-
-            if (securityToken.Assertion.Conditions.Conditions.ElementAt(0) is SamlAudienceRestrictionCondition)
+            if (securityToken.Assertion.Conditions == null)
             {
-                foreach (var condition in securityToken.Assertion.Conditions.Conditions)
+                if (validationParameters.RequireAudience)
+                    throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11401));
+               
+                return;
+            }
+
+            ValidateLifetime(securityToken.Assertion.Conditions.NotBefore, securityToken.Assertion.Conditions.NotOnOrAfter, securityToken, validationParameters);
+
+            var foundAudienceRestriction = false;
+            foreach (var condition in securityToken.Assertion.Conditions.Conditions)
+            {
+                if (condition is SamlAudienceRestrictionCondition audienceRestriction)
                 {
-                    if (condition is SamlAudienceRestrictionCondition audienceRestriction)
-                        Validators.ValidateAudience(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
+                    if (!foundAudienceRestriction)
+                        foundAudienceRestriction = true;
+
+                    ValidateAudience(audienceRestriction.Audiences.ToDictionary(x => x.OriginalString).Keys, securityToken, validationParameters);
                 }
-            }            
+            }
+
+            if (validationParameters.RequireAudience && !foundAudienceRestriction)
+                throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11401));
         }
 
         /// <summary>
@@ -971,13 +982,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (validationParameters.ValidateIssuerSigningKey)
-            {
-                if (validationParameters.IssuerSigningKeyValidator != null)
-                    validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters);
-                else
-                    Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
-            }
+           Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -1190,7 +1195,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             ValidateConditions(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+
+            if (samlToken.Assertion.Conditions != null)
+                ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identities = CreateClaimsIdentities(samlToken, issuer, validationParameters);
