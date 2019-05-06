@@ -257,6 +257,12 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets the 'value' of the 'zip' claim { zip, 'value' }.
+        /// </summary>
+        /// <remarks>If the 'zip' claim is not found, null is returned.</remarks>   
+        public string Zip => GetStandardClaim(JwtHeaderParameterNames.Zip);
+         
+        /// <summary>
         /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
         /// </summary>
         /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>

@@ -357,33 +357,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Decompress JWT token bytes.
-        /// </summary>
-        /// <param name="tokenBytes"></param>
-        /// <param name="algorithm"></param>
-        /// <exception cref="ArgumentNullException">if 'tokenBytes' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'algorithm' is null.</exception>
-        /// <exception cref="NotSupportedException">if the decompression algorithm is not supported.</exception>
-        /// <returns>Decompressed JWT token</returns>
-        private string DecompressToken(byte[] tokenBytes, string algorithm)
-        {
-            if (tokenBytes == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenBytes));
-
-            if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
-
-            if (!CompressionProviderFactory.Default.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10682, algorithm)));
-
-            var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm);
-
-            var decompressedBytes = compressionProvider.Decompress(tokenBytes);
-
-            return decompressedBytes != null ? Encoding.UTF8.GetString(decompressedBytes) : throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, algorithm)));
-        }
-
-        /// <summary>
         /// Decrypts a JWE and returns the clear text 
         /// </summary>
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
@@ -454,7 +427,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
            
             try
             {
-                return DecompressToken(decryptedTokenBytes, jwtToken.Zip);
+                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Zip);
             }
             catch (Exception ex)
             {

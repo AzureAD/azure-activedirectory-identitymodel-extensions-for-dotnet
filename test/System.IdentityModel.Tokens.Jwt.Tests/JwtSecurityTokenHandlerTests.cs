@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.TestUtils;
@@ -681,6 +682,92 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.False(identity.HasClaim(c => c.Type == "unwantedClaim"));
             Assert.False(identity.HasClaim(c => c.Type == "jwtClaim"));
             Assert.True(identity.HasClaim("internalClaim", "claimValue"));
+        }
+
+        [Theory, MemberData(nameof(JWEDecompressionTheoryData))]
+        public void JWEDecompressionTest(JWEDecompressionTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.JWEDecompressionTest", theoryData);
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                var claimsPrincipal = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters, out var validatedToken);
+
+                if (!claimsPrincipal.Claims.Any())
+                        context.Diffs.Add("claimsPrincipal.Claims is empty.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JWEDecompressionTheoryData> JWEDecompressionTheoryData()
+        {
+            var compressionProviderFactoryForCustom = new CompressionProviderFactory()
+            {
+                CustomCompressionProvider = new SampleCustomCompressionProvider("MyAlgorithm")
+            };
+
+            var compressionProviderFactoryForCustom2 = new CompressionProviderFactory()
+            {
+                CustomCompressionProvider = new SampleCustomCompressionProviderDecompressAndCompressAlwaysFail("MyAlgorithm")
+            };
+
+            return new TheoryData<JWEDecompressionTheoryData>() {
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    TestId = "ValidAlgorithm"
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithUnsupportedAlgorithm,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    TestId = "InvalidAlgorithm",
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(NotSupportedException))
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWEInvalidCompressionTokenWithDEF,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    TestId = "InvalidToken",
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidDataException))
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
+                    CompressionProviderFactory = null,
+                    TestId = "NullCompressionProviderFactory",
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    CompressionProviderFactory = compressionProviderFactoryForCustom,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithCustomAlgorithm,
+                    TestId = "CustomCompressionProviderSucceeds"
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
+                    CompressionProviderFactory = compressionProviderFactoryForCustom2,
+                    TestId = "CustomCompressionProviderFails",
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(SecurityTokenDecompressionFailedException))
+                }
+            };
         }
 
         [Fact]
