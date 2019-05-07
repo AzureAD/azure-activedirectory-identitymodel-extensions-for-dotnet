@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
                 // https://tools.ietf.org/html/rfc7517#section-4.2
                 if (!(string.IsNullOrWhiteSpace(webKey.Use) || webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal)))
                 {
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.KeyId ?? "" , webKey.Use));
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.KeyId ?? "null" , webKey.Use ?? "null"));
 
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (!isResolved)
                     {
-                        LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey.KeyId ?? ""));
+                        LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey.KeyId ?? "null"));
 
                         if(!SkipUnresolvedJsonWebKeys)
                             signingKeys.Add(webKey);
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                 {
                     // kty is not 'EC' or 'RSA'
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10809, webKey.Kty ?? ""));
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10809, webKey.Kty ?? "null"));
 
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
