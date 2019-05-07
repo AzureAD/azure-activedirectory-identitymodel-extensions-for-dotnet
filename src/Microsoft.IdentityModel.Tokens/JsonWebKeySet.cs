@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 ECDsaAdapter = new ECDsaAdapter();
             }
-            catch (PlatformNotSupportedException ex)
+            catch (Exception ex)
             {
                 LogHelper.LogExceptionMessage(ex);
             }
@@ -162,6 +162,10 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!(string.IsNullOrWhiteSpace(webKey.Use) || webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal)))
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.KeyId ?? "" , webKey.Use));
+
+                    if (!SkipUnresolvedJsonWebKeys)
+                        signingKeys.Add(webKey);
+
                     continue;
                 }
 

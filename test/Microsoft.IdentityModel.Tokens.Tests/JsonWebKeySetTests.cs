@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
@@ -128,6 +129,67 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
         }
 
+        [Fact]
+        public void SigningKeysExtensibility()
+        {
+            var context = new CompareContext($"{this}.SigningKeysExtensibility");
+            TestUtilities.WriteHeader($"{this}.SigningKeysExtensibility");
+
+            try
+            {
+                // Received json web key only has an x5t property and it can't be used for signature validation as it can't be resolved into a SecurityKey, without user's custom code.
+                // This test proves that the scenario described above is possible using extensibility.
+                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
+                var signingKeys = DataSets.JsonWebKeySetOnlyX5t.GetSigningKeys();
+
+                var tokenValidationParameters = new TokenValidationParameters()
+                {
+                    IssuerSigningKeys = signingKeys,
+                    IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { ResolveX509Certificate(token, securityToken, keyIdentifier, tvp) }; },
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                };
+
+                var tokenValidationResult = new JsonWebTokens.JsonWebTokenHandler().ValidateToken(Default.AsymmetricJwt, tokenValidationParameters);
+
+                if (tokenValidationResult.IsValid != true)
+                    context.Diffs.Add("tokenValidationResult.IsValid != true");
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"TokenValidationFailed: {ex}");
+            }
+
+            finally
+            {
+                // revert back to default
+                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private SecurityKey ResolveX509Certificate(string token, SecurityToken securityToken, string keyIdentifier, TokenValidationParameters tvp)
+        {
+            // example: get a certificate from a cert store
+
+            if (tvp.IssuerSigningKeys.First() is JsonWebKey jsonWebKey)
+            {
+                if (!string.IsNullOrEmpty(jsonWebKey.X5t))
+                {
+                    // X509Store store = new X509Store(StoreLocation.CurrentUser);
+                    // store.Open(OpenFlags.ReadOnly);
+                    // X509Certificate2Collection certs = store.Certificates.Find(X509FindType.FindByThumbprint, Base64UrlEncoder.Decode(jsonWebKey.X5t), true);
+                    // return new X509SecurityKey(certs[0]);
+
+                    return new X509SecurityKey(KeyingMaterial.DefaultCert_2048);
+                }
+            }
+
+            return null;
+        }
+
         [Theory, MemberData(nameof(GetSigningKeysTheoryData))]
         public void GetSigningKeys(JsonWebKeySetTheoryData theoryData)
         {
@@ -179,7 +241,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     First = true,
                     JsonWebKeySet = jsonWebKeySet,
+                    SkipUnresolvedJsonWebKeys = true,
                     ExpectedSigningKeys = new List<SecurityKey>(),
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    TestId = "ZeroKeysWithSigAsUseSkipUnresolved",
+                });
+
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString);
+                theoryData.Add(new JsonWebKeySetTheoryData
+                {
+                    JsonWebKeySet = jsonWebKeySet,
+                    SkipUnresolvedJsonWebKeys = false,
+                    ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
                     ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ZeroKeysWithSigAsUse",
                 });
