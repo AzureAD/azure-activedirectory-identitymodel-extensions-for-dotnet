@@ -135,7 +135,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor.SigningCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor.SigningCredentials));
 
-            var payload = tokenDescriptor.Claims == null ? new Dictionary<string, object>() : new Dictionary<string, object>(tokenDescriptor.Claims);
+            // JObject needs to be upcast to an IDictionary<string, JToken> so that we can access the ContainsKey() and Any() methods
+            IDictionary<string, JToken> payload = tokenDescriptor.Claims == null ? new JObject() : JObject.FromObject(tokenDescriptor.Claims);
 
             if (tokenDescriptor.Audience != null)
             {
@@ -180,7 +181,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!payload.Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14115));
 
-            return CreateTokenPrivate(JObject.FromObject(payload), tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
+            return CreateTokenPrivate(payload as JObject, tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
         }
 
         /// <summary>
