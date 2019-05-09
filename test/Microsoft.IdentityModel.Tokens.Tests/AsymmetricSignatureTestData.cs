@@ -102,6 +102,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512Signature },
         };
 
+        public static List<Tuple<string, string>> RsaPssSigningAlgorithms = new List<Tuple<string, string>>
+        {
+            { SecurityAlgorithms.RsaSsaPssSha256, SecurityAlgorithms.RsaSsaPssSha256 },
+            { SecurityAlgorithms.RsaSsaPssSha256, SecurityAlgorithms.RsaSsaPssSha256Signature },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, SecurityAlgorithms.RsaSsaPssSha256 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, SecurityAlgorithms.RsaSsaPssSha256Signature },
+            { SecurityAlgorithms.RsaSsaPssSha384, SecurityAlgorithms.RsaSsaPssSha384 },
+            { SecurityAlgorithms.RsaSsaPssSha384, SecurityAlgorithms.RsaSsaPssSha384Signature },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, SecurityAlgorithms.RsaSsaPssSha384 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, SecurityAlgorithms.RsaSsaPssSha384Signature },
+            { SecurityAlgorithms.RsaSsaPssSha512, SecurityAlgorithms.RsaSsaPssSha512 },
+            { SecurityAlgorithms.RsaSsaPssSha512, SecurityAlgorithms.RsaSsaPssSha512Signature },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, SecurityAlgorithms.RsaSsaPssSha512 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, SecurityAlgorithms.RsaSsaPssSha512Signature },
+        };
+
         public static readonly List<Tuple<X509SecurityKey, X509SecurityKey, string>> X509SecurityKeys = new List<Tuple<X509SecurityKey, X509SecurityKey, string>>
         {
             { KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, "X509Key1" },
@@ -132,6 +148,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = theoryData.TestId + algorithm.Item1 + algorithm.Item2,
                     VerifyAlgorithm = algorithm.Item2,
                     VerifyKey = theoryData.VerifyKey
+                });
+        }
+
+        public static void AddRsaPssAlgorithmVariations(SignatureProviderTheoryData theoryData, TheoryData<SignatureProviderTheoryData> variations)
+        {
+            foreach (var algorithm in RsaPssSigningAlgorithms)
+                variations.Add(new SignatureProviderTheoryData
+                {
+                    SigningAlgorithm = algorithm.Item1,
+                    SigningKey = theoryData.SigningKey,
+                    TestId = theoryData.TestId + algorithm.Item1 + algorithm.Item2,
+                    VerifyAlgorithm = algorithm.Item2,
+                    VerifyKey = theoryData.VerifyKey,
+                    ExpectedException = theoryData.ExpectedException,
                 });
         }
     }

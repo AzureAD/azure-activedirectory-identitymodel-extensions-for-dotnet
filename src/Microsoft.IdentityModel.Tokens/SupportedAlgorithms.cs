@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.Logging;
 using System;
 using System.Security.Cryptography;
 
@@ -44,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static bool IsSupportedAlgorithm(string algorithm, SecurityKey key)
         {
             if (key as RsaSecurityKey != null)
-                return IsSupportedRsaAlgorithm(algorithm);
+                return IsSupportedRsaAlgorithm(algorithm, key);
 
             if (key is X509SecurityKey x509Key)
             {
@@ -52,13 +53,13 @@ namespace Microsoft.IdentityModel.Tokens
                 if (x509Key.PublicKey as RSA == null)
                     return false;
 
-                return IsSupportedRsaAlgorithm(algorithm);
+                return IsSupportedRsaAlgorithm(algorithm, key);
             }
 
             if (key is JsonWebKey jsonWebKey)
             {
                 if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return IsSupportedRsaAlgorithm(algorithm);
+                    return IsSupportedRsaAlgorithm(algorithm, key);
                 else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
                     return IsSupportedEcdsaAlgorithm(algorithm);
                 else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
@@ -156,7 +157,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool IsSupportedRsaAlgorithm(string algorithm)
+        internal static bool IsSupportedRsaAlgorithm(string algorithm, SecurityKey key)
         {
             switch (algorithm)
             {
@@ -170,9 +171,49 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaPKCS1:
                 case SecurityAlgorithms.RsaOaepKeyWrap:
                     return true;
+                case SecurityAlgorithms.RsaSsaPssSha256:
+                case SecurityAlgorithms.RsaSsaPssSha384:
+                case SecurityAlgorithms.RsaSsaPssSha512:
+                case SecurityAlgorithms.RsaSsaPssSha256Signature:
+                case SecurityAlgorithms.RsaSsaPssSha384Signature:
+                case SecurityAlgorithms.RsaSsaPssSha512Signature:
+                    return IsSupportedRsaPss(key);
             }
 
             return false;
+        }
+
+        private static bool IsSupportedRsaPss(SecurityKey key)
+        {
+#if NET45 || NET451
+            // RSA-PSS is not available on .NET 4.5 and .NET 4.5.1
+            LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10692));
+            return false;
+#elif NET461 || NETSTANDARD2_0
+            // RSACryptoServiceProvider doesn't support RSA-PSS
+            if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
+            {
+                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
+                return false;
+            }
+            else if (key is X509SecurityKey x509 && x509.PrivateKey is RSACryptoServiceProvider)
+            {
+                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
+                return false;
+            }
+            else if (key is X509SecurityKey x509P && x509P.PublicKey is RSACryptoServiceProvider)
+            {
+                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+#else // NETSTANDARD1_4
+            // .NET Standard 1.4 doesn't know about RSACryptoServiceProvider type
+            return true;
+#endif
         }
 
         internal static bool IsSupportedSymmetricAlgorithm(string algorithm)

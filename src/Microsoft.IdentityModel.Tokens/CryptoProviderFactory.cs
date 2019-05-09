@@ -173,15 +173,15 @@ namespace Microsoft.IdentityModel.Tokens
                 return keyWrapProvider;
             }
 
-            if (key is RsaSecurityKey rsaKey && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
+            if (key is RsaSecurityKey rsaKey && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm, rsaKey))
                 return new RsaKeyWrapProvider(key, algorithm, willUnwrap);
 
-            if (key is X509SecurityKey x509Key && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
+            if (key is X509SecurityKey x509Key && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm, x509Key))
                 return new RsaKeyWrapProvider(x509Key, algorithm, willUnwrap);
 
             if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm))
+                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA && SupportedAlgorithms.IsSupportedRsaAlgorithm(algorithm, key))
                 {
                     return new RsaKeyWrapProvider(jsonWebKey, algorithm, willUnwrap);
                 }
