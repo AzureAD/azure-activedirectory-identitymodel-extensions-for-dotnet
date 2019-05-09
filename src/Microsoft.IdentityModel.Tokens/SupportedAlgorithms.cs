@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
                 return false;
             }
-            else if (key is X509SecurityKey x509P && x509P.PublicKey is RSACryptoServiceProvider)
+            else if (key is X509SecurityKey x509SecurityKey && x509SecurityKey.PublicKey is RSACryptoServiceProvider)
             {
                 LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
                 return false;

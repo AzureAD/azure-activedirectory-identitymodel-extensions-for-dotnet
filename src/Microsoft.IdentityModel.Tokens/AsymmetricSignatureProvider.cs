@@ -57,12 +57,12 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha256Signature, 2048 },
             { SecurityAlgorithms.RsaSha384Signature, 2048 },
             { SecurityAlgorithms.RsaSha512Signature, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha256, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha384, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha512, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha256Signature, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha384Signature, 2048 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 2048 }
+            { SecurityAlgorithms.RsaSsaPssSha256, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
         };
 
         /// <summary>
@@ -79,12 +79,12 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha256Signature, 1024 },
             { SecurityAlgorithms.RsaSha384Signature, 1024 },
             { SecurityAlgorithms.RsaSha512Signature, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha256, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha384, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha512, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha256Signature, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha384Signature, 1024 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1024 }
+            { SecurityAlgorithms.RsaSsaPssSha256, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
         };
 
         internal AsymmetricSignatureProvider(SecurityKey key, string algorithm, CryptoProviderFactory cryptoProviderFactory)

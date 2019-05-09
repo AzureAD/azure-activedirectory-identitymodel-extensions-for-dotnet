@@ -472,14 +472,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
-            var localContext = new CompareContext
+            var localContext = new CompareContext("localContext", theoryData);
+
+            if (localContext.PropertiesToIgnoreWhenComparing == null)
             {
-                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                localContext.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
                     { typeof(JwtHeader), new List<string> { "Item" } },
                     { typeof(JwtPayload), new List<string> { "Item" } }
-                }
-            };
+                };
+            }
+            else
+            {
+                localContext.PropertiesToIgnoreWhenComparing.Add(typeof(JwtHeader), new List<string> { "Item" });
+                localContext.PropertiesToIgnoreWhenComparing.Add(typeof(JwtPayload), new List<string> { "Item" });
+            }
 
             if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken2, localContext))
             {
@@ -627,6 +634,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
+#if NET461 || NETCOREAPP2_0
+            // RsaPss is not supported on .NET < 4.6
+            var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "Test7",
+                TokenDescriptor = Default.SecurityTokenDescriptor(null, rsaPssSigningCredentials, ClaimSets.DefaultClaims),
+                //RsaPss produces different signatures
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtSecurityToken), new List<string> { "RawSignature", "RawData" } },
+                },
+                ValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuer = false,
+                }
+            });
+#endif
+
             return theoryData;
         }
 
@@ -670,7 +699,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Token = Default.AsymmetricJwt,
                     }
                 };
-            }                  
+            }
         }
 
         [Theory, MemberData(nameof(RoundTripJWEParams))]
@@ -1173,13 +1202,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             ClaimsIdentity subject =
                 new ClaimsIdentity(
-                    new List<Claim> 
-                    {   new Claim(_nameClaimTypeForDelegate, delegateName), 
-                        new Claim(validationParametersNameClaimType, validationParameterName), 
-                        new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName), 
+                    new List<Claim>
+                    {   new Claim(_nameClaimTypeForDelegate, delegateName),
+                        new Claim(validationParametersNameClaimType, validationParameterName),
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName),
                         new Claim(_roleClaimTypeForDelegate, delegateRole),
-                        new Claim(validationParametersRoleClaimType, validationParameterRole), 
-                        new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole), 
+                        new Claim(validationParametersRoleClaimType, validationParameterRole),
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole),
                     });
 
             JwtSecurityToken jwt = handler.CreateJwtSecurityToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;

@@ -586,7 +586,34 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = "Audience",
                             ValidIssuer = "Issuer"
                         }
+                    },
+
+ #if NET461 || NETCOREAPP2_0
+                    // RsaPss is not supported on .NET < 4.6
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "RsaPss",
+                        Payload = Default.PayloadString,
+                        //RsaPss produces different signatures
+                        PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                        {
+                            { typeof(JsonWebToken), new List<string> { "EncodedToken", "EncodedSignature" } },
+                        },
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Claims = Default.PayloadDictionary,
+                            SigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256),
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = Default.AsymmetricSigningKey,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidateIssuer = false,
+                        }
                     }
+#endif
                 };
             }
         }
