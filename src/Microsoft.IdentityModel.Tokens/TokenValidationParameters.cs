@@ -136,8 +136,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default for the maximm token size.
         /// </summary>
-        /// <remarks>2 MB (mega bytes).</remarks>
-        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 1024 * 2; // 2meg.
+        /// <remarks>250 KB (kilobytes).</remarks>
+        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 250;
 
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
