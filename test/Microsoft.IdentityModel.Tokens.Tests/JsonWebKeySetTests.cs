@@ -242,7 +242,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     First = true,
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>(),
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ZeroKeysWithSigAsUseSkipUnresolved",
                 });
 
@@ -252,7 +251,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ZeroKeysWithSigAsUse",
                 });
 
@@ -262,7 +260,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>(),
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "KeysWithoutKtySkipUnresolved",
                 });
 
@@ -272,7 +269,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "KeysWithoutKty",
                 });
 
@@ -282,7 +278,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0), CreateX509SecurityKey(jsonWebKeySet, 0) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "EvoSigningKey",
                 });
 
@@ -292,7 +287,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>(),
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "NonRsaNonEcKeySkipUnresolved",
                 });
 
@@ -302,7 +296,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "NonRsaNonEcKey",
                 });
 
@@ -312,7 +305,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>(),
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "JsonWebKeyNotInvalidNotResolvedSkipUnresolved"
                 });
 
@@ -322,7 +314,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "JsonWebKeyNotInvalidNotResolved"
                 });
 
@@ -332,7 +323,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "OneValidAndOneInvalidRsaSkipUnresolved",
                 });
 
@@ -342,7 +332,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0], (jsonWebKeySet.Keys as List<JsonWebKey>)[1] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "OneValidAndOneInvalidRsa",
                 });
 
@@ -352,7 +341,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateEcdsaSecurityKey(jsonWebKeySet, 1, ecdsaAdapter) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "OneValidAndOneInvalidEcSkipUnresolved",
                 });
 
@@ -362,7 +350,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0], CreateEcdsaSecurityKey(jsonWebKeySet, 1, ecdsaAdapter) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "OneValidAndOneInvalidEC",
                 });
 
@@ -372,7 +359,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ValidRsaInvalidEcSkipUnresolved",
                 });
 
@@ -382,7 +368,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0), (jsonWebKeySet.Keys as List<JsonWebKey>)[1] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ValidRsaInvalidEc",
                 });
 
@@ -392,7 +377,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateX509SecurityKey(jsonWebKeySet, 0) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "ValidX5c",
                 });
 
@@ -402,7 +386,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0) },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "InvalidX5cSkipUnresolvedAddRsa",
                 });
 
@@ -412,7 +395,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { CreateRsaSecurityKey(jsonWebKeySet, 0), (jsonWebKeySet.Keys as List<JsonWebKey>)[0] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = "InvalidX5c",
                 });
 
@@ -422,7 +404,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>(),
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     SetEcdsaAdapterToNull = true,
                     TestId = "ECDsaAdapterIsNotSupportedSkipUnresolved",
                 });
@@ -433,7 +414,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0], (jsonWebKeySet.Keys as List<JsonWebKey>)[1] },
-                    ExpectedException = ExpectedException.NoExceptionExpected,
                     SetEcdsaAdapterToNull = true,
                     TestId = "ECDsaAdapterIsNotSupported",
                 });
