@@ -86,8 +86,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new OpenIdConnectTheoryData
                 {
                     OpenIdConnectMetadataFileName = OpenIdConfigData.OpenIdConnectMetadataFileEnd2End,
-                    SigningCredentials =
-                        new SigningCredentials(
+                    SigningCredentials = new SigningCredentials(
                             KeyingMaterial.RsaSecurityKey_2048,
                             SecurityAlgorithms.RsaSha256
                         ),

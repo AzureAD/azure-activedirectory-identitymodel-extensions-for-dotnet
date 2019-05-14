@@ -42,6 +42,8 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKeySet
     {
+        private readonly bool _skipUnresolvedJsonWebKeys = SkipUnresolvedJsonWebKeys;
+
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
@@ -123,15 +125,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// This adapter abstracts the <see cref="ECDsa"/> differences between versions of .Net targets.
-        /// </summary>
-        internal static ECDsaAdapter ECDsaAdapter;
-
-        /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
         [JsonExtensionData]
         public virtual IDictionary<string, object> AdditionalData { get; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// This adapter abstracts the <see cref="ECDsa"/> differences between versions of .Net targets.
+        /// </summary>
+        internal static ECDsaAdapter ECDsaAdapter;
 
         /// <summary>
         /// Gets the <see cref="IList{JsonWebKey}"/>.
@@ -163,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.KeyId ?? "null" , webKey.Use ?? "null"));
 
-                    if (!SkipUnresolvedJsonWebKeys)
+                    if (!_skipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
 
                     continue;
@@ -189,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey.KeyId ?? "null"));
 
-                        if(!SkipUnresolvedJsonWebKeys)
+                        if(!_skipUnresolvedJsonWebKeys)
                             signingKeys.Add(webKey);
                     }
                 }
@@ -202,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens
                     // kty is not 'EC' or 'RSA'
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10809, webKey.Kty ?? "null"));
 
-                    if (!SkipUnresolvedJsonWebKeys)
+                    if (!_skipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
             }
@@ -227,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, jsonWebKey.X5c[0], ex), ex));
 
-                if (!SkipUnresolvedJsonWebKeys)
+                if (!_skipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }
@@ -253,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, jsonWebKey.E, jsonWebKey.N, ex), ex));
 
-                if (!SkipUnresolvedJsonWebKeys)
+                if (!_skipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }
@@ -264,7 +266,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (ECDsaAdapter == null)
             {
                 LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10690));
-                if (!SkipUnresolvedJsonWebKeys)
+                if (!_skipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
 
                 return;
@@ -284,7 +286,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10807, ex), ex));
 
-                if (!SkipUnresolvedJsonWebKeys)
+                if (!_skipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }
