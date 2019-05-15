@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// String that is used in place of any arguments to log messages if the 'ShowPII' flag is set to false.
         /// </summary>
-        public static string HiddenPIIString { get; } = "[PII is hidden]";
+        public static string HiddenPIIString { get; } = "[PII is hidden. For more details, see https://aka.ms/IdentityModel/PII.]";
 
         /// <summary>
         /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.
