@@ -187,23 +187,18 @@ namespace Microsoft.IdentityModel.Tokens
         {
 #if NET45 || NET451
             // RSA-PSS is not available on .NET 4.5 and .NET 4.5.1
-            LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10692));
+            LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
 #elif NET461 || NETSTANDARD2_0
             // RSACryptoServiceProvider doesn't support RSA-PSS
             if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
             {
-                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
-                return false;
-            }
-            else if (key is X509SecurityKey x509 && x509.PrivateKey is RSACryptoServiceProvider)
-            {
-                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
+                LogHelper.LogInformation(LogMessages.IDX10693);
                 return false;
             }
             else if (key is X509SecurityKey x509SecurityKey && x509SecurityKey.PublicKey is RSACryptoServiceProvider)
             {
-                LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10693));
+                LogHelper.LogInformation(LogMessages.IDX10693);
                 return false;
             }
             else

@@ -137,7 +137,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     theoryData);
 
 #if NET461 || NETCOREAPP2_0
-
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,

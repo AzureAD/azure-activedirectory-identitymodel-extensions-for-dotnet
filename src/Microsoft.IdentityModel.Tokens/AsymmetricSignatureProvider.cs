@@ -197,7 +197,6 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.RsaSha256Signature:
                 case SecurityAlgorithms.RsaSsaPssSha256:
                 case SecurityAlgorithms.RsaSsaPssSha256Signature:
-
                     return HashAlgorithmName.SHA256;
 
                 case SecurityAlgorithms.EcdsaSha384:
