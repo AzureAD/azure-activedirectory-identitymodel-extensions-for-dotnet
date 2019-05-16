@@ -260,7 +260,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -557,7 +557,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -584,7 +584,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor

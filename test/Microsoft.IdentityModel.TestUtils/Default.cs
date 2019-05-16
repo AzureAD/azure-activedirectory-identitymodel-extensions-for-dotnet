@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, Default.Issuer },
                 { JwtRegisteredClaimNames.Aud, Default.Audience },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
             }.ToString();
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer, ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Aud, Default.Audience, ClaimValueTypes.String, Issuer, Issuer),
-                new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString(), ClaimValueTypes.String, Issuer, Issuer),
+                new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString(), ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString(), ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer),
             };
@@ -415,7 +415,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, Default.Issuer },
                 { JwtRegisteredClaimNames.Aud, Default.Audience },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
             };
