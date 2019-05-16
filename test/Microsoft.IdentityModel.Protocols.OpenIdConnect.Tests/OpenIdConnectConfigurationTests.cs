@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
             var oidcWithEmptyCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithEmptyCollections);
 
-            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null,\"SigningKeys\":[]}", context);
+            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null}", context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
