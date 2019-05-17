@@ -200,8 +200,15 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)){ SigningKey = securityKey });
             }
 
-            if (securityKey == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityKey));
+            if (!validationParameters.RequireSignedTokens && securityKey == null)
+            {
+                LogHelper.LogInformation(LogMessages.IDX10252);
+                return;
+            }
+            else if (securityKey == null)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(securityKey), LogMessages.IDX10253));
+            }
 
             if (securityToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(securityToken));

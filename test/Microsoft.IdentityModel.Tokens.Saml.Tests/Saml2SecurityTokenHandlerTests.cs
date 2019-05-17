@@ -690,10 +690,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
             var context = new CompareContext($"{this}.ValidateToken, {theoryData}");
-            ClaimsPrincipal retVal = null;
             try
             {
-                retVal = theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.Handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -961,6 +960,67 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { KeyingMaterial.DefaultAADSigningKey }; },
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}RequireSignedTokens",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultJsonWebKeyWithCertificate2,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}RequireSignedTokensNullSigningKey",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}DontRequireSignedTokens",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = KeyingMaterial.DefaultJsonWebKeyWithCertificate2,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_SignatureMissing)}DontRequireSignedTokensNullSigningKey",
+                        Token = ReferenceTokens.Saml2Token_SignatureMissing,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
                         }
                     }
                 };
