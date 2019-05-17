@@ -42,8 +42,6 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKeySet
     {
-        private readonly bool _skipUnresolvedJsonWebKeys = SkipUnresolvedJsonWebKeys;
-
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
@@ -142,10 +140,16 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<JsonWebKey> Keys { get; private set; } = new List<JsonWebKey>();
 
         /// <summary>
+        /// Default value for the flag that controls whether unresolved JsonWebKeys will be included in the resulting collection of <see cref="GetSigningKeys"/> method.
+        /// </summary>
+        [DefaultValue(true)]
+        public static bool DefaultSkipUnresolvedJsonWebKeys = true;
+
+        /// <summary>
         /// Flag that controls whether unresolved JsonWebKeys will be included in the resulting collection of <see cref="GetSigningKeys"/> method.
         /// </summary>
         [DefaultValue(true)]
-        public static bool SkipUnresolvedJsonWebKeys { get; set; } = true;
+        public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
@@ -165,7 +169,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey.KeyId ?? "null" , webKey.Use ?? "null"));
 
-                    if (!_skipUnresolvedJsonWebKeys)
+                    if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
 
                     continue;
@@ -191,7 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey.KeyId ?? "null"));
 
-                        if(!_skipUnresolvedJsonWebKeys)
+                        if(!SkipUnresolvedJsonWebKeys)
                             signingKeys.Add(webKey);
                     }
                 }
@@ -204,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
                     // kty is not 'EC' or 'RSA'
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10809, webKey.Kty ?? "null"));
 
-                    if (!_skipUnresolvedJsonWebKeys)
+                    if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
             }
@@ -229,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10802, jsonWebKey.X5c[0], ex), ex));
 
-                if (!_skipUnresolvedJsonWebKeys)
+                if (!SkipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }
@@ -255,7 +259,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10801, jsonWebKey.E, jsonWebKey.N, ex), ex));
 
-                if (!_skipUnresolvedJsonWebKeys)
+                if (!SkipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }
@@ -266,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (ECDsaAdapter == null)
             {
                 LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10690));
-                if (!_skipUnresolvedJsonWebKeys)
+                if (!SkipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
 
                 return;
@@ -286,7 +290,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10807, ex), ex));
 
-                if (!_skipUnresolvedJsonWebKeys)
+                if (!SkipUnresolvedJsonWebKeys)
                     signingKeys.Add(jsonWebKey);
             }
         }

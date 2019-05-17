@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 // Received json web key only has an x5t property and it can't be used for signature validation as it can't be resolved into a SecurityKey, without user's custom code.
                 // This test proves that the scenario described above is possible using extensibility.
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
+                JsonWebKeySet.DefaultSkipUnresolvedJsonWebKeys = false;
                 var signingKeys = new JsonWebKeySet(DataSets.JsonWebKeySetOnlyX5tString).GetSigningKeys();
 
                 var tokenValidationParameters = new TokenValidationParameters()
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             finally
             {
                 // revert back to default
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
+                JsonWebKeySet.DefaultSkipUnresolvedJsonWebKeys = true;
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -212,7 +212,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
 
             // revert to default
-            JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
             if (theoryData.SetEcdsaAdapterToNull)
             {
                 try
@@ -235,8 +234,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var ecdsaAdapter = new ECDsaAdapter();
                 var theoryData = new TheoryData<JsonWebKeySetTheoryData>();
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                var jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString);
+                var jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     First = true,
@@ -245,8 +243,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ZeroKeysWithSigAsUseSkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -254,8 +251,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ZeroKeysWithSigAsUse",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -263,8 +259,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "KeysWithoutKtySkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNoKtyString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -272,8 +267,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "KeysWithoutKty",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetEvoString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetEvoString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -281,8 +275,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "EvoSigningKey",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetKtyNotRsaString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetKtyNotRsaString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -290,8 +283,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "NonRsaNonEcKeySkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetKtyNotRsaString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetKtyNotRsaString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -299,8 +291,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "NonRsaNonEcKey",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOnlyX5tString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOnlyX5tString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -308,8 +299,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "JsonWebKeyNotInvalidNotResolvedSkipUnresolved"
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOnlyX5tString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOnlyX5tString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -317,8 +307,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "JsonWebKeyNotInvalidNotResolved"
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -326,8 +315,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "OneValidAndOneInvalidRsaSkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidRsaString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -335,8 +323,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "OneValidAndOneInvalidRsa",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -344,8 +331,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "OneValidAndOneInvalidEcSkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -353,8 +339,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "OneValidAndOneInvalidEC",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -362,8 +347,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ValidRsaInvalidEcSkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneValidRsaOneInvalidEcString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -371,8 +355,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ValidRsaInvalidEc",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetX509DataString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetX509DataString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -380,8 +363,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ValidX5c",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -389,8 +371,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "InvalidX5cSkipUnresolvedAddRsa",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetBadX509String) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -398,8 +379,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "InvalidX5c",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = true;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString) { SkipUnresolvedJsonWebKeys = true };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
@@ -408,8 +388,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "ECDsaAdapterIsNotSupportedSkipUnresolved",
                 });
 
-                JsonWebKeySet.SkipUnresolvedJsonWebKeys = false;
-                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString);
+                jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetOneInvalidEcOneValidEcString) { SkipUnresolvedJsonWebKeys = false };
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
