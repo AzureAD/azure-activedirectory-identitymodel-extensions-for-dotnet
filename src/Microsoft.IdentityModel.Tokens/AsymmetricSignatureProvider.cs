@@ -56,7 +56,13 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512, 2048 },
             { SecurityAlgorithms.RsaSha256Signature, 2048 },
             { SecurityAlgorithms.RsaSha384Signature, 2048 },
-            { SecurityAlgorithms.RsaSha512Signature, 2048 }
+            { SecurityAlgorithms.RsaSha512Signature, 2048 },
+            { SecurityAlgorithms.RsaSsaPssSha256, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
         };
 
         /// <summary>
@@ -72,7 +78,13 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSha512, 1024 },
             { SecurityAlgorithms.RsaSha256Signature, 1024 },
             { SecurityAlgorithms.RsaSha384Signature, 1024 },
-            { SecurityAlgorithms.RsaSha512Signature, 1024 }
+            { SecurityAlgorithms.RsaSha512Signature, 1024 },
+            { SecurityAlgorithms.RsaSsaPssSha256, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
         };
 
         internal AsymmetricSignatureProvider(SecurityKey key, string algorithm, CryptoProviderFactory cryptoProviderFactory)
@@ -183,18 +195,24 @@ namespace Microsoft.IdentityModel.Tokens
                 case SecurityAlgorithms.EcdsaSha256Signature:
                 case SecurityAlgorithms.RsaSha256:
                 case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSsaPssSha256:
+                case SecurityAlgorithms.RsaSsaPssSha256Signature:
                     return HashAlgorithmName.SHA256;
 
                 case SecurityAlgorithms.EcdsaSha384:
                 case SecurityAlgorithms.EcdsaSha384Signature:
                 case SecurityAlgorithms.RsaSha384:
                 case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSsaPssSha384:
+                case SecurityAlgorithms.RsaSsaPssSha384Signature:
                     return HashAlgorithmName.SHA384;
 
                 case SecurityAlgorithms.EcdsaSha512:
                 case SecurityAlgorithms.EcdsaSha512Signature:
                 case SecurityAlgorithms.RsaSha512:
                 case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RsaSsaPssSha512:
+                case SecurityAlgorithms.RsaSsaPssSha512Signature:
                     return HashAlgorithmName.SHA512;
             }
 

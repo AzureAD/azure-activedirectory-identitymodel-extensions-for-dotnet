@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than '{0}'.";
         public const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
         public const string IDX10631 = "IDX10631: The '{0}' for verifying cannot be smaller than '{1}' bits. KeySize: '{2}'.";
-        public const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
+        public const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         // public const string IDX10635 = "IDX10635:";
         public const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX10638 = "IDX10638: Cannot create the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
@@ -187,6 +187,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10689 = "IDX10689: Unable to create an ECDsa object. See inner exception for more details.";
         public const string IDX10690 = "IDX10690: ECDsa creation is not supported by NETSTANDARD1.4, when running on platforms other than Windows. For more details, see https://aka.ms/IdentityModel/create-ecdsa";
         public const string IDX10691 = "IDX10691: Unable to create an ECDsa object, internal CreateECDsaFunction is not available.";
+        public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on .NET 4.5 and .NET 4.5.1 targets. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
+        public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
 
         // security keys
         public const string IDX10700 = "IDX10700: Invalid RsaParameters: '{0}'. Both modulus and exponent should be present";
