@@ -194,6 +194,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, null, new TokenValidationParameters { ValidateIssuerSigningKey = false }, ExpectedException.NoExceptionExpected);
                 dataset.Add(KeyingMaterial.ExpiredX509SecurityKey_Public, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true }, ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"));
                 dataset.Add(KeyingMaterial.NotYetValidX509SecurityKey_Public, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true }, ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10248:"));
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = true }, ExpectedException.NoExceptionExpected);
+                dataset.Add(KeyingMaterial.SymmetricSecurityKey2_256, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false }, ExpectedException.NoExceptionExpected);
+                dataset.Add(null, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = true }, ExpectedException.ArgumentNullException("IDX10253: "));
+                dataset.Add(null, new JwtSecurityToken(), new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false }, ExpectedException.NoExceptionExpected);
                 return dataset;
             }
         }

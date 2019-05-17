@@ -1493,6 +1493,63 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         TestId = "Token: Invalid Format",
                         Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.f",
                         ValidationParameters = new TokenValidationParameters()
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJws) + "RequireSignedTokens",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = Default.SymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        TestId = nameof(Default.SymmetricJws) + "RequireSignedTokensNullSigningKey",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJws) + "DontRequireSignedTokens",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = Default.SymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.UnsignedJwt) + "DontRequireSignedTokensNullSigningKey",
+                        Token = Default.UnsignedJwt,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
                     }
                 };
             }
