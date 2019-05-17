@@ -244,11 +244,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsNull",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
                             Claims = null
@@ -267,11 +273,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsEmpty",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
                             Claims = new Dictionary<string, object>()
@@ -324,6 +336,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                    },
+                    new CreateTokenTheoryData // Test checks that values in SecurityTokenDescriptor.Payload
+                    // are properly replaced with the properties that are explicitly specified on the SecurityTokenDescriptor.
+                    {
+                        TestId = "UseSecurityTokenDescriptorProperties",
+                        Payload = new JObject()
+                        {
+                            { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                            { JwtRegisteredClaimNames.GivenName, "Bob" },
+                            { JwtRegisteredClaimNames.Iss, "Issuer" },
+                            { JwtRegisteredClaimNames.Aud, "Audience" },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")).ToString() },
+                        }.ToString(Formatting.None),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary,
+                            Issuer = "Issuer",
+                            Audience = "Audience",
+                            IssuedAt = DateTime.Parse("2018-03-17T18:33:37.080Z"),
+                            NotBefore = DateTime.Parse("2018-03-17T18:33:37.080Z"),
+                            Expires = DateTime.Parse("2023-03-17T18:33:37.080Z")
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = "Audience",
+                            ValidIssuer = "Issuer"
+                        }
                     }
                 };
             }
@@ -482,11 +528,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsNull",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             Claims = null
                         },
@@ -503,11 +555,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "TokenDescriptorClaimsEmpty",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Aud, Default.Audience }
+                            { JwtRegisteredClaimNames.Aud, Default.Audience },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
+                            IssuedAt = Default.NotBefore,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             Claims = new Dictionary<string, object>()
                         },
