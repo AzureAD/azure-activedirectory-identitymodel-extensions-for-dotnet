@@ -290,10 +290,30 @@ namespace Microsoft.IdentityModel.Tokens
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         private HashAlgorithmName HashAlgorithmName { get; set; }
+
+        private RSASignaturePadding RSASignaturePadding { get; set; }
 #endif
 
         private void Initialize(RSA rsa, string algorithm)
         {
+
+#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
+            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature))
+            {
+                RSASignaturePadding = RSASignaturePadding.Pss;
+            }
+            else
+            {
+                // default RSASignaturePadding for other supported RSA algorithms is Pkcs1
+                RSASignaturePadding = RSASignaturePadding.Pkcs1;
+            }
+#endif
+
             // This case is the result of a calling
             // X509Certificate2.GetPrivateKey OR X509Certificate2.GetPublicKey.Key
             // These calls return an AsymmetricAlgorithm which doesn't have API's to do much and need to be cast.
@@ -366,7 +386,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         private byte[] SignWithRsa(byte[] bytes)
         {
-            return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding.Pkcs1);
+            return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding);
         }
 #endif
 
@@ -394,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
-            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding.Pkcs1);
+            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
         }
 #endif
 

@@ -39,8 +39,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         // Throw for NET45 and NET451 targets for derived RSA types.
         [Fact]
-        public void UnsupportedRSAType()
+        public void UnsupportedRSATypes()
         {
+            var context = new CompareContext("UnsupportedRSATypes");
+            TestUtilities.WriteHeader($"{this}.UnsupportedRSATypes");
+
 #if NET452
             var expectedException = ExpectedException.NotSupportedException();
 #endif
@@ -52,12 +55,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 new AsymmetricSignatureProvider(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
-                expectedException.ProcessNoException();
+                expectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                expectedException.ProcessException(ex);
+                expectedException.ProcessException(ex, context);
             }
+
+#if NET452
+            // RSA-PSS is not available on .NET 4.5.2
+            expectedException = ExpectedException.NotSupportedException("IDX10634:");
+#endif
+
+#if NET461 || NETCOREAPP2_0
+            expectedException = ExpectedException.NoExceptionExpected;
+#endif
+
+            try
+            {
+                new AsymmetricSignatureProvider(KeyingMaterial.DefaultRsaSecurityKey1, SecurityAlgorithms.RsaSsaPssSha256, false);
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(SignVerifyTheoryData))]
@@ -65,8 +89,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.SignVerify", theoryData);
             var bytes = Guid.NewGuid().ToByteArray();
-            byte[] signatureDirect = null;
-            byte[] signatureFromFactory = null;
             try
             {
                 var providerForSigningDirect = new AsymmetricSignatureProvider(theoryData.SigningKey, theoryData.SigningAlgorithm, true);
@@ -74,8 +96,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var providerForSigningFromFactory = theoryData.SigningKey.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var providerForVerifyingFromFactory = theoryData.VerifyKey.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
 
-                signatureDirect = providerForSigningDirect.Sign(bytes);
-                signatureFromFactory = providerForSigningFromFactory.Sign(bytes);
+                byte[] signatureDirect = providerForSigningDirect.Sign(bytes);
+                byte[] signatureFromFactory = providerForSigningFromFactory.Sign(bytes);
 
                 if (!providerForVerifyingDirect.Verify(bytes, signatureDirect))
                     context.AddDiff($"providerForVerifyingDirect.Verify (signatureDirect) - FAILED. signingKey : signingAlgorithm '{theoryData.SigningKey}' : '{theoryData.SigningAlgorithm}. verifyKey : verifyAlgorithm '{theoryData.VerifyKey}' : '{theoryData.VerifyAlgorithm}");
@@ -115,6 +137,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     theoryData);
 
 #if NET461 || NETCOREAPP2_0
+                theoryData.Add(new SignatureProviderTheoryData()
+                {
+                    SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
+                    SigningKey = KeyingMaterial.RsaSecurityKey_1024,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException(),
+                    TestId = "KeySizeSmallerThanRequiredSize"
+                });
+
                 foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
                     AsymmetricSignatureTestData.AddRsaAlgorithmVariations(new SignatureProviderTheoryData
                     {
@@ -139,6 +169,84 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.GetRSAPrivateKey()),
                         TestId = "CngCng" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey())
+                    },
+                    theoryData);
+
+                 foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
+                        TestId = "CapiCapi" + certTuple.Item3,
+                        VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
+#if NET461
+                        ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
+#elif NETCOREAPP2_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#endif
+                    },
+                    theoryData);
+
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
+                        TestId = "CapiCng" + certTuple.Item3,
+                        VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
+#if NET461
+                        ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
+#elif NETCOREAPP2_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#endif
+                    },
+                    theoryData);
+
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = new RsaSecurityKey(certTuple.Item1.GetRSAPrivateKey()),
+                        TestId = "CngCapi" + certTuple.Item3,
+                        VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
+#if NET461
+                        ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
+#elif NETCOREAPP2_0
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+#endif
+                    },
+                    theoryData);
+
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = new RsaSecurityKey(certTuple.Item1.GetRSAPrivateKey()),
+                        TestId = "CngCng" + certTuple.Item3,
+                        VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey())
+                    },
+                    theoryData);
+
+                foreach (var jsonKeyTuple in AsymmetricSignatureTestData.JsonRsaSecurityKeys)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = jsonKeyTuple.Item1,
+                        TestId = jsonKeyTuple.Item3,
+                        VerifyKey = jsonKeyTuple.Item2
+                    },
+                    theoryData);
+
+                foreach (var rsaKeyTuple in AsymmetricSignatureTestData.RsaSecurityKeys)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = rsaKeyTuple.Item1,
+                        TestId = rsaKeyTuple.Item3,
+                        VerifyKey = rsaKeyTuple.Item2
+                    },
+                    theoryData);
+
+                foreach (var x509KeyTuple in AsymmetricSignatureTestData.X509SecurityKeys)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = x509KeyTuple.Item1,
+                        TestId = x509KeyTuple.Item3,
+                        VerifyKey = x509KeyTuple.Item2
                     },
                     theoryData);
 #endif
@@ -188,6 +296,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
+#if NET452
+                // RSA-PSS is not available on .NET 4.5.2
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
+                    {
+                        SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
+                        TestId = "CapiCapi" + certTuple.Item3,
+                        VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
+                        ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
+                    },
+                    theoryData);
+#endif
                 return theoryData;
             }
         }
