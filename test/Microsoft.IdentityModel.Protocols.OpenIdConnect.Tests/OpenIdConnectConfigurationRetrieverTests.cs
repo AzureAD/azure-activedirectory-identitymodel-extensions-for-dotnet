@@ -91,8 +91,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // for now turn off checking for inner
             var ee = ExpectedException.InvalidOperationException(inner: typeof(CryptographicException));
             ee.IgnoreInnerException = true;
-            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: ee);
-            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.InvalidOperationException(inner: typeof(FormatException)));
+
+            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadX509DataString, expectedException: ExpectedException.NoExceptionExpected);
+            await GetConfigurationFromMixedAsync(OpenIdConfigData.OpenIdConnectMetadataBadBase64DataString, expectedException: ExpectedException.NoExceptionExpected);
 
             TestUtilities.AssertFailIfErrors(context);
         }

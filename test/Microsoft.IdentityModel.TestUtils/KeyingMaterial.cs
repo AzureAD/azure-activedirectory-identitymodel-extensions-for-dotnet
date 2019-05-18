@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2_Public = new SigningCredentials(DefaultX509Key_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
-        public static string ExpiredX509Data_Public = @"MIIDKTCCAhGgAwIBAgIQWYE2RAW22K1AwRf9VBgsLDANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tMB4XDTE3MTEwMjIyNTMwNloXDTE3MTEwMjIzMDI0NVowJDEiMCAGA1UEAwwZaHR0cDovL0RlZmF1bHQuSXNzdWVyLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK79bBjoH2zMR2poFZDm7wJjzgp+Nidk8jkrps3iqzqqf1YVFtEtFBng4KE+2jfyaQxS4FO3dnd1Nh7wdCBH/60A0e6uROEBe4L/kydyJS3u2wsz+aabCBJ2M8FVUWziGZ4o2NKwAvRbCWFbsA9irhXTEw3hjqP7DDdjAayztmczG7vgeU10GnEPcYanyrraNRWkVaZGAI6EeFOy4QEYtFLd7N7gb84ScW/h2edVKm5VoYaVXF6KE7gfbMp+uflqJ8hBaLXjFSoXxN3Y6BQqxUGxX4qdAnpuRqDJzYQjDUm81MtD2XIfY46duJDDZOwpRPyXRe2YeJp5rVG5Pr0i7gECAwEAAaNXMFUwDgYDVR0PAQH/BAQDAgWgMCQGA1UdEQQdMBuCGWh0dHA6Ly9EZWZhdWx0Lklzc3Vlci5jb20wHQYDVR0OBBYEFJI/4wsmVjLpK1tRYJ96zKoBULBzMA0GCSqGSIb3DQEBCwUAA4IBAQBUToqoMJ0QJciKd+GRzivq3idPzCEyo4/V2V7B/H5czwzVx+lhn2e/EwCaMBPk3x9C5DQbJdmSp6DoX9VvD2XNOiFFeabBu/w9jhkRiDpOtNnWMJwzjHMAD0f4z8fSO5ZXcvFr2Ze3zGDTEY1vdXkAK2k9WuKu7c9kcoZO55Tads5T15vg4e8OmBq9kcGNEZRt2xBHkjlef0v6gBZ/lFeJHe0qTuKNCiTxJvUfAPnP0sTAdFdsDBt9bqLBHx+Wz/ALj535dUpCi5tXv4bI/t6qgh8toQNvJ7lNMv34W4+CiRYAPR9fK5bGsua+tb1FvfEqXx17yOLLgHgsu8oOsaZo"; 
+        public static string ExpiredX509Data_Public = @"MIIDKTCCAhGgAwIBAgIQWYE2RAW22K1AwRf9VBgsLDANBgkqhkiG9w0BAQsFADAkMSIwIAYDVQQDDBlodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tMB4XDTE3MTEwMjIyNTMwNloXDTE3MTEwMjIzMDI0NVowJDEiMCAGA1UEAwwZaHR0cDovL0RlZmF1bHQuSXNzdWVyLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK79bBjoH2zMR2poFZDm7wJjzgp+Nidk8jkrps3iqzqqf1YVFtEtFBng4KE+2jfyaQxS4FO3dnd1Nh7wdCBH/60A0e6uROEBe4L/kydyJS3u2wsz+aabCBJ2M8FVUWziGZ4o2NKwAvRbCWFbsA9irhXTEw3hjqP7DDdjAayztmczG7vgeU10GnEPcYanyrraNRWkVaZGAI6EeFOy4QEYtFLd7N7gb84ScW/h2edVKm5VoYaVXF6KE7gfbMp+uflqJ8hBaLXjFSoXxN3Y6BQqxUGxX4qdAnpuRqDJzYQjDUm81MtD2XIfY46duJDDZOwpRPyXRe2YeJp5rVG5Pr0i7gECAwEAAaNXMFUwDgYDVR0PAQH/BAQDAgWgMCQGA1UdEQQdMBuCGWh0dHA6Ly9EZWZhdWx0Lklzc3Vlci5jb20wHQYDVR0OBBYEFJI/4wsmVjLpK1tRYJ96zKoBULBzMA0GCSqGSIb3DQEBCwUAA4IBAQBUToqoMJ0QJciKd+GRzivq3idPzCEyo4/V2V7B/H5czwzVx+lhn2e/EwCaMBPk3x9C5DQbJdmSp6DoX9VvD2XNOiFFeabBu/w9jhkRiDpOtNnWMJwzjHMAD0f4z8fSO5ZXcvFr2Ze3zGDTEY1vdXkAK2k9WuKu7c9kcoZO55Tads5T15vg4e8OmBq9kcGNEZRt2xBHkjlef0v6gBZ/lFeJHe0qTuKNCiTxJvUfAPnP0sTAdFdsDBt9bqLBHx+Wz/ALj535dUpCi5tXv4bI/t6qgh8toQNvJ7lNMv34W4+CiRYAPR9fK5bGsua+tb1FvfEqXx17yOLLgHgsu8oOsaZo";
         public static X509Certificate2 ExpiredX509Cert_Public = new X509Certificate2(Convert.FromBase64String(ExpiredX509Data_Public));
         public static X509SecurityKey ExpiredX509SecurityKey_Public = new X509SecurityKey(ExpiredX509Cert_Public);
         public static SigningCredentials ExpiredX509SigningCreds_Public = new SigningCredentials(ExpiredX509SecurityKey_Public, SecurityAlgorithms.RsaSha256Signature);
@@ -867,7 +867,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     ""y"": ""AdymlHvOiLxXkEhayXQnNCvDX4h9htZaCJN34kfmC6pV5OhQHiraVySsUdaQkAgDPrwQrJmbnX9cwlGfP-HqHZR1"",
                     ""d"": ""{{0}}""
                     }}", curvePointParameter);
-                
+
                 return new JsonWebKey(jsonString);
             }
         }
@@ -901,8 +901,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA",
                     Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ",
                     D = badPrivateKey,
-                    KeyId = "JsonWebKeyP256_BadPrivateKey",
-                    Kid = "JsonWebKeyP256_BadPrivateKey",
+                    KeyId = "JsonWebKeyEcdsa256_BadPrivateKey",
+                    Kid = "JsonWebKeyEcdsa256_BadPrivateKey",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -950,8 +950,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     Crv = "P-384",
                     X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg",
                     Y = "Vh872HVKNHrzlVu0Ko-3dN-eHoDYBeZgdGLAqenyZ0_X_TctwT6MVLxcAvwbJG5l",
-                    KeyId = "JsonWebKeyP384_Public",
-                    Kid = "JsonWebKeyP384_Public",
+                    KeyId = "JsonWebKeyEcdsa384_Public",
+                    Kid = "JsonWebKeyEcdsa384_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -967,8 +967,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
                     Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
                     D = "AWAduQ9Eu0fw2X_jBfYcSCc3jLfUuQY9Un3pQXHay4BlIhRObnNZAWPWOZccbP0ApfQLPHEAuByMtHv5D6sMVbCz",
-                    KeyId = "JsonWebKeyP521",
-                    Kid = "JsonWebKeyP521",
+                    KeyId = "JsonWebKeyEcdsa521",
+                    Kid = "JsonWebKeyEcdsa521",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }
@@ -983,8 +983,8 @@ namespace Microsoft.IdentityModel.TestUtils
                     Crv = "P-521",
                     X = "AX0BXx6mpDjvGk-NLTwobKNjfAP4QCRjtKi8UQsuPqQ2sRKITAcSti3UMn0COcrG_FVgEDNPyPVlSi5LnUl0dREr",
                     Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW",
-                    KeyId = "JsonWebKeyP521_Public",
-                    Kid = "JsonWebKeyP521_Public",
+                    KeyId = "JsonWebKeyEcdsa521_Public",
+                    Kid = "JsonWebKeyEcdsa521_Public",
                     Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                 };
             }

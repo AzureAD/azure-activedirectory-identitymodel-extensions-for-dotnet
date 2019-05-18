@@ -80,6 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public static string JsonFile = @"OpenIdConnectMetadata.json";
         public static string OpenIdConnectMetadataFileEnd2End = @"OpenIdConnectMetadataEnd2End.json";
+        public static string OpenIdConnectMetadataFileEnd2EndEC = @"OpenIdConnectMetadataEnd2EndEC.json";
         public static string JsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
@@ -180,8 +181,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             SingleX509Data.JsonWebKeySet = DataSets.JsonWebKeySetX509Data;
             SingleX509Data.JwksUri = "JsonWebKeySetSingleX509Data.json";
             SingleX509Data.IdTokenSigningAlgValuesSupported.Add("RS256");
-            AddToCollection(SingleX509Data.ResponseTypesSupported, new string[]{"code", "id_token", "code id_token"});
-            AddToCollection(SingleX509Data.ResponseModesSupported, new string[]{"query", "fragment", "form_post"});
+            AddToCollection(SingleX509Data.ResponseTypesSupported, new string[] { "code", "id_token", "code id_token" });
+            AddToCollection(SingleX509Data.ResponseModesSupported, new string[] { "query", "fragment", "form_post" });
             SingleX509Data.ScopesSupported.Add("openid");
             SingleX509Data.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
             SingleX509Data.SubjectTypesSupported.Add("pairwise");
@@ -210,7 +211,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.GrantTypesSupported, "authorization_code", "implicit");
             config.HttpLogoutSupported = true;
             AddToCollection(config.IdTokenEncryptionAlgValuesSupported, "RSA1_5", "A256KW");
-            AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256","A256CBC-HS512");
+            AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256", "A256CBC-HS512");
             AddToCollection(config.IdTokenSigningAlgValuesSupported, "RS256");
             config.Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/";
             config.JwksUri = "JsonWebKeySet.json";
@@ -233,7 +234,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.TokenEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
             AddToCollection(config.UILocalesSupported, "hak-CN", "en-us");
             config.UserInfoEndpoint = "https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo";
-            AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW","ECDH-ES+A192KW");
+            AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW", "ECDH-ES+A192KW");
             AddToCollection(config.UserInfoEndpointEncryptionEncValuesSupported, "A256CBC-HS512", "A128CBC-HS256");
             AddToCollection(config.UserInfoEndpointSigningAlgValuesSupported, "ES384", "ES512");
 
