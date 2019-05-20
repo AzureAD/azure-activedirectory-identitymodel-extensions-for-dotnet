@@ -74,6 +74,11 @@ namespace Microsoft.IdentityModel.TestUtils
             return issuer;
         }
 
+        public static string IssuerValidatorReturnsDifferentIssuer(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            return "DifferentIssuer";
+        }
+
         public static string IssuerValidatorReturnsNull(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return null;
