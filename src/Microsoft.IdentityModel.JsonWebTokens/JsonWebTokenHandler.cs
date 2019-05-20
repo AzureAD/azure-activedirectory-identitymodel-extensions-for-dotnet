@@ -894,7 +894,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
             Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
-            Validators.ValidateIssuer(jsonWebToken.Issuer, jsonWebToken, validationParameters);
+            var issuer = Validators.ValidateIssuer(jsonWebToken.Issuer, jsonWebToken, validationParameters);
             Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
@@ -905,7 +905,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return new TokenValidationResult
             {
                 SecurityToken = jsonWebToken,
-                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters),
+                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters, issuer),
                 IsValid = true
             };
         }
