@@ -26,10 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Xml;
-using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -70,13 +67,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="xmlElementReader"/> is null.</exception>
         public EnvelopedSignatureReader(XmlReader reader, IXmlElementReader xmlElementReader)
+            : this(reader)
         {
-            if (reader == null)
-                throw LogArgumentNullException(nameof(reader));
-
             _xmlElementReader = xmlElementReader ?? throw LogArgumentNullException(nameof(xmlElementReader));
-            _tokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
-            InnerReader = _tokenStreamReader;
         }
 
         /// <summary>
