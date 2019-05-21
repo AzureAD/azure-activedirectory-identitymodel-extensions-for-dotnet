@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets the canonicalized (ExclusiveC14n) representation without comments.
         /// </summary>
-        public string CanonicalString
+        internal string CanonicalString
         {
             get
             {
