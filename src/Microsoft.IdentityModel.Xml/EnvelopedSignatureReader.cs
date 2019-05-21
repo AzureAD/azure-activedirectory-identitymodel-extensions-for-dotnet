@@ -26,7 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml;
+using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -41,6 +44,7 @@ namespace Microsoft.IdentityModel.Xml
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private int _elementCount;
         private XmlTokenStreamReader _tokenStreamReader;
+        private IXmlElementReader _xmlElementReader = null;
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
@@ -55,6 +59,24 @@ namespace Microsoft.IdentityModel.Xml
 
             _tokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
             InnerReader  = _tokenStreamReader;
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="EnvelopedSignatureReader"/>
+        /// </summary>
+        /// <param name="reader">a <see cref="XmlReader"/> pointing to XML that may contain an enveloped signature.</param>
+        /// <param name="xmlElementReader"> specified to read inner objects.</param>
+        /// <remarks>If a &lt;Signature> element is found, the <see cref="Signature"/> will be set.</remarks>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="xmlElementReader"/> is null.</exception>
+        public EnvelopedSignatureReader(XmlReader reader, IXmlElementReader xmlElementReader)
+        {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
+            _xmlElementReader = xmlElementReader ?? throw LogArgumentNullException(nameof(xmlElementReader));
+            _tokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
+            InnerReader = _tokenStreamReader;
         }
 
         /// <summary>
@@ -86,18 +108,34 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="XmlReadException">if a &lt;Reference> element was not found in the &lt;SignedInfo>.</exception>
         public override bool Read()
         {
-            if ((NodeType == XmlNodeType.Element) && (!base.IsEmptyElement))
-                _elementCount++;
+            bool result = true;
+            bool completed = false;
 
-            if (NodeType == XmlNodeType.EndElement)
+            if (_xmlElementReader != null && _xmlElementReader.CanRead(InnerReader))
             {
-                _elementCount--;
-                if (_elementCount == 0)
-                    OnEndOfRootElement();
+                _xmlElementReader.Read(InnerReader);
+                result = !InnerReader.EOF;
+            }
+            else
+            {
+                if ((NodeType == XmlNodeType.Element) && (!base.IsEmptyElement))
+                    _elementCount++;
+
+                if (NodeType == XmlNodeType.EndElement)
+                {
+                    _elementCount--;
+                    if (_elementCount == 0)
+                    {
+                        OnEndOfRootElement();
+                        completed = true;
+                    }
+                }
+
+                result = InnerReader.Read();
             }
 
-            bool result = InnerReader.Read();
             if (result
+                && !completed
                 && InnerReader.IsLocalName(XmlSignatureConstants.Elements.Signature)
                 && InnerReader.IsNamespaceUri(XmlSignatureConstants.Namespace))
             {
@@ -119,5 +157,10 @@ namespace Microsoft.IdentityModel.Xml
             get;
             protected set;
         }
+
+        /// <summary>
+        /// Gets the <see cref="XmlTokenStream"/> that was use
+        /// </summary>
+        internal XmlTokenStream XmlTokenStream { get => _tokenStreamReader.TokenStream; }
     }
 }

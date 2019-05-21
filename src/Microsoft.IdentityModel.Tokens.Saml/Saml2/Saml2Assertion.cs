@@ -27,6 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
+using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -38,6 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public class Saml2Assertion
     {
+        private string _canonicalString;
         private Saml2Id _id;
         private DateTime _issueInstant;
         private Saml2NameIdentifier _issuer;
@@ -82,6 +87,46 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Gets the canonicalized (ExclusiveC14n) representation without comments.
+        /// </summary>
+        public string CanonicalString
+        {
+            get
+            {
+                if (_canonicalString == null)
+                {
+                    if (XmlTokenStream != null)
+                    {
+                        _canonicalString = CanonicalizingTransfrom.GetString(XmlTokenStream, false, null);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var serializer = new Saml2Serializer();
+                            var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+                            using (var c14nStream = new MemoryStream())
+                            {
+                                writer.StartCanonicalization(c14nStream, false, null);
+                                serializer.WriteAssertion(writer, this);
+                                writer.Flush();
+                                _canonicalString = Encoding.UTF8.GetString(c14nStream.ToArray());
+                            }
+                        }
+                        catch
+                        { }
+                    }
+                }
+
+                return _canonicalString;
+            }
+            set
+            {
+                _canonicalString = string.IsNullOrEmpty(value) ? throw LogArgumentNullException(nameof(value)) : value;
+            }
         }
 
         /// <summary>
@@ -155,5 +200,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get => Saml2Constants.Version;
         }
+
+        internal XmlTokenStream XmlTokenStream { get; set; }
     }
 }

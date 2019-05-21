@@ -80,6 +80,8 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public TokenValidationParameters ValidationParameters { get; set; }
 
+        public XmlReader XmlReader { get; set; }
+
         public XmlWriter XmlWriter { get; set; }
     }
 }

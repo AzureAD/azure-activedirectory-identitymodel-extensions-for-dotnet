@@ -196,10 +196,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void ReadToken(SamlTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
+            SecurityToken samlTokenFromString = null;
+            SecurityToken samlTokenFromXmlReader = null;
             try
             {
-                theoryData.Handler.ReadToken(theoryData.Token);
+                samlTokenFromString = theoryData.Handler.ReadToken(theoryData.Token);
+                samlTokenFromXmlReader = theoryData.Handler.ReadToken(theoryData.XmlReader);
                 theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(samlTokenFromString, samlTokenFromXmlReader, context);
             }
             catch (Exception ex)
             {
@@ -221,109 +225,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         First = true,
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_Valid),
-                        Token = ReferenceTokens.SamlToken_Valid
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        XmlReader = new XmlTextReader(new StringReader(ReferenceTokens.SamlToken_Valid))
                     }
                 };
             }
-        }
-
-        [Theory, MemberData(nameof(RoundTripTokenTheoryData))]
-        public void RoundTripToken(SamlTheoryData theoryData)
-        {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripToken", theoryData);
-            try
-            {
-                var samlToken = theoryData.Handler.CreateToken(theoryData.TokenDescriptor);
-                var token = theoryData.Handler.WriteToken(samlToken);
-                var principal = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<SamlTheoryData> RoundTripTokenTheoryData
-        {
-            get => new TheoryData<SamlTheoryData>
-            {
-                new SamlTheoryData
-                {
-                    First = true,
-                    TestId = nameof(Default.ClaimsIdentity),
-                    TokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                        Audience = Default.Audience,
-                        SigningCredentials = Default.AsymmetricSigningCredentials,
-                        Issuer = Default.Issuer,
-                        Subject = Default.SamlClaimsIdentity
-                    },
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = Default.AsymmetricSigningKey,
-                        ValidAudience = Default.Audience,
-                        ValidIssuer = Default.Issuer,
-                    }
-                },
-                new SamlTheoryData
-                {
-                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RsaSigningCreds_2048),
-                    TokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                        Audience = Default.Audience,
-                        SigningCredentials = KeyingMaterial.RsaSigningCreds_2048,
-                        Issuer = Default.Issuer,
-                        Subject = Default.SamlClaimsIdentity
-                    },
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
-                        ValidAudience = Default.Audience,
-                        ValidIssuer = Default.Issuer,
-                    },
-                },
-                new SamlTheoryData
-                {
-                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.RsaSigningCreds_2048_FromRsa),
-                    TokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                        Audience = Default.Audience,
-                        SigningCredentials = KeyingMaterial.RsaSigningCreds_2048_FromRsa,
-                        Issuer = Default.Issuer,
-                        Subject = Default.SamlClaimsIdentity
-                    },
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_FromRsa_Public.Key,
-                        ValidAudience = Default.Audience,
-                        ValidIssuer = Default.Issuer,
-                    },
-                },
-                new SamlTheoryData
-                {
-                    TestId = nameof(Default.ClaimsIdentity) + nameof(KeyingMaterial.JsonWebKeyRsa256SigningCredentials),
-                    TokenDescriptor = new SecurityTokenDescriptor
-                    {
-                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
-                        Audience = Default.Audience,
-                        SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                        Issuer = Default.Issuer,
-                        Subject = Default.SamlClaimsIdentity
-                    },
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key,
-                        ValidAudience = Default.Audience,
-                        ValidIssuer = Default.Issuer,
-                    }
-                }
-            };
         }
 
         // Test checks to make sure that default times are correctly added to the token
@@ -768,7 +674,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
-                { typeof(SamlAssertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials" } },
+                { typeof(SamlAssertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
                 { typeof(SamlSecurityToken), new List<string> { "SigningKey" } },
             };
 

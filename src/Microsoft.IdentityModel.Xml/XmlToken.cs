@@ -29,46 +29,49 @@ using System.Xml;
 
 namespace Microsoft.IdentityModel.Xml
 {
-    internal class XmlTokenEntry
-    {
-        internal XmlNodeType NodeType;
-        internal string _prefix;
-        internal string _localName;
-        internal string _namespace;
-        private string _value;
 
+    /// <summary>
+    /// Contains info about an single xml token read by an XmlReader.
+    /// </summary>
+    internal class XmlToken
+    {
         public bool IsEmptyElement
         {
-            get { return _value == null; }
-            set { _value = value ? null : ""; }
+            get { return Value == null; }
+            set { Value = value ? null : ""; }
         }
 
-        public string Value
-        {
-            get; private set;
-        }
+        public string Prefix { get; private set; }
 
-        public XmlTokenEntry(XmlNodeType nodeType, string value)
+        public string LocalName { get; private set; }
+
+        public string Namespace { get; private set; }
+
+        public XmlNodeType NodeType { get; private set; }
+
+        public string Value { get; private set; }
+
+        public XmlToken(XmlNodeType nodeType, string value)
         {
             NodeType = nodeType;
             Value = value;
         }
 
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
+        public XmlToken(XmlNodeType nodeType, string prefix, string localName, string @namespace, string value)
         {
             NodeType = nodeType;
-            _prefix = prefix;
-            _localName = localName;
-            _namespace = @namespace;
+            Prefix = prefix;
+            LocalName = localName;
+            Namespace = @namespace;
             Value = value;
         }
 
-        public XmlTokenEntry(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
+        public XmlToken(XmlNodeType nodeType, string prefix, string localName, string @namespace, bool isEmptyElement)
         {
             NodeType = nodeType;
-            _prefix = prefix;
-            _localName = localName;
-            _namespace = @namespace;
+            Prefix = prefix;
+            LocalName = localName;
+            Namespace = @namespace;
             IsEmptyElement = isEmptyElement;
         }
     }

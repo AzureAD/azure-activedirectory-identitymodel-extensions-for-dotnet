@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -86,6 +87,8 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
         public void RoundTripSaml2(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripSaml2", theoryData);
+            context.PropertiesToIgnoreWhenComparing.Add( typeof(Saml2Assertion), new List<string> { "CanonicalString" });
+
             try
             {
                 var serializer = new Saml2Serializer();

@@ -25,41 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Xml;
-using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Xml;
 
-namespace Microsoft.IdentityModel.Tokens.Xml.Tests
+namespace Microsoft.IdentityModel.Xml
 {
-    public class EnvelopedSignatureTheoryData : TheoryDataBase
+    /// <summary>
+    /// Defines an interface for reading xml that has a known start element
+    /// </summary>
+    public interface IXmlElementReader
     {
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = CryptoProviderFactory.Default;
+        /// <summary>
+        /// Returns true if the <see cref="XmlReader"/> is pointing to an element that can be read.
+        /// </summary>
+        bool CanRead(XmlReader reader);
 
-        public bool ExpectSignature { get; set; } = true;
+        /// <summary>
+        /// Reads an object from the current location and stores the result in items.
+        /// </summary>
+        /// <param name="reader">an <see cref="XmlReader"/>.</param>
+        void Read(XmlReader reader);
 
-        public string ReferenceId { get; set; }
-
-        public string InclusiveNamespacesPrefixList { get; set; }
-
-        public SecurityKey SecurityKey { get; set; }
-
-        public SecurityKey TokenSecurityKey { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public Signature Signature { get; set; }
-
-        public string Xml { get; set; }
-
-        public XmlReader XmlReader { get; set; }
-
-        public XmlWriter XmlWriter { get; set; }
-
-        public IXmlElementReader XmlElementReader { get; set; }
-
-        public override string ToString()
-        {
-            return TestId + ", ExpectSignature: " + ExpectSignature;
-        }
+        /// <summary>
+        /// Returns the list of items that were read.
+        /// </summary>
+        IList<object> Items { get; }
     }
 }

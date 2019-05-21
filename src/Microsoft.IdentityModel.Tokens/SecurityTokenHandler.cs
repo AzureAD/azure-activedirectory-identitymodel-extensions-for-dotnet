@@ -93,6 +93,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Indicates whether the <see cref="XmlReader"/> is positioned at an element that can be read.
+        /// </summary>
+        /// <param name="reader">An <see cref="XmlReader"/> reader positioned at a start element. The reader should not be advanced.</param>
+        /// <returns>'true' if the token can be read.</returns>
+        public virtual bool CanReadToken(XmlReader reader)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Indicates whether the current token string can be read as a token 
         /// of the type handled by this instance.
         /// </summary>
@@ -155,6 +165,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">the current <see cref="TokenValidationParameters"/>.</param>
         /// <param name="validatedToken">The token of type <see cref="TokenType"/> that was validated.</param>
         public virtual ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Reads and validates a token using a xmlReader and <see cref="TokenValidationParameters"/>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> pointing at the start element of the token.</param>
+        /// <param name="validationParameters">Contains data and information needed for validation.</param>
+        /// <param name="validatedToken">The <see cref="SecurityToken"/> that was validated.</param>
+        public virtual ClaimsPrincipal ValidateToken(XmlReader reader, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
             throw new NotImplementedException();
         }

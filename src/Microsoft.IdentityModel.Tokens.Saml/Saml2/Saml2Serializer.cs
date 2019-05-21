@@ -188,9 +188,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Reads a &lt;saml:Assertion> element.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
-        /// <exception cref="NotSupportedException">if assertion is encrypted.</exception>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a 'saml2:assertion' element.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null.</exception>
+        /// <exception cref="NotSupportedException">If assertion is encrypted.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If <paramref name="reader"/> is not positioned at a Saml2Assertion.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If Version is not '2.0'.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If 'Id' is missing.</exception>>
@@ -199,12 +199,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
             if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
                 throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13141));
 
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
-            var envelopeReader = new EnvelopedSignatureReader(reader);
+            var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
             try
             {
@@ -292,7 +295,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
 
                 // attach signedXml for validation of signature
+
+                // attach signature for verification
                 assertion.Signature = envelopeReader.Signature;
+                assertion.XmlTokenStream = envelopeReader.XmlTokenStream;
                 return assertion;
             }
             catch (Exception ex)

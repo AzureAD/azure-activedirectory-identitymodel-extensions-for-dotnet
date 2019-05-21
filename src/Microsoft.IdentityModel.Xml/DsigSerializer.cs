@@ -339,55 +339,74 @@ namespace Microsoft.IdentityModel.Xml
 
             try
             {
-                var defaultNamespace = reader.LookupNamespace(string.Empty);
-                var bufferedStream = new MemoryStream();
-                var settings = new XmlWriterSettings
+                XmlDictionaryReader canonicalizingReader = null;
+                XmlDictionaryReader actualReader = null;
+                if (reader is XmlDictionaryReader dictionaryReader)
                 {
-                    Encoding = Encoding.UTF8,
-                    NewLineHandling = NewLineHandling.None
+                    if (dictionaryReader.CanCanonicalize)
+                    {
+                        canonicalizingReader = dictionaryReader;
+                        actualReader = reader as XmlDictionaryReader;
+                        if (actualReader == null)
+                            actualReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+                    }
+                }
+
+                if (canonicalizingReader == null && reader is XmlTokenStreamReader tokenStreamReader)
+                {
+                    if (tokenStreamReader.XmlDictionaryReader.CanCanonicalize)
+                    {
+                        canonicalizingReader = tokenStreamReader.XmlDictionaryReader;
+                        actualReader = reader as XmlDictionaryReader;
+                        if (actualReader == null)
+                            actualReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+                    }
+                }
+
+                if (canonicalizingReader == null)
+                {
+                    var bufferedStream = new MemoryStream();
+                    var settings = new XmlWriterSettings
+                    {
+                        Encoding = Encoding.UTF8,
+                        NewLineHandling = NewLineHandling.None
+                    };
+
+                    // need to read into buffer since the canonicalization reader needs a stream.
+                    var bufferwriter = XmlDictionaryWriter.Create(bufferedStream, settings);
+                    bufferwriter.WriteNode(reader, true);
+                    bufferwriter.Flush();
+                    bufferedStream.Position = 0;
+                    canonicalizingReader = XmlDictionaryReader.CreateTextReader(bufferedStream, XmlDictionaryReaderQuotas.Max);
+                    actualReader = canonicalizingReader;
+                }
+
+                var signedInfo = new SignedInfo
+                {
+                    CanonicalStream = new MemoryStream()
                 };
 
-                // need to read into buffer since the canonicalization reader needs a stream.
-                using (XmlWriter bufferWriter = XmlDictionaryWriter.Create(bufferedStream, settings))
-                {
-                    bufferWriter.WriteNode(reader, true);
-                    bufferWriter.Flush();
-                }
+                // TODO - should not always use 'false'
+                canonicalizingReader.StartCanonicalization(signedInfo.CanonicalStream, false, null);
+                actualReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
+                signedInfo.Prefix = actualReader.Prefix;
+                signedInfo.Id = actualReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
+                // read <SignedInfo ...> start element
+                actualReader.Read();
+                // TODO - if comments are not false, then we need to reset.
+                // this should be very rare.
+                signedInfo.CanonicalizationMethod = ReadCanonicalizationMethod(actualReader);
+                signedInfo.SignatureMethod = ReadSignatureMethod(actualReader);
+                signedInfo.References.Add(ReadReference(actualReader));
 
-                bufferedStream.Position = 0;
+                if (actualReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
+                    throw XmlUtil.LogReadException(LogMessages.IDX30020);
 
-                //
-                // We are creating a XmlDictionaryReader with a hard-coded Max XmlDictionaryReaderQuotas. This is a reader that we
-                // are creating over an already buffered content. The content was initially read off user provided XmlDictionaryReader
-                // with the correct quotas and hence we know the data is valid.
-                //
-                using (var canonicalizingReader = XmlDictionaryReader.CreateTextReader(bufferedStream, XmlDictionaryReaderQuotas.Max))
-                {
-                    var signedInfo = new SignedInfo();
-                    signedInfo.CanonicalStream = new MemoryStream();
+                actualReader.ReadEndElement();
+                canonicalizingReader.EndCanonicalization();
+                signedInfo.CanonicalStream.Flush();
 
-                    // TODO - should not always use 'false'
-                    canonicalizingReader.StartCanonicalization(signedInfo.CanonicalStream, false, null);
-                    canonicalizingReader.MoveToStartElement(XmlSignatureConstants.Elements.SignedInfo, XmlSignatureConstants.Namespace);
-                    signedInfo.Prefix = canonicalizingReader.Prefix;
-                    signedInfo.Id = canonicalizingReader.GetAttribute(XmlSignatureConstants.Attributes.Id, null);
-                    // read <SignedInfo ...> start element
-                    canonicalizingReader.Read();
-                    // TODO - if comments are not false, then we need to reset.
-                    // this should be very rare.
-                    signedInfo.CanonicalizationMethod = ReadCanonicalizationMethod(canonicalizingReader);
-                    signedInfo.SignatureMethod = ReadSignatureMethod(canonicalizingReader);
-                    signedInfo.References.Add(ReadReference(canonicalizingReader));
-
-                    if (canonicalizingReader.IsStartElement(XmlSignatureConstants.Elements.Reference, XmlSignatureConstants.Namespace))
-                        throw XmlUtil.LogReadException(LogMessages.IDX30020);
-
-                    canonicalizingReader.ReadEndElement();
-                    canonicalizingReader.EndCanonicalization();
-                    signedInfo.CanonicalStream.Flush();
-
-                    return signedInfo;
-                }
+                return signedInfo;
             }
             catch(Exception ex)
             {

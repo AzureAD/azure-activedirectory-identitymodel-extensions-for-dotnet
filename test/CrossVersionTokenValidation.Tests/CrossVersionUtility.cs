@@ -27,6 +27,7 @@
 
 using System;
 using System.IdentityModel.Tokens;
+using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
@@ -67,22 +68,30 @@ namespace Microsoft.IdentityModel.Protocols.Extensions.OldVersion
 
         public static string WriteSamlToken(SecurityToken4x token)
         {
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            new SamlSecurityTokenHandler4x().WriteToken(writer, token);
-            writer.Flush();
-            writer.Close();
-            return sb.ToString();
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
+                {
+                    new SamlSecurityTokenHandler4x().WriteToken(writer, token);
+                    writer.Flush();
+                    writer.Close();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
         }
 
         public static string WriteSaml2Token(SecurityToken4x token)
         {
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            new Saml2SecurityTokenHandler4x().WriteToken(writer, token);
-            writer.Flush();
-            writer.Close();
-            return sb.ToString();
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
+                {
+                    new Saml2SecurityTokenHandler4x().WriteToken(writer, token);
+                    writer.Flush();
+                    writer.Close();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
         }
 
         public static bool AreDateTimesEqual(DateTime? date1, DateTime? date2, CompareContext context)
