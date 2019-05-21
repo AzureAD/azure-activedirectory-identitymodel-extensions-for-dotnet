@@ -294,8 +294,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                 }
 
-                // attach signedXml for validation of signature
-
                 // attach signature for verification
                 assertion.Signature = envelopeReader.Signature;
                 assertion.XmlTokenStream = envelopeReader.XmlTokenStream;
