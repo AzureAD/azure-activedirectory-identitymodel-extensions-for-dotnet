@@ -42,10 +42,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // testing constructor that takes ECDsa instance
             ECDsaSecurityKeyConstructorWithEcdsa(null, ExpectedException.ArgumentNullException("ecdsa"));
-#if !NETCOREAPP2_0
+#if !NET_CORE
             ECDsaSecurityKeyConstructorWithEcdsa(new ECDsaCng(), ExpectedException.NoExceptionExpected);
             var ecdsaSecurityKey = new ECDsaSecurityKey(new ECDsaCng());
-#elif NETCOREAPP2_0
+#elif NET_CORE
             ECDsaSecurityKeyConstructorWithEcdsa(ECDsa.Create(), ExpectedException.NoExceptionExpected);
             var ecdsaSecurityKey = new ECDsaSecurityKey(ECDsa.Create());
 #endif
