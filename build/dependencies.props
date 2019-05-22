@@ -1,7 +1,17 @@
 <Project>
   <PropertyGroup>
-    <CoreFxVersion>4.3.0</CoreFxVersion>
     <JsonNetVersion>10.0.1</JsonNetVersion>
-    <NetStandardVersion>1.6.0</NetStandardVersion>
+    <MicrosoftAzureKeyVaultVersion>3.0.0</MicrosoftAzureKeyVaultVersion>
+    <MicrosoftAzureServicesAppAuthenticationVersion>1.0.3</MicrosoftAzureServicesAppAuthenticationVersion>
+    <MicrosoftSourceLinkGitHubVersion>1.0.0-beta2-18618-05</MicrosoftSourceLinkGitHubVersion>
+    <NetStandardVersion>2.0.3</NetStandardVersion>
+    <SystemCollectionsSpecializedVersion>4.3.0</SystemCollectionsSpecializedVersion>
+    <SystemDiagnosticsContractsVersion>4.3.0</SystemDiagnosticsContractsVersion>
+    <SystemDynamicRuntimeVersion>4.3.0</SystemDynamicRuntimeVersion>
+    <SystemNetHttpVersion>4.3.2</SystemNetHttpVersion>
+    <SystemRuntimeSerializationXmlVersion>4.3.0</SystemRuntimeSerializationXmlVersion>
+    <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
+    <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
+    <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
   </PropertyGroup>
 </Project>
