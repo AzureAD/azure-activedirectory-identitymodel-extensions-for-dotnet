@@ -164,6 +164,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            RequireAudience = other.RequireAudience;
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
             RoleClaimType = other.RoleClaimType;
@@ -194,6 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             RequireExpirationTime = true;
             RequireSignedTokens = true;
+            RequireAudience = true;
             SaveSigninToken = false;
             ValidateActor = false;
             ValidateAudience = true;
@@ -508,6 +510,12 @@ namespace Microsoft.IdentityModel.Tokens
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool RequireAudience { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether tokens must have an 'expiration' value.

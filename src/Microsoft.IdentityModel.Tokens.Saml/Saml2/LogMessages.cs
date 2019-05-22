@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         // token validation
         internal const string IDX13400 = "IDX13400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX13001 = "IDX13001: A SAML2 assertion that specifies an AuthenticationContext DeclarationReference is not supported.To handle DeclarationReference, extend the Saml2SecurityTokenHandler and override ProcessAuthenticationStatement.";
+        internal const string IDX13002 = "IDX13002: Unable to validate token. TokenValidationParameters.RequireAudience is true but no AudienceRestrictions were found in the inbound token.";
 
         // signature creation / validation
         internal const string IDX13509 = "IDX13509: Unable to validate token, Subject is null.";
