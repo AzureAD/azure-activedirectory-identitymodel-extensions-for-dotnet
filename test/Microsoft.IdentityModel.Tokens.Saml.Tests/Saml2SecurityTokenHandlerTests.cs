@@ -525,7 +525,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             var context = new CompareContext($"{this}.ValidateAudience, {theoryData}");
             try
             {
-                (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, null, theoryData.ValidationParameters);
+                (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateAudiencePublic(theoryData.Audiences, theoryData.SecurityToken, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -927,6 +927,82 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         }
+                    },
+                     new Saml2TheoryData
+                     { 
+                        Audiences = new List<string>(),
+                        Token = ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature,
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenException), "IDX13002:"),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature)}RequireAudienceTrue",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                            ValidateIssuer = false,
+                            RequireSignedTokens = false                    
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Audiences = new List<string>(),
+                        Token = ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature,
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature)}RequireAudienceFalse",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            RequireAudience = false,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                            ValidateIssuer = false,
+                            RequireSignedTokens = false                        
+                        },
+                    },
+                    new Saml2TheoryData
+                    {
+                        Audiences = new List<string>(),
+                        Token = ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature,
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenExpiredException), "IDX10223:"),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature)}RequireAudienceFalseValidateLifetimeTrue",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            RequireAudience = false,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = true,
+                            ValidateIssuer = false,
+                            RequireSignedTokens = false
+                        },
+                    },
+                    new Saml2TheoryData
+                    {
+                        Audiences = new List<string>(),
+                        Token = ReferenceTokens.Saml2Token_NoConditions_NoSignature,
+                        ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenException), "IDX13002:"),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_NoConditions_NoSignature)}RequireAudienceTrue",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                            ValidateIssuer = false,
+                            RequireSignedTokens = false
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        Audiences = new List<string>(),
+                        Token = ReferenceTokens.Saml2Token_NoConditions_NoSignature,
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_NoConditions_NoSignature)}RequireAudienceFalse",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            RequireAudience = false,
+                            ValidAudience = "spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4",
+                            ValidateLifetime = false,
+                            ValidateIssuer = false,
+                            RequireSignedTokens = false
+                        },
                     }
                 };
             }

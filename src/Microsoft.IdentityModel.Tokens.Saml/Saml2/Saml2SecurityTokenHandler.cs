@@ -241,7 +241,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ValidateConditions(samlToken, validationParameters);
             ValidateSubject(samlToken, validationParameters);
             var issuer = ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-            ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+
+            if (samlToken.Assertion.Conditions != null)
+                ValidateTokenReplay(samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters);
+
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
@@ -290,6 +293,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void ValidateIssuerSecurityKey(SecurityKey key, Saml2SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateIssuerSecurityKey(key, securityToken, validationParameters);
+        }
+
+        /// <summary>
+        /// Validates the lifetime of a <see cref="Saml2SecurityToken"/>.
+        /// </summary>
+        /// <param name="notBefore">The <see cref="DateTime"/> value found in the <see cref="Saml2SecurityToken"/>.</param>
+        /// <param name="expires">The <see cref="DateTime"/> value found in the <see cref="Saml2SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        {
+            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -964,22 +980,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
-            if (samlToken.Assertion.Conditions != null)
+            if (samlToken.Assertion.Conditions == null)
             {
-                var utcNow = DateTime.UtcNow;
-                Validators.ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
+                if (validationParameters.RequireAudience)
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
 
-                if (samlToken.Assertion.Conditions.OneTimeUse)
-                    ValidateOneTimeUseCondition(samlToken, validationParameters);
-
-                if (samlToken.Assertion.Conditions.ProxyRestriction != null)
-                    throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
+                return;
             }
 
+            ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
+
+            if (samlToken.Assertion.Conditions.OneTimeUse)
+                ValidateOneTimeUseCondition(samlToken, validationParameters);
+
+            if (samlToken.Assertion.Conditions.ProxyRestriction != null)
+                throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
+
+            var foundAudienceRestriction = false;
             foreach (var audienceRestriction in samlToken.Assertion.Conditions.AudienceRestrictions)
             {
-                Validators.ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
+                if (!foundAudienceRestriction)
+                    foundAudienceRestriction = true;
+
+                ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
             }
+            
+            if (validationParameters.RequireAudience && !foundAudienceRestriction)
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
         }
 
         /// <summary>
