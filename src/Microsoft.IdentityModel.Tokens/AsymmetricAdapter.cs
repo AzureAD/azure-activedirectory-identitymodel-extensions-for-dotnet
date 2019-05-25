@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (key is JsonWebKey ecdsaWebKey && ecdsaWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
             {
-                var ecdsaAdapter = new ECDsaAdapter();
+                var ecdsaAdapter = ECDsaAdapter.Instance;
                 ECDsa = ecdsaAdapter.CreateECDsa(ecdsaWebKey, requirePrivateKey);
                 SignatureFunction = SignWithECDsa;
                 VerifyFunction = VerifyWithECDsa;
@@ -185,8 +185,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
                 {
-                    var ecdsaAdapter = new ECDsaAdapter();
-                    ECDsa = ecdsaAdapter.CreateECDsa(jsonWebKey, requirePrivateKey);
+                    ECDsa = ECDsaAdapter.Instance.CreateECDsa(jsonWebKey, requirePrivateKey);
                     SignatureFunction = SignWithECDsa;
                     VerifyFunction = VerifyWithECDsa;
                     _disposeCryptoOperators = true;

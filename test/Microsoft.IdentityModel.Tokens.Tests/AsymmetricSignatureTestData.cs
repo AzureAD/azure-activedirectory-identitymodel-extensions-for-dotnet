@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static readonly List<Tuple<JsonWebKey, JsonWebKey, string>> JsonRsaSecurityKeys = new List<Tuple<JsonWebKey, JsonWebKey, string>>
         {
-            { KeyingMaterial.JsonWebKeyRsa256, KeyingMaterial.JsonWebKeyRsa256Public, "JsonKey1" },
+            { KeyingMaterial.JsonWebKeyRsa_2048, KeyingMaterial.JsonWebKeyRsa_2048_Public, "JsonKey1" },
         };
 
         public static readonly List<Tuple<JsonWebKey, JsonWebKey, string>> JsonX509SecurityKeys = new List<Tuple<JsonWebKey, JsonWebKey, string>>

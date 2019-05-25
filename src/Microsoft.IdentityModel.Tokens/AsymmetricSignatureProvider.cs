@@ -136,6 +136,11 @@ namespace Microsoft.IdentityModel.Tokens
             _cryptoProviderFactory = key.CryptoProviderFactory;
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
+
+            var jsonWebKey = key as JsonWebKey;
+            if (jsonWebKey != null)
+                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey _);
+
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10638, key)));
 
@@ -143,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            _asymmetricAdapter = ResolveAsymmetricAdapter(key, algorithm, willCreateSignatures);
+            _asymmetricAdapter = ResolveAsymmetricAdapter(jsonWebKey?.ConvertedSecurityKey ?? key, algorithm, willCreateSignatures);
             WillCreateSignatures = willCreateSignatures;
         }
 
@@ -330,14 +335,20 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
+            int keySize;
+            if (key is JsonWebKey jsonWebKey && jsonWebKey.ConvertedSecurityKey is AsymmetricSecurityKey)
+                keySize = (jsonWebKey.ConvertedSecurityKey as AsymmetricSecurityKey).KeySize;
+            else
+                keySize = key.KeySize;
+
             if (willCreateSignatures)
             {
                 if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm)
-                && key.KeySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                && keySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
             }
             else if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm)
-                 && key.KeySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
+                 && keySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
             }

@@ -42,15 +42,30 @@ namespace Microsoft.IdentityModel.Tokens
 
         private PrivateKeyStatus _foundPrivateKey;
 
+        internal RsaSecurityKey(JsonWebKey webKey)
+            : base(webKey)
+        {
+            IntializeWithRsaParameters(webKey.CreateRsaParameters());
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RsaSecurityKey"/> class.
         /// </summary>
         /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
+            IntializeWithRsaParameters(rsaParameters);
+        }
+
+        internal void IntializeWithRsaParameters(RSAParameters rsaParameters)
+        {
             // must have modulus and exponent otherwise the crypto operations fail later
-            if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
+            if (rsaParameters.Modulus == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
+
+            if (rsaParameters.Exponent == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Exponent")));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             _foundPrivateKey = _hasPrivateKey.Value ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;

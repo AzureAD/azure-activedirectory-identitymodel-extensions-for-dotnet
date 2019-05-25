@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
             try
             {
-                new X509SecurityKey(null);
+                new X509SecurityKey((X509Certificate2)null);
                 expectedException.ProcessNoException(context);
             }
             catch (Exception exception)

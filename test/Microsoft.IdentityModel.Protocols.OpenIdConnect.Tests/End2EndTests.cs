@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             ValidIssuer = configuration.Issuer,
                         };
 
-                tokenHandler.ValidateToken(jwtToken.RawData, validationParameters, out SecurityToken securityToken);
+                tokenHandler.ValidateToken(jwtToken.RawData, validationParameters, out SecurityToken _);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)

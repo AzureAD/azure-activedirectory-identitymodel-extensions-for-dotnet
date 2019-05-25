@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     Y = theoryData.Y,
                     D = theoryData.D,
                 };
-                var ecdsaAdapter = new ECDsaAdapter();
+                var ecdsaAdapter = ECDsaAdapter.Instance;
                 ecdsaAdapter.CreateECDsa(jsonWebKey, theoryData.UsePrivateKey);
                 theoryData.ExpectedException.ProcessNoException(context);
             }

@@ -58,17 +58,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
                     return IsSupportedRsaAlgorithm(algorithm, key);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
                     return IsSupportedEcdsaAlgorithm(algorithm);
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
                     return IsSupportedSymmetricAlgorithm(algorithm);
 
                 return false;
             }
 
-            if (key is ECDsaSecurityKey ecdsaSecurityKey)
+            if (key is ECDsaSecurityKey)
                 return IsSupportedEcdsaAlgorithm(algorithm);
 
             if (key as SymmetricSecurityKey != null)
@@ -205,8 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return true;
             }
-#else // NETSTANDARD1_4
-            // .NET Standard 1.4 doesn't know about RSACryptoServiceProvider type
+#else
             return true;
 #endif
         }
