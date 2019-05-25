@@ -37,6 +37,13 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool? _hasPrivateKey;
 
+        internal ECDsaSecurityKey(JsonWebKey webKey, bool usePrivateKey)
+            : base(webKey)
+        {
+            ECDsa = ECDsaAdapter.Instance.CreateECDsa(webKey, usePrivateKey);
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
         /// Returns a new instance of <see cref="ECDsaSecurityKey"/>.
         /// </summary>

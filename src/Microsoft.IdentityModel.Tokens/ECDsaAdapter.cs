@@ -40,7 +40,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class ECDsaAdapter
     {
-        private readonly CreateECDsaDelegate CreateECDsaFunction;
+        internal readonly CreateECDsaDelegate CreateECDsaFunction = null;
+        internal static ECDsaAdapter Instance;
+
+        static ECDsaAdapter()
+        {
+            Instance = new ECDsaAdapter();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ECDsaAdapter"/> class.
@@ -59,8 +65,6 @@ namespace Microsoft.IdentityModel.Tokens
 #elif NETSTANDARD1_4
             if (SupportsCNGKey())
                 CreateECDsaFunction = CreateECDsaUsingCNGKey;
-            else
-                throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10690));
 #elif DESKTOP
             CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #endif
@@ -74,8 +78,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (CreateECDsaFunction != null)
                 return CreateECDsaFunction(jsonWebKey, usePrivateKey);
 
-            // we should never get here, it's a bug if we do
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10691));
+            // we will get here on platforms that are not supported.
+            throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10690));
         }
 
         /// <summary>

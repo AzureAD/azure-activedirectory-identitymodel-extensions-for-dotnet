@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
             }
 
-            Action[] actions = new Action[10000];
+            var actions = new Action[1000];
             for (int i = 0; i < actions.Length; i++)
                 actions[i] = action;
 

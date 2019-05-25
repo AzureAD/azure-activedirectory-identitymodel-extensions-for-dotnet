@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Tokens
             // types are checked in order of expected occurrence
             string typeofSignatureProvider = null;
             bool createAsymmetric = true;
-            if (key is AsymmetricSecurityKey asymmetricSecurityKey)
+            if (key is AsymmetricSecurityKey)
             {
                 typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
             }
@@ -398,16 +398,17 @@ namespace Microsoft.IdentityModel.Tokens
                 if (jsonWebKey.Kty != null)
                 {
                     if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    {
                         typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
-
-                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    }
+                    else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                     {
                         typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
                         createAsymmetric = false;
                     }
                 }
             }
-            else if (key is SymmetricSecurityKey symmetricSecurityKey)
+            else if (key is SymmetricSecurityKey)
             {
                 typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
                 createAsymmetric = false;
@@ -473,7 +474,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key))
                 return true;
 
-            return SupportedAlgorithms.IsSupportedAlgorithm(algorithm, key);
+            return SupportedAlgorithms.IsSupportedAlgorithm(
+                        algorithm,
+                        (key is JsonWebKey jsonWebKey && jsonWebKey.ConvertedSecurityKey != null)
+                        ? jsonWebKey.ConvertedSecurityKey
+                        : key);
         }
 
         /// <summary>

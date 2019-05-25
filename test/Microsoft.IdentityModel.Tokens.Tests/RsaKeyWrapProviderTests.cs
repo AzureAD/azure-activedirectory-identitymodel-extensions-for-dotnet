@@ -147,13 +147,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     TestId = "JwkRSA",
                     WillUnwrap = false,
-                    WrapKey = KeyingMaterial.JsonWebKeyRsa256,
+                    WrapKey = KeyingMaterial.JsonWebKeyRsa_2048,
                     WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                 },
                 new KeyWrapTheoryData
                 {
                     TestId = "RsaPublicKey",
-                    UnwrapKey = KeyingMaterial.JsonWebKeyRsa256Public,
+                    UnwrapKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
                     UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WillUnwrap = true
                 }

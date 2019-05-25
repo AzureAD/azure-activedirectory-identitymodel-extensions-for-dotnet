@@ -33,6 +33,18 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class AsymmetricSecurityKey : SecurityKey
     {
         /// <summary>
+        /// Default constructor
+        /// </summary>
+        public AsymmetricSecurityKey()
+        {
+        }
+
+        internal AsymmetricSecurityKey(SecurityKey key)
+            : base(key)
+        {
+        }
+
+        /// <summary>
         /// This must be overridden to get a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>

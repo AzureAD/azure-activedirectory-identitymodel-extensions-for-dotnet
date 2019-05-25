@@ -53,6 +53,7 @@ namespace Microsoft.IdentityModel.Xml
         private long _signaturePosition;
         private SigningCredentials _signingCredentials;
         private MemoryStream _writerStream;
+        private object _signatureLock = new object();
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
@@ -149,12 +150,15 @@ namespace Microsoft.IdentityModel.Xml
             Reference reference = null;
             try
             {
-                reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+                lock (_signatureLock)
                 {
-                    Uri = _referenceUri,
-                    DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
-                    DigestMethod = _signingCredentials.Digest
-                };
+                    reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+                    {
+                        Uri = _referenceUri,
+                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
+                        DigestMethod = _signingCredentials.Digest
+                    };
+                }
             }
             finally
             {

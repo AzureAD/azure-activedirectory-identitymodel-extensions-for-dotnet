@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -36,29 +35,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeyConverterTest
     {
-        [Theory, MemberData(nameof(JsonWebKeyConverterTestTheoryData))]
-        public void ConverterTest(ConverterTheoryData theoryData)
+        [Theory, MemberData(nameof(ConvertSecurityKeyToJsonWebKeyTheoryData))]
+        public void ConvertSecurityKeyToJsonWebKey(JsonWebKeyConverterTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ConverterTest", theoryData);
-            var context = new CompareContext($"{this}.ConverterTest, {theoryData.TestId}");
-
+            var context = TestUtilities.WriteHeader($"{this}.ConvertSecurityKeyToJsonWebKey", theoryData);
             try
             {
-                var jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(theoryData.SecurityKey);
-                if (theoryData.SecurityKey.GetType() == typeof(X509SecurityKey))
-                {
-                    theoryData.ExpectedException.ProcessNoException(context);
-                    IdentityComparer.AreEqual(jsonWebKey.Kty, theoryData.ComparisonJsonWebKey.Kty, context);
-                    IdentityComparer.AreEqual(jsonWebKey.Kid, theoryData.ComparisonJsonWebKey.Kid, context);
-                    var certificateExpected = (theoryData.SecurityKey as X509SecurityKey).Certificate;
-                    var certificateNew = new X509Certificate2(Convert.FromBase64String(jsonWebKey.X5c[0]));
-                    IdentityComparer.AreEqual(certificateNew, certificateExpected, context);
-                }
-                else
-                {
-                    theoryData.ExpectedException.ProcessNoException(context);
-                    IdentityComparer.AreEqual(jsonWebKey, theoryData.ComparisonJsonWebKey, context);
-                }
+                var convertedKey = JsonWebKeyConverter.ConvertFromSecurityKey(theoryData.SecurityKey);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(convertedKey, theoryData.JsonWebKey, context);
+                if (convertedKey.ConvertedSecurityKey.GetType() != theoryData.SecurityKey.GetType())
+                    context.AddDiff($"theoryData.JsonWebKey.RelatedSecurityKey.GetType(): '{theoryData.JsonWebKey.ConvertedSecurityKey.GetType()}' != theoryData.SecurityKey.GetType(): '{theoryData.SecurityKey.GetType()}'.");
             }
             catch(Exception ex)
             {
@@ -68,56 +56,107 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<ConverterTheoryData> JsonWebKeyConverterTestTheoryData
+        [Theory, MemberData(nameof(ConvertToJsonWebKeyToSecurityKeyTheoryData))]
+        public void ConvertJsonWebKeyToSecurityKey(JsonWebKeyConverterTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ConvertJsonWebKeyToSecurityKey", theoryData);
+            try
+            {
+                var wasConverted = JsonWebKeyConverter.TryConvertToSecurityKey(theoryData.JsonWebKey, out SecurityKey securityKey);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(securityKey, theoryData.SecurityKey, context);
+                if (theoryData.JsonWebKey.ConvertedSecurityKey.GetType() != theoryData.SecurityKey.GetType())
+                    context.AddDiff($"theoryData.JsonWebKey.RelatedSecurityKey.GetType(): '{theoryData.JsonWebKey.ConvertedSecurityKey.GetType()}' != theoryData.SecurityKey.GetType(): '{theoryData.SecurityKey.GetType()}'.");
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonWebKeyConverterTheoryData> ConvertSecurityKeyToJsonWebKeyTheoryData
         {
             get
             {
-                return new TheoryData<ConverterTheoryData>()
+                var theoryData = ConversionKeyTheoryData;
+                theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
-                    new ConverterTheoryData
+                    SecurityKey = KeyingMaterial.Ecdsa256Key,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyP256_Public,
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10674"),
+                    TestId = "SecurityKeyNotSupported"
+                });
+
+                return theoryData;
+            }
+        }
+
+        public static TheoryData<JsonWebKeyConverterTheoryData> ConvertToJsonWebKeyToSecurityKeyTheoryData
+        {
+            get 
+            {
+                return ConversionKeyTheoryData;
+            }
+        }
+
+        public static TheoryData<JsonWebKeyConverterTheoryData> ConversionKeyTheoryData
+        {
+            get
+            {
+                return new TheoryData<JsonWebKeyConverterTheoryData>()
+                {
+                    new JsonWebKeyConverterTheoryData
                     {
                         First = true,
                         SecurityKey = KeyingMaterial.RsaSecurityKey_2048,
-                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyRsa256,
+                        JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048,
                         TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
                     },
-                    new ConverterTheoryData
+                    new JsonWebKeyConverterTheoryData
                     {
                         SecurityKey = KeyingMaterial.RsaSecurityKey_2048_Public,
-                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyRsa256Public,
+                        JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
                         TestId = nameof(KeyingMaterial.RsaSecurityKey_2048_Public)
                     },
-                    new ConverterTheoryData
+                    new JsonWebKeyConverterTheoryData
                     {
                         SecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_64,
-                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeySymmetric64,
+                        JsonWebKey = KeyingMaterial.JsonWebKeySymmetric64,
                         TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_64)
                     },
-                    new ConverterTheoryData
+                    new JsonWebKeyConverterTheoryData
                     {
                         SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
-                        ComparisonJsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_With_KeyId,
                         TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId)
                     },
-                    new ConverterTheoryData
+                    new JsonWebKeyConverterTheoryData
                     {
-                        SecurityKey = KeyingMaterial.Ecdsa256Key,
-                        ExpectedException = ExpectedException.NotSupportedException("IDX10674"),
-                        TestId = "Security key not supported test"
+                        SecurityKey = KeyingMaterial.DefaultX509Key_2048,
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048)
+                    },
+                    new JsonWebKeyConverterTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                     },
                 };
             }
         }
     }
 
-    public class ConverterTheoryData : TheoryDataBase
+    public class JsonWebKeyConverterTheoryData : TheoryDataBase
     {
         public SecurityKey SecurityKey
         {
             get;
             set;
         }
-        public JsonWebKey ComparisonJsonWebKey
+        public JsonWebKey JsonWebKey
         {
             get;
             set;
