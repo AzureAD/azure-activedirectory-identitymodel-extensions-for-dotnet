@@ -85,8 +85,7 @@ namespace Microsoft.IdentityModel.Xml
         {
             if (_innerTokenStreamReader != null)
             {
-                // if the inner reader is a XmlTokenStreamReader tell it to skip recording the signature position
-                if (!_innerTokenStreamReader.Read(false))
+                if (!_innerTokenStreamReader.Read(recordSignaturePosition))
                     return false;
             }
             else if (!InnerReader.Read())
@@ -113,7 +112,6 @@ namespace Microsoft.IdentityModel.Xml
 
             if (!_recordDone)
                 Record(true);
-
 
             return true;
         }

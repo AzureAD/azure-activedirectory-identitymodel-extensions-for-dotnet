@@ -43,6 +43,16 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
     {
+        /// <summary>
+        /// Default name of the SignaturePlaceholder element.
+        /// </summary>
+        /// <remarks>
+        /// Signature placeholder element will be written, and later replaced with a correct signature
+        /// when the envelope is completed. Placeholder element will be written only if <see cref="WriteSignature"/>
+        /// method was explicitly called.
+        /// </remarks>
+        public static readonly string SignaturePlaceholder = "_SignaturePlaceholder";
+
         private MemoryStream _canonicalStream;
         private bool _disposed;
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
@@ -50,9 +60,9 @@ namespace Microsoft.IdentityModel.Xml
         private string _inclusiveNamespacesPrefixList;
         private XmlWriter _originalWriter;
         private string _referenceUri;
-        private long _signaturePosition;
+        private bool _signaturePlaceholderWritten;
         private SigningCredentials _signingCredentials;
-        private MemoryStream _writerStream;
+        private MemoryStream _internalStream;
         private object _signatureLock = new object();
 
         /// <summary>
@@ -92,13 +102,13 @@ namespace Microsoft.IdentityModel.Xml
 
             _inclusiveNamespacesPrefixList = inclusivePrefixList;
             _referenceUri = referenceId;
-            _writerStream = new MemoryStream();
+            _internalStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
-            InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
+            InnerWriter = CreateTextWriter(Stream.Null);
             InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusiveNamespacesPrefixList(_inclusiveNamespacesPrefixList));
-            _signaturePosition = -1;
+            InternalWriter = CreateTextWriter(_internalStream, Encoding.UTF8, false);
+            _signaturePlaceholderWritten = false;
         }
-
 
         /// <summary>
         /// Gets or sets the <see cref="DSigSerializer"/> to use.
@@ -111,32 +121,54 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Calculates and inserts the Signature.
+        /// Calculates and inserts/replaces the Signature.
         /// </summary>
         private void OnEndRootElement()
         {
-            if (_signaturePosition == -1)
-                WriteSignature();
-
+            // wrap-up canonicalization
             InnerWriter.WriteEndElement();
             InnerWriter.Flush();
             InnerWriter.EndCanonicalization();
 
             var signature = CreateSignature();
-            var signatureStream = new MemoryStream();
-            var signatureWriter = CreateTextWriter(signatureStream);
-            DSigSerializer.WriteSignature(signatureWriter, signature);
-            signatureWriter.Flush();
-            var signatureBytes = signatureStream.ToArray();
-            var writerBytes = _writerStream.ToArray();
-            byte[] effectiveBytes = new byte[signatureBytes.Length + writerBytes.Length];
-            Array.Copy(writerBytes, effectiveBytes, (int)_signaturePosition);
-            Array.Copy(signatureBytes, 0, effectiveBytes, (int)_signaturePosition, signatureBytes.Length);
-            Array.Copy(writerBytes, (int)_signaturePosition, effectiveBytes, (int)_signaturePosition + signatureBytes.Length, writerBytes.Length - (int)_signaturePosition);
 
-            XmlReader reader = XmlDictionaryReader.CreateTextReader(effectiveBytes, XmlDictionaryReaderQuotas.Max);
-            reader.MoveToContent();
-            _originalWriter.WriteNode(reader, false);
+            // in case when signature placeholder element is written, it needs to be replaced with a correct (real) signature.
+            if (_signaturePlaceholderWritten)
+            {
+                InternalWriter.WriteEndElement();
+                InternalWriter.Flush();
+
+                // create XmlTokenStream out of the internalStream, and write that XmlTokenStream into original writer.
+                // while writing the XmlTokenStream, replace signature (placeholder) element with the real signature (using DSigSerializer).
+                _internalStream.Position = 0;
+                var xmlTokenStreamReader = new XmlTokenStreamReader(XmlDictionaryReader.CreateTextReader(_internalStream, XmlDictionaryReaderQuotas.Max));
+
+                while (xmlTokenStreamReader.Read() != false) ;
+
+                var xmlTokenStreamWriter = new XmlTokenStreamWriter(xmlTokenStreamReader.TokenStream);
+                xmlTokenStreamWriter.WriteAndReplaceSignature(_originalWriter, signature, DSigSerializer);
+            }
+            // write the signature into the internalStream and write the complete internalStream, as a node, into the originalWriter.
+            else
+            {
+                DSigSerializer.WriteSignature(InternalWriter, signature);
+                InternalWriter.WriteEndElement();
+                InternalWriter.Flush();
+
+                _internalStream.Position = 0;
+                XmlReader reader = XmlDictionaryReader.CreateTextReader(_internalStream, XmlDictionaryReaderQuotas.Max);
+                reader.MoveToContent();
+                _originalWriter.WriteNode(reader, false);
+
+                // wrap-up the TracingWriter, if initialized.
+                if (TracingWriter != null)
+                {
+                    DSigSerializer.WriteSignature(TracingWriter, signature);
+                    TracingWriter.WriteEndElement();
+                    TracingWriter.Flush();
+                }
+            }
+
             _originalWriter.Flush();
         }
 
@@ -202,14 +234,19 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Sets the position of the signature within the envelope. Call this
-        /// method while writing the envelope to indicate at which point the 
+        /// Call this method while writing the envelope to indicate at which point the
         /// signature should be inserted.
         /// </summary>
+        /// <remarks>
+        /// Signature placeholder element will be written, and later replaced with a correct signature
+        /// when the envelope is completed.
+        /// </remarks>
         public void WriteSignature()
         {
-            InnerWriter.Flush();
-            _signaturePosition = _writerStream.Length;
+            InternalWriter.WriteStartElement(SignaturePlaceholder);
+            InternalWriter.WriteEndElement();
+            InternalWriter.Flush();
+            _signaturePlaceholderWritten = true;
         }
 
         /// <summary>
@@ -266,7 +303,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
 #region IDisposable Members
-
         /// <summary>
         /// Releases the unmanaged resources used by the System.IdentityModel.Protocols.XmlSignature.EnvelopedSignatureWriter and optionally
         /// releases the managed resources.
@@ -287,10 +323,10 @@ namespace Microsoft.IdentityModel.Xml
 
             if (disposing)
             {
-                if (_writerStream != null)
+                if (_internalStream != null)
                 {
-                    _writerStream.Dispose();
-                    _writerStream = null;
+                    _internalStream.Dispose();
+                    _internalStream = null;
                 }
 
                 if (_canonicalStream != null)
@@ -300,7 +336,6 @@ namespace Microsoft.IdentityModel.Xml
                 }
             }
         }
-
 #endregion
     }
 }

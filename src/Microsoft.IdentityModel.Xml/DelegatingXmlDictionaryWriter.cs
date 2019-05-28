@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Xml
     public class DelegatingXmlDictionaryWriter : XmlDictionaryWriter
     {
         private XmlDictionaryWriter _innerWriter;
+        private XmlDictionaryWriter _internalWriter;
         private XmlDictionaryWriter _tracingWriter;
 
         /// <summary>
@@ -66,6 +67,16 @@ namespace Microsoft.IdentityModel.Xml
             set => _innerWriter = value ?? throw LogArgumentNullException(nameof(value));
         }
 
+        /// <summary>
+        /// Gets or sets the InternalWriter.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"> if 'value' is null.</exception>
+        internal XmlDictionaryWriter InternalWriter
+        {
+            get => _internalWriter;
+            set => _internalWriter = value ?? throw LogArgumentNullException(nameof(value));
+        }
+
 #if NET45 || NET451
         /// <summary>
         /// Closes the underlying stream.
@@ -73,8 +84,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void Close()
         {
             UseInnerWriter.Close();
-            if (TracingWriter != null)
-                TracingWriter.Close();
+            TracingWriter?.Close();
+            InternalWriter?.Close();
         }
 #endif
 
@@ -84,8 +95,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void Flush()
         {
             UseInnerWriter.Flush();
-            if (TracingWriter != null)
-                TracingWriter.Flush();
+            TracingWriter?.Flush();
+            InternalWriter?.Flush();
         }
 
         /// <summary>
@@ -97,8 +108,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteBase64(byte[] buffer, int index, int count)
         {
             UseInnerWriter.WriteBase64(buffer, index, count);
-            if (TracingWriter != null)
-                TracingWriter.WriteBase64(buffer, index, count);
+            TracingWriter?.WriteBase64(buffer, index, count);
+            InternalWriter?.WriteBase64(buffer, index, count);
         }
 
         /// <summary>
@@ -108,8 +119,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteCData(string text)
         {
             UseInnerWriter.WriteCData(text);
-            if (TracingWriter != null)
-                TracingWriter.WriteCData(text);
+            TracingWriter?.WriteCData(text);
+            InternalWriter?.WriteCData(text);
         }
 
         /// <summary>
@@ -119,8 +130,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteCharEntity(char ch)
         {
             UseInnerWriter.WriteCharEntity(ch);
-            if (TracingWriter != null)
-                TracingWriter.WriteCharEntity(ch);
+            TracingWriter?.WriteCharEntity(ch);
+            InternalWriter?.WriteCharEntity(ch);
         }
 
         /// <summary>
@@ -132,8 +143,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteChars(char[] buffer, int index, int count)
         {
             UseInnerWriter.WriteChars(buffer, index, count);
-            if (TracingWriter != null)
-                TracingWriter.WriteChars(buffer, index, count);
+            TracingWriter?.WriteChars(buffer, index, count);
+            InternalWriter?.WriteChars(buffer, index, count);
         }
 
         /// <summary>
@@ -143,8 +154,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteComment(string text)
         {
             UseInnerWriter.WriteComment(text);
-            if (TracingWriter != null)
-                TracingWriter.WriteComment(text);
+            TracingWriter?.WriteComment(text);
+            InternalWriter?.WriteComment(text);
         }
 
         /// <summary>
@@ -160,8 +171,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             UseInnerWriter.WriteDocType(name, pubid, sysid, subset);
-            if (TracingWriter != null)
-                TracingWriter.WriteDocType(name, pubid, sysid, subset);
+            TracingWriter?.WriteDocType(name, pubid, sysid, subset);
+            InternalWriter?.WriteDocType(name, pubid, sysid, subset);
         }
 
         /// <summary>
@@ -170,8 +181,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteEndAttribute()
         {
             UseInnerWriter.WriteEndAttribute();
-            if (TracingWriter != null)
-                TracingWriter.WriteEndAttribute();
+            TracingWriter?.WriteEndAttribute();
+            InternalWriter?.WriteEndAttribute();
         }
 
         /// <summary>
@@ -180,8 +191,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteEndDocument()
         {
             UseInnerWriter.WriteEndDocument();
-            if (TracingWriter != null)
-                TracingWriter.WriteEndDocument();
+            TracingWriter?.WriteEndDocument();
+            InternalWriter?.WriteEndDocument();
         }
 
         /// <summary>
@@ -190,8 +201,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteEndElement()
         {
             UseInnerWriter.WriteEndElement();
-            if (TracingWriter != null)
-                TracingWriter.WriteEndElement();
+            TracingWriter?.WriteEndElement();
+            InternalWriter?.WriteEndElement();
         }
 
         /// <summary>
@@ -201,8 +212,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteEntityRef(string name)
         {
             UseInnerWriter.WriteEntityRef(name);
-            if (TracingWriter != null)
-                TracingWriter.WriteEntityRef(name);
+            TracingWriter?.WriteEntityRef(name);
+            InternalWriter?.WriteEntityRef(name);
         }
 
         /// <summary>
@@ -211,8 +222,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteFullEndElement()
         {
             UseInnerWriter.WriteFullEndElement();
-            if (TracingWriter != null)
-                TracingWriter.WriteFullEndElement();
+            TracingWriter?.WriteFullEndElement();
+            InternalWriter?.WriteFullEndElement();
         }
 
         /// <summary>
@@ -223,8 +234,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteProcessingInstruction(string name, string text)
         {
             UseInnerWriter.WriteProcessingInstruction(name, text);
-            if (TracingWriter != null)
-                TracingWriter.WriteProcessingInstruction(name, text);
+            TracingWriter?.WriteProcessingInstruction(name, text);
+            InternalWriter?.WriteProcessingInstruction(name, text);
         }
 
         /// <summary>
@@ -236,8 +247,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteRaw(char[] buffer, int index, int count)
         {
             UseInnerWriter.WriteRaw(buffer, index, count);
-            if (TracingWriter != null)
-                TracingWriter.WriteRaw(buffer, index, count);
+            TracingWriter?.WriteRaw(buffer, index, count);
+            InternalWriter?.WriteRaw(buffer, index, count);
         }
 
         /// <summary>
@@ -247,8 +258,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteRaw(string data)
         {
             UseInnerWriter.WriteRaw(data);
-            if (TracingWriter != null)
-                TracingWriter.WriteRaw(data);
+            TracingWriter?.WriteRaw(data);
+            InternalWriter?.WriteRaw(data);
         }
 
         /// <summary>
@@ -260,8 +271,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteStartAttribute(string prefix, string localName, string @namespace)
         {
             UseInnerWriter.WriteStartAttribute(prefix, localName, @namespace);
-            if (TracingWriter != null)
-                TracingWriter.WriteStartAttribute(prefix, localName, @namespace);
+            TracingWriter?.WriteStartAttribute(prefix, localName, @namespace);
+            InternalWriter?.WriteStartAttribute(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -270,8 +281,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteStartDocument()
         {
             UseInnerWriter.WriteStartDocument();
-            if (TracingWriter != null)
-                TracingWriter.WriteStartDocument();
+            TracingWriter?.WriteStartDocument();
+            InternalWriter?.WriteStartDocument();
         }
 
         /// <summary>
@@ -282,8 +293,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteStartDocument(bool standalone)
         {
             UseInnerWriter.WriteStartDocument(standalone);
-            if (TracingWriter != null)
-                TracingWriter.WriteStartDocument(standalone);
+            TracingWriter?.WriteStartDocument(standalone);
+            InternalWriter?.WriteStartDocument(standalone);
         }
 
         /// <summary>
@@ -296,8 +307,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteStartElement(string prefix, string localName, string @namespace)
         {
             UseInnerWriter.WriteStartElement(prefix, localName, @namespace);
-            if (TracingWriter != null)
-                TracingWriter.WriteStartElement(prefix, localName, @namespace);
+            TracingWriter?.WriteStartElement(prefix, localName, @namespace);
+            InternalWriter?.WriteStartElement(prefix, localName, @namespace);
         }
 
         /// <summary>
@@ -315,8 +326,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteString(string text)
         {
             UseInnerWriter.WriteString(text);
-            if (TracingWriter != null)
-                TracingWriter.WriteString(text);
+            TracingWriter?.WriteString(text);
+            InternalWriter?.WriteString(text);
         }
 
         /// <summary>
@@ -327,8 +338,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
             UseInnerWriter.WriteSurrogateCharEntity(lowChar, highChar);
-            if (TracingWriter != null)
-                TracingWriter.WriteSurrogateCharEntity(lowChar, highChar);
+            TracingWriter?.WriteSurrogateCharEntity(lowChar, highChar);
+            InternalWriter?.WriteSurrogateCharEntity(lowChar, highChar);
         }
 
         /// <summary>
@@ -338,8 +349,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteWhitespace(string ws)
         {
             UseInnerWriter.WriteWhitespace(ws);
-            if (TracingWriter != null)
-                TracingWriter.WriteWhitespace(ws);
+            TracingWriter?.WriteWhitespace(ws);
+            InternalWriter?.WriteWhitespace(ws);
         }
 
         /// <summary>
@@ -350,8 +361,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteXmlAttribute(string localName, string value)
         {
             UseInnerWriter.WriteXmlAttribute(localName, value);
-            if (TracingWriter != null)
-                TracingWriter.WriteAttributeString(localName, value);
+            TracingWriter?.WriteAttributeString(localName, value);
+            InternalWriter?.WriteAttributeString(localName, value);
         }
 
         /// <summary>
@@ -362,8 +373,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteXmlnsAttribute(string prefix, string @namespace)
         {
             UseInnerWriter.WriteXmlnsAttribute(prefix, @namespace);
-            if (TracingWriter != null)
-                TracingWriter.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
+            TracingWriter?.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
+            InternalWriter?.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
         }
 
         /// <summary>

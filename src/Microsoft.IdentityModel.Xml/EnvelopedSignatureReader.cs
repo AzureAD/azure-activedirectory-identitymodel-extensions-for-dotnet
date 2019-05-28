@@ -124,7 +124,11 @@ namespace Microsoft.IdentityModel.Xml
                     }
                 }
 
-                result = InnerReader.Read();
+                // If reading of an element will be completed in this pass, allow the InnerReader to record the signature position.
+                if (completed && InnerReader is XmlTokenStreamReader xmlTokenStreamReader)
+                    result = xmlTokenStreamReader.Read(true);
+                else
+                    result = InnerReader.Read();
             }
 
             if (result
