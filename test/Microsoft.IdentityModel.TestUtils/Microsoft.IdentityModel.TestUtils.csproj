@@ -9,11 +9,9 @@
     <Description>Contains test utilities and data that are shared across Microsoft.IdentityModel.xys.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.TestUtils</PackageId>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <SignAssembly>true</SignAssembly>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,14 +25,11 @@
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 

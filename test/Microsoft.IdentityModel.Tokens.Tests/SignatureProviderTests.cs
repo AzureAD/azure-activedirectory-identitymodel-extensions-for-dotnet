@@ -730,7 +730,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-#if NETCOREAPP2_0
+#if NET_CORE
         // Excluding OSX as SignatureTampering test is slow on OSX (~6 minutes)
         // especially tests with IDs RS256 and ES256
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
@@ -760,7 +760,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
-#if NETCOREAPP2_0
+#if NET_CORE
         // Excluding OSX as SignatureTruncation test throws an exception only on OSX
         // This behavior should be fixed with netcore3.0
         // Exceptions is thrown somewhere in System/Security/Cryptography/DerEncoder.cs class which is removed in netcore3.0

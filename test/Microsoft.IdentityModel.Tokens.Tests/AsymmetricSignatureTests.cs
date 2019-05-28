@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var expectedException = ExpectedException.NotSupportedException();
 #endif
 
-#if NET461 || NETCOREAPP2_0
+#if NET461 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
 #endif
 
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             expectedException = ExpectedException.NotSupportedException("IDX10634:");
 #endif
 
-#if NET461 || NETCOREAPP2_0
+#if NET461 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
 #endif
 
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET461 || NETCOREAPP2_0
+#if NET461 || NET_CORE
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET461
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP2_0
+#elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -194,7 +194,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
 #if NET461
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP2_0
+#elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
 #if NET461
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-#elif NETCOREAPP2_0
+#elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
 #endif
                     },

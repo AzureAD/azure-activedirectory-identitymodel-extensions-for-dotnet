@@ -635,7 +635,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-#if NET461 || NETCOREAPP2_0
+#if NET461 || NET_CORE
             // RsaPss is not supported on .NET < 4.6
             var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
             theoryData.Add(new JwtTheoryData
