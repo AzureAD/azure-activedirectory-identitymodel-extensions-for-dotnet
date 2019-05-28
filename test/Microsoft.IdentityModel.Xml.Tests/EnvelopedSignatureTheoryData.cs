@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
@@ -33,6 +35,8 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class EnvelopedSignatureTheoryData : TheoryDataBase
     {
+        public Action<EnvelopedSignatureWriter> Action { get; set; }
+
         public CryptoProviderFactory CryptoProviderFactory { get; set; } = CryptoProviderFactory.Default;
 
         public bool ExpectSignature { get; set; } = true;

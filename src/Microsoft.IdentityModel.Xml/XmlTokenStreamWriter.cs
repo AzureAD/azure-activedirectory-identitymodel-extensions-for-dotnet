@@ -220,5 +220,85 @@ namespace Microsoft.IdentityModel.Xml
             }
             while (MoveToNext());
         }
+
+        internal void WriteAndReplaceSignature(XmlWriter writer, Signature signature, DSigSerializer dSigSerializer)
+        {
+            if (writer == null)
+                throw LogExceptionMessage(new ArgumentNullException(nameof(writer)));
+
+            if (signature == null)
+                throw LogExceptionMessage(new ArgumentNullException(nameof(signature)));
+
+            if (dSigSerializer == null)
+                throw LogExceptionMessage(new ArgumentNullException(nameof(dSigSerializer)));
+
+            if (!MoveToFirst())
+                throw LogExceptionMessage(new ArgumentException("XmlTokenBufferIsEmpty"));
+
+            bool include = true;
+            do
+            {
+                switch (NodeType)
+                {
+                    case XmlNodeType.Element:
+                        bool isEmpty = IsEmptyElement;
+                        // if the current XmlToken represents a placeholder signature element, skip writing the placeholder token
+                        // and write the signature using the provided DSigSerializer.
+                        if (LocalName == EnvelopedSignatureWriter.SignaturePlaceholder)
+                        {
+                            dSigSerializer.WriteSignature(writer, signature);
+                            include = false;
+                        }
+                        else
+                        {
+                            writer.WriteStartElement(Prefix, LocalName, Namespace);
+                        }
+                        if (MoveToFirstAttribute())
+                        {
+                            do
+                            {
+                                if (include)
+                                {
+                                    writer.WriteAttributeString(Prefix, LocalName, Namespace, Value);
+                                }
+                            }
+                            while (MoveToNextAttribute());
+                        }
+                        if (isEmpty)
+                        {
+                            goto case XmlNodeType.EndElement;
+                        }
+                        break;
+                    case XmlNodeType.EndElement:
+                        if (include)
+                        {
+                            writer.WriteEndElement();
+                        }
+                        else
+                        {
+                            // skip writing EndElement as it's already written by the provided DSigSerializer.
+                            include = true;
+                        }
+                        break;
+                    case XmlNodeType.CDATA:
+                        writer.WriteCData(Value);
+                        break;
+                    case XmlNodeType.Comment:
+                        writer.WriteComment(Value);
+                        break;
+                    case XmlNodeType.Text:
+                        writer.WriteString(Value);
+                        break;
+                    case XmlNodeType.SignificantWhitespace:
+                    case XmlNodeType.Whitespace:
+                        writer.WriteWhitespace(Value);
+                        break;
+                    case XmlNodeType.DocumentType:
+                    case XmlNodeType.XmlDeclaration:
+                        break;
+                }
+            }
+            while (MoveToNext());
+        }
     }
 }
