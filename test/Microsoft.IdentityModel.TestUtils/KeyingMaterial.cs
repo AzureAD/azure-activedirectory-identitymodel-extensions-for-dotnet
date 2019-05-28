@@ -428,7 +428,7 @@ namespace Microsoft.IdentityModel.TestUtils
             RsaSigningCreds_2048_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
             RsaSigningCreds_2048_FromRsa = new SigningCredentials(RsaSecurityKey_2048_FromRsa, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
             RsaSigningCreds_2048_FromRsa_Public = new SigningCredentials(RsaSecurityKey_2048_FromRsa_Public, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256);
-            RsaSigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature);
+            RsaSigningCreds_4096 = new SigningCredentials(RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256);
             RsaSigningCreds_4096_Public = new SigningCredentials(RsaSecurityKey_2048_Public, SecurityAlgorithms.RsaSha256Signature);
 
 #if !NET_CORE
