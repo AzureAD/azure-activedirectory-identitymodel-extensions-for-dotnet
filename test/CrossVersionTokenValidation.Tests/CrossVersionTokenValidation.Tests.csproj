@@ -3,7 +3,7 @@
   <Import Project="..\..\build\commonTest.props" />
 
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFrameworks>net452</TargetFrameworks>
     <AssemblyName>CrossVersionTokenValidation.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
@@ -27,20 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Protocol.Extensions" Version="1.0.4.403061554" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-*" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="4.0.4.403061554" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocol.Extensions" Version="$(MicrosoftIdentityModelProtocolExtensionsVersion)" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion4x)" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
     <Reference Include="System.IdentityModel" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   

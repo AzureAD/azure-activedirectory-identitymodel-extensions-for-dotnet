@@ -7,9 +7,6 @@
     <Description>Microsoft.IdentityModel.Logging.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Logging.Tests</PackageId>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,15 +18,7 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
-    <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 

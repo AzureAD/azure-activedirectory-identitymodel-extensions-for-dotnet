@@ -1,8 +1,13 @@
 <Project>
   <PropertyGroup>
-    <CoreFxVersion>4.3.0-*</CoreFxVersion>
+    <DotNetCoreAppRuntimeVersion>2.2.3</DotNetCoreAppRuntimeVersion>
+    <NetStandardVersion>2.0.3</NetStandardVersion>
+    <MicrosoftAzureKeyVaultCryptographyVersion>2.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-prerelease-63213-02</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftIdentityModelProtocolExtensionsVersion>1.0.4.403061554</MicrosoftIdentityModelProtocolExtensionsVersion>
     <MicrosoftNETTestSdkVersion>15.9.0</MicrosoftNETTestSdkVersion>
+    <SystemIdentityModelTokensJwtVersion4x>4.0.4.403061554</SystemIdentityModelTokensJwtVersion4x>
+    <SystemNetHttpVersion>4.3.2</SystemNetHttpVersion>
     <XunitVersion>2.4.0</XunitVersion>
-    <NetStandardVersion>1.6.1</NetStandardVersion>
   </PropertyGroup>
 </Project>

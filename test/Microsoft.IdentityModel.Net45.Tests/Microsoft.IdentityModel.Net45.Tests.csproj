@@ -21,6 +21,10 @@
     <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
+  </ItemGroup>
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>

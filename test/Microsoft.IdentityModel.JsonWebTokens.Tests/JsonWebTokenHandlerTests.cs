@@ -713,7 +713,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         }
                     },
 
- #if NET461 || NETCOREAPP2_0
+ #if NET461 || NET_CORE
                     // RsaPss is not supported on .NET < 4.6
                     new CreateTokenTheoryData
                     {

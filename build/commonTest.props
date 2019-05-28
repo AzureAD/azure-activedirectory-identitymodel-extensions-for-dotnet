@@ -6,7 +6,6 @@
   <PropertyGroup>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <DelaySign>false</DelaySign>
-    <DotNetCoreAppRuntimeVersion>2.0.0</DotNetCoreAppRuntimeVersion>
     <OutputTypeEx>library</OutputTypeEx>
     <Product>Microsoft IdentityModel</Product>
     <RepositoryType>git</RepositoryType>
@@ -14,14 +13,24 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsNotAsErrors>0618</WarningsNotAsErrors>
     <IsTestProject>true</IsTestProject>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(TestOnlyCoreTargets)</TargetFrameworks>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)'=='.NETFramework' AND '$(OutputType)'=='library'">
-    <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
+    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="2.4.0-prerelease-63213-02" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
 </Project>
