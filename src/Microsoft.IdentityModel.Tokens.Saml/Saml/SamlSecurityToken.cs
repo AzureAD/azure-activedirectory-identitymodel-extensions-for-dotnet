@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
@@ -38,7 +40,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Initializes an instance of <see cref="SamlSecurityToken"/>.
         /// </summary>
-        protected SamlSecurityToken() { }
+        protected SamlSecurityToken()
+        {
+            Assertion = new SamlAssertion("_" + Guid.NewGuid().ToString(), ClaimsIdentity.DefaultIssuer, DateTime.UtcNow, new SamlConditions(), new SamlAdvice(), new List<SamlStatement>());
+        }
 
         /// <summary>
         /// Initializes an instance of <see cref="SamlSecurityToken"/>.
