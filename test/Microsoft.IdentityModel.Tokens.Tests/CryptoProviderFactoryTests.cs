@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             if (!object.ReferenceEquals(cryptoFactory1, cryptoFactory2))
                 context.Diffs.Add("!object.ReferenceEquals(cryptoFactory1, cryptoFactory2)");
 
-            if (cryptoFactory2.CacheSignatureProviders)
-                context.Diffs.Add("cryptoFactory2.CacheSignatureProviders should be false");
+            if (!cryptoFactory2.CacheSignatureProviders)
+                context.Diffs.Add("cryptoFactory2.CacheSignatureProviders should be true");
 
             if (cryptoFactory1.CustomCryptoProvider != null)
                 context.Diffs.Add("cryptoFactory2.CustomCryptoProvider should be NULL");
@@ -125,7 +125,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ObjectDisposedException,
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider
                     },
                     ShouldFindSignSignatureProvider = false,
@@ -149,7 +148,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ObjectDisposedException,
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider
                     },
@@ -177,7 +175,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider
                     },
                     ShouldFindSignSignatureProvider = false,
@@ -251,7 +248,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.CryptographicException("KeyedHashAlgorithmThrowOnHashFinal"),
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true)
                         {
                             KeyedHashAlgorithmPublic = new CustomKeyedHashAlgorithm(Default.SymmetricSigningKey256.Key)
@@ -278,7 +274,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.CryptographicException("KeyedHashAlgorithmThrowOnHashFinal"),
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true),
                         VerifyingSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, false)
                         {
@@ -306,7 +301,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.CryptographicException("KeyedHashAlgorithmThrowOnHashFinal"),
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true),
                         VerifyingSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, false)
                         {
@@ -337,7 +331,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ObjectDisposedException,
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider,
                     },
@@ -361,7 +354,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ObjectDisposedException,
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider,
                     },
@@ -385,7 +377,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = EE.ObjectDisposedException,
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider,
                     },
@@ -408,7 +399,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider,
                     },
@@ -431,7 +421,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.HmacSha256 })
                     {
-                        CacheSignatureProviders = true,
                         SigningSignatureProvider = signingSignatureProvider,
                         VerifyingSignatureProvider = verifyingSignatureProvider,
                     },

@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the default value for caching
         /// </summary>
-        [DefaultValue(false)]
-        public static bool DefaultCacheSignatureProviders { get; set; } = false;
+        [DefaultValue(true)]
+        public static bool DefaultCacheSignatureProviders { get; set; } = true;
 
         /// <summary>
         /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a bool controlling if <see cref="SignatureProvider"/> should be cached.
         /// </summary>
-        [DefaultValue(false)]
+        [DefaultValue(true)]
         public bool CacheSignatureProviders { get; set; } = DefaultCacheSignatureProviders;
 
         /// <summary>
