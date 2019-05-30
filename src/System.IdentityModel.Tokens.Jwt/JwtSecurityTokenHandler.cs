@@ -967,7 +967,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (kidMatched) 
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
                 else 
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, jwtToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
             }
             else
             {
