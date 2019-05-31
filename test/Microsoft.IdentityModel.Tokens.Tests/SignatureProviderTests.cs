@@ -903,6 +903,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public byte[] Signature { get; set; }
 
+        public string SignatureProviderType { get; set; }
+
         public bool VerifySpecifyingLength { get; set; }
     }
 }
