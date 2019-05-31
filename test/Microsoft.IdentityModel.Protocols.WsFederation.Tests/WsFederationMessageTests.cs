@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             var type = typeof(WsFederationMessage);
             var properties = type.GetProperties();
-            Assert.True(properties.Length == 27, $"Number of properties has changed from 27 to: {properties.Length}, adjust tests");
+            Assert.True(properties.Length == 28, $"Number of properties has changed from 28 to: {properties.Length}, adjust tests");
 
             var context = new GetSetContext
             {

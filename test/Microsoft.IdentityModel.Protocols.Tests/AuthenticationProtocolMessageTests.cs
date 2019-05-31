@@ -40,28 +40,26 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Fact]
         public void Defaults()
         {
-            List<string> errors = new List<string>();
+            var context = new CompareContext();
             string issuerAddress = "http://www.gotjwt.com";
+            var script = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>";
 
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, CompareContext.Default))
-            {
-                errors.Add("authenticationProtocolMessage.IssuerAddress != string.Empty: " + authenticationProtocolMessage.IssuerAddress ?? "null");
-            }
+            IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, context);
 
             authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = issuerAddress };
-            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, issuerAddress, CompareContext.Default))
-            {
-                errors.Add("authenticationProtocolMessage.IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
-            }
+            IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, issuerAddress, context);
+
+            if (!authenticationProtocolMessage.Script.Equals(script))
+                context.Diffs.Add("The value of authenticationProtocolMessage.Script should be '" + script + "'.");
 
             if (authenticationProtocolMessage.Parameters == null)
-            {
-                errors.Add("uthenticationProtocolMessage.Parameters .IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
-            }
+                context.Diffs.Add("authenticationProtocolMessage.Parameters == null");
 
-            Assert.NotNull(authenticationProtocolMessage.Parameters);
-            Assert.Equal(0, authenticationProtocolMessage.Parameters.Count);
+            if (authenticationProtocolMessage.Parameters.Count != 0)
+                context.Diffs.Add("authenticationProtocolMessage.Parameters.Count != 0");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
