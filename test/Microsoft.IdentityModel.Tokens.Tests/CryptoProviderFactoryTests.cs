@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
@@ -44,6 +45,70 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class CryptoProviderFactoryTests
     {
+        /// <summary>
+        /// This test checks that SignatureProviders are properly created and released when CryptoProviderFactory.CacheSignatureProviders = false.
+        /// </summary>
+        [Theory, MemberData(nameof(CreateAndReleaseSignatureProvidersTheoryData))]
+        public void CreateAndReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateAndReleaseSignatureProvidersTheoryData", theoryData);
+            var cryptoProviderFactory = new CryptoProviderFactory() { CacheSignatureProviders = false };
+            try
+            {
+                var signatureProvider = cryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
+                if (cryptoProviderFactory.CryptoProviderCache.TryGetSignatureProvider(theoryData.SigningKey, theoryData.SigningAlgorithm, theoryData.SignatureProviderType, true, out var _))
+                    context.Diffs.Add("A SignatureProvider was added to CryptoProviderFactory.CryptoProviderCache, but CryptoProviderFactory.CacheSignatureProviders is false.");
+
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+
+                // If the signatureProvider is cached Dispose() will not be called on it.
+                if (signatureProvider.GetType().Equals(typeof(AsymmetricSignatureProvider)))
+                {
+                    var disposeCalled = (bool)typeof(AsymmetricSignatureProvider).GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue((AsymmetricSignatureProvider)signatureProvider);
+                    if (!disposeCalled)
+                        context.Diffs.Add("Dispose wasn't called on the AsymmetricSignatureProvider.");
+                }
+                else // signatureProvider.GetType().Equals(typeof(SymmetricSignatureProvider))
+                {
+                    var disposeCalled = (bool)typeof(SymmetricSignatureProvider).GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue((SymmetricSignatureProvider)signatureProvider);
+                    if (!disposeCalled)
+                        context.Diffs.Add("Dispose wasn't called on the SymmetricSignatureProvider.");
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            theoryData.ExpectedException.ProcessNoException(context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignatureProviderTheoryData> CreateAndReleaseSignatureProvidersTheoryData
+        {
+            get
+            {
+                return new TheoryData<SignatureProviderTheoryData>
+                {
+                    new SignatureProviderTheoryData
+                    {
+                        First = true,
+                        SigningKey = Default.AsymmetricSigningKey,
+                        SigningAlgorithm = Default.AsymmetricSigningAlgorithm,
+                        SignatureProviderType = typeof(AsymmetricSignatureProvider).ToString(),
+                        TestId = "Asymmetric"
+                    },
+                    new SignatureProviderTheoryData
+                    {
+                        SigningKey = Default.SymmetricSigningKey,
+                        SigningAlgorithm = ALG.HmacSha256,
+                        SignatureProviderType = typeof(SymmetricSignatureProvider).ToString(),
+                        TestId = "Symmetric"
+                    },
+                };
+            }
+        }
+
         /// <summary>
         /// Tests that defaults haven't changed.
         /// </summary>
@@ -447,7 +512,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
             var cryptoProviderFactory = new CryptoProviderFactory();
             try
-            { if (theoryData.CustomCryptoProvider != null)
+            {
+                if (theoryData.CustomCryptoProvider != null)
                     cryptoProviderFactory.CustomCryptoProvider = theoryData.CustomCryptoProvider;
                 cryptoProviderFactory.ReleaseSignatureProvider(theoryData.SigningSignatureProvider);
                 if (theoryData.CustomCryptoProvider != null && theoryData.SigningSignatureProvider != null && !((CustomCryptoProvider)theoryData.CustomCryptoProvider).ReleaseCalled)
@@ -555,7 +621,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     HashAlgorithm = Default.HashAlgorithm
                 };
                 var cryptoProviderFactory = new CryptoProviderFactory() { CustomCryptoProvider = customCryptoProvider };
- 
+
                 var theoryData = new TheoryData<CryptoProviderFactoryTheoryData>
                 {
                     new CryptoProviderFactoryTheoryData
@@ -663,7 +729,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 SecurityKey key = Default.SymmetricEncryptionKey128;
-                var provider = (RsaKeyWrapProvider) key.CryptoProviderFactory.CreateKeyWrapProvider(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaPKCS1);
+                var provider = (RsaKeyWrapProvider)key.CryptoProviderFactory.CreateKeyWrapProvider(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaPKCS1);
                 var customCryptoProvider = new CustomCryptoProvider(new string[] { SecurityAlgorithms.RsaPKCS1 })
                 {
                     RsaKeyWrapProvider = provider
