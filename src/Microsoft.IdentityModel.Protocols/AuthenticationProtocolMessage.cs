@@ -79,7 +79,9 @@ namespace Microsoft.IdentityModel.Protocols
             strBuilder.Append("</p><input type=\"submit\" value=\"");
             strBuilder.Append(HtmlEncode(ScriptButtonText));
             strBuilder.Append("\" /></noscript>");
-            strBuilder.Append("</form><script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script></body></html>");
+            strBuilder.Append("</form>");
+            strBuilder.Append(Script);
+            strBuilder.Append("</body></html>");
             return strBuilder.ToString();
         }
 
@@ -233,6 +235,11 @@ namespace Microsoft.IdentityModel.Protocols
                 SetParameter(key, nameValueCollection[key]);
             };
         }
+
+        /// <summary>
+        /// Gets the script used when constructing the post string.
+        /// </summary>
+        public string Script { get; } = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>";
 
         /// <summary>
         /// Gets or sets the script button text used when constructing the post string.
