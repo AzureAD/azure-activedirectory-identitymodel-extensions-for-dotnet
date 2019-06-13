@@ -74,6 +74,11 @@ namespace Microsoft.IdentityModel.Tokens
         private SignDelegate SignatureFunction;
         private VerifyDelegate VerifyFunction;
 
+        private object _signRsaLock = new object();
+        private object _signEcdsaLock = new object();
+        private object _verifyRsaLock = new object();
+        private object _verifyEcdsaLock = new object();
+
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
@@ -380,13 +385,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] SignWithECDsa(byte[] bytes)
         {
-            return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
+            lock (_signEcdsaLock)
+            {
+                return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
+            }
         }
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         private byte[] SignWithRsa(byte[] bytes)
         {
-            return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding);
+            lock (_signRsaLock)
+            {
+                return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding);
+            }
         }
 #endif
 
@@ -408,20 +419,29 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyWithECDsa(byte[] bytes, byte[] signature)
         {
-            return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+            lock (_verifyEcdsaLock)
+            {
+                return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+            }
         }
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
-            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
+            lock (_verifyRsaLock)
+            {
+                return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
+            }
         }
 #endif
 
 #if DESKTOP
         private bool VerifyWithRsaCryptoServiceProviderProxy(byte[] bytes, byte[] signature)
         {
-            return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);
+            lock (_verifyRsaLock)
+            {
+                return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);
+            }
         }
 #endif
 
