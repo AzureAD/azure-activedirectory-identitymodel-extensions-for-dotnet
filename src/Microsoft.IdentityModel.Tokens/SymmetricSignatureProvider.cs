@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool _disposed;
         private KeyedHashAlgorithm _keyedHash;
+        private object _signLock = new object();
+        private object _verifyLock = new object();
 
         /// <summary>
         /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
@@ -194,15 +196,20 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             LogHelper.LogInformation(LogMessages.IDX10642, input);
+
             try
             {
-                return KeyedHashAlgorithm.ComputeHash(input);
+                lock (_signLock)
+                {
+                    return KeyedHashAlgorithm.ComputeHash(input);
+                }
             }
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
                 throw;
             }
+
         }
 
         /// <summary>
@@ -236,7 +243,10 @@ namespace Microsoft.IdentityModel.Tokens
             LogHelper.LogInformation(LogMessages.IDX10643, input);
             try
             {
-                return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input));
+                lock (_verifyLock)
+                {
+                    return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input));
+                }
             }
             catch
             {
@@ -279,7 +289,10 @@ namespace Microsoft.IdentityModel.Tokens
             LogHelper.LogInformation(LogMessages.IDX10643, input);
             try
             {
-                return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input), length);
+                lock (_verifyLock)
+                {
+                    return Utility.AreEqual(signature, KeyedHashAlgorithm.ComputeHash(input), length);
+                }
             }
             catch
             {
