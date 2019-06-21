@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Json;
+using System;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -35,7 +35,24 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityKey
     {
-        private CryptoProviderFactory _cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderFactory.Default);
+        private CryptoProviderFactory _cryptoProviderFactory;
+
+        internal SecurityKey(SecurityKey key)
+        {
+            _cryptoProviderFactory = key._cryptoProviderFactory;
+            KeyId = key.KeyId;
+        }
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public SecurityKey()
+        {
+            _cryptoProviderFactory = CryptoProviderFactory.Default;
+        }
+
+        [JsonIgnore]
+        internal string InternalId { get; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
@@ -60,13 +77,17 @@ namespace Microsoft.IdentityModel.Tokens
             }
             set
             {
-                if (value == null)
-                {
-                    throw LogHelper.LogArgumentNullException("value");
-                };
-
-                _cryptoProviderFactory = value;
+                _cryptoProviderFactory = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             }
+        }
+
+        /// <summary>
+        /// Returns the formatted string: GetType(), KeyId: 'value', InternalId: 'value'.
+        /// </summary>
+        /// <returns>string</returns>
+        public override string ToString()
+        {
+            return $"{GetType()}, KeyId: '{KeyId}', InternalId: '{InternalId}'.";
         }
     }
 }

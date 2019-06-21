@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -39,57 +40,134 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Constructor()
         {
-            X509SecurityKey x509SecurityKey;
             var context = new CompareContext();
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
+            var expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
             try
             {
-                x509SecurityKey = new X509SecurityKey(null);
-                expectedException.ProcessNoException();
+                new X509SecurityKey((X509Certificate2)null);
+                expectedException.ProcessNoException(context);
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                expectedException.ProcessException(exception, context);
             }
 
-            X509Certificate2 x509Certificate2 = KeyingMaterial.DefaultCert_2048;
+            var certificate = KeyingMaterial.DefaultCert_2048;
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyId");
+            try
+            {
+                new X509SecurityKey(certificate, null);
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
+            }
+
+            try
+            {
+                new X509SecurityKey(certificate, string.Empty);
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
+            }
+
             expectedException = ExpectedException.NoExceptionExpected;
             try
             {
-                x509SecurityKey = new X509SecurityKey(x509Certificate2);
-                IdentityComparer.AreEqual(x509SecurityKey.X5t, x509SecurityKey.KeyId);
-                IdentityComparer.AreEqual(x509Certificate2, x509SecurityKey.Certificate, context);
+                var x509SecurityKey = new X509SecurityKey(certificate);
+                IdentityComparer.AreEqual(x509SecurityKey.KeyId, certificate.Thumbprint, context);
+                IdentityComparer.AreEqual(x509SecurityKey.X5t, Base64UrlEncoder.Encode(certificate.GetCertHash()), context);
+                IdentityComparer.AreEqual(certificate, x509SecurityKey.Certificate, context);
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                expectedException.ProcessException(exception, context);
+            }
+
+            try
+            {
+                var x509SecurityKey = new X509SecurityKey(certificate, "KID");
+                IdentityComparer.AreEqual(x509SecurityKey.KeyId, "KID", context);
+                IdentityComparer.AreEqual(x509SecurityKey.X5t, Base64UrlEncoder.Encode(certificate.GetCertHash()), context);
+                IdentityComparer.AreEqual(certificate, x509SecurityKey.Certificate, context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
+        [Theory, MemberData(nameof(IsAlgorithmSupportedTheoryData))]
+        public void IsSupportedAlgorithm(X509SecurityKeyTheoryData theoryData)
         {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+            var context = TestUtilities.WriteHeader($"{this}.IsSupportedAlgorithm", theoryData);
+
+            try
+            {
+                if (theoryData.X509SecurityKey.CryptoProviderFactory.IsSupportedAlgorithm(theoryData.Algorithm, theoryData.X509SecurityKey) != theoryData.IsSupported)
+                    context.AddDiff($"CryptoProviderFactory.IsSupportedAlgorithm mismatch. theoryData.Algorithm: {theoryData.Algorithm}, theoryData.X509SecurityKey: {theoryData.X509SecurityKey}, theoryData.IsSupported: {theoryData.IsSupported}.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+
         }
 
-        public static TheoryData<X509SecurityKey, string, bool> IsSupportedAlgDataSet
+        public static TheoryData<X509SecurityKeyTheoryData> IsAlgorithmSupportedTheoryData
         {
-            get
+            get => new TheoryData<X509SecurityKeyTheoryData>
             {
-                var dataset = new TheoryData<X509SecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true);
-                X509SecurityKey testKey = new X509SecurityKey(KeyingMaterial.CertSelfSigned2048_SHA256);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSsaPssSha256Signature, true);
-                return dataset;
-            }
+                new X509SecurityKeyTheoryData(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true, SecurityAlgorithms.RsaSha256Signature),
+                new X509SecurityKeyTheoryData(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true, SecurityAlgorithms.RsaSha256),
+                new X509SecurityKeyTheoryData(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false, SecurityAlgorithms.Aes128Encryption),
+                new X509SecurityKeyTheoryData(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true, SecurityAlgorithms.RsaSha384),
+                new X509SecurityKeyTheoryData(
+                    new X509SecurityKey(KeyingMaterial.CertSelfSigned2048_SHA256)
+                    {
+                        CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature })
+                    },
+                    SecurityAlgorithms.RsaSsaPssSha256Signature,
+                    true,
+                    "CustomProvider:" + SecurityAlgorithms.RsaSsaPssSha256Signature),
+            };
         }
+    }
+
+    public class X509SecurityKeyTheoryData : TheoryDataBase
+    {
+        public X509SecurityKeyTheoryData(X509Certificate2 certificate, string algorithm, bool isSupported, string testId)
+        {
+            X509Certificate = certificate;
+            Algorithm = algorithm;
+            IsSupported = isSupported;
+        }
+
+        public X509SecurityKeyTheoryData(X509SecurityKey key, string algorithm, bool isSupported, string testId)
+        {
+            X509SecurityKey = key;
+            Algorithm = algorithm;
+            IsSupported = isSupported;
+        }
+
+        public string Algorithm { get; set; }
+
+        string KeyId { get; set; }
+
+        public bool IsSupported { get; set; }
+
+        public X509Certificate X509Certificate { get; set; }
+
+        public X509SecurityKey X509SecurityKey { get; set; }
     }
 }
 

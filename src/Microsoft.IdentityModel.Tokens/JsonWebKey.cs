@@ -86,6 +86,12 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// If this was converted to or from a SecurityKey, this field will be set.
+        /// </summary>
+        [JsonIgnore]
+        internal SecurityKey ConvertedSecurityKey { get; set; }
+
+        /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
         [JsonExtensionData]
@@ -306,33 +312,32 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal RSAParameters CreateRsaParameters()
         {
-            if (N == null || E == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this)));
+            if (string.IsNullOrEmpty(N))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
 
-            RSAParameters parameters = new RSAParameters();
+            if(string.IsNullOrEmpty(E))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this), "Exponent"));
 
-            if (D != null)
-                parameters.D = Base64UrlEncoder.DecodeBytes(D);
+            return new RSAParameters
+            {
+                Modulus = Base64UrlEncoder.DecodeBytes(N),
+                Exponent = Base64UrlEncoder.DecodeBytes(E),
+                D = string.IsNullOrEmpty(D) ? null : Base64UrlEncoder.DecodeBytes(D),
+                P = string.IsNullOrEmpty(P) ? null : Base64UrlEncoder.DecodeBytes(P),
+                Q = string.IsNullOrEmpty(Q) ? null : Base64UrlEncoder.DecodeBytes(Q),
+                DP = string.IsNullOrEmpty(DP) ? null : Base64UrlEncoder.DecodeBytes(DP),
+                DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ),
+                InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI)
+            };
+        }
 
-            if (DP != null)
-                parameters.DP = Base64UrlEncoder.DecodeBytes(DP);
-
-            if (DQ != null)
-                parameters.DQ = Base64UrlEncoder.DecodeBytes(DQ);
-
-            if (QI != null)
-                parameters.InverseQ = Base64UrlEncoder.DecodeBytes(QI);
-
-            if (P != null)
-                parameters.P = Base64UrlEncoder.DecodeBytes(P);
-
-            if (Q != null)
-                parameters.Q = Base64UrlEncoder.DecodeBytes(Q);
-
-            parameters.Exponent = Base64UrlEncoder.DecodeBytes(E);
-            parameters.Modulus = Base64UrlEncoder.DecodeBytes(N);
-
-            return parameters;
+        /// <summary>
+        /// Returns the formatted string: GetType(), Use: 'value', Kid: 'value', Kty: 'value', InternalId: 'value'.
+        /// </summary>
+        /// <returns>string</returns>
+        public override string ToString()
+        {
+            return $"{GetType()}, Use: '{Use}',  Kid: '{Kid}', Kty: '{Kty}', InternalId: '{InternalId}'.";
         }
     }
 }

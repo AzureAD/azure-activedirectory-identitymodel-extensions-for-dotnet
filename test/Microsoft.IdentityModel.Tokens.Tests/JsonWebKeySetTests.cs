@@ -31,8 +31,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.TestUtils;
+using Newtonsoft.Json;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -41,16 +41,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeySetTests
     {
-        [Theory, MemberData(nameof(JsonWekKeySetDataSet))]
+        private static readonly JsonSerializerSettings _jsonSerializerSettingsForRegressionTest = new JsonSerializerSettings
+        {
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+        };
+
+        [Theory, MemberData(nameof(JsonWebKeySetDataSet))]
         public void Constructors(
+            string testId,
             string json,
             JsonWebKeySet compareTo,
+            JsonSerializerSettings settings,
             ExpectedException ee)
         {
-            var context = new CompareContext();
+            var context = new CompareContext($"{this}.{testId}");
+            context.PropertiesToIgnoreWhenComparing.Add(typeof(JsonWebKeySet), new List<string>() { "SkipUnresolvedJsonWebKeys" });
             try
             {
-                var jsonWebKeys = new JsonWebKeySet(json);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var jsonWebKeys = new JsonWebKeySet(json, settings);
+#pragma warning restore CS0618 // Type or member is obsolete
                 var keys = jsonWebKeys.GetSigningKeys();
                 ee.ProcessNoException(context);
                 if (compareTo != null)
@@ -65,26 +75,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, JsonWebKeySet, ExpectedException> JsonWekKeySetDataSet
+        public static TheoryData<string, string, JsonWebKeySet, JsonSerializerSettings, ExpectedException> JsonWebKeySetDataSet
         {
             get
             {
-                var dataset = new TheoryData<string, JsonWebKeySet, ExpectedException>();
+                var dataset = new TheoryData<string, string, JsonWebKeySet, JsonSerializerSettings, ExpectedException>();
 
-                dataset.Add(DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, ExpectedException.NoExceptionExpected);
-                dataset.Add(null, null, ExpectedException.ArgumentNullException());
-                dataset.Add(DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
-                dataset.Add(File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadX509String, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetBadECCurveString, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetOnlyX5tString, DataSets.JsonWebKeySetOnlyX5t, ExpectedException.NoExceptionExpected);
-                dataset.Add(DataSets.JsonWebKeySetX509DataString, DataSets.JsonWebKeySetX509Data, ExpectedException.NoExceptionExpected);
+                foreach (var setting in new[] { _jsonSerializerSettingsForRegressionTest, null })
+                {
+                    dataset.Add("Test1", DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test2", null, null, setting, ExpectedException.ArgumentNullException());
+                    dataset.Add("Test3", DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test4", DataSets.JsonWebKeySetBadFormatingString, null, setting, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
+                    dataset.Add("Test5", File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test6", DataSets.JsonWebKeySetBadRsaExponentString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test7", DataSets.JsonWebKeySetBadRsaModulusString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test8", DataSets.JsonWebKeySetKtyNotRsaString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test9", DataSets.JsonWebKeySetUseNotSigString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test10", DataSets.JsonWebKeySetBadX509String, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test11", DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test12", DataSets.JsonWebKeySetBadECCurveString, null, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test13", DataSets.JsonWebKeySetOnlyX5tString, DataSets.JsonWebKeySetOnlyX5t, setting, ExpectedException.NoExceptionExpected);
+                    dataset.Add("Test14", DataSets.JsonWebKeySetX509DataString, DataSets.JsonWebKeySetX509Data, setting, ExpectedException.NoExceptionExpected);
+                }
 
                 return dataset;
             }
@@ -186,9 +199,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.GetSigningKeys", theoryData);
             try
             {
-                if (theoryData.SetEcdsaAdapterToNull)
-                    JsonWebKeySet.ECDsaAdapter = null;
-
                 var signingKeys = theoryData.JsonWebKeySet.GetSigningKeys();
 
                 IdentityComparer.AreEqual(signingKeys, theoryData.ExpectedSigningKeys, context);
@@ -200,19 +210,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
 
-            // revert to default
-            if (theoryData.SetEcdsaAdapterToNull)
-            {
-                try
-                {
-                    JsonWebKeySet.ECDsaAdapter = new ECDsaAdapter();
-                }
-                catch
-                {
-                    // ECDsaAdapter is not supported by NETSTANDARD1.4, when running on platforms other than Windows
-                }
-            }
-
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -220,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                var ecdsaAdapter = new ECDsaAdapter();
+                var ecdsaAdapter = ECDsaAdapter.Instance;
                 var theoryData = new TheoryData<JsonWebKeySetTheoryData>();
 
                 var jsonWebKeySet = new JsonWebKeySet(DataSets.JsonWebKeySetUseNotSigString) { SkipUnresolvedJsonWebKeys = true };
@@ -372,8 +369,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new JsonWebKeySetTheoryData
                 {
                     JsonWebKeySet = jsonWebKeySet,
-                    ExpectedSigningKeys = new List<SecurityKey>(),
-                    SetEcdsaAdapterToNull = true,
+                    ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[1] },
                     TestId = "ECDsaAdapterIsNotSupportedSkipUnresolved",
                 });
 
@@ -382,7 +378,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     JsonWebKeySet = jsonWebKeySet,
                     ExpectedSigningKeys = new List<SecurityKey>() { (jsonWebKeySet.Keys as List<JsonWebKey>)[0], (jsonWebKeySet.Keys as List<JsonWebKey>)[1] },
-                    SetEcdsaAdapterToNull = true,
                     TestId = "ECDsaAdapterIsNotSupported",
                 });
 
@@ -431,8 +426,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public JsonWebKeySet JsonWebKeySet { get; set; }
 
             public List<SecurityKey> ExpectedSigningKeys { get; set; }
-
-            public bool SetEcdsaAdapterToNull { get; set; } = false;
          }
     }
 }

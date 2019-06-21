@@ -187,9 +187,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa5", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.JsonWebKeyP384, KEY.JsonWebKeyP384_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa6", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521, KEY.JsonWebKeyP521_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_BadPrivateKey, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
-                new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
-                new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
-                new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
+                new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
+                new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
                 new SignatureProviderTheoryData("RsaSecurityKey1", ALG.RsaSha256, ALG.RsaSha256, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKey2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // Private keys missing
                 new SignatureProviderTheoryData("PrivateKeyMissing1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_Public, KEY.JsonWebKeyP256_Public, EE.InvalidOperationException("IDX10638:")),
-                new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa256Public, KEY.JsonWebKeyRsa256Public, EE.InvalidOperationException("IDX10638:")),
+                new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048_Public, KEY.JsonWebKeyRsa_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048_Public,KEY.RsaSecurityKey_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing4", ALG.RsaSha256, ALG.RsaSha256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.InvalidOperationException("IDX10638:")),
 #if NET452
@@ -264,8 +264,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // JsonWebKey
                 new SignatureProviderTheoryData("JsonWebKeySymmetric1", ALG.HmacSha256, ALG.HmacSha256, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256),
                 new SignatureProviderTheoryData("JsonWebKeySymmetric2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256),
-                new SignatureProviderTheoryData("JsonWebKeySymmetric3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("JsonWebKeySymmetric4", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeySymmetric3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeySymmetric4", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
                 new SignatureProviderTheoryData("SymmetricSecurityKey1", ALG.HmacSha256, ALG.HmacSha256, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256),
                 new SignatureProviderTheoryData("SymmetricSecurityKey2", ALG.HmacSha256, ALG.HmacSha256, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
@@ -704,7 +704,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 {
                     "Test3",
-                    KEY.JsonWebKeyRsa256,
+                    KEY.JsonWebKeyRsa_2048,
                     ALG.RsaSha256,
                     EE.NoExceptionExpected
                 },

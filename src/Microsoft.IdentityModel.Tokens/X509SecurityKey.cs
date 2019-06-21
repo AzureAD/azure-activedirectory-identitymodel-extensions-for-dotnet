@@ -43,6 +43,14 @@ namespace Microsoft.IdentityModel.Tokens
         AsymmetricAlgorithm _publicKey;
         object _thisLock = new Object();
 
+        internal X509SecurityKey(JsonWebKey webKey)
+            : base(webKey)
+        {
+            Certificate = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+            X5t = Base64UrlEncoder.Encode(Certificate.GetCertHash());
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
         /// Instantiates a <see cref="SecurityKey"/> using a <see cref="X509Certificate2"/>
         /// </summary>

@@ -38,6 +38,17 @@ namespace Microsoft.IdentityModel.Tokens
         int _keySize;
         byte[] _key;
 
+        internal SymmetricSecurityKey(JsonWebKey webKey)
+            : base(webKey)
+        {
+            if (string.IsNullOrEmpty(webKey.K))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, typeof(SymmetricSecurityKey))));
+
+            _key = Base64UrlEncoder.DecodeBytes(webKey.K);
+            _keySize = _key.Length * 8;
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
         /// Returns a new instance of <see cref="SymmetricSecurityKey"/> instance.
         /// </summary>
@@ -48,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX10703));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, typeof(SymmetricSecurityKey))));
 
             _key = key.CloneByteArray();
             _keySize = _key.Length * 8;
