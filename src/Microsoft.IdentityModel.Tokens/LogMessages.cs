@@ -184,10 +184,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
         public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 or NET451 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
-        //public const string IDX10688 = "IDX10688:";
+        //public const string IDX10688 = "IDX10688:"
         public const string IDX10689 = "IDX10689: Unable to create an ECDsa object. See inner exception for more details.";
         public const string IDX10690 = "IDX10690: ECDsa creation is not supported by NETSTANDARD1.4, when running on platforms other than Windows. For more details, see https://aka.ms/IdentityModel/create-ecdsa";
-        public const string IDX10691 = "IDX10691: Unable to create an ECDsa object, internal CreateECDsaFunction is not available.";
+        //public const string IDX10691 = "IDX10691:"
         public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on .NET 4.5 and .NET 4.5.1 targets. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
 
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
         //public const string IDX10802 = "IDX10802:"
-        public const string IDX10804 = "IDX10804: Unable to retrieve document from: '{0}'.";
+        //public const string IDX10804 = "IDX10804:"
         public const string IDX10805 = "IDX10805: Error deserializing json: '{0}' into '{1}'.";
         public const string IDX10806 = "IDX10806: Deserializing json: '{0}' into '{1}'.";
         //public const string IDX10807 = "IDX10807:"
