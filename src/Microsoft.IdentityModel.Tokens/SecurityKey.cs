@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {

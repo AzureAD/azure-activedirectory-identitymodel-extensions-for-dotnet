@@ -32,7 +32,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
-using Newtonsoft.Json;
+using Microsoft.IdentityModel.Json;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -41,31 +41,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeySetTests
     {
-        private static readonly JsonSerializerSettings _jsonSerializerSettingsForRegressionTest = new JsonSerializerSettings
-        {
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-        };
-
         [Theory, MemberData(nameof(JsonWebKeySetDataSet))]
-        public void Constructors(
+        private void Constructors(
             string testId,
             string json,
             JsonWebKeySet compareTo,
-            JsonSerializerSettings settings,
             ExpectedException ee)
         {
             var context = new CompareContext($"{this}.{testId}");
             context.PropertiesToIgnoreWhenComparing.Add(typeof(JsonWebKeySet), new List<string>() { "SkipUnresolvedJsonWebKeys" });
             try
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                var jsonWebKeys = new JsonWebKeySet(json, settings);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var jsonWebKeys = new JsonWebKeySet(json);
                 var keys = jsonWebKeys.GetSigningKeys();
                 ee.ProcessNoException(context);
                 if (compareTo != null)
                     IdentityComparer.AreEqual(jsonWebKeys, compareTo, context);
-
             }
             catch (Exception ex)
             {
@@ -75,29 +66,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, string, JsonWebKeySet, JsonSerializerSettings, ExpectedException> JsonWebKeySetDataSet
+        public static TheoryData<string, string, JsonWebKeySet, ExpectedException> JsonWebKeySetDataSet
         {
             get
             {
-                var dataset = new TheoryData<string, string, JsonWebKeySet, JsonSerializerSettings, ExpectedException>();
-
-                foreach (var setting in new[] { _jsonSerializerSettingsForRegressionTest, null })
-                {
-                    dataset.Add("Test1", DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test2", null, null, setting, ExpectedException.ArgumentNullException());
-                    dataset.Add("Test3", DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test4", DataSets.JsonWebKeySetBadFormatingString, null, setting, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
-                    dataset.Add("Test5", File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test6", DataSets.JsonWebKeySetBadRsaExponentString, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test7", DataSets.JsonWebKeySetBadRsaModulusString, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test8", DataSets.JsonWebKeySetKtyNotRsaString, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test9", DataSets.JsonWebKeySetUseNotSigString, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test10", DataSets.JsonWebKeySetBadX509String, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test11", DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test12", DataSets.JsonWebKeySetBadECCurveString, null, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test13", DataSets.JsonWebKeySetOnlyX5tString, DataSets.JsonWebKeySetOnlyX5t, setting, ExpectedException.NoExceptionExpected);
-                    dataset.Add("Test14", DataSets.JsonWebKeySetX509DataString, DataSets.JsonWebKeySetX509Data, setting, ExpectedException.NoExceptionExpected);
-                }
+                var dataset = new TheoryData<string, string, JsonWebKeySet, ExpectedException>();
+                dataset.Add("Test1", DataSets.JsonWebKeySetAdditionalDataString1, DataSets.JsonWebKeySetAdditionalData1, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test2", null, null, ExpectedException.ArgumentNullException());
+                dataset.Add("Test3", DataSets.JsonWebKeySetString1, DataSets.JsonWebKeySet1, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test4", DataSets.JsonWebKeySetBadFormatingString, null, ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(JsonReaderException)));
+                dataset.Add("Test5", File.ReadAllText(DataSets.GoogleCertsFile), DataSets.GoogleCertsExpected, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test6", DataSets.JsonWebKeySetBadRsaExponentString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test7", DataSets.JsonWebKeySetBadRsaModulusString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test8", DataSets.JsonWebKeySetKtyNotRsaString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test9", DataSets.JsonWebKeySetUseNotSigString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test10", DataSets.JsonWebKeySetBadX509String, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test11", DataSets.JsonWebKeySetECCString, DataSets.JsonWebKeySetEC, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test12", DataSets.JsonWebKeySetBadECCurveString, null, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test13", DataSets.JsonWebKeySetOnlyX5tString, DataSets.JsonWebKeySetOnlyX5t, ExpectedException.NoExceptionExpected);
+                dataset.Add("Test14", DataSets.JsonWebKeySetX509DataString, DataSets.JsonWebKeySetX509Data, ExpectedException.NoExceptionExpected);
 
                 return dataset;
             }

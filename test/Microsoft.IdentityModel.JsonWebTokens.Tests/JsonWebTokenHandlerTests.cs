@@ -193,9 +193,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     var innerTokenFromString = jweTokenFromString.InnerToken as JsonWebToken;
 
                     IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.X5t, innerTokenFromSecurityTokenDescriptor.Kid, context);
+                    IdentityComparer.AreEqual(innerTokenFromSecurityTokenDescriptor.Kid, x509SecurityKey.KeyId, context);
                     IdentityComparer.AreEqual(innerTokenFromString.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(innerTokenFromString.X5t, innerTokenFromString.Kid, context);
+                    IdentityComparer.AreEqual(innerTokenFromString.Kid, x509SecurityKey.KeyId, context);
                 }
 
                 context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
@@ -518,9 +518,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                 {
                     IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, jwsTokenFromSecurityTokenDescriptor.Kid, context);
+                    IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Kid, x509SecurityKey.KeyId, context);
                     IdentityComparer.AreEqual(jwsTokenFromString.X5t, x509SecurityKey.X5t, context);
-                    IdentityComparer.AreEqual(jwsTokenFromString.X5t, jwsTokenFromString.Kid, context);
+                    IdentityComparer.AreEqual(jwsTokenFromString.Kid, x509SecurityKey.KeyId, context);
                 }
 
                 IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor, jwsTokenFromString, context);

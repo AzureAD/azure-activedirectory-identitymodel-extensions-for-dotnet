@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
