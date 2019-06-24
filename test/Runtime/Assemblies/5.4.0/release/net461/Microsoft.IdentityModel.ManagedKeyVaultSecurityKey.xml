@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey">
+            <summary>
+            Provides signing and verifying operations using Azure Key Vault
+            for resources that are using Managed identities for Azure resources.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey"/> class.
+            </summary>
+            <param name="keyIdentifier">The key identifier that is recognized by KeyVault.</param>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey.#ctor(System.String,Microsoft.IdentityModel.KeyVaultExtensions.KeyVaultSecurityKey.AuthenticationCallback)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey"/> class.
+            </summary>
+            <param name="keyIdentifier">The key identifier that is recognized by KeyVault.</param>
+            <param name="callback">The authentication callback.</param>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="callback"/>is null.</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey"/> class.
+            </summary>
+            <param name="keyIdentifier">The key identifier.</param>
+            <param name="clientId">Identifier of the client.</param>
+            <param name="clientSecret">Secret of the client identity.</param>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="clientId"/>is null or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="clientSecret"/>is null or clientSecret.</exception>
+        </member>
+    </members>
+</doc>

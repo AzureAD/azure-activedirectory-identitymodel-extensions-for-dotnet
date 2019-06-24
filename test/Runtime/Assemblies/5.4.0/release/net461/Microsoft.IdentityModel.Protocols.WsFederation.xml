@@ -1,0 +1,536 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.IdentityModel.Protocols.WsFederation</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration">
+            <summary>
+            Contains WsFederation metadata that can be populated from a XML string.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.#ctor">
+            <summary>
+            Initializes an new instance of <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/>.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.Issuer">
+            <summary>
+            Gets or sets the token issuer.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.SigningKeys">
+            <summary>
+            Gets the <see cref="T:System.Collections.Generic.IList`1"/> that the IdentityProvider indicates are to be used signing keys.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.Signature">
+            <summary>
+            The <see cref="T:Microsoft.IdentityModel.Xml.Signature"/> element that was found when reading metadata.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.SigningCredentials">
+            <summary>
+            The <see cref="T:Microsoft.IdentityModel.Tokens.SigningCredentials"/> that was used to sign the metadata.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.KeyInfos">
+            <summary>
+            Get the <see cref="T:System.Collections.Generic.IList`1"/> that the IdentityProvider indicates are to be used signing keys.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration.TokenEndpoint">
+            <summary>
+            Gets or sets token endpoint.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever">
+            <summary>
+             Retrieves a populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> given an address.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever.GetAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> given an address.
+            </summary>
+            <param name="address">address of the metadata document.</param>
+            <param name="cancel"><see cref="T:System.Threading.CancellationToken"/>.</param>
+            <returns>A populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever.GetAsync(System.String,System.Net.Http.HttpClient,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> given an address and an <see cref="T:System.Net.Http.HttpClient"/>.
+            </summary>
+            <param name="address">address of the metadata document.</param>
+            <param name="httpClient">the <see cref="T:System.Net.Http.HttpClient"/> to use to read the metadata document.</param>
+            <param name="cancel">a <see cref="T:System.Threading.CancellationToken"/>.</param>
+            <returns>A populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="httpClient"/> is null.</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfigurationRetriever.GetAsync(System.String,Microsoft.IdentityModel.Protocols.IDocumentRetriever,System.Threading.CancellationToken)">
+            <summary>
+            Retrieves a populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> given an address and an <see cref="T:Microsoft.IdentityModel.Protocols.IDocumentRetriever"/>.
+            </summary>
+            <param name="address">address of the metadata document.</param>
+            <param name="retriever">the <see cref="T:Microsoft.IdentityModel.Protocols.IDocumentRetriever"/> to use to read the metadata document</param>
+            <param name="cancel"><see cref="T:System.Threading.CancellationToken"/>.</param>
+            <returns>A populated <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> instance.</returns>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="address"/> is null or empty.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="retriever"/> is null.</exception>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException">
+            <summary>
+            Represents a Ws Federation exception.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException"/> class with a specified error message.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException"/> class with a specified error message
+            and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The <see cref="T:System.Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException">
+            <summary>
+            This exception is thrown when processing Ws Federation metadata.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException"/> class.
+            </summary>
+            <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationReadException"/> class.
+            </summary>
+            <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+            <param name="innerException">A <see cref="T:System.Exception"/> that represents the root cause of the exception.</param>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.LogMessages">
+            <summary>
+            Log messages and codes
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper">
+            <summary>
+            Class for parsing query string.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper.ParseQuery(System.String)">
+            <summary>
+            Parse a query string into its component key and value parts.
+            </summary>
+            <param name="queryString">The raw query string value, with or without the leading '?'.</param>
+            <returns>A collection of parsed keys and values.</returns>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper.ParseNullableQuery(System.String)">
+            <summary>
+            Parse a query string into its component key and value parts.
+            </summary>
+            <param name="queryString">The raw query string value, with or without the leading '?'.</param>
+            <returns>A collection of parsed keys and values, null if there are no entries.</returns>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.KeyValueAccumulator">
+            <summary>
+            Class for storing the key value pairs in query string.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.SecurityTokenServiceTypeRoleDescriptor">
+            <summary>
+            Class for SecurityTokenService type role descriptor
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.SecurityTokenServiceTypeRoleDescriptor.KeyInfos">
+            <summary>
+            KeyInfo
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.SecurityTokenServiceTypeRoleDescriptor.TokenEndpoint">
+            <summary>
+            Token endpoint
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants">
+            <summary>
+            Constants for WsFederation.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.WsFederationActions">
+            <summary>
+            Constants for WsFederation actions.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.WsFederationFaultCodes">
+            <summary>
+            Constants for WsFederation Fault codes.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.WsFederationParameterNames">
+            <summary>
+            Defines the WsFederation Constants
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Attributes">
+            <summary>
+            Attributes for WsFederation metadata xml.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Elements">
+            <summary>
+            Elements for WsFederation metadata xml.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Namespaces">
+            <summary>
+            Namespaces for WsFederation metadata xml.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Types">
+            <summary>
+            Types for WsFederation metadata xml.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.KeyUse">
+            <summary>
+            Defines the key use value in key descriptor for WsFederation metadata xml.
+            </summary>
+        </member>
+        <member name="F:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Xmlns">
+            <summary>
+            xmlns string.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Prefixes">
+            <summary>
+            Prefix names.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage">
+            <summary>
+            Provides access to common WsFederation message parameters.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.FromQueryString(System.String)">
+            <summary>
+            Creates a <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> from the contents of a query string.
+            </summary>
+            <param name="queryString"> query string to extract parameters.</param>
+            <returns>An instance of <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/>.</returns>
+            <remarks>If 'queryString' is null or whitespace, a default <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> is returned. Parameters are parsed from <see cref="P:System.Uri.Query"/>.</remarks>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.FromUri(System.Uri)">
+            <summary>
+            Creates a <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> from the contents of a <see cref="T:System.Uri"/>.
+            </summary>
+            <param name="uri">uri containing parameters.</param>
+            <returns>An instance of <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/>.</returns>
+            <remarks><see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="P:System.Uri.Query"/>.</remarks>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.#ctor(Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> class.
+            </summary>
+            <param name="wsFederationMessage"> message to copy.</param>        
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.#ctor(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.String[]}})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> class.
+            </summary>
+            <param name="parameters">Enumeration of key value pairs.</param>        
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.CreateSignInUrl">
+            <summary>
+            Creates a 'wsignin1.0' message using the current contents of this <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/>.
+            </summary>
+            <returns>The uri to use for a redirect.</returns>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.CreateSignOutUrl">
+            <summary>
+            Creates a 'wsignout1.0' message using the current contents of this <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/>.
+            </summary>
+            <returns>The uri to use for a redirect.</returns>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.GetToken">
+            <summary>
+            Reads the 'wresult' and returns the embedded security token.
+            </summary>
+            <returns>the 'SecurityToken'.</returns>
+            <exception cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException">if exception occurs while reading security token.</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.GetToken(System.String)">
+            <summary>
+            Processes the 'Wresult' and returns the first 'RequestedSecurityToken' found.
+            This method is called only for netstandard 1.4 targets as XmlTextReader is not available and
+            XmlDictionaryReader.CreateTextReader normalizes the XML causing signature failures.
+            This is only called after it is determined the Wresult is well formed xml. A successful call the GetTokenUsingXmlReader should be made first.
+            </summary>
+            <returns>the string version of the security token.</returns>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.GetTokenUsingXmlReader">
+            <summary>
+            Reads the 'wresult' and returns the embedded security token.
+            </summary>
+            <returns>the 'SecurityToken'.</returns>
+            <exception cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationException">if exception occurs while reading security token.</exception>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.IsSignInMessage">
+            <summary>
+            Gets a boolean representing if the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> is a 'sign-in-message'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.IsSignOutMessage">
+            <summary>
+            Gets a boolean representing if the <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage"/> is a 'sign-out-message'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wa">
+            <summary>
+            Gets or sets 'wa'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wattr">
+            <summary>
+            Gets or sets 'wattr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wattrptr">
+            <summary>
+            Gets or sets 'wattrptr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wauth">
+            <summary>
+            Gets or sets 'wauth'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wct">
+            <summary>
+            Gets or sets 'wct'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wctx">
+            <summary>
+            Gets or sets 'wctx'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wencoding">
+            <summary>
+            Gets or sets 'wencoding'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wfed">
+            <summary>
+            Gets or sets 'wfed'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wfresh">
+            <summary>
+            Gets or sets 'wfresh'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Whr">
+            <summary>
+            Gets or sets 'whr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wp">
+            <summary>
+            Gets or sets 'wp'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wpseudo">
+            <summary>
+            Gets or sets 'wpseudo'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wpseudoptr">
+            <summary>
+            Gets or sets 'wpseudoptr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wreply">
+            <summary>
+            Gets or sets 'wreply'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wreq">
+            <summary>
+            Gets or sets 'wreq'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wreqptr">
+            <summary>
+            Gets or sets 'wreqptr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wres">
+            <summary>
+            Gets or sets 'wres'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wresult">
+            <summary>
+            Gets or sets 'wresult'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wresultptr">
+            <summary>
+            Gets or sets 'wresultptr'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.Wtrealm">
+            <summary>
+            Gets or sets 'wtrealm'.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer">
+            <summary>
+            Metadata serializer class for WsFed. 
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.#ctor">
+            <summary>
+            Metadata serializer for WsFed.
+            </summary>
+        </member>
+        <member name="P:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.PreferredPrefix">
+            <summary>
+            Gets or sets the prefix to use when writing xml.
+            </summary>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadMetadata(System.Xml.XmlReader)">
+            <summary>
+            Read metadata and create the corresponding <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/>.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> used to read metadata</param>
+            <returns><see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/></returns>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlReadException">if error occurs when reading metadata</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadEntityDescriptor(System.Xml.XmlReader)">
+            <summary>
+            Read EntityDescriptor element in xml.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> used to read entity descriptor</param>
+            <returns><see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/></returns>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlReadException">if error occurs when reading entity descriptor</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadKeyDescriptorForSigning(System.Xml.XmlReader)">
+            <summary>
+            Read KeyDescriptor element in xml.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> used to read key descriptor</param>
+            <returns><see cref="T:Microsoft.IdentityModel.Xml.KeyInfo"/></returns>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlReadException">if error occurs when reading key descriptor</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadSecurityTokenServiceTypeRoleDescriptor(System.Xml.XmlReader)">
+            <summary>
+            Read RoleDescriptor element in xml.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> used to read security token service type role descriptor</param>
+            <returns><see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.SecurityTokenServiceTypeRoleDescriptor"/></returns>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlReadException">if error occurs when reading role descriptor</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadPassiveRequestorEndpoint(System.Xml.XmlReader)">
+            <summary>
+            Read fed:PassiveRequestorEndpoint element in xml.
+            </summary>
+            <param name="reader"><see cref="T:System.Xml.XmlReader"/> used to read PassiveRequestorEndpoint</param>
+            <returns>token endpoint string</returns>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlReadException">if error occurs when reading PassiveRequestorEndpoint</exception>
+        </member>
+        <member name="M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.WriteMetadata(System.Xml.XmlWriter,Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration)">
+            <summary>
+            Write the content in configuration into writer.
+            </summary>
+            <param name="writer">The <see cref="T:System.Xml.XmlWriter"/> used to write the configuration content.</param>
+            <param name="configuration">The <see cref="T:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration"/> provided.</param>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+            <exception cref="T:System.ArgumentNullException">if <paramref name="configuration"/> is null.</exception>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlWriteException">if <paramref name="configuration"/>.Issuer is null or empty.</exception>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlWriteException">if <paramref name="configuration"/>.TokenEndpoint is null or empty.</exception>
+            <exception cref="T:Microsoft.IdentityModel.Xml.XmlWriteException">if error occurs when writing metadata.</exception>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsAddressing">
+            <summary>
+            Constants for WsTrust.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsAddressing.Elements">
+            <summary>
+            Elements that can be in a WsTrust message
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsPolicy">
+            <summary>
+            Constants for WsPolicy.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants">
+            <summary>
+            Constants for WsTrust.
+            Attributes and Elements are almost the same across all versions 2005, 1.3, 1.4
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants.Elements">
+            <summary>
+            Elements that can be in a WsTrust message
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants.Namespaces">
+            <summary>
+            Namespaces that can be in a WsTrust message
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants_1_3">
+            <summary>
+            Constants for WsTrust 1.3
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants_1_4">
+            <summary>
+            Constants for WsTrust 1.4
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsTrustConstants_2005">
+            <summary>
+            Constants for WsTrust 2005
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsUtility">
+            <summary>
+            Constants for WsAddressing.
+            </summary>
+        </member>
+        <member name="T:Microsoft.IdentityModel.Xml.WsUtility.Elements">
+            <summary>
+            Elements that are in the WsAddressing ns
+            </summary>
+        </member>
+    </members>
+</doc>
