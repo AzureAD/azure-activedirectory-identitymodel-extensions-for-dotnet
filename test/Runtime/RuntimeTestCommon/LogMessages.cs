@@ -12,6 +12,6 @@ namespace RuntimeTestCommon
     internal static class LogMessages
     {
         internal const string PERF10000 = "PERF10000: Certificate with thumbprint: '{0}' could not be found in certificate store with name '{1}' and location '{2}'.";
-        internal const string PERF10001 = "PERF10001: {0} cannot be less than {1}.";
+        //internal const string PERF10001 = "PERF10001: {0} cannot be less than {1}.";
     }
 }
