@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Exp))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Expires)));
 
-                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(tokenDescriptor.Expires.Value).ToString();
+                payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(tokenDescriptor.Expires.Value);
             }
 
             if (tokenDescriptor.Issuer != null)
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Iat))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.IssuedAt)));
 
-                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(tokenDescriptor.IssuedAt.Value).ToString();
+                payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(tokenDescriptor.IssuedAt.Value);
             }
 
             if (tokenDescriptor.NotBefore.HasValue)
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Nbf))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.NotBefore)));
 
-                payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value).ToString();
+                payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
             }
 
             if (!payload.Any())
@@ -252,13 +252,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 var now = DateTime.UtcNow;
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, out _))
-                    payload.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(now + TimeSpan.FromMinutes(TokenLifetimeInMinutes)).ToString());
+                    payload.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(now + TimeSpan.FromMinutes(TokenLifetimeInMinutes)));
 
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, out _))
-                    payload.Add(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(now).ToString());
+                    payload.Add(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(now));
 
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out _))
-                    payload.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(now).ToString());
+                    payload.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(now));
             }
        
             var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload.ToString(Formatting.None)));
