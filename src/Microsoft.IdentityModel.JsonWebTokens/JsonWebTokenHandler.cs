@@ -250,15 +250,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (SetDefaultTimesOnTokenCreation)
             {
-                var now = DateTime.UtcNow;
+                var now = EpochTime.GetIntDate(DateTime.UtcNow);
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, out _))
-                    payload.Add(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(now + TimeSpan.FromMinutes(TokenLifetimeInMinutes)));
+                    payload.Add(JwtRegisteredClaimNames.Exp, now + TimeSpan.FromMinutes(TokenLifetimeInMinutes).TotalSeconds);
 
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, out _))
-                    payload.Add(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(now));
+                    payload.Add(JwtRegisteredClaimNames.Iat, now);
 
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out _))
-                    payload.Add(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(now));
+                    payload.Add(JwtRegisteredClaimNames.Nbf, now);
             }
        
             var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload.ToString(Formatting.None)));
