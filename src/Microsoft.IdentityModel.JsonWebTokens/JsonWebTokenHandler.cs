@@ -279,20 +279,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateTokenPrivate(JObject.Parse(payload), signingCredentials, encryptingCredentials, compressionAlgorithm);
         }
 
-        private string CreateTokenPrivate(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string algorithm)
+        private string CreateTokenPrivate(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
         {
             var rawHeader = string.Empty;
             if (signingCredentials != null && !JsonWebTokenManager.KeyToHeaderCache.TryGetValue(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), out rawHeader))
             {
-                    var header = new JObject
+                var header = new JObject
                     {
                         { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm },
                         { JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId },
                         { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
                     };
 
-                    if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
-                        header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
+                if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
+                    header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
                 rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                 JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var rawSignature = signingCredentials == null ? string.Empty : JwtTokenUtilities.CreateEncodedSignature(message, signingCredentials);
 
             if (encryptingCredentials != null)
-                return EncryptTokenPrivate(message + "." + rawSignature, encryptingCredentials, algorithm);
+                return EncryptTokenPrivate(message + "." + rawSignature, encryptingCredentials, compressionAlgorithm);
             else
                 return message + "." + rawSignature;
         }
@@ -333,25 +333,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Compress a JWT token string.
         /// </summary>
         /// <param name="token"></param>
-        /// <param name="algorithm"></param>
-        /// <exception cref="ArgumentNullException">if 'token' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'algorithm' is null.</exception>
+        /// <param name="compressionAlgorithm"></param>
+        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="compressionAlgorithm"/> is null.</exception>
         /// <exception cref="NotSupportedException">if the compression algorithm is not supported.</exception>
         /// <returns>Compressed JWT token bytes.</returns>
-        private byte[] CompressToken(string token, string algorithm)
+        private byte[] CompressToken(string token, string compressionAlgorithm)
         {
             if (token == null)
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
-            if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+            if (string.IsNullOrEmpty(compressionAlgorithm))
+                throw LogHelper.LogArgumentNullException(nameof(compressionAlgorithm));
 
-            if (!CompressionProviderFactory.Default.IsSupportedAlgorithm(algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10682, algorithm)));
+            if (!CompressionProviderFactory.Default.IsSupportedAlgorithm(compressionAlgorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10682, compressionAlgorithm)));
 
-            var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm);
+            var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(compressionAlgorithm);
 
-            return compressionProvider.Compress(Encoding.UTF8.GetBytes(token)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, algorithm)));
+            return compressionProvider.Compress(Encoding.UTF8.GetBytes(token)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm)));
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenCompressionFailedException">if compression using 'algorithm' fails.</exception>
+        /// <exception cref="SecurityTokenCompressionFailedException">if compression using <paramref name="algorithm"/> fails.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
         public string EncryptToken(string innerJwt, EncryptingCredentials encryptingCredentials, string algorithm)
@@ -559,7 +559,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return EncryptTokenPrivate(innerJwt, encryptingCredentials, algorithm);
         }
 
-        private string EncryptTokenPrivate(string innerJwt, EncryptingCredentials encryptingCredentials, string algorithm)
+        private string EncryptTokenPrivate(string innerJwt, EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
         {
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
@@ -583,8 +583,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
                     header.Add(JwtHeaderParameterNames.Kid, encryptingCredentials.Key.KeyId);
 
-                if (!string.IsNullOrEmpty(algorithm))
-                    header.Add(JwtHeaderParameterNames.Zip, algorithm);
+                if (!string.IsNullOrEmpty(compressionAlgorithm))
+                    header.Add(JwtHeaderParameterNames.Zip, compressionAlgorithm);
 
                 header.Add(JwtHeaderParameterNames.Typ, JwtConstants.HeaderType);
 
@@ -593,15 +593,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
 
                 byte[] plainText;
-                if (!string.IsNullOrEmpty(algorithm))
+                if (!string.IsNullOrEmpty(compressionAlgorithm))
                 {
                     try
                     {
-                        plainText = CompressToken(innerJwt, algorithm);
+                        plainText = CompressToken(innerJwt, compressionAlgorithm);
                     }
                     catch (Exception ex)
                     {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, algorithm), ex));
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
                     }
                 }
                 else
@@ -655,21 +655,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
                     header.Add(JwtHeaderParameterNames.Kid, encryptingCredentials.Key.KeyId);
 
-                if (!string.IsNullOrEmpty(algorithm))
-                    header.Add(JwtHeaderParameterNames.Zip, algorithm);
+                if (!string.IsNullOrEmpty(compressionAlgorithm))
+                    header.Add(JwtHeaderParameterNames.Zip, compressionAlgorithm);
 
                 header.Add(JwtHeaderParameterNames.Typ, JwtConstants.HeaderType);
 
                 byte[] plainText;
-                if (!string.IsNullOrEmpty(algorithm))
+                if (!string.IsNullOrEmpty(compressionAlgorithm))
                 {
                     try
                     {
-                        plainText = CompressToken(innerJwt, algorithm);
+                        plainText = CompressToken(innerJwt, compressionAlgorithm);
                     }
                     catch (Exception ex)
                     {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, algorithm), ex));
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
                     }
                 }
                 else
