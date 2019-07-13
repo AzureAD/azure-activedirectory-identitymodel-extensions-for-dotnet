@@ -32,6 +32,10 @@
     {
       "file": "OpenIdConnectParameterNames.cs",
       "_justification": "One of the constants has value: 'client_secret' which triggers a CredScan issue."
+    },
+    {
+      "file": "ReferenceTokens.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
     }
   ]
 }
