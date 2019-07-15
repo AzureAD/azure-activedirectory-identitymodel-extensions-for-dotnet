@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -117,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the compression algorithm is supported, false otherwise.</returns>
         public bool IsSupportedAlgorithm(string algorithm)
         {
-            return Algorithm.Equals(algorithm);
+            return Algorithm.Equals(algorithm, StringComparison.Ordinal);
         }
     }
 }

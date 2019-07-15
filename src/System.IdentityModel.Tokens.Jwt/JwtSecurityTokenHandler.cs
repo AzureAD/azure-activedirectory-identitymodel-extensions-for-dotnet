@@ -1439,7 +1439,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (keys == null)
                 keys = GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
+            if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
