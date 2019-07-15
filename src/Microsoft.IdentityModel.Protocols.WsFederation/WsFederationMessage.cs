@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // find first <RequestedSecurityToken>
-            var tokenStartIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken);
+            var tokenStartIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, StringComparison.Ordinal);
             if (tokenStartIndex == -1)
             {
                 LogHelper.LogWarning(LogMessages.IDX22904);
@@ -251,16 +251,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             string token = null;
             using (var sr = new StringReader(Wresult))
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45 || NET451
-                settings.XmlResolver = null;
-#endif
 
 #if NETSTANDARD1_4
                 var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max);
 #else
                 var xmlReader = new XmlTextReader(sr);
 #endif
+                if (xmlReader.Settings != null)
+                    xmlReader.Settings.DtdProcessing = DtdProcessing.Prohibit;
 
                 // Read StartElement <RequestSecurityTokenResponseCollection> this is possible for wstrust 1.3 and 1.4
                 if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))

@@ -302,12 +302,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
-            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature))
+            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256, StringComparison.Ordinal) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature, StringComparison.Ordinal) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384, StringComparison.Ordinal) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature, StringComparison.Ordinal) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512, StringComparison.Ordinal) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature, StringComparison.Ordinal))
             {
                 RSASignaturePadding = RSASignaturePadding.Pss;
             }
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens
             // they will use one of these two targets Net45 or Net451, but the type is RSACng.
             // The 'lightup' code will bind to the correct operators.
 #if NET45 || NET451
-            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName, StringComparison.InvariantCulture) && IsRsaCngSupported())
+            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName, StringComparison.Ordinal) && IsRsaCngSupported())
             {
                 _lightUpHashAlgorithmName = GetLightUpHashAlgorithmName();
                 SignatureFunction = Pkcs1SignData;
@@ -358,7 +358,7 @@ namespace Microsoft.IdentityModel.Tokens
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
             // Here we can use RSA straight up.
-            _rsaEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
+            _rsaEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
                         : RSAEncryptionPadding.Pkcs1;
             RSA = rsa;

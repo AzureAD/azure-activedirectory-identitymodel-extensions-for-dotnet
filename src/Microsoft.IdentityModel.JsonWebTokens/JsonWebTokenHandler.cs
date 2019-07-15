@@ -663,7 +663,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys == null)
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg))
+            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
