@@ -1,0 +1,150 @@
+Begin evaluating template '/.azure-pipelines.yml'
+Begin transform: trigger
+Evaluating: value
+Result: Object
+End transform: trigger
+Begin transform: step
+Evaluating: transform('stepToTaskBaseProperties', value)
+Evaluating: arg0
+Result: Object
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('script', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: False
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('displayName', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: True
+Evaluating: pair['key']
+Result: 'displayName'
+Evaluating: pair['value']
+Result: 'Install dependencies'
+Result: Object
+Evaluating: value['script']
+Result: 'npm ci
+'
+Evaluating: value['failOnStderr']
+Expanded: Null
+Result: False
+Evaluating: value['workingDirectory']
+Expanded: Null
+Result: False
+End transform: step
+Begin transform: step
+Evaluating: transform('stepToTaskBaseProperties', value)
+Evaluating: arg0
+Result: Object
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('script', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: False
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('displayName', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: True
+Evaluating: pair['key']
+Result: 'displayName'
+Evaluating: pair['value']
+Result: 'Compile client'
+Result: Object
+Evaluating: value['script']
+Result: 'npm run compile:client
+'
+Evaluating: value['failOnStderr']
+Expanded: Null
+Result: False
+Evaluating: value['workingDirectory']
+Expanded: Null
+Result: False
+End transform: step
+Begin transform: step
+Evaluating: transform('stepToTaskBaseProperties', value)
+Evaluating: arg0
+Result: Object
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('script', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: False
+Evaluating: in(pair['key'], 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Expanded: in('displayName', 'condition', 'continueOnError', 'displayName', 'enabled', 'env', 'name', 'timeoutInMinutes')
+Result: True
+Evaluating: pair['key']
+Result: 'displayName'
+Evaluating: pair['value']
+Result: 'Compile server'
+Result: Object
+Evaluating: value['script']
+Result: 'npm run compile:server
+'
+Evaluating: value['failOnStderr']
+Expanded: Null
+Result: False
+Evaluating: value['workingDirectory']
+Expanded: Null
+Result: False
+End transform: step
+Begin transform: pipeline
+Evaluating: value
+Result: Object
+Evaluating: notIn(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: notIn('trigger', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: True
+Evaluating: pair['key']
+Result: 'trigger'
+Evaluating: pair['value']
+Result: Object
+Evaluating: notIn(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: notIn('pool', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: False
+Evaluating: notIn(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: notIn('steps', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: False
+Evaluating: value
+Result: Object
+Evaluating: in(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: in('trigger', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: False
+Evaluating: in(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: in('pool', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: True
+Evaluating: pair['key']
+Result: 'pool'
+Evaluating: pair['value']
+Result: Object
+Evaluating: in(pair['key'], 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Expanded: in('steps', 'strategy', 'continueOnError', 'pool', 'container', 'services', 'workspace', 'steps')
+Result: True
+Evaluating: pair['key']
+Result: 'steps'
+Evaluating: pair['value']
+Result: Object
+End transform: pipeline
+Finished evaluating template '/.azure-pipelines.yml'
+********************************************************************************
+Template and static variable resolution complete. Final runtime YAML document:
+trigger:
+  branches:
+    include:
+    - master
+stages:
+- stage: __default
+  jobs:
+  - job: Job
+    pool:
+      vmImage: Ubuntu-16.04
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: 10.15.1
+      displayName: Use Node.js 10.15.1
+    - task: CmdLine@2
+      displayName: Install dependencies
+      inputs:
+        script: >
+          npm ci
+    - task: CmdLine@2
+      displayName: Compile client
+      inputs:
+        script: >
+          npm run compile:client
+    - task: CmdLine@2
+      displayName: Compile server
+      inputs:
+        script: >
+          npm run compile:server
+
