@@ -395,17 +395,35 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty != null)
+                try
                 {
-                    if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                    if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey convertedSecurityKey))
                     {
-                        typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+                        if (convertedSecurityKey is AsymmetricSecurityKey)
+                        {
+                            typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+                        }
+                        else if (convertedSecurityKey is SymmetricSecurityKey)
+                        {
+                            typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                            createAsymmetric = false;
+                        }
                     }
-                    else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                    // this code is simply to maintain the same exception thrown
+                    else
                     {
-                        typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
-                        createAsymmetric = false;
+                        if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA || jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
+                            typeofSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
+                        else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
+                        {
+                            typeofSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
+                            createAsymmetric = false;
+                        }
                     }
+                }
+                catch(Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10694, key, ex), ex));
                 }
             }
             else if (key is SymmetricSecurityKey)

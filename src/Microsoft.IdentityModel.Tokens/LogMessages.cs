@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens
         // public const string IDX10681 = "IDX10681:";
         public const string IDX10682 = "IDX10682: Compression algorithm '{0}' is not supported.";
         // public const string IDX10683 = "IDX10683:";
-        public const string IDX10684 = "IDX10684: Unable to create a AsymmetricAdapter, Algorithm: '{0}', Key: '{1}'.";
+        public const string IDX10684 = "IDX10684: Unable to convert the JsonWebKey to an AsymmetricSecurityKey. Algorithm: '{0}', Key: '{1}'.";
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
         public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 or NET451 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
@@ -190,12 +190,14 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10691 = "IDX10691:"
         public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on .NET 4.5 and .NET 4.5.1 targets. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
+        public const string IDX10694 = "IDX10694: JsonWebKeyConverter threw attempting to convert JsonWebKey: '{0}'. Exception: '{1}'.";
 
         // security keys
         public const string IDX10700 = "IDX10700: {0} is unable to use 'rsaParameters'. {1} is null.";
         //public const string IDX10701 = "IDX10701:"
         //public const string IDX10702 = "IDX10702:"
         public const string IDX10703 = "IDX10703: Cannot create a '{0}', key length is zero.";
+        public const string IDX10704 = "IDX10704: Cannot verify the key size. The SecurityKey is not or cannot be converted to an AsymmetricSecuritKey. SecurityKey: '{0}'.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
