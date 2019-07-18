@@ -250,7 +250,6 @@ namespace Microsoft.IdentityModel.Tokens
                     if (_disposeRsa)
                     {
                         _rsa.Dispose();
-
                     }
                 }
             }

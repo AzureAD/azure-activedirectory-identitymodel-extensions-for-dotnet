@@ -311,6 +311,116 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
+
+        [Theory, MemberData(nameof(ValidateAsymmetricKeySizeTheoryData))]
+        public void VerifyAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.VerifyAsymmetricKeySize", theoryData);
+
+            try
+            {
+                theoryData.AsymmetricSignatureProvider.ValidateAsymmetricSecurityKeySize(theoryData.SecurityKey, theoryData.Algorithm, theoryData.WillCreateSignatures);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<AsymmetricSignatureProviderTheoryData> ValidateAsymmetricKeySizeTheoryData
+        {
+            get => new TheoryData<AsymmetricSignatureProviderTheoryData>
+            {
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                    SecurityKey = KeyingMaterial.RsaSecurityKey_1024,
+                    TestId = nameof(KeyingMaterial.RsaSecurityKey_1024),
+                    WillCreateSignatures = true
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    SecurityKey = KeyingMaterial.RsaSecurityKey_1024_Public,
+                    TestId = nameof(KeyingMaterial.RsaSecurityKey_1024_Public),
+                    WillCreateSignatures = false
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10630:"),
+                    SecurityKey = KeyingMaterial.JsonWebKeyRsa_1024,
+                    TestId = nameof(KeyingMaterial.JsonWebKeyRsa_1024),
+                    WillCreateSignatures = true
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    SecurityKey = KeyingMaterial.JsonWebKeyRsa_1024_Public,
+                    TestId = nameof(KeyingMaterial.JsonWebKeyRsa_1024_Public),
+                    WillCreateSignatures = false
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    SecurityKey = KeyingMaterial.JsonWebKeyRsa_2048,
+                    TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048),
+                    WillCreateSignatures = true
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    SecurityKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
+                    TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public),
+                    WillCreateSignatures = false
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10704:"),
+                    SecurityKey = KeyingMaterial.SymmetricSecurityKey2_1024,
+                    TestId = nameof(KeyingMaterial.SymmetricSecurityKey2_1024),
+                    WillCreateSignatures = false
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.RsaSha256,
+                    ExpectedException = ExpectedException.NotSupportedException("IDX10704:"),
+                    SecurityKey = KeyingMaterial.JsonWebKeySymmetric128,
+                    TestId = nameof(KeyingMaterial.JsonWebKeySymmetric128),
+                    WillCreateSignatures = false
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.EcdsaSha256,
+                    SecurityKey = KeyingMaterial.Ecdsa256Key,
+                    TestId = nameof(KeyingMaterial.Ecdsa256Key),
+                    WillCreateSignatures = true
+                },
+                new AsymmetricSignatureProviderTheoryData
+                {
+                    Algorithm = SecurityAlgorithms.EcdsaSha256,
+                    SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
+                    TestId = nameof(KeyingMaterial.Ecdsa256Key_Public),
+                    WillCreateSignatures = false
+                }
+            };
+        }
+    }
+
+    public class AsymmetricSignatureProviderTheoryData : TheoryDataBase
+    {
+        public string Algorithm { get; set; }
+
+        public AsymmetricSignatureProvider AsymmetricSignatureProvider { get; set; } = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256);
+
+        public SecurityKey SecurityKey { get; set; }
+
+        public bool WillCreateSignatures { get; set; }
     }
 }
 

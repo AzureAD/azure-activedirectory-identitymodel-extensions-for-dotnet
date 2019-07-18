@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa4", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa5", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.JsonWebKeyP384, KEY.JsonWebKeyP384_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa6", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521, KEY.JsonWebKeyP521_Public),
-                new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_BadPrivateKey, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
+                new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_Invalid_D, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
                 new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
                 new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
                 new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
@@ -228,9 +228,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // .Net Core throws some funky inner exception that GetType() reports as: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
                 new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, new EE(typeof(Exception)){IgnoreExceptionType = true}),
 #endif
-                // BadKeys
-                new SignatureProviderTheoryData("BadKeys1", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongX_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),
-                new SignatureProviderTheoryData("BadKeys2", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongY_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),
+                // Invalid JsonWebKeyComponents
+                new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_X", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_X, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
+                new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_Y", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_Y, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
+                new SignatureProviderTheoryData("JsonWebKeyP521_Invalid_D", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Invalid_D, KEY.JsonWebKeyP521_Public, EE.NotSupportedException()),
             };
         }
 

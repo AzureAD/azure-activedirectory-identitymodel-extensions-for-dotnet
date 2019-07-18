@@ -105,46 +105,57 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                return new TheoryData<JsonWebKeyConverterTheoryData>()
+                var theoryData = new TheoryData<JsonWebKeyConverterTheoryData>();
+
+                // need to adjust the kid to match as the keys have different id's.
+                var securityKey = KeyingMaterial.RsaSecurityKey_2048;
+                securityKey.KeyId = KeyingMaterial.JsonWebKeyRsa_2048.KeyId;
+                theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        First = true,
-                        SecurityKey = KeyingMaterial.RsaSecurityKey_2048,
-                        JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048,
-                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
-                    },
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        SecurityKey = KeyingMaterial.RsaSecurityKey_2048_Public,
-                        JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
-                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048_Public)
-                    },
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        SecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_64,
-                        JsonWebKey = KeyingMaterial.JsonWebKeySymmetric64,
-                        TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_64)
-                    },
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
-                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_With_KeyId,
-                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId)
-                    },
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        SecurityKey = KeyingMaterial.DefaultX509Key_2048,
-                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
-                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048)
-                    },
-                    new JsonWebKeyConverterTheoryData
-                    {
-                        SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
-                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
-                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
-                    },
-                };
+                    First = true,
+                    SecurityKey = securityKey,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048,
+                    TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                });
+
+                securityKey = KeyingMaterial.RsaSecurityKey_2048_Public;
+                securityKey.KeyId = KeyingMaterial.JsonWebKeyRsa_2048_Public.KeyId;
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = securityKey,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
+                    TestId = nameof(KeyingMaterial.RsaSecurityKey_2048_Public)
+                });
+
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_64,
+                    JsonWebKey = KeyingMaterial.JsonWebKeySymmetric64,
+                    TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_64)
+                });
+
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.DefaultX509Key_2048_With_KeyId,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_With_KeyId,
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_With_KeyId)
+                });
+
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.DefaultX509Key_2048,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048)
+                });
+
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
+                    JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
+                });
+
+                return theoryData;
             }
         }
     }

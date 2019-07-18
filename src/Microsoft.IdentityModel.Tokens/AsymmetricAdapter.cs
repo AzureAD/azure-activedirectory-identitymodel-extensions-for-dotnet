@@ -82,52 +82,9 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
+            : this(key, algorithm, hashAlgorithm, requirePrivateKey)
         {
-            HashAlgorithm = hashAlgorithm;
             HashAlgorithmName = hashAlgorithmName;
-
-            if (key is RsaSecurityKey rsaKey)
-            {
-                if (rsaKey.Rsa != null)
-                    Initialize(rsaKey.Rsa, algorithm);
-                else
-                {
-                    var rsa = RSA.Create();
-                    rsa.ImportParameters(rsaKey.Parameters);
-                    Initialize(rsa, algorithm);
-                    _disposeCryptoOperators = true;
-                }
-            }
-            else if (key is X509SecurityKey x509Key)
-            {
-                if (requirePrivateKey)
-                    Initialize(x509Key.Certificate.GetRSAPrivateKey(), algorithm);
-                else
-                    Initialize(x509Key.Certificate.GetRSAPublicKey(), algorithm);
-            }
-            else if (key is JsonWebKey rsaWebKey && rsaWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-            {
-                var rsa = RSA.Create();
-                rsa.ImportParameters(rsaWebKey.CreateRsaParameters());
-                Initialize(rsa, algorithm);
-                _disposeCryptoOperators = true;
-            }
-            else if (key is JsonWebKey ecdsaWebKey && ecdsaWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-            {
-                var ecdsaAdapter = ECDsaAdapter.Instance;
-                ECDsa = ecdsaAdapter.CreateECDsa(ecdsaWebKey, requirePrivateKey);
-                SignatureFunction = SignWithECDsa;
-                VerifyFunction = VerifyWithECDsa;
-                _disposeCryptoOperators = true;
-            }
-            else if (key is ECDsaSecurityKey ecdKey)
-            {
-                ECDsa = ecdKey.ECDsa;
-                SignatureFunction = SignWithECDsa;
-                VerifyFunction = VerifyWithECDsa;
-            }
-            else
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
         }
 #endif
 
@@ -146,56 +103,29 @@ namespace Microsoft.IdentityModel.Tokens
             // If we use the RsaParameters, we create a new RSA object and will need to dispose.
             if (key is RsaSecurityKey rsaKey)
             {
-                if (rsaKey.Rsa != null)
-                    Initialize(rsaKey.Rsa, algorithm);
-                else
-                {
-                    var rsa = RSA.Create();
-                    rsa.ImportParameters(rsaKey.Parameters);
-                    Initialize(rsa, algorithm);
-                    _disposeCryptoOperators = true;
-                }
+                InitializeUsingRsaSecurityKey(rsaKey, algorithm);
             }
             else if (key is X509SecurityKey x509Key)
             {
-#if NET45 || NET451
-                if (requirePrivateKey)
-                    Initialize(x509Key.Certificate.PrivateKey as RSA, algorithm);
-                else
-                    Initialize(x509Key.Certificate.PublicKey.Key as RSA, algorithm);
-#endif
-
-#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
-                if (requirePrivateKey)
-                    Initialize(x509Key.Certificate.GetRSAPrivateKey(), algorithm);
-                else
-                    Initialize(x509Key.Certificate.GetRSAPublicKey(), algorithm);
-#endif
+                InitializeUsingX509SecurityKey(x509Key, algorithm, requirePrivateKey);
             }
             else if (key is JsonWebKey jsonWebKey)
             {
-                if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
+                if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey securityKey))
                 {
-                    // RSA.Create() can return RSACrytpoServiceProvider OR RSACng depending on what
-                    // .net framework is installed
-                    var rsa = RSA.Create();
-                    rsa.ImportParameters(jsonWebKey.CreateRsaParameters());
-                    Initialize(rsa, algorithm);
-                    _disposeCryptoOperators = true;
+                    if (securityKey is RsaSecurityKey rsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingRsaSecurityKey(rsaSecurityKeyFromJsonWebKey, algorithm);
+                    else if (securityKey is X509SecurityKey x509SecurityKeyFromJsonWebKey)
+                        InitializeUsingX509SecurityKey(x509SecurityKeyFromJsonWebKey, algorithm, requirePrivateKey);
+                    else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
+                        InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
+                    else
+                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
                 }
-                else if (jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve)
-                {
-                    ECDsa = ECDsaAdapter.Instance.CreateECDsa(jsonWebKey, requirePrivateKey);
-                    SignatureFunction = SignWithECDsa;
-                    VerifyFunction = VerifyWithECDsa;
-                    _disposeCryptoOperators = true;
-                }
-                else
-                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
             }
             else if (key is ECDsaSecurityKey ecdsaKey)
             {
-                ECDsa = ecdsaKey.ECDsa;
+                ECDsaSecurityKey = ecdsaKey;
                 SignatureFunction = SignWithECDsa;
                 VerifyFunction = VerifyWithECDsa;
             }
@@ -203,7 +133,35 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
         }
 
-        private string Algorithm { get; set; }
+        private void InitializeUsingRsaSecurityKey(RsaSecurityKey rsaSecurityKey, string algorithm)
+        {
+            if (rsaSecurityKey.Rsa != null)
+            {
+                InitializeUsingRsa(rsaSecurityKey.Rsa, algorithm);
+            }
+            else
+            {
+                var rsa = RSA.Create();
+                rsa.ImportParameters(rsaSecurityKey.Parameters);
+                InitializeUsingRsa(rsa, algorithm);
+                _disposeCryptoOperators = true;
+            }
+        }
+
+        private void InitializeUsingX509SecurityKey(X509SecurityKey x509SecurityKey, string algorithm, bool requirePrivateKey)
+        {
+            if (requirePrivateKey)
+                InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
+            else
+                InitializeUsingRsa(x509SecurityKey.PublicKey as RSA, algorithm);
+        }
+
+        private void InitializeUsingEcdsaSecurityKey(ECDsaSecurityKey ecdsaSecurityKey)
+        {
+            ECDsaSecurityKey = ecdsaSecurityKey;
+            SignatureFunction = SignWithECDsa;
+            VerifyFunction = VerifyWithECDsa;
+        }
 
         internal byte[] Decrypt(byte[] data)
         {
@@ -239,14 +197,13 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (_disposeCryptoOperators)
                     {
-                        if (ECDsa != null)
-                            ECDsa.Dispose();
-
+                        if (ECDsaSecurityKey != null)
+                            ECDsaSecurityKey.ECDsa.Dispose();
 #if DESKTOP
+                        // when investigating issue 1240, should Dispose always be called?
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
 #endif
-
                         if (RSA != null)
                             RSA.Dispose();
                     }
@@ -263,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             GC.SuppressFinalize(this);
         }
 
-        private ECDsa ECDsa { get; set; }
+        private ECDsaSecurityKey ECDsaSecurityKey { get; set; }
 
         internal byte[] Encrypt(byte[] data)
         {
@@ -298,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
         private RSASignaturePadding RSASignaturePadding { get; set; }
 #endif
 
-        private void Initialize(RSA rsa, string algorithm)
+        private void InitializeUsingRsa(RSA rsa, string algorithm)
         {
 
 #if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
@@ -332,6 +289,8 @@ namespace Microsoft.IdentityModel.Tokens
                 RsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
                 SignatureFunction = SignWithRsaCryptoServiceProviderProxy;
                 VerifyFunction = VerifyWithRsaCryptoServiceProviderProxy;
+                // when investigating issue 1240, should _disposeCryptoOperators be set to true?
+                //_disposeCryptoOperators = true;
                 return;
             }
 #endif
@@ -386,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             lock (_signEcdsaLock)
             {
-                return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
+                return ECDsaSecurityKey.ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
             }
         }
 
@@ -420,7 +379,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             lock (_verifyEcdsaLock)
             {
-                return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+                return ECDsaSecurityKey.ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
             }
         }
 
