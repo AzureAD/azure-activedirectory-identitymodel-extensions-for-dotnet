@@ -266,9 +266,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -295,9 +295,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -368,9 +368,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.GivenName, "Bob" },
                             { JwtRegisteredClaimNames.Iss, "Issuer" },
                             { JwtRegisteredClaimNames.Aud, "Audience" },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -569,9 +569,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -596,9 +596,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString() },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -663,9 +663,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.GivenName, "Bob" },
                             { JwtRegisteredClaimNames.Iss, "Issuer" },
                             { JwtRegisteredClaimNames.Aud, "Audience" },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")).ToString() },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")).ToString() },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
