@@ -46,6 +46,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
+        /// Gets the Base64Url encoded string representation of the following JWT header: 
+        /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
+        /// </summary>
+        /// <return>The Base64Url encoded string representation of the unsigned JWT header.</return>
+        public const string Base64UrlEncodedUnsignedJWSHeader = "eyJhbGciOiJub25lIn0";
+
+        /// <summary>
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
         /// <return>The type of <see cref="JsonWebToken"/></return>
@@ -281,29 +288,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private string CreateTokenPrivate(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
         {
-            var rawHeader = string.Empty;
+            var rawHeader = Base64UrlEncodedUnsignedJWSHeader;
             if (signingCredentials != null && !JsonWebTokenManager.KeyToHeaderCache.TryGetValue(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), out rawHeader))
             {
                 var header = new JObject
-                    {
-                        { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm },
-                        { JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId },
-                        { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
-                    };
+                {
+                    { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm },
+                    { JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId },
+                    { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
+                };
 
                 if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
                     header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
                 rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                 JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
-            }
-            else if (signingCredentials == null)
-            {
-                var header = new JObject
-                {
-                    { JwtHeaderParameterNames.Alg, SecurityAlgorithms.None }
-                };
-                rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
             }
 
             if (SetDefaultTimesOnTokenCreation)

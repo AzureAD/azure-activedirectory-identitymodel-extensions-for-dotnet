@@ -45,6 +45,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
+
+        // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
+        [Fact]
+        public void Base64UrlEncodedUnsignedJwtHeader()
+        {
+            TestUtilities.WriteHeader($"{this}.Base64UrlEncodedUnsignedJwtHeader");
+            var context = new CompareContext();
+
+            var header = new JObject
+            {
+                { JwtHeaderParameterNames.Alg, SecurityAlgorithms.None }
+            };
+            var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
+
+            if (!JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader.Equals(rawHeader))
+                context.AddDiff("!JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader.Equals(rawHeader)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(SegmentTheoryData))]
         public void SegmentCanRead(JwtTheoryData theoryData)
         {
@@ -1127,9 +1147,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwt = new JsonWebToken(jwtString);
 
             // DateTime.MinValue is returned if the value of a DateTime claim is not found in the payload
-            Assert.NotEqual(DateTime.MinValue, jwt.IssuedAt);
-            Assert.NotEqual(DateTime.MinValue, jwt.ValidFrom);
-            Assert.NotEqual(DateTime.MinValue, jwt.ValidTo);
+            if (DateTime.MinValue.Equals(jwt.IssuedAt))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.IssuedAt). Value for the 'iat' claim not found in the payload.");
+            if (DateTime.MinValue.Equals(jwt.ValidFrom))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidFrom). Value for the 'nbf' claim not found in the payload.");
+            if (DateTime.MinValue.Equals(jwt.ValidTo))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidTo). Value for the 'exp' claim not found in the payload.");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         // Test checks to make sure that an access token can be successfully validated by the JsonWebTokenHandler.
