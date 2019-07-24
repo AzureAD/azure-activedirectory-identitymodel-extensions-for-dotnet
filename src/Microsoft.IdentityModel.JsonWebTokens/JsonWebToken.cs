@@ -497,7 +497,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
 
-            if (!Payload.TryGetValue(key, out var jTokenValue))
+            if (!Payload.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
 
             if (jTokenValue.Type == JTokenType.Null)
@@ -531,7 +531,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (typeof(T).Equals(typeof(Claim)))
                 return (T)(object)GetClaim(key);
 
-            if (!Payload.TryGetValue(key, out var jTokenValue))
+            if (!Payload.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
 
             T value;
@@ -555,7 +555,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
 
-            if (!Payload.TryGetValue(key, out var jTokenValue))
+            if (!Payload.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
             {
                 value = null;
                 return false;
@@ -601,7 +601,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return foundClaim;
             }
 
-            if (!Payload.TryGetValue(key, out var jTokenValue))
+            if (!Payload.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
             {
                 value = default(T);
                 return false;
@@ -629,7 +629,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (!Header.TryGetValue(key, out var jTokenValue))
+            if (!Header.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14303, key)));
 
             T value;
@@ -657,7 +657,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return false;
             }
 
-            if (!Header.TryGetValue(key, out var jTokenValue))
+            if (!Header.TryGetValue(key, StringComparison.Ordinal, out var jTokenValue))
             {
                 value = default(T);
                 return false;

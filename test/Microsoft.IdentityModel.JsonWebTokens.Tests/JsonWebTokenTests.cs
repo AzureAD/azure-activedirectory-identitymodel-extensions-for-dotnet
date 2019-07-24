@@ -144,6 +144,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
             }
 
+            try // Try to retrieve a claim value using an uppercase version of an existing key.
+            {
+                jsonWebToken.GetClaim("STRING");
+                context.AddDiff("jsonWebToken.GetClaim(\"STRING\") was successful, but claim types are case sensitive.");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
+            }
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -157,6 +167,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             // Tries to retrieve a value that does not exist in the payload.
             var success = jsonWebToken.TryGetClaim("doesnotexist", out Claim doesNotExist);
+            IdentityComparer.AreEqual(null, doesNotExist, context);
+            IdentityComparer.AreEqual(false, success, context);
+
+            // Tries to retrieve a claim value using an uppercase version of an existing key.
+            success = jsonWebToken.TryGetClaim("STRING", out doesNotExist);
             IdentityComparer.AreEqual(null, doesNotExist, context);
             IdentityComparer.AreEqual(false, success, context);
 
@@ -250,6 +265,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
             }
 
+            try // Try to retrieve a claim value using an uppercase version of an existing key.
+            {
+                token.GetHeaderValue<string>("STRING");
+                context.AddDiff("token.GetHeaderValue<string>(\"STRING\") was successful, but claim types are case sensitive.");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
+            }
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -279,6 +304,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
 
+            // Tries to retrieve a claim value using an uppercase version of an existing key.
+            success = token.TryGetHeaderValue("STRING", out string doesNotExist);
+            IdentityComparer.AreEqual(null, doesNotExist, context);
+            IdentityComparer.AreEqual(false, success, context);
+
             success = token.TryGetHeaderValue("float", out float floatingPoint);
             IdentityComparer.AreEqual(42.0, floatingPoint, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -295,8 +325,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(boolean, true, context);
             IdentityComparer.AreEqual(true, success, context);
 
-            success = token.TryGetHeaderValue("doesnotexist", out int doesNotExist);
-            IdentityComparer.AreEqual(0, doesNotExist, context);
+            success = token.TryGetHeaderValue("doesnotexist", out doesNotExist);
+            IdentityComparer.AreEqual(null, doesNotExist, context);
             IdentityComparer.AreEqual(false, success, context);
 
             success = token.TryGetHeaderValue("string", out int cannotConvert);
@@ -358,6 +388,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
             }
 
+            try // Try to retrieve a claim value using an uppercase version of an existing key.
+            {
+                token.GetPayloadValue<string>("STRING");
+                context.AddDiff("token.GetPayloadValue<string>(\"STRING\") was successful, but claim types are case sensitive.");
+            }
+            catch (Exception ex)
+            {
+                ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
+            }
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -387,6 +427,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
 
+            // Tries to retrieve a claim value using an uppercase version of an existing key.
+            success = token.TryGetPayloadValue("STRING", out string doesNotExist);
+            IdentityComparer.AreEqual(null, doesNotExist, context);
+            IdentityComparer.AreEqual(false, success, context);
+
             success = token.TryGetPayloadValue("float", out float floatingPoint);
             IdentityComparer.AreEqual(42.0, floatingPoint, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -403,8 +448,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(boolean, true, context);
             IdentityComparer.AreEqual(true, success, context);
 
-            success = token.TryGetPayloadValue("doesnotexist", out int doesNotExist);
-            IdentityComparer.AreEqual(0, doesNotExist, context);
+            success = token.TryGetPayloadValue("doesnotexist", out doesNotExist);
+            IdentityComparer.AreEqual(null, doesNotExist, context);
             IdentityComparer.AreEqual(false, success, context);
 
             success = token.TryGetPayloadValue("string", out int cannotConvert);
