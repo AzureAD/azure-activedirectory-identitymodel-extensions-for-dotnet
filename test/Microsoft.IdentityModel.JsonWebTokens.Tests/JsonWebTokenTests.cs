@@ -272,7 +272,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             catch (Exception ex)
             {
-                ExpectedException.ArgumentException("IDX14304:").ProcessException(ex, context);
+                ExpectedException.ArgumentException("IDX14303:").ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
