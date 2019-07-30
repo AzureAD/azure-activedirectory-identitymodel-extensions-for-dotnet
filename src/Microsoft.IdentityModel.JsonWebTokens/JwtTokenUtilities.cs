@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>The DateTime representation of a claim.</returns>
         internal static DateTime GetDateTime(string key, JObject payload)
         {
-            if (!payload.TryGetValue(key, out var jToken))
+            if (!payload.TryGetValue(key, StringComparison.Ordinal, out var jToken))
                 return DateTime.MinValue;
 
             return EpochTime.DateTime(Convert.ToInt64(Math.Truncate(Convert.ToDouble(ParseTimeValue(jToken, key), CultureInfo.InvariantCulture))));
