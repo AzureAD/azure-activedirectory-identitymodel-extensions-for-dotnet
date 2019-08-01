@@ -45,6 +45,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
+
+        // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
+        [Fact]
+        public void Base64UrlEncodedUnsignedJwtHeader()
+        {
+            TestUtilities.WriteHeader($"{this}.Base64UrlEncodedUnsignedJwtHeader");
+            var context = new CompareContext();
+
+            var header = new JObject
+            {
+                { JwtHeaderParameterNames.Alg, SecurityAlgorithms.None }
+            };
+            var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
+
+            if (!JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader.Equals(rawHeader))
+                context.AddDiff("!JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader.Equals(rawHeader)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(SegmentTheoryData))]
         public void SegmentCanRead(JwtTheoryData theoryData)
         {
@@ -174,7 +194,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 string jweFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
-                string jweFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials);
+                string jweFromString;
+                if (theoryData.TokenDescriptor.SigningCredentials != null)
+                    jweFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials);
+                else
+                    jweFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.EncryptingCredentials);
 
                 var validationResultFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.ValidateToken(jweFromSecurityTokenDescriptor, theoryData.ValidationParameters);
                 var validationResultFromString = theoryData.JsonWebTokenHandler.ValidateToken(jweFromString, theoryData.ValidationParameters);
@@ -187,7 +211,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
                 // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
-                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
+                if (theoryData.TokenDescriptor.SigningCredentials?.Key is X509SecurityKey x509SecurityKey)
                 {
                     var innerTokenFromSecurityTokenDescriptor = jweTokenFromSecurityTokenDescriptor.InnerToken as JsonWebToken;
                     var innerTokenFromString = jweTokenFromString.InnerToken as JsonWebToken;
@@ -354,7 +378,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new CreateTokenTheoryData
                     {
-                        TestId = "TokenDescriptorSigningCredentialsNull",
+                        TestId = "TokenDescriptorSigningCredentialsNullRequireSignedTokensFalse",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -368,9 +392,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            RequireSignedTokens = false,
                         },
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "TokenDescriptorSigningCredentialsNullRequireSignedTokensTrue",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = null,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                        },
+                        IsValid = false
                     },
                     new CreateTokenTheoryData // Test checks that values in SecurityTokenDescriptor.Payload
                     // are properly replaced with the properties that are explicitly specified on the SecurityTokenDescriptor.
@@ -502,7 +546,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 string jwtFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
-                string jwtFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials);
+                string jwtFromString;
+                if (theoryData.TokenDescriptor.SigningCredentials != null)
+                    jwtFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials);
+                else
+                    jwtFromString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload);
 
                 var tokenValidationResultFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.ValidateToken(jwtFromSecurityTokenDescriptor, theoryData.ValidationParameters);
                 var tokenValidationResultFromString = theoryData.JsonWebTokenHandler.ValidateToken(jwtFromString, theoryData.ValidationParameters);
@@ -515,7 +563,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 // If the signing key used was an x509SecurityKey, make sure that the 'X5t' property was set properly and
                 // that the values of 'X5t' and 'Kid' on the JsonWebToken are equal to each other.
-                if (theoryData.TokenDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
+                if (theoryData.TokenDescriptor.SigningCredentials?.Key is X509SecurityKey x509SecurityKey)
                 {
                     IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.X5t, x509SecurityKey.X5t, context);
                     IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Kid, x509SecurityKey.KeyId, context);
@@ -664,7 +712,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new CreateTokenTheoryData
                     {
-                        TestId = "TokenDescriptorSigningCredentialsNull",
+                        TestId = "TokenDescriptorSigningCredentialsNullRequireSignedTokensFalse",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -676,9 +724,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidIssuer = Default.Issuer,
+                            RequireSignedTokens = false                          
                         },
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "TokenDescriptorSigningCredentialsNullRequireSignedTokensTrue",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = null,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                        },
+                        IsValid = false
                     },
                     new CreateTokenTheoryData // Test checks that values in SecurityTokenDescriptor.Payload
                     // are properly replaced with the properties that are explicitly specified on the SecurityTokenDescriptor.
@@ -1081,9 +1147,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwt = new JsonWebToken(jwtString);
 
             // DateTime.MinValue is returned if the value of a DateTime claim is not found in the payload
-            Assert.NotEqual(DateTime.MinValue, jwt.IssuedAt);
-            Assert.NotEqual(DateTime.MinValue, jwt.ValidFrom);
-            Assert.NotEqual(DateTime.MinValue, jwt.ValidTo);
+            if (DateTime.MinValue.Equals(jwt.IssuedAt))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.IssuedAt). Value for the 'iat' claim not found in the payload.");
+            if (DateTime.MinValue.Equals(jwt.ValidFrom))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidFrom). Value for the 'nbf' claim not found in the payload.");
+            if (DateTime.MinValue.Equals(jwt.ValidTo))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidTo). Value for the 'exp' claim not found in the payload.");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         // Test checks to make sure that an access token can be successfully validated by the JsonWebTokenHandler.
@@ -1206,7 +1277,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var handler = new JsonWebTokenHandler();
                 CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
-                var innerJwt = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+                string innerJwt;
+                if (theoryData.SigningCredentials != null)
+                    innerJwt = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+                else
+                    innerJwt = handler.CreateToken(theoryData.Payload);
+
                 var jwtToken = handler.EncryptToken(innerJwt, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
                 var validationResult = handler.ValidateToken(jwtToken, theoryData.ValidationParameters);
                 if (validationResult.Exception != null)
@@ -1233,8 +1309,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var handler = new JsonWebTokenHandler();
                 CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
-                var jwtToken = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
+                string jwtToken;
+                if (theoryData.SigningCredentials != null)
+                    jwtToken = handler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
+                else
+                    jwtToken = handler.CreateToken(theoryData.Payload, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
+
                 var validationResult = handler.ValidateToken(jwtToken, theoryData.ValidationParameters);
+                if (validationResult.Exception != null)
+                    throw validationResult.Exception;
 
                 IdentityComparer.AreEqual(theoryData.Payload, (validationResult.SecurityToken as JsonWebToken).InnerToken.Payload.ToString(), context);
 
@@ -1262,7 +1345,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     CustomCompressionProvider = new SampleCustomCompressionProviderDecompressAndCompressAlwaysFail("MyAlgorithm")
                 };
 
-                return new TheoryData<CreateTokenTheoryData>
+                var tokenValidationParametersRequireSignedTokensFalse = Default.TokenValidationParameters(KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
+                tokenValidationParametersRequireSignedTokensFalse.ValidateLifetime = false;
+                tokenValidationParametersRequireSignedTokensFalse.RequireSignedTokens = false;
+
+                    return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData()
                     {
@@ -1296,6 +1383,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                    },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "NullSigningCredentialsRequireSignedTokensFalse",
+                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                        CompressionProviderFactory = new CompressionProviderFactory(),
+                        ValidationParameters = tokenValidationParametersRequireSignedTokensFalse,
+                        Payload = Default.PayloadString,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)
+                    },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "NullSigningCredentialsRequireSignedTokensTrue",
+                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                        CompressionProviderFactory = new CompressionProviderFactory(),
+                        ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                        Payload = Default.PayloadString,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -1333,6 +1439,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
                 var validationResult = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters);
                 var validatedToken = validationResult.SecurityToken as JsonWebToken;
+                if (validationResult.Exception != null)
+                    throw validationResult.Exception;
 
                 if (validationResult.IsValid)
                 {
@@ -1364,13 +1472,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 CustomCompressionProvider = new SampleCustomCompressionProviderDecompressAndCompressAlwaysFail("MyAlgorithm")
             };
 
+            var tokenValidationParametersRequireSignedTokensFalse = Default.TokenValidationParameters(KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key);
+            tokenValidationParametersRequireSignedTokensFalse.ValidateLifetime = false;
+            tokenValidationParametersRequireSignedTokensFalse.RequireSignedTokens = false;
+
             return new TheoryData<JWEDecompressionTheoryData>() {
                 new JWEDecompressionTheoryData
                 {
+                    First = true,
                     ValidationParameters = Default.JWECompressionTokenValidationParameters,
                     JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
                     CompressionProviderFactory = CompressionProviderFactory.Default,
                     TestId = "ValidAlgorithm"
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = tokenValidationParametersRequireSignedTokensFalse,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithUnsignedInnerJWS,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    TestId = "ValidAlgorithmUnsignedInnerJWSRequireSignedTokensFalse"
+                },
+                new JWEDecompressionTheoryData
+                {
+                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithUnsignedInnerJWS,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    TestId = "ValidAlgorithmUnsignedInnerJWSRequireSignedTokensTrue",
+                    ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:")
                 },
                 new JWEDecompressionTheoryData
                 {
