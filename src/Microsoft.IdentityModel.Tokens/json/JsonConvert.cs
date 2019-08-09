@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Json
 
         private static string EnsureDecimalPlace(double value, string text)
         {
-            if (double.IsNaN(value) || double.IsInfinity(value) || text.IndexOf(".", StringComparison.OrdinalIgnoreCase) != -1 || text.IndexOf("E", StringComparison.OrdinalIgnoreCase) != -1 || text.IndexOf("e", StringComparison.OrdinalIgnoreCase) != -1)
+            if (double.IsNaN(value) || double.IsInfinity(value) || text.IndexOf('.') != -1 || text.IndexOf('E') != -1 || text.IndexOf('e') != -1)
             {
                 return text;
             }

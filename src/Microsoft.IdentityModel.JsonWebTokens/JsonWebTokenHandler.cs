@@ -150,11 +150,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            if (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any())
-                LogHelper.LogWarning(LogMessages.IDX14114);
+            if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any()) 
+                && (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any()))
+                LogHelper.LogWarning(LogMessages.IDX14114, nameof(SecurityTokenDescriptor), nameof(SecurityTokenDescriptor.Subject), nameof(SecurityTokenDescriptor.Claims));
+            
+            JObject payload;
+            if (tokenDescriptor.Subject != null)
+                payload = JObject.FromObject(JwtTokenUtilities.CreateDictionaryFromClaims(tokenDescriptor.Subject.Claims));
+            else
+                payload = new JObject();
 
-            // JObject needs to be upcast to an IDictionary<string, JToken> so that we can access the ContainsKey() and Any() methods
-            IDictionary<string, JToken> payload = tokenDescriptor.Claims == null ? new JObject() : JObject.FromObject(tokenDescriptor.Claims);
+            // If a key is present in both tokenDescriptor.Subject.Claims and tokenDescriptor.Claims, the value present in tokenDescriptor.Claims is the
+            // one that takes precedence and will remain after the merge. Key comparison is case sensitive. 
+            if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
+                payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
             if (tokenDescriptor.Audience != null)
             {
@@ -196,10 +205,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
             }
 
-            if (!payload.Any())
+            if (!payload.HasValues)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14115));
 
-            return CreateTokenPrivate(payload as JObject, tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
+            return CreateTokenPrivate(payload, tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
         }
 
         /// <summary>

@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                         property.SetLineInfo(lineInfo, settings);
                         JObject parentObject = (JObject)parent;
                         // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                        JProperty existingPropertyWithName = parentObject.Property(propertyName);
                         if (existingPropertyWithName == null)
                         {
                             parent.Add(property);

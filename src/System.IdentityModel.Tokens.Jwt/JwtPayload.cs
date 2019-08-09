@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -448,13 +449,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="claims">For each <see cref="Claim"/> a JSON pair { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
         /// <remarks>
         /// <para>Any <see cref="Claim"/> in the <see cref="IEnumerable{Claim}"/> that is null, will be ignored.</para></remarks>
-        /// <exception cref="ArgumentNullException">'claims' is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="claims"/> is null.</exception>
         public void AddClaims(IEnumerable<Claim> claims)
         {
             if (claims == null)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claims"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claims)));
 
             foreach (Claim claim in claims)
             {
@@ -464,7 +463,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : JwtTokenUtilities.GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
@@ -486,62 +485,6 @@ namespace System.IdentityModel.Tokens.Jwt
                     this[jsonClaimType] = jsonClaimValue;
                 }
             }
-        }
-
-        internal static object GetClaimValueUsingValueType(Claim claim)
-        {
-            if (claim.ValueType == ClaimValueTypes.Boolean)
-            {
-                bool boolValue;
-                if (bool.TryParse(claim.Value, out boolValue))
-                {
-                    return boolValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Double)
-            {
-                double doubleValue;
-                if (double.TryParse(claim.Value, out doubleValue))
-                {
-                    return doubleValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
-            {
-                int intValue;
-                if (int.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer64)
-            {
-                long intValue;
-                if (long.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.Json)
-            {
-                return JObject.Parse(claim.Value);
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.JsonArray)
-            {
-                return JArray.Parse(claim.Value);
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.JsonNull)
-            {
-                return string.Empty;
-            }
-
-            return claim.Value;
         }
 
         internal static string GetClaimValueType(object obj)

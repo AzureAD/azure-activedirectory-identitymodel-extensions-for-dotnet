@@ -352,13 +352,13 @@ namespace Microsoft.IdentityModel.Json.Linq
             {
                 ValidationUtils.ArgumentNotNull(propertyName, nameof(propertyName));
 
-                JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                JProperty property = Property(propertyName);
 
                 return property?.Value;
             }
             set
             {
-                JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+                JProperty property = Property(propertyName);
                 if (property != null)
                 {
                     property.Value = value;
@@ -591,7 +591,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns><c>true</c> if item was successfully removed; otherwise, <c>false</c>.</returns>
         public bool Remove(string propertyName)
         {
-            JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(propertyName);
             if (property == null)
             {
                 return false;
@@ -609,7 +609,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns><c>true</c> if a value was successfully retrieved; otherwise, <c>false</c>.</returns>
         public bool TryGetValue(string propertyName, out JToken value)
         {
-            JProperty property = Property(propertyName, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(propertyName);
             if (property == null)
             {
                 value = null;
@@ -637,7 +637,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
         bool ICollection<KeyValuePair<string, JToken>>.Contains(KeyValuePair<string, JToken> item)
         {
-            JProperty property = Property(item.Key, StringComparison.OrdinalIgnoreCase);
+            JProperty property = Property(item.Key);
             if (property == null)
             {
                 return false;
