@@ -308,13 +308,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (SetDefaultTimesOnTokenCreation)
             {
                 var now = EpochTime.GetIntDate(DateTime.UtcNow);
-                if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, out _))
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal, out _))
                     payload.Add(JwtRegisteredClaimNames.Exp, now + TimeSpan.FromMinutes(TokenLifetimeInMinutes).TotalSeconds);
 
-                if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, out _))
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, StringComparison.Ordinal, out _))
                     payload.Add(JwtRegisteredClaimNames.Iat, now);
 
-                if (!payload.TryGetValue(JwtRegisteredClaimNames.Nbf, out _))
+                if (!payload.TryGetValue(JwtRegisteredClaimNames.Nbf, StringComparison.Ordinal, out _))
                     payload.Add(JwtRegisteredClaimNames.Nbf, now);
             }
 

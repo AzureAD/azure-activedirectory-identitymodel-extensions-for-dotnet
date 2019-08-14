@@ -682,7 +682,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             NotBefore = Default.NotBefore,
                             Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            Claims = new Dictionary<string, object>()                   
+                            Claims = new Dictionary<string, object>()
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
@@ -725,7 +725,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
-                            RequireSignedTokens = false                          
+                            RequireSignedTokens = false
                         },
                     },
                     new CreateTokenTheoryData
@@ -1156,6 +1156,72 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+        // According to the JWT RFC (https://tools.ietf.org/html/rfc7519) JWT claim names are case sensitive. 
+        // Therefore, if time values are present in the payload but they're not lowercase (as per spec) and 
+        // SetDefaultTimesOnTokenCreation=true, default time values should still be added to the token WITHOUT
+        // overriding the values that are already present.
+        [Theory, MemberData(nameof(SetDefaultTimesOnTokenCreationTheoryData))]
+        public void DifferentCaseTimeValuesPresentInToken(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.DifferentCaseTimeValuesPresentInToken", theoryData);
+            var jwtString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+            var jwt = new JsonWebToken(jwtString);
+
+            // Since claim values are case sensitive and default times weren't added, the 'iat', 'nbf' and 'exp' claims should not be found.
+            // By default, DateTime.MinValue is returned if the value of a DateTime claim is not found in the payload.
+            if (!theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && !DateTime.MinValue.Equals(jwt.IssuedAt))
+                context.AddDiff("!DateTime.MinValue.Equals(jwt.IssuedAt). 'iat' claim is case sensitive and should not be found in the payload.");
+            if (!theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && !DateTime.MinValue.Equals(jwt.ValidFrom))
+                context.AddDiff("!DateTime.MinValue.Equals(jwt.ValidFrom). 'nbf' claim is case sensitive and should not be found in the payload.");
+            if (!theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && !DateTime.MinValue.Equals(jwt.ValidTo))
+                context.AddDiff("!DateTime.MinValue.Equals(jwt.ValidTo). 'exp' claim is case sensitive and should not be found in the payload.");
+
+            // Default times were added, so we should be able to retrieve values for the 'iat', 'nbf', and 'exp claims.
+            if (theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && DateTime.MinValue.Equals(jwt.IssuedAt))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.IssuedAt). Value for the 'iat' claim not found in the payload.");
+            if (theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && DateTime.MinValue.Equals(jwt.ValidFrom))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidFrom). Value for the 'nbf' claim not found in the payload.");
+            if (theoryData.JsonWebTokenHandler.SetDefaultTimesOnTokenCreation && DateTime.MinValue.Equals(jwt.ValidTo))
+                context.AddDiff("DateTime.MinValue.Equals(jwt.ValidTo). Value for the 'exp' claim not found in the payload.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> SetDefaultTimesOnTokenCreationTheoryData
+        {
+            get
+            {
+                var payloadWithDifferentCaseTimeClaims = new JObject()
+                {
+                    { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                    { JwtRegisteredClaimNames.GivenName, "Bob" },
+                    { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                    { JwtRegisteredClaimNames.Aud, Default.Audience },
+                    { JwtRegisteredClaimNames.Iat.ToUpper(), EpochTime.GetIntDate(Default.IssueInstant) },
+                    { JwtRegisteredClaimNames.Nbf.ToUpper(), EpochTime.GetIntDate(Default.NotBefore) },
+                    { JwtRegisteredClaimNames.Exp.ToUpper(), EpochTime.GetIntDate(Default.Expires) }
+                }.ToString(Formatting.None);
+
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                    new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "SetDefaultTimesOnTokenCreationFalse",
+                        Payload = payloadWithDifferentCaseTimeClaims,
+                        JsonWebTokenHandler = new JsonWebTokenHandler {SetDefaultTimesOnTokenCreation = false },
+                        SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "SetDefaultTimesOnTokenCreationTrue",
+                        Payload = payloadWithDifferentCaseTimeClaims,
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials
+                    }
+                };
+            }
+        }
 
         // Test checks to make sure that an access token can be successfully validated by the JsonWebTokenHandler.
         // Also ensures that a non-standard claim can be successfully retrieved from the payload and validated.
@@ -1349,7 +1415,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 tokenValidationParametersRequireSignedTokensFalse.ValidateLifetime = false;
                 tokenValidationParametersRequireSignedTokensFalse.RequireSignedTokens = false;
 
-                    return new TheoryData<CreateTokenTheoryData>
+                return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData()
                     {
