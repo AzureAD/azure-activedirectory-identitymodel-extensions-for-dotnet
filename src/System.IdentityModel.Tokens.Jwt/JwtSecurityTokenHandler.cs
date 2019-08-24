@@ -673,7 +673,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException"><paramref name="token"/> does not have 3 or 5 parts.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/> returns false.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException"><paramref name="token"/> was a JWE was not able to be decrypted.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException"><paramref name="token"/> 'kid' header claim is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenException"><paramref name="token"/> 'enc' header claim is null or empty.</exception>
         /// <exception cref="SecurityTokenExpiredException"><paramref name="token"/> 'exp' claim is &lt; DateTime.UtcNow.</exception>
         /// <exception cref="SecurityTokenInvalidAudienceException"><see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null. Audience is not validated if <see cref="TokenValidationParameters.ValidateAudience"/> is set to false.</exception>
@@ -1349,7 +1348,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">if 'jwtToken' is null.</exception>
         /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         protected string DecryptToken(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
