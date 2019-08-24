@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
     /// See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
-    public class JsonWebTokenHandler : TokenHandler
+    public class JsonWebTokenHandler : TokenHandler, ISecurityTokenValidator
     {
         private List<string> _defaultHeaderParameters = new List<string>()
         {
@@ -610,7 +610,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/>  is null.</exception>
         /// <exception cref="SecurityTokenException">if '<paramref name="jwtToken"/> .Enc' is null or empty.</exception>
         /// <exception cref="SecurityTokenDecompressionFailedException">if decompression failed.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if '<paramref name="jwtToken"/> .Kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         public string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
@@ -1133,6 +1132,54 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (token.Length > MaximumTokenSizeInBytes)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes))) };
 
+            return ValidateTokenPrivate(token, validationParameters);
+        }
+
+        /// <summary>
+        /// Validates a JWS or a JWE.
+        /// </summary>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validatedToken">The <see cref="JsonWebToken"/> that was validated.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/>.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="token"/> does not have 3 (JWS) or 5 (JWE) parts.</exception>
+        /// <exception cref="SecurityTokenException">if the token is a JWE and the  <see cref="JwtHeaderParameterNames.Enc"/> header claim is null or empty.</exception>
+        /// <exception cref="SecurityTokenDecompressionFailedException">if <paramref name="token"/> is a JWE and decompression fails.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">if <paramref name="token"/> is a JWE and was not able to be decrypted.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException"> if the signing key could not be matched or no signing keys were provided.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"> if the signature of <paramref name="token"/> is not properly formatted.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"> if the signature of <paramref name="token"/> cannot be validated with the provided keys.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"> if <paramref name="token"/> is unsigned but <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException"> if a <see cref="SignatureValidator"/> or <see cref="TokenReader"/> delegate is provided but it fails or doesn't return a <see cref="JsonWebToken"/>.</exception>
+        /// <returns> A <see cref="ClaimsPrincipal"/> that was created from the JWT. Does not include claims found in the JWT header.</returns>
+        /// <remarks> 
+        /// This method calls the <see cref="Validators.ValidateLifetime"/>, <see cref="Validators.ValidateAudience"/>, <see cref="Validators.ValidateIssuer"/>, <see cref="Validators.ValidateTokenReplay(DateTime?, string, TokenValidationParameters)"/>
+        /// and <see cref="Validators.ValidateIssuerSecurityKey(SecurityKey, SecurityToken, TokenValidationParameters)"/> methods. Any of the exceptions thrown by these methods may also be thrown; see <see cref="Validators"/> to examine
+        /// the full call graph.
+        /// </remarks>
+        public ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            if (string.IsNullOrEmpty(token))
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (token.Length > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+
+            var tokenValidationResult = ValidateTokenPrivate(token, validationParameters);
+            if (!tokenValidationResult.IsValid)
+                throw tokenValidationResult.Exception;
+
+            validatedToken = tokenValidationResult.SecurityToken;
+            return new ClaimsPrincipal(tokenValidationResult.ClaimsIdentity);
+        }
+
+        private TokenValidationResult ValidateTokenPrivate(string token, TokenValidationParameters validationParameters)
+        {
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token))) };

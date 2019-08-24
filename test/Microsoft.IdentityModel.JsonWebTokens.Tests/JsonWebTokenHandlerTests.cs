@@ -1913,6 +1913,100 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+
+        [Theory, MemberData(nameof(ValidateTokenAndCreateClaimsPrincipalTheoryData))]
+        public void ValidateTokenAndCreateClaimsPrincipal(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAndCreateClaimsPrincipal", theoryData);
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            try
+            {
+                var claimsPrincipal = jsonWebTokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken token);
+                var tokenValidationResult = jsonWebTokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+
+                 if (claimsPrincipal == null)
+                    context.AddDiff("claimsPrincipal == null");
+
+                 if (token == null)
+                    context.AddDiff("token == null");
+
+                IdentityComparer.AreEqual(token, tokenValidationResult.SecurityToken, context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateTokenAndCreateClaimsPrincipalTheoryData
+        {
+            get
+            {
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJws) + "RequireSignedTokens",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = Default.SymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        TestId = nameof(Default.SymmetricJws) + "RequireSignedTokensNullSigningKey",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJws) + "DontRequireSignedTokens",
+                        Token = Default.SymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = Default.SymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.UnsignedJwt) + "DontRequireSignedTokensNullSigningKey",
+                        Token = Default.UnsignedJwt,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = false,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    }
+                };
+            }
+        }
+
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
         public void EncryptExistingJWSWithCompressionTest(CreateTokenTheoryData theoryData)
         {
