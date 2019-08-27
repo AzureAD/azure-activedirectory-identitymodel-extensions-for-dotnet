@@ -1,0 +1,1 @@
+rd /s/q %USERPROFILE%\.nuget\packages\system.servicemodel.federation

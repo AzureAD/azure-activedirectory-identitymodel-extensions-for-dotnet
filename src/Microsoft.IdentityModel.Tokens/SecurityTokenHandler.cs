@@ -64,6 +64,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets a value indicating whether the class provides serialization functionality to serialize token handled
+        /// by this instance.
+        /// </summary>
+        /// <returns>true if the WriteToken method can serialize this token.</returns>
+        public virtual bool CanWriteSecurityToken(SecurityToken securityToken)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this handler supports validation of tokens 
         /// handled by this instance.
         /// </summary>v
@@ -131,6 +141,17 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual SecurityToken ReadToken(XmlReader reader)
         {
             return null;
+        }
+
+        /// <summary>
+        /// Attempts to write original source data.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="securityToken"></param>
+        /// <returns></returns>
+        public virtual bool TryWriteSourceData(XmlWriter writer, SecurityToken securityToken)
+        {
+            return false;
         }
 
         /// <summary>
