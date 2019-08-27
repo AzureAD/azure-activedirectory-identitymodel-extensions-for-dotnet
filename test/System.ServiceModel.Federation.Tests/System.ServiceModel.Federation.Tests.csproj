@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\commonTest.props" />
+
+  <PropertyGroup>
+    <AssemblyName>System.ServiceModel.Federation.Tests</AssemblyName>
+    <Description>System.ServiceModel.Federation.Tests</Description>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <PackageId>System.ServiceModel.Federation.Tests</PackageId>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>true</DelaySign>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
+    <ProjectReference Include="..\..\src\System.ServiceModel.Federation\System.ServiceModel.Federation.csproj" />
+  </ItemGroup>
+
+</Project>

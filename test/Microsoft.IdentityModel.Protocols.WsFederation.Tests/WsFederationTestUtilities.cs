@@ -31,7 +31,10 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Xml;
+using Microsoft.IdentityModel.Protocols.WsAddressing;
+using Microsoft.IdentityModel.Protocols.WsTrust;
+using Microsoft.IdentityModel.Protocols.WsUtility;
+using Microsoft.IdentityModel.Protocols.WsPolicy;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 {
@@ -44,23 +47,23 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
                 {
                     // <RequestSecurityTokenResponse>
-                    writer.WriteStartElement(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.RequestSecurityTokenResponse, WsTrustConstants_1_3.Namespace);
+                    writer.WriteStartElement(WsTrustConstants.Trust13.Prefix, WsTrustElements.RequestSecurityTokenResponse, WsTrustConstants.Trust13.Namespace);
                    
                     // <Lifetime>
-                    writer.WriteStartElement(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.Lifetime, WsTrustConstants.Namespaces.WsTrust1_3);
+                    writer.WriteStartElement(WsTrustConstants.Trust13.Prefix, WsTrustElements.Lifetime, WsTrustConstants.Trust13.Namespace);
 
-                    writer.WriteElementString(WsUtility.PreferredPrefix, WsUtility.Elements.Created, WsUtility.Namespace, Default.IssueInstantString);
-                    writer.WriteElementString(WsUtility.PreferredPrefix, WsUtility.Elements.Expires, WsUtility.Namespace, Default.ExpiresString);
+                    writer.WriteElementString(WsUtilityConstants.WsUtility10.Prefix, WsUtilityElements.Created, WsUtilityConstants.WsUtility10.Namespace, Default.IssueInstantString);
+                    writer.WriteElementString(WsUtilityConstants.WsUtility10.Prefix, WsUtilityElements.Expires, WsUtilityConstants.WsUtility10.Namespace, Default.ExpiresString);
 
                     // </Lifetime>
                     writer.WriteEndElement();
 
                     // <AppliesTo>
-                    writer.WriteStartElement(WsPolicy.PreferredPrefix, WsPolicy.Elements.AppliesTo, WsPolicy.Namespace);
+                    writer.WriteStartElement(WsPolicyConstants.Policy12.Prefix, WsPolicyElements.AppliesTo, WsPolicyConstants.Policy12.Namespace);
 
                     // <EndpointReference>
-                    writer.WriteStartElement(WsAddressing.PreferredPrefix, WsAddressing.Elements.EndpointReference, WsAddressing.Namespace);
-                    writer.WriteElementString(WsAddressing.PreferredPrefix, WsAddressing.Elements.Address, WsAddressing.Namespace, Default.Audience);
+                    writer.WriteStartElement(WsAddressingConstants.Addressing10.Prefix, WsAddressingElements.EndpointReference, WsAddressingConstants.Addressing10.Namespace);
+                    writer.WriteElementString(WsAddressingConstants.Addressing10.Prefix, WsAddressingElements.Address, WsAddressingConstants.Addressing10.Namespace, Default.Audience);
 
                     // </EndpointReference>
                     writer.WriteEndElement();
@@ -69,20 +72,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     writer.WriteEndElement();
 
                     // <RequestedSecurityToken>token</RequestedSecurityToken>
-                    writer.WriteStartElement(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.RequestedSecurityToken, WsTrustConstants_1_3.Namespace);
+                    writer.WriteStartElement(WsTrustConstants.Trust13.Prefix, WsTrustElements.RequestedSecurityToken, WsTrustConstants.Trust13.Namespace);
 
                     tokenHandler.WriteToken(writer, securityToken);
 
                     writer.WriteEndElement();
 
                     // <TokenType>tokenType</TokenType>
-                    writer.WriteElementString(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.TokenType, WsTrustConstants_1_3.Namespace, tokenType);
+                    writer.WriteElementString(WsTrustConstants.Trust13.Prefix, WsTrustElements.TokenType, WsTrustConstants.Trust13.Namespace, tokenType);
 
                     //<RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</RequestType>
-                    writer.WriteElementString(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.RequestType, WsTrustConstants_1_3.Namespace, WsTrustConstants_1_3.Actions.Issue);
+                    writer.WriteElementString(WsTrustConstants.Trust13.Prefix, WsTrustElements.RequestType, WsTrustConstants.Trust13.Namespace, WsTrustActions.Trust13.Issue);
 
                     //<KeyType>http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey</KeyType>
-                    writer.WriteElementString(WsTrustConstants_1_3.PreferredPrefix, WsTrustConstants.Elements.KeyType, WsTrustConstants_1_3.Namespace, "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey");
+                    writer.WriteElementString(WsTrustConstants.Trust13.Prefix, WsTrustElements.KeyType, WsTrustConstants.Trust13.Namespace, "http://schemas.xmlsoap.org/ws/2005/05/identity/NoProofKey");
 
                     // </RequestSecurityTokenResponse>
                     writer.WriteEndElement();

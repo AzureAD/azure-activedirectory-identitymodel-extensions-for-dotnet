@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Xml
         internal const string IDX30404 = "IDX30404: Unable to write XML. Signature.SignedInfo is null.";
         internal const string IDX30405 = "IDX30405: Unable to write XML. SignedInfo.Reference is null.";
         internal const string IDX30406 = "IDX30406: Unsupported NodeType: {0}.";
+        internal const string IDX30407 = "IDX30407: Exception caught while writing: '{0}'. Caught exception: '{1}'.";
 
         // XML validation
         internal const string IDX30500 = "IDX30500: xsi:type attribute was not found. Expected: '{0}':'{1}'.";
