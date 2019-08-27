@@ -1,0 +1,25 @@
+<trust:RequestSecurityToken Context="458e3c3e-c879-4dee-8d2c-6e25a3a821bd" xmlns:trust="http://docs.oasis-open.org/ws-sx/ws-trust/200512">
+<trust:RequestType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue</trust:RequestType>
+<trust:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0</trust:TokenType>
+<trust:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey</trust:KeyType>
+<trust:KeySize>256</trust:KeySize>
+<trust:CanonicalizationAlgorithm>http://www.w3.org/2001/10/xml-exc-c14n#</trust:CanonicalizationAlgorithm>
+<trust:EncryptionAlgorithm>http://www.w3.org/2001/04/xmlenc#aes256-cbc</trust:EncryptionAlgorithm>
+<trust:EncryptWith>http://www.w3.org/2001/04/xmlenc#aes256-cbc</trust:EncryptWith>
+<trust:SignWith>http://www.w3.org/2001/04/xmlenc#sha256</trust:SignWith>
+<trust:ComputedKeyAlgorithm>http://docs.oasis-open.org/ws-sx/ws-trust/200512/CK/PSHA1</trust:ComputedKeyAlgorithm>
+<wsa:EndpointReference xmlns:wsa="http://www.w3.org/2005/08/addressing">
+  <wsa:Address>https://www.identitymodel.com/</wsa:Address>
+</wsa:EndpointReference>
+<auth:AdditionalContext xmlns:auth="http://docs.oasis-open.org/wsfed/authorization/200706">
+  <auth:ContextItem Name="http://referenceUri" Scope="8954b59e-3907-4939-976d-959395583ecb">
+    <auth:Value>90b88c42-55ca-4e4c-a45f-cde102383f3b</auth:Value>
+  </auth:ContextItem>
+</auth:AdditionalContext>
+<trust:Claims Dialect="edef1723-d88b-4897-a879-2d2fc62f9148">
+  <auth:ClaimType Uri="a14bf1a3-a189-4a81-9d9a-7d3dfeb7724a" xmlns:auth="http://docs.oasis-open.org/wsfed/authorization/200706">
+    <auth:Value>77a6fa04-0454-4d08-8761-2a840e281399</auth:Value>
+  </auth:ClaimType>
+</trust:Claims>
+<wsp:PolicyReference URI="http://referenceUri" Digest="http://www.w3.org/2001/04/xmlenc#sha256" DigestAlgorithm="27d58d3c-3aeb-4161-ac1b-cdb0006168aa" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"/>
+</trust:RequestSecurityToken>
