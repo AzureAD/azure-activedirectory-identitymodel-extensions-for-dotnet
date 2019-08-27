@@ -84,6 +84,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
+        /// Gets a value indicating whether the class provides serialization functionality to serialize token handled
+        /// by this instance.
+        /// </summary>
+        /// <returns>true if the WriteToken method can serialize this token.</returns>
+        public override bool CanWriteSecurityToken(SecurityToken securityToken)
+        {
+            return securityToken is Saml2SecurityToken;
+        }
+
+        /// <summary>
         /// Determines if the string is a valid Saml2 token by examining the xml for the correct start element.
         /// </summary>
         /// <param name="token">A Saml2 token as a string.</param>
@@ -1263,6 +1273,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             ProcessStatements(samlToken.Assertion.Statements, identity, actualIssuer);
 
             return identity;
+        }
+
+        /// <summary>
+        /// Attempts to write original source data.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="securityToken"></param>
+        /// <returns></returns>
+        public override bool TryWriteSourceData(XmlWriter writer, SecurityToken securityToken)
+        {
+            if (securityToken is Saml2SecurityToken saml2Token && saml2Token.Assertion.XmlTokenStream != null)
+            {
+                saml2Token.Assertion.XmlTokenStream.WriteTo(writer, null, null);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

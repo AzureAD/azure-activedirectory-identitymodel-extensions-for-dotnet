@@ -27,8 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Xml
@@ -104,7 +106,7 @@ namespace Microsoft.IdentityModel.Xml
 
             if (string.IsNullOrEmpty(@namespace))
             {
-                if (!reader.IsStartElement(element))
+                if (!string.Equals(reader.LocalName, element, StringComparison.OrdinalIgnoreCase))
                     throw LogReadException(LogMessages.IDX30024, element, reader.LocalName);
             }
             else
@@ -115,6 +117,23 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
+        /// Determine if reader is at expected element in one of the listed namespace in namespaceList.
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <param name="element">the expected element.</param>
+        /// <param name="namespace">the expected namespace.</param>
+        /// <returns>if <paramref name="reader"/> is at expected element.</returns>
+        internal static bool IsStartElement(XmlReader reader, string element, string @namespace)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            reader.MoveToContent();
+            return reader.IsStartElement(element, @namespace);
+        }
+
+
+        /// <summary>
         /// Determine if reader is at expected element in one of the listed namespace in namespaceList. 
         /// </summary>
         /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
@@ -123,6 +142,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <returns>if <paramref name="reader"/> is at expected element.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        /// <remarks>If <paramref name="namespaceList"/> is null, then the 'local' name is checked.</remarks>
         public static bool IsStartElement(XmlReader reader, string element, ICollection<string> namespaceList)
         {
             if (reader == null)
@@ -234,6 +254,39 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
+        /// Assumes the xmlreader is positioned on a startelement.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        internal static XmlElement ReadAsXmlElement(XmlDictionaryReader reader)
+        {
+            XmlElement xmlElement = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                {
+                    writer.WriteNode(reader, true);
+                    writer.Flush();
+                }
+
+                ms.Seek(0, SeekOrigin.Begin);
+                if (ms.Length == 0)
+                    return null;
+
+                var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
+                XmlDocument dom = new XmlDocument
+                {
+                    PreserveWhitespace = true
+                };
+
+                dom.Load(memoryReader);
+                xmlElement = dom.DocumentElement;
+            }
+
+            return xmlElement;
+        }
+
+        /// <summary>
         /// Determines if the prefix on a name maps to a namespace that is in scope the reader.
         /// </summary>
         /// <param name="reader">the <see cref="XmlReader"/> in scope.</param>
@@ -260,6 +313,48 @@ namespace Microsoft.IdentityModel.Xml
             }
 
             return new XmlQualifiedName(name, reader.LookupNamespace(prefix));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static string ReadStringElement(XmlDictionaryReader reader)
+        {
+            if (reader.IsEmptyElement)
+            {
+                reader.ReadStartElement();
+                return null;
+            }
+
+            reader.ReadStartElement();
+            var strVal = reader.ReadContentAsString();
+            reader.MoveToContent();
+            reader.ReadEndElement();
+
+            return strVal;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public static int? ReadIntElement(XmlDictionaryReader reader)
+        {
+            if (reader.IsEmptyElement)
+            {
+                reader.ReadStartElement();
+                return null;
+            }
+
+            reader.ReadStartElement();
+            var intVal = reader.ReadContentAsInt();
+            reader.MoveToContent();
+            reader.ReadEndElement();
+
+            return intVal;
         }
 
         /// <summary>

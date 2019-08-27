@@ -11,7 +11,7 @@
     <PackageId>Microsoft.IdentityModel.TestUtils</PackageId>
     <SignAssembly>true</SignAssembly>
     <IsTestProject>false</IsTestProject>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets);net45</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.WsTrust\Microsoft.IdentityModel.Protocols.WsTrust.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 

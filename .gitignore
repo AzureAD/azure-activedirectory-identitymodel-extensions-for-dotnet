@@ -207,6 +207,6 @@ stash/*
 TestResults/*
 backup/*
 .testPublish/
-/.vs/
+**/.vs/
 test/ApiChangeTest/Resource/devAssemblies
 test/ApiChangeTest/Resource/reports
