@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TestTargets>net452;net461;netcoreapp2.2</TestTargets>
+    <TestTargets>netcoreapp2.2</TestTargets>
     <TestOnlyCoreTargets>netcoreapp2.2</TestOnlyCoreTargets>
   </PropertyGroup>
 </Project>

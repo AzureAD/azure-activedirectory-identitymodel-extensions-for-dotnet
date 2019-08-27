@@ -28,4 +28,8 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="WsFederation\" />
+  </ItemGroup>
+
 </Project>
