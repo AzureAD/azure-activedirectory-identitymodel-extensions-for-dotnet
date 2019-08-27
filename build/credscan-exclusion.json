@@ -42,6 +42,14 @@
       "_justification": "File contains tokens that are used only for testing purposes."
     },
     {
+      "file": "JwtSecurityTokenHandlerTests.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "References.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
       "file": "JsonWebKeyTests.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
     },

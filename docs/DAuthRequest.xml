@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:t="http://schemas.xmlsoap.org/ws/2005/02/trust" xmlns:auth="http://schemas.xmlsoap.org/ws/2006/12/authorization" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+    <s:Header>
+        <a:To s:mustUnderstand="1" u:Id="_1">https://login.live.com/liveidSTS.srf</a:To>
+        <a:Action s:mustUnderstand="1">http://schemas.xmlsoap.org/ws/2005/02/trust/RST/Issue</a:Action>
+        <a:MessageID>urn:uuid:243861ed-30e2-4b5e-a135-1cdfcd876d68</a:MessageID>
+        <a:ReplyTo>
+            <a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>
+        </a:ReplyTo>
+        <o:Security s:mustUnderstand="1">
+            <u:Timestamp u:Id="_0">
+                <u:Created>2010-09-14T23:28:00Z</u:Created>
+                <u:Expires>2010-09-14T23:33:00Z</u:Expires>
+            </u:Timestamp>
+            <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <SignedInfo>
+                    <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                    <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+                    <Reference URI="#_1">
+                        <Transforms>
+                            <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                        </Transforms>
+                        <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                        <DigestValue>IBGOt0+/2RV7LFcca9eOBxBRlVs=</DigestValue>
+                    </Reference>
+                    <Reference URI="#_0">
+                        <Transforms>
+                            <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                        </Transforms>
+                        <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                        <DigestValue>v0v1EnydMBJff38nkGw5XYoMuco=</DigestValue>
+                    </Reference>
+                </SignedInfo>
+                <SignatureValue>DtdyGXr44CpxxlGqA1sBX8W+sYPrgk2miZtBaCXq7X6kyBk/euaDQjyY9yzU9WT7uAAGeW/sRumsAkMj05lqO/ZY4rz/gnG/wqn0YEFXmvcaKpz3PpG+fMlccpnzBPsmmisJM3E4QloTnzcK+WfdSaeX37PTddTxHXEeB1xM7tYFcl1fE71VlMhVvia4YosCl5Gpzbk2lX5eoxMqSobcfAkqLVSLlMi/RlqsE39SiEyk4qQ9iYgrnXhnAlegZfP0ypu0l78Ju5GfAkhi0O6nXbC4nql3Ic3f6VCj/INMgf/45C46mXuOuoMXH8l1wvNlgqDh4wvLUDuHvzvfqepjaQ==</SignatureValue>
+                <KeyInfo>
+                    <o:SecurityTokenReference>
+                        <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">zcMNwV1I0WnzgqTcBc7KMlWjcMU=</o:KeyIdentifier>
+                    </o:SecurityTokenReference>
+                </KeyInfo>
+            </Signature>
+        </o:Security>
+    </s:Header>
+    <s:Body>
+        <t:RequestSecurityToken Id="uuid-bdda680b-0921-4060-ac39-3429dc8ce7b5">
+            <t:RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</t:RequestType>
+            <t:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</t:TokenType>
+            <t:KeyType>http://schemas.xmlsoap.org/ws/2005/02/trust/SymmetricKey</t:KeyType>
+            <t:KeySize>256</t:KeySize>
+            <t:CanonicalizationAlgorithm>http://www.w3.org/2001/10/xml-exc-c14n#</t:CanonicalizationAlgorithm>
+            <t:EncryptionAlgorithm>http://www.w3.org/2001/04/xmlenc#aes256-cbc</t:EncryptionAlgorithm>
+            <t:EncryptWith>http://www.w3.org/2001/04/xmlenc#aes256-cbc</t:EncryptWith>
+            <t:SignWith>http://www.w3.org/2000/09/xmldsig#hmac-sha1</t:SignWith>
+            <t:ComputedKeyAlgorithm>http://schemas.xmlsoap.org/ws/2005/02/trust/CK/PSHA1</t:ComputedKeyAlgorithm>
+            <wsp:AppliesTo>
+                <a:EndpointReference>
+                    <a:Address>http://exchangecalendarsharing.com</a:Address>
+                </a:EndpointReference>
+            </wsp:AppliesTo>
+            <t:OnBehalfOf>
+                <saml:Assertion MajorVersion="1" MinorVersion="1" AssertionID="saml-9e1c03a5-7bfe-4945-838b-f784e285cdb9" Issuer="outlook.com" IssueInstant="2010-09-14T23:28:00.499Z" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion">
+                    <saml:Conditions NotBefore="2010-09-14T23:28:00.499Z" NotOnOrAfter="2010-09-14T23:33:00.499Z">
+                        <saml:AudienceRestrictionCondition>
+                            <saml:Audience>uri:WindowsLiveID</saml:Audience>
+                        </saml:AudienceRestrictionCondition>
+                    </saml:Conditions>
+                    <saml:AttributeStatement>
+                        <saml:Subject>
+                            <saml:NameIdentifier Format="http://schemas.microsoft.com/LiveID/Federation/2008/05/ImmutableID">233708@microsoft.com</saml:NameIdentifier>
+                            <saml:SubjectConfirmation>
+                                <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:sender-vouches</saml:ConfirmationMethod>
+                            </saml:SubjectConfirmation>
+                        </saml:Subject>
+                        <saml:Attribute AttributeName="EmailAddress" AttributeNamespace="http://schemas.xmlsoap.org/ws/2005/05/identity/claims">
+                            <saml:AttributeValue>chgooi@exchangecalendarsharing.com</saml:AttributeValue>
+                        </saml:Attribute>
+                    </saml:AttributeStatement>
+                    <saml:AuthenticationStatement AuthenticationMethod="urn:oasis:names:tc:SAML:1.0:am:password" AuthenticationInstant="2010-09-14T23:28:00.499Z">
+                        <saml:Subject>
+                            <saml:NameIdentifier Format="http://schemas.microsoft.com/LiveID/Federation/2008/05/ImmutableID">233708@microsoft.com</saml:NameIdentifier>
+                            <saml:SubjectConfirmation>
+                                <saml:ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:sender-vouches</saml:ConfirmationMethod>
+                            </saml:SubjectConfirmation>
+                        </saml:Subject>
+                    </saml:AuthenticationStatement>
+                    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+                        <SignedInfo>
+                            <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                            <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+                            <Reference URI="#saml-9e1c03a5-7bfe-4945-838b-f784e285cdb9">
+                                <Transforms>
+                                    <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                                    <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+                                </Transforms>
+                                <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+                                <DigestValue>N3Y3kDnyxzLEheoHMNHyhaqxYoQ=</DigestValue>
+                            </Reference>
+                        </SignedInfo>
+                        <SignatureValue>CZPqBCYK4epKGB+Sf6Cff2JrO5iG1FBZk9zTqcJm7S07uVL3SGEm1enuR/SWH25ZgzKtrUFnKz7+2o1aOsA4LXr6niEJiZQlbo4ymExs012h29rosM69/oEYKE+/P/TGcGrz6l6aXOEZ6hKxogBaTtpuAodNmt/OIAKTDMMHyCv/jvNMBSSMBKZqtvYmVSqYP6f7/dBDf+4CDN1O/TOaxAWkCDhYXJjuFc8SWJ4aUmdOY86UT5IEuqLe+ovw1cBj9DxYizyIaFmhmpcj4npkRyTpZ/mstMFqWLOe3sg9JiUB0l3swqZtXYSt8dA/hSTIe/oiuvcpGH1xHW526nQzFw==</SignatureValue>
+                        <KeyInfo>
+                            <o:SecurityTokenReference xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                                <o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">zcMNwV1I0WnzgqTcBc7KMlWjcMU=</o:KeyIdentifier>
+                            </o:SecurityTokenReference>
+                        </KeyInfo>
+                    </Signature>
+                </saml:Assertion>
+            </t:OnBehalfOf>
+            <auth:AdditionalContext>
+                <auth:ContextItem Scope="http://schemas.xmlsoap.org/ws/2006/12/authorization/ctx/requestor" Name="http://schemas.microsoft.com/wlid/requestor">
+                    <auth:Value>outlook.com</auth:Value>
+                </auth:ContextItem>
+            </auth:AdditionalContext>
+            <t:Claims Dialect="http://schemas.xmlsoap.org/ws/2006/12/authorization/authclaims">
+                <auth:ClaimType Uri="http://schemas.xmlsoap.org/ws/2006/12/authorization/claims/action">
+                    <auth:Value>MSExchange.SharingCalendarFreeBusy</auth:Value>
+                </auth:ClaimType>
+            </t:Claims>
+            <wsp:PolicyReference URI="EX_MBI_FED_SSL"></wsp:PolicyReference>
+        </t:RequestSecurityToken>
+    </s:Body>
+</s:Envelope>

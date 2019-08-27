@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <AssemblyName>Microsoft.IdentityModel.Protocols.WsTrust</AssemblyName>
+    <Description>Includes types that provide support for creating, serializing and validating WsTrust Messages.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Microsoft.IdentityModel.Protocols.WsTrust</PackageId>
+    <PackageTags>.NET;Windows;Authentication;Identity;WsTrust</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Wcf\**" />
+    <EmbeddedResource Remove="Wcf\**" />
+    <None Remove="Wcf\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="WsSecurityPolicy\WSSecurityPolicy.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
+    <ProjectReference Include="..\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' Or '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Xml.XmlDocument" Version="$(SystemXmlXmlDocumentVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or  '$(TargetFramework)' == 'net451' Or  '$(TargetFramework)' == 'net461'">
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Exceptions\" />
+    <Folder Include="Protocols\" />
+    <Folder Include="WsSecurityPolicy\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.ServiceModel">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.ServiceModel.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
