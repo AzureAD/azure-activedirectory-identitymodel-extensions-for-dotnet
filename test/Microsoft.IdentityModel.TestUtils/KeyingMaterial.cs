@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string P256_D = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4TQ";
         public static string P256_X = "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA";
         public static string P256_Y = "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ";
-        public static string P256_Invalid_D = "OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4QA";
+        public static string P256_Invalid_D = "OOX7PnY____l1BSclDj5Gi___sx_SPgEqStjY3doku4QA";
 
         public static string P384_D = "lJ44FtBCW4DyyGmRwAwFqjrpuet3BiL_VdYqOsywNjvoMDAVvgQ6SGTwIh4Qi7Yl";
         public static string P384_X = "5mn3HaDoUgdNTFCACaWIvrpriQTloEbMbx4eUu_XvB4pyExig45VIozMnj7FedJg";
