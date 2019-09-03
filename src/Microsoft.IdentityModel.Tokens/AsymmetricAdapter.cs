@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return SignatureFunction(bytes);
 
             // we should never get here, its a bug if we do.
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10685));
+            throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX10685));
         }
 
         private byte[] SignWithECDsa(byte[] bytes)

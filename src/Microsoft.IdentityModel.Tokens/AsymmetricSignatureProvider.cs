@@ -345,7 +345,7 @@ namespace Microsoft.IdentityModel.Tokens
                 JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey convertedSecurityKey);
                 if (convertedSecurityKey is AsymmetricSecurityKey convertedAsymmetricKey)
                     keySize = convertedAsymmetricKey.KeySize;
-                else
+                else if (convertedSecurityKey is SymmetricSecurityKey)
                     throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, key)));
             }
             else
@@ -357,12 +357,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (MinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(algorithm)
                 && keySize < MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10630, key, MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm], keySize)));
             }
             else if (MinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(algorithm)
                  && keySize < MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm])
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], key.KeySize)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10631, key, MinimumAsymmetricKeySizeInBitsForVerifyingMap[algorithm], keySize)));
             }
         }
 
