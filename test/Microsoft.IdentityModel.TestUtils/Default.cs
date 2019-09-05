@@ -413,8 +413,8 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iss, Default.Issuer },
-                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
