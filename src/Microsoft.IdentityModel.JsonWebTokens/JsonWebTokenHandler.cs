@@ -150,15 +150,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            if (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any())
-                LogHelper.LogWarning(LogMessages.IDX14114);
+            if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any()) 
+                && (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any()))
+                LogHelper.LogWarning(LogMessages.IDX14114, nameof(SecurityTokenDescriptor), nameof(SecurityTokenDescriptor.Subject), nameof(SecurityTokenDescriptor.Claims));
+            
+            JObject payload;
+            if (tokenDescriptor.Subject != null)
+                payload = JObject.FromObject(JwtTokenUtilities.CreateDictionaryFromClaims(tokenDescriptor.Subject.Claims));
+            else
+                payload = new JObject();
 
-            // JObject needs to be upcast to an IDictionary<string, JToken> so that we can access the ContainsKey() and Any() methods
-            IDictionary<string, JToken> payload = tokenDescriptor.Claims == null ? new JObject() : JObject.FromObject(tokenDescriptor.Claims);
+            // If a key is present in both tokenDescriptor.Subject.Claims and tokenDescriptor.Claims, the value present in tokenDescriptor.Claims is the
+            // one that takes precedence and will remain after the merge. Key comparison is case sensitive. 
+            if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
+                payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
             if (tokenDescriptor.Audience != null)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
+                if (payload.Property(JwtRegisteredClaimNames.Aud) != null)
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Audience)));
 
                 payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
@@ -166,7 +175,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Expires.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Exp))
+                if (payload.Property(JwtRegisteredClaimNames.Exp) != null)
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Expires)));
 
                 payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(tokenDescriptor.Expires.Value);
@@ -174,7 +183,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Issuer != null)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Iss))
+                if (payload.Property(JwtRegisteredClaimNames.Iss) != null)
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.Issuer)));
 
                 payload[JwtRegisteredClaimNames.Iss] = tokenDescriptor.Issuer;
@@ -182,7 +191,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.IssuedAt.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Iat))
+                if (payload.Property(JwtRegisteredClaimNames.Iat) != null)
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.IssuedAt)));
 
                 payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(tokenDescriptor.IssuedAt.Value);
@@ -190,16 +199,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.NotBefore.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Nbf))
+                if (payload.Property(JwtRegisteredClaimNames.Nbf) != null)
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, nameof(tokenDescriptor.NotBefore)));
 
                 payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
             }
 
-            if (!payload.Any())
+            if (!payload.HasValues)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14115));
 
-            return CreateTokenPrivate(payload as JObject, tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
+            return CreateTokenPrivate(payload, tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm);
         }
 
         /// <summary>
