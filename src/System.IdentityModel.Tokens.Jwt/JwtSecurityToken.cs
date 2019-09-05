@@ -467,7 +467,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 		
-		/// <summary>
+        /// <summary>
         /// Gets the 'value' of the 'issued at' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
         /// </summary>
         /// <remarks>If the 'issued at' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
