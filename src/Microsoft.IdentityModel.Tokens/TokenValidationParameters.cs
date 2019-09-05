@@ -208,11 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets <see cref="TokenValidationParameters"/>.
         /// </summary>
-        public TokenValidationParameters ActorValidationParameters
-        {
-            get;
-            set;
-        }
+        public TokenValidationParameters ActorValidationParameters { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
@@ -221,23 +217,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the 'audience' instead of normal processing.
         /// If <see cref="ValidateAudience"/> is false, this delegate will not be called.
         /// </remarks>
-        public AudienceValidator AudienceValidator
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be used to read the token.
-        /// </summary>
-        /// <remarks>
-        /// If set, this delegate will be called to read the token instead of normal processing.
-        /// </remarks>
-        public TokenReader TokenReader
-        {
-            get;
-            set;
-        }
+        public AudienceValidator AudienceValidator { get; set; }
 
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
@@ -343,32 +323,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
         /// </summary>
-        public CryptoProviderFactory CryptoProviderFactory
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
-        /// </summary>
-        public SecurityKey TokenDecryptionKey
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
-        /// </summary>
-        /// <remarks>
-        /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
-        /// </remarks>
-        public TokenDecryptionKeyResolver TokenDecryptionKeyResolver
-        {
-            get;
-            set;
-        }
+        public CryptoProviderFactory CryptoProviderFactory { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
@@ -376,20 +331,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of normal processing.
         /// </remarks>
-        public IssuerSigningKeyValidator IssuerSigningKeyValidator
-        {
-            get;
-            set;
-        }
+        public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for signature validation.
         /// </summary>
-        public SecurityKey IssuerSigningKey
-        {
-            get;
-            set;
-        }
+        public SecurityKey IssuerSigningKey { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation.
@@ -397,20 +344,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public IssuerSigningKeyResolver IssuerSigningKeyResolver
-        {
-            get;
-            set;
-        }
+        public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IEnumerable{SecurityKey}"/> used for signature validation.
         /// </summary>
-        public IEnumerable<SecurityKey> IssuerSigningKeys
-        {
-            get;
-            set;
-        }
+        public IEnumerable<SecurityKey> IssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
@@ -419,11 +358,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the 'issuer' of the token, instead of normal processing.
         /// If <see cref="ValidateIssuer"/> is false, this delegate will not be called.
         /// </remarks>
-        public IssuerValidator IssuerValidator
-        {
-            get;
-            set;
-        }
+        public IssuerValidator IssuerValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
@@ -432,24 +367,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the lifetime of the token, instead of normal processing.
         /// If <see cref="ValidateLifetime"/> is false, this delegate will not be called.
         /// </remarks>
-        public LifetimeValidator LifetimeValidator
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be used to validate the token replay of the token
-        /// </summary>
-        /// <remarks>
-        /// If set, this delegate will be called to validate the token replay of the token, instead of normal processing.
-        /// If <see cref="ValidateTokenReplay"/> is false, this delegate will not be called.
-        /// </remarks>
-        public TokenReplayValidator TokenReplayValidator
-        {
-            get;
-            set;
-        }
+        public LifetimeValidator LifetimeValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="string"/> that defines the <see cref="ClaimsIdentity.NameClaimType"/>.
@@ -505,11 +423,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
-        public IDictionary<string, Object> PropertyBag
-        {
-            get;
-            set;
-        }
+        public IDictionary<string, Object> PropertyBag { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
@@ -540,11 +454,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>The runtime will consult this value and save the original token that was validated.</remarks>
         [DefaultValue(false)]
-        public bool SaveSigninToken
-        {
-            get;
-            set;
-        }
+        public bool SaveSigninToken { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the signature of the token.
@@ -552,40 +462,54 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to signature of the token, instead of normal processing.
         /// </remarks>
-        public SignatureValidator SignatureValidator
-        {
-            get;
-            set;
-        }
+        public SignatureValidator SignatureValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
+        /// </summary>
+        public SecurityKey TokenDecryptionKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// </summary>
+        /// <remarks>
+        /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
+        /// </remarks>
+        public TokenDecryptionKeyResolver TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
-        public IEnumerable<SecurityKey> TokenDecryptionKeys
-        {
-            get;
-            set;
-        }
+        public IEnumerable<SecurityKey> TokenDecryptionKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to read the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to read the token instead of normal processing.
+        /// </remarks>
+        public TokenReader TokenReader { get; set; }
 
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that store tokens that can be checked to help detect token replay.
         /// </summary>
         /// <remarks>If set, then tokens must have an expiration time or the runtime will fault.</remarks>
-        public ITokenReplayCache TokenReplayCache
-        {
-            get;
-            set;
-        }
+        public ITokenReplayCache TokenReplayCache { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the token replay of the token
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the token replay of the token, instead of normal processing.
+        /// If <see cref="ValidateTokenReplay"/> is false, this delegate will not be called.
+        /// </remarks>
+        public TokenReplayValidator TokenReplayValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if an actor token is detected, whether it should be validated.
         /// </summary>
         [DefaultValue(false)]
-        public bool ValidateActor
-        {
-            get;
-            set;
-        }
+        public bool ValidateActor { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the audience will be validated during token validation.
@@ -593,11 +517,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>Validation of the audience, mitigates forwarding attacks. For example, a site that receives a token, could not replay it to another side.
         /// A forwarded token would contain the audience of the original site.</remarks>
         [DefaultValue(true)]
-        public bool ValidateAudience
-        {
-            get;
-            set;
-        }
+        public bool ValidateAudience { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the issuer will be validated during token validation.
@@ -610,21 +530,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// to the application that accepts tokens for contoso.
         /// </remarks>
         [DefaultValue(true)]
-        public bool ValidateIssuer
-        {
-            get;
-            set;
-        }
+        public bool ValidateIssuer { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the lifetime will be validated during token validation.
         /// </summary>                
         [DefaultValue(true)]
-        public bool ValidateLifetime
-        {
-            get;
-            set;
-        }
+        public bool ValidateLifetime { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
@@ -632,56 +544,32 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>It is possible for tokens to contain the public key needed to check the signature. For example, X509Data can be hydrated into an X509Certificate,
         /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. </remarks>
         [DefaultValue(false)]
-        public bool ValidateIssuerSigningKey
-        {
-            get;
-            set;
-        }
+        public bool ValidateIssuerSigningKey { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the token replay will be validated during token validation.
         /// </summary>                
         [DefaultValue(false)]
-        public bool ValidateTokenReplay
-        {
-            get;
-            set;
-        }
+        public bool ValidateTokenReplay { get; set; }
 
         /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used to check against the token's audience.
         /// </summary>
-        public string ValidAudience
-        {
-            get;
-            set;
-        }
+        public string ValidAudience { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid audiences that will be used to check against the token's audience.
         /// </summary>
-        public IEnumerable<string> ValidAudiences
-        {
-            get;
-            set;
-        }
+        public IEnumerable<string> ValidAudiences { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="String"/> that represents a valid issuer that will be used to check against the token's issuer.
         /// </summary>
-        public string ValidIssuer
-        {
-            get;
-            set;
-        }
+        public string ValidIssuer { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// </summary>
-        public IEnumerable<string> ValidIssuers
-        {
-            get;
-            set;
-        }
+        public IEnumerable<string> ValidIssuers { get; set; }
     }
 }
