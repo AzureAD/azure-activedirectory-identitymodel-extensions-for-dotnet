@@ -53,8 +53,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14112 = "IDX14112: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         internal const string IDX14113 = "IDX14113: A duplicate value for 'SecurityTokenDescriptor.{0}' exists in 'SecurityTokenDescriptor.Claims'. \nThe value of 'SecurityTokenDescriptor.{0}' is used.";
         internal const string IDX14114 = "IDX14114: Both '{0}.{1}' and '{0}.{2}' are null or empty.";
-        internal const string IDX14115 = "IDX14115: A JWT cannot be created with an empty payload.";
-
+        // internal const string IDX14115 = "IDX14115:";
+        internal const string IDX14116 = "IDX14116: ''{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
+        
         // logging
         internal const string IDX14200 = "IDX14200: Creating raw signature using the signature credentials.";
         
