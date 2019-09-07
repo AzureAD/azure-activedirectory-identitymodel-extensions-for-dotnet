@@ -10,7 +10,6 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <LangVersion>latest</LangVersion>
     <PackageId>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests</PackageId>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net452;netcoreapp2.2</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 

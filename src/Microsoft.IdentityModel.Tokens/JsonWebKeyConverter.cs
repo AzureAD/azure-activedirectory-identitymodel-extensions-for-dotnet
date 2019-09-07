@@ -151,6 +151,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool TryConvertToSecurityKey(JsonWebKey webKey, out SecurityKey key)
         {
+            if (webKey.ConvertedSecurityKey != null)
+            {
+                key = webKey.ConvertedSecurityKey;
+                return true;
+            }
+
             key = null;
             try
             {
@@ -177,6 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10812, typeof(SecurityKey), webKey));
+
             return false;
         }
 
@@ -202,7 +209,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, typeof(SymmetricSecurityKey), webKey, ex), ex));
             }
 
-            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10812, typeof(SymmetricSecurityKey), webKey)));
             return false;
         }
 
@@ -230,7 +236,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, typeof(X509SecurityKey), webKey, ex), ex));
             }
 
-            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10812, typeof(X509SecurityKey), webKey)));
             return false;
         }
 
@@ -256,7 +261,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, typeof(RsaSecurityKey), webKey, ex), ex));
             }
 
-            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10812, typeof(RsaSecurityKey), webKey)));
             return false;
         }
 
@@ -282,7 +286,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, typeof(ECDsaSecurityKey), webKey, ex), ex));
             }
 
-            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10812, typeof(ECDsaSecurityKey), webKey)));
             return false;
         }
     }

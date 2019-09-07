@@ -335,11 +335,23 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            int keySize;
-            if (key is JsonWebKey jsonWebKey && jsonWebKey.ConvertedSecurityKey is AsymmetricSecurityKey)
-                keySize = (jsonWebKey.ConvertedSecurityKey as AsymmetricSecurityKey).KeySize;
+            int keySize = key.KeySize;
+            if (key is AsymmetricSecurityKey securityKey)
+            {
+                keySize = securityKey.KeySize;
+            }
+            else if (key is JsonWebKey jsonWebKey)
+            {
+                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey convertedSecurityKey);
+                if (convertedSecurityKey is AsymmetricSecurityKey convertedAsymmetricKey)
+                    keySize = convertedAsymmetricKey.KeySize;
+                else
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, key)));
+            }
             else
-                keySize = key.KeySize;
+            {
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, key)));
+            }
 
             if (willCreateSignatures)
             {
