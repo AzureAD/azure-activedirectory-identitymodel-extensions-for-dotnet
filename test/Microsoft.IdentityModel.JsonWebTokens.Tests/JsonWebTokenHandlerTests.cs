@@ -32,6 +32,7 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
