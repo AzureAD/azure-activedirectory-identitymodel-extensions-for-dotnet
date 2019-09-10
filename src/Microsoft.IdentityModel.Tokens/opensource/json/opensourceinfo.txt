@@ -1,0 +1,3 @@
+Name: Newtonsoft.Json
+Version: 12.0.1
+Commit: 509643a8952ce731e0207710c429ad6e67dc43db
