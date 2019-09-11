@@ -44,7 +44,7 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="$(SystemRuntimeSerializationPrimitivesVersion)" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="$(SystemRuntimeSerializationXmlVersion)" />
     <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityClaimsVersion)" />
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="$(SystemSecurityCryptographyCngVersion)"/>
+    <PackageReference Include="System.Security.Cryptography.Cng" Version="$(SystemSecurityCryptographyCngVersion)" />
     <PackageReference Include="System.Xml.XmlDocument" Version="$(SystemXmlXmlDocumentVersion)" />
   </ItemGroup>
   
