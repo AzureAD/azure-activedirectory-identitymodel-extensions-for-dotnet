@@ -592,7 +592,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenDecompressionFailedException">if decompression failed.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if '<paramref name="jwtToken"/> .Kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
-        protected string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        public string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
