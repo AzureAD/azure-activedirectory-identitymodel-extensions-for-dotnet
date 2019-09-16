@@ -38,74 +38,80 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string AuthorizationHeader = "Authorization";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
-        /// </summary>
-        public const string PopAuthorizationHeader = "PoP";
-
-        /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.1
-        /// </summary>
-        public const string PopTokenType = "pop";
-
-        /// <summary>
         /// 
         /// </summary>
-        public static class ClaimTypes
+        public static class HttpRequest
         {
             /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
             /// </summary>
-            public const string At = "at";
+            public const string PopAuthorizationHeader = "PoP";
 
             /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.1
             /// </summary>
-            public const string Ts = "ts";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string M = "m";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string U = "u";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string P = "p";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string Q = "q";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string H = "h";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-            /// </summary>
-            public const string B = "b";
-
-            /// <summary>
-            /// https://tools.ietf.org/html/rfc7800#section-3.1
-            /// </summary>
-            public const string Cnf = "cnf";
+            public const string PopTokenType = "pop";
 
             /// <summary>
             /// 
             /// </summary>
-            public const string Nonce = "nonce";
+            public static class ClaimTypes
+            {
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string At = "at";
 
-            /// <summary>
-            /// 
-            /// </summary>
-            public const string Jwe = "jwe";
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string Ts = "ts";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string M = "m";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string U = "u";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string P = "p";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string Q = "q";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string H = "h";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+                /// </summary>
+                public const string B = "b";
+
+                /// <summary>
+                /// https://tools.ietf.org/html/rfc7800#section-3.1
+                /// </summary>
+                public const string Cnf = "cnf";
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public const string Nonce = "nonce";
+
+                /// <summary>
+                /// 
+                /// </summary>
+                public const string Jwe = "jwe";
+            }
         }
     }
 }

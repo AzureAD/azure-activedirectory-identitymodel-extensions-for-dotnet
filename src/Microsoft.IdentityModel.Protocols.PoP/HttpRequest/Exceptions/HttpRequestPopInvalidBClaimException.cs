@@ -27,34 +27,34 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
     /// </summary>
-    public class PopInvalidCnfClaimException : PopValidationException
+    public class HttpRequestPopInvalidBClaimException : PopValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidBClaimException"/> class.
         /// </summary>
-        public PopInvalidCnfClaimException()
+        public HttpRequestPopInvalidBClaimException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidHClaimException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidCnfClaimException(string message)
+        public HttpRequestPopInvalidBClaimException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidBClaimException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidCnfClaimException(string message, Exception innerException)
+        public HttpRequestPopInvalidBClaimException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

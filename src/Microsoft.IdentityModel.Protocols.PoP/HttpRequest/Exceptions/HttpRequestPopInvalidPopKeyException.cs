@@ -27,34 +27,34 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
     /// </summary>
-    public class PopInvalidBClaimException : PopValidationException
+    public class HttpRequestPopInvalidPopKeyException : PopValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidBClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidPopKeyException"/> class.
         /// </summary>
-        public PopInvalidBClaimException()
+        public HttpRequestPopInvalidPopKeyException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidHClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidPopKeyException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidBClaimException(string message)
+        public HttpRequestPopInvalidPopKeyException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidBClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidPopKeyException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidBClaimException(string message, Exception innerException)
+        public HttpRequestPopInvalidPopKeyException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
