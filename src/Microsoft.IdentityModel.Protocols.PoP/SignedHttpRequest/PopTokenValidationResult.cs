@@ -25,38 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
+    /// 
     /// </summary>
-    public class PopInvalidCnfClaimException : PopValidationException
+    public class PopTokenValidationResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Gets or sets the AccessToken.
         /// </summary>
-        public PopInvalidCnfClaimException()
-        {
-        }
+        public string AccessToken { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Gets or sets the PopToken.
         /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidCnfClaimException(string message)
-            : base(message)
-        {
-        }
+        public string PopToken { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidCnfClaimException"/> class.
+        /// Gets or sets the validated access token.
         /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidCnfClaimException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        public SecurityToken ValidatedAccessToken { get; set; }
+
+        /// <summary>
+        /// Gets or sets the validated PopToken.
+        /// </summary>
+        public SecurityToken ValidatedPopToken { get; set; }
     }
 }
