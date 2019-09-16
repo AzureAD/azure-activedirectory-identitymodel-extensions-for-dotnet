@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
     /// 
