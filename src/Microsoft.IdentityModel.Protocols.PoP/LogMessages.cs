@@ -26,7 +26,8 @@
 //------------------------------------------------------------------------------
 
 //  Microsoft.IdentityModel.Protocols.PoP
-// Range: 23000 - 23999
+// Range: 23000 - 23999.
+// HttpRequestPopToken range: 23000 - 23199.
 
 namespace Microsoft.IdentityModel.Protocols.PoP
 {

@@ -28,8 +28,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
+    using ClaimTypes = PopConstants.HttpRequest.ClaimTypes;
+
     /// <summary>
     /// 
     /// </summary>
@@ -37,19 +39,19 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="payload"></param>
     /// <param name="httpRequestData"></param>
     /// <param name="popTokenCreationPolicy"></param>
-    public delegate void CustomClaimCreator(string tokenWithCnfClaim, IDictionary<string, object> payload, HttpRequestData httpRequestData, PopTokenCreationPolicy popTokenCreationPolicy);
+    public delegate void CustomClaimCreator(string tokenWithCnfClaim, IDictionary<string, object> payload, HttpRequestData httpRequestData, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy);
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="payload"></param>
     /// <param name="popTokenCreationPolicy"></param>
-    public delegate void NonceClaimCreator(IDictionary<string, object> payload, PopTokenCreationPolicy popTokenCreationPolicy);
+    public delegate void NonceClaimCreator(IDictionary<string, object> payload, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy);
 
     /// <summary>
     /// 
     /// </summary>
-    public class PopTokenCreationPolicy
+    public class HttpRequestPopTokenCreationPolicy
     {
         /// <summary>
         /// </summary>
@@ -66,37 +68,37 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public bool CreateNonce { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.Ts"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be created or not.
         /// </summary>
         public bool CreateTs { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.M"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.M"/> claim should be created or not.
         /// </summary>
         public bool CreateM { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.U"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.U"/> claim should be created or not.
         /// </summary>
         public bool CreateU { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.P"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.P"/> claim should be created or not.
         /// </summary>
         public bool CreateP { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.Q"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Q"/> claim should be created or not.
         /// </summary>
         public bool CreateQ { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.H"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.H"/> claim should be created or not.
         /// </summary>
         public bool CreateH { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.B"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be created or not.
         /// </summary>
         public bool CreateB { get; set; } = false;
 

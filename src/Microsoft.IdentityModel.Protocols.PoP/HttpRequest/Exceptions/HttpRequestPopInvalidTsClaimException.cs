@@ -23,27 +23,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
+//------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tokens;
-using System.Threading;
-using System.Threading.Tasks;
+using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public interface IPopTokenCreator
+    public class HttpRequestPopInvalidTsClaimException : PopValidationException
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
         /// </summary>
-        /// <param name="tokenWithCnfClaim"></param>
-        /// <param name="signingCredentials"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="popTokenCreationPolicy"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, SigningCredentials signingCredentials, HttpRequestData httpRequestData, PopTokenCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
+        public HttpRequestPopInvalidTsClaimException()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public HttpRequestPopInvalidTsClaimException(string message)
+            : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public HttpRequestPopInvalidTsClaimException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

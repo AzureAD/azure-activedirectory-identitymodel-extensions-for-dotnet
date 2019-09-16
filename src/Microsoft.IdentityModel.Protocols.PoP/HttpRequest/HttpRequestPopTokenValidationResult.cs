@@ -23,40 +23,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
 
-using System;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
+    /// 
     /// </summary>
-    public class PopInvalidPClaimException : PopValidationException
+    public class HttpRequestPopTokenValidationResult : PopTokenValidationResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidPClaimException"/> class.
+        /// Gets or sets the PopToken.
         /// </summary>
-        public PopInvalidPClaimException()
-        {
-        }
+        public string PopToken { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidPClaimException"/> class.
+        /// Gets or sets the validated PopToken.
         /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidPClaimException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidPClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidPClaimException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        public SecurityToken ValidatedPopToken { get; set; }
     }
 }

@@ -25,57 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
-using System.Net.Http;
-using System.Threading.Tasks;
+using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public static class PopUtilities
+    public class HttpRequestPopInvalidMClaimException : PopValidationException
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidMClaimException"/> class.
         /// </summary>
-        /// <param name="popToken"></param>
-        /// <returns></returns>
-        public static string CreateHttpRequestPopHeader(string popToken)
+        public HttpRequestPopInvalidMClaimException()
         {
-            if (string.IsNullOrEmpty(popToken))
-                throw LogHelper.LogArgumentNullException(nameof(popToken));
-
-            return $"{PopConstants.HttpRequest.PopAuthorizationHeader} {popToken}";
         }
 
         /// <summary>
-        ///
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidMClaimException"/> class.
         /// </summary>
-        /// <param name="httpRequestMessage"></param>
-        /// <returns></returns>
-        public static async Task<HttpRequestData> ToHttpRequestDataAsync(this HttpRequestMessage httpRequestMessage)
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public HttpRequestPopInvalidMClaimException(string message)
+            : base(message)
         {
-            if (httpRequestMessage == null)
-                throw LogHelper.LogArgumentNullException(nameof(httpRequestMessage));
-
-            var httpRequestData = new HttpRequestData()
-            {
-                HttpMethod = httpRequestMessage.Method?.ToString(),
-                HttpRequestUri = httpRequestMessage.RequestUri
-            };
-
-            httpRequestData.AppendHeaders(httpRequestMessage.Headers);
-
-            if (httpRequestMessage.Content != null)
-            {
-                httpRequestData.HttpRequestBody = await httpRequestMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                httpRequestData.AppendHeaders(httpRequestMessage.Content.Headers);
-            }
-
-            return httpRequestData;
         }
 
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidMClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public HttpRequestPopInvalidMClaimException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

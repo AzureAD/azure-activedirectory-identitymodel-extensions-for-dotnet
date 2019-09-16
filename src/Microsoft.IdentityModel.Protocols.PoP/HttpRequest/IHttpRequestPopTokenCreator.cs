@@ -23,40 +23,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
 
-using System;
+using Microsoft.IdentityModel.Tokens;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
+    /// 
     /// </summary>
-    public class PopInvalidMClaimException : PopValidationException
+    public interface IHttpRequestPopTokenCreator
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidMClaimException"/> class.
+        /// 
         /// </summary>
-        public PopInvalidMClaimException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidMClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidMClaimException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidMClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidMClaimException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        /// <param name="tokenWithCnfClaim"></param>
+        /// <param name="signingCredentials"></param>
+        /// <param name="httpRequestData"></param>
+        /// <param name="popTokenCreationPolicy"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, SigningCredentials signingCredentials, HttpRequestData httpRequestData, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
     }
 }

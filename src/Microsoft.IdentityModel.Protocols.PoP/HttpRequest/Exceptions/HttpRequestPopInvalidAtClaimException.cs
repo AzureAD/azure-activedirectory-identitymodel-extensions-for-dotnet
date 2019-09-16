@@ -27,34 +27,34 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
     /// </summary>
-    public class PopInvalidUClaimException : PopValidationException
+    public class HttpRequestPopInvalidAtClaimException : PopValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidUClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidAtClaimException"/> class.
         /// </summary>
-        public PopInvalidUClaimException()
+        public HttpRequestPopInvalidAtClaimException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidUClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidAtClaimException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopInvalidUClaimException(string message)
+        public HttpRequestPopInvalidAtClaimException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopInvalidUClaimException"/> class.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidAtClaimException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopInvalidUClaimException(string message, Exception innerException)
+        public HttpRequestPopInvalidAtClaimException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

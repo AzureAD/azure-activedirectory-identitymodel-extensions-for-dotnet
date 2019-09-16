@@ -25,33 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tokens;
+using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public class PopTokenValidationResult
+    public class HttpRequestPopInvalidUClaimException : PopValidationException
     {
         /// <summary>
-        /// Gets or sets the AccessToken.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidUClaimException"/> class.
         /// </summary>
-        public string AccessToken { get; set; }
+        public HttpRequestPopInvalidUClaimException()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the PopToken.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidUClaimException"/> class.
         /// </summary>
-        public string PopToken { get; set; }
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public HttpRequestPopInvalidUClaimException(string message)
+            : base(message)
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the validated access token.
+        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidUClaimException"/> class.
         /// </summary>
-        public SecurityToken ValidatedAccessToken { get; set; }
-
-        /// <summary>
-        /// Gets or sets the validated PopToken.
-        /// </summary>
-        public SecurityToken ValidatedPopToken { get; set; }
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public HttpRequestPopInvalidUClaimException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

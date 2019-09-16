@@ -28,22 +28,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IPopTokenValidator
+    public interface IHttpRequestPopTokenValidator
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="popToken"></param>
-        /// <param name="popTokenValidationPolicy"></param>
-        /// <param name="exceptionMessage"></param>
-        /// <returns></returns>
-        bool CanValidatePopToken(string popToken, PopTokenValidationPolicy popTokenValidationPolicy, out string exceptionMessage);
-        
         /// <summary>
         /// 
         /// </summary>
@@ -53,6 +44,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="popTokenValidationPolicy"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<PopTokenValidationResult> ValidatePopTokenAsync(string popToken, HttpRequestData httpRequestData, TokenValidationParameters tokenValidationParameters, PopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+        Task<HttpRequestPopTokenValidationResult> ValidatePopTokenAsync(string popToken, HttpRequestData httpRequestData, TokenValidationParameters tokenValidationParameters, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
     }
 }

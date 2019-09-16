@@ -34,8 +34,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 {
+    using ClaimTypes = PopConstants.HttpRequest.ClaimTypes;
+
     /// <summary>
     /// 
     /// </summary>
@@ -45,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, PopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -54,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, PopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -82,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, PopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -95,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <summary>
     /// 
     /// </summary>
-    public class PopTokenValidationPolicy
+    public class HttpRequestPopTokenValidationPolicy
     {
         private TimeSpan _popTokenLifetime = DefaultPopTokenLifetime;
 
@@ -178,37 +180,37 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.Ts"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be validated or not.
         /// </summary>
         public bool ValidateTs { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.M"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.M"/> claim should be validated or not.
         /// </summary>
         public bool ValidateM { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.U"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.U"/> claim should be validated or not.
         /// </summary>
         public bool ValidateU { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.P"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.P"/> claim should be validated or not.
         /// </summary>
         public bool ValidateP { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.Q"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Q"/> claim should be validated or not.
         /// </summary>
         public bool ValidateQ { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.H"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.H"/> claim should be validated or not.
         /// </summary>
         public bool ValidateH { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="PopConstants.ClaimTypes.B"/> claim should be validated or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be validated or not.
         /// </summary>
         public bool ValidateB { get; set; } = false;
     }
