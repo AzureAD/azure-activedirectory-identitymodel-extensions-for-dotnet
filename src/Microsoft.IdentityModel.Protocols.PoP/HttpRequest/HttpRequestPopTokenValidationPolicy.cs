@@ -213,5 +213,34 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be validated or not.
         /// </summary>
         public bool ValidateB { get; set; } = false;
+
+        internal bool DoesApply(JsonWebToken jwtPopToken)
+        {
+            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.At, out string at) || string.IsNullOrEmpty(at))
+                return false;
+
+            if (ValidateTs && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Ts, out long _)))
+                return false;
+
+            if (ValidateM && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.M, out string m) || string.IsNullOrEmpty(m)))
+                return false;
+
+            if (ValidateU && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.U, out string u) || string.IsNullOrEmpty(u)))
+                return false;
+
+            if (ValidateP && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.P, out string p) || string.IsNullOrEmpty(p)))
+                return false;
+
+            if (ValidateQ && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Q, out object q) || q == null))
+                return false;
+
+            if (ValidateH && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.H, out object h) || h == null))
+                return false;
+
+            if (ValidateB && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.B, out string b) || string.IsNullOrEmpty(b)))
+                return false;
+
+            return true;
+        }
     }
 }
