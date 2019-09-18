@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.PoP
@@ -38,6 +39,11 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         /// Gets or sets the AccessToken.
         /// </summary>
         public string AccessToken { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ClaimsIdentity"/> representing the Subject.
+        /// </summary>
+        public ClaimsIdentity SubjectIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets the validated access token.

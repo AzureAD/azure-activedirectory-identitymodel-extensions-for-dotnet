@@ -419,14 +419,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 
             var jwtPopToken = ReadPopTokenAsJwt(popToken);
             var accessToken = ReadAccessToken(jwtPopToken);
-            var validatedAccessToken = await ValidateAccessTokenAsync(accessToken, tokenValidationParameters, cancellationToken).ConfigureAwait(false) as JsonWebToken;
-            var validatedPopToken = await ValidatePopTokenAsync(jwtPopToken, validatedAccessToken, httpRequestData, popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
+            var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, tokenValidationParameters, cancellationToken).ConfigureAwait(false);
+            var validatedPopToken = await ValidatePopTokenAsync(jwtPopToken, tokenValidationResult.SecurityToken as JsonWebToken, httpRequestData, popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
 
             return new HttpRequestPopTokenValidationResult()
             {
                 AccessToken = accessToken,
+                SubjectIdentity = tokenValidationResult.ClaimsIdentity,
+                ValidatedAccessToken = tokenValidationResult.SecurityToken,
                 PopToken = popToken,
-                ValidatedAccessToken = validatedAccessToken,
                 ValidatedPopToken = validatedPopToken
             };
         }
@@ -461,7 +462,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
         /// <param name="tokenValidationParameters"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual Task<SecurityToken> ValidateAccessTokenAsync(string accessToken, TokenValidationParameters tokenValidationParameters, CancellationToken cancellationToken)
+        protected virtual Task<TokenValidationResult> ValidateAccessTokenAsync(string accessToken, TokenValidationParameters tokenValidationParameters, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(accessToken))
                 throw LogHelper.LogArgumentNullException(nameof(accessToken));
@@ -472,11 +473,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             var tokenValidationResult = _jwtTokenHandler.ValidateToken(accessToken, tokenValidationParameters);
 
             if (!tokenValidationResult.IsValid)
-            {
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
-            }
 
-            return Task.FromResult(tokenValidationResult.SecurityToken);
+            return Task.FromResult(tokenValidationResult);
         }
 
         /// <summary>
