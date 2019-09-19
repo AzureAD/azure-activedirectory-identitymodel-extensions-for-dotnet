@@ -41,9 +41,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public string AccessToken { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="ClaimsIdentity"/> representing the Subject.
+        /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
-        public ClaimsIdentity SubjectIdentity { get; set; }
+        public ClaimsIdentity ClaimsIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets the validated access token.

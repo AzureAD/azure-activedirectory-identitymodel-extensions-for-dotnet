@@ -430,7 +430,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             return new HttpRequestPopTokenValidationResult()
             {
                 AccessToken = accessToken,
-                SubjectIdentity = tokenValidationResult.ClaimsIdentity,
+                ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                 ValidatedAccessToken = tokenValidationResult.SecurityToken,
                 PopToken = popToken,
                 ValidatedPopToken = validatedPopToken
