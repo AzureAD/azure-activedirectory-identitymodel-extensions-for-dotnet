@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string IDX23007 = "IDX23007: HttpRequestUri is an invalid relative URI: '{0}'.";
         public const string IDX23008 = "IDX23008: Exception caught while creating the '{0}' claim. Inner exception: '{1}'.";
         public const string IDX23009 = "IDX23009: Pop token signature validation failed.";
-        public const string IDX23010 = "IDX23010: Lifetime validation of the pop token failed. Current time: '{0}', Pop token is valid to: {'1'}.";
+        public const string IDX23010 = "IDX23010: Lifetime validation of the pop token failed. Current time: '{0}', Pop token is valid until: '{1}'.";
         public const string IDX23011 = "IDX23011: The '{0}' claim validation failed. Expected value: '{1}', value found: '{2}'.";
         public const string IDX23012 = "IDX23012: The '{0}' claim validation failed. Expected values: '{0}' or '{1}', value found: '{2}'.";
         public const string IDX23013 = "IDX23013: The 'at' token validation failed. Inner exception: '{0}'.";
