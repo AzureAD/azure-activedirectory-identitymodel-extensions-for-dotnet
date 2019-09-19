@@ -420,7 +420,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             var jwtPopToken = ReadPopTokenAsJwt(popToken);
             var accessToken = ReadAccessToken(jwtPopToken);
             var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, tokenValidationParameters, cancellationToken).ConfigureAwait(false);
-            var validatedPopToken = await ValidatePopTokenAsync(jwtPopToken, tokenValidationResult.SecurityToken as JsonWebToken, httpRequestData, popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
+            var validatedAccessToken = tokenValidationResult.SecurityToken as JsonWebToken;
+            // use the decrypted jwt if the accessToken is encrypted.
+            if (validatedAccessToken.InnerToken != null)
+                validatedAccessToken = validatedAccessToken.InnerToken;
+
+            var validatedPopToken = await ValidatePopTokenAsync(jwtPopToken, validatedAccessToken, httpRequestData, popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
 
             return new HttpRequestPopTokenValidationResult()
             {
