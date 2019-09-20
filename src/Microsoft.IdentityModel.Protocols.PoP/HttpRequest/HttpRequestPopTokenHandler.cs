@@ -262,6 +262,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
                     throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
             }
 
+            // value is normalized by always omitting the trailing '/'
             payload.Add(ClaimTypes.P, httpRequestUri.AbsolutePath.TrimEnd('/'));
         }
 
@@ -335,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
                 var lastHeader = sanitizedHeaders.Last();
                 foreach (var header in sanitizedHeaders)
                 {
-                    var headerName = header.Key.ToLower();
+                    var headerName = header.Key.ToLowerInvariant();
                     headerNameList.Add(headerName);
 
                     var encodedValue = $"{headerName}: {header.Value}";
@@ -647,8 +648,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             var expectedUClaimValue = httpRequestUri.Host;
             var expectedUClaimValueIncludingPort = $"{expectedUClaimValue}:{httpRequestUri.Port}";
 
-            if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.Ordinal) &&
-                !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.Ordinal))
+            if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
         }
 
@@ -675,9 +676,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.P)));
 
+            // value is normalized by always omitting the trailing '/'
             var expectedPClaimValue = httpRequestUri.AbsolutePath.TrimEnd('/');
 
-            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.Ordinal))
+            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, ClaimTypes.P, expectedPClaimValue, pClaimValue)));
         }
 
@@ -1124,8 +1126,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var queryString = httpRequestUri.Query.TrimStart('?');
-            var queryParams = queryString.Split('&').Select(x => x.Split('=')).Select(x => new KeyValuePair<string, string>(x[0], x[1])).ToList();
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
+
+            if (string.IsNullOrEmpty(queryString))
+                return sanitizedQueryParams;
+
+            var queryParams = queryString.Split('&').Select(x => x.Split('=')).Select(x => new KeyValuePair<string, string>(x[0], x[1])).ToList();
             var repeatedQueryParams = new List<string>();
             foreach (var queryParam in queryParams)
             {
