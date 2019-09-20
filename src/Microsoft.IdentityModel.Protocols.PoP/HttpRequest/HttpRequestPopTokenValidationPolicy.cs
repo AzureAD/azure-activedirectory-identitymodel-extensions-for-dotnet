@@ -62,9 +62,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     /// 
     /// </summary>
     /// <param name="kid"></param>
+    /// <param name="validatedAccessToken"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, CancellationToken cancellationToken);
 
     /// <summary>
     /// 

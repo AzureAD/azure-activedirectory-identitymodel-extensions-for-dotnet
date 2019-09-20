@@ -905,7 +905,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             }
             else if (cnf.TryGetValue(JwtHeaderParameterNames.Kid, StringComparison.Ordinal, out var kid))
             {
-                return await ResolvePopKeyFromKeyIdentifierAsync(kid.ToString(), popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
+                return await ResolvePopKeyFromKeyIdentifierAsync(kid.ToString(), validatedAccessToken, popTokenValidationPolicy, cancellationToken).ConfigureAwait(false);
             }
             else
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23014)));
@@ -1085,10 +1085,11 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
         /// 
         /// </summary>
         /// <param name="kid"></param>
+        /// <param name="validatedAccessToken"></param>
         /// <param name="popTokenValidationPolicy"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken)
+        protected virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(kid))
                 throw LogHelper.LogArgumentNullException(nameof(kid));
@@ -1097,7 +1098,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(popTokenValidationPolicy));
 
             if (popTokenValidationPolicy.PopKeyResolverFromKeyIdentifierAsync != null)
-                return await popTokenValidationPolicy.PopKeyResolverFromKeyIdentifierAsync(kid, cancellationToken).ConfigureAwait(false);
+                return await popTokenValidationPolicy.PopKeyResolverFromKeyIdentifierAsync(kid, validatedAccessToken, cancellationToken).ConfigureAwait(false);
             else
             {
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23023)));
