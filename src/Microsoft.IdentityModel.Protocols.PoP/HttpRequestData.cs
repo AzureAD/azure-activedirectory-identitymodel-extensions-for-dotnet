@@ -59,6 +59,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP
             if (HttpRequestHeaders == null)
                 HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
+            if (headers == null || !headers.Any())
+                return;
+
             foreach (var header in headers)
             {
                 if (HttpRequestHeaders.ContainsKey(header.Key))
