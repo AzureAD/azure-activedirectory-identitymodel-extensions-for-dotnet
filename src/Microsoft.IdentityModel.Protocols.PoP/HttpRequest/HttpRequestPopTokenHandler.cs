@@ -433,8 +433,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
                 AccessToken = accessToken,
                 ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                 ValidatedAccessToken = tokenValidationResult.SecurityToken,
-                PopToken = popToken,
-                ValidatedPopToken = validatedPopToken
+                HttpRequestPopToken = popToken,
+                ValidatedHttpRequestPopToken = validatedPopToken
             };
         }
 

@@ -34,13 +34,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     public class HttpRequestPopTokenValidationResult : PopTokenValidationResult
     {
         /// <summary>
-        /// Gets or sets the PopToken.
+        /// Gets or sets the HttpRequestPopToken.
         /// </summary>
-        public string PopToken { get; set; }
+        public string HttpRequestPopToken { get; set; }
 
         /// <summary>
-        /// Gets or sets the validated PopToken.
+        /// Gets or sets the validated HttpRequestPopToken.
         /// </summary>
-        public SecurityToken ValidatedPopToken { get; set; }
+        public SecurityToken ValidatedHttpRequestPopToken { get; set; }
     }
 }
