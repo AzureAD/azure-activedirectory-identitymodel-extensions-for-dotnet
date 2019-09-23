@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
 
             try
             {
-                var popToken = await popHandler.CreatePopTokenAsync(accessTokenWithCnfClaim, signingCredentials, httpRequestData, popCreationPolicy, CancellationToken.None).ConfigureAwait(false);
+                var popToken = await popHandler.CreatePopTokenAsync(accessTokenWithCnfClaim, httpRequestData, signingCredentials,popCreationPolicy, CancellationToken.None).ConfigureAwait(false);
                 var result = await popHandler.ValidatePopTokenAsync(popToken, httpRequestData, tokenValidationParameters, popValidationPolicy, CancellationToken.None).ConfigureAwait(false);
                 //4.1.
                 var popHeader = PopUtilities.CreateHttpRequestPopHeader(result.HttpRequestPopToken);
