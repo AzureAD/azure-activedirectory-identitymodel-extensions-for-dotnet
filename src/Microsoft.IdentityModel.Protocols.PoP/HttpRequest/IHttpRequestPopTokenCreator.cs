@@ -39,11 +39,11 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
         /// 
         /// </summary>
         /// <param name="tokenWithCnfClaim"></param>
-        /// <param name="signingCredentials"></param>
         /// <param name="httpRequestData"></param>
+        /// <param name="signingCredentials"></param>
         /// <param name="popTokenCreationPolicy"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, SigningCredentials signingCredentials, HttpRequestData httpRequestData, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
+        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, HttpRequestData httpRequestData, SigningCredentials signingCredentials, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
     }
 }
