@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 
-using Microsoft.IdentityModel.Tokens;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,15 +34,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// </summary>
     public interface ISignedHttpRequestCreator
     {
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="tokenWithCnfClaim"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="signingCredentials"></param>
-        /// <param name="popTokenCreationPolicy"></param>
+        /// <param name="signedHttpRequestCreationData"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
+        Task<string> CreateSignedHttpRequestAsync(SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken);
     }
 }

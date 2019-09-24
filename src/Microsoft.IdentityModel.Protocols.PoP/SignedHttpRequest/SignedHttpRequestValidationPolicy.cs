@@ -43,39 +43,39 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// </summary>
     /// <param name="jwtPopToken"></param>
     /// <param name="validatedAccessToken"></param>
-    /// <param name="httpRequestData"></param>
-    /// <param name="popTokenValidationPolicy"></param>
+    /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="validatedAccessToken"></param>
-    /// <param name="httpRequestData"></param>
-    /// <param name="popTokenValidationPolicy"></param>
+    /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="kid"></param>
     /// <param name="validatedAccessToken"></param>
-    /// <param name="httpRequestData"></param>
+    /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="jwtPopToken"></param>
+    /// <param name="nonce"></param>
+    /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenReplayValidatorAsync(JsonWebToken jwtPopToken, CancellationToken cancellationToken);
+    public delegate Task PopTokenReplayValidatorAsync(JsonWebToken jwtPopToken, string nonce, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
 
     /// <summary>
@@ -84,11 +84,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="popKey"></param>
     /// <param name="jwtPopToken"></param>
     /// <param name="validatedAccessToken"></param>
-    /// <param name="httpRequestData"></param>
-    /// <param name="popTokenValidationPolicy"></param>
+    /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 

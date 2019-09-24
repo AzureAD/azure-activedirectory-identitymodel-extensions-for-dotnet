@@ -37,13 +37,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="signedHttpRequestToken"></param>
+        /// <param name="signedHttpRequest"></param>
         /// <param name="httpRequestData"></param>
         /// <param name="accessTokenValidationParameters"></param>
         /// <param name="signedHttpRequestValidationPolicy"></param>
-        public SignedHttpRequestValidationData(string signedHttpRequestToken, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy) : base(httpRequestData, CallContext.Default)
+        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy) : base(httpRequestData, CallContext.Default)
         {
-            SignedHttpRequestToken = !string.IsNullOrEmpty(signedHttpRequestToken) ? signedHttpRequestToken : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestToken));
+            SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
             SignedHttpRequestValidationPolicy = signedHttpRequestValidationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationPolicy));
         }
@@ -51,14 +51,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="signedHttpRequestToken"></param>
+        /// <param name="signedHttpRequest"></param>
         /// <param name="httpRequestData"></param>
         /// <param name="accessTokenValidationParameters"></param>
         /// <param name="signedHttpRequestValidationPolicy"></param>
         /// <param name="callContext"></param>
-        public SignedHttpRequestValidationData(string signedHttpRequestToken, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) : base(httpRequestData, callContext)
+        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) : base(httpRequestData, callContext)
         {
-            SignedHttpRequestToken = !string.IsNullOrEmpty(signedHttpRequestToken) ? signedHttpRequestToken : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestToken));
+            SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
             SignedHttpRequestValidationPolicy = signedHttpRequestValidationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationPolicy));
         }
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        public string SignedHttpRequestToken { get; }
+        public string SignedHttpRequest { get; }
 
         /// <summary>
         /// 
