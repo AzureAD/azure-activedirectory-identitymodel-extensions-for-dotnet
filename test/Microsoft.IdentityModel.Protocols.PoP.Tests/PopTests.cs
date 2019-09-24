@@ -81,10 +81,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
                     { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
                 }
             };
-            
 
-            // adjust the PopTokenCreationPolicy
-            var popCreationPolicy = new SignedHttpRequestCreationPolicy()
+
+            // adjust the creationPolicy
+            var creationPolicy = new SignedHttpRequestCreationPolicy()
             {
                 CreateTs = true,
                 CreateM = true,
@@ -95,7 +95,17 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
                 CreateQ = true,
             };
 
-           
+            // adjust the validationPolicy
+            var validationPolicy = new SignedHttpRequestValidationPolicy()
+            {
+                ValidateTs = true,
+                ValidateM = true,
+                ValidateP = true,
+                ValidateU = true,
+                ValidateH = false,
+                ValidateB = false,
+                ValidateQ = false,
+            };
 
             var tokenValidationParameters = new TokenValidationParameters()
             {
@@ -106,36 +116,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
 
             try
             {
-                var popToken = await popHandler.CreatePopTokenAsync(accessTokenWithCnfClaim, httpRequestData, signingCredentials,popCreationPolicy, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequestCreationData = new SignedHttpRequestCreationData(accessTokenWithCnfClaim, httpRequestData, signingCredentials, creationPolicy);
+                var signedHttpRequest = await popHandler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
 
-
-                var httpRequestDataForValidation = new HttpRequestData()
-                {
-                    HttpMethod = "GET",
-                    HttpRequestUri = new Uri("https://www.contoso.com/it/requests/"),
-                    HttpRequestBody = Guid.NewGuid().ToByteArray(),
-                    HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
-                {
-                    { "Content-Type", new List<string> { "application/json" } },
-                    { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
-                }
-                };
-
-                // adjust the PopTokenValidationPolicy
-                var popValidationPolicy = new SignedHttpRequestValidationPolicy()
-                {
-                    ValidateTs = true,
-                    ValidateM = true,
-                    ValidateP = true,
-                    ValidateU = true,
-                    ValidateH = false,
-                    ValidateB = false,
-                    ValidateQ = false,
-                };
-
-                var result = await popHandler.ValidatePopTokenAsync(popToken, httpRequestDataForValidation, tokenValidationParameters, popValidationPolicy, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequestValiationData = new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
+                var result = await popHandler.ValidateSignedHttpRequestAsync(signedHttpRequestValiationData, CancellationToken.None).ConfigureAwait(false);
+                
                 //4.1.
-                var popHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequestJws);
+                var signedHttpRequestHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequestJws);
             }
             catch (PopException e)
             {

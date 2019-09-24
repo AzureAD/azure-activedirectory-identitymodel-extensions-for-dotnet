@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 
-using Microsoft.IdentityModel.Tokens;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,12 +37,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="popToken"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="tokenValidationParameters"></param>
-        /// <param name="popTokenValidationPolicy"></param>
+        /// <param name="signedHttpRequestValidationData"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<SignedHttpRequestValidationResult> ValidatePopTokenAsync(string popToken, HttpRequestData httpRequestData, TokenValidationParameters tokenValidationParameters, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+        Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestAsync(SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
     }
 }
