@@ -23,40 +23,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
 
-using System;
+using Microsoft.IdentityModel.Tokens;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
+    /// 
     /// </summary>
-    public class HttpRequestPopInvalidHClaimException : PopValidationException
+    public interface ISignedHttpRequestValidator
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidHClaimException"/> class.
+        /// 
         /// </summary>
-        public HttpRequestPopInvalidHClaimException()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidHClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public HttpRequestPopInvalidHClaimException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidHClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public HttpRequestPopInvalidHClaimException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        /// <param name="popToken"></param>
+        /// <param name="httpRequestData"></param>
+        /// <param name="tokenValidationParameters"></param>
+        /// <param name="popTokenValidationPolicy"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<SignedHttpRequestValidationResult> ValidatePopTokenAsync(string popToken, HttpRequestData httpRequestData, TokenValidationParameters tokenValidationParameters, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
     }
 }

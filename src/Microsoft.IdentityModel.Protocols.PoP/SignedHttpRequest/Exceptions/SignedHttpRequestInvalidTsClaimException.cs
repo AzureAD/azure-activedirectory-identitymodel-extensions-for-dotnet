@@ -23,24 +23,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
+//------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tokens;
+using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public class HttpRequestPopTokenValidationResult : PopTokenValidationResult
+    public class SignedHttpRequestInvalidTsClaimException : PopValidationException
     {
         /// <summary>
-        /// Gets or sets the HttpRequestPopToken.
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidTsClaimException"/> class.
         /// </summary>
-        public string HttpRequestPopToken { get; set; }
+        public SignedHttpRequestInvalidTsClaimException()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the validated HttpRequestPopToken.
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidTsClaimException"/> class.
         /// </summary>
-        public SecurityToken ValidatedHttpRequestPopToken { get; set; }
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public SignedHttpRequestInvalidTsClaimException(string message)
+            : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidTsClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public SignedHttpRequestInvalidTsClaimException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

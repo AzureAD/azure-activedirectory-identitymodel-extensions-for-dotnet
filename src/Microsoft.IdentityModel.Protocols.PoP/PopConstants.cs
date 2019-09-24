@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         /// <summary>
         /// 
         /// </summary>
-        public static class HttpRequest
+        public static class SignedHttpRequest
         {
             /// <summary>
             /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1

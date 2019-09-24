@@ -23,27 +23,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
+//------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Tokens;
-using System.Threading;
-using System.Threading.Tasks;
+using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public interface IHttpRequestPopTokenCreator
+    public class SignedHttpRequestInvalidPClaimException : PopValidationException
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidPClaimException"/> class.
         /// </summary>
-        /// <param name="tokenWithCnfClaim"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="signingCredentials"></param>
-        /// <param name="popTokenCreationPolicy"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<string> CreatePopTokenAsync(string tokenWithCnfClaim, HttpRequestData httpRequestData, SigningCredentials signingCredentials, HttpRequestPopTokenCreationPolicy popTokenCreationPolicy, CancellationToken cancellationToken);
+        public SignedHttpRequestInvalidPClaimException()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidPClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public SignedHttpRequestInvalidPClaimException(string message)
+            : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidPClaimException"/> class.
+        /// </summary>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public SignedHttpRequestInvalidPClaimException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }
