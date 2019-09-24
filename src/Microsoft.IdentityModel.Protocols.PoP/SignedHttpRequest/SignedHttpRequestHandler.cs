@@ -33,7 +33,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -65,9 +64,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (signedHttpRequestCreationData == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData));
 
-            var header = CreatePopTokenHeader(signedHttpRequestCreationData);
-            var payload = CreatePopTokenPayload(signedHttpRequestCreationData);
-            return await SignPopTokenAsync(header, payload, signedHttpRequestCreationData, cancellationToken).ConfigureAwait(false);
+            var header = CreateHttpRequestHeader(signedHttpRequestCreationData);
+            var payload = CreateHttpRequestPayload(signedHttpRequestCreationData);
+            return await SignHttpRequestAsync(header, payload, signedHttpRequestCreationData, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -75,12 +74,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </summary>
         /// <param name="signedHttpRequestCreationData"></param>
         /// <returns></returns>
-        protected virtual string CreatePopTokenHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             var header = new JObject
             {
                 { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm },
-                { JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.PopTokenType }
+                { JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType }
             };
 
             if (signedHttpRequestCreationData.HttpRequestSigningCredentials.Key?.KeyId != null)
@@ -97,7 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </summary>
         /// <param name="signedHttpRequestCreationData"></param>
         /// <returns></returns>
-        private protected virtual string CreatePopTokenPayload(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        private protected virtual string CreateHttpRequestPayload(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
 
@@ -140,7 +139,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="signedHttpRequestCreationData"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected virtual Task<string> SignPopTokenAsync(string header, string payload, SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
+        protected virtual Task<string> SignHttpRequestAsync(string header, string payload, SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(header))
                 throw LogHelper.LogArgumentNullException(nameof(header));
@@ -176,8 +175,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var popTokenCreationTime = DateTime.UtcNow.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.ClockSkew);
-            payload.Add(ClaimTypes.Ts, (long)(popTokenCreationTime - EpochTime.UnixEpoch).TotalSeconds);
+            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.ClockSkew);
+            payload.Add(ClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
         }
 
         /// <summary>
@@ -196,7 +195,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpMethod));
 
             if (!httpMethod.ToUpper().Equals(httpMethod, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
 
             payload.Add(ClaimTypes.M, httpMethod);
         }
@@ -217,7 +216,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
 
             if (!httpRequestUri.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
 
             // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
             // u claim: The HTTP URL host component as a JSON string. This MAY include the port separated from the host by a colon in host:port format.
@@ -244,11 +243,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
 
-            if (!httpRequestUri.IsAbsoluteUri)
-            {
-                if (!Uri.TryCreate(_baseUriHelper, httpRequestUri, out httpRequestUri))
-                    throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
-            }
+            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
 
             payload.Add(ClaimTypes.P, httpRequestUri.AbsolutePath);
         }
@@ -268,12 +263,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
 
-            if (!httpRequestUri.IsAbsoluteUri)
-            {
-                if (!Uri.TryCreate(_baseUriHelper, httpRequestUri, out httpRequestUri))
-                    throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
-            }
-
+            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
 
             StringBuilder stringBuffer = new StringBuilder();
@@ -297,7 +287,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.Q, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.Q, e), e));
             }
         }
 
@@ -346,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.H, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.H, e), e));
             }
         }
 
@@ -372,7 +362,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.B, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.B, e), e));
             }
         }
 
@@ -405,44 +395,44 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (signedHttpRequestValidationData == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData));
 
-            var jwtPopToken = ReadPopTokenAsJwt(signedHttpRequestValidationData.SignedHttpRequest);
-            var accessToken = ReadAccessToken(jwtPopToken);
+            var jwtSignedHttpRequest = ReadSignedHttpRequestAsJwt(signedHttpRequestValidationData.SignedHttpRequest);
+            var accessToken = ReadAccessToken(jwtSignedHttpRequest);
             var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             var validatedAccessToken = tokenValidationResult.SecurityToken as JsonWebToken;
             // use the decrypted jwt if the accessToken is encrypted.
             if (validatedAccessToken.InnerToken != null)
                 validatedAccessToken = validatedAccessToken.InnerToken;
 
-            var validatedPopToken = await ValidatePopTokenAsync(jwtPopToken, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            var validateSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
 
             return new SignedHttpRequestValidationResult()
             {
                 AccessToken = accessToken,
                 ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                 ValidatedAccessToken = tokenValidationResult.SecurityToken,
-                SignedHttpRequestJws = validatedPopToken.EncodedToken,
-                ValidatedSignedHttpRequestJws = validatedPopToken
+                SignedHttpRequest = validateSignedHttpRequest.EncodedToken,
+                ValidatedSignedHttpRequest = validateSignedHttpRequest
             };
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="popToken"></param>
+        /// <param name="signedHttpRequest"></param>
         /// <returns></returns>
-        protected virtual JsonWebToken ReadPopTokenAsJwt(string popToken)
+        protected virtual JsonWebToken ReadSignedHttpRequestAsJwt(string signedHttpRequest)
         {
-            return _jwtTokenHandler.ReadJsonWebToken(popToken);
+            return _jwtTokenHandler.ReadJsonWebToken(signedHttpRequest);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <returns></returns>
-        protected virtual string ReadAccessToken(JsonWebToken jwtPopToken)
+        protected virtual string ReadAccessToken(JsonWebToken jwtSignedHttpRequest)
         {
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.At, out string accessToken) || accessToken == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string accessToken) || accessToken == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.At)));
 
             return accessToken;
@@ -471,80 +461,80 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="validatedAccessToken"></param>
         /// <param name="signedHttpRequestValidationData"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        private protected virtual async Task<JsonWebToken> ValidatePopTokenAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        private protected virtual async Task<JsonWebToken> ValidateSignedHttpRequestAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenReplayValidatorAsync != null)
+            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null)
             {
-                if (jwtPopToken.TryGetPayloadValue(ClaimTypes.Nonce, out string nonce))
-                    await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenReplayValidatorAsync(jwtPopToken, nonce, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+                if (jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.Nonce, out string nonce))
+                    await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync(nonce, jwtSignedHttpRequest, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
                 else
-                    await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenReplayValidatorAsync(jwtPopToken, string.Empty, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+                    await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync(string.Empty, jwtSignedHttpRequest, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             }
 
-            await ValidatePopTokenSignatureAsync(jwtPopToken, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            await ValidateSignedHttpRequestSignatureAsync(jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateTs)
-                ValidateTsClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateTsClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateM)
-                ValidateMClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateMClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateU)
-                ValidateUClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateUClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateP)
-                ValidatePClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidatePClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateQ)
-                ValidateQClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateQClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateH)
-                ValidateHClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateHClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateB)
-                ValidateBClaim(jwtPopToken, signedHttpRequestValidationData);
+                ValidateBClaim(jwtSignedHttpRequest, signedHttpRequestValidationData);
 
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.CustomClaimValidatorAsync != null)
-                await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.CustomClaimValidatorAsync(jwtPopToken, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+                await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.CustomClaimValidatorAsync(jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
 
-            return jwtPopToken;
+            return jwtSignedHttpRequest;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="validatedAccessToken"></param>
         /// <param name="signedHttpRequestValidationData"></param>
         /// <param name="cancellationToken"></param>
-        protected virtual async Task ValidatePopTokenSignatureAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        protected virtual async Task ValidateSignedHttpRequestSignatureAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             var popKey = await ResolvePopKeyAsync(validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             if (popKey == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23030)));
 
-            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenSignatureValidatorAsync != null)
+            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestSignatureValidatorAsync != null)
             {
-                await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenSignatureValidatorAsync(popKey, jwtPopToken, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+                await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestSignatureValidatorAsync(popKey, jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
                 return;
             }
 
-            var signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, jwtPopToken.Alg);
+            var signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, jwtSignedHttpRequest.Alg);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23000, popKey?.ToString() ?? "Null", jwtPopToken.Alg ?? "Null")));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23000, popKey?.ToString() ?? "Null", jwtSignedHttpRequest.Alg ?? "Null")));
 
             try
             {
-                var encodedBytes = Encoding.UTF8.GetBytes(jwtPopToken.EncodedHeader + "." + jwtPopToken.EncodedPayload);
-                var signature = Base64UrlEncoder.DecodeBytes(jwtPopToken.EncodedSignature);
+                var encodedBytes = Encoding.UTF8.GetBytes(jwtSignedHttpRequest.EncodedHeader + "." + jwtSignedHttpRequest.EncodedPayload);
+                var signature = Base64UrlEncoder.DecodeBytes(jwtSignedHttpRequest.EncodedSignature);
 
                 if (!signatureProvider.Verify(encodedBytes, signature))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23009)));
@@ -558,40 +548,40 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateTsClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateTsClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Ts, out long tsClaimValue))
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.Ts, out long tsClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.Ts)));
 
             DateTime utcNow = DateTime.UtcNow;
-            DateTime popTokenCreationTime = EpochTime.DateTime(tsClaimValue);
-            DateTime popTokenExpirationTime = popTokenCreationTime.Add(signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopTokenLifetime);
+            DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsClaimValue);
+            DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestLifetime);
 
-            if (utcNow > popTokenExpirationTime)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, utcNow, popTokenExpirationTime)));
+            if (utcNow > signedHttpRequestExpirationTime)
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, utcNow, signedHttpRequestExpirationTime)));
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateMClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateMClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var expectedHttpMethod = signedHttpRequestValidationData.HttpRequestData.HttpMethod;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (string.IsNullOrEmpty(expectedHttpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.M, out string httpMethod) || httpMethod == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.M, out string httpMethod) || httpMethod == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.M)));
 
             // "get " is functionally the same as "GET".
@@ -605,14 +595,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateUClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateUClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.HttpRequestUri));
@@ -620,7 +610,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.U, out string uClaimValue) || uClaimValue == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.U, out string uClaimValue) || uClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.U)));
 
             // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2
@@ -637,25 +627,20 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidatePClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidatePClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.HttpRequestUri));
 
-            if (!httpRequestUri.IsAbsoluteUri)
-            {
-                if (!Uri.TryCreate(_baseUriHelper, httpRequestUri, out httpRequestUri))
-                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
-            }
-
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
+            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.P)));
 
             var expectedPClaimValue = httpRequestUri.AbsolutePath.TrimEnd('/');
@@ -669,27 +654,22 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateQClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateQClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestUri));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Q, out JArray qClaim) || qClaim == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.Q, out JArray qClaim) || qClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.Q)));
 
-            if (!httpRequestUri.IsAbsoluteUri)
-            {
-                if (!Uri.TryCreate(_baseUriHelper, httpRequestUri, out httpRequestUri))
-                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
-            }
-
+            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
 
             string qClaimBase64UrlEncodedHash = string.Empty;
@@ -747,19 +727,19 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateHClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateHClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestHeaders = signedHttpRequestValidationData.HttpRequestData.HttpRequestHeaders;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestHeaders == null || !httpRequestHeaders.Any())
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestHeaders));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.H, out JArray hClaim) || hClaim == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.H, out JArray hClaim) || hClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.H)));
 
             var sanitizedHeaders = SanitizeHeaders(httpRequestHeaders);
@@ -818,19 +798,19 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="jwtPopToken"></param>
+        /// <param name="jwtSignedHttpRequest"></param>
         /// <param name="signedHttpRequestValidationData"></param>
-        protected virtual void ValidateBClaim(JsonWebToken jwtPopToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        protected virtual void ValidateBClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestBody = signedHttpRequestValidationData.HttpRequestData.HttpRequestBody;
 
-            if (jwtPopToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtPopToken));
+            if (jwtSignedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestBody == null || httpRequestBody.Count() == 0)
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestBody));
 
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.B, out string bClaim) || bClaim == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.B, out string bClaim) || bClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.B)));
 
             string expectedBase64UrlEncodedHash;
@@ -840,7 +820,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.B, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ClaimTypes.B, e), e));
             }
 
             if (!string.Equals(expectedBase64UrlEncodedHash, bClaim, StringComparison.Ordinal))
@@ -1083,6 +1063,21 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             {
                 var hashedBytes = hash.ComputeHash(bytes);
                 return Base64UrlEncoder.Encode(hashedBytes);
+            }
+        }
+
+        private Uri EnsureAbsoluteUri(Uri uri)
+        {
+            if (uri.IsAbsoluteUri)
+            {
+                return uri;
+            }
+            else
+            {
+                if (!Uri.TryCreate(_baseUriHelper, uri, out Uri absoluteUri))
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23007, uri.ToString())));
+
+                return absoluteUri;
             }
         }
 

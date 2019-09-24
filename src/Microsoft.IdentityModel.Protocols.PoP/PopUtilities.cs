@@ -39,14 +39,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="popToken"></param>
+        /// <param name="signedHttpRequest"></param>
         /// <returns></returns>
-        public static string CreateSignedHttpRequestHeader(string popToken)
+        public static string CreateSignedHttpRequestHeader(string signedHttpRequest)
         {
-            if (string.IsNullOrEmpty(popToken))
-                throw LogHelper.LogArgumentNullException(nameof(popToken));
+            if (string.IsNullOrEmpty(signedHttpRequest))
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
 
-            return $"{PopConstants.SignedHttpRequest.PopAuthorizationHeader} {popToken}";
+            return $"{PopConstants.SignedHttpRequest.AuthorizationHeader} {signedHttpRequest}";
         }
 
         /// <summary>

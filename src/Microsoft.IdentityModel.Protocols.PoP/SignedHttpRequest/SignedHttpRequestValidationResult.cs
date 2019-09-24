@@ -34,13 +34,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     public class SignedHttpRequestValidationResult : PopTokenValidationResult
     {
         /// <summary>
-        /// Gets or sets the SignedHttpRequest JWS content.
+        /// Gets or sets the SignedHttpRequest.
         /// </summary>
-        public string SignedHttpRequestJws { get; set; }
+        public string SignedHttpRequest { get; set; }
 
         /// <summary>
-        /// Gets or sets the validated SignedHttpRequest JWS content.
+        /// Gets or sets the validated SignedHttpRequest.
         /// </summary>
-        public SecurityToken ValidatedSignedHttpRequestJws { get; set; }
+        public SecurityToken ValidatedSignedHttpRequest { get; set; }
     }
 }

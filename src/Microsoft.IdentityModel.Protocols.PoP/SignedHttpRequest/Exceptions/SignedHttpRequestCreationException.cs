@@ -23,35 +23,40 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
+//------------------------------------------------------------------------------
+
+using System;
 
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
     /// </summary>
-    public abstract class SignedHttpRequestData
+    public class SignedHttpRequestCreationException : PopCreationException
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="SignedHttpRequestCreationException"/> class.
         /// </summary>
-        /// <param name="httpRequestData"></param>
-        /// <param name="callContext"></param>
-        public SignedHttpRequestData(HttpRequestData httpRequestData, CallContext callContext)
+        public SignedHttpRequestCreationException()
         {
-            HttpRequestData = httpRequestData ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestData));
-            CallContext = callContext ?? throw LogHelper.LogArgumentNullException(nameof(callContext));
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="SignedHttpRequestCreationException"/> class.
         /// </summary>
-        public CallContext CallContext { get; }
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public SignedHttpRequestCreationException(string message)
+            : base(message)
+        {
+        }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="SignedHttpRequestCreationException"/> class.
         /// </summary>
-        public HttpRequestData HttpRequestData { get; }
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        public SignedHttpRequestCreationException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }
