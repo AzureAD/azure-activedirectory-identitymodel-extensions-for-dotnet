@@ -34,9 +34,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
-    using ClaimTypes = PopConstants.HttpRequest.ClaimTypes;
+    using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
 
     /// <summary>
     /// 
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     /// <param name="popTokenValidationPolicy"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, HttpRequestPopTokenValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
+    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, HttpRequestData httpRequestData, SignedHttpRequestValidationPolicy popTokenValidationPolicy, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
     /// <summary>
     /// 
     /// </summary>
-    public class HttpRequestPopTokenValidationPolicy
+    public class SignedHttpRequestValidationPolicy
     {
         private TimeSpan _popTokenLifetime = DefaultPopTokenLifetime;
 

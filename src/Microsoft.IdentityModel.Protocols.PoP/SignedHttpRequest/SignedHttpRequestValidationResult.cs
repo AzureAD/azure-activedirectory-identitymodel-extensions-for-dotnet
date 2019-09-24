@@ -23,40 +23,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
 
-using System;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
+namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
+    /// 
     /// </summary>
-    public class HttpRequestPopInvalidTsClaimException : PopValidationException
+    public class SignedHttpRequestValidationResult : PopTokenValidationResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
+        /// Gets or sets the SignedHttpRequest JWS content.
         /// </summary>
-        public HttpRequestPopInvalidTsClaimException()
-        {
-        }
+        public string SignedHttpRequestJws { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
+        /// Gets or sets the validated SignedHttpRequest JWS content.
         /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public HttpRequestPopInvalidTsClaimException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpRequestPopInvalidTsClaimException"/> class.
-        /// </summary>
-        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public HttpRequestPopInvalidTsClaimException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+        public SecurityToken ValidatedSignedHttpRequestJws { get; set; }
     }
 }
