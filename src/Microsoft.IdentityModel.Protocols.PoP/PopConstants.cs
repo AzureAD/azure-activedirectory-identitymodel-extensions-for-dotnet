@@ -45,12 +45,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP
             /// <summary>
             /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
             /// </summary>
-            public const string PopAuthorizationHeader = "PoP";
+            public const string AuthorizationHeader = "PoP";
 
             /// <summary>
             /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.1
             /// </summary>
-            public const string PopTokenType = "pop";
+            public const string TokenType = "pop";
 
             /// <summary>
             /// 

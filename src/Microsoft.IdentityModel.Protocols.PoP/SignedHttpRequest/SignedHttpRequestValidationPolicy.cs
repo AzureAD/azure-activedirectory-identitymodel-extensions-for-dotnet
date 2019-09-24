@@ -41,12 +41,20 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="jwtPopToken"></param>
+    /// <param name="jweCnf"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jweCnf, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="jwtSignedHttpRequest"></param>
     /// <param name="validatedAccessToken"></param>
     /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
@@ -70,39 +78,30 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="jwtPopToken"></param>
     /// <param name="nonce"></param>
+    /// <param name="jwtSignedHttpRequest"></param>
     /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenReplayValidatorAsync(JsonWebToken jwtPopToken, string nonce, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
-
+    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="popKey"></param>
-    /// <param name="jwtPopToken"></param>
+    /// <param name="jwtSignedHttpRequest"></param>
     /// <param name="validatedAccessToken"></param>
     /// <param name="signedHttpRequestValidationData"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public delegate Task PopTokenSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtPopToken, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="jwe"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jwe, CancellationToken cancellationToken);
+    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// 
     /// </summary>
     public class SignedHttpRequestValidationPolicy
     {
-        private TimeSpan _popTokenLifetime = DefaultPopTokenLifetime;
+        private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
 
         /// <summary>
         /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1
@@ -132,31 +131,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <summary>
         /// 
         /// </summary>
-        public static readonly TimeSpan DefaultPopTokenLifetime = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan DefaultSignedHttpRequestLifetime = TimeSpan.FromMinutes(5);
 
         /// <summary>
         /// 
         /// </summary>
         public HttpClient HttpClientForJkuResourceRetrieval { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public TimeSpan PopTokenLifetime
-        {
-            get
-            {
-                return _popTokenLifetime;
-            }
-
-            set
-            {
-                if (value < TimeSpan.Zero)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
-
-                _popTokenLifetime = value;
-            }
-        }
 
         /// <summary>
         /// 
@@ -169,18 +149,37 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public PopKeyResolverFromKeyIdentifierAsync PopKeyResolverFromKeyIdentifierAsync { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to check if the pop token is replayed.
         /// </summary>
-        public PopTokenReplayValidatorAsync PopTokenReplayValidatorAsync { get; set; }
+        public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
 
         /// <summary>
         /// 
         /// </summary>
-        public PopTokenSignatureValidatorAsync PopTokenSignatureValidatorAsync { get; set; }
+        public TimeSpan SignedHttpRequestLifetime
+        {
+            get
+            {
+                return _signedHttpRequestLifetime;
+            }
+
+            set
+            {
+                if (value < TimeSpan.Zero)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
+
+                _signedHttpRequestLifetime = value;
+            }
+        }
 
         /// <summary>
+        /// Gets or sets a delegate that will be used to check if the pop token is replayed.
         /// </summary>
-        public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
+        public SignedHttpRequestReplayValidatorAsync SignedHttpRequestReplayValidatorAsync { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public SignedHttpRequestSignatureValidatorAsync SignedHttpRequestSignatureValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be validated or not.
@@ -217,30 +216,30 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </summary>
         public bool ValidateB { get; set; } = false;
 
-        internal bool DoesApply(JsonWebToken jwtPopToken)
+        internal bool DoesApply(JsonWebToken jwtSignedHttpRequest)
         {
-            if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.At, out string at) || string.IsNullOrEmpty(at))
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string at) || string.IsNullOrEmpty(at))
                 return false;
 
-            if (ValidateTs && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Ts, out long _)))
+            if (ValidateTs && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.Ts, out long _)))
                 return false;
 
-            if (ValidateM && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.M, out string m) || string.IsNullOrEmpty(m)))
+            if (ValidateM && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.M, out string m) || string.IsNullOrEmpty(m)))
                 return false;
 
-            if (ValidateU && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.U, out string u) || string.IsNullOrEmpty(u)))
+            if (ValidateU && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.U, out string u) || string.IsNullOrEmpty(u)))
                 return false;
 
-            if (ValidateP && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.P, out string p) || string.IsNullOrEmpty(p)))
+            if (ValidateP && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.P, out string p) || string.IsNullOrEmpty(p)))
                 return false;
 
-            if (ValidateQ && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.Q, out object q) || q == null))
+            if (ValidateQ && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.Q, out object q) || q == null))
                 return false;
 
-            if (ValidateH && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.H, out object h) || h == null))
+            if (ValidateH && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.H, out object h) || h == null))
                 return false;
 
-            if (ValidateB && (!jwtPopToken.TryGetPayloadValue(ClaimTypes.B, out string b) || string.IsNullOrEmpty(b)))
+            if (ValidateB && (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.B, out string b) || string.IsNullOrEmpty(b)))
                 return false;
 
             return true;

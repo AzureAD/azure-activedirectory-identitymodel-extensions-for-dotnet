@@ -39,14 +39,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string IDX23000 = "IDX23000: CryptoProviderFactory returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX23001 = "IDX23001: HttpRequestUri must be absolute when creating or validating the 'u' claim. HttpRequestUri: '{0}'.";
         public const string IDX23002 = "IDX23002: The HTTP Method must be uppercase HTTP verb. HttpMethod: '{0}'.";
-        public const string IDX23003 = "IDX23003: The pop token does not contain the '{0}' claim or claim value is null. This claim is required to validate a pop token.";
+        public const string IDX23003 = "IDX23003: The signed http request does not contain the '{0}' claim or claim value is null. This claim is required to validate a signed http request.";
         public const string IDX23004 = "IDX23004: The following query parameters will not be processed as they are repeated: '{0}'.";
         public const string IDX23005 = "IDX23005: The following headers will not be processed as they are repeated: '{0}'.";
-        public const string IDX23006 = "IDX23006: The address specified '{0}' is not valid as per HTTPS scheme. Please specify an https address for security reasons. For testing with an http address, set the RequireHttpsForJkuResourceRetrieval property on PopTokenValidationPolicy to false.";
+        public const string IDX23006 = "IDX23006: The address specified '{0}' is not valid as per HTTPS scheme. Please specify an https address for security reasons. For testing with an http address, set the RequireHttpsForJkuResourceRetrieval property on SignedHttpRequestValidationPolicy to false.";
         public const string IDX23007 = "IDX23007: HttpRequestUri is an invalid relative URI: '{0}'.";
         public const string IDX23008 = "IDX23008: Exception caught while creating the '{0}' claim. Inner exception: '{1}'.";
-        public const string IDX23009 = "IDX23009: Pop token signature validation failed.";
-        public const string IDX23010 = "IDX23010: Lifetime validation of the pop token failed. Current time: '{0}', Pop token is valid until: '{1}'.";
+        public const string IDX23009 = "IDX23009: Signed http request signature validation failed.";
+        public const string IDX23010 = "IDX23010: Lifetime validation of the signed http request failed. Current time: '{0}', signed http request is valid until: '{1}'.";
         public const string IDX23011 = "IDX23011: The '{0}' claim validation failed. Expected value: '{1}', value found: '{2}'.";
         public const string IDX23012 = "IDX23012: The '{0}' claim validation failed. Expected values: '{1}' or '{2}', value found: '{3}'.";
         public const string IDX23013 = "IDX23013: The 'at' token validation failed. Inner exception: '{0}'.";
@@ -56,16 +56,16 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string IDX23017 = "IDX23017: No decryption keys found. Unable to decrypt a key found in the 'jwe' claim without decryption keys.";
         public const string IDX23018 = "IDX23018: Unable to decrypt a 'jwe' claim. Decryption keys used: '{0}'. Inner exception: '{1}'.";
         public const string IDX23019 = "IDX23019: A security key resolved from the 'jwe' claim is not a symmetric key. Resolved key type: '{0}'.";
-        public const string IDX23020 = "IDX23020: Only one pop key should be resolved using the 'jku' claim. Number of resolved keys: '{0}'.";
-        public const string IDX23021 = "IDX23021: Unable to resolve a pop key from the 'jku' claim. Unable to match kid '{0}' against '{1}'.";
+        public const string IDX23020 = "IDX23020: Only one PoP key should be resolved using the 'jku' claim. Number of resolved keys: '{0}'.";
+        public const string IDX23021 = "IDX23021: Unable to resolve a PoP key from the 'jku' claim. Unable to match kid '{0}' against '{1}'.";
         public const string IDX23022 = "IDX23022: Exception caught while retrieving a jwk set from: '{0}'. Inner exception: '{1}'.";
-        public const string IDX23023 = "IDX23023: To resolve a security key using only the 'kid' claim, set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on PopTokenValidationPolicy.";
+        public const string IDX23023 = "IDX23023: To resolve a security key using only the 'kid' claim, set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on SignedHttpRequestValidationPolicy.";
         public const string IDX23024 = "IDX23024: Unable to parse the '{0}' claim: '{1}'. Inner exception: '{2}'.";
         public const string IDX23025 = "IDX23025: Exception caught while validation the '{0}' claim. Inner exception: '{1}'.";
-        public const string IDX23026 = "IDX23026: The request contains uncovered headers and PopTokenValidationPolicy.AcceptUncoveredHeaders is set to 'false'. Uncovered headers: '{0}'.";
+        public const string IDX23026 = "IDX23026: The request contains uncovered headers and SignedHttpRequestValidationPolicy.AcceptUncoveredHeaders is set to 'false'. Uncovered headers: '{0}'.";
         public const string IDX23027 = "IDX23027: Header: '{0}' is not found in the request headers: '{1}'. Unable to validate the 'h' claim.";
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' is not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
-        public const string IDX23029 = "IDX23029: The request contains uncovered query parameters and PopTokenValidationPolicy.AcceptUncoveredQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
-        public const string IDX23030 = "IDX23030: Resolved pop key is null. Unable to validate a pop token signature without a pop key.";
+        public const string IDX23029 = "IDX23029: The request contains uncovered query parameters and SignedHttpRequestValidationPolicy.AcceptUncoveredQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
+        public const string IDX23030 = "IDX23030: Resolved PoP key is null. Unable to validate a signed http request signature without a PoP key.";
     }
 }

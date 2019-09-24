@@ -41,7 +41,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="httpRequestData"></param>
         /// <param name="httpRequestSigningCredentials"></param>
         /// <param name="signedHttpRequestCreationPolicy"></param>
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) : base(httpRequestData, CallContext.Default)
+        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) 
+            : base(httpRequestData, CallContext.Default)
         {
             AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
             HttpRequestSigningCredentials = httpRequestSigningCredentials ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestSigningCredentials));
@@ -56,7 +57,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="httpRequestSigningCredentials"></param>
         /// <param name="signedHttpRequestCreationPolicy"></param>
         /// <param name="callContext"></param>
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) : base(httpRequestData, callContext)
+        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
+            : base(httpRequestData, callContext)
         {
             AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
             HttpRequestSigningCredentials = httpRequestSigningCredentials ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestSigningCredentials));

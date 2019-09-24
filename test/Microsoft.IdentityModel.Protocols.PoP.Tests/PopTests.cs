@@ -102,9 +102,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
                 ValidateM = true,
                 ValidateP = true,
                 ValidateU = true,
-                ValidateH = false,
-                ValidateB = false,
-                ValidateQ = false,
+                ValidateH = true,
+                ValidateB = true,
+                ValidateQ = true,
             };
 
             var tokenValidationParameters = new TokenValidationParameters()
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
                 var result = await popHandler.ValidateSignedHttpRequestAsync(signedHttpRequestValiationData, CancellationToken.None).ConfigureAwait(false);
                 
                 //4.1.
-                var signedHttpRequestHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequestJws);
+                var signedHttpRequestHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequest);
             }
             catch (PopException e)
             {
