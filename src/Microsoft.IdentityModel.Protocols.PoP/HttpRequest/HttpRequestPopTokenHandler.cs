@@ -262,8 +262,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
                     throw LogHelper.LogExceptionMessage(new PopCreationException(LogHelper.FormatInvariant(LogMessages.IDX23007, httpRequestUri.ToString())));
             }
 
-            // value is normalized by always omitting the trailing '/'
-            payload.Add(ClaimTypes.P, httpRequestUri.AbsolutePath.TrimEnd('/'));
+            payload.Add(ClaimTypes.P, httpRequestUri.AbsolutePath);
         }
 
         /// <summary>
@@ -651,7 +650,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
 
             if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
+                throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, ClaimTypes.U, expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
         }
 
         /// <summary>
@@ -677,11 +676,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.HttpRequest
             if (!jwtPopToken.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.P)));
 
-            // value is normalized by always omitting the trailing '/'
             var expectedPClaimValue = httpRequestUri.AbsolutePath.TrimEnd('/');
+            var expectedPClaimValueWithTrailingForwardSlash = expectedPClaimValue + '/';
 
-            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, ClaimTypes.P, expectedPClaimValue, pClaimValue)));
+            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(expectedPClaimValueWithTrailingForwardSlash, pClaimValue, StringComparison.OrdinalIgnoreCase))
+                throw LogHelper.LogExceptionMessage(new HttpRequestPopInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, ClaimTypes.P, expectedPClaimValue, expectedPClaimValueWithTrailingForwardSlash, pClaimValue)));
         }
 
         /// <summary>

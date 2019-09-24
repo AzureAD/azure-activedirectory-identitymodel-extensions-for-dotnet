@@ -95,17 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
                 CreateQ = true,
             };
 
-            // adjust the PopTokenValidationPolicy
-            var popValidationPolicy = new HttpRequestPopTokenValidationPolicy()
-            {
-                ValidateTs = true,
-                ValidateM = true,
-                ValidateP = true,
-                ValidateU = true,
-                ValidateH = true,
-                ValidateB = true,
-                ValidateQ = true,
-            };
+           
 
             var tokenValidationParameters = new TokenValidationParameters()
             {
@@ -117,7 +107,33 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
             try
             {
                 var popToken = await popHandler.CreatePopTokenAsync(accessTokenWithCnfClaim, httpRequestData, signingCredentials,popCreationPolicy, CancellationToken.None).ConfigureAwait(false);
-                var result = await popHandler.ValidatePopTokenAsync(popToken, httpRequestData, tokenValidationParameters, popValidationPolicy, CancellationToken.None).ConfigureAwait(false);
+
+
+                var httpRequestDataForValidation = new HttpRequestData()
+                {
+                    HttpMethod = "GET",
+                    HttpRequestUri = new Uri("https://www.contoso.com/it/requests/"),
+                    HttpRequestBody = Guid.NewGuid().ToByteArray(),
+                    HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
+                {
+                    { "Content-Type", new List<string> { "application/json" } },
+                    { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                }
+                };
+
+                // adjust the PopTokenValidationPolicy
+                var popValidationPolicy = new HttpRequestPopTokenValidationPolicy()
+                {
+                    ValidateTs = true,
+                    ValidateM = true,
+                    ValidateP = true,
+                    ValidateU = true,
+                    ValidateH = false,
+                    ValidateB = false,
+                    ValidateQ = false,
+                };
+
+                var result = await popHandler.ValidatePopTokenAsync(popToken, httpRequestDataForValidation, tokenValidationParameters, popValidationPolicy, CancellationToken.None).ConfigureAwait(false);
                 //4.1.
                 var popHeader = PopUtilities.CreateHttpRequestPopHeader(result.HttpRequestPopToken);
             }
