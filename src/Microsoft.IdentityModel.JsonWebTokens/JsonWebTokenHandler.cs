@@ -563,7 +563,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateClaimsIdentity(jwtToken, validationParameters, actualIssuer);
         }
 
-        internal ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string actualIssuer)
+        private ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string actualIssuer)
         {
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
