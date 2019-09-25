@@ -7,7 +7,7 @@
     <Description>Includes types that provide support for PoP protocol.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Protocols.PoP</PackageId>
-    <PackageTags>.NET;Windows;Authentication;Identity;PoP;ProofOfPossession</PackageTags>
+    <PackageTags>.NET;Windows;Authentication;Identity;PoP;ProofOfPossession;SignedHttpRequest</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -18,7 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj" />
-    <ProjectReference Include="..\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
@@ -27,7 +26,10 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net451' Or '$(TargetFramework)' == 'net461' ">
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  
+   <ItemGroup >
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
   </ItemGroup>
 
 </Project>
