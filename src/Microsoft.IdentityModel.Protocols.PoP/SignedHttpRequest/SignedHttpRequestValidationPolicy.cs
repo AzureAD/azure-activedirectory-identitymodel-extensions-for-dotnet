@@ -25,135 +25,141 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
 
     /// <summary>
-    /// 
+    /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
     /// </summary>
-    /// <param name="jweCnf"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// A delegate that will be called to validate a custom claim, if set. 
     /// </summary>
-    /// <param name="jwtSignedHttpRequest"></param>
-    /// <param name="validatedAccessToken"></param>
-    /// <param name="signedHttpRequestValidationData"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns>Expected to throw an appropriate exception if custom claim validation failed.</returns>
     public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// A delegate that will take control over PoP key resolution, if set.
     /// </summary>
-    /// <param name="validatedAccessToken"></param>
-    /// <param name="signedHttpRequestValidationData"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
+    /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
     public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
     /// </summary>
-    /// <param name="kid"></param>
-    /// <param name="validatedAccessToken"></param>
-    /// <param name="signedHttpRequestValidationData"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="kid">KeyIdentifier value.</param>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
+    /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
     public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
-    /// <param name="nonce"></param>
-    /// <param name="jwtSignedHttpRequest"></param>
-    /// <param name="signedHttpRequestValidationData"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="nonce">A value of the 'nonce' claim. Value will be <see cref="string.Empty"/> if 'nonce' claim is not found.</param>
+    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
     public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// A delegate that will take control over SignedHttpRequest signature validation, if set.
     /// </summary>
-    /// <param name="popKey"></param>
-    /// <param name="jwtSignedHttpRequest"></param>
-    /// <param name="validatedAccessToken"></param>
-    /// <param name="signedHttpRequestValidationData"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="popKey">A resolved PoP key.</param>
+    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns>Expected to throw an appropriate exception if SignedHttpRequest has invalid signature.</returns>
     public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
-    /// 
+    /// Defines a policy for validating signed http requests. 
     /// </summary>
     public class SignedHttpRequestValidationPolicy
     {
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1
+        /// Gets or sets a value indicating whether the uncovered query parameters are accepted or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUncoveredQueryParameters { get; set; } = true;
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.2
+        /// Gets or sets a value indicating whether the uncovered headers are accepted or not. 
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUncoveredHeaders { get; set; } = true;
 
         /// <summary>
-        /// 
+        /// Gets or sets a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
         /// </summary>
         public IEnumerable<SecurityKey> CnfDecryptionKeys { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="SignedHttpRequestSignatureValidatorAsync"/> delegate.
         /// </summary>
         public CnfDecryptionKeysResolverAsync CnfDecryptionKeysResolverAsync { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="CustomClaimValidatorAsync"/> delegate.
         /// </summary>
         public CustomClaimValidatorAsync CustomClaimValidatorAsync { get; set; }
 
         /// <summary>
-        /// 
+        /// Default value for the <see cref="SignedHttpRequestLifetime"/>.
         /// </summary>
         public static readonly TimeSpan DefaultSignedHttpRequestLifetime = TimeSpan.FromMinutes(5);
 
         /// <summary>
-        /// 
+        /// Gets or sets a custom HttpClient when obtaining a JWK set using the 'jku' claim.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks> s
         public HttpClient HttpClientForJkuResourceRetrieval { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
         /// </summary>
         public PopKeyResolverAsync PopKeyResolverAsync { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="PopKeyResolverFromKeyIdentifierAsync"/> delegate.
         /// </summary>
         public PopKeyResolverFromKeyIdentifierAsync PopKeyResolverFromKeyIdentifierAsync { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether TLS is required when obtaining a JWK set using the 'jku' claim.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks>
         public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
 
         /// <summary>
-        /// 
+        /// Gets or sets the signed http request lifetime.
         /// </summary>
         public TimeSpan SignedHttpRequestLifetime
         {
@@ -172,50 +178,62 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to check if the pop token is replayed.
+        /// Gets or sets the <see cref="SignedHttpRequestReplayValidatorAsync"/> delegate.
         /// </summary>
         public SignedHttpRequestReplayValidatorAsync SignedHttpRequestReplayValidatorAsync { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the <see cref="SignedHttpRequestSignatureValidatorAsync"/> delegate.
         /// </summary>
         public SignedHttpRequestSignatureValidatorAsync SignedHttpRequestSignatureValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateTs { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.M"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateM { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.U"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateU { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.P"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateP { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Q"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateQ { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.H"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateH { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be validated or not.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateB { get; set; } = false;
 
+        /// <summary>
+        /// Checks if the policy applies to the <paramref name="jwtSignedHttpRequest"/>.
+        /// </summary>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <returns><c>true</c> if the policy applies to the <paramref name="jwtSignedHttpRequest"/>, otherwise <c>false</c>.</returns>
         internal bool DoesApply(JsonWebToken jwtSignedHttpRequest)
         {
             if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string at) || string.IsNullOrEmpty(at))

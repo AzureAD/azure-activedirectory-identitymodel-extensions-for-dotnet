@@ -29,12 +29,12 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
+    /// Contains artifacts obtained when a SignedHttpRequest is validated.
     /// </summary>
     public class SignedHttpRequestValidationResult : PopTokenValidationResult
     {
         /// <summary>
-        /// Gets or sets the SignedHttpRequest.
+        /// Gets or sets SignedHttpRequest in original form.
         /// </summary>
         public string SignedHttpRequest { get; set; }
 

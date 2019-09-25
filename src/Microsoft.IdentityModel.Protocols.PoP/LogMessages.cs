@@ -50,9 +50,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string IDX23011 = "IDX23011: The '{0}' claim validation failed. Expected value: '{1}', value found: '{2}'.";
         public const string IDX23012 = "IDX23012: The '{0}' claim validation failed. Expected values: '{1}' or '{2}', value found: '{3}'.";
         public const string IDX23013 = "IDX23013: The 'at' token validation failed. Inner exception: '{0}'.";
-        public const string IDX23014 = "IDX23014: Unable to resolve a PoP key. The 'cnf' object must have one of the following claims: 'jwk', 'jwe', 'jku', 'kid'.";
+        public const string IDX23014 = "IDX23014: Unable to resolve a PoP key. The 'cnf' object must have one of the following claims: 'jwk', 'jwe', 'jku', 'kid'. The 'cnf' claim value: '{0}'.";
         public const string IDX23015 = "IDX23015: A security key resolved from the 'jwk' claim is not an asymmetric key. Resolved key type: '{0}'.";
-        public const string IDX23016 = "IDX23016: Unable to convert a key found in the 'jwk' claim to a security key. KeyId: '{0}'.";
+        public const string IDX23016 = "IDX23016: Unable to convert a key found in the 'jwk' claim to a security key. JsonWebKey: '{0}'.";
         public const string IDX23017 = "IDX23017: No decryption keys found. Unable to decrypt a key found in the 'jwe' claim without decryption keys.";
         public const string IDX23018 = "IDX23018: Unable to decrypt a 'jwe' claim. Decryption keys used: '{0}'. Inner exception: '{1}'.";
         public const string IDX23019 = "IDX23019: A security key resolved from the 'jwe' claim is not a symmetric key. Resolved key type: '{0}'.";

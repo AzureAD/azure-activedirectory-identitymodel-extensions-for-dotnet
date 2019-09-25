@@ -30,6 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
+    /// This exception is thrown when signature of a SignedHttpRequest was not valid. 
     /// </summary>
     public class SignedHttpRequestInvalidSignatureException : PopValidationException
     {

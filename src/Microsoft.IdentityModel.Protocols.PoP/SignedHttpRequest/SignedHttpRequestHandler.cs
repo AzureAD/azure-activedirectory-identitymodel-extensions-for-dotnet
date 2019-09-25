@@ -24,11 +24,6 @@
 // THE SOFTWARE.
 //
 
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,28 +32,36 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
 
     /// <summary>
-    /// 
+    /// A handler designed for creating and validating signed http requests. 
     /// </summary>
+    /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler : ISignedHttpRequestCreator, ISignedHttpRequestValidator
     {
+        // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
+        // Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character.
+        private readonly string _newlineSeparator = "\n";
         private readonly JsonWebTokenHandler _jwtTokenHandler = new JsonWebTokenHandler();
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
         private readonly HttpClient _defaultHttpClient = new HttpClient();
-        private readonly string _newlineSeparator = "\n";
 
         #region SignedHttpRequest creation
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="signedHttpRequestCreationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// Creates a signed http request using the <paramref name="signedHttpRequestCreationData"/>.
+        /// /// </summary>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
         public async Task<string> CreateSignedHttpRequestAsync(SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
         {
             if (signedHttpRequestCreationData == null)
@@ -70,10 +73,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Creates JSON representation of a HttpRequest header.
         /// </summary>
-        /// <param name="signedHttpRequestCreationData"></param>
-        /// <returns></returns>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <returns>A JSON representation of an HttpRequest header.</returns>
         protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             var header = new JObject
@@ -92,10 +95,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Creates JSON representation of a HttpRequest payload.
         /// </summary>
-        /// <param name="signedHttpRequestCreationData"></param>
-        /// <returns></returns>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <returns>A JSON representation of an HttpRequest payload.</returns>
+        /// <remarks>
+        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.CustomClaimCreator"/> to create additional claim(s) and add them to the signed http request.
+        /// </remarks>
         private protected virtual string CreateHttpRequestPayload(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
@@ -132,13 +138,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestCreationData.HttpRequestSigningCredentials"/>.
         /// </summary>
-        /// <param name="header"></param>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="header">A JSON representation of an HttpRequest header.</param>
+        /// <param name="payload">A JSON representation of an HttpRequest payload.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>SignedHttpRequest as a JWS in Compact Serialization Format.</returns>
         protected virtual Task<string> SignHttpRequestAsync(string header, string payload, SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(header))
@@ -153,10 +159,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'at' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         protected virtual void AddAtClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -166,10 +172,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'ts' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateTs"/> is set to <c>true</c>.
+        /// </remarks>    
         protected virtual void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -180,10 +189,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'm' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateM"/> is set to <c>true</c>.
+        /// </remarks>   
         protected virtual void AddMClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -201,10 +213,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'u' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateU"/> is set to <c>true</c>.
+        /// </remarks>  
         protected virtual void AddUClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -229,10 +244,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'm' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateP"/> is set to <c>true</c>.
+        /// </remarks>  
         protected virtual void AddPClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -249,10 +267,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'q' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateQ"/> is set to <c>true</c>.
+        /// </remarks>  
         protected virtual void AddQClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -292,10 +313,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'h' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateH"/> is set to <c>true</c>.
+        /// </remarks>  
         protected virtual void AddHClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -322,12 +346,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                     if (header.Equals(lastHeader))
                         stringBuffer.Append(encodedValue);
                     else
-                        // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
-                        // Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character.
-                        //
-                        // GK: The spec holds a wrong example of the hash. Value "bZA981YJBrPlIzOvplbu3e7ueREXXr38vSkxIBYOaxI" is calculated using the "\r\n" separator, and not "\n".
-                        // Spec authors probably used Environment.NewLine or stringBuilder.AppendLine which appends "\r\n" on non-Unix platforms.
-                        // The correct hash value should be "P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs".
                         stringBuffer.Append(encodedValue + _newlineSeparator);
                 }
 
@@ -341,10 +359,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'b' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateB"/> is set to <c>true</c>.
+        /// </remarks> 
         protected virtual void AddBClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -367,10 +388,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Adds the 'nonce' claim to the <paramref name="payload"/>.
         /// </summary>
-        /// <param name="payload"></param>
-        /// <param name="signedHttpRequestCreationData"></param>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateNonce"/> is set to <c>true</c>.
+        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.NonceClaimCreator"/> to override the default behavior.
+        /// </remarks>
         protected virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
@@ -385,10 +410,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 
         #region SignedHttpRequest validation
         /// <summary>
-        /// 
+        /// Validates a signed http request using the <paramref name="signedHttpRequestValidationData"/>.
         /// </summary>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns></returns>
         public async Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestAsync(SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
@@ -410,26 +435,26 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 AccessToken = accessToken,
                 ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                 ValidatedAccessToken = validatedAccessToken,
-                SignedHttpRequest = validateSignedHttpRequest.EncodedToken,
+                SignedHttpRequest = jwtSignedHttpRequest.EncodedToken,
                 ValidatedSignedHttpRequest = validateSignedHttpRequest
             };
         }
 
         /// <summary>
-        /// 
+        /// Parses signed http request into a <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <param name="signedHttpRequest"></param>
-        /// <returns></returns>
+        /// <param name="signedHttpRequest">SignedHttpRequest as a JWS in Compact Serialization Format.</param>
+        /// <returns>A signed http request as  a <see cref="JsonWebToken"/>.</returns>
         protected virtual JsonWebToken ReadSignedHttpRequestAsJwt(string signedHttpRequest)
         {
             return _jwtTokenHandler.ReadJsonWebToken(signedHttpRequest);
         }
 
         /// <summary>
-        /// 
+        /// Gets the value of the "at" claim.
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <returns></returns>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <returns>Access tokens as a JWT.</returns>
         protected virtual string ReadAccessToken(JsonWebToken jwtSignedHttpRequest)
         {
             if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string accessToken) || accessToken == null)
@@ -439,12 +464,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates an access token ("at").
         /// </summary>
-        /// <param name="accessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="accessToken">An access token ("at") as a JWT.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         protected virtual Task<TokenValidationResult> ValidateAccessTokenAsync(string accessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(accessToken))
@@ -459,13 +484,18 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates signed http request.
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="validatedAccessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns></returns>
+        /// <remarks>
+        /// The library doesn't provide any caching logic for replay validation purposes.
+        /// <see cref="SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync"/> delegate can be utilized for replay validation.
+        /// Users can utilize <see cref="SignedHttpRequestValidationPolicy.CustomClaimValidatorAsync"/> to validate additional signed http request claim(s).
+        /// </remarks>
         private protected virtual async Task<JsonWebToken> ValidateSignedHttpRequestAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null)
@@ -506,12 +536,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Resolves that PoP key and uses the key to validate the signature of the signed http request.
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="validatedAccessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         protected virtual async Task ValidateSignedHttpRequestSignatureAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (jwtSignedHttpRequest == null)
@@ -546,10 +576,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request lifetime ("ts").
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateTs"/> is set to <c>true</c>.
+        /// </remarks>    
         protected virtual void ValidateTsClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             if (jwtSignedHttpRequest == null)
@@ -567,10 +600,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "m" claim.
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateM"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidateMClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var expectedHttpMethod = signedHttpRequestValidationData.HttpRequestData.HttpMethod;
@@ -593,10 +629,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "u" claim. 
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateU"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidateUClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
@@ -625,10 +664,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "p" claim. 
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateP"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidatePClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
@@ -652,10 +694,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "q" claim. 
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateQ"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidateQClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
@@ -725,10 +770,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "h" claim. 
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateH"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidateHClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestHeaders = signedHttpRequestValidationData.HttpRequestData.HttpRequestHeaders;
@@ -796,10 +844,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Validates the signed http request "b" claim. 
         /// </summary>
-        /// <param name="jwtSignedHttpRequest"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
+        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <remarks>
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateB"/> is set to <c>true</c>.
+        /// </remarks>     
         protected virtual void ValidateBClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             var httpRequestBody = signedHttpRequestValidationData.HttpRequestData.HttpRequestBody;
@@ -830,12 +881,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 
         #region Resolving PoP key
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the 'cnf' claim.
         /// </summary>
-        /// <param name="validatedAccessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual async Task<SecurityKey> ResolvePopKeyAsync(JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (validatedAccessToken == null)
@@ -865,15 +916,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 return await ResolvePopKeyFromKeyIdentifierAsync(kid.ToString(), validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             }
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23014)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23014, cnf.ToString())));
         }
 
         /// <summary>
-        /// 
+        /// Gets the JSON representation of the 'cnf' claim.
         /// </summary>
-        /// <param name="validatedAccessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <returns></returns>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <returns>JSON representation of the 'cnf' claim.</returns>
         protected virtual string GetCnfClaimValue(JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             if (validatedAccessToken == null)
@@ -886,11 +937,11 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the asymmetric representation of a PoP key. 
         /// </summary>
-        /// <param name="jwk"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <returns></returns>
+        /// <param name="jwk">An asymmetric representation of a PoP key (JSON).</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual SecurityKey ResolvePopKeyFromJwk(string jwk, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
             if (string.IsNullOrEmpty(jwk))
@@ -906,16 +957,16 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23015, key.GetType().ToString())));
             }
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, jsonWebKey.Kid ?? "Null")));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, jsonWebKey.ToString())));
         }
 
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the encrypted symmetric representation of a PoP key. 
         /// </summary>
-        /// <param name="jwe"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="jwe">An encrypted symmetric representation of a PoP key (JSON).</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromJweAsync(string jwe, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(jwe))
@@ -960,15 +1011,16 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP JWK set.
+        /// The method throws an exception is there is more than one resolved PoP key.
         /// </summary>
-        /// <param name="jku"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jku, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
+        protected virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
-            var popKeys = await GetPopKeysFromJkuAsync(jku, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             var popKeyCount = popKeys.Count;
 
             if (popKeyCount == 0)
@@ -980,19 +1032,19 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP key.  
         /// </summary>
-        /// <param name="jku"></param>
-        /// <param name="kid"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        protected virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jku, string kid, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
+        /// <param name="kid">A PoP key identifier.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
+        protected virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, string kid, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(kid))
                 throw LogHelper.LogArgumentNullException(nameof(kid));
 
-            var popKeys = await GetPopKeysFromJkuAsync(jku, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
 
             foreach (var key in popKeys)
             {
@@ -1004,12 +1056,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Gets a JWK set of PoP <see cref="SecurityKey"/> from the <paramref name="jkuSetUrl"/>.
         /// </summary>
-        /// <param name="jkuSetUrl"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A collection of PoP <see cref="SecurityKey"/>.</returns>
         protected virtual async Task<IList<SecurityKey>> GetPopKeysFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(jkuSetUrl))
@@ -1033,13 +1085,16 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Resolves a PoP <see cref="SecurityKey"/> using a key identifier of a PoP key. 
         /// </summary>
         /// <param name="kid"></param>
-        /// <param name="validatedAccessToken"></param>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
+        /// <remarks>
+        /// To resolve a PoP <see cref="SecurityKey"/> using only the 'kid' claim, set the <see cref="SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdentifierAsync"/> delegate.
+        /// </remarks>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdentifierAsync != null)
@@ -1066,6 +1121,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
         }
 
+        /// <summary>
+        /// Ensures that the <paramref name="uri"/> is absolute.
+        /// If <paramref name="uri"/>, the method returns it as-is.
+        /// If <paramref name="uri"/> is <see cref="UriKind.Relative"/>, new helper (absolute) URI is created and returned.
+        /// Throws in case that an absolute URI can't be created.
+        /// </summary>
         private Uri EnsureAbsoluteUri(Uri uri)
         {
             if (uri.IsAbsoluteUri)
@@ -1081,6 +1142,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             }
         }
 
+        /// <summary>
+        /// Sanitizes the query params to comply with the specification.
+        /// </summary>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
         private Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
         {
             // Remove repeated query params. https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
@@ -1118,7 +1183,14 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             return sanitizedQueryParams;
         }
 
-        private IDictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
+        /// <summary>
+        /// Sanitizes the headers to comply with the specification.
+        /// </summary>
+        /// <remarks>
+        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
+        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5
+        /// </remarks>
+        private Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
             // Remove repeated headers. https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the

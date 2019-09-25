@@ -30,17 +30,22 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
+    /// Structure that wraps parameters needed for SignedHttpRequest creation. 
     /// </summary>
     public class SignedHttpRequestCreationData : SignedHttpRequestData
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="SignedHttpRequestCreationData"/>.
         /// </summary>
-        /// <param name="accessToken"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="httpRequestSigningCredentials"></param>
-        /// <param name="signedHttpRequestCreationPolicy"></param>
+        /// <remarks>
+        /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key could be resolved on the validation side.
+        /// https://tools.ietf.org/html/rfc7800#section-3.1
+        /// Default <see cref="CallContext"/> is created.
+        /// </remarks>
+        /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
+        /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
+        /// <param name="httpRequestSigningCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
         public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) 
             : base(httpRequestData, CallContext.Default)
         {
@@ -50,13 +55,17 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="SignedHttpRequestCreationData"/>.
         /// </summary>
-        /// <param name="accessToken"></param>
-        /// <param name="httpRequestData"></param>
-        /// <param name="httpRequestSigningCredentials"></param>
-        /// <param name="signedHttpRequestCreationPolicy"></param>
-        /// <param name="callContext"></param>
+        /// <remarks>
+        /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key could be resolved on the validation side.
+        /// https://tools.ietf.org/html/rfc7800#section-3.1
+        /// </remarks> 
+        /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
+        /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
+        /// <param name="httpRequestSigningCredentials">Defines the security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
+        /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param> 
         public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
             : base(httpRequestData, callContext)
         {
@@ -66,17 +75,17 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// Gets an access token that contains the 'cnf' claim.
         /// </summary>
         public string AccessToken { get; }
 
         /// <summary>
-        /// 
+        /// Gets signing credentials that are used to sign a (Signed)HttpRequest.
         /// </summary>
         public SigningCredentials HttpRequestSigningCredentials { get; }
 
         /// <summary>
-        /// 
+        /// Gets a policy that is used for creating a SignedHttpRequest.
         /// </summary>
         public SignedHttpRequestCreationPolicy SignedHttpRequestCreationPolicy { get; }
     }
