@@ -30,16 +30,16 @@ using System.Threading.Tasks;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
+    /// Describes an interface for validating signed http requests.
     /// </summary>
     public interface ISignedHttpRequestValidator
     {
         /// <summary>
-        /// 
+        /// Validates a signed http request using the <paramref name="signedHttpRequestValidationData"/>.
         /// </summary>
-        /// <param name="signedHttpRequestValidationData"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A <see cref="SignedHttpRequestValidationResult"/>.</returns>
         Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestAsync(SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
     }
 }

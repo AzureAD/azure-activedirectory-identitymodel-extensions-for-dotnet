@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Creates a default context that doesn't capture any logs.
         /// </summary>
         public static CallContext Default
         {

@@ -30,6 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
+    /// This exception is thrown when a Pop protocol handler encounters an error during token validation.
     /// </summary>
     public class PopValidationException : PopException
     {

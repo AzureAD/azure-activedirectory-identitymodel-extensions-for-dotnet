@@ -31,12 +31,12 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
-    /// 
+    /// Contains artifacts obtained when an AccessToken is validated.
     /// </summary>
     public class PopTokenValidationResult
     {
         /// <summary>
-        /// Gets or sets the AccessToken.
+        /// Gets or sets the AccessToken in original form.
         /// </summary>
         public string AccessToken { get; set; }
 

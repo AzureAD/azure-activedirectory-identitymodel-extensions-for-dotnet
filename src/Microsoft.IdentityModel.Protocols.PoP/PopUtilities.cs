@@ -25,35 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
-    /// 
+    /// A class which contains useful methods related to processing of proof-of-possession protocol.
     /// </summary>
     public static class PopUtilities
     {
         /// <summary>
-        /// 
+        /// Creates an authorization header using the SignedHttpRequest value.
         /// </summary>
-        /// <param name="signedHttpRequest"></param>
-        /// <returns></returns>
+        /// <param name="signedHttpRequest">A signed http request.</param>
+        /// <returns>SignedHttpRequest value prefixed with the word "PoP".</returns>
+        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1</remarks>
         public static string CreateSignedHttpRequestHeader(string signedHttpRequest)
         {
             if (string.IsNullOrEmpty(signedHttpRequest))
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
 
-            return $"{PopConstants.SignedHttpRequest.AuthorizationHeader} {signedHttpRequest}";
+            return $"{PopConstants.SignedHttpRequest.AuthorizationHeaderSchemeName} {signedHttpRequest}";
         }
 
         /// <summary>
-        ///
+        /// A helper method that converts <see cref="HttpRequestMessage"/> into <see cref="HttpRequestData"/> object.
         /// </summary>
-        /// <param name="httpRequestMessage"></param>
-        /// <returns></returns>
+        /// <param name="httpRequestMessage"><see cref="HttpRequestMessage"/> object that represents incoming or outgoing http request.</param>
+        /// <returns><see cref="HttpRequestData"/> object</returns>
         public static async Task<HttpRequestData> ToHttpRequestDataAsync(this HttpRequestMessage httpRequestMessage)
         {
             if (httpRequestMessage == null)
@@ -75,7 +76,5 @@ namespace Microsoft.IdentityModel.Protocols.PoP
 
             return httpRequestData;
         }
-
-
     }
 }

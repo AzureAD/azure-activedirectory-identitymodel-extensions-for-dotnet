@@ -28,32 +28,35 @@
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
-    /// Constants for proof of possession related properties
+    /// Constants for proof of possession related properties.
     /// </summary>
     public static class PopConstants
     {
         /// <summary>
-        /// https://tools.ietf.org/html/rfc7235#section-4.2
+        /// The "Authorization" header string.
         /// </summary>
+        /// <remarks>https://tools.ietf.org/html/rfc7235#section-4.2</remarks>
         public const string AuthorizationHeader = "Authorization";
 
         /// <summary>
-        /// 
+        /// Constants for SignedHttpRequest related properties.
         /// </summary>
         internal static class SignedHttpRequest
         {
             /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
+            /// Authorization header scheme name.
             /// </summary>
-            public const string AuthorizationHeader = "PoP";
+            /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1</remarks>
+            public const string AuthorizationHeaderSchemeName = "PoP";
 
             /// <summary>
-            /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.1
+            /// SignedHttpRequest token type.
             /// </summary>
+            /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.1</remarks> 
             public const string TokenType = "pop";
 
             /// <summary>
-            /// 
+            /// Claim types used with SignedHttpRequest.
             /// </summary>
             public static class ClaimTypes
             {
@@ -103,12 +106,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP
                 public const string Cnf = "cnf";
 
                 /// <summary>
-                /// 
+                /// https://tools.ietf.org/html/rfc7800#section-3.6
                 /// </summary>
                 public const string Nonce = "nonce";
 
                 /// <summary>
-                /// 
+                /// https://tools.ietf.org/html/rfc7800#section-6.2.2
                 /// </summary>
                 public const string Jwe = "jwe";
             }

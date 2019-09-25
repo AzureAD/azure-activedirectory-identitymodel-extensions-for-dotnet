@@ -29,15 +29,15 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// 
+    /// Structure that wraps parameters needed for SignedHttpRequest processing.
     /// </summary>
     public abstract class SignedHttpRequestData
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="SignedHttpRequestData"/> from a <see cref="HttpRequestData"/> and <see cref="CallContext"/>.
         /// </summary>
-        /// <param name="httpRequestData"></param>
-        /// <param name="callContext"></param>
+        /// <param name="httpRequestData">A structure that represents incoming or outgoing http request.</param>
+        /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
         public SignedHttpRequestData(HttpRequestData httpRequestData, CallContext callContext)
         {
             HttpRequestData = httpRequestData ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestData));
@@ -45,12 +45,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// 
+        /// An opaque context used to store work when working with authentication artifacts.
         /// </summary>
         public CallContext CallContext { get; }
 
         /// <summary>
-        /// 
+        /// A structure that represents incoming or outgoing http request.
         /// </summary>
         public HttpRequestData HttpRequestData { get; }
     }

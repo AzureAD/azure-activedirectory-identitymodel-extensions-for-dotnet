@@ -33,27 +33,34 @@ using System.Net.Http.Headers;
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
-    /// 
+    /// A structure that represents incoming or outgoing http request.
     /// </summary>
     public class HttpRequestData
     {
         /// <summary>
+        /// Gets or sets the http request URI. 
         /// </summary>
         public Uri HttpRequestUri { get; set; }
 
         /// <summary>
+        /// Gets or sets the http request method.
         /// </summary>
         public string HttpMethod { get; set; }
 
         /// <summary>
+        /// Gets or sets the http request body.
         /// </summary>
         public byte[] HttpRequestBody { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the collection of http request headers.
         /// </summary>
         public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
 
+        /// <summary>
+        /// A utility method that appends <paramref name="headers"/> to the <see cref="HttpRequestHeaders"/>.
+        /// </summary>
+        /// <param name="headers">A collection of http request headers.</param>
         internal void AppendHeaders(HttpHeaders headers)
         {
             if (HttpRequestHeaders == null)
@@ -69,7 +76,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP
                 else
                     HttpRequestHeaders.Add(header.Key, header.Value);
             }
-
         }
     }
 }

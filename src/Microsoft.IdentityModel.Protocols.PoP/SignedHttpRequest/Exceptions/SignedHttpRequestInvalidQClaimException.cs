@@ -30,6 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'q' claim validation.  
     /// </summary>
     public class SignedHttpRequestInvalidQClaimException : PopValidationException
     {

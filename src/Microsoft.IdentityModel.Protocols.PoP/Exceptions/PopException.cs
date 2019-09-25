@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.PoP
 {
     /// <summary>
-    /// This exception is thrown when an Pop protocol handler encounters a protocol error.
+    /// This exception is thrown when a Pop protocol handler encounters a protocol error.
     /// </summary>
     public class PopException : Exception
     {
