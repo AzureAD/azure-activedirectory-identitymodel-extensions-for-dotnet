@@ -409,7 +409,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             {
                 AccessToken = accessToken,
                 ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
-                ValidatedAccessToken = tokenValidationResult.SecurityToken,
+                ValidatedAccessToken = validatedAccessToken,
                 SignedHttpRequest = validateSignedHttpRequest.EncodedToken,
                 ValidatedSignedHttpRequest = validateSignedHttpRequest
             };
