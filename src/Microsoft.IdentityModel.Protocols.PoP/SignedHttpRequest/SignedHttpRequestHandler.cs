@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.ClockSkew);
+            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.TimeAdjustment);
             payload.Add(ClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
         }
 
