@@ -79,6 +79,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <returns>A JSON representation of an HttpRequest header.</returns>
         protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
+            if (string.IsNullOrEmpty(signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm));
+
             var header = new JObject
             {
                 { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm },
