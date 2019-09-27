@@ -32,11 +32,11 @@ using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttp
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// A delegate that will be called to create custom claim(s), if set.
+    /// A delegate that will be called to create additional claim(s), if set.
     /// </summary>
     /// <param name="payload">A SignedHttpRequest payload.</param>
     /// <param name="signedHttpRequestCreationData">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
-    public delegate void CustomClaimCreator(IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData);
+    public delegate void AdditionalClaimCreator(IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData);
 
     /// <summary>
     /// A delegate that will be called to create the nonce claim, overriding the default behavior.
@@ -104,9 +104,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public bool CreateB { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets the <see cref="CustomClaimCreator"/> delegate.
+        /// Gets or sets the <see cref="AdditionalClaimCreator"/> delegate.
         /// </summary>
-        public CustomClaimCreator CustomClaimCreator { get; set; }
+        public AdditionalClaimCreator AdditionalClaimCreator { get; set; }
 
         /// <summary>
         /// Default value for the <see cref="ClockSkew"/>.
