@@ -1126,10 +1126,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// Ensures that the <paramref name="uri"/> is absolute.
-        /// If <paramref name="uri"/>, the method returns it as-is.
-        /// If <paramref name="uri"/> is <see cref="UriKind.Relative"/>, new helper (absolute) URI is created and returned.
-        /// Throws in case that an absolute URI can't be created.
+        /// Ensures that the <paramref name="uri"/> is <see cref="UriKind.Absolute"/>.
+        /// If <paramref name="uri"/> is <see cref="UriKind.Absolute"/>, the method returns it as-is.
+        /// If <paramref name="uri"/> is <see cref="UriKind.Relative"/>, new helper <see cref="UriKind.Absolute"/> URI is created and returned.
+        /// Throws in case that an <see cref="UriKind.Absolute"/> URI can't be created.
         /// </summary>
         private Uri EnsureAbsoluteUri(Uri uri)
         {
