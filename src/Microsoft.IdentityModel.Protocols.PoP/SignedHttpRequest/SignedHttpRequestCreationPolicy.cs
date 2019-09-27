@@ -51,12 +51,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     public class SignedHttpRequestCreationPolicy
     {
         /// <summary>
-        /// Gets or sets the clock skew to apply when creating the timestamp ("ts") claim.
-        /// </summary>
-        /// <remarks>Allows for adjusting the local time so it matches a server time.</remarks>
-        public TimeSpan ClockSkew { get; set; } = DefaultClockSkew;
-
-        /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Nonce"/> claim should be created or not.
         /// </summary>
         public bool CreateNonce { get; set; } = true;
@@ -109,13 +103,19 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public AdditionalClaimCreator AdditionalClaimCreator { get; set; }
 
         /// <summary>
-        /// Default value for the <see cref="ClockSkew"/>.
-        /// </summary>
-        public static readonly TimeSpan DefaultClockSkew = TimeSpan.Zero;
-
-        /// <summary>
         /// Gets or sets the <see cref="CustomNonceCreator"/> delegate. 
         /// </summary>
         public CustomNonceCreator CustomNonceCreator { get; set; }
+
+        /// <summary>
+        /// Default value for the <see cref="TimeAdjustment"/>.
+        /// </summary>
+        public static readonly TimeSpan DefaultTimeAdjustment = TimeSpan.Zero;
+
+        /// <summary>
+        /// Gets or sets a time adjustment to apply when creating the timestamp ("ts") claim.
+        /// </summary>
+        /// <remarks>Allows for adjusting the local time so it matches a server time.</remarks>
+        public TimeSpan TimeAdjustment { get; set; } = DefaultTimeAdjustment;
     }
 }
