@@ -37,11 +37,10 @@ using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttpRequest.ClaimTypes;
 
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
-    using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
-
     /// <summary>
     /// A handler designed for creating and validating signed http requests. 
     /// </summary>
