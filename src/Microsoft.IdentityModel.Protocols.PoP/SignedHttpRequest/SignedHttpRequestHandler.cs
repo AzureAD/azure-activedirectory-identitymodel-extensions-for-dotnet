@@ -432,7 +432,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (validatedAccessToken.InnerToken != null)
                 validatedAccessToken = validatedAccessToken.InnerToken;
 
-            var validateSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            var validatedSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
 
             return new SignedHttpRequestValidationResult()
             {
@@ -440,7 +440,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                 ValidatedAccessToken = validatedAccessToken,
                 SignedHttpRequest = jwtSignedHttpRequest.EncodedToken,
-                ValidatedSignedHttpRequest = validateSignedHttpRequest
+                ValidatedSignedHttpRequest = validatedSignedHttpRequest
             };
         }
 
