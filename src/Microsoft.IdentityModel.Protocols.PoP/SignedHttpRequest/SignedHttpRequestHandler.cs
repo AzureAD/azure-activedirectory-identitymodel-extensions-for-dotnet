@@ -49,8 +49,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     public class SignedHttpRequestHandler : ISignedHttpRequestCreator, ISignedHttpRequestValidator
     {
         // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
-        // Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character.
+        // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
+
         private readonly JsonWebTokenHandler _jwtTokenHandler = new JsonWebTokenHandler();
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
         private readonly HttpClient _defaultHttpClient = new HttpClient();
