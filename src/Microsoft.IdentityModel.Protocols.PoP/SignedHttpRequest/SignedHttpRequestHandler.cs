@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// Creates JSON representation of a HttpRequest header.
+        /// Creates a JSON representation of a HttpRequest header.
         /// </summary>
         /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest header.</returns>
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// Creates JSON representation of a HttpRequest payload.
+        /// Creates a JSON representation of a HttpRequest payload.
         /// </summary>
         /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
@@ -536,10 +536,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves that PoP key and uses the key to validate the signature of the signed http request.
+        /// Resolves the PoP key and uses the key to validate the signature of the signed http request.
         /// </summary>
         /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         protected virtual async Task ValidateSignedHttpRequestSignatureAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
@@ -1163,7 +1163,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             {
                 var queryParamName = queryParam.Key;
 
-                // if sanitizedQueryParams already contain the query parameter name it means that the query parameter name is repeated.
+                // if sanitizedQueryParams already contains the query parameter name it means that the query parameter name is repeated.
                 // in that case query parameter name should not be added, and the existing entry in sanitizedQueryParams should be removed.
                 if (sanitizedQueryParams.ContainsKey(queryParamName))
                 {
@@ -1205,7 +1205,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
                 if (string.Equals(headerName, PopConstants.AuthorizationHeader, StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                // if sanitizedHeaders already contain the header name it means that the headerName is repeated.
+                // if sanitizedHeaders already contains the header name it means that the headerName is repeated.
                 // in that case headerName should not be added, and the existing entry in sanitizedHeaders should be removed.
                 if (sanitizedHeaders.ContainsKey(headerName))
                 {

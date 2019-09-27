@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
 
     /// <summary>
-    /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
+    /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
     /// </summary>
     /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="JsonWebToken"/>.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
