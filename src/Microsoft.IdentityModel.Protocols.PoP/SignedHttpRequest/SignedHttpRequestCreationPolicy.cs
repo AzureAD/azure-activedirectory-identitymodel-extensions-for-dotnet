@@ -27,11 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttpRequest.ClaimTypes;
 
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
-    using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
-
     /// <summary>
     /// A delegate that will be called to create custom claim(s), if set.
     /// </summary>
