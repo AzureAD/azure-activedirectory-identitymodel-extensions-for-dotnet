@@ -62,15 +62,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP
 
             var httpRequestData = new HttpRequestData()
             {
-                HttpMethod = httpRequestMessage.Method?.ToString(),
-                HttpRequestUri = httpRequestMessage.RequestUri
+                Method = httpRequestMessage.Method?.ToString(),
+                Uri = httpRequestMessage.RequestUri
             };
 
             httpRequestData.AppendHeaders(httpRequestMessage.Headers);
 
             if (httpRequestMessage.Content != null)
             {
-                httpRequestData.HttpRequestBody = await httpRequestMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                httpRequestData.Body = await httpRequestMessage.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                 httpRequestData.AppendHeaders(httpRequestMessage.Content.Headers);
             }
 

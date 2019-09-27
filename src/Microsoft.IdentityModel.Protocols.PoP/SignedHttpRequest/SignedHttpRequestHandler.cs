@@ -204,10 +204,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpMethod = signedHttpRequestCreationData.HttpRequestData.HttpMethod;
+            var httpMethod = signedHttpRequestCreationData.HttpRequestData.Method;
 
             if (string.IsNullOrEmpty(httpMethod))
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpMethod));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Method));
 
             if (!httpMethod.ToUpper().Equals(httpMethod, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
@@ -228,10 +228,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
 
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
@@ -259,10 +259,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
 
@@ -282,10 +282,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestUri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
@@ -328,10 +328,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestHeaders = signedHttpRequestCreationData.HttpRequestData.HttpRequestHeaders;
+            var httpRequestHeaders = signedHttpRequestCreationData.HttpRequestData.Headers;
 
             if (httpRequestHeaders == null || !httpRequestHeaders.Any())
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestHeaders));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Headers));
 
             var sanitizedHeaders = SanitizeHeaders(httpRequestHeaders);
 
@@ -374,10 +374,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestBody = signedHttpRequestCreationData.HttpRequestData.HttpRequestBody;
+            var httpRequestBody = signedHttpRequestCreationData.HttpRequestData.Body;
 
             if (httpRequestBody == null || httpRequestBody.Count() == 0)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.HttpRequestBody));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Body));
 
             try
             {
@@ -612,7 +612,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidateMClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var expectedHttpMethod = signedHttpRequestValidationData.HttpRequestData.HttpMethod;
+            var expectedHttpMethod = signedHttpRequestValidationData.HttpRequestData.Method;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
@@ -641,13 +641,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidateUClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.Uri;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.HttpRequestUri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.Uri));
 
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
@@ -676,13 +676,13 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidatePClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.Uri;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.HttpRequestUri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationData.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
@@ -706,7 +706,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidateQClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.HttpRequestUri;
+            var httpRequestUri = signedHttpRequestValidationData.HttpRequestData.Uri;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
@@ -782,7 +782,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidateHClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var httpRequestHeaders = signedHttpRequestValidationData.HttpRequestData.HttpRequestHeaders;
+            var httpRequestHeaders = signedHttpRequestValidationData.HttpRequestData.Headers;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));
@@ -856,7 +856,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>     
         protected virtual void ValidateBClaim(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
         {
-            var httpRequestBody = signedHttpRequestValidationData.HttpRequestData.HttpRequestBody;
+            var httpRequestBody = signedHttpRequestValidationData.HttpRequestData.Body;
 
             if (jwtSignedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtSignedHttpRequest));

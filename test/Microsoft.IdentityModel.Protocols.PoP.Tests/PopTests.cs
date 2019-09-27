@@ -72,10 +72,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
             //or set up http request data directly
             var httpRequestData = new HttpRequestData()
             {
-                HttpMethod = "GET",
-                HttpRequestUri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
-                HttpRequestBody = Guid.NewGuid().ToByteArray(),
-                HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
+                Method = "GET",
+                Uri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
+                Body = Guid.NewGuid().ToByteArray(),
+                Headers = new Dictionary<string, IEnumerable<string>>
                 {
                     { "Content-Type", new List<string> { "application/json" } },
                     { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
