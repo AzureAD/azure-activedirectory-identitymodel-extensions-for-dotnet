@@ -1152,7 +1152,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
         private Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
         {
-            // Remove repeated query params. https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated query params according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var queryString = httpRequestUri.Query.TrimStart('?');
@@ -1196,7 +1196,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// </remarks>
         private Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
-            // Remove repeated headers. https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated headers according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
