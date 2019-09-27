@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
-        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.CustomClaimCreator"/> to create additional claim(s) and add them to the signed http request.
+        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.AdditionalClaimCreator"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
         private protected virtual string CreateHttpRequestPayload(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
             if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateNonce)
                 AddNonceClaim(payload, signedHttpRequestCreationData);
 
-            signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CustomClaimCreator?.Invoke(payload, signedHttpRequestCreationData);
+            signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestCreationData);
 
             return JObject.FromObject(payload).ToString(Formatting.None);
         }
