@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP
     public class PopTokenValidationResult
     {
         /// <summary>
-        /// Gets or sets the AccessToken in original form.
+        /// Gets or sets the AccessToken in its original encoded form.
         /// </summary>
         public string AccessToken { get; set; }
 
