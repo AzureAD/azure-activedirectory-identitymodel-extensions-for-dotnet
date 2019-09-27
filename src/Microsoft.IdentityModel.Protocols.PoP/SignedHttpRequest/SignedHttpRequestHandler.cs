@@ -397,15 +397,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateNonce"/> is set to <c>true</c>.
-        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.NonceClaimCreator"/> to override the default behavior.
+        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.CustomNonceCreator"/> to override the default behavior.
         /// </remarks>
         protected virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.NonceClaimCreator != null)
-                signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.NonceClaimCreator(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
+                signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CustomNonceCreator(payload, signedHttpRequestCreationData);
             else
                 payload.Add(ClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
         }
@@ -1096,12 +1096,12 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         /// <remarks>
-        /// To resolve a PoP <see cref="SecurityKey"/> using only the 'kid' claim, set the <see cref="SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdentifierAsync"/> delegate.
+        /// To resolve a PoP <see cref="SecurityKey"/> using only the 'kid' claim, set the <see cref="SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync"/> delegate.
         /// </remarks>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdentifierAsync != null)
-                return await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdentifierAsync(kid, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync != null)
+                return await signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             else
             {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23023)));

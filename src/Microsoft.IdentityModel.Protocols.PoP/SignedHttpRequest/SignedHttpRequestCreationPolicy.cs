@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// </summary>
     /// <param name="payload">A SignedHttpRequest payload.</param>
     /// <param name="signedHttpRequestCreationData">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
-    public delegate void NonceClaimCreator(IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData);
+    public delegate void CustomNonceCreator(IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData);
 
     /// <summary>
     /// Defines a policy for creating signed http requests.
@@ -114,8 +114,8 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public static readonly TimeSpan DefaultClockSkew = TimeSpan.Zero;
 
         /// <summary>
-        /// Gets or sets the <see cref="NonceClaimCreator"/> delegate. 
+        /// Gets or sets the <see cref="CustomNonceCreator"/> delegate. 
         /// </summary>
-        public NonceClaimCreator NonceClaimCreator { get; set; }
+        public CustomNonceCreator CustomNonceCreator { get; set; }
     }
 }

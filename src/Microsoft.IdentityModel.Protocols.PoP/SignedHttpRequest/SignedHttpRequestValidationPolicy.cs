@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdentifierAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
@@ -147,9 +147,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public PopKeyResolverAsync PopKeyResolverAsync { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="PopKeyResolverFromKeyIdentifierAsync"/> delegate.
+        /// Gets or sets the <see cref="PopKeyResolverFromKeyIdAsync"/> delegate.
         /// </summary>
-        public PopKeyResolverFromKeyIdentifierAsync PopKeyResolverFromKeyIdentifierAsync { get; set; }
+        public PopKeyResolverFromKeyIdAsync PopKeyResolverFromKeyIdAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether TLS is required when obtaining a JWK set using the 'jku' claim.
