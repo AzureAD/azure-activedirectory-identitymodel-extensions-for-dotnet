@@ -40,41 +40,41 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         /// <summary>
         /// Gets or sets the http request URI. 
         /// </summary>
-        public Uri HttpRequestUri { get; set; }
+        public Uri Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the http request method.
         /// </summary>
-        public string HttpMethod { get; set; }
+        public string Method { get; set; }
 
         /// <summary>
         /// Gets or sets the http request body.
         /// </summary>
-        public byte[] HttpRequestBody { get; set; }
+        public byte[] Body { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of http request headers.
         /// </summary>
-        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
         /// <summary>
-        /// A utility method that appends <paramref name="headers"/> to the <see cref="HttpRequestHeaders"/>.
+        /// A utility method that appends <paramref name="headers"/> to the <see cref="Headers"/>.
         /// </summary>
         /// <param name="headers">A collection of http request headers.</param>
         internal void AppendHeaders(HttpHeaders headers)
         {
-            if (HttpRequestHeaders == null)
-                HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
+            if (Headers == null)
+                Headers = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
 
             if (headers == null || !headers.Any())
                 return;
 
             foreach (var header in headers)
             {
-                if (HttpRequestHeaders.ContainsKey(header.Key))
-                    HttpRequestHeaders[header.Key] = HttpRequestHeaders[header.Key].Concat(header.Value);
+                if (Headers.ContainsKey(header.Key))
+                    Headers[header.Key] = Headers[header.Key].Concat(header.Value);
                 else
-                    HttpRequestHeaders.Add(header.Key, header.Value);
+                    Headers.Add(header.Key, header.Value);
             }
         }
     }
