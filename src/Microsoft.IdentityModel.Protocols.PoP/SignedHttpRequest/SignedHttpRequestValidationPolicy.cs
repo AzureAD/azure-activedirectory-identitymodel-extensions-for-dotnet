@@ -38,14 +38,6 @@ using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttp
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
-    /// </summary>
-    /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="JsonWebToken"/>.</param>
-    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns></returns>
-    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jweCnf, CancellationToken cancellationToken);
-
-    /// <summary>
     /// A delegate that will be called to validate a custom claim, if set. 
     /// </summary>
     /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
@@ -53,7 +45,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if custom claim validation failed.</returns>
-    public delegate Task CustomClaimValidatorAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task AdditionalClaimValidatorAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
+    /// </summary>
+    /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns></returns>
+    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over PoP key resolution, if set.
@@ -116,6 +116,11 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public bool AcceptUncoveredHeaders { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the <see cref="AdditionalClaimValidatorAsync"/> delegate.
+        /// </summary>
+        public AdditionalClaimValidatorAsync AdditionalClaimValidatorAsync { get; set; }
+
+        /// <summary>
         /// Gets or sets a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
         /// </summary>
         public IEnumerable<SecurityKey> CnfDecryptionKeys { get; set; }
@@ -124,11 +129,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         /// Gets or sets the <see cref="SignedHttpRequestSignatureValidatorAsync"/> delegate.
         /// </summary>
         public CnfDecryptionKeysResolverAsync CnfDecryptionKeysResolverAsync { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="CustomClaimValidatorAsync"/> delegate.
-        /// </summary>
-        public CustomClaimValidatorAsync CustomClaimValidatorAsync { get; set; }
 
         /// <summary>
         /// Default value for the <see cref="SignedHttpRequestLifetime"/>.
