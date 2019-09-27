@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     using ClaimTypes = PopConstants.SignedHttpRequest.ClaimTypes;
 
     /// <summary>
-    /// A delegate that will be called to create a custom claim, if set.
+    /// A delegate that will be called to create custom claim(s), if set.
     /// </summary>
     /// <param name="payload">A SignedHttpRequest payload.</param>
     /// <param name="signedHttpRequestCreationData">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
