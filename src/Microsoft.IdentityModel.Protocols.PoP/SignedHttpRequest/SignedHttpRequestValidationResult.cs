@@ -33,8 +33,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// </summary>
     public class SignedHttpRequestValidationResult : PopTokenValidationResult
     {
+
         /// <summary>
-        /// Gets or sets SignedHttpRequest in original form.
+        /// Gets or sets SignedHttpRequest in its original encoded form.
         /// </summary>
         public string SignedHttpRequest { get; set; }
 
