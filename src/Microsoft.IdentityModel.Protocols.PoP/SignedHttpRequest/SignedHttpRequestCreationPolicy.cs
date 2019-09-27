@@ -32,14 +32,14 @@ using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttp
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// A delegate that will be called to create additional claim(s), if set.
+    /// A delegate that will be called to create and add additional claim(s), if set.
     /// </summary>
     /// <param name="payload">A SignedHttpRequest payload.</param>
     /// <param name="signedHttpRequestCreationData">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
     public delegate void AdditionalClaimCreator(IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData);
 
     /// <summary>
-    /// A delegate that will be called to create the nonce claim, overriding the default behavior.
+    /// A delegate that will be called to create and add the nonce claim, overriding the default behavior.
     /// </summary>
     /// <param name="payload">A SignedHttpRequest payload.</param>
     /// <param name="signedHttpRequestCreationData">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
@@ -51,48 +51,48 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     public class SignedHttpRequestCreationPolicy
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Nonce"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Nonce"/> claim should be created and added or not.
         /// </summary>
         public bool CreateNonce { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Ts"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateTs { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.M"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.M"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateM { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.U"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.U"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateU { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.P"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.P"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>
         public bool CreateP { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Q"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.Q"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateQ { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.H"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.H"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateH { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be created or not.
+        /// Gets or sets a value indicating whether the <see cref="ClaimTypes.B"/> claim should be created and added or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateB { get; set; } = false;
