@@ -76,9 +76,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Key
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.ManagedKeyVaultSecurityKey", "src\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey\Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.csproj", "{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.PoP", "src\Microsoft.IdentityModel.Protocols.PoP\Microsoft.IdentityModel.Protocols.PoP.csproj", "{C768FBB5-DE0D-4970-918C-96B37485E34C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.Pop", "src\Microsoft.IdentityModel.Protocols.Pop\Microsoft.IdentityModel.Protocols.Pop.csproj", "{C768FBB5-DE0D-4970-918C-96B37485E34C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.PoP.Tests", "test\Microsoft.IdentityModel.Protocols.PoP.Tests\Microsoft.IdentityModel.Protocols.PoP.Tests.csproj", "{15944563-F7DA-4150-B5F1-6144EBF2CE23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Protocols.Pop.Tests", "test\Microsoft.IdentityModel.Protocols.Pop.Tests\Microsoft.IdentityModel.Protocols.Pop.Tests.csproj", "{15944563-F7DA-4150-B5F1-6144EBF2CE23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

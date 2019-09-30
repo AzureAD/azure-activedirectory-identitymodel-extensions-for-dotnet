@@ -3,11 +3,11 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <AssemblyName>Microsoft.IdentityModel.Protocols.PoP</AssemblyName>
-    <Description>Includes types that provide support for PoP protocol.</Description>
+    <AssemblyName>Microsoft.IdentityModel.Protocols.Pop</AssemblyName>
+    <Description>Includes types that provide support for Pop protocol.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageId>Microsoft.IdentityModel.Protocols.PoP</PackageId>
-    <PackageTags>.NET;Windows;Authentication;Identity;PoP;ProofOfPossession;SignedHttpRequest</PackageTags>
+    <PackageId>Microsoft.IdentityModel.Protocols.Pop</PackageId>
+    <PackageTags>.NET;Windows;Authentication;Identity;IdentityModel;PoP;ProofOfPossession;SignedHttpRequest</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
