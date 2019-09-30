@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// This exception is thrown when a SignedHttpRequest handler encounters an error during a signed http request creation.

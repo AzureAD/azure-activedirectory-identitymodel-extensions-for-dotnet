@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.PoP\Microsoft.IdentityModel.Protocols.Pop.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.Pop\Microsoft.IdentityModel.Protocols.Pop.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />

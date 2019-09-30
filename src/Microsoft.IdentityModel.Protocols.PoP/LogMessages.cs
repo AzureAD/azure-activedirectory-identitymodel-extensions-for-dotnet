@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-//  Microsoft.IdentityModel.Protocols.PoP
+//  Microsoft.IdentityModel.Protocols.Pop
 // Range: 23000 - 23999.
 // SignedHttpRequest range: 23000 - 23199.
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.Pop
 {
     /// <summary>
     /// Log messages and codes
@@ -67,5 +67,6 @@ namespace Microsoft.IdentityModel.Protocols.PoP
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' was not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
         public const string IDX23029 = "IDX23029: The request contains uncovered query parameters and SignedHttpRequestValidationPolicy.AcceptUncoveredQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
         public const string IDX23030 = "IDX23030: Resolved PoP key is null. Unable to validate a signed http request signature without a PoP key.";
+        public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
     }
 }

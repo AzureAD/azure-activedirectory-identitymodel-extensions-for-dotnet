@@ -27,7 +27,7 @@
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// Structure that wraps parameters needed for SignedHttpRequest validation.

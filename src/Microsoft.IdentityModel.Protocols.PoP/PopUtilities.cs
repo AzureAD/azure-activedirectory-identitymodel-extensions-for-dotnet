@@ -29,7 +29,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.Pop
 {
     /// <summary>
     /// A class which contains useful methods related to processing of proof-of-possession protocol.

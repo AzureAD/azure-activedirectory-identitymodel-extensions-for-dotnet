@@ -33,27 +33,27 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttpRequest.ClaimTypes;
+using ClaimTypes = Microsoft.IdentityModel.Protocols.Pop.PopConstants.SignedHttpRequest.ClaimTypes;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// A delegate that will be called to validate a custom claim, if set. 
     /// </summary>
-    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if custom claim validation failed.</returns>
-    public delegate Task AdditionalClaimValidatorAsync(JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task AdditionalClaimValidatorAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
     /// </summary>
-    /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="SecurityToken"/>.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
-    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(JsonWebToken jweCnf, CancellationToken cancellationToken);
+    public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(SecurityToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over PoP key resolution, if set.
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
@@ -73,28 +73,28 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
     /// <param name="nonce">A value of the 'nonce' claim. Value will be <see cref="string.Empty"/> if 'nonce' claim is not found.</param>
-    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="signedHttpRequest">SignedHttpRequest.</param>
     /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
-    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
     /// </summary>
     /// <param name="popKey">A resolved PoP key.</param>
-    /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest has invalid signature.</returns>
-    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, JsonWebToken jwtSignedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
 
     /// <summary>
     /// Defines a policy for validating signed http requests. 
@@ -229,12 +229,15 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
         public bool ValidateB { get; set; } = false;
 
         /// <summary>
-        /// Checks if the policy applies to the <paramref name="jwtSignedHttpRequest"/>.
+        /// Checks if the policy applies to the <paramref name="signedHttpRequest"/>.
         /// </summary>
-        /// <param name="jwtSignedHttpRequest">SignedHttpRequest as a <see cref="JsonWebToken"/>.</param>
-        /// <returns><c>true</c> if the policy applies to the <paramref name="jwtSignedHttpRequest"/>, otherwise <c>false</c>.</returns>
-        internal bool DoesApply(JsonWebToken jwtSignedHttpRequest)
+        /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+        /// <returns><c>true</c> if the policy applies to the <paramref name="signedHttpRequest"/>, otherwise <c>false</c>.</returns>
+        internal bool DoesApply(SecurityToken signedHttpRequest)
         {
+            if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
+                return false;
+
             if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string at) || string.IsNullOrEmpty(at))
                 return false;
 

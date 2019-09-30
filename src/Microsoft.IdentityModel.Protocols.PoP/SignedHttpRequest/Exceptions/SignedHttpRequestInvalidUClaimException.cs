@@ -27,12 +27,12 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'u' claim validation. 
     /// </summary>
-    public class SignedHttpRequestInvalidUClaimException : PopValidationException
+    public class SignedHttpRequestInvalidUClaimException : SignedHttpRequestValidationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidUClaimException"/> class.

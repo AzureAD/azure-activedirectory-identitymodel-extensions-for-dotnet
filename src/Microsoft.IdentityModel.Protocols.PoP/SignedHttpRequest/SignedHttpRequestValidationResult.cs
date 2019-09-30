@@ -26,7 +26,7 @@
 
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// Contains artifacts obtained when a SignedHttpRequest is validated.

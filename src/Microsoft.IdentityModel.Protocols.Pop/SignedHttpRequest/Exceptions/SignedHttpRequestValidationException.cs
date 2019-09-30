@@ -27,35 +27,35 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.Pop
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a Pop protocol handler encounters an error during token validation.
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during a signed http request validation.
     /// </summary>
-    public class PopValidationException : PopException
+    public class SignedHttpRequestValidationException : PopValidationException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopValidationException"/> class.
+        /// Initializes a new instance of the <see cref="SignedHttpRequestValidationException"/> class.
         /// </summary>
-        public PopValidationException()
+        public SignedHttpRequestValidationException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopValidationException"/> class.
+        /// Initializes a new instance of the <see cref="SignedHttpRequestValidationException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
-        public PopValidationException(string message)
+        public SignedHttpRequestValidationException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PopValidationException"/> class.
+        /// Initializes a new instance of the <see cref="SignedHttpRequestValidationException"/> class.
         /// </summary>
         /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public PopValidationException(string message, Exception innerException)
+        public SignedHttpRequestValidationException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

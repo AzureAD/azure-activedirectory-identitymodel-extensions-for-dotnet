@@ -28,7 +28,7 @@
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.Pop
 {
     /// <summary>
     /// Contains artifacts obtained when an AccessToken is validated.

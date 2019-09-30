@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP
+namespace Microsoft.IdentityModel.Protocols.Pop
 {
     /// <summary>
     /// This exception is thrown when a Pop protocol handler encounters an error during token creation.

@@ -33,11 +33,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest;
+using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.Tests
+namespace Microsoft.IdentityModel.Protocols.Pop.Tests
 {
-    public class PopTests
+    public class SignedHttpRequest
     {
         [Fact]
         public async void RoundtripTest()

@@ -27,12 +27,12 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// This exception is thrown when signature of a SignedHttpRequest was not valid. 
     /// </summary>
-    public class SignedHttpRequestInvalidSignatureException : PopValidationException
+    public class SignedHttpRequestInvalidSignatureException : SignedHttpRequestValidationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidSignatureException"/> class.

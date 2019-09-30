@@ -27,9 +27,9 @@
 
 using System;
 using System.Collections.Generic;
-using ClaimTypes = Microsoft.IdentityModel.Protocols.PoP.PopConstants.SignedHttpRequest.ClaimTypes;
+using ClaimTypes = Microsoft.IdentityModel.Protocols.Pop.PopConstants.SignedHttpRequest.ClaimTypes;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// A delegate that will be called to create and add additional claim(s), if set.

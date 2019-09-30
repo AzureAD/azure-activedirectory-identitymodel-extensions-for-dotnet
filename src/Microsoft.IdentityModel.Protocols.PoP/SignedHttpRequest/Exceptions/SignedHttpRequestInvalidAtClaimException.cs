@@ -27,12 +27,12 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 {
     /// <summary>
     /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'at' claim validation.  
     /// </summary>
-    public class SignedHttpRequestInvalidAtClaimException : PopValidationException
+    public class SignedHttpRequestInvalidAtClaimException : SignedHttpRequestValidationException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidAtClaimException"/> class.
