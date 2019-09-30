@@ -44,13 +44,13 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// </remarks>
         /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
         /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
-        /// <param name="httpRequestSigningCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) 
+        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) 
             : base(httpRequestData, CallContext.Default)
         {
             AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
-            HttpRequestSigningCredentials = httpRequestSigningCredentials ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestSigningCredentials));
+            SigningCredentials = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             SignedHttpRequestCreationPolicy = signedHttpRequestCreationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationPolicy));
         }
 
@@ -63,14 +63,14 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// </remarks> 
         /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
         /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
-        /// <param name="httpRequestSigningCredentials">Defines the security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param> 
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials httpRequestSigningCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
+        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
             : base(httpRequestData, callContext)
         {
             AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
-            HttpRequestSigningCredentials = httpRequestSigningCredentials ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestSigningCredentials));
+            SigningCredentials = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             SignedHttpRequestCreationPolicy = signedHttpRequestCreationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationPolicy));
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// <summary>
         /// Gets signing credentials that are used to sign a (Signed)HttpRequest.
         /// </summary>
-        public SigningCredentials HttpRequestSigningCredentials { get; }
+        public SigningCredentials SigningCredentials { get; }
 
         /// <summary>
         /// Gets a policy that is used for creating a SignedHttpRequest.

@@ -79,19 +79,19 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// <returns>A JSON representation of an HttpRequest header.</returns>
         protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
-            if (string.IsNullOrEmpty(signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm));
+            if (string.IsNullOrEmpty(signedHttpRequestCreationData.SigningCredentials.Algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.SigningCredentials.Algorithm));
 
             var header = new JObject
             {
-                { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.HttpRequestSigningCredentials.Algorithm },
+                { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.SigningCredentials.Algorithm },
                 { JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType }
             };
 
-            if (signedHttpRequestCreationData.HttpRequestSigningCredentials.Key?.KeyId != null)
-                header.Add(JwtHeaderParameterNames.Kid, signedHttpRequestCreationData.HttpRequestSigningCredentials.Key.KeyId);
+            if (signedHttpRequestCreationData.SigningCredentials.Key?.KeyId != null)
+                header.Add(JwtHeaderParameterNames.Kid, signedHttpRequestCreationData.SigningCredentials.Key.KeyId);
 
-            if (signedHttpRequestCreationData.HttpRequestSigningCredentials.Key is X509SecurityKey x509SecurityKey)
+            if (signedHttpRequestCreationData.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                 header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
             return header.ToString(Formatting.None);
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         }
 
         /// <summary>
-        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestCreationData.HttpRequestSigningCredentials"/>.
+        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestCreationData.SigningCredentials"/>.
         /// </summary>
         /// <param name="header">A JSON representation of an HttpRequest header.</param>
         /// <param name="payload">A JSON representation of an HttpRequest payload.</param>
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             var message = $"{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header))}.{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload))}";
-            var signature = JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestCreationData.HttpRequestSigningCredentials);
+            var signature = JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestCreationData.SigningCredentials);
             return Task.FromResult($"{message}.{signature}");
         }
 
