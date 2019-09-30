@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
     {
         /// <summary>
         /// Creates a signed http request using the <paramref name="signedHttpRequestCreationData"/>.
-        /// /// </summary>
+        /// </summary>
         /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>

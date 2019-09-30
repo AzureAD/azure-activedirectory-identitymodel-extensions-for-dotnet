@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests
     public class PopTests
     {
         [Fact]
-        public async void MsalUsageSample()
+        public async void RoundtripTest()
         {
             var popHandler = new SignedHttpRequestHandler();
 

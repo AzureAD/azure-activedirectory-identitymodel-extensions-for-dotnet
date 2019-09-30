@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.PoP.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a SignedHttpRequest handler encounters an error during the pop key resolution.  
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during a pop key resolution.
     /// </summary>
     public class SignedHttpRequestInvalidPopKeyException : PopValidationException
     {

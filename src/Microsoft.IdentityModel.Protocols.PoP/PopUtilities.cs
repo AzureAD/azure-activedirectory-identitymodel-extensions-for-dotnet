@@ -37,10 +37,10 @@ namespace Microsoft.IdentityModel.Protocols.PoP
     public static class PopUtilities
     {
         /// <summary>
-        /// Creates an authorization header using the SignedHttpRequest value.
+        /// Creates an authorization header using the SignedHttpRequest.
         /// </summary>
         /// <param name="signedHttpRequest">A signed http request.</param>
-        /// <returns>SignedHttpRequest value prefixed with the word "PoP".</returns>
+        /// <returns>A SignedHttpRequest value prefixed with the word "PoP".</returns>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1</remarks>
         public static string CreateSignedHttpRequestHeader(string signedHttpRequest)
         {
