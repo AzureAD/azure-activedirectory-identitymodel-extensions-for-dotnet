@@ -33,11 +33,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.IdentityModel.Protocols.Pop;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
 
-namespace Microsoft.IdentityModel.Protocols.Pop.Tests
+namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 {
-    public class SignedHttpRequest
+    public class SignedHttpRequestE2ETests
     {
         [Fact]
         public async void RoundtripTest()
@@ -121,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests
 
                 var signedHttpRequestValiationData = new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
                 var result = await popHandler.ValidateSignedHttpRequestAsync(signedHttpRequestValiationData, CancellationToken.None).ConfigureAwait(false);
-                
+
                 //4.1.
                 var signedHttpRequestHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequest);
             }

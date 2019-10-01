@@ -35,7 +35,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Protocols.PoP.Tests.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 {
     /// <summary>
     /// Mock SignedHttpRequestHandler.
@@ -72,13 +72,9 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests.SignedHttpRequest
             base.AddAtClaim(payload, signedHttpRequestCreationData);
         }
    
-        public void AddTsClaimPublic(Dictionary<string, object> payload, DateTime now, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddTsClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var signedHttpRequestCreationTime = now.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.TimeAdjustment);
-            payload.Add(Pop.PopConstants.SignedHttpRequest.ClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
+            AddTsClaim(payload, signedHttpRequestCreationData);
         }
 
         public void AddMClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
@@ -210,5 +206,23 @@ namespace Microsoft.IdentityModel.Protocols.PoP.Tests.SignedHttpRequest
         {
             return await base.ResolvePopKeyFromKeyIdentifierAsync(kid, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
         }
+
+        #region Mock methods
+        protected override void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        {
+            if (signedHttpRequestCreationData.CallContext.PropertyBag != null && signedHttpRequestCreationData.CallContext.PropertyBag.TryGetValue("MockAddTsClaim", out object DateTimeNow))
+            {
+                if (payload == null)
+                    throw LogHelper.LogArgumentNullException(nameof(payload));
+
+                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.TimeAdjustment);
+                payload.Add(Pop.PopConstants.SignedHttpRequest.ClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
+            }
+            else
+            {
+                base.AddTsClaim(payload, signedHttpRequestCreationData);
+            }
+        }
+        #endregion
     }
 }
