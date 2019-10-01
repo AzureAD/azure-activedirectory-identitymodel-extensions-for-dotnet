@@ -1287,6 +1287,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 
             return sanitizedHeaders;
         }
-    #endregion
+        #endregion
     }
 }
