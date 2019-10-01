@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -79,9 +80,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// <returns>A JSON representation of an HttpRequest header.</returns>
         protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
-            if (string.IsNullOrEmpty(signedHttpRequestCreationData.SigningCredentials.Algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.SigningCredentials.Algorithm));
-
             var header = new JObject
             {
                 { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.SigningCredentials.Algorithm },
@@ -304,7 +302,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             List<string> queryParamNameList = new List<string>();
             try
             {
-                var lastQueryParam = sanitizedQueryParams.Last();
+                var lastQueryParam = sanitizedQueryParams.LastOrDefault();
                 foreach (var queryParam in sanitizedQueryParams)
                 {
                     queryParamNameList.Add(queryParam.Key);
@@ -338,21 +336,18 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestHeaders = signedHttpRequestCreationData.HttpRequestData.Headers;
-
-            if (httpRequestHeaders == null || !httpRequestHeaders.Any())
+            if (signedHttpRequestCreationData.HttpRequestData.Headers == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Headers));
 
-            var sanitizedHeaders = SanitizeHeaders(httpRequestHeaders);
-
+            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestCreationData.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
             List<string> headerNameList = new List<string>();
             try
             {
-                var lastHeader = sanitizedHeaders.Last();
+                var lastHeader = sanitizedHeaders.LastOrDefault();
                 foreach (var header in sanitizedHeaders)
                 {
-                    var headerName = header.Key.ToLowerInvariant();
+                    var headerName = header.Key.ToLower();
                     headerNameList.Add(headerName);
 
                     var encodedValue = $"{headerName}: {header.Value}";
@@ -386,8 +381,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 
             var httpRequestBody = signedHttpRequestCreationData.HttpRequestData.Body;
 
-            if (httpRequestBody == null || httpRequestBody.Count() == 0)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Body));
+            if (httpRequestBody == null)
+                httpRequestBody = new byte[0];
 
             try
             {
@@ -1198,33 +1193,42 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             // Remove repeated query params according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
-            var queryString = httpRequestUri.Query.TrimStart('?');
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
+            var repeatedQueryParams = new List<string>();
 
+            var queryString = httpRequestUri.Query.TrimStart('?');
             if (string.IsNullOrEmpty(queryString))
                 return sanitizedQueryParams;
 
-            var queryParams = queryString.Split('&').Select(x => x.Split('=')).Select(x => new KeyValuePair<string, string>(x[0], x[1])).ToList();
-            var repeatedQueryParams = new List<string>();
-            foreach (var queryParam in queryParams)
+            var queryParamKeyValuePairs = queryString.Split('&');
+            foreach (var queryParamValuePair in queryParamKeyValuePairs)
             {
-                var queryParamName = queryParam.Key;
-
-                // if sanitizedQueryParams already contains the query parameter name it means that the query parameter name is repeated.
-                // in that case query parameter name should not be added, and the existing entry in sanitizedQueryParams should be removed.
-                if (sanitizedQueryParams.ContainsKey(queryParamName))
+                var queryParamKeyValuePairArray = queryParamValuePair.Split('=');
+                if (queryParamKeyValuePairArray.Count() == 2)
                 {
-                    sanitizedQueryParams.Remove(queryParamName);
-                    repeatedQueryParams.Add(queryParamName);
-                }
-                else
-                {
-                    sanitizedQueryParams.Add(queryParamName, queryParam.Value);
+                    var queryParamName = queryParamKeyValuePairArray[0];
+                    var queryParamValue = queryParamKeyValuePairArray[1];
+                    if (!string.IsNullOrEmpty(queryParamName))
+                    {
+                        // if sanitizedQueryParams already contains the query parameter name it means that the queryParamName is repeated.
+                        // in that case queryParamName should not be added, and the existing entry in sanitizedQueryParams should be removed.
+                        if (sanitizedQueryParams.ContainsKey(queryParamName))
+                            repeatedQueryParams.Add(queryParamName);
+                        else if (!string.IsNullOrEmpty(queryParamValue))
+                            sanitizedQueryParams.Add(queryParamName, queryParamValue);
+                    }
                 }
             }
+
             if (repeatedQueryParams.Any())
             {
                 LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23004, string.Join(", ", repeatedQueryParams)));
+
+                foreach (var repeatedQueryParam in repeatedQueryParams)
+                {
+                    if (sanitizedQueryParams.ContainsKey(repeatedQueryParam))
+                    sanitizedQueryParams.Remove(repeatedQueryParam);
+                }
             }
 
             return sanitizedQueryParams;
@@ -1248,6 +1252,9 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             {
                 var headerName = header.Key;
 
+                if (string.IsNullOrEmpty(headerName))
+                    continue;
+
                 // Don't include the authorization header (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1).
                 if (string.Equals(headerName, PopConstants.AuthorizationHeader, StringComparison.OrdinalIgnoreCase))
                     continue;
@@ -1256,23 +1263,30 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
                 // in that case headerName should not be added, and the existing entry in sanitizedHeaders should be removed.
                 if (sanitizedHeaders.ContainsKey(headerName))
                 {
-                    sanitizedHeaders.Remove(headerName);
-                    repeatedHeaders.Add(headerName.ToLowerInvariant());
+                    repeatedHeaders.Add(headerName.ToLower());
                 }
                 // if header has more than one value don't add it to the sanitizedHeaders as it's repeated.
                 else if (header.Value.Count() > 1)
                 {
-                    repeatedHeaders.Add(headerName.ToLowerInvariant());
+                    repeatedHeaders.Add(headerName.ToLower());
                 }
-                else
+                else if (header.Value.Count() == 1 && !string.IsNullOrEmpty(header.Value.First()))
                     sanitizedHeaders.Add(headerName, header.Value.First());
             }
 
             if (repeatedHeaders.Any())
+            {
                 LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23005, string.Join(", ", repeatedHeaders)));
+
+                foreach (var repeatedHeaderName in repeatedHeaders)
+                {
+                    if (sanitizedHeaders.ContainsKey(repeatedHeaderName))
+                        sanitizedHeaders.Remove(repeatedHeaderName);
+                }
+            }
 
             return sanitizedHeaders;
         }
-        #endregion
+    #endregion
     }
 }
