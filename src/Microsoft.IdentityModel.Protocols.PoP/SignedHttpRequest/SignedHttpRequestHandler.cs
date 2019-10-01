@@ -137,6 +137,16 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
 
             signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestCreationData);
 
+            return ConvertToJson(payload);
+        }
+
+        /// <summary>
+        /// Converts a dictionary representation of HttpRequest into a JSON string.
+        /// </summary>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <returns>A JSON string.</returns>
+        protected virtual string ConvertToJson(Dictionary<string, object> payload)
+        {
             return JObject.FromObject(payload).ToString(Formatting.None);
         }
 
