@@ -26,7 +26,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -712,12 +711,12 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.P, out string pClaimValue) || pClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.P)));
 
-            var expectedPClaimValue = httpRequestUri.AbsolutePath.TrimEnd('/');
-            var expectedPClaimValueWithTrailingForwardSlash = expectedPClaimValue + '/';
+            // relax comparison by trimming start and ending forward slashes
+            pClaimValue = pClaimValue.Trim('/');
+            var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
 
-            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(expectedPClaimValueWithTrailingForwardSlash, pClaimValue, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, ClaimTypes.P, expectedPClaimValue, expectedPClaimValueWithTrailingForwardSlash, pClaimValue)));
+            if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, ClaimTypes.P, expectedPClaimValue, pClaimValue)));
         }
 
         /// <summary>
@@ -891,8 +890,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (signedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
 
-            if (httpRequestBody == null || httpRequestBody.Count() == 0)
-                throw LogHelper.LogArgumentNullException(nameof(httpRequestBody));
+            if (httpRequestBody == null)
+                httpRequestBody = new byte[0];
 
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
