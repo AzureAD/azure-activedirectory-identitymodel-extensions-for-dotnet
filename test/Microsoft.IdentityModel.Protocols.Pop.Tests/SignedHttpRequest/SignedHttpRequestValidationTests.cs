@@ -31,6 +31,8 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -940,6 +942,139 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullToken",
                     },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(ValidateSignedHttpRequestCallsTheoryData))]
+        public async Task ValidateSignedHttpRequestCalls(ValidateSignedHttpRequestTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateSignedHttpRequestCalls", theoryData);
+            var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+
+            var handler = new SignedHttpRequestHandlerPublic();
+             _ = await handler.ValidateSignedHttpRequestPublicAsync(null, null, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+
+            var methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateTs)
+                context.AddDiff($"ValidationPolicy.ValidateTs={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateTs}, ValidateTsClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateMClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateM)
+                context.AddDiff($"ValidationPolicy.ValidateM={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateM}, ValidateMClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateUClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateU)
+                context.AddDiff($"ValidationPolicy.ValidateU={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateU}, ValidateUClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidatePClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateP)
+                context.AddDiff($"ValidationPolicy.ValidateP={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateP}, ValidatePClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateQClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateQ)
+                context.AddDiff($"ValidationPolicy.ValidateQ={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateQ}, ValidateQClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateHClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateH)
+                context.AddDiff($"ValidationPolicy.ValidateH={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateH}, ValidateHClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateBClaimCall"];
+            if (methodCalledStatus != signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateB)
+                context.AddDiff($"ValidationPolicy.ValidateB={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_AdditionalClaimValidatorCall"];
+            if (methodCalledStatus != (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync != null))
+                context.AddDiff($"ValidationPolicy.AdditionalClaimValidatorAsync={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync != null}, AdditionalClaimValidator call status: {methodCalledStatus}.");
+
+            methodCalledStatus = (bool)signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
+            if (methodCalledStatus != (signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null))
+                context.AddDiff($"ValidationPolicy.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationData.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateSignedHttpRequestCallsTheoryData
+        {
+            get
+            {
+                return new TheoryData<ValidateSignedHttpRequestTheoryData>
+                {
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            ValidateTs = true,
+                            ValidateM = true,
+                            ValidateP = true,
+                            ValidateQ = true,
+                            ValidateU = true,
+                            ValidateH = true,
+                            ValidateB = true,
+                            AdditionalClaimValidatorAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_AdditionalClaimValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            },
+                            SignedHttpRequestReplayValidatorAsync = async (string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidAllCalls",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            AdditionalClaimValidatorAsync = null,
+                            SignedHttpRequestReplayValidatorAsync = null,
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidNoCalls",
+                    },
+
                 };
             }
         }

@@ -51,10 +51,10 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             var context = TestUtilities.WriteHeader($"{this}.CreateSignedHttpRequest", "", true);
 
             var handler = new SignedHttpRequestHandlerPublic();
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestPublicAsync(null, CancellationToken.None).ConfigureAwait(false));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestAsync(null, CancellationToken.None).ConfigureAwait(false));
 
             var signedHttpRequestCreationData = new SignedHttpRequestCreationData(ReferenceTokens.JWSWithDifferentTyp, new HttpRequestData(), Default.AsymmetricSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
-            var signedHttpRequestString = await handler.CreateSignedHttpRequestPublicAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+            var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
 
             var tvp = new TokenValidationParameters()
             {

@@ -42,11 +42,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
     /// </summary>
     public class SignedHttpRequestHandlerPublic : SignedHttpRequestHandler
     {
-        public async Task<string> CreateSignedHttpRequestPublicAsync(SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
-        {
-            return await CreateSignedHttpRequestAsync(signedHttpRequestCreationData, cancellationToken).ConfigureAwait(false);
-        }
-
         public string CreateHttpRequestHeaderPublic(SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             return base.CreateHttpRequestHeader(signedHttpRequestCreationData);
@@ -110,16 +105,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         public void AddNonceClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
         {
             base.AddNonceClaim(payload, signedHttpRequestCreationData);
-        }
-
-        public async Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestPublicAsync(SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
-        {
-            return await base.ValidateSignedHttpRequestAsync(signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task<TokenValidationResult> ValidateAccessTokenPublicAsync(string accessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
-        {
-            return await base.ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<SecurityToken> ValidateSignedHttpRequestPublicAsync(SecurityToken jwtSignedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
@@ -223,6 +208,71 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 base.AddTsClaim(payload, signedHttpRequestCreationData);
             }
         }
+
+        protected override void ValidateTsClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateTsClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"] = true;
+            else
+                base.ValidateTsClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidateMClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateMClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateMClaimCall"] = true;
+            else
+                base.ValidateMClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidatePClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidatePClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidatePClaimCall"] = true;
+            else
+                base.ValidatePClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidateUClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateUClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateUClaimCall"] = true;
+            else
+                base.ValidateUClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidateQClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateQClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateQClaimCall"] = true;
+            else
+                base.ValidateQClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidateHClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateHClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateHClaimCall"] = true;
+            else
+                base.ValidateHClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override void ValidateBClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateBClaimCall"))
+                signedHttpRequestValidationData.CallContext.PropertyBag["onlyTrack_ValidateBClaimCall"] = true;
+            else
+                base.ValidateBClaim(signedHttpRequest, signedHttpRequestValidationData);
+        }
+
+        protected override async Task ValidateSignedHttpRequestSignatureAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockValidateSignedHttpRequestSignatureAsync"))
+                return;
+            else
+                await base.ValidateSignedHttpRequestSignatureAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+        }
+
         #endregion
     }
 }
