@@ -31,6 +31,7 @@
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(SrcTargets)</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets)</TargetFrameworks>
     <NetStandardImplicitPackageVersion>$(NetStandardVersion)</NetStandardImplicitPackageVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
