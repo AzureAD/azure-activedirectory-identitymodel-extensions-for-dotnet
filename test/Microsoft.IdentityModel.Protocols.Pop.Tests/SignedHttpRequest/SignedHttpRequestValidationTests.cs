@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
@@ -170,12 +171,14 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new ValidateSignedHttpRequestTheoryData
                     {
                         HttpRequestMethod = "",
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.M, null)),
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "EmptyExpectedMethod",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
                         HttpRequestMethod = null,
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.M, null)),
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullExpectedMethod",
                     },
@@ -276,6 +279,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new ValidateSignedHttpRequestTheoryData
                     {
                         HttpRequestUri = null,
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.U, null)),
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullUri",
                     },
@@ -393,6 +397,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new ValidateSignedHttpRequestTheoryData
                     {
                         HttpRequestUri = null,
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.P, null)),
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullUri",
                     },
@@ -402,6 +407,458 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.P, null)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1"),
+                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
+                        TestId = "InvalidTokenType",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "NullToken",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(ValidateHClaimTheoryData))]
+        public void ValidateHClaim(ValidateSignedHttpRequestTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateHClaim", theoryData);
+            try
+            {
+                var handler = new SignedHttpRequestHandlerPublic();
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                handler.ValidateHClaimPublic(theoryData.SignedHttpRequestToken, signedHttpRequestValidationData);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateHClaimTheoryData
+        {
+            get
+            {
+                return new TheoryData<ValidateSignedHttpRequestTheoryData>
+                {
+                    // the specification has incorrect hash value ("bZA981YJBrPlIzOvplbu3e7ueREXXr38vSkxIBYOaxI")
+                    // because authors used "\r\n" as a separator instead of "\n" as stated in the spec.
+                    // "P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs" is the value if "\n" is used as a separator.
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "content-type" , new List<string> { "application/json" } },
+                            { "etag" , new List<string> { "742-3u8f34-3r2nvv3" } },
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"content-type\", \"etag\"],\"P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs\"]"))),
+                        TestId = "ValidHSpecTest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        TestId = "ValidH1",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidH2",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { PopConstants.AuthorizationHeader , new List<string> { "exyz...." } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        TestId = "ValidH3",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { PopConstants.AuthorizationHeader.ToLower() , new List<string> { "exyz...." } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        TestId = "ValidH4",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\",\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2")}\"]"))),
+                        TestId = "ValidH5",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } },
+                            { "headerName3" , new List<string> { "headerValue3" } },
+
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\",\"headername2\",\"headername3\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2\nheadername3: headerValue3")}\"]"))),
+                        TestId = "ValidH6",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1", "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidHRepeated1",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "HEADERNAME1" , new List<string> { "headerValue1" } },
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidHRepeated2",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1", "headerValue2" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername2: headerValue2")}\"]"))),
+                        TestId = "ValidHRepeated3",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "HeaderNAME1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername2: headerValue2")}\"]"))),
+                        TestId = "ValidHRepeated4",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "HEADERNAME1" , new List<string> { "headerValue1" } },
+                            { "HeaderNAME1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername2: headerValue2")}\"]"))),
+                        TestId = "ValidHRepeated5",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "HEADERNAME1" , new List<string> { "headerValue1" } },
+                            { "HeaderNAME1" , new List<string> { "headerValue1" } },
+                            { "headerName3" , new List<string> { "headerValue3" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername2\",\"headername3\"],\"{CalculateBase64UrlEncodedHash("headername2: headerValue2\nheadername3: headerValue3")}\"]"))),
+                        TestId = "ValidHRepeated6",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "HEADERNAME1" , new List<string> { "headerValue1" } },
+                            { "HeaderNAME1" , new List<string> { "headerValue1" } },
+                            { "headerName3" , new List<string> { "headerValue3" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername3\",\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername3: headerValue3\nheadername2: headerValue2")}\"]"))),
+                        TestId = "ValidHRepeated7",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        TestId = "ValidAcceptUncoveredHeaders",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } },
+                            { "headerName2" , new List<string> { "headerValue2" } }
+
+                        },
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            ValidateH = true,
+                            AcceptUncoveredHeaders = false,
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23026"),
+                        TestId = "InvalidDontAcceptUncoveredHeaders",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue2" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23011"),
+                        TestId = "InvalidMismatchValue",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName2" , new List<string> { "headerValue1" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23025", typeof(SignedHttpRequestInvalidHClaimException)),
+                        TestId = "InvalidHeaderNameMismatch",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName2" , new List<string> { "headerValue1" } }
+                        },
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, JArray.Parse($"[\"headername1\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23024", null, true),
+                        TestId = "InvalidNumberOfArguments",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = null,
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, null)),
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "NullHeaders",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, "notAnArray")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23003"),
+                        TestId = "InvalidClaimType",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.H, null)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23003"),
+                        TestId = "InvalidClaimNotPresent",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
+                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
+                        TestId = "InvalidTokenType",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "NullToken",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(ValidateQClaimTheoryData))]
+        public void ValidateQClaim(ValidateSignedHttpRequestTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateQClaim", theoryData);
+            try
+            {
+                var handler = new SignedHttpRequestHandlerPublic();
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                handler.ValidateQClaimPublic(theoryData.SignedHttpRequestToken, signedHttpRequestValidationData);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateQClaimTheoryData
+        {
+            get
+            {
+                return new TheoryData<ValidateSignedHttpRequestTheoryData>
+                {
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        HttpRequestUri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"b\", \"a\", \"c\"],\"u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY\"]"))),
+                        TestId = "ValidQSpecTest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidQ1",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\",\"queryParam2\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]"))),
+                        TestId = "ValidQ2",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam2=value2&queryParam1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\",\"queryParam2\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]"))),
+                        TestId = "ValidQ3",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("/path1?queryParam1=value1", UriKind.Relative),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidQ4",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidQ5",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?query Param1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"query%20Param1\"],\"{CalculateBase64UrlEncodedHash("query%20Param1=value1")}\"]"))),
+                        TestId = "ValidQ6",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=val ue1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=val%20ue1")}\"]"))),
+                        TestId = "ValidQ7",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&QUERYParam1=value2"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\",\"QUERYParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1&QUERYParam1=value2")}\"]"))),
+                        TestId = "ValidQ8",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam2=value2&queryParam1=value1&queryParam2=value3"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidQRepeated1",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam2=value2&queryParam2=value22&queryParam1=value1&queryParam2=value3"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidQRepeated2",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam1=value2"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidQRepeated3",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam1=value2&queryParam1=value3"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[],\"{CalculateBase64UrlEncodedHash("")}\"]"))),
+                        TestId = "ValidQRepeated4",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        TestId = "ValidAcceptUncoveredQueryParams",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23029"),
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            ValidateH = true,
+                            AcceptUncoveredQueryParameters = false,
+                        },
+                        TestId = "InvalidDontAcceptUncoveredQueryParams",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[\"queryParam1\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23024", null, true),
+                        TestId = "InvalidNumberOfArguments",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam2\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23025", typeof(SignedHttpRequestInvalidQClaimException)),
+                        TestId = "InvalidQueryParamNameMismatch",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value2")}\"]"))),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23011"),
+                        TestId = "InvalidValueMismatch",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = null,
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, null)),
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "NullUri",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q, null)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23003"),
+                        TestId = "InvalidClaimNotPresent",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        HttpRequestUri = new Uri("https://www.contoso.com"),
+                        SignedHttpRequestToken = ReplaceOrAddPropertyAndCreateSignedHttpRequest(new JProperty(PopConstants.SignedHttpRequest.ClaimTypes.Q,  "notAnArray")),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23003"),
+                        TestId = "InvalidClaimType",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
