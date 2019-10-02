@@ -472,7 +472,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
 
-            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string accessToken) || accessToken == null)
+            if (!jwtSignedHttpRequest.TryGetPayloadValue(ClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.At)));
 
             return accessToken;
