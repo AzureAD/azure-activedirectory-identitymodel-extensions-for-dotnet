@@ -813,7 +813,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (signedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
 
-            if (httpRequestHeaders == null || !httpRequestHeaders.Any())
+            if (httpRequestHeaders == null)
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestHeaders));
 
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
@@ -841,7 +841,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             try
             {
                 StringBuilder stringBuffer = new StringBuilder();
-                var lastHeader = hClaimHeaderNames.Last();
+                var lastHeader = hClaimHeaderNames.LastOrDefault();
                 foreach (var headerName in hClaimHeaderNames)
                 {
                     if (!sanitizedHeaders.TryGetValue(headerName, out var headerValue))
