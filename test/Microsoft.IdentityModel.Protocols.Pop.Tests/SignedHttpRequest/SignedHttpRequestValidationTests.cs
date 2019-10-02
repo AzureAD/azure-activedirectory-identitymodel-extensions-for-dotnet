@@ -1079,6 +1079,113 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             }
         }
 
+        [Theory, MemberData(nameof(ValidateSignedHttpRequestSignatureTheoryData))]
+        public async Task ValidateSignedHttpRequestSignature(ValidateSignedHttpRequestTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateSignedHttpRequestSignature", theoryData);
+            try
+            {
+                var handler = new SignedHttpRequestHandlerPublic();
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                await handler.ValidateSignedHttpRequestSignaturePublicAsync(theoryData.SignedHttpRequestToken, null, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ValidateSignedHttpRequestTheoryData> ValidateSignedHttpRequestSignatureTheoryData
+        {
+            get
+            {
+                return new TheoryData<ValidateSignedHttpRequestTheoryData>
+                {
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        SignedHttpRequestToken = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullToken",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyAsync_returnValidKey", null },
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
+                        TestId = "InvalidTokenType",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.SignedHttpRequestPayload.ToString(Formatting.None)),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyAsync_returnNullKey", null },
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23030"),
+                        TestId = "InvalidNullPopKey",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.SignedHttpRequestPayload.ToString(Formatting.None)),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyAsync_returnInvalidKey", null },
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
+                        TestId = "InvalidPopKeySignatureValidationFails",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.SignedHttpRequestPayload.ToString(Formatting.None)),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyAsync_returnValidKey", null },
+                            }
+                        },
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            SignedHttpRequestSignatureValidatorAsync = (SecurityKey popKey, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                throw new InvalidOperationException();
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                        TestId = "InvalidDelegateThrows",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.SignedHttpRequestPayload.ToString(Formatting.None)),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyAsync_returnValidKey", null },
+                            }
+                        },
+                        TestId = "ValidTest",
+                    },
+                };
+            }
+        }
+
         internal static JsonWebToken ReplaceOrAddPropertyAndCreateSignedHttpRequest(JProperty newProperty)
         {
             JObject token = SignedHttpRequestTestUtils.SignedHttpRequestPayload;
@@ -1089,7 +1196,12 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             if (newProperty.Value != null)
                 token.Add(newProperty);
 
-            return new JsonWebToken(new JsonWebTokenHandler().CreateToken(token.ToString(Formatting.None), SignedHttpRequestTestUtils.SigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } }));
+            return CreateDefaultSignedHttpRequestToken(token.ToString(Formatting.None));
+        }
+
+        internal static JsonWebToken CreateDefaultSignedHttpRequestToken(string signedHttpRequestTokenPayload)
+        {
+            return new JsonWebToken(new JsonWebTokenHandler().CreateToken(signedHttpRequestTokenPayload, SignedHttpRequestTestUtils.SigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } }));
         }
 
         internal static string CalculateBase64UrlEncodedHash(string data)
