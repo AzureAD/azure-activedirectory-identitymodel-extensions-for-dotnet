@@ -906,7 +906,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
                         ExpectedClaimValue = $"[[\"header name1\"],\"{CalculateBase64UrlEncodedHash("header name1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
@@ -917,7 +916,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
                         ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
@@ -928,7 +926,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
                         ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
@@ -939,7 +936,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
                         ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
@@ -951,7 +947,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
                         ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
