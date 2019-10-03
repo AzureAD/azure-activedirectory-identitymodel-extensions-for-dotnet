@@ -81,6 +81,36 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             { JwtHeaderParameterNames.Jwk, DefaultJwk },
         };
 
+        internal static JObject DefaultJwe => new JObject
+        {
+            { JsonWebKeyParameterNames.Kty, JsonWebAlgorithmsKeyTypes.Octet },
+            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.Aes128CbcHmacSha256 },
+            { JsonWebKeyParameterNames.K, KeyingMaterial.DefaultSymmetricKeyEncoded_256 }
+        };
+
+        internal static JObject DefaultCnfJwe => new JObject
+        {
+            { ClaimTypes.Jwe, EncryptToken(DefaultJwe.ToString(Formatting.None)) },
+        };
+
+        internal static JObject DefaultJku => new JObject
+        {
+            { JwtHeaderParameterNames.Jku, "jku.json" },
+        };
+
+        internal static JObject DefaultJkuKid => new JObject
+        {
+            { JwtHeaderParameterNames.Jku, "jku.json" },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
+        };
+
+        internal static JObject DefaultKid => new JObject
+        {
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
+        };
+
+
+
         internal static JObject DefaultSignedHttpRequestHeader => new JObject
         {
             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 },
@@ -110,6 +140,11 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), SignedHttpRequestTestUtils.DefaultSigningCredentials, KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
 
             return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), SignedHttpRequestTestUtils.DefaultSigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
+        }
+
+        private static string EncryptToken(string innerJwt)
+        {
+            return new JsonWebTokenHandler().EncryptToken(innerJwt, DefaultEncryptingCredentials);
         }
 
         internal static JsonWebToken ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(JProperty newProperty)

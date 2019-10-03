@@ -33,7 +33,6 @@ using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
-using Microsoft.IdentityModel.TestUtils;
 
 namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 {

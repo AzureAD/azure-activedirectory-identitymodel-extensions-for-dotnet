@@ -31,6 +31,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
@@ -308,6 +309,93 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             {
                 return await base.ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             }
+        }
+
+        protected override string GetCnfClaimValue(SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJwk"))
+            {
+                return SignedHttpRequestTestUtils.DefaultCnfJwk.ToString(Formatting.None);
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJwe"))
+            {
+                return SignedHttpRequestTestUtils.DefaultCnfJwe.ToString(Formatting.None);
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJku"))
+            {
+                return SignedHttpRequestTestUtils.DefaultJku.ToString(Formatting.None);
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJkuKid"))
+            {
+                return SignedHttpRequestTestUtils.DefaultJkuKid.ToString(Formatting.None);
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnKid"))
+            {
+                return SignedHttpRequestTestUtils.DefaultKid.ToString(Formatting.None);
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnCustom"))
+            {
+                return "{\"custom\": 1}";
+            }
+            else
+            {
+                return base.GetCnfClaimValue(validatedAccessToken, signedHttpRequestValidationData);
+            }
+        }
+
+        protected override SecurityKey ResolvePopKeyFromJwk(string jwk, SignedHttpRequestValidationData signedHttpRequestValidationData)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJwk"))
+            {
+                signedHttpRequestValidationData.CallContext.PropertyBag["trackResolvePopKeyFromJwk"] = true;
+                return null;
+            }
+
+            return base.ResolvePopKeyFromJwk(jwk, signedHttpRequestValidationData);  
+        }
+
+        protected override async Task<SecurityKey> ResolvePopKeyFromJweAsync(string jwe, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJwe"))
+            {
+                signedHttpRequestValidationData.CallContext.PropertyBag["trackResolvePopKeyFromJwe"] = true;
+                return null;
+            }
+
+            return await base.ResolvePopKeyFromJweAsync(jwe, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+        }
+
+        protected override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJku"))
+            {
+                signedHttpRequestValidationData.CallContext.PropertyBag["trackResolvePopKeyFromJku"] = true;
+                return null;
+            }
+
+            return await base.ResolvePopKeyFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+        }
+
+        protected override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, string kid, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJkuKid"))
+            {
+                signedHttpRequestValidationData.CallContext.PropertyBag["trackResolvePopKeyFromJkuKid"] = true;
+                return null;
+            }
+
+            return await base.ResolvePopKeyFromJkuAsync(jkuSetUrl, kid, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+        }
+
+        protected override async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromKid"))
+            {
+                signedHttpRequestValidationData.CallContext.PropertyBag["trackResolvePopKeyFromKid"] = true;
+                return null;
+            }
+
+            return await base.ResolvePopKeyFromKeyIdentifierAsync(kid, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
         }
 
         #endregion
