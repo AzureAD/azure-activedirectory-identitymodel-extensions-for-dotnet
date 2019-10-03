@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!header.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Header doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(header.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(header.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{header.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -438,7 +438,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -503,7 +503,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!theoryData.Payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -589,7 +589,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -689,7 +689,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -852,7 +852,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<JArray>(theoryData.ExpectedClaim).ToString(Formatting.None)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -1062,7 +1062,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                     context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -1130,7 +1130,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 
                 if (theoryData.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
                 {
-                    if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                    if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                         context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
                 }
 
@@ -1193,7 +1193,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     if (!payload.ContainsKey(theoryData.ExpectedClaim))
                         context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                    if (!IdentityComparer.AreEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
+                    if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                         context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
                 }
                 else

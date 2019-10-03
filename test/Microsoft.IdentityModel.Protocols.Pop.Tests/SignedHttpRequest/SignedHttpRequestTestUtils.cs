@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -202,6 +203,39 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 var hashedBytes = hash.ComputeHash(bytes);
                 return Base64UrlEncoder.Encode(hashedBytes);
             }
+        }
+
+        internal static HttpHeaders CreateHttpHeaders(List<KeyValuePair<string, string>> headerKeyValuePairs)
+        {
+            using (var client = new HttpClient())
+            {
+                var headers = client.DefaultRequestHeaders;
+                foreach(var headerKeyValuePair in headerKeyValuePairs)
+                    headers.Add(headerKeyValuePair.Key, headerKeyValuePair.Value);
+
+                return headers;
+            }
+        }
+
+        internal static HttpRequestMessage CreateHttpRequestMessage(HttpMethod method, Uri uri, List<KeyValuePair<string, string>> headers, byte[] content, List<KeyValuePair<string, string>> contentHeaders = null)
+        {
+            var message = new HttpRequestMessage()
+            {
+                RequestUri = uri,
+                Method = method,
+            };
+
+            foreach (var header in headers)
+                message.Headers.Add(header.Key, header.Value);
+
+            if (content != null)
+                message.Content = new ByteArrayContent(content);
+
+            if (contentHeaders != null)
+                foreach (var contentHeader in contentHeaders)
+                    message.Content.Headers.Add(contentHeader.Key, contentHeader.Value);
+
+            return message;
         }
 
         internal static HttpResponseMessage CreateHttpResponseMessage(string json)

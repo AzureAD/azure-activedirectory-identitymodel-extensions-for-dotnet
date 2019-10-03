@@ -41,7 +41,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
         /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
-        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy) : base(httpRequestData, CallContext.Default)
+        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy) 
+            : base(httpRequestData, CallContext.Default)
         {
             SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
@@ -56,7 +57,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
         /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
-        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) : base(httpRequestData, callContext)
+        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) 
+            : base(httpRequestData, callContext)
         {
             SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
