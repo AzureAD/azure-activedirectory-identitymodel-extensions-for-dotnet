@@ -76,6 +76,25 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
         };
 
+        internal static JObject DefaultJwkEcdsa => new JObject
+        {
+            { "kty", "EC" },
+            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.EcdsaSha256 },
+            { JsonWebKeyParameterNames.Use, "sig" },
+            { JsonWebKeyParameterNames.Crv, "P-256" },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId },
+            { JsonWebKeyParameterNames.X, "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA" },
+            { JsonWebKeyParameterNames.Y, "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ" }
+        };
+
+        internal static JObject InvalidJwk => new JObject
+        {
+            { "kty", "RSA" },
+            { "e", "bad_data" },
+            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
+        };
+
         internal static JObject DefaultCnfJwk => new JObject
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwk },

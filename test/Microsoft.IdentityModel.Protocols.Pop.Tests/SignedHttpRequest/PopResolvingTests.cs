@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
@@ -158,6 +159,77 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 };
             }
         }
+
+        [Theory, MemberData(nameof(ResolvePopKeyFromJwkTheoryData))]
+        public void ResolvePopKeyFromJwk(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyTheoryData", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                _ = handler.ResolvePopKeyFromJwkPublic(theoryData.PopKeyString, signedHttpRequestValidationData);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromJwkTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        PopKeyString = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullPopKey",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = string.Empty,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidEmptyPopKey",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = "dummy",
+                        ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX10805", null, true),
+                        TestId = "InvalidPopKeyNotAJWK",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultJwe.ToString(Formatting.None),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23015"),
+                        TestId = "InvalidPopKeyNotSymmetricKey",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = SignedHttpRequestTestUtils.InvalidJwk.ToString(Formatting.None),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23016"),
+                        TestId = "InvalidPopKeyRsa",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultJwkEcdsa.ToString(Formatting.None),
+                        TestId = "ValidEcdsa",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultJwk.ToString(Formatting.None),
+                        TestId = "ValidRsa",
+                    },
+                };
+            }
+        }
     }
 
     public class ResolvePopKeyTheoryData : TheoryDataBase
@@ -215,6 +287,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         public SecurityToken SignedHttpRequestToken { get; set; }
 
         public SecurityToken ValidatedAccessToken { get; set; }
+
+        public string PopKeyString { get; set; }
     }
 }
 
