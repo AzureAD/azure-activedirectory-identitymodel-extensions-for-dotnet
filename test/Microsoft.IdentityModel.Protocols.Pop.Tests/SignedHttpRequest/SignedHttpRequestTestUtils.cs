@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), SignedHttpRequestTestUtils.DefaultSigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
         }
 
-        private static string EncryptToken(string innerJwt)
+        internal static string EncryptToken(string innerJwt)
         {
             return new JsonWebTokenHandler().EncryptToken(innerJwt, DefaultEncryptingCredentials);
         }

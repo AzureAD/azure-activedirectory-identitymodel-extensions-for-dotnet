@@ -145,6 +145,27 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new ResolvePopKeyTheoryData
                     {
+                        MethodToCall = "trackPopKeyResolver",
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackPopKeyResolver", false }
+                            }
+                        },
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            PopKeyResolverAsync = async (SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationData.CallContext.PropertyBag["trackPopKeyResolver"] = true;
+                                return await Task.FromResult<SecurityKey>(null);
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidResolverCall",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -230,6 +251,130 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 };
             }
         }
+
+        [Theory, MemberData(nameof(ResolvePopKeyFromJweTheoryData))]
+        public async Task ResolvePopKeyFromJweAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJwe", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                _ = await handler.ResolvePopKeyFromJwePublicAsync(theoryData.PopKeyString, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromJweTheoryData
+        {
+            get
+            {
+                var jwe = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultJwe.ToString(Formatting.None));
+                var jweRsa = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultJwk.ToString(Formatting.None));
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        PopKeyString = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullPopKey",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = string.Empty,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidEmptyPopKey",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = "dummy",
+                        ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14100", null, true),
+                        TestId = "InvalidPopKeyNotAJWK",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23017"),
+                        TestId = "InvalidNoDecryptionKeysSet",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
+                            {
+                                return await Task.FromResult<IEnumerable<SecurityKey>>(null);
+                            }
+                        },
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23017"),
+                        TestId = "InvalidCnfDelegateReturnsNull"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
+                            {
+                                return await Task.FromResult<IEnumerable<SecurityKey>>(new List<SecurityKey>());
+                            }
+                        },
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23017"),
+                        TestId = "InvalidCnfDelegateReturnsEmptyList"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
+                        },
+                        PopKeyString = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23018", null, true),
+                        TestId = "InvalidBadToken"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
+                        },
+                        PopKeyString = jweRsa,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23019"),
+                        TestId = "InvalidNotSymmetricKey"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
+                            {
+                                return await Task.FromResult<IEnumerable<SecurityKey>>(new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key });
+                            }
+                        },
+                        PopKeyString = jwe,
+                        TestId = "ValidCnfDelegateReturnsCorrectKey"
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
+                        },
+                        PopKeyString = jwe,
+                        TestId = "ValidTest"
+                    },
+                };
+            }
+        }
     }
 
     public class ResolvePopKeyTheoryData : TheoryDataBase
@@ -244,8 +389,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 Headers = HttpRequestHeaders
             };
 
-            var tokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters;
-
             // add testId for debugging purposes
             var callContext = CallContext;
             if (callContext.PropertyBag == null)
@@ -254,7 +397,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 callContext.PropertyBag.Add("testId", TestId);
 
             // set SignedHttpRequestToken if set and if JsonWebToken, otherwise set "dummy" value
-            return new SignedHttpRequestValidationData(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, tokenValidationParameters, SignedHttpRequestValidationPolicy, callContext);
+            return new SignedHttpRequestValidationData(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, SignedHttpRequestTestUtils.DefaultTokenValidationParameters, SignedHttpRequestValidationPolicy, callContext);
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
