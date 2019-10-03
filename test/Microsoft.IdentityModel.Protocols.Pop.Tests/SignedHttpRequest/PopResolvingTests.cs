@@ -638,6 +638,16 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     },
                     new ResolvePopKeyTheoryData
                     {
+                        JkuSetUrl = "http://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            RequireHttpsForJkuResourceRetrieval = false,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", typeof(ArgumentException)),
+                        TestId = "Valid0KeysReturnedLive",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
                         {
