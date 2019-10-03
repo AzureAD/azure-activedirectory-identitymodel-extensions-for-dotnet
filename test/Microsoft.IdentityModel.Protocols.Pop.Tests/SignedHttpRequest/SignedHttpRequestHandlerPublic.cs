@@ -398,6 +398,42 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             return await base.ResolvePopKeyFromKeyIdentifierAsync(kid, validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
         }
 
+        protected override async Task<IList<SecurityKey>> GetPopKeysFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetPopKeysFromJkuAsync_return0Keys"))
+            {
+                return new List<SecurityKey>();
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetPopKeysFromJkuAsync_returnNull"))
+            {
+                return null;
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetPopKeysFromJkuAsync_return2Keys"))
+            {
+                return new List<SecurityKey>()
+                {
+                    SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key,
+                    SignedHttpRequestTestUtils.DefaultSigningCredentials.Key,
+                };
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetPopKeysFromJkuAsync_return1Key"))
+            {
+                return new List<SecurityKey>()
+                {
+                    SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
+                };
+            }
+            else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockGetPopKeysFromJkuAsync_returnWrongKey"))
+            {
+                return new List<SecurityKey>()
+                {
+                    SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key
+                };
+            }
+
+            return await base.GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+        }
+
         #endregion
     }
 }

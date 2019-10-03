@@ -27,8 +27,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -198,6 +202,31 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 var hashedBytes = hash.ComputeHash(bytes);
                 return Base64UrlEncoder.Encode(hashedBytes);
             }
+        }
+
+        internal static HttpResponseMessage CreateHttpResponseMessage(string json)
+        {
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
+        }
+
+        internal static HttpClient SetupHttpClientThatReturns(string json)
+        {
+            return new HttpClient(new MockHttpMessageHandler(CreateHttpResponseMessage(json)));
+        }
+    }
+
+    public class MockHttpMessageHandler : HttpMessageHandler
+    {
+        private HttpResponseMessage _httpResponseMessage;
+
+        public MockHttpMessageHandler(HttpResponseMessage httpResponseMessage)
+        {
+            _httpResponseMessage = httpResponseMessage;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return await Task.FromResult(_httpResponseMessage);
         }
     }
 }

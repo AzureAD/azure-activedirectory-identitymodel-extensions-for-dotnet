@@ -68,5 +68,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop
         public const string IDX23029 = "IDX23029: The request contains uncovered query parameters and SignedHttpRequestValidationPolicy.AcceptUncoveredQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
         public const string IDX23030 = "IDX23030: Resolved PoP key is null. Unable to validate a signed http request signature without a PoP key.";
         public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
+        public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null..";
     }
 }

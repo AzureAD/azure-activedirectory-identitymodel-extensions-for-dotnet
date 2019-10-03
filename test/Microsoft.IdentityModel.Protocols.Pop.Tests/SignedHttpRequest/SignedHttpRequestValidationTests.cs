@@ -1168,10 +1168,10 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         {
                             SignedHttpRequestSignatureValidatorAsync = (SecurityKey popKey, SecurityToken signedHttpRequestToken, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
                             {
-                                throw new InvalidOperationException();
+                                throw new NotImplementedException();
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                        ExpectedException = new ExpectedException(typeof(NotImplementedException)),
                         TestId = "InvalidDelegateThrows",
                     },
                     new ValidateSignedHttpRequestTheoryData

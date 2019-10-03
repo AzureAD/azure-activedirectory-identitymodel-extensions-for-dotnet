@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
@@ -375,6 +376,357 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 };
             }
         }
+
+        [Theory, MemberData(nameof(ResolvePopKeyFromJkuTheoryData))]
+        public async Task ResolvePopKeyFromJkuAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJkuAsync", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+
+                if (popKey == null)
+                    context.AddDiff("Resolved Pop key is null.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromJkuTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return0Keys", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
+                        TestId = "InvalidZeroKeysReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_returnNull", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
+                        TestId = "InvalidNullReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return2Keys", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
+                        TestId = "InvalidTwoKeysReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return1Key", null }
+                            }
+                        },
+                        TestId = "ValidOneKeyReturned",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(ResolvePopKeyFromJkuKidTheoryData))]
+        public async Task ResolvePopKeyFromJkuKidAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJkuKidAsync", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, theoryData.Kid, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+
+                if (popKey == null)
+                    context.AddDiff("Resolved Pop key is null.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromJkuKidTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        Kid = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidKidNull",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = string.Empty,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidEmptyKid",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = "irelevantForThisTest",
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return0Keys", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23021"),
+                        TestId = "InvalidZeroKeysReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = "irelevantForThisTest",
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_returnNull", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23032"),
+                        TestId = "InvalidNullReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_returnWrongKey", null }
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23021"),
+                        TestId = "InvalidNoKidMatch",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return2Keys", null }
+                            }
+                        },
+                        TestId = "ValidOneKidMatch",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        Kid = SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockGetPopKeysFromJkuAsync_return1Key", null }
+                            }
+                        },
+                        TestId = "ValidKidMatch",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(GetPopKeysFromJkuAsyncTheoryData))]
+        public async Task GetPopKeysFromJkuAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetPopKeysFromJkuAsync", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                var popKeys = await handler.GetPopKeysFromJkuPublicAsync(theoryData.JkuSetUrl, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+
+                if (popKeys.Count != theoryData.ExpectedNumberOfPopKeysReturned)
+                    context.AddDiff($"Number of returned pop keys {popKeys.Count} is not the same as the expected: {theoryData.ExpectedNumberOfPopKeysReturned}.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> GetPopKeysFromJkuAsyncTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        JkuSetUrl = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidJkuUrlNull",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = string.Empty,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidJkuUrlEmptyString",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "http://www.contoso.com",
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23006"),
+                        TestId = "InvalidHttpsRequired",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "https://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", null, true),
+                        TestId = "InvalidNoContentReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "http://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            RequireHttpsForJkuResourceRetrieval = false,
+                            HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", null, true),
+                        TestId = "InvalidHttpNoContentReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "https://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns("{\"test\": 1}"),
+                        },
+                        ExpectedNumberOfPopKeysReturned = 0,
+                        TestId = "Valid0KeysReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "https://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetString2),
+                        },
+                        ExpectedNumberOfPopKeysReturned = 2,
+                        TestId = "Valid2KeysReturned",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        JkuSetUrl = "https://www.contoso.com",
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetECCString),
+                        },
+                        ExpectedNumberOfPopKeysReturned = 3,
+                        TestId = "Valid3KeysReturned",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(ResolvePopKeyFromKeyIdentifierAsyncTheoryData))]
+        public async Task ResolvePopKeyFromKeyIdentifierAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromKeyIdentifierAsync", theoryData);
+            try
+            {
+                var signedHttpRequestValidationData = theoryData.BuildSignedHttpRequestValidationData();
+                var handler = new SignedHttpRequestHandlerPublic();
+                var popKeys = await handler.ResolvePopKeyFromKeyIdentifierPublicAsync(theoryData.Kid, theoryData.ValidatedAccessToken, signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromKeyIdentifierAsyncTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23023"),
+                        TestId = "InvalidDelegateNotSet",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            PopKeyResolverFromKeyIdAsync = (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                throw new NotImplementedException();
+                            }
+                        },
+                        ExpectedException = new ExpectedException(typeof(NotImplementedException)),
+                        TestId = "InvalidDelegatThrows",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        {
+                            PopKeyResolverFromKeyIdAsync = async (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken) =>
+                            {
+                                return await Task.FromResult(SignedHttpRequestTestUtils.DefaultSigningCredentials.Key);
+                            }
+                        },
+                        TestId = "ValidTest",
+                    },
+                };
+            }
+        }
     }
 
     public class ResolvePopKeyTheoryData : TheoryDataBase
@@ -432,6 +784,12 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         public SecurityToken ValidatedAccessToken { get; set; }
 
         public string PopKeyString { get; set; }
+
+        public string Kid { get; set; }
+
+        public string JkuSetUrl { get; set; }
+
+        public int ExpectedNumberOfPopKeysReturned { get; set; }
     }
 }
 

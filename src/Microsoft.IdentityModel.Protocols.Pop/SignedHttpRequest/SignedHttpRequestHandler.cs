@@ -1062,7 +1062,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
         protected virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
         {
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
-            var popKeyCount = popKeys.Count;
+            var popKeyCount = popKeys != null ? popKeys.Count : 0;
 
             if (popKeyCount == 0)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23020, popKeyCount.ToString())));
@@ -1086,6 +1086,9 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(kid));
 
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+
+            if (popKeys == null)
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23032)));
 
             foreach (var key in popKeys)
             {
