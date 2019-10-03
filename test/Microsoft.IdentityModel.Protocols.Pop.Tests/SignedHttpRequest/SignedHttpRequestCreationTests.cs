@@ -53,8 +53,9 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             var handler = new SignedHttpRequestHandlerPublic();
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestAsync(null, CancellationToken.None).ConfigureAwait(false));
 
-            var signedHttpRequestCreationData = new SignedHttpRequestCreationData(ReferenceTokens.JWSWithDifferentTyp, new HttpRequestData(), Default.AsymmetricSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
+            var signedHttpRequestCreationData = new SignedHttpRequestCreationData(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
             var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+
 
             var tvp = new TokenValidationParameters()
             {
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = false,
                 ValidateLifetime = false,
-                IssuerSigningKey = signedHttpRequestCreationData.SigningCredentials.Key
+                IssuerSigningKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
             };
             var result = new JsonWebTokenHandler().ValidateToken(signedHttpRequestString, tvp);
 
@@ -116,8 +117,8 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = JwtHeaderParameterNames.Kid,
-                        ExpectedClaimValue =  Default.AsymmetricSigningCredentials.Kid,
-                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        ExpectedClaimValue =  SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         TestId = "ExpectedKid",
                     },
                     new CreateSignedHttpRequestTheoryData
@@ -201,7 +202,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     {
                         HeaderString = "{\"alg\": \"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"}",
                         PayloadString = "{\"claim\": 1}",
-                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        SigningCredentials =  SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         TestId = "ValidSignedHttpRequest",
                     },
                 };
@@ -340,7 +341,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     {
                         First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.At,
-                        ExpectedClaimValue = ReferenceTokens.JWSWithDifferentTyp,
+                        ExpectedClaimValue = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
                         TestId = "ValidAt",
                     },
                     new CreateSignedHttpRequestTheoryData
@@ -711,112 +712,112 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     {
                         First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
                         TestId = "ValidQ1",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\",\"queryParam2\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\",\"queryParam2\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
                         TestId = "ValidQ2",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\",\"queryParam2\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\",\"queryParam2\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1&queryParam2=value2")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&queryParam1=value1&queryParam2=value2"),
                         TestId = "ValidQ3",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"query%20Param1\"],\"{CalculateBase64UrlEncodedHash("query%20Param1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"query%20Param1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("query%20Param1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?query Param1=value1"),
                         TestId = "ValidQ4",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"query%20Param1%20\"],\"{CalculateBase64UrlEncodedHash("query%20Param1%20=value1%20")}\"]",
+                        ExpectedClaimValue = $"[[\"query%20Param1%20\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("query%20Param1%20=value1%20")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?query Param1 =value1%20"),
                         TestId = "ValidQ5",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&queryParam1=value1&query=Param2=value2"),
                         TestId = "ValidQ6",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1"),
                         TestId = "ValidNoQueryParams1",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1&"),
                         TestId = "ValidNoQueryParams2",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1&t"),
                         TestId = "ValidNoQueryParams3",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1&t="),
                         TestId = "ValidNoQueryParams4",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&repeated=repeated1&repeated=repeate2"),
                         TestId = "ValidRepeatedQ1",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&repeated=repeated1&queryParam1=value1&repeated=repeate2"),
                         TestId = "ValidRepeatedQ2",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&repeated=repeated1&repeated=repeate2&queryParam1=value1"),
                         TestId = "ValidRepeatedQ3",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&repeated=repeated1&repeated=repeate2&queryParam1=value1&repeated=repeate3"),
                         TestId = "ValidRepeatedQ4",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?&repeated=repeated1&repeated=repeate2"),
                         TestId = "RepeatedQEmpty",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.Q,
-                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
                         HttpRequestUri = new Uri("/relativePath?queryParam1=value1", UriKind.Relative),
                         TestId = "ValidRelativeUri",
                     },
@@ -874,7 +875,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     {
                         First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } }
@@ -884,7 +885,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\",\"headername2\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\",\"headername2\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } },
@@ -895,7 +896,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\",\"headername2\",\"headername3\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2\nheadername3: headerValue3")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\",\"headername2\",\"headername3\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1\nheadername2: headerValue2\nheadername3: headerValue3")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } },
@@ -907,7 +908,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"header name1\"],\"{CalculateBase64UrlEncodedHash("header name1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"header name1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("header name1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "header Name1" , new List<string> { "headerValue1" } }
@@ -917,7 +918,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "" , new List<string> { "headerValue1" } }
@@ -927,7 +928,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "h1" , new List<string> { "" } }
@@ -937,7 +938,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } },
@@ -948,7 +949,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } }
@@ -958,7 +959,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1" } },
@@ -969,7 +970,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName2" , new List<string> { "headerValue2", "headerValue10" } },
@@ -980,7 +981,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName2" , new List<string> { "headerValue2", "headerValue10" } },
@@ -990,7 +991,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "HeaDerName2" , new List<string> { "headerValue2" } },
@@ -1002,7 +1003,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[\"headername1\"],\"{CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "HeaDerName2" , new List<string> { "headerValue2" } },
@@ -1015,7 +1016,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "headerName1" , new List<string> { "headerValue1", "headerValue10" } },
@@ -1025,7 +1026,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.H,
-                        ExpectedClaimValue = $"[[],\"{CalculateBase64UrlEncodedHash("")}\"]",
+                        ExpectedClaimValue = $"[[],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("")}\"]",
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         TestId = "EmptyHeaders",
                     },
@@ -1084,21 +1085,21 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                     {
                         First = true,
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.B,
-                        ExpectedClaimValue = CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("abcd")),
+                        ExpectedClaimValue = SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("abcd")),
                         HttpRequestBody = Encoding.UTF8.GetBytes("abcd"),
                         TestId = "ValidB1",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.B,
-                        ExpectedClaimValue = CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("")),
+                        ExpectedClaimValue = SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("")),
                         HttpRequestBody = new byte[0],
                         TestId = "ValidB2",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = PopConstants.SignedHttpRequest.ClaimTypes.B,
-                        ExpectedClaimValue = CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("")),
+                        ExpectedClaimValue = SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("")),
                         HttpRequestBody = null,
                         TestId = "NullBytes",
                     },
@@ -1252,20 +1253,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 };
             }
         }
-
-        private static string CalculateBase64UrlEncodedHash(string data)
-        {
-            return CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes(data));
-        }
-
-        private static string CalculateBase64UrlEncodedHash(byte[] bytes)
-        {
-            using (var hash = SHA256.Create())
-            {
-                var hashedBytes = hash.ComputeHash(bytes);
-                return Base64UrlEncoder.Encode(hashedBytes);
-            }
-        }
     }
 
     public class CreateSignedHttpRequestTheoryData : TheoryDataBase
@@ -1319,9 +1306,9 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 
         public Dictionary<string, object> Payload { get; set; } = new Dictionary<string, object>();
 
-        public SigningCredentials SigningCredentials { get; set; } = Default.AsymmetricSigningCredentials;
+        public SigningCredentials SigningCredentials { get; set; } = SignedHttpRequestTestUtils.DefaultSigningCredentials;
 
-        public string Token { get; set; } = ReferenceTokens.JWSWithDifferentTyp;
+        public string Token { get; set; } = SignedHttpRequestTestUtils.DefaultEncodedAccessToken;
 
         public string HeaderString { get; set; }
 

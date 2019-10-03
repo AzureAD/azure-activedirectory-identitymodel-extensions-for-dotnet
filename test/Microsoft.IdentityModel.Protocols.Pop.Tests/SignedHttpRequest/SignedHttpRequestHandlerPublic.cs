@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         {
             if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyAsync_returnValidKey"))
             {
-                return SignedHttpRequestTestUtils.RsaSecurityKey_2048;
+                return SignedHttpRequestTestUtils.DefaultSigningCredentials.Key;
             }
             else if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyAsync_returnInvalidKey"))
             {
@@ -293,6 +293,23 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                 return await base.ResolvePopKeyAsync(validatedAccessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
             }
         }
+
+        protected override async Task<TokenValidationResult> ValidateAccessTokenAsync(string accessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken)
+        {
+            if (signedHttpRequestValidationData.CallContext.PropertyBag != null && signedHttpRequestValidationData.CallContext.PropertyBag.ContainsKey("mockValidateAccessTokenAsync_returnInvalidResult"))
+            {
+                return new TokenValidationResult()
+                {
+                    IsValid = false,
+                    Exception = new SecurityTokenValidationException()
+                };
+            }
+            else
+            {
+                return await base.ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationData, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
         #endregion
     }
 }
