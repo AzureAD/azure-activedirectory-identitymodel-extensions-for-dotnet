@@ -120,12 +120,12 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         },
                         HttpHeaders = SignedHttpRequestTestUtils.CreateHttpHeaders(new List<KeyValuePair<string, string>>()
                         {
-                            new KeyValuePair<string, string> ("Etag", "742-3u8f34-3r2nvv3")
+                            new KeyValuePair<string, string> ("h2", "value2")
                         }),
                         ExpectedHttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "Content-Type", new List<string> { "application/json" } },
-                            { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                            { "h2", new List<string> { "value2" } },
                         },
                         TestId = "Valid4",
                     },
@@ -139,12 +139,12 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         HttpHeaders = SignedHttpRequestTestUtils.CreateHttpHeaders(new List<KeyValuePair<string, string>>()
                         {
                             new KeyValuePair<string, string> ("h1", "value2"),
-                            new KeyValuePair<string, string> ("Etag", "742-3u8f34-3r2nvv3")
+                            new KeyValuePair<string, string> ("h2", "value2")
                         }),
                         ExpectedHttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
                             { "Content-Type", new List<string> { "application/json" } },
-                            { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                            { "h2", new List<string> { "value2" } },
                             { "h1", new List<string> { "value1", "value2" } },
                         },
                         TestId = "Valid5",
@@ -160,7 +160,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             try
             {
                 var httpRequestData = await PopUtilities.ToHttpRequestDataAsync(theoryData.HttpRequestMessage).ConfigureAwait(false);
-
                 IdentityComparer.AreStringsEqual(httpRequestData.Method, theoryData.ExpectedHttpRequestData.Method, context);
                 IdentityComparer.AreUrisEqual(httpRequestData.Uri, theoryData.ExpectedHttpRequestData.Uri, context);
                 IdentityComparer.AreBytesEqual(httpRequestData.Body, theoryData.ExpectedHttpRequestData.Body, context);
@@ -245,7 +244,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             new List<KeyValuePair<string, string>>()
                             {
                                 new KeyValuePair<string, string> ("h1", "value1"),
-                                new KeyValuePair<string, string> ("Etag", "742-3u8f34-3r2nvv3")
+                                new KeyValuePair<string, string> ("h2", "value2")
                             },
                             null
                         ),
@@ -256,7 +255,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             Headers = new Dictionary<string, IEnumerable<string>>()
                             {
                                 { "h1", new List<string> { "value1" } },
-                                { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                                { "h2", new List<string> { "value2" } },
                             },
                         },
                         TestId = "Valid5",
@@ -269,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             new List<KeyValuePair<string, string>>()
                             {
                                 new KeyValuePair<string, string> ("h1", "value1"),
-                                new KeyValuePair<string, string> ("Etag", "742-3u8f34-3r2nvv3")
+                                new KeyValuePair<string, string> ("h2", "value2")
                             },
                             Encoding.UTF8.GetBytes("abcd")
                         ), 
@@ -280,7 +279,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             Headers = new Dictionary<string, IEnumerable<string>>()
                             {
                                 { "h1", new List<string> { "value1" } },
-                                { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                                { "h2", new List<string> { "value2" } },
                                 { "Content-Length", new List<string> { "abcd".Length.ToString() } },
                                 
                             },
@@ -296,7 +295,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             new List<KeyValuePair<string, string>>()
                             {
                                 new KeyValuePair<string, string> ("h1", "value1"),
-                                new KeyValuePair<string, string> ("Etag", "742-3u8f34-3r2nvv3")
+                                new KeyValuePair<string, string> ("h2", "value2")
                             },
                             Encoding.UTF8.GetBytes("abcd"),
                             new List<KeyValuePair<string, string>>()
@@ -311,7 +310,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             Headers = new Dictionary<string, IEnumerable<string>>()
                             {
                                 { "h1", new List<string> { "value1" } },
-                                { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                                { "h2", new List<string> { "value2" } },
                                 { "Content-Type",  new List<string> { "application/json" } },
                                 { "Content-Length", new List<string> { "abcd".Length.ToString() } },
                             },
