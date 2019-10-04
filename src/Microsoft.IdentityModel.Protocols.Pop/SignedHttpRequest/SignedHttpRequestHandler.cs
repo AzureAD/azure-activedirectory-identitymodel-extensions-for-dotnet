@@ -968,7 +968,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest
             if (!(validatedAccessToken is JsonWebToken jwtValidatedAccessToken))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, validatedAccessToken.GetType(), typeof(JsonWebToken), validatedAccessToken)));
 
-            if (jwtValidatedAccessToken.TryGetPayloadValue(ClaimTypes.Cnf, out JObject cnf) || cnf == null)
+            if (jwtValidatedAccessToken.TryGetPayloadValue(ClaimTypes.Cnf, out JObject cnf) && cnf != null)
                 return cnf.ToString();
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ClaimTypes.Cnf)));
