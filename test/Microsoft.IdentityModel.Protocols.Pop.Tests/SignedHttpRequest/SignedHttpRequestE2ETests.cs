@@ -33,92 +33,230 @@ using System.Threading;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.Protocols.Pop.SignedHttpRequest;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.TestUtils;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
 {
     public class SignedHttpRequestE2ETests
     {
-        [Fact]
-        public async void RoundtripTest()
+        [Theory, MemberData(nameof(RoundtripTheoryData))]
+        public async Task Roundtrips(RoundtripSignedHttpRequestTheoryData theoryData)
         {
-            var popHandler = new SignedHttpRequestHandler();
-
-            /* set the HttpRequestData via HttpRequestMessage
-            var requestMessage = new HttpRequestMessage();
-            requestMessage.RequestUri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck");
-            requestMessage.Method = HttpMethod.Get;
-            requestMessage.Headers.Add("Etag", "742-3u8f34-3r2nvv3");
-            requestMessage.Content = new ByteArrayContent(Guid.NewGuid().ToByteArray());
-            requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var httpRequestData = await requestMessage.ToHttpRequestDataAsync().ConfigureAwait(false);
-            */
-
-            //or set up http request data directly
-            var httpRequestData = new HttpRequestData()
-            {
-                Method = "GET",
-                Uri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
-                Body = Guid.NewGuid().ToByteArray(),
-                Headers = new Dictionary<string, IEnumerable<string>>
-                {
-                    { "Content-Type", new List<string> { "application/json" } },
-                    { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
-                }
-            };
-
-
-            // adjust the creationPolicy
-            var creationPolicy = new SignedHttpRequestCreationPolicy()
-            {
-                CreateTs = true,
-                CreateM = true,
-                CreateP = true,
-                CreateU = true,
-                CreateH = true,
-                CreateB = true,
-                CreateQ = true,
-            };
-
-            // adjust the validationPolicy
-            var validationPolicy = new SignedHttpRequestValidationPolicy()
-            {
-                ValidateTs = true,
-                ValidateM = true,
-                ValidateP = true,
-                ValidateU = true,
-                ValidateH = true,
-                ValidateB = true,
-                ValidateQ = true,
-            };
-
-            var tokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateAudience = false,
-                ValidateIssuer = false,
-                IssuerSigningKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
-            };
-
+            var context = TestUtilities.WriteHeader($"{this}.Roundtrips", theoryData);
             try
             {
-                var signedHttpRequestCreationData = new SignedHttpRequestCreationData(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, httpRequestData, SignedHttpRequestTestUtils.DefaultSigningCredentials, creationPolicy);
-                var signedHttpRequest = await popHandler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+                var handler = new SignedHttpRequestHandler();
+                var signedHttpRequestCreationData = new SignedHttpRequestCreationData(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationPolicy);
+                var signedHttpRequest = await handler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequestValidationData = new SignedHttpRequestValidationData(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationPolicy);
+                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
 
-                var signedHttpRequestValiationData = new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
-                var result = await popHandler.ValidateSignedHttpRequestAsync(signedHttpRequestValiationData, CancellationToken.None).ConfigureAwait(false);
+                Assert.NotNull(result);
+                Assert.NotNull(result.SignedHttpRequest);
+                Assert.NotNull(result.ValidatedSignedHttpRequest);
+                Assert.NotNull(result.AccessToken);
+                Assert.NotNull(result.ValidatedAccessToken);
+                Assert.NotNull(result.ClaimsIdentity);
 
-                //4.1.
-                var signedHttpRequestHeader = PopUtilities.CreateSignedHttpRequestHeader(result.SignedHttpRequest);
-            }
-            catch (PopException e)
-            {
-                // handle the exception
-                throw e;
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                // handle the exception
-                throw ex;
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<RoundtripSignedHttpRequestTheoryData> RoundtripTheoryData
+        {
+            get
+            {
+                var body = Guid.NewGuid().ToByteArray();
+                var httpRequestData = new HttpRequestData()
+                {
+                    Method = "GET",
+                    Uri = new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
+                    Body = body,
+                    Headers = new Dictionary<string, IEnumerable<string>>
+                    {
+                        { "Content-Type", new List<string> { "application/json" } },
+                        { "Content-Length", new List<string> { body.Length.ToString() } },
+                        { "Etag", new List<string> { "742-3u8f34-3r2nvv3" } },
+                    }
+                };
+
+                var httpRequestMessage = SignedHttpRequestTestUtils.CreateHttpRequestMessage
+                (
+                    HttpMethod.Get,
+                    new Uri("https://www.contoso.com:443/it/requests?b=bar&a=foo&c=duck"),
+                    new List<KeyValuePair<string, string>>()
+                    {
+                        new KeyValuePair<string, string>("Etag", "742-3u8f34-3r2nvv3")
+                    },
+                    body,
+                    new List<KeyValuePair<string, string>>()
+                    {
+                        new KeyValuePair<string, string>("Content-Type", "application/json")
+                    }
+                );
+
+                var creationPolicy = new SignedHttpRequestCreationPolicy()
+                {
+                    CreateTs = true,
+                    CreateM = true,
+                    CreateP = true,
+                    CreateU = true,
+                    CreateH = true,
+                    CreateB = true,
+                    CreateQ = true,
+                };
+
+                var validationPolicy = new SignedHttpRequestValidationPolicy()
+                {
+                    ValidateTs = true,
+                    ValidateM = true,
+                    ValidateP = true,
+                    ValidateU = true,
+                    ValidateH = true,
+                    ValidateB = true,
+                    ValidateQ = true,
+                };
+
+                var tvpWrongIssuerSigningKey = SignedHttpRequestTestUtils.DefaultTokenValidationParameters;
+                tvpWrongIssuerSigningKey.IssuerSigningKey = KeyingMaterial.RsaSecurityKey2;
+                var ecdsaSigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256);
+
+                return new TheoryData<RoundtripSignedHttpRequestTheoryData>
+                {
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        TestId = "ValidJwkRsa",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = PopUtilities.ToHttpRequestDataAsync(httpRequestMessage).ConfigureAwait(false).GetAwaiter().GetResult(),
+                        AccessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        TestId = "ValidJwkRsaUsingHttpRequestMessage",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        TestId = "ValidJwe",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkEcdsa, false),
+                        SigningCredentials = ecdsaSigningCredentials,
+                        TestId = "ValidJwkEcdsa",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        {
+                            CreateU = false,
+                            CreateB = true,
+                            CreateH = true,
+                            CreateM = true,
+                            CreateP = true,
+                            CreateQ = true,
+                            CreateTs = true
+                        },
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidUClaimException), "IDX23003"),
+                        TestId = "InvalidNoUClaim",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = tvpWrongIssuerSigningKey,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidAtClaimException), "IDX23013", typeof(SecurityTokenSignatureKeyNotFoundException)),
+                        TestId = "InvalidBadIssuerSigningKey",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationPolicy = creationPolicy,
+                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
+                        SigningCredentials = KeyingMaterial.X509SigningCreds_SelfSigned2048_SHA512,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
+                        TestId = "InvalidBadPopSigningKey",
+                    },
+                };
             }
         }
     }
+
+    public class RoundtripSignedHttpRequestTheoryData : TheoryDataBase
+    {
+        public string AccessToken { get; set; }
+        public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; set; }
+        public TokenValidationParameters TokenValidationParameters { get; set; }
+        public HttpRequestData HttpRequestData { get; set; }
+
+        public Uri HttpRequestUri { get; set; }
+
+        public string HttpRequestMethod { get; set; }
+
+        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+
+        public byte[] HttpRequestBody { get; set; }
+
+        public SignedHttpRequestCreationPolicy SignedHttpRequestCreationPolicy { get; set; } = new SignedHttpRequestCreationPolicy()
+        {
+            CreateB = true,
+            CreateH = true,
+            CreateM = true,
+            CreateNonce = true,
+            CreateP = true,
+            CreateQ = true,
+            CreateTs = true,
+            CreateU = true
+        };
+
+        public Dictionary<string, object> Payload { get; set; } = new Dictionary<string, object>();
+
+        public SigningCredentials SigningCredentials { get; set; } = SignedHttpRequestTestUtils.DefaultSigningCredentials;
+
+        public string Token { get; set; } = SignedHttpRequestTestUtils.DefaultEncodedAccessToken;
+
+        public string HeaderString { get; set; }
+
+        public string PayloadString { get; set; }
+    }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.EcdsaSha256 },
             { JsonWebKeyParameterNames.Use, "sig" },
             { JsonWebKeyParameterNames.Crv, "P-256" },
-            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.Ecdsa256Key.KeyId },
             { JsonWebKeyParameterNames.X, "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA" },
             { JsonWebKeyParameterNames.Y, "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ" }
         };
@@ -103,6 +103,11 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         internal static JObject DefaultCnfJwk => new JObject
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwk },
+        };
+
+        internal static JObject DefaultCnfJwkEcdsa => new JObject
+        {
+            { JwtHeaderParameterNames.Jwk, DefaultJwkEcdsa },
         };
 
         internal static JObject DefaultJwe => new JObject
@@ -161,9 +166,9 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             accessToken.Add(ClaimTypes.Cnf, cnf);
 
             if (encrypt)
-                return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), SignedHttpRequestTestUtils.DefaultSigningCredentials, KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
+                return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), DefaultSigningCredentials, KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
 
-            return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), SignedHttpRequestTestUtils.DefaultSigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
+            return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), DefaultSigningCredentials, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, PopConstants.SignedHttpRequest.TokenType } });
         }
 
         internal static string EncryptToken(string innerJwt)

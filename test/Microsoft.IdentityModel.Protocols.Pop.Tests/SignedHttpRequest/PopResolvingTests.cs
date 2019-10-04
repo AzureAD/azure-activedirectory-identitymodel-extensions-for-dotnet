@@ -738,7 +738,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             }
         }
     }
-
     public class ResolvePopKeyTheoryData : TheoryDataBase
     {
         public SignedHttpRequestValidationData BuildSignedHttpRequestValidationData()
