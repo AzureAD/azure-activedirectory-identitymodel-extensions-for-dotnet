@@ -81,17 +81,6 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
         };
 
-        internal static JObject DefaultJwkEcdsa => new JObject
-        {
-            { "kty", "EC" },
-            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.EcdsaSha256 },
-            { JsonWebKeyParameterNames.Use, "sig" },
-            { JsonWebKeyParameterNames.Crv, "P-256" },
-            { JwtHeaderParameterNames.Kid, KeyingMaterial.Ecdsa256Key.KeyId },
-            { JsonWebKeyParameterNames.X, "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA" },
-            { JsonWebKeyParameterNames.Y, "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ" }
-        };
-
         internal static JObject InvalidJwk => new JObject
         {
             { "kty", "RSA" },
@@ -104,12 +93,34 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwk },
         };
-
         internal static JObject DefaultCnfJwkEcdsa => new JObject
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwkEcdsa },
         };
 
+#if !NET_CORE
+        internal static JObject DefaultJwkEcdsa => new JObject
+        {
+            { "kty", "EC" },
+            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.EcdsaSha256 },
+            { JsonWebKeyParameterNames.Use, "sig" },
+            { JsonWebKeyParameterNames.Crv, "P-256" },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.Ecdsa256Key.KeyId },
+            { JsonWebKeyParameterNames.X, "luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA" },
+            { JsonWebKeyParameterNames.Y, "tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ" }
+        };
+#else
+        internal static JObject DefaultJwkEcdsa => new JObject
+        {
+            { "kty", "EC" },
+            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.EcdsaSha256 },
+            { JsonWebKeyParameterNames.Use, "sig" },
+            { JsonWebKeyParameterNames.Crv, "P-256" },
+            { JwtHeaderParameterNames.Kid, KeyingMaterial.Ecdsa256Key.KeyId },
+            { JsonWebKeyParameterNames.X, KeyingMaterial.Ecdsa256Parameters_Public.Q.X },
+            { JsonWebKeyParameterNames.Y, KeyingMaterial.Ecdsa256Parameters_Public.Q.Y }
+        };
+#endif
         internal static JObject DefaultJwe => new JObject
         {
             { JsonWebKeyParameterNames.Kty, JsonWebAlgorithmsKeyTypes.Octet },
@@ -228,13 +239,11 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             {
                 RequestUri = uri,
                 Method = method,
-            };
+                Content = content != null ? new ByteArrayContent(content) : null,
+        };
 
             foreach (var header in headers)
                 message.Headers.Add(header.Key, header.Value);
-
-            if (content != null)
-                message.Content = new ByteArrayContent(content);
 
             if (contentHeaders != null)
                 foreach (var contentHeader in contentHeaders)
