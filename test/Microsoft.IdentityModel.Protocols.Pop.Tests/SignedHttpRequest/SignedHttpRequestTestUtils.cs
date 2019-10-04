@@ -239,11 +239,18 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
             {
                 RequestUri = uri,
                 Method = method,
-                Content = content != null ? new ByteArrayContent(content) : null,
-        };
+            };
+
+            if (content != null)
+            {
+                message.Content = new ByteArrayContent(content);
+                message.Content.Headers.ContentLength = content.Length;
+            }
 
             foreach (var header in headers)
+            { 
                 message.Headers.Add(header.Key, header.Value);
+            }
 
             if (contentHeaders != null)
                 foreach (var contentHeader in contentHeaders)
