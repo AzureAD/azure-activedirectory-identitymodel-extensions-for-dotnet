@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
-    <ProjectReference Include="..\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4'">
