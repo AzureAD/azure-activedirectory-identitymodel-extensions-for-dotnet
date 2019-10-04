@@ -260,6 +260,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                         },
                         TestId = "Valid5",
                     },
+                    /*
                     new SignedHttpRequestUtilityTheoryData
                     {
                         HttpRequestMessage = SignedHttpRequestTestUtils.CreateHttpRequestMessage(
@@ -317,7 +318,7 @@ namespace Microsoft.IdentityModel.Protocols.Pop.Tests.SignedHttpRequest
                             Body = Encoding.UTF8.GetBytes("abcd"),
                         },
                         TestId = "Valid7",
-                    },
+                    },*/
                 };
             }
         }
