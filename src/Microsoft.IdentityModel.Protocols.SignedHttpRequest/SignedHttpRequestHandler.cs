@@ -430,15 +430,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (signedHttpRequestValidationContext == null)
                     throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
 
-                var signedHttpRequest = ReadAsSecurityToken(signedHttpRequestValidationContext.SignedHttpRequest);
-                if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
-                var accessToken = ReadAccessToken(jwtSignedHttpRequest);
+                // read signed http request as JWT
+                var jwtSignedHttpRequest = _jwtTokenHandler.ReadJsonWebToken(signedHttpRequestValidationContext.SignedHttpRequest);
+
+                // read access token ("at")
+                if (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.At)));
+
+                // validate access token ("at")
                 var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 if (!tokenValidationResult.IsValid)
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 
+                // validate signed http request
                 var validatedSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, tokenValidationResult.SecurityToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 return new SignedHttpRequestValidationResult()
@@ -459,32 +464,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     Exception = ex
                 };
             }
-        }
-
-        /// <summary>
-        /// Converts a string into an instance of <see cref="SecurityToken"/>.
-        /// </summary>
-        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
-        /// <returns>A <see cref="SecurityToken"/>.</returns>
-        protected virtual SecurityToken ReadAsSecurityToken(string token)
-        {
-            return _jwtTokenHandler.ReadJsonWebToken(token);
-        }
-
-        /// <summary>
-        /// Gets the value of the "at" claim.
-        /// </summary>
-        /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
-        /// <returns>Access tokens as a JWT.</returns>
-        protected virtual string ReadAccessToken(SecurityToken signedHttpRequest)
-        {
-            if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
-
-            if (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.At)));
-
-            return accessToken;
         }
 
         /// <summary>
@@ -1023,11 +1002,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(jwe))
                 throw LogHelper.LogArgumentNullException(nameof(jwe));
 
-            var jsonWebToken = ReadAsSecurityToken(jwe);
+            var jweJwt = _jwtTokenHandler.ReadJsonWebToken(jwe);
 
             IEnumerable<SecurityKey> decryptionKeys;
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeysResolverAsync != null)
-                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeysResolverAsync(jsonWebToken, cancellationToken).ConfigureAwait(false);
+                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
             else
                 decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeys;
 
@@ -1044,13 +1023,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 ValidateIssuerSigningKey = false,
             };
 
-            if (!(jsonWebToken is JsonWebToken jwtCnf))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, jsonWebToken.GetType(), typeof(JsonWebToken), jsonWebToken)));
-
             JsonWebKey jsonWebKey;
             try
             {
-                var decryptedJson = _jwtTokenHandler.DecryptToken(jwtCnf, tokenDecryptionParameters);
+                var decryptedJson = _jwtTokenHandler.DecryptToken(jweJwt, tokenDecryptionParameters);
                 jsonWebKey = new JsonWebKey(decryptedJson);
             }
             catch (Exception e)
