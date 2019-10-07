@@ -420,35 +420,49 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="SignedHttpRequestValidationResult"/>. 
+        /// <see cref="TokenValidationResult.IsValid"/> will be <c>true</c> if the signed http request was successfully validated, <c>false</c> otherwise.
+        /// </returns>
         public async Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestAsync(SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationContext == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
-
-            var signedHttpRequest = ReadAsSecurityToken(signedHttpRequestValidationContext.SignedHttpRequest);
-            if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
-            var accessToken = ReadAccessToken(jwtSignedHttpRequest);
-            var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-
-            if (!tokenValidationResult.IsValid)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
-
-            // use the decrypted jwt if the accessToken is encrypted.
-            if (tokenValidationResult.SecurityToken is JsonWebToken jwtValidatedAccessToken && jwtValidatedAccessToken.InnerToken != null)
-                tokenValidationResult.SecurityToken = jwtValidatedAccessToken.InnerToken;
-
-            var validatedSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, tokenValidationResult.SecurityToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-
-            return new SignedHttpRequestValidationResult()
+            try
             {
-                AccessToken = accessToken,
-                ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
-                ValidatedAccessToken = tokenValidationResult.SecurityToken,
-                SignedHttpRequest = jwtSignedHttpRequest.EncodedToken,
-                ValidatedSignedHttpRequest = validatedSignedHttpRequest
-            };
+                if (signedHttpRequestValidationContext == null)
+                    throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
+
+                var signedHttpRequest = ReadAsSecurityToken(signedHttpRequestValidationContext.SignedHttpRequest);
+                if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
+                var accessToken = ReadAccessToken(jwtSignedHttpRequest);
+                var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+
+                if (!tokenValidationResult.IsValid)
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
+
+                // use the decrypted jwt if the accessToken is encrypted.
+                if (tokenValidationResult.SecurityToken is JsonWebToken jwtValidatedAccessToken && jwtValidatedAccessToken.InnerToken != null)
+                    tokenValidationResult.SecurityToken = jwtValidatedAccessToken.InnerToken;
+
+                var validatedSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, tokenValidationResult.SecurityToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+
+                return new SignedHttpRequestValidationResult()
+                {
+                    IsValid = true,
+                    AccessToken = accessToken,
+                    ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
+                    SecurityToken = tokenValidationResult.SecurityToken,
+                    SignedHttpRequest = jwtSignedHttpRequest.EncodedToken,
+                    ValidatedSignedHttpRequest = validatedSignedHttpRequest
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SignedHttpRequestValidationResult()
+                {
+                    IsValid = false,
+                    Exception = ex
+                };
+            }
         }
 
         /// <summary>

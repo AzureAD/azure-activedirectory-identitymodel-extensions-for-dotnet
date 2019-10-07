@@ -1201,6 +1201,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     signedHttpRequestValidationContext = null;
 
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+
+                if (result.Exception != null)
+                    throw result.Exception;
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -1291,7 +1295,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             AccessToken = encodedEncryptedAccessToken,
                             SignedHttpRequest = signedHttpRequestWithEncryptedAt.EncodedToken,
                             ValidatedSignedHttpRequest = signedHttpRequestWithEncryptedAt,
-                            ValidatedAccessToken = validatedToken, // decrypted
+                            SecurityToken = validatedToken, // decrypted
                             ClaimsIdentity = resultingClaimsIdentity
                         },
                         TestId = "ValidEncryptedAcccessToken",
@@ -1314,7 +1318,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             AccessToken = encodedAccessToken,
                             SignedHttpRequest = signedHttpRequest.EncodedToken,
                             ValidatedSignedHttpRequest = signedHttpRequest,
-                            ValidatedAccessToken = validatedToken,
+                            SecurityToken = validatedToken,
                             ClaimsIdentity = resultingClaimsIdentity
                         },
                         TestId = "ValidTest",

@@ -54,11 +54,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationPolicy);
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
+                IdentityComparer.AreBoolsEqual(result.IsValid, theoryData.IsValid, context);
+
+                if (result.Exception != null)
+                    throw result.Exception;
+
                 Assert.NotNull(result);
                 Assert.NotNull(result.SignedHttpRequest);
                 Assert.NotNull(result.ValidatedSignedHttpRequest);
                 Assert.NotNull(result.AccessToken);
-                Assert.NotNull(result.ValidatedAccessToken);
+                Assert.NotNull(result.SecurityToken);
                 Assert.NotNull(result.ClaimsIdentity);
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -191,6 +196,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidUClaimException), "IDX23003"),
+                        IsValid = false,
                         TestId = "InvalidNoUClaim",
                     },
                     new RoundtripSignedHttpRequestTheoryData
@@ -202,6 +208,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidAtClaimException), "IDX23013", typeof(SecurityTokenSignatureKeyNotFoundException)),
+                        IsValid = false,
                         TestId = "InvalidBadIssuerSigningKey",
                     },
                     new RoundtripSignedHttpRequestTheoryData
@@ -213,6 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = KeyingMaterial.X509SigningCreds_SelfSigned2048_SHA512,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
+                        IsValid = false,
                         TestId = "InvalidBadPopSigningKey",
                     },
                 };
@@ -223,9 +231,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class RoundtripSignedHttpRequestTheoryData : TheoryDataBase
     {
         public string AccessToken { get; set; }
+
         public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; set; }
+
         public TokenValidationParameters TokenValidationParameters { get; set; }
+
         public HttpRequestData HttpRequestData { get; set; }
+
+        public bool IsValid { get; set; } = true;
 
         public Uri HttpRequestUri { get; set; }
 

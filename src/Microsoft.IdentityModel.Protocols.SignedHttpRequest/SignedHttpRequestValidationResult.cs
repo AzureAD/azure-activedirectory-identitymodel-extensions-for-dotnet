@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// Contains artifacts obtained when a SignedHttpRequest is validated.
     /// </summary>
-    public class SignedHttpRequestValidationResult
+    public class SignedHttpRequestValidationResult : TokenValidationResult
     {
         /// <summary>
         /// Gets or sets the AccessToken in its original encoded form.
@@ -40,19 +40,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public string AccessToken { get; set; }
 
         /// <summary>
-        /// The <see cref="ClaimsIdentity"/> created from the validated security token.
-        /// </summary>
-        public ClaimsIdentity ClaimsIdentity { get; set; }
-
-        /// <summary>
         /// Gets or sets SignedHttpRequest in its original encoded form.
         /// </summary>
         public string SignedHttpRequest { get; set; }
-
-        /// <summary>
-        /// Gets or sets the validated access token.
-        /// </summary>
-        public SecurityToken ValidatedAccessToken { get; set; }
 
         /// <summary>
         /// Gets or sets the validated SignedHttpRequest.
