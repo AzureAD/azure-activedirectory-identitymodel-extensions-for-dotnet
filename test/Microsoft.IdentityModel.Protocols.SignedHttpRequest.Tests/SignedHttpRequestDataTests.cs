@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        public void SignedHttpRequestValidationData()
+        public void SignedHttpRequestValidationContext()
         {
             var httpRequestData = new HttpRequestData();
             var signedHttpRequest = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString()).EncodedToken;
@@ -78,25 +78,50 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var validationPolicy = new SignedHttpRequestValidationPolicy();
             var callContext = CallContext.Default;
 
-            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationData(null, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationData(null, httpRequestData, null, null, callContext));
-            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationData(string.Empty, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, null, null, callContext));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestValidationPolicy", () => new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, null));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestValidationPolicy", () => new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, null, callContext));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestValidationData(string.Empty, httpRequestData, null, null, null));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null, validationPolicy, callContext));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null, (SignedHttpRequestValidationPolicy)null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(string.Empty, httpRequestData, null, validationPolicy, callContext));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(string.Empty, httpRequestData, null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(string.Empty, httpRequestData, null, (SignedHttpRequestValidationPolicy)null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(string.Empty, httpRequestData, null, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestValidationContext(signedHttpRequest, null, null, validationPolicy, callContext));
+            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestValidationContext(signedHttpRequest, null, null));
+            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestValidationContext(signedHttpRequest, null, null, (SignedHttpRequestValidationPolicy)null));
+            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestValidationContext(signedHttpRequest, null, null, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, null, validationPolicy, callContext));
+            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, null));
+            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, null, (SignedHttpRequestValidationPolicy)null));
+            Assert.Throws<ArgumentNullException>("accessTokenValidationParameters", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, null, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequestValidationPolicy", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, (SignedHttpRequestValidationPolicy)null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequestValidationPolicy", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, null, callContext));
+            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, null));
 
             // no exceptions
-            var creationData = new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
+            var creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters);
+            Assert.Equal(httpRequestData, creationData.HttpRequestData);
+            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
+            Assert.NotNull(creationData.SignedHttpRequestValidationPolicy);
+            Assert.NotNull(creationData.CallContext);
+
+            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, callContext);
+            Assert.Equal(httpRequestData, creationData.HttpRequestData);
+            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
+            Assert.Equal(callContext, creationData.CallContext);
+            Assert.NotNull(creationData.SignedHttpRequestValidationPolicy);
+            
+
+            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
             Assert.Equal(httpRequestData, creationData.HttpRequestData);
             Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
             Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
             Assert.Equal(validationPolicy, creationData.SignedHttpRequestValidationPolicy);
             Assert.NotNull(creationData.CallContext);
 
-            creationData = new SignedHttpRequestValidationData(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, callContext);
+            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, callContext);
             Assert.Equal(httpRequestData, creationData.HttpRequestData);
             Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
             Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);

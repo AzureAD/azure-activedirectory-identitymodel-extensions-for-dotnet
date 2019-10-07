@@ -32,43 +32,76 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// Structure that wraps parameters needed for SignedHttpRequest validation.
     /// </summary>
-    public class SignedHttpRequestValidationData : SignedHttpRequestData
+    public class SignedHttpRequestValidationContext
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="SignedHttpRequestValidationData"/>.
+        /// Initializes a new instance of <see cref="SignedHttpRequestValidationContext"/>.
         /// </summary>
         /// <param name="signedHttpRequest">SignedHttpRequest to be validated as a JWS in Compact Serialization Format.</param>
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
-        /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
-        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy) 
-            : base(httpRequestData, CallContext.Default)
+        /// <remarks>Default <see cref="SignedHttpRequestValidationPolicy"/> and <see cref="CallContext"/> will be created.</remarks>
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters) 
+            : this (signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationPolicy(), CallContext.Default)
         {
-            SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
-            AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
-            SignedHttpRequestValidationPolicy = signedHttpRequestValidationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationPolicy));
+        }
+        /// <summary>
+        /// Initializes a new instance of <see cref="SignedHttpRequestValidationContext"/>.
+        /// </summary>
+        /// <param name="signedHttpRequest">SignedHttpRequest to be validated encoded as a JWS in Compact Serialization Format.</param>
+        /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
+        /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
+        /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
+        /// <remarks>Default <see cref="CallContext"/> will be created.</remarks>
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy)
+            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, signedHttpRequestValidationPolicy, CallContext.Default)
+        {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SignedHttpRequestValidationData"/>.
+        /// Initializes a new instance of <see cref="SignedHttpRequestValidationContext"/>.
+        /// </summary>
+        /// <param name="signedHttpRequest">SignedHttpRequest to be validated encoded as a JWS in Compact Serialization Format.</param>
+        /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
+        /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
+        /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
+        /// <remarks>Default <see cref="SignedHttpRequestValidationPolicy"/> will be created.</remarks>
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, CallContext callContext)
+            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationPolicy(), callContext)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SignedHttpRequestValidationContext"/>.
         /// </summary>
         /// <param name="signedHttpRequest">SignedHttpRequest to be validated encoded as a JWS in Compact Serialization Format.</param>
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
         /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
-        public SignedHttpRequestValidationData(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) 
-            : base(httpRequestData, callContext)
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) 
         {
             SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
+            HttpRequestData = httpRequestData ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestData));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
             SignedHttpRequestValidationPolicy = signedHttpRequestValidationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationPolicy));
+            CallContext = callContext ?? throw LogHelper.LogArgumentNullException(nameof(callContext));
         }
 
         /// <summary>
         /// Gets <see cref="TokenValidationParameters"/> required for access token ("at") validation.
         /// </summary>
         public TokenValidationParameters AccessTokenValidationParameters { get; }
+
+        /// <summary>
+        /// An opaque context used to store work when working with authentication artifacts.
+        /// </summary>
+        public CallContext CallContext { get; }
+
+        /// <summary>
+        /// A structure that represents an incoming http request.
+        /// </summary>
+        public HttpRequestData HttpRequestData { get; }
 
         /// <summary>
         /// Gets a signed http request that is to be validated as a JWS in Compact Serialization Format.

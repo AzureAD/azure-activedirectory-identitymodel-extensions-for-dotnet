@@ -41,10 +41,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
-    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if custom claim validation failed.</returns>
-    public delegate Task AdditionalClaimValidatorAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task AdditionalClaimValidatorAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
@@ -58,31 +58,31 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// A delegate that will take control over PoP key resolution, if set.
     /// </summary>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
-    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
     /// </summary>
     /// <param name="kid">KeyIdentifier value.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
-    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
     /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
     /// <param name="nonce">A value of the 'nonce' claim. Value will be <see cref="string.Empty"/> if 'nonce' claim is not found.</param>
     /// <param name="signedHttpRequest">SignedHttpRequest.</param>
-    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
-    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
@@ -90,10 +90,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="popKey">A resolved PoP key.</param>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
-    /// <param name="signedHttpRequestValidationData">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest has invalid signature.</returns>
-    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationData signedHttpRequestValidationData, CancellationToken cancellationToken);
+    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Defines a policy for validating signed http requests. 

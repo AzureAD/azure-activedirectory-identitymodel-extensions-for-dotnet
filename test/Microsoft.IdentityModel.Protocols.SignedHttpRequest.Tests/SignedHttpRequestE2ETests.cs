@@ -51,8 +51,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var handler = new SignedHttpRequestHandler();
                 var signedHttpRequestCreationData = new SignedHttpRequestCreationData(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationPolicy);
                 var signedHttpRequest = await handler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
-                var signedHttpRequestValidationData = new SignedHttpRequestValidationData(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationPolicy);
-                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationData, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationPolicy);
+                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 Assert.NotNull(result);
                 Assert.NotNull(result.SignedHttpRequest);
