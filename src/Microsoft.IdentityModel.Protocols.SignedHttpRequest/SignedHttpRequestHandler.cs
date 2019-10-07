@@ -439,10 +439,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (!tokenValidationResult.IsValid)
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 
-                // use the decrypted jwt if the accessToken is encrypted.
-                if (tokenValidationResult.SecurityToken is JsonWebToken jwtValidatedAccessToken && jwtValidatedAccessToken.InnerToken != null)
-                    tokenValidationResult.SecurityToken = jwtValidatedAccessToken.InnerToken;
-
                 var validatedSignedHttpRequest = await ValidateSignedHttpRequestAsync(jwtSignedHttpRequest, tokenValidationResult.SecurityToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 return new SignedHttpRequestValidationResult()
@@ -980,6 +976,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (!(validatedAccessToken is JsonWebToken jwtValidatedAccessToken))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, validatedAccessToken.GetType(), typeof(JsonWebToken), validatedAccessToken)));
+
+            // use the decrypted jwt if the jwtValidatedAccessToken is encrypted.
+            if (jwtValidatedAccessToken.InnerToken != null)
+                jwtValidatedAccessToken = jwtValidatedAccessToken.InnerToken;
 
             if (jwtValidatedAccessToken.TryGetPayloadValue(SignedHttpRequestClaimTypes.Cnf, out JObject cnf) && cnf != null)
                 return cnf.ToString();
