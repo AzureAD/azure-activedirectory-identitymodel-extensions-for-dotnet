@@ -33,7 +33,7 @@ using System.Net.Http.Headers;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// A structure that represents an incoming or an outgoing http request.
+    /// Structure that represents an incoming or an outgoing http request.
     /// </summary>
     public class HttpRequestData
     {
