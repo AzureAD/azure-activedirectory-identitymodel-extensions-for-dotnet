@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                _ = await handler.ResolvePopKeyPublicAsync(theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                _ = await handler.ResolvePopKeyPublicAsync(theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if ((bool)signedHttpRequestValidationContext.CallContext.PropertyBag[theoryData.MethodToCall] == false)
                     context.AddDiff($"{theoryData.MethodToCall} was not called.");
