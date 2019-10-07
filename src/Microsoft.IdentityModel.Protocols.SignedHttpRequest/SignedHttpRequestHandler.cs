@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// A handler designed for creating and validating signed http requests. 
     /// </summary>
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
-    public class SignedHttpRequestHandler : ISignedHttpRequestCreator, ISignedHttpRequestValidator
+    public class SignedHttpRequestHandler
     {
         // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
