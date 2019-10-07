@@ -44,19 +44,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     /// </summary>
     public class SignedHttpRequestHandlerPublic : SignedHttpRequestHandler
     {
-        public string CreateHttpRequestHeaderPublic(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public string CreateHttpRequestHeaderPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            return base.CreateHttpRequestHeader(signedHttpRequestCreationData);
+            return base.CreateHttpRequestHeader(signedHttpRequestDescriptor);
         }
 
-        public string CreateHttpRequestPayloadPublic(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public string CreateHttpRequestPayloadPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            return base.CreateHttpRequestPayload(signedHttpRequestCreationData);
+            return base.CreateHttpRequestPayload(signedHttpRequestDescriptor);
         }
 
-        public async Task<string> SignHttpRequestPublicAsync(string header, string payload, SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
+        public async Task<string> SignHttpRequestPublicAsync(string header, string payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
         {
-            return await base.SignHttpRequestAsync(header, payload, signedHttpRequestCreationData, cancellationToken).ConfigureAwait(false);
+            return await base.SignHttpRequestAsync(header, payload, signedHttpRequestDescriptor, cancellationToken).ConfigureAwait(false);
         }
 
         public string ConvertToJsonPublic(Dictionary<string, object> payload)
@@ -64,49 +64,49 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return base.ConvertToJson(payload);
         }
 
-        public void AddAtClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddAtClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddAtClaim(payload, signedHttpRequestCreationData);
+            base.AddAtClaim(payload, signedHttpRequestDescriptor);
         }
    
-        public void AddTsClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddTsClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            AddTsClaim(payload, signedHttpRequestCreationData);
+            AddTsClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddMClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddMClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddMClaim(payload, signedHttpRequestCreationData);
+            base.AddMClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddUClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddUClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddUClaim(payload, signedHttpRequestCreationData);
+            base.AddUClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddPClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddPClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddPClaim(payload, signedHttpRequestCreationData);
+            base.AddPClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddQClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddQClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddQClaim(payload, signedHttpRequestCreationData);
+            base.AddQClaim(payload, signedHttpRequestDescriptor);
         }
  
-        public void AddHClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddHClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddHClaim(payload, signedHttpRequestCreationData);
+            base.AddHClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddBClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddBClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddBClaim(payload, signedHttpRequestCreationData);
+            base.AddBClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public void AddNonceClaimPublic(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        public void AddNonceClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            base.AddNonceClaim(payload, signedHttpRequestCreationData);
+            base.AddNonceClaim(payload, signedHttpRequestDescriptor);
         }
 
         public async Task<SecurityToken> ValidateSignedHttpRequestPublicAsync(SecurityToken jwtSignedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
@@ -195,19 +195,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         #region Mock methods
-        protected override void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected override void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (signedHttpRequestCreationData.CallContext.PropertyBag != null && signedHttpRequestCreationData.CallContext.PropertyBag.TryGetValue("MockAddTsClaim", out object DateTimeNow))
+            if (signedHttpRequestDescriptor.CallContext.PropertyBag != null && signedHttpRequestDescriptor.CallContext.PropertyBag.TryGetValue("MockAddTsClaim", out object DateTimeNow))
             {
                 if (payload == null)
                     throw LogHelper.LogArgumentNullException(nameof(payload));
 
-                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.TimeAdjustment);
+                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.TimeAdjustment);
                 payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
             }
             else
             {
-                base.AddTsClaim(payload, signedHttpRequestCreationData);
+                base.AddTsClaim(payload, signedHttpRequestDescriptor);
             }
         }
 

@@ -32,43 +32,8 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
-    public class SignedHttpRequestDataTests
+    public class SignedHttpRequestValidationContextTests
     {
-        [Fact]
-        public void SignedHttpRequestCreationData()
-        {
-            var httpRequestData = new HttpRequestData();
-            var accessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken;
-            var signingCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials;
-            var creationPolicy = new SignedHttpRequestCreationPolicy();
-            var callContext = CallContext.Default;
-
-            Assert.Throws<ArgumentNullException>("accessToken", () =>  new SignedHttpRequestCreationData(null, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestCreationData(null, httpRequestData, null, null, callContext));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestCreationData(string.Empty, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestCreationData(accessToken, httpRequestData, null, null));
-            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestCreationData(accessToken, httpRequestData, null, null, callContext));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestCreationPolicy", () => new SignedHttpRequestCreationData(accessToken, httpRequestData, signingCredentials, null));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestCreationPolicy", () => new SignedHttpRequestCreationData(accessToken, httpRequestData, signingCredentials, null, callContext));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestCreationData(string.Empty, httpRequestData, null, null, null));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestCreationData(accessToken, httpRequestData, signingCredentials, creationPolicy, null));
-
-            // no exceptions
-            var creationData = new SignedHttpRequestCreationData(accessToken, httpRequestData, signingCredentials, creationPolicy);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(accessToken, creationData.AccessToken);
-            Assert.Equal(signingCredentials, creationData.SigningCredentials);
-            Assert.Equal(creationPolicy, creationData.SignedHttpRequestCreationPolicy);
-            Assert.NotNull(creationData.CallContext);
-
-            creationData = new SignedHttpRequestCreationData(accessToken, httpRequestData, signingCredentials, creationPolicy, callContext);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(accessToken, creationData.AccessToken);
-            Assert.Equal(signingCredentials, creationData.SigningCredentials);
-            Assert.Equal(creationPolicy, creationData.SignedHttpRequestCreationPolicy);
-            Assert.Equal(callContext, creationData.CallContext);
-        }
-
         [Fact]
         public void SignedHttpRequestValidationContext()
         {
@@ -99,34 +64,34 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, null));
 
             // no exceptions
-            var creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
-            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
-            Assert.NotNull(creationData.SignedHttpRequestValidationPolicy);
-            Assert.NotNull(creationData.CallContext);
+            var signedHttpRequestDescriptor = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters);
+            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
+            Assert.Equal(signedHttpRequest, signedHttpRequestDescriptor.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, signedHttpRequestDescriptor.AccessTokenValidationParameters);
+            Assert.NotNull(signedHttpRequestDescriptor.SignedHttpRequestValidationPolicy);
+            Assert.NotNull(signedHttpRequestDescriptor.CallContext);
 
-            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, callContext);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
-            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
-            Assert.Equal(callContext, creationData.CallContext);
-            Assert.NotNull(creationData.SignedHttpRequestValidationPolicy);
+            signedHttpRequestDescriptor = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, callContext);
+            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
+            Assert.Equal(signedHttpRequest, signedHttpRequestDescriptor.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, signedHttpRequestDescriptor.AccessTokenValidationParameters);
+            Assert.Equal(callContext, signedHttpRequestDescriptor.CallContext);
+            Assert.NotNull(signedHttpRequestDescriptor.SignedHttpRequestValidationPolicy);
             
 
-            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
-            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
-            Assert.Equal(validationPolicy, creationData.SignedHttpRequestValidationPolicy);
-            Assert.NotNull(creationData.CallContext);
+            signedHttpRequestDescriptor = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy);
+            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
+            Assert.Equal(signedHttpRequest, signedHttpRequestDescriptor.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, signedHttpRequestDescriptor.AccessTokenValidationParameters);
+            Assert.Equal(validationPolicy, signedHttpRequestDescriptor.SignedHttpRequestValidationPolicy);
+            Assert.NotNull(signedHttpRequestDescriptor.CallContext);
 
-            creationData = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, callContext);
-            Assert.Equal(httpRequestData, creationData.HttpRequestData);
-            Assert.Equal(signedHttpRequest, creationData.SignedHttpRequest);
-            Assert.Equal(tokenValidationParameters, creationData.AccessTokenValidationParameters);
-            Assert.Equal(validationPolicy, creationData.SignedHttpRequestValidationPolicy);
-            Assert.Equal(callContext, creationData.CallContext);
+            signedHttpRequestDescriptor = new SignedHttpRequestValidationContext(signedHttpRequest, httpRequestData, tokenValidationParameters, validationPolicy, callContext);
+            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
+            Assert.Equal(signedHttpRequest, signedHttpRequestDescriptor.SignedHttpRequest);
+            Assert.Equal(tokenValidationParameters, signedHttpRequestDescriptor.AccessTokenValidationParameters);
+            Assert.Equal(validationPolicy, signedHttpRequestDescriptor.SignedHttpRequestValidationPolicy);
+            Assert.Equal(callContext, signedHttpRequestDescriptor.CallContext);
         }
     }
 }

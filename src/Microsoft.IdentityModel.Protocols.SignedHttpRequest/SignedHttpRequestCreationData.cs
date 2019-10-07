@@ -32,30 +32,60 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// Structure that wraps parameters needed for SignedHttpRequest creation. 
     /// </summary>
-    public class SignedHttpRequestCreationData : SignedHttpRequestData
+    public class SignedHttpRequestDescriptor
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="SignedHttpRequestCreationData"/>.
+        /// Initializes a new instance of <see cref="SignedHttpRequestDescriptor"/>.
         /// </summary>
         /// <remarks>
         /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
         /// https://tools.ietf.org/html/rfc7800#section-3.1
-        /// Default <see cref="CallContext"/> is created.
+        /// Default <see cref="SignedHttpRequestCreationPolicy"/> and <see cref="CallContext"/> will be created.
+        /// </remarks>
+        /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
+        /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
+        /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials) 
+            : this(accessToken, httpRequestData, signingCredentials, new SignedHttpRequestCreationPolicy(), CallContext.Default)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SignedHttpRequestDescriptor"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
+        /// https://tools.ietf.org/html/rfc7800#section-3.1
+        /// Default <see cref="SignedHttpRequestCreationPolicy"/> and <see cref="CallContext"/> will be created. 
         /// </remarks>
         /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
         /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
         /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy) 
-            : base(httpRequestData, CallContext.Default)
+        public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy)
+            : this(accessToken, httpRequestData, signingCredentials, signedHttpRequestCreationPolicy, CallContext.Default)
         {
-            AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
-            SigningCredentials = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
-            SignedHttpRequestCreationPolicy = signedHttpRequestCreationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationPolicy));
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SignedHttpRequestCreationData"/>.
+        /// Initializes a new instance of <see cref="SignedHttpRequestDescriptor"/>.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
+        /// https://tools.ietf.org/html/rfc7800#section-3.1
+        /// Default <see cref="SignedHttpRequestCreationPolicy"/> and <see cref="CallContext"/> will be created. 
+        /// </remarks>
+        /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
+        /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
+        /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
+        /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
+        public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, CallContext callContext)
+            : this(accessToken, httpRequestData, signingCredentials, new SignedHttpRequestCreationPolicy(), callContext)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SignedHttpRequestDescriptor"/>.
         /// </summary>
         /// <remarks>
         /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
@@ -66,18 +96,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         /// <param name="signedHttpRequestCreationPolicy">A policy for creating the SignedHttpRequest.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param> 
-        public SignedHttpRequestCreationData(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
-            : base(httpRequestData, callContext)
+        public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationPolicy signedHttpRequestCreationPolicy, CallContext callContext) 
         {
             AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : throw LogHelper.LogArgumentNullException(nameof(accessToken));
+            HttpRequestData = httpRequestData ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestData));
             SigningCredentials = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             SignedHttpRequestCreationPolicy = signedHttpRequestCreationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationPolicy));
+            CallContext = callContext ?? throw LogHelper.LogArgumentNullException(nameof(callContext));
         }
 
         /// <summary>
         /// Gets an access token that contains the 'cnf' claim.
         /// </summary>
         public string AccessToken { get; }
+
+        /// <summary>
+        /// An opaque context used to store work when working with authentication artifacts.
+        /// </summary>
+        public CallContext CallContext { get; }
+
+        /// <summary>
+        /// A structure that represents an outgoing http request.
+        /// </summary>
+        public HttpRequestData HttpRequestData { get; }
 
         /// <summary>
         /// Gets signing credentials that are used to sign a (Signed)HttpRequest.

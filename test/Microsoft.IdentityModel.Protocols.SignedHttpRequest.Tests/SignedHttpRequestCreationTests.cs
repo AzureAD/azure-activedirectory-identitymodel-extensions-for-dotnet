@@ -53,8 +53,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var handler = new SignedHttpRequestHandlerPublic();
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestAsync(null, CancellationToken.None).ConfigureAwait(false));
 
-            var signedHttpRequestCreationData = new SignedHttpRequestCreationData(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
-            var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+            var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
+            var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
 
 
             var tvp = new TokenValidationParameters()
@@ -80,9 +80,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var headerString = handler.CreateHttpRequestHeaderPublic(signedHttpRequestCreationData);
+                var headerString = handler.CreateHttpRequestHeaderPublic(signedHttpRequestDescriptor);
                 var header = JObject.Parse(headerString);
 
                 if (!header.ContainsKey(theoryData.ExpectedClaim))
@@ -139,8 +139,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
-                var signedHttpRequestString = await handler.SignHttpRequestPublicAsync(theoryData.HeaderString, theoryData.PayloadString, signedHttpRequestCreationData, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
+                var signedHttpRequestString = await handler.SignHttpRequestPublicAsync(theoryData.HeaderString, theoryData.PayloadString, signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
 
                 var tvp = new TokenValidationParameters()
                 {
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     ValidateIssuer = false,
                     ValidateIssuerSigningKey = false,
                     ValidateLifetime = false,
-                    IssuerSigningKey = signedHttpRequestCreationData.SigningCredentials.Key
+                    IssuerSigningKey = signedHttpRequestDescriptor.SigningCredentials.Key
                 };
                 var result = new JsonWebTokenHandler().ValidateToken(signedHttpRequestString, tvp);
 
@@ -216,9 +216,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var payloadString = handler.CreateHttpRequestPayloadPublic(signedHttpRequestCreationData);
+                var payloadString = handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
                 var payload = JObject.Parse(payloadString);
 
                 foreach (var payloadItem in payload)
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateTs = true,
                             CreateU = true,
                             CustomNonceCreator = null,
-                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData) => payload.Add("additionalClaim", "additionalClaimValue"),
+                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("additionalClaim", "additionalClaimValue"),
                         },
                         HttpRequestBody = Guid.NewGuid().ToByteArray(),
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
@@ -310,9 +310,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddAtClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddAtClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -361,9 +361,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddTsClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddTsClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -430,9 +430,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddMClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddMClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -495,9 +495,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddUClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddUClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!theoryData.Payload.ContainsKey(theoryData.ExpectedClaim))
@@ -581,9 +581,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddPClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddPClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -681,9 +681,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddQClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddQClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -844,9 +844,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddHClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddHClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -1054,9 +1054,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddBClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddBClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -1120,9 +1120,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                handler.AddNonceClaimPublic(theoryData.Payload, signedHttpRequestCreationData);
+                handler.AddNonceClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
                 var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
@@ -1162,7 +1162,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = "customNonceValue",
                         SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
                         {
-                            CustomNonceCreator = (IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData) => payload.Add("customNonce", "customNonceValue"),
+                            CustomNonceCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("customNonce", "customNonceValue"),
                         },
                         TestId = "ValidCustomNonce",
                     },
@@ -1183,9 +1183,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestCreationData = theoryData.BuildSignedHttpRequestCreationData();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestCreationData);
+                var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
                 var payload = JObject.Parse(payloadString);
 
                 if (theoryData.SignedHttpRequestCreationPolicy.AdditionalClaimCreator != null)
@@ -1228,7 +1228,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateU = false,
                             CreateM = false,
                             CreateP = false,
-                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData) => payload.Add("customClaim", "customClaimValue"),
+                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("customClaim", "customClaimValue"),
                         },
                         TestId = "ValidAdditionalClaim",
                     },
@@ -1257,7 +1257,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
     public class CreateSignedHttpRequestTheoryData : TheoryDataBase
     {
-        public SignedHttpRequestCreationData BuildSignedHttpRequestCreationData()
+        public SignedHttpRequestDescriptor BuildSignedHttpRequestDescriptor()
         {
             var httpRequestData = new HttpRequestData()
             {
@@ -1273,7 +1273,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             else
                 callContext.PropertyBag.Add("testId", TestId);
 
-            return new SignedHttpRequestCreationData(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationPolicy, callContext);
+            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationPolicy, callContext);
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;

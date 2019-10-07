@@ -56,38 +56,38 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
         #region SignedHttpRequest creation
         /// <summary>
-        /// Creates a signed http request using the <paramref name="signedHttpRequestCreationData"/>.
+        /// Creates a signed http request using the <paramref name="signedHttpRequestDescriptor"/>.
         /// /// </summary>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
-        public async Task<string> CreateSignedHttpRequestAsync(SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
+        public async Task<string> CreateSignedHttpRequestAsync(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestCreationData == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData));
+            if (signedHttpRequestDescriptor == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
-            var header = CreateHttpRequestHeader(signedHttpRequestCreationData);
-            var payload = CreateHttpRequestPayload(signedHttpRequestCreationData);
-            return await SignHttpRequestAsync(header, payload, signedHttpRequestCreationData, cancellationToken).ConfigureAwait(false);
+            var header = CreateHttpRequestHeader(signedHttpRequestDescriptor);
+            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor);
+            return await SignHttpRequestAsync(header, payload, signedHttpRequestDescriptor, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Creates a JSON representation of a HttpRequest header.
         /// </summary>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest header.</returns>
-        protected virtual string CreateHttpRequestHeader(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual string CreateHttpRequestHeader(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             var header = new JObject
             {
-                { JwtHeaderParameterNames.Alg, signedHttpRequestCreationData.SigningCredentials.Algorithm },
+                { JwtHeaderParameterNames.Alg, signedHttpRequestDescriptor.SigningCredentials.Algorithm },
                 { JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType }
             };
 
-            if (signedHttpRequestCreationData.SigningCredentials.Key?.KeyId != null)
-                header.Add(JwtHeaderParameterNames.Kid, signedHttpRequestCreationData.SigningCredentials.Key.KeyId);
+            if (signedHttpRequestDescriptor.SigningCredentials.Key?.KeyId != null)
+                header.Add(JwtHeaderParameterNames.Kid, signedHttpRequestDescriptor.SigningCredentials.Key.KeyId);
 
-            if (signedHttpRequestCreationData.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
+            if (signedHttpRequestDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                 header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
             return header.ToString(Formatting.None);
@@ -96,42 +96,42 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Creates a JSON representation of a HttpRequest payload.
         /// </summary>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
         /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.AdditionalClaimCreator"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
-        private protected virtual string CreateHttpRequestPayload(SignedHttpRequestCreationData signedHttpRequestCreationData)
+        private protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
 
-            AddAtClaim(payload, signedHttpRequestCreationData);
+            AddAtClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateTs)
-                AddTsClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateTs)
+                AddTsClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateM)
-                AddMClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateM)
+                AddMClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateU)
-                AddUClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateU)
+                AddUClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateP)
-                AddPClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateP)
+                AddPClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateQ)
-                AddQClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateQ)
+                AddQClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateH)
-                AddHClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateH)
+                AddHClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateB)
-                AddBClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateB)
+                AddBClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CreateNonce)
-                AddNonceClaim(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateNonce)
+                AddNonceClaim(payload, signedHttpRequestDescriptor);
 
-            signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestCreationData);
+            signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestDescriptor);
 
             return ConvertToJson(payload);
         }
@@ -147,14 +147,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestCreationData.SigningCredentials"/>.
+        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestDescriptor.SigningCredentials"/>.
         /// </summary>
         /// <param name="header">A JSON representation of an HttpRequest header.</param>
         /// <param name="payload">A JSON representation of an HttpRequest payload.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>SignedHttpRequest as a JWS in Compact Serialization Format.</returns>
-        protected virtual Task<string> SignHttpRequestAsync(string header, string payload, SignedHttpRequestCreationData signedHttpRequestCreationData, CancellationToken cancellationToken)
+        protected virtual Task<string> SignHttpRequestAsync(string header, string payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(header))
                 throw LogHelper.LogArgumentNullException(nameof(header));
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             var message = $"{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header))}.{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload))}";
-            var signature = JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestCreationData.SigningCredentials);
+            var signature = JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials);
             return Task.FromResult($"{message}.{signature}");
         }
 
@@ -171,29 +171,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'at' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        protected virtual void AddAtClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        protected virtual void AddAtClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            payload.Add(SignedHttpRequestClaimTypes.At, signedHttpRequestCreationData.AccessToken);
+            payload.Add(SignedHttpRequestClaimTypes.At, signedHttpRequestDescriptor.AccessToken);
         }
 
         /// <summary>
         /// Adds the 'ts' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateTs"/> is set to <c>true</c>.
         /// </remarks>    
-        protected virtual void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.TimeAdjustment);
+            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.TimeAdjustment);
             payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
         }
 
@@ -201,19 +201,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'm' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateM"/> is set to <c>true</c>.
         /// </remarks>   
-        protected virtual void AddMClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddMClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpMethod = signedHttpRequestCreationData.HttpRequestData.Method;
+            var httpMethod = signedHttpRequestDescriptor.HttpRequestData.Method;
 
             if (string.IsNullOrEmpty(httpMethod))
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Method));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Method));
 
             if (!httpMethod.ToUpper().Equals(httpMethod, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
@@ -225,19 +225,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'u' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateU"/> is set to <c>true</c>.
         /// </remarks>  
-        protected virtual void AddUClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddUClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
+            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.ToString())));
@@ -256,19 +256,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'm' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateP"/> is set to <c>true</c>.
         /// </remarks>  
-        protected virtual void AddPClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddPClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
+            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
 
@@ -279,19 +279,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'q' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateQ"/> is set to <c>true</c>.
         /// </remarks>  
-        protected virtual void AddQClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddQClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestUri = signedHttpRequestCreationData.HttpRequestData.Uri;
+            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
 
             if (httpRequestUri == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Uri));
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
@@ -325,19 +325,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'h' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateH"/> is set to <c>true</c>.
         /// </remarks>  
-        protected virtual void AddHClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddHClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestCreationData.HttpRequestData.Headers == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestCreationData.HttpRequestData.Headers));
+            if (signedHttpRequestDescriptor.HttpRequestData.Headers == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Headers));
 
-            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestCreationData.HttpRequestData.Headers);
+            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
             List<string> headerNameList = new List<string>();
             try
@@ -368,16 +368,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'b' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateB"/> is set to <c>true</c>.
         /// </remarks> 
-        protected virtual void AddBClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddBClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var httpRequestBody = signedHttpRequestCreationData.HttpRequestData.Body;
+            var httpRequestBody = signedHttpRequestDescriptor.HttpRequestData.Body;
 
             if (httpRequestBody == null)
                 httpRequestBody = new byte[0];
@@ -397,18 +397,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Adds the 'nonce' claim to the <paramref name="payload"/>.
         /// </summary>
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestCreationData">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateNonce"/> is set to <c>true</c>.
         /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.CustomNonceCreator"/> to override the default behavior.
         /// </remarks>
-        protected virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestCreationData signedHttpRequestCreationData)
+        protected virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
-                signedHttpRequestCreationData.SignedHttpRequestCreationPolicy.CustomNonceCreator(payload, signedHttpRequestCreationData);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
+                signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CustomNonceCreator(payload, signedHttpRequestDescriptor);
             else
                 payload.Add(SignedHttpRequestClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
         }
