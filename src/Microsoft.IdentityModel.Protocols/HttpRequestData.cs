@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 
-namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
+namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
     /// A structure that represents an incoming or an outgoing http request.
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// A utility method that appends <paramref name="headers"/> to the <see cref="Headers"/>.
         /// </summary>
         /// <param name="headers">A collection of http request headers.</param>
-        internal void AppendHeaders(HttpHeaders headers)
+        public void AppendHeaders(HttpHeaders headers)
         {
             if (Headers == null)
                 Headers = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
