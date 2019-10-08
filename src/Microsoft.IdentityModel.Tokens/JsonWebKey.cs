@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
 
@@ -315,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(N))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
 
-            if(string.IsNullOrEmpty(E))
+            if (string.IsNullOrEmpty(E))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this), "Exponent"));
 
             return new RSAParameters
@@ -329,6 +330,70 @@ namespace Microsoft.IdentityModel.Tokens
                 DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ),
                 InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI)
             };
+        }
+
+        /// <summary>
+        /// Computes a hash over the <see cref="JsonWebKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public byte[] ComputeJwkThumbprint()
+        {
+            if (string.IsNullOrEmpty(Kty))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Kty)), nameof(Kty)));
+
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+                return ComputeECThumbprint();
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+                return ComputeRsaThumbprint();
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+                return ComputeOctThumbprint();
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, nameof(Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA, JsonWebAlgorithmsKeyTypes.Octet), nameof(Kty))));
+        }
+
+        private byte[] ComputeOctThumbprint()
+        {
+            if (string.IsNullOrEmpty(K))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(K)), nameof(K)));
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{K}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}""}}";
+            return HashCanonicalJwkBytes(canonicalJwk);
+        }
+
+        private byte[] ComputeRsaThumbprint()
+        {
+            if (string.IsNullOrEmpty(E))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(E)), nameof(E)));
+
+            if (string.IsNullOrEmpty(N))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(N)), nameof(N)));
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{E}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.N}"":""{N}""}}";
+            return HashCanonicalJwkBytes(canonicalJwk);
+        }
+
+        private byte[] ComputeECThumbprint()
+        {
+            if (string.IsNullOrEmpty(Crv))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Crv)), nameof(Crv)));
+
+            if (string.IsNullOrEmpty(X))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(X)), nameof(X)));
+
+            if (string.IsNullOrEmpty(Y))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Y)), nameof(Y)));
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.X}"":""{X}"",""{JsonWebKeyParameterNames.Y}"":""{Y}""}}";
+            return HashCanonicalJwkBytes(canonicalJwk);
+        }
+
+        private byte[] HashCanonicalJwkBytes(string canonicalJwt)
+        {
+            using (var hash = SHA256.Create())
+            {
+                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwt));
+            }
         }
 
         /// <summary>

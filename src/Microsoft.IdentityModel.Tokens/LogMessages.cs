@@ -202,6 +202,8 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10702 = "IDX10702:"
         public const string IDX10703 = "IDX10703: Cannot create a '{0}', key length is zero.";
         public const string IDX10704 = "IDX10704: Cannot verify the key size. The SecurityKey is not or cannot be converted to an AsymmetricSecuritKey. SecurityKey: '{0}'.";
+        public const string IDX10705 = "IDX10705: Cannot create a JWK thumbprint, '{0}' is null or empty.";
+        public const string IDX10706 = "IDX10706: Cannot create a JWK thumbprint, '{0}' must be one of the following: '{1}'.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
