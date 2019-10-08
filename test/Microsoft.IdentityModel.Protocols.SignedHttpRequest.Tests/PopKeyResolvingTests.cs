@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
                         {
-                            PopKeyResolverAsync = async (SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            PopKeyResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["trackPopKeyResolver"] = true;
                                 return await Task.FromResult<SecurityKey>(null);
