@@ -609,7 +609,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
                         },
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
-                        TestId = "ValidAcceptUncoveredHeaders",
+                        TestId = "ValidAcceptUnsignedHeaders",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -622,11 +622,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateH = true,
-                            AcceptUncoveredHeaders = false,
+                            AcceptUnsignedHeaders = false,
                         },
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, JArray.Parse($"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]"))),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23026"),
-                        TestId = "InvalidDontAcceptUncoveredHeaders",
+                        TestId = "InvalidDontAcceptUnsignedHeaders",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -804,7 +804,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
-                        TestId = "ValidAcceptUncoveredQueryParams",
+                        TestId = "ValidAcceptUnsignedQueryParams",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -814,9 +814,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateH = true,
-                            AcceptUncoveredQueryParameters = false,
+                            AcceptUnsignedQueryParameters = false,
                         },
-                        TestId = "InvalidDontAcceptUncoveredQueryParams",
+                        TestId = "InvalidDontAcceptUnsignedQueryParams",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {

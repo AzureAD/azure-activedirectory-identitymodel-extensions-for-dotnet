@@ -102,16 +102,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the uncovered query parameters are accepted or not.
+        /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
-        public bool AcceptUncoveredQueryParameters { get; set; } = true;
+        public bool AcceptUnsignedQueryParameters { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the uncovered headers are accepted or not. 
+        /// Gets or sets a value indicating whether the unsigned headers are accepted or not. 
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
-        public bool AcceptUncoveredHeaders { get; set; } = true;
+        public bool AcceptUnsignedHeaders { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the <see cref="AdditionalClaimValidatorAsync"/> delegate.

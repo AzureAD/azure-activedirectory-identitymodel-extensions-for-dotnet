@@ -782,7 +782,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.Q, e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUncoveredQueryParameters && sanitizedQueryParams.Any())
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, string.Join(", ", sanitizedQueryParams.Select(x => x.Key)))));
 
             if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash, StringComparison.Ordinal))
@@ -859,7 +859,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.H, e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUncoveredHeaders && sanitizedHeaders.Any())
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders && sanitizedHeaders.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, string.Join(", ", sanitizedHeaders.Select(x => x.Key)))));
 
             if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash, StringComparison.Ordinal))

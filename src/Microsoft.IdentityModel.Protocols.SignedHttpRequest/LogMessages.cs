@@ -61,10 +61,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23023 = "IDX23023: To resolve a security key using only the 'kid' claim, set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on SignedHttpRequestValidationParameters.";
         public const string IDX23024 = "IDX23024: Unable to parse the '{0}' claim: '{1}'. Inner exception: '{2}'.";
         public const string IDX23025 = "IDX23025: Exception caught while validating the '{0}' claim. Inner exception: '{1}'.";
-        public const string IDX23026 = "IDX23026: The request contains unsigned headers and SignedHttpRequestValidationParameters.AcceptUnsignedHeaders is set to 'false'. Uncovered headers: '{0}'.";
+        public const string IDX23026 = "IDX23026: The request contains unsigned headers and SignedHttpRequestValidationParameters.AcceptUnsignedHeaders is set to 'false'. Unsigned headers: '{0}'.";
         public const string IDX23027 = "IDX23027: Header: '{0}' was not found in the request headers: '{1}'. Unable to validate the 'h' claim.";
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' was not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
-        public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
+        public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Unsigned query parameters: '{0}'.";
         public const string IDX23030 = "IDX23030: Resolved PoP key is null. Unable to validate a signed http request signature without a PoP key.";
         public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
         public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null..";
