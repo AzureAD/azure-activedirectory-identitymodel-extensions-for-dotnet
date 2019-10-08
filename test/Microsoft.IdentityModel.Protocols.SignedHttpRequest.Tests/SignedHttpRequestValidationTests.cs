@@ -619,7 +619,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             { "headerName2" , new List<string> { "headerValue2" } }
 
                         },
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateH = true,
                             AcceptUncoveredHeaders = false,
@@ -811,7 +811,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1&queryParam2=value2"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q, JArray.Parse($"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]"))),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23029"),
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateH = true,
                             AcceptUncoveredQueryParameters = false,
@@ -957,40 +957,40 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
              _ = await handler.ValidateSignedHttpRequestPublicAsync(null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateTs)
-                context.AddDiff($"ValidationPolicy.ValidateTs={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateTs}, ValidateTsClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
+                context.AddDiff($"ValidationParameters.ValidateTs={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs}, ValidateTsClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateMClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateM)
-                context.AddDiff($"ValidationPolicy.ValidateM={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateM}, ValidateMClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM)
+                context.AddDiff($"ValidationParameters.ValidateM={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM}, ValidateMClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateUClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateU)
-                context.AddDiff($"ValidationPolicy.ValidateU={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateU}, ValidateUClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU)
+                context.AddDiff($"ValidationParameters.ValidateU={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU}, ValidateUClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidatePClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateP)
-                context.AddDiff($"ValidationPolicy.ValidateP={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateP}, ValidatePClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP)
+                context.AddDiff($"ValidationParameters.ValidateP={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP}, ValidatePClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateQClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateQ)
-                context.AddDiff($"ValidationPolicy.ValidateQ={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateQ}, ValidateQClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ)
+                context.AddDiff($"ValidationParameters.ValidateQ={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ}, ValidateQClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateHClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateH)
-                context.AddDiff($"ValidationPolicy.ValidateH={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateH}, ValidateHClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH)
+                context.AddDiff($"ValidationParameters.ValidateH={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH}, ValidateHClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateBClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateB)
-                context.AddDiff($"ValidationPolicy.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
+                context.AddDiff($"ValidationParameters.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_AdditionalClaimValidatorCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync != null))
-                context.AddDiff($"ValidationPolicy.AdditionalClaimValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync != null}, AdditionalClaimValidator call status: {methodCalledStatus}.");
+            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null))
+                context.AddDiff($"ValidationParameters.AdditionalClaimValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null}, AdditionalClaimValidator call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null))
-                context.AddDiff($"ValidationPolicy.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
+            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null))
+                context.AddDiff($"ValidationParameters.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -1004,7 +1004,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateTs = true,
                             ValidateM = true,
@@ -1045,7 +1045,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateTs = false,
                             ValidateM = false,
@@ -1140,7 +1140,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         SignedHttpRequestToken = signedHttpRequest,
                         PopKey = validPopKey,
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             SignedHttpRequestSignatureValidatorAsync = (SecurityKey popKey, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
@@ -1265,7 +1265,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequestWithEncryptedAt, 
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateB = false,
                             ValidateH = false,
@@ -1288,7 +1288,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateB = false,
                             ValidateH = false,
@@ -1335,7 +1335,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 callContext.PropertyBag.Add("testId", TestId);
 
             // set SignedHttpRequestToken if set and if JsonWebToken, otherwise set "dummy" value
-            return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, tokenValidationParameters, SignedHttpRequestValidationPolicy, callContext);
+            return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, tokenValidationParameters, SignedHttpRequestValidationParameters, callContext);
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
@@ -1350,7 +1350,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public byte[] HttpRequestBody { get; set; }
 
-        public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; set; } = new SignedHttpRequestValidationPolicy()
+        public SignedHttpRequestValidationParameters SignedHttpRequestValidationParameters { get; set; } = new SignedHttpRequestValidationParameters()
         {
             ValidateB = true,
             ValidateH = true,

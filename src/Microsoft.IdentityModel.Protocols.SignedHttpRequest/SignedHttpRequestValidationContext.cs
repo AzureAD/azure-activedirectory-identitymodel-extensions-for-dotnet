@@ -40,9 +40,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">SignedHttpRequest to be validated as a JWS in Compact Serialization Format.</param>
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
-        /// <remarks>Default <see cref="SignedHttpRequestValidationPolicy"/> and <see cref="CallContext"/> will be created.</remarks>
+        /// <remarks>Default <see cref="SignedHttpRequestValidationParameters"/> and <see cref="CallContext"/> will be created.</remarks>
         public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters) 
-            : this (signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationPolicy(), CallContext.Default)
+            : this (signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationParameters(), CallContext.Default)
         {
         }
         /// <summary>
@@ -51,10 +51,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">SignedHttpRequest to be validated encoded as a JWS in Compact Serialization Format.</param>
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
-        /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
+        /// <param name="signedHttpRequestValidationParameters">A set of parameters required for validating a SignedHttpRequest.</param>
         /// <remarks>Default <see cref="CallContext"/> will be created.</remarks>
-        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy)
-            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, signedHttpRequestValidationPolicy, CallContext.Default)
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationParameters signedHttpRequestValidationParameters)
+            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, signedHttpRequestValidationParameters, CallContext.Default)
         {
         }
 
@@ -65,9 +65,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
-        /// <remarks>Default <see cref="SignedHttpRequestValidationPolicy"/> will be created.</remarks>
+        /// <remarks>Default <see cref="SignedHttpRequestValidationParameters"/> will be created.</remarks>
         public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, CallContext callContext)
-            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationPolicy(), callContext)
+            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationParameters(), callContext)
         {
         }
 
@@ -77,14 +77,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">SignedHttpRequest to be validated encoded as a JWS in Compact Serialization Format.</param>
         /// <param name="httpRequestData">A structure that represents an incoming http request.</param>
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
-        /// <param name="signedHttpRequestValidationPolicy">A policy for validating the SignedHttpRequest.</param>
+        /// <param name="signedHttpRequestValidationParameters">A set of parameters required for validating a SignedHttpRequest.</param>
         /// <param name="callContext">An opaque context used to store work when working with authentication artifacts.</param>
-        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationPolicy signedHttpRequestValidationPolicy, CallContext callContext) 
+        public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationParameters signedHttpRequestValidationParameters, CallContext callContext) 
         {
             SignedHttpRequest = !string.IsNullOrEmpty(signedHttpRequest) ? signedHttpRequest : throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
             HttpRequestData = httpRequestData ?? throw LogHelper.LogArgumentNullException(nameof(httpRequestData));
             AccessTokenValidationParameters = accessTokenValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(accessTokenValidationParameters));
-            SignedHttpRequestValidationPolicy = signedHttpRequestValidationPolicy ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationPolicy));
+            SignedHttpRequestValidationParameters = signedHttpRequestValidationParameters ?? throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationParameters));
             CallContext = callContext ?? throw LogHelper.LogArgumentNullException(nameof(callContext));
         }
 
@@ -109,8 +109,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public string SignedHttpRequest { get; }
 
         /// <summary>
-        /// Gets a policy that is used for validating a SignedHttpRequest.
+        /// Gets a set of parameters required for validating a SignedHttpRequest.
         /// </summary>
-        public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; }
+        public SignedHttpRequestValidationParameters SignedHttpRequestValidationParameters { get; }
     }
 }

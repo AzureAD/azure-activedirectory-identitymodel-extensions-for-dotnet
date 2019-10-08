@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 { "trackPopKeyResolver", false }
                             }
                         },
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             PopKeyResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
                             {
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
                             {
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
                         },
@@ -343,7 +343,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
                         },
@@ -353,7 +353,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeysResolverAsync = async (SecurityToken jweCnf, CancellationToken cancellationToken) =>
                             {
@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             CnfDecryptionKeys = new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultEncryptingCredentials.Key }
                         },
@@ -617,7 +617,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "https://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
                         },
@@ -627,7 +627,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "http://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             RequireHttpsForJkuResourceRetrieval = false,
                             HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
@@ -638,7 +638,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "http://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             RequireHttpsForJkuResourceRetrieval = false,
                         },
@@ -648,7 +648,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "https://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns("{\"test\": 1}"),
                         },
@@ -658,7 +658,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "https://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetString2),
                         },
@@ -668,7 +668,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         JkuSetUrl = "https://www.contoso.com",
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             HttpClientForJkuResourceRetrieval = SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetECCString),
                         },
@@ -712,7 +712,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             PopKeyResolverFromKeyIdAsync = (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
@@ -724,7 +724,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestValidationPolicy = new SignedHttpRequestValidationPolicy()
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             PopKeyResolverFromKeyIdAsync = async (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
@@ -757,7 +757,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 callContext.PropertyBag.Add("testId", TestId);
 
             // set SignedHttpRequestToken if set and if JsonWebToken, otherwise set "dummy" value
-            return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, SignedHttpRequestTestUtils.DefaultTokenValidationParameters, SignedHttpRequestValidationPolicy, callContext);
+            return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, SignedHttpRequestTestUtils.DefaultTokenValidationParameters, SignedHttpRequestValidationParameters, callContext);
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
@@ -772,7 +772,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public byte[] HttpRequestBody { get; set; }
 
-        public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; set; } = new SignedHttpRequestValidationPolicy()
+        public SignedHttpRequestValidationParameters SignedHttpRequestValidationParameters { get; set; } = new SignedHttpRequestValidationParameters()
         {
             ValidateB = true,
             ValidateH = true,

@@ -45,9 +45,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public delegate void CustomNonceCreator(IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor);
 
     /// <summary>
-    /// Defines a policy for creating signed http requests.
+    /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when creating a SignedHttpRequest.
     /// </summary>
-    public class SignedHttpRequestCreationPolicy
+    public class SignedHttpRequestCreationParameters
     {
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Nonce"/> claim should be created and added or not.

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23003 = "IDX23003: The signed http request does not contain the '{0}' claim or the claim value is null. This claim is required to validate a signed http request.";
         public const string IDX23004 = "IDX23004: The following query parameters will not be processed as they are repeated: '{0}'.";
         public const string IDX23005 = "IDX23005: The following headers will not be processed as they are repeated: '{0}'.";
-        public const string IDX23006 = "IDX23006: The address specified '{0}' is not valid as per the HTTPS scheme. Please specify an https address for security reasons. For testing with an http address, set the RequireHttpsForJkuResourceRetrieval property on SignedHttpRequestValidationPolicy to false.";
+        public const string IDX23006 = "IDX23006: The address specified '{0}' is not valid as per the HTTPS scheme. Please specify an https address for security reasons. For testing with an http address, set the RequireHttpsForJkuResourceRetrieval property on SignedHttpRequestValidationParameters to false.";
         public const string IDX23007 = "IDX23007: HttpRequestUri is an invalid relative URI: '{0}'.";
         public const string IDX23008 = "IDX23008: Exception caught while creating the '{0}' claim. Inner exception: '{1}'.";
         public const string IDX23009 = "IDX23009: Signed http request signature validation failed.";
@@ -58,13 +58,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23020 = "IDX23020: Only one PoP key should be resolved using the 'jku' claim. Number of resolved keys: '{0}'.";
         public const string IDX23021 = "IDX23021: Unable to resolve a PoP key from the 'jku' claim. Unable to match kid '{0}' against '{1}'.";
         public const string IDX23022 = "IDX23022: Exception caught while retrieving a jwk set from: '{0}'. Inner exception: '{1}'.";
-        public const string IDX23023 = "IDX23023: To resolve a security key using only the 'kid' claim, set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on SignedHttpRequestValidationPolicy.";
+        public const string IDX23023 = "IDX23023: To resolve a security key using only the 'kid' claim, set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on SignedHttpRequestValidationParameters.";
         public const string IDX23024 = "IDX23024: Unable to parse the '{0}' claim: '{1}'. Inner exception: '{2}'.";
         public const string IDX23025 = "IDX23025: Exception caught while validating the '{0}' claim. Inner exception: '{1}'.";
-        public const string IDX23026 = "IDX23026: The request contains unsigned headers and SignedHttpRequestValidationPolicy.AcceptUncoveredHeaders is set to 'false'. Uncovered headers: '{0}'.";
+        public const string IDX23026 = "IDX23026: The request contains unsigned headers and SignedHttpRequestValidationParameters.AcceptUnsignedHeaders is set to 'false'. Uncovered headers: '{0}'.";
         public const string IDX23027 = "IDX23027: Header: '{0}' was not found in the request headers: '{1}'. Unable to validate the 'h' claim.";
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' was not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
-        public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationPolicy.AcceptUncoveredQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
+        public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Uncovered query parameters: '{0}'.";
         public const string IDX23030 = "IDX23030: Resolved PoP key is null. Unable to validate a signed http request signature without a PoP key.";
         public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
         public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null..";

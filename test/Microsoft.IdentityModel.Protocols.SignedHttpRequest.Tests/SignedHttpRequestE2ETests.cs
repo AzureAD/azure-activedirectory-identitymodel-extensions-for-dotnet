@@ -49,9 +49,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var handler = new SignedHttpRequestHandler();
-                var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationPolicy);
+                var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationParameters);
                 var signedHttpRequest = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
-                var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationPolicy);
+                var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationParameters);
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 IdentityComparer.AreBoolsEqual(result.IsValid, theoryData.IsValid, context);
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     }
                 );
 
-                var creationPolicy = new SignedHttpRequestCreationPolicy()
+                var creationParameters = new SignedHttpRequestCreationParameters()
                 {
                     CreateTs = true,
                     CreateM = true,
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     CreateQ = true,
                 };
 
-                var validationPolicy = new SignedHttpRequestValidationPolicy()
+                var validationParameters = new SignedHttpRequestValidationParameters()
                 {
                     ValidateTs = true,
                     ValidateM = true,
@@ -140,8 +140,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new RoundtripSignedHttpRequestTheoryData
                     {
                         First = true,
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
@@ -150,8 +150,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = SignedHttpRequestUtilities.ToHttpRequestDataAsync(httpRequestMessage).ConfigureAwait(false).GetAwaiter().GetResult(),
                         AccessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
@@ -160,8 +160,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
@@ -170,8 +170,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkEcdsa, false),
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateU = false,
                             CreateB = true,
@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateQ = true,
                             CreateTs = true
                         },
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
@@ -201,8 +201,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = tvpWrongIssuerSigningKey,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
@@ -213,8 +213,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationPolicy = creationPolicy,
-                        SignedHttpRequestValidationPolicy = validationPolicy,
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     {
         public string AccessToken { get; set; }
 
-        public SignedHttpRequestValidationPolicy SignedHttpRequestValidationPolicy { get; set; }
+        public SignedHttpRequestValidationParameters SignedHttpRequestValidationParameters { get; set; }
 
         public TokenValidationParameters TokenValidationParameters { get; set; }
 
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public byte[] HttpRequestBody { get; set; }
 
-        public SignedHttpRequestCreationPolicy SignedHttpRequestCreationPolicy { get; set; } = new SignedHttpRequestCreationPolicy()
+        public SignedHttpRequestCreationParameters SignedHttpRequestCreationParameters { get; set; } = new SignedHttpRequestCreationParameters()
         {
             CreateB = true,
             CreateH = true,

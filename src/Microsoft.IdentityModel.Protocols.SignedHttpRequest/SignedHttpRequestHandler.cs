@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
-        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.AdditionalClaimCreator"/> to create additional claim(s) and add them to the signed http request.
+        /// Users can utilize <see cref="SignedHttpRequestCreationParameters.AdditionalClaimCreator"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
         private protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -107,31 +107,31 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             AddAtClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateTs)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateTs)
                 AddTsClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateM)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateM)
                 AddMClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateU)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateU)
                 AddUClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateP)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateP)
                 AddPClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateQ)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateQ)
                 AddQClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateH)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateH)
                 AddHClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateB)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateB)
                 AddBClaim(payload, signedHttpRequestDescriptor);
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CreateNonce)
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateNonce)
                 AddNonceClaim(payload, signedHttpRequestDescriptor);
 
-            signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestDescriptor);
+            signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestDescriptor);
 
             return ConvertToJson(payload);
         }
@@ -186,14 +186,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateTs"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateTs"/> is set to <c>true</c>.
         /// </remarks>    
         protected virtual void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.TimeAdjustment);
+            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment);
             payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
         }
 
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateM"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateM"/> is set to <c>true</c>.
         /// </remarks>   
         protected virtual void AddMClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateU"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateU"/> is set to <c>true</c>.
         /// </remarks>  
         protected virtual void AddUClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateP"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateP"/> is set to <c>true</c>.
         /// </remarks>  
         protected virtual void AddPClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateQ"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateQ"/> is set to <c>true</c>.
         /// </remarks>  
         protected virtual void AddQClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -327,7 +327,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateH"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateH"/> is set to <c>true</c>.
         /// </remarks>  
         protected virtual void AddHClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateB"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateB"/> is set to <c>true</c>.
         /// </remarks> 
         protected virtual void AddBClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -399,16 +399,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestCreationPolicy.CreateNonce"/> is set to <c>true</c>.
-        /// Users can utilize <see cref="SignedHttpRequestCreationPolicy.CustomNonceCreator"/> to override the default behavior.
+        /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateNonce"/> is set to <c>true</c>.
+        /// Users can utilize <see cref="SignedHttpRequestCreationParameters.CustomNonceCreator"/> to override the default behavior.
         /// </remarks>
         protected virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
-                signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.CustomNonceCreator(payload, signedHttpRequestDescriptor);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CustomNonceCreator != null)
+                signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CustomNonceCreator(payload, signedHttpRequestDescriptor);
             else
                 payload.Add(SignedHttpRequestClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
         }
@@ -439,7 +439,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                 // validate access token ("at")
                 var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-
                 if (!tokenValidationResult.IsValid)
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 
@@ -497,44 +496,44 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns></returns>
         /// <remarks>
         /// The library doesn't provide any caching logic for replay validation purposes.
-        /// <see cref="SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync"/> delegate can be utilized for replay validation.
-        /// Users can utilize <see cref="SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync"/> to validate additional signed http request claim(s).
+        /// <see cref="SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync"/> delegate can be utilized for replay validation.
+        /// Users can utilize <see cref="SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync"/> to validate additional signed http request claim(s).
         /// </remarks>
         private protected virtual async Task<SecurityToken> ValidateSignedHttpRequestAsync(SecurityToken signedHttpRequest, SecurityKey popKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync != null)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null)
             {
                 if (signedHttpRequest is JsonWebToken jwtSignedHttpRequest && jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Nonce, out string nonce))
-                    await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync(nonce, jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                    await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync(nonce, jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
                 else
-                    await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestReplayValidatorAsync(string.Empty, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                    await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync(string.Empty, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             }
 
             await ValidateSignedHttpRequestSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateTs)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
                 ValidateTsClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateM)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM)
                 ValidateMClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateU)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU)
                 ValidateUClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateP)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP)
                 ValidatePClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateQ)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ)
                 ValidateQClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateH)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH)
                 ValidateHClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.ValidateB)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
                 ValidateBClaim(signedHttpRequest, signedHttpRequestValidationContext);
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync != null)
-                await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AdditionalClaimValidatorAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null)
+                await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             return signedHttpRequest;
         }
@@ -554,9 +553,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (popKey == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23030)));
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestSignatureValidatorAsync != null)
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestSignatureValidatorAsync != null)
             {
-                await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestSignatureValidatorAsync(popKey, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestSignatureValidatorAsync(popKey, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -565,7 +564,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             var signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, jwtSignedHttpRequest.Alg);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23000, popKey?.ToString() ?? "Null", jwtSignedHttpRequest.Alg ?? "Null")));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23000, popKey?.ToString() ?? "Null", jwtSignedHttpRequest.Alg)));
 
             try
             {
@@ -587,7 +586,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateTs"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateTs"/> is set to <c>true</c>.
         /// </remarks>    
         protected virtual void ValidateTsClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -602,7 +601,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             DateTime utcNow = DateTime.UtcNow;
             DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsClaimValue);
-            DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.SignedHttpRequestLifetime);
+            DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
 
             if (utcNow > signedHttpRequestExpirationTime)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, utcNow, signedHttpRequestExpirationTime)));
@@ -614,7 +613,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateM"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateM"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidateMClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -646,7 +645,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateU"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateU"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidateUClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -684,7 +683,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateP"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateP"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidatePClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -717,7 +716,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateQ"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateQ"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidateQClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -783,7 +782,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.Q, e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AcceptUncoveredQueryParameters && sanitizedQueryParams.Any())
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUncoveredQueryParameters && sanitizedQueryParams.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, string.Join(", ", sanitizedQueryParams.Select(x => x.Key)))));
 
             if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash, StringComparison.Ordinal))
@@ -796,7 +795,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateH"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateH"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidateHClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -860,7 +859,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.H, e), e));
             }
 
-            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.AcceptUncoveredHeaders && sanitizedHeaders.Any())
+            if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUncoveredHeaders && sanitizedHeaders.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, string.Join(", ", sanitizedHeaders.Select(x => x.Key)))));
 
             if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash, StringComparison.Ordinal))
@@ -873,7 +872,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <remarks>
-        /// This method will be executed only if <see cref="SignedHttpRequestValidationPolicy.ValidateB"/> is set to <c>true</c>.
+        /// This method will be executed only if <see cref="SignedHttpRequestValidationParameters.ValidateB"/> is set to <c>true</c>.
         /// </remarks>     
         protected virtual void ValidateBClaim(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
@@ -917,8 +916,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual async Task<SecurityKey> ResolvePopKeyAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.PopKeyResolverAsync != null)
-                return await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.PopKeyResolverAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverAsync != null)
+                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             var cnf = JObject.Parse(GetCnfClaimValue(validatedAccessToken, signedHttpRequestValidationContext));
             if (cnf.TryGetValue(JwtHeaderParameterNames.Jwk, StringComparison.Ordinal, out var jwk))
@@ -1007,10 +1006,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var jweJwt = _jwtTokenHandler.ReadJsonWebToken(jwe);
 
             IEnumerable<SecurityKey> decryptionKeys;
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeysResolverAsync != null)
-                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync != null)
+                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
             else
-                decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.CnfDecryptionKeys;
+                decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeys;
 
             if (decryptionKeys == null || !decryptionKeys.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23017)));
@@ -1102,12 +1101,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(jkuSetUrl))
                 throw LogHelper.LogArgumentNullException(nameof(jkuSetUrl));
 
-            if (!Utility.IsHttps(jkuSetUrl) && signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.RequireHttpsForJkuResourceRetrieval)
+            if (!Utility.IsHttps(jkuSetUrl) && signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.RequireHttpsForJkuResourceRetrieval)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23006, jkuSetUrl)));
 
             try
             {
-                var httpClient = signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.HttpClientForJkuResourceRetrieval ?? _defaultHttpClient;
+                var httpClient = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.HttpClientForJkuResourceRetrieval ?? _defaultHttpClient;
                 var response = await httpClient.GetAsync(jkuSetUrl, cancellationToken).ConfigureAwait(false);
                 var jsonWebKey = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var jsonWebKeySet = new JsonWebKeySet(jsonWebKey);
@@ -1128,12 +1127,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         /// <remarks>
-        /// To resolve a PoP <see cref="SecurityKey"/> using only the 'kid' claim, set the <see cref="SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync"/> delegate.
+        /// To resolve a PoP <see cref="SecurityKey"/> using only the 'kid' claim, set the <see cref="SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync"/> delegate.
         /// </remarks>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync != null)
-                return await signedHttpRequestValidationContext.SignedHttpRequestValidationPolicy.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync != null)
+                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else
             {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23023)));

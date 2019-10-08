@@ -95,9 +95,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Defines a policy for validating signed http requests. 
+    /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when validating a SignedHttpRequest.
     /// </summary>
-    public class SignedHttpRequestValidationPolicy
+    public class SignedHttpRequestValidationParameters
     {
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
 
@@ -225,42 +225,5 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateB { get; set; } = false;
-
-        /// <summary>
-        /// Checks if the policy applies to the <paramref name="signedHttpRequest"/>.
-        /// </summary>
-        /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
-        /// <returns><c>true</c> if the policy applies to the <paramref name="signedHttpRequest"/>, otherwise <c>false</c>.</returns>
-        internal bool DoesApply(SecurityToken signedHttpRequest)
-        {
-            if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                return false;
-
-            if (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string at) || string.IsNullOrEmpty(at))
-                return false;
-
-            if (ValidateTs && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Ts, out long _)))
-                return false;
-
-            if (ValidateM && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.M, out string m) || string.IsNullOrEmpty(m)))
-                return false;
-
-            if (ValidateU && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.U, out string u) || string.IsNullOrEmpty(u)))
-                return false;
-
-            if (ValidateP && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.P, out string p) || string.IsNullOrEmpty(p)))
-                return false;
-
-            if (ValidateQ && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Q, out object q) || q == null))
-                return false;
-
-            if (ValidateH && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out object h) || h == null))
-                return false;
-
-            if (ValidateB && (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.B, out string b) || string.IsNullOrEmpty(b)))
-                return false;
-
-            return true;
-        }
     }
 }

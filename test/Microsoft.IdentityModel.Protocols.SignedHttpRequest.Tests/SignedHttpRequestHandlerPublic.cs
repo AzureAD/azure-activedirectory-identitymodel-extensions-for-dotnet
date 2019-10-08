@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 if (payload == null)
                     throw LogHelper.LogArgumentNullException(nameof(payload));
 
-                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestDescriptor.SignedHttpRequestCreationPolicy.TimeAdjustment);
+                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment);
                 payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
             }
             else

@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var handler = new SignedHttpRequestHandlerPublic();
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestAsync(null, CancellationToken.None).ConfigureAwait(false));
 
-            var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationPolicy() { CreateM = false, CreateP = false, CreateU = false });
+            var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationParameters() { CreateM = false, CreateP = false, CreateU = false });
             var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
 
 
@@ -253,7 +253,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         First = true,
                         ExpectedPayloadClaims = new List<string>() { "at" },
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateB = false,
                             CreateH = false,
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedPayloadClaims = new List<string>() { "at", "b", "h", "m", "nonce", "p", "q", "ts", "u", "additionalClaim" },
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateB = true,
                             CreateH = true,
@@ -400,7 +400,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new CreateSignedHttpRequestTheoryData
                     {
                         CallContext = new CallContext() { PropertyBag = new Dictionary<string, object>() { {"MockAddTsClaim", timeNow } } },
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy() { TimeAdjustment = TimeSpan.FromMinutes(-1) },
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters() { TimeAdjustment = TimeSpan.FromMinutes(-1) },
                         ExpectedClaim = SignedHttpRequestClaimTypes.Ts,
                         ExpectedClaimValue = (long)(timeNow - EpochTime.UnixEpoch).TotalSeconds - 60,
                         TestId = "ValidTsWithTimeAdjustmentMinus",
@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new CreateSignedHttpRequestTheoryData
                     {
                         CallContext = new CallContext() { PropertyBag = new Dictionary<string, object>() { {"MockAddTsClaim", timeNow } } },
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy() { TimeAdjustment = TimeSpan.FromMinutes(1) },
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters() { TimeAdjustment = TimeSpan.FromMinutes(1) },
                         ExpectedClaim = SignedHttpRequestClaimTypes.Ts,
                         ExpectedClaimValue = (long)(timeNow - EpochTime.UnixEpoch).TotalSeconds + 60,
                         TestId = "ValidTsWithTimeAdjustmentPlus",
@@ -1128,7 +1128,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (theoryData.SignedHttpRequestCreationPolicy.CustomNonceCreator != null)
+                if (theoryData.SignedHttpRequestCreationParameters.CustomNonceCreator != null)
                 {
                     if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                         context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
@@ -1160,7 +1160,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         ExpectedClaim = "customNonce",
                         ExpectedClaimValue = "customNonceValue",
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CustomNonceCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("customNonce", "customNonceValue"),
                         },
@@ -1188,7 +1188,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
                 var payload = JObject.Parse(payloadString);
 
-                if (theoryData.SignedHttpRequestCreationPolicy.AdditionalClaimCreator != null)
+                if (theoryData.SignedHttpRequestCreationParameters.AdditionalClaimCreator != null)
                 {
                     if (!payload.ContainsKey(theoryData.ExpectedClaim))
                         context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -1223,7 +1223,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         First = true,
                         ExpectedClaim = "customClaim",
                         ExpectedClaimValue = "customClaimValue",
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateU = false,
                             CreateM = false,
@@ -1236,7 +1236,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         ExpectedClaim = "customClaim",
                         ExpectedClaimValue = "customClaimValue",
-                        SignedHttpRequestCreationPolicy = new SignedHttpRequestCreationPolicy()
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateU = false,
                             CreateM = false,
@@ -1273,7 +1273,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             else
                 callContext.PropertyBag.Add("testId", TestId);
 
-            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationPolicy, callContext);
+            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters, callContext);
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
@@ -1292,7 +1292,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public byte[] HttpRequestBody { get; set; }
 
-        public SignedHttpRequestCreationPolicy SignedHttpRequestCreationPolicy { get; set; } = new SignedHttpRequestCreationPolicy()
+        public SignedHttpRequestCreationParameters SignedHttpRequestCreationParameters { get; set; } = new SignedHttpRequestCreationParameters()
         {
             CreateB = true,
             CreateH = true,
