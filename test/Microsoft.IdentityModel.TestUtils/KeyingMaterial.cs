@@ -895,7 +895,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static JsonWebKey JsonWebKeyP521_Invalid_D => CreateJsonWebKeyEC(JsonWebKeyECTypes.P521, "JsonWebKeyP521_Invalid_D", P521_Invalid, P521_X, P521_Y);
 
-        private static JsonWebKey CreateJsonWebKeyEC(string crv, string kid, string D, string X, string Y)
+        public static JsonWebKey CreateJsonWebKeyEC(string crv, string kid, string D, string X, string Y)
         {
             return new JsonWebKey
             {

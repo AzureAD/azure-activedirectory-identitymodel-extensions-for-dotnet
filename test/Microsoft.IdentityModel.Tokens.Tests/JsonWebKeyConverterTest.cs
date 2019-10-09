@@ -81,6 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var theoryData = ConversionKeyTheoryData;
+#if !NET_CORE
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key,
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     ExpectedException = ExpectedException.NotSupportedException("IDX10674"),
                     TestId = "SecurityKeyNotSupported"
                 });
-
+#endif
                 return theoryData;
             }
         }
@@ -154,6 +155,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
+#if NET_CORE
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
+                    JsonWebKey = KeyingMaterial.CreateJsonWebKeyEC(
+                        JsonWebKeyECTypes.P256, 
+                        KeyingMaterial.Ecdsa256Key_Public.KeyId,
+                        null,
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X), 
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.Y)
+                    ),
+                    TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                });
+
+                theoryData.Add(new JsonWebKeyConverterTheoryData
+                {
+                    SecurityKey = KeyingMaterial.Ecdsa256Key,
+                    JsonWebKey = KeyingMaterial.CreateJsonWebKeyEC(
+                        JsonWebKeyECTypes.P256,
+                        KeyingMaterial.Ecdsa256Key.KeyId,
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters.D),
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters.Q.X),
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters.Q.Y)
+                    ),
+                    TestId = nameof(KeyingMaterial.Ecdsa256Key)
+                });
+#endif
 
                 return theoryData;
             }
