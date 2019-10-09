@@ -107,6 +107,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
         }
 
+        // If the OpenIdConnect metadata has a "SigningKeys" claim, it should NOT be deserialized into the corresponding OpenIdConnectConfiguration.SigningKeys property.
+        // This value should only be populated from the 'jwks_uri' claim.
+        [Fact]
+        public void DeserializeOpenIdConnectConfigurationWithSigningKeys()
+        {
+            TestUtilities.WriteHeader($"{this}.DeserializeOpenIdConnectConfigurationWithSigningKeys");
+            var context = new CompareContext();
+
+            var config = OpenIdConnectConfiguration.Create(
+                OpenIdConnectConfiguration.Write(new OpenIdConnectConfiguration(OpenIdConfigData.JsonWithSigningKeys)));
+
+            // "SigningKeys" should be found in AdditionalData.
+            if (!config.AdditionalData.ContainsKey("SigningKeys"))
+                context.AddDiff(@"!config.AdditionalData.ContainsKey(""SigningKeys"")");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Fact]
         public void GetSets()
         {

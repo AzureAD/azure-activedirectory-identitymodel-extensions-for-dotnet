@@ -142,6 +142,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""]
                                             }";
 
+        public static string JsonWithSigningKeys =
+                                            @"{ ""authorization_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
+                                                ""end_session_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
+                                                ""id_token_signing_alg_values_supported"":[""RS256""],
+                                                ""issuer"":""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
+                                                ""jwks_uri"":""JsonWebKeySetSingleX509Data.json"",
+                                                ""microsoft_multi_refresh_token"":true,
+                                                ""response_types_supported"":[""code"",""id_token"",""code id_token""],
+                                                ""response_modes_supported"":[""query"",""fragment"",""form_post""],
+                                                ""scopes_supported"":[""openid""],
+                                                ""subject_types_supported"":[""pairwise""],
+                                                ""token_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
+                                                ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""],
+                                                ""SigningKeys"":[""key1"",""key2""]
+                                            }";
+
         public static string OpenIdConnectMetadataBadX509DataString = @"{""jwks_uri"":""JsonWebKeySetBadX509Data.json""}";
         public static string OpenIdConnectMetadataBadBase64DataString = @"{""jwks_uri"":""JsonWebKeySetBadBase64Data.json""}";
         public static string OpenIdConnectMetadataBadUriKeysString = @"{""jwks_uri"":""___NoSuchFile___""}";
