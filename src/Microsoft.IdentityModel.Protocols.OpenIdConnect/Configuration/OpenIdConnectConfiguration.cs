@@ -306,6 +306,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
+        [JsonIgnore]
         public ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
