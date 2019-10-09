@@ -134,6 +134,33 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Converts a <see cref="X509SecurityKey"/> into a <see cref="JsonWebKey"/>.
+        /// </summary>
+        /// <param name="key">a <see cref="X509SecurityKey"/> to convert.</param>
+        /// <param name="representAsRsaKey">
+        /// <c>true</c> to represent the <paramref name="key"/> as an <see cref="RsaSecurityKey"/>, 
+        /// <c>false</c> to represent the <paramref name="key"/> as an <see cref="X509SecurityKey"/>, using the "x5c" parameter.
+        /// </param>
+        /// <returns>a <see cref="JsonWebKey"/>.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
+        public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key, bool representAsRsaKey)
+        {
+            if (!representAsRsaKey)
+                return ConvertFromX509SecurityKey(key);
+
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            RSA rsaKey;
+            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+                rsaKey = key.PrivateKey as RSA;
+            else
+                rsaKey = key.PublicKey as RSA;
+
+            return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey) { KeyId = key.KeyId });
+        }
+
+        /// <summary>
         /// Converts a <see cref="SymmetricSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
         /// <param name="key">a <see cref="SymmetricSecurityKey"/> to convert.</param>
