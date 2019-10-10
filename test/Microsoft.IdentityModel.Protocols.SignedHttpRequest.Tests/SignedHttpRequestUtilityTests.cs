@@ -29,8 +29,10 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -70,6 +72,120 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(CreateJwkClaimTheoryData))]
+        public void CreateJwkClaim(SignedHttpRequestUtilityTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateJwkClaim", theoryData);
+            try
+            {
+                var jwkClaim = SignedHttpRequestUtilities.CreateJwkClaim(theoryData.JsonWebKey);
+
+                if (!string.IsNullOrEmpty(theoryData.ExpectedJwkClaim))
+                    IdentityComparer.AreStringsEqual(jwkClaim, theoryData.ExpectedJwkClaim, context);
+
+                var jwkJwt = JObject.Parse(jwkClaim);
+                var privateKeyPropertyNames = new List<string>()
+                {
+                    JsonWebKeyParameterNames.D,
+                    JsonWebKeyParameterNames.DP,
+                    JsonWebKeyParameterNames.DQ,
+                    JsonWebKeyParameterNames.Oth,
+                    JsonWebKeyParameterNames.P,
+                    JsonWebKeyParameterNames.Q,
+                    JsonWebKeyParameterNames.QI,
+                };
+
+                foreach (var privateKeyPropertyName in privateKeyPropertyNames)
+                {
+                    if (jwkJwt.ContainsKey(privateKeyPropertyName))
+                        context.AddDiff($"The resulting jwk claim contains '{privateKeyPropertyName}' field, that represents a private key.");
+                }
+
+                if (new JsonWebKey(jwkClaim).HasPrivateKey)
+                    context.AddDiff($"The resulting jwk claim contains a private key.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignedHttpRequestUtilityTheoryData> CreateJwkClaimTheoryData
+        {
+            get
+            {
+                var rsaKey = KeyingMaterial.DefaultX509Key_2048.PrivateKey as RSA;
+                var rsaParams = rsaKey.ExportParameters(true);
+                var jsonWebKeyP256_AdditionalData = KeyingMaterial.JsonWebKeyP256;
+                jsonWebKeyP256_AdditionalData.AdditionalData.Add("key1", "value1");
+
+                return new TheoryData<SignedHttpRequestUtilityTheoryData>
+                {
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        First = true,
+                        JsonWebKey = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidJsonWebKeyNull",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeySymmetric128,
+                        ExpectedException = ExpectedException.ArgumentException("IDX23034"),
+                        TestId = "InvalidKty",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyP256_Public,
+                        TestId = "ValidNoPrivateInfo1",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyP384,
+                        TestId = "ValidNoPrivateInfo2",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyRsa_1024,
+                        TestId = "ValidNoPrivateInfo3",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
+                        TestId = "ValidNoPrivateInfo4",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = jsonWebKeyP256_AdditionalData,
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""crv"":""P-256"",""kid"":""JsonWebKeyP256"",""kty"":""EC"",""x"":""{KeyingMaterial.P256_X}"",""y"":""{KeyingMaterial.P256_Y}"",""key1"":""value1""}}}}",
+                        TestId = "ValidEC256VAdditionalData",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyP256,
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""crv"":""P-256"",""kid"":""JsonWebKeyP256"",""kty"":""EC"",""x"":""{KeyingMaterial.P256_X}"",""y"":""{KeyingMaterial.P256_Y}""}}}}",
+                        TestId = "ValidEC256",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""kid"":""{KeyingMaterial.DefaultCert_2048.Thumbprint}"",""kty"":""RSA"",""x5c"":[""{Convert.ToBase64String(KeyingMaterial.DefaultCert_2048.RawData)}""],""x5t"":""{Base64UrlEncoder.Encode(KeyingMaterial.DefaultCert_2048.GetCertHash())}""}}}}",
+                        TestId = "ValidX509",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA,
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""e"":""{Base64UrlEncoder.Encode(rsaParams.Exponent)}"",""kid"":""{KeyingMaterial.DefaultCert_2048.Thumbprint}"",""kty"":""RSA"",""n"":""{Base64UrlEncoder.Encode(rsaParams.Modulus)}""}}}}",
+                        TestId = "ValidRsa",
+                    },
+                };
+            }
         }
 
         public static TheoryData<SignedHttpRequestUtilityTheoryData> AppendHeadersTheoryData
@@ -330,7 +446,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public string HttpRequestMethod { get; set; }
 
+        public JsonWebKey JsonWebKey { get; set; }
+
         public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+
+        public string ExpectedJwkClaim { get; set; }
 
         public IDictionary<string, IEnumerable<string>> ExpectedHttpRequestHeaders { get; set; }
 

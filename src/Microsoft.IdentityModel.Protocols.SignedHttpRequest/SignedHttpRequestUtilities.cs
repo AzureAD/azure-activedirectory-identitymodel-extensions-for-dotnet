@@ -25,9 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Serialization;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
@@ -36,6 +41,57 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     public static class SignedHttpRequestUtilities
     {
+        /// <summary>
+        /// Creates a "jwk" claim from a JsonWebKey representation of an asymmetric public key.
+        /// </summary>
+        /// <param name="jsonWebKey">JsonWebKey representation of an asymmetric public key.</param>
+        /// <returns>A "jwk" claim as a JSON string.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.2</remarks>
+        public static string CreateJwkClaim(JsonWebKey jsonWebKey)
+        {
+            if (jsonWebKey == null)
+                throw LogHelper.LogArgumentNullException(nameof(jsonWebKey));
+
+            if (string.IsNullOrEmpty(jsonWebKey.Kid))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX23033, nameof(jsonWebKey.Kid)), nameof(jsonWebKey.Kid)));
+
+            if (!string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal) &&
+                !string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX23034, nameof(jsonWebKey.Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA), nameof(jsonWebKey.Kty))));
+
+            // exclude private parameters by using the JsonWebKeyIgnorePrivatePropertiesContractResolver,
+            // that ignores private key properties during serialization into a JSON string.
+            var jsonSerializerSettings = new JsonSerializerSettings()
+            {
+                ContractResolver = new JsonWebKeyIgnorePrivatePropertiesContractResolver(),
+            };
+
+            var jwk = JsonConvert.SerializeObject(jsonWebKey, jsonSerializerSettings);
+            return $@"{{""{ConfirmationClaimTypes.Jwk}"":{jwk}}}";
+        }
+
+        /// <summary>
+        /// Represents a contract resolver that ignores private/secret properties during serialization of a JWK into a JSON string.
+        /// </summary>
+        class JsonWebKeyIgnorePrivatePropertiesContractResolver : DefaultContractResolver
+        {
+            protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+            {
+                JsonProperty property = base.CreateProperty(member, memberSerialization);
+                if (member.Name == nameof(JsonWebKey.D) ||   // ec or rsa
+                    member.Name == nameof(JsonWebKey.DP) ||  // rsa
+                    member.Name == nameof(JsonWebKey.DQ) ||  // rsa
+                    member.Name == nameof(JsonWebKey.Oth) || // rsa
+                    member.Name == nameof(JsonWebKey.P) ||   // rsa
+                    member.Name == nameof(JsonWebKey.Q) ||   // rsa
+                    member.Name == nameof(JsonWebKey.QI))    // rsa
+                {
+                    property.Ignored = true;
+                }
+                return property;
+            }
+        }
+
         /// <summary>
         /// Creates an authorization header using the SignedHttpRequest.
         /// </summary>
