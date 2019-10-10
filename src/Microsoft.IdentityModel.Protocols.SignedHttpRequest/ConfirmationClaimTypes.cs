@@ -28,48 +28,39 @@
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// Claim types used with SignedHttpRequest.
+    /// Confirmation Claim ("cnf") related constants
+    /// https://tools.ietf.org/html/rfc7800
     /// </summary>
-    public static class SignedHttpRequestClaimTypes
+    public static class ConfirmationClaimTypes
     {
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-6.1.1
         /// </summary>
-        public const string At = "at";
+        public const string Cnf = "cnf";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-6.2.2
         /// </summary>
-        public const string Ts = "ts";
+        public const string Jwk = "jwk";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-6.2.2
         /// </summary>
-        public const string M = "m";
+        public const string Jwe = "jwe";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-6.2.2
         /// </summary>
-        public const string U = "u";
+        public const string Jku = "jku";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-6.2.2        
         /// </summary>
-        public const string P = "p";
+        public const string Kid = "kid";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://tools.ietf.org/html/rfc7800#section-3.6
         /// </summary>
-        public const string Q = "q";
-
-        /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-        /// </summary>
-        public const string H = "h";
-
-        /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
-        /// </summary>
-        public const string B = "b";
+        public const string Nonce = "nonce";
     }
 }

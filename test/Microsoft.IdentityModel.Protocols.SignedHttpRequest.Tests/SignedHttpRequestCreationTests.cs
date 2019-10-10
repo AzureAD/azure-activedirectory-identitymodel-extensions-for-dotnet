@@ -1153,7 +1153,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new CreateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        ExpectedClaim = SignedHttpRequestClaimTypes.Nonce,
+                        ExpectedClaim = ConfirmationClaimTypes.Nonce,
                         TestId = "ValidDefaultNonce",
                     },
                     new CreateSignedHttpRequestTheoryData

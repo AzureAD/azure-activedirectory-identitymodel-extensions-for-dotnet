@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public class SignedHttpRequestCreationParameters
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Nonce"/> claim should be created and added or not.
+        /// Gets or sets a value indicating whether the <see cref="ConfirmationClaimTypes.Nonce"/> claim should be created and added or not.
         /// </summary>
         public bool CreateNonce { get; set; } = true;
 
