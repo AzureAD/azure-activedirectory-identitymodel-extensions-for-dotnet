@@ -35,6 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     internal static class LogMessages
     {
+        public const string IDX23000 = "IDX23000: CryptoProviderFactory returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX23001 = "IDX23001: HttpRequestUri must be absolute when creating or validating the 'u' claim. HttpRequestUri: '{0}'.";
         public const string IDX23002 = "IDX23002: The HTTP Method must be an uppercase HTTP verb. HttpMethod: '{0}'.";
         public const string IDX23003 = "IDX23003: The signed http request does not contain the '{0}' claim or the claim value is null. This claim is required to validate a signed http request.";
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23006 = "IDX23006: The address specified '{0}' is not valid as per the HTTPS scheme. Please specify an https address for security reasons. For testing with an http address, set the RequireHttpsForJkuResourceRetrieval property on SignedHttpRequestValidationParameters to false.";
         public const string IDX23007 = "IDX23007: HttpRequestUri is an invalid relative URI: '{0}'.";
         public const string IDX23008 = "IDX23008: Exception caught while creating the '{0}' claim. Inner exception: '{1}'.";
-        public const string IDX23009 = "IDX23009: Signed http request signature validation failed.";
+        public const string IDX23009 = "IDX23009: Signed http request signature validation failed. Exceptions caught: '{0}'.";
         public const string IDX23010 = "IDX23010: Lifetime validation of the signed http request failed. Current time: '{0}', signed http request is valid until: '{1}'.";
         public const string IDX23011 = "IDX23011: The '{0}' claim validation failed. Expected value: '{1}', value found: '{2}'.";
         public const string IDX23012 = "IDX23012: The '{0}' claim validation failed. Expected values: '{1}' or '{2}', value found: '{3}'.";

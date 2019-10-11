@@ -54,14 +54,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(SecurityToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
-    /// A delegate that will take control over PoP key resolution, if set.
+    /// A delegate that will take control over PoP keys resolution, if set.
     /// </summary>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
-    /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    public delegate Task<SecurityKey> PopKeyResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    /// <returns>A collection of resolved <see cref="SecurityKey"/>(s).</returns>
+    public delegate Task<IEnumerable<SecurityKey>> PopKeysResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
@@ -87,12 +87,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
     /// </summary>
-    /// <param name="popKey">A resolved PoP key.</param>
+    /// <param name="popKeys">A collection of resolved PoP keys.</param>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns>Expected to throw an appropriate exception if SignedHttpRequest has invalid signature.</returns>
-    public delegate Task SignedHttpRequestSignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    /// <returns>A <see cref="SecurityKey"/> used to validate a signature of the <paramref name="signedHttpRequest"/>, otherwise expected to throw an appropriate exception.</returns>
+    public delegate Task<SecurityKey> SignedHttpRequestSignatureValidatorAsync(IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when validating a SignedHttpRequest.
@@ -140,9 +140,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public HttpClient HttpClientForJkuResourceRetrieval { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
+        /// Gets or sets the <see cref="PopKeysResolverAsync"/> delegate.
         /// </summary>
-        public PopKeyResolverAsync PopKeyResolverAsync { get; set; }
+        public PopKeysResolverAsync PopKeysResolverAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverFromKeyIdAsync"/> delegate.

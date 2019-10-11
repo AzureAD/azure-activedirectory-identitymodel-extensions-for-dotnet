@@ -27,9 +27,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
@@ -42,6 +44,118 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public class PopKeyResolvingTests
     {
+        [Theory, MemberData(nameof(ResolvePopKeyFromCnfClaimAsyncTheoryData))]
+        public async Task ResolvePopKeyFromCnfClaimAsync(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromCnfClaimAsync", theoryData);
+            try
+            {
+                var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
+                var handler = new SignedHttpRequestHandlerPublic();
+                _ = await handler.ResolvePopKeyFromCnfClaimPublicAsync(theoryData.ConfirmationClaim, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+
+                if ((bool)signedHttpRequestValidationContext.CallContext.PropertyBag[theoryData.MethodToCall] == false)
+                    context.AddDiff($"{theoryData.MethodToCall} was not called.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> ResolvePopKeyFromCnfClaimAsyncTheoryData
+        {
+            get
+            {
+                var accessToken = new JsonWebToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken);
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        MethodToCall = "trackResolvePopKeyFromJwk",
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwk.ToString(Formatting.None),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackResolvePopKeyFromJwk", false }
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidJwk",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        MethodToCall = "trackResolvePopKeyFromJwe",
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwe.ToString(Formatting.None),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackResolvePopKeyFromJwe", false }
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidJwe",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        MethodToCall = "trackResolvePopKeyFromJku",
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJku.ToString(Formatting.None),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackResolvePopKeyFromJku", false }
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidJku",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        MethodToCall = "trackResolvePopKeyFromJkuKid",
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJkuKid.ToString(Formatting.None),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackResolvePopKeyFromJkuKid", false }
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidJkuKid",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        MethodToCall = "trackResolvePopKeyFromKid",
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultKid.ToString(Formatting.None),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                { "trackResolvePopKeyFromKid", false }
+                            }
+                        },
+                        ValidatedAccessToken = accessToken,
+                        TestId = "ValidKid",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        ConfirmationClaim = string.Empty,
+                        ValidatedAccessToken = accessToken,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidCnfClaim",
+                    },
+                };
+            }
+        }
+
         [Theory, MemberData(nameof(ResolvePopKeyAsyncTheoryData))]
         public async Task ResolvePopKeyAsync(ResolvePopKeyTheoryData theoryData)
         {
@@ -50,7 +164,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                _ = await handler.ResolvePopKeyPublicAsync(theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                _ = await handler.ResolvePopKeysPublicAsync(theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if ((bool)signedHttpRequestValidationContext.CallContext.PropertyBag[theoryData.MethodToCall] == false)
                     context.AddDiff($"{theoryData.MethodToCall} was not called.");
@@ -75,76 +189,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         First = true,
-                        MethodToCall = "trackResolvePopKeyFromJwk",
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnJwk", null },
-                                { "trackResolvePopKeyFromJwk", false }
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        TestId = "ValidJwk",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        MethodToCall = "trackResolvePopKeyFromJwe",
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnJwe", null },
-                                { "trackResolvePopKeyFromJwe", false }
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        TestId = "ValidJwe",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        MethodToCall = "trackResolvePopKeyFromJku",
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnJku", null },
-                                { "trackResolvePopKeyFromJku", false }
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        TestId = "ValidJku",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        MethodToCall = "trackResolvePopKeyFromJkuKid",
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnJkuKid", null },
-                                { "trackResolvePopKeyFromJkuKid", false }
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        TestId = "ValidJkuKid",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        MethodToCall = "trackResolvePopKeyFromKid",
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnKid", null },
-                                { "trackResolvePopKeyFromKid", false }
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        TestId = "ValidKid",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
                         MethodToCall = "trackPopKeyResolver",
                         CallContext = new CallContext()
                         {
@@ -155,27 +199,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            PopKeyResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            PopKeysResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["trackPopKeyResolver"] = true;
-                                return await Task.FromResult<SecurityKey>(null);
+                                return await Task.FromResult<IEnumerable<SecurityKey>>(null);
                             }
                         },
                         ValidatedAccessToken = accessToken,
                         TestId = "ValidResolverCall",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                { "mockGetCnfClaimValue_returnCustom", null },
-                            }
-                        },
-                        ValidatedAccessToken = accessToken,
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23014"),
-                        TestId = "InvalidCnfClaim",
                     },
                 };
             }
@@ -452,6 +483,64 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             }
                         },
                         TestId = "ValidOneKeyReturned",
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(GetCnfClaimValueTheoryData))]
+        public void GetCnfClaimValue(ResolvePopKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetCnfClaimValue", theoryData);
+            try
+            {
+                var handler = new SignedHttpRequestHandlerPublic();
+                _ = handler.GetCnfClaimValuePublic(null, theoryData.ValidatedAccessToken, null);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ResolvePopKeyTheoryData> GetCnfClaimValueTheoryData
+        {
+            get
+            {
+                return new TheoryData<ResolvePopKeyTheoryData>
+                {
+                    new ResolvePopKeyTheoryData
+                    {
+                        First = true,
+                        ValidatedAccessToken = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullAccessToken",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        ValidatedAccessToken = new JwtSecurityToken(SignedHttpRequestTestUtils.CreateAt(null, false)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
+                        TestId = "InvalidNullAccessToken",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(null, false, false)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23003"),
+                        TestId = "InvalidNoCnfClaimFound",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(null, false)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23003"),
+                        TestId = "InvalidCnfIsNull",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwk, false)),
+                        TestId = "ValidTest",
                     },
                 };
             }
@@ -761,6 +850,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
+
+        public string ConfirmationClaim { get; set; }
 
         public string MethodToCall { get; set; }
 

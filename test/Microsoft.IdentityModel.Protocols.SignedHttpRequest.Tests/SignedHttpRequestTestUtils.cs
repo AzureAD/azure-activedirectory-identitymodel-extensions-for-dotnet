@@ -170,10 +170,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { ConfirmationClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" }
         };
 
-        internal static string CreateAt(JObject cnf, bool encrypt)
+        internal static string CreateAt(JObject cnf, bool encrypt, bool addCnf = true)
         {
             var accessToken = DefaultAccessTokenPayload;
-            accessToken.Add(ConfirmationClaimTypes.Cnf, cnf);
+
+            if (addCnf)
+                accessToken.Add(ConfirmationClaimTypes.Cnf, cnf);
 
             if (encrypt)
                 return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), DefaultSigningCredentials, KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType } });

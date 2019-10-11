@@ -28,13 +28,13 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class SignedHttpRequestValidationTests
     {
         private readonly static string _encodedTokenHelper = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJhdCI6eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJSU0EiLCJuIjoiNitGckZrdC9UQnlRL0w1ZDdvcis5UFZBb3dwc3d4VWUzZEplWUZUWTBMZ3E3ektJNU9RNVJuU3JJMFQ5eXJmblJ6RTlvT2RkNHptVmo5dHhWTEkreXlTdmluQXUzeVFEUW91MkdhNDJNTC8rSzRKcmQ1Y2xNVVBSR01iWGRWNVJsOXp6QjBzMkpvWkplZHVhNWR3b1F3MEdrUzVaOFlBWEJFelVMcnVwMDZmbkI1bjZ4NXIyeTFDLzhFYnA1Y3lFNEJqczdXNjhyVWx5SWx4MWx6WXZha3hTbmhVeFNzang3dS9tSWR5d3lHZmdpVDN0dzBGc1d2a2kvS1l1ckFQUjFCU01YaEN6elpUa01XS0U4SWFMa2hhdXc1TWR4b2p4eUJWdU5ZK0ovZWxxK0hnSi9kWks2Zzd2TU52WHoyL3ZUK1N5a0lrendpRDllU0k5VVdmc2p3PT0iLCJlIjoiQVFBQiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCJ9fX0sIm0iOiJHRVQiLCJ1Ijoid3d3LmNvbnRvc28uY29tIiwicCI6Ii9wYXRoMSIsInEiOiJbW1wiYlwiLFwiYVwiLFwiY1wiXSxcInU0TGdrR1VXaFA5TXNLckVqQTRkaXpJbGxEWGx1RGt1NlpxQ2V5dVItSllcIl0iLCJoIjoiW1tcImNvbnRlbnQtdHlwZVwiLFwiZXRhZ1wiXSxcIlA2ejVYTjR0VHpIa2Z3ZTNYTzFZdlZVSXVyU3VodmhfVUcxME5fai1hR3NcIl0iLCJiIjoiWkstTzJnekhqcHNDR3BlZDZzVUwyRU0yMFo5VC11RjA3TENHTUE4OFVGdyIsIm5vbmNlIjoiODFkYTQ5MGY0NmMzNDk0ZWJhOGM2ZTI1YTQ1YTRkMGYiLCJ0cyI6MTU2OTk0NDc2OSwiZXhwIjoxNTY5OTczNTc4LjAsImlhdCI6MTU2OTk2OTk3OCwibmJmIjoxNTY5OTY5OTc4fQ.OiLM-S_Da8gwKw3dxXI-4TMyH9JZuKCdJnr_1xyFg1UbhKe2kuWA9J6nBtuAWHXUxHpvwwHNYcEjB6eNMJFEHnAVwEvaMgJCmI0dG6xof201riSKqflFJxh2fq7z2clReWpLLmP0o1S1LGSx74g5cubl90ivQ7MoYPeyIMoSTfGwsTGXKAnf4MnCIt3Ykp0KbTj6WHnS1LmtSCTBGXslV7jD28ikjF3w5Xk2Nv6WmUJAYNhGC3fiUnzqt3buiyynhF4sXbYxKDLYPeUWH-oZVEFuaGC2nnTA_5-aS0yHPmcj-CDRanHAZA9Y-UFMyFm9oO-QffHc-ZL8mcIfx-Kmfg";
-
+        
         [Theory, MemberData(nameof(ValidateTsClaimTheoryData))]
         public void ValidateTsClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
@@ -954,7 +954,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             var handler = new SignedHttpRequestHandlerPublic();
-             _ = await handler.ValidateSignedHttpRequestPublicAsync(null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+             var signedHttpRequest = await handler.ValidateSignedHttpRequestPublicAsync(theoryData.SignedHttpRequestToken, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
             if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
@@ -992,6 +992,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null))
                 context.AddDiff($"ValidationParameters.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
 
+            if (signedHttpRequest.SigningKey == null)
+                context.AddDiff("signedHttpRequest.SigningKey == null");
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -999,11 +1002,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             get
             {
+                var signedHttpRequestToken = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString());
                 return new TheoryData<ValidateSignedHttpRequestTheoryData>
                 {
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
+                        SignedHttpRequestToken = signedHttpRequestToken,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateTs = true,
@@ -1045,6 +1050,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
+                        SignedHttpRequestToken = signedHttpRequestToken,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateTs = false,
@@ -1088,7 +1094,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var handler = new SignedHttpRequestHandlerPublic();
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                await handler.ValidateSignedHttpRequestSignaturePublicAsync(theoryData.SignedHttpRequestToken, theoryData.PopKey, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var signingKey = await handler.ValidateSignedHttpRequestSignaturePublicAsync(theoryData.SignedHttpRequestToken, theoryData.PopKeys, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                IdentityComparer.AreSecurityKeysEqual(signingKey, theoryData.ExpectedPopKey, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -1111,38 +1118,40 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        SignedHttpRequestToken = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "InvalidNullToken",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
                         SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        PopKey = validPopKey,
+                        PopKeys = new List<SecurityKey>() {  validPopKey },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
                         TestId = "InvalidTokenType",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        PopKey = null,
+                        PopKeys = null,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23030"),
                         TestId = "InvalidNullPopKey",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        PopKey = invalidPopKey,
+                        PopKeys = new List<SecurityKey>(),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23030"),
+                        TestId = "InvalidEmptyPopKeys",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequest,
+                        PopKeys = new List<SecurityKey>() { invalidPopKey },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
                         TestId = "InvalidPopKeySignatureValidationFails",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        PopKey = validPopKey,
+                        PopKeys = new List<SecurityKey>() {  validPopKey },
+                        ExpectedPopKey = validPopKey,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            SignedHttpRequestSignatureValidatorAsync = (SecurityKey popKey, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            SignedHttpRequestSignatureValidatorAsync = (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 throw new NotImplementedException();
                             }
@@ -1153,8 +1162,30 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        PopKey = validPopKey,
+                        PopKeys = new List<SecurityKey>() {  validPopKey },
+                        ExpectedPopKey = validPopKey,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            SignedHttpRequestSignatureValidatorAsync = async (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                return await Task.FromResult(popKeys.First());
+                            }
+                        },
+                        TestId = "ValidDelegate",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequest,
+                        PopKeys = new List<SecurityKey>() {  validPopKey },
+                        ExpectedPopKey = validPopKey,
                         TestId = "ValidTest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequest,
+                        PopKeys = new List<SecurityKey>() {  invalidPopKey, validPopKey },
+                        ExpectedPopKey = validPopKey,
+                        TestId = "ValidTestTwoKeys",
                     },
                 };
             }
@@ -1361,7 +1392,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             ValidateU = true
         };
 
-        public SecurityKey PopKey { get; set; }
+        public IEnumerable<SecurityKey> PopKeys { get; set; }
+
+        public SecurityKey ExpectedPopKey { get; set; }
 
         internal SecurityToken SignedHttpRequestToken { get; set; }
     }
