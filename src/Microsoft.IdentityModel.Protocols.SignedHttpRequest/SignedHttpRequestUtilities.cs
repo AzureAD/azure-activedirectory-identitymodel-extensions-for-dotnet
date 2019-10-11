@@ -59,14 +59,27 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 !string.Equals(jsonWebKey.Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX23034, nameof(jsonWebKey.Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA), nameof(jsonWebKey.Kty))));
 
-            // exclude private parameters by using the JsonWebKeyIgnorePrivatePropertiesContractResolver,
-            // that ignores private key properties during serialization into a JSON string.
-            var jsonSerializerSettings = new JsonSerializerSettings()
+            string jwk;
+            if (jsonWebKey.HasPrivateKey)
             {
-                ContractResolver = new JsonWebKeyIgnorePrivatePropertiesContractResolver(),
-            };
+                // exclude private parameters by using the JsonWebKeyIgnorePrivatePropertiesContractResolver,
+                // that ignores private key properties during serialization into a JSON string.
+                var jsonSerializerSettings = new JsonSerializerSettings()
+                {
+                    ContractResolver = new JsonWebKeyIgnorePrivatePropertiesContractResolver(),
+                };
 
-            var jwk = JsonConvert.SerializeObject(jsonWebKey, jsonSerializerSettings);
+                jwk = JsonConvert.SerializeObject(jsonWebKey, jsonSerializerSettings);
+
+                // safeguard - if newtonsoft json implementation changes, private key information shouldn't leak.
+                if (new JsonWebKey(jwk).HasPrivateKey)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX23035, jwk))); 
+            }
+            else
+            {
+                jwk = JsonConvert.SerializeObject(jsonWebKey);
+            }
+
             return $@"{{""{ConfirmationClaimTypes.Jwk}"":{jwk}}}";
         }
 
