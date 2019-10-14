@@ -71,5 +71,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string B = "b";
+
+        /// <summary>
+        /// The "cnf" claim might be present in SignedHttpRequest payload.
+        ///  https://tools.ietf.org/html/rfc7800#section-6.1.1
+        /// </summary>
+        public const string Cnf = "cnf";
     }
 }

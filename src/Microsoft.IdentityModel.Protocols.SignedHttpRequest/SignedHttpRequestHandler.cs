@@ -84,9 +84,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 { JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType }
             };
 
-            if (signedHttpRequestDescriptor.SigningCredentials.Key?.KeyId != null)
-                header.Add(JwtHeaderParameterNames.Kid, signedHttpRequestDescriptor.SigningCredentials.Key.KeyId);
-
             if (signedHttpRequestDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                 header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
@@ -130,6 +127,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateNonce)
                 AddNonceClaim(payload, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateCnf)
+                AddCnfClaim(payload, signedHttpRequestDescriptor);
 
             signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestDescriptor);
 
@@ -411,6 +411,50 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CustomNonceCreator(payload, signedHttpRequestDescriptor);
             else
                 payload.Add(ConfirmationClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
+        }
+
+        /// <summary>
+        /// Adds the 'cnf' claim to the <paramref name="payload"/>.
+        /// </summary>
+        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <remarks>
+        /// If <see cref="SignedHttpRequestDescriptor.CnfClaimValue"/> is not null or empty, its value will be used as a "cnf" claim value.
+        /// Otherwise, a "cnf" claim value will be derived from the <see cref="SigningCredentials"/> member of <paramref name="signedHttpRequestDescriptor"/>.
+        /// </remarks>
+        protected virtual void AddCnfClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        {
+            if (payload == null)
+                throw LogHelper.LogArgumentNullException(nameof(payload));
+            try
+            {
+                if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CnfClaimValue))
+                {
+                    payload.Add(SignedHttpRequestClaimTypes.Cnf, JObject.Parse(signedHttpRequestDescriptor.CnfClaimValue));
+                }
+                else
+                {
+                    var signedHttpRequestSigningKey = signedHttpRequestDescriptor.SigningCredentials.Key;
+                    JsonWebKey jsonWebKey;
+                    if (signedHttpRequestSigningKey is JsonWebKey jwk)
+                        jsonWebKey = jwk;
+                    // create a JsonWebKey from an X509SecurityKey, represented as an RsaSecurityKey. 
+                    else if (signedHttpRequestSigningKey is X509SecurityKey x509SecurityKey)
+                        jsonWebKey = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509SecurityKey, true);
+                    else if (signedHttpRequestSigningKey is AsymmetricSecurityKey asymmetricSecurityKey)
+                        jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
+                    else
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23036, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
+
+                    // set the jwk thumbprint as the Kid
+                    jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
+                    payload.Add(SignedHttpRequestClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));
+                }
+            }
+            catch (Exception e)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.Cnf, e), e));
+            }
         }
         #endregion
 

@@ -50,6 +50,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public class SignedHttpRequestCreationParameters
     {
         /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="ConfirmationClaimTypes.Cnf"/> claim should be created and added or not.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="SignedHttpRequestDescriptor.CnfClaimValue"/> will be used as a "cnf" claim value, if set. 
+        /// Otherwise, a "cnf" claim value will be derived from <see cref="SignedHttpRequestDescriptor.SigningCredentials"/>.
+        /// </remarks>
+        public bool CreateCnf { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the <see cref="ConfirmationClaimTypes.Nonce"/> claim should be created and added or not.
         /// </summary>
         public bool CreateNonce { get; set; } = true;

@@ -170,7 +170,17 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
+                        {
+                            CreateCnf = false,
+                            CreateTs = true,
+                            CreateM = true,
+                            CreateP = true,
+                            CreateU = true,
+                            CreateH = true,
+                            CreateB = true,
+                            CreateQ = true,
+                        },
                         SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,

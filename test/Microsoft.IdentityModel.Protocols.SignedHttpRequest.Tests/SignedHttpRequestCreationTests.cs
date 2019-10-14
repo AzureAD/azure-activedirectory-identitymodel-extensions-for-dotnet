@@ -255,6 +255,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedPayloadClaims = new List<string>() { "at" },
                         SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
+                            CreateCnf = false,
                             CreateB = false,
                             CreateH = false,
                             CreateM = false,
@@ -270,9 +271,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        ExpectedPayloadClaims = new List<string>() { "at", "b", "h", "m", "nonce", "p", "q", "ts", "u", "additionalClaim" },
+                        ExpectedPayloadClaims = new List<string>() { "at", "b", "h", "m", "nonce", "p", "q", "ts", "u", "additionalClaim", "cnf" },
                         SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
+                            CreateCnf = true,
                             CreateB = true,
                             CreateH = true,
                             CreateM = true,
