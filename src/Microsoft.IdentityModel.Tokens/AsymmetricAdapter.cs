@@ -200,7 +200,6 @@ namespace Microsoft.IdentityModel.Tokens
                         if (ECDsaSecurityKey != null)
                             ECDsaSecurityKey.ECDsa.Dispose();
 #if DESKTOP
-                        // when investigating issue 1240, should Dispose always be called?
                         if (RsaCryptoServiceProviderProxy != null)
                             RsaCryptoServiceProviderProxy.Dispose();
 #endif
@@ -289,8 +288,9 @@ namespace Microsoft.IdentityModel.Tokens
                 RsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
                 SignatureFunction = SignWithRsaCryptoServiceProviderProxy;
                 VerifyFunction = VerifyWithRsaCryptoServiceProviderProxy;
-                // when investigating issue 1240, should _disposeCryptoOperators be set to true?
-                //_disposeCryptoOperators = true;
+                // RSACryptoServiceProviderProxy will keep track of if it creates a new RSA object.
+                // Only if a new RSA was creaated, RSACryptoServiceProviderProxy will call RSA.Dispose().
+                _disposeCryptoOperators = true;
                 return;
             }
 #endif
