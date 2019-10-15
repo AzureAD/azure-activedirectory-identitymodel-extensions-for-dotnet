@@ -253,9 +253,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             {
 
 #if NETSTANDARD1_4
-                var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max);
+                var xmlReader = XmlReader.Create(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
 #else
-                var xmlReader = new XmlTextReader(sr);
+                var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit };
 #endif
                 if (xmlReader.Settings != null)
                     xmlReader.Settings.DtdProcessing = DtdProcessing.Prohibit;
