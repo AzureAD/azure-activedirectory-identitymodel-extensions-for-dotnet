@@ -70,6 +70,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.True(jwtPayload.ValidFrom == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
             Assert.True(jwtPayload.ValidTo == DateTime.MinValue, "jwtPayload.ValidTo != DateTime.MinValue");
+            Assert.True(jwtPayload.IssuedAt == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
         }
 
         [Fact]
@@ -80,8 +81,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtPayload jwtPayload = new JwtPayload();
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 22)
-                Assert.True(false, "Number of properties has changed from 22 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 23)
+                Assert.True(false, "Number of properties has changed from 23 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
