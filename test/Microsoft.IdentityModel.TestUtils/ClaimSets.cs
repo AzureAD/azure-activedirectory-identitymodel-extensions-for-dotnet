@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(JwtRegisteredClaimNames.Aud, "audClaimSets.Value"),
                 new Claim(JwtHeaderParameterNames.Typ, "BADDTYPE"),
                 new Claim(JwtRegisteredClaimNames.Exp, "BADDATEFORMAT"),
-                new Claim(JwtRegisteredClaimNames.Iat, "issuedatClaimSets.Value"),
+                new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.UtcNow).ToString()),
                 new Claim(JwtRegisteredClaimNames.Iss, "issuerClaimSets.Value"),
                 new Claim(JwtRegisteredClaimNames.Jti, "jwtIdClaimSets.Value"),
                 new Claim(JwtRegisteredClaimNames.Nbf, "BADDATEFORMAT"),
