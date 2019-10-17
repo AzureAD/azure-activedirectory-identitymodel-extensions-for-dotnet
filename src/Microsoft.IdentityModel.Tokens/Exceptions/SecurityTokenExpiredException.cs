@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenExpiredException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Gets or sets the Expires value that created the validation exception.
+        /// Gets or sets the Expires value that created the validation exception. This value is always in UTC.
         /// </summary>
         public DateTime Expires { get; set; }
 

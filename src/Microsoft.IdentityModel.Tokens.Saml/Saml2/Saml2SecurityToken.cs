@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets the time the token is valid from.
+        /// Gets the time the token is valid from. This value is always in UTC.
         /// </summary>
         public override DateTime ValidFrom
         {
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets the time the token is valid to.
+        /// Gets the time the token is valid to. This value is always in UTC.
         /// </summary>
         public override DateTime ValidTo
         {

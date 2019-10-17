@@ -73,7 +73,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets the time at which the authentication took place. [Saml2Core, 2.7.2]
+        /// Gets or sets the time at which the authentication took place. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC. [Saml2Core, 2.7.2]
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null.</exception>
         public DateTime AuthenticationInstant
@@ -95,7 +96,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets or sets the time instant at which the session between the principal 
         /// identified by the subject and the SAML authority issuing this statement
-        /// must be considered ended. [Saml2Core, 2.7.2]
+        /// must be considered ended. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC. [Saml2Core, 2.7.2]
         /// </summary>
         public DateTime? SessionNotOnOrAfter
         {
