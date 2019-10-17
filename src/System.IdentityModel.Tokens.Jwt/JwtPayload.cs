@@ -367,7 +367,11 @@ namespace System.IdentityModel.Tokens.Jwt
                                 continue;
                             }
 
-                            claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(obj), GetClaimValueType(obj), issuer, issuer));
+                            // DateTime claims require special processing. JsonConvert.SerializeObject(obj) will result in "\"dateTimeValue\"". The quotes will be added.
+                            if (obj is DateTime dateTimeValue)
+                                claims.Add(new Claim(keyValuePair.Key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                            else
+                                claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(obj), GetClaimValueType(obj), issuer, issuer));
                         }
 
                         continue;
@@ -382,7 +386,11 @@ namespace System.IdentityModel.Tokens.Jwt
                         continue;
                     }
 
-                    claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
+                    // DateTime claims require special processing. JsonConvert.SerializeObject(keyValuePair.Value) will result in "\"dateTimeValue\"". The quotes will be added.
+                    if (keyValuePair.Value is DateTime dateTime)
+                        claims.Add(new Claim(keyValuePair.Key, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                    else
+                        claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
                 }
 
                 return claims;
@@ -432,6 +440,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 // Boolean needs item.ToString otherwise 'true' => 'True'
                 if (jvalue.Type == JTokenType.String)
                     claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
+                // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
+                else if (jvalue.Value is DateTime dateTimeValue)
+                    claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
                     claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
             }
@@ -526,6 +537,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 return ClaimValueTypes.Integer64;
             }
+
+            if (objType == typeof(DateTime))
+                return ClaimValueTypes.DateTime;
 
             if (objType == typeof(JObject))
                 return JsonClaimValueTypes.Json;
