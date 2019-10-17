@@ -27,8 +27,10 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -186,6 +188,18 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
+        public void TestDateTimeClaim()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            var dateTime = new DateTime(2020, 1, 1, 1, 1, 1, 1);
+            jwtPayload.Add("dateTime", dateTime);
+            var dateTimeClaim = jwtPayload.Claims.First();
+
+            Assert.True(string.Equals(dateTimeClaim.ValueType, ClaimValueTypes.DateTime, StringComparison.Ordinal), "dateTimeClaim.Type != ClaimValueTypes.DateTime");
+            Assert.True(string.Equals(dateTimeClaim.Value, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), StringComparison.Ordinal), "dateTimeClaim.Value != dateTime.ToUniversalTime('o', CultureInfo.InvariantCulture).ToString()");
+        }
+
+        [Fact]
         public void TestClaimWithLargeExpValue()
         {
             JwtPayload jwtPayload = new JwtPayload();
@@ -205,7 +219,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
-                    { typeof(JwtPayload), new List<string> { "Item" } }
+                    { typeof(JwtPayload), new List<string> { "Item" } },
                 }
             };
 
@@ -257,6 +271,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim("ClaimValueTypes.int.MinValue", intMinValue, ClaimValueTypes.Integer),
                         new Claim("ClaimValueTypes.long.MaxValue", longMaxValue, ClaimValueTypes.Integer64),
                         new Claim("ClaimValueTypes.long.MinValue", longMinValue, ClaimValueTypes.Integer64),
+                        new Claim("ClaimValueTypes.DateTime.IS8061", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime),
+                        new Claim("ClaimValueTypes.DateTime", "2019-11-15", ClaimValueTypes.String),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.Json1", @"{""jsonProperty1"":""jsonvalue1""}", JsonClaimValueTypes.Json),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.Json2", @"{""jsonProperty2"":""jsonvalue2""}", JsonClaimValueTypes.Json),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray", "1", ClaimValueTypes.Integer),
@@ -272,6 +288,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim("emailaddress", "user1@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("emailaddress", "user2@contoso.com", ClaimValueTypes.String, "http://test.local/api/"),
                         new Claim("name", "user", ClaimValueTypes.String, "http://test.local/api/"),
+                        new Claim("dateTime", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime, "http://test.local/api/"),
                         new Claim("iss", "http://test.local/api/", ClaimValueTypes.String, "http://test.local/api/")
                     },
                     dataset);
@@ -291,6 +308,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim("ClaimValueTypes", "-132.64", ClaimValueTypes.Double),
                         new Claim("ClaimValueTypes", "true", ClaimValueTypes.Boolean),
                         new Claim("ClaimValueTypes", "false", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime),
+                        new Claim("ClaimValueTypes", "2019-11-15", ClaimValueTypes.String),
                         new Claim("ClaimValueTypes", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
                         new Claim("ClaimValueTypes", @"[""status"",""feed""]", JsonClaimValueTypes.JsonArray),
                     },
@@ -301,6 +320,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         new Claim("json3", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
                         new Claim("json3", @"{""name3.2"":""value3.2""}", JsonClaimValueTypes.Json),
+                        new Claim("json3", @"{""dateTimeIso8061"":""2019-11-15T14:31:21.6101326Z""}", JsonClaimValueTypes.Json),
+                        new Claim("json3", @"{""dateTime"":""2019-11-15""}", JsonClaimValueTypes.Json),
                         new Claim("json3", @"{""name3.3"":[1,2,3]}", JsonClaimValueTypes.Json),
                         new Claim("json3", "name3.4"),
                         new Claim("may_act",  @"{""sub"":""admin@example.net"",""name"":""Admin""}", JsonClaimValueTypes.Json),
@@ -342,6 +363,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                     case ClaimValueTypes.Integer64:
                         jsonValue = long.Parse(claim.Value);
+                        break;
+
+                    case ClaimValueTypes.DateTime:
+                        jsonValue = DateTime.Parse(claim.Value);
                         break;
 
                     case JsonClaimValueTypes.Json:
@@ -436,6 +461,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         long long64;
                         if (!long.TryParse(claim.Value, out long64))
                             context.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "long.TryParse(claim.Value, out long64), value: '{0}'", claim.Value));
+
+                        break;
+
+                    case ClaimValueTypes.DateTime:
+                        DateTime dateTime;
+                        if (!DateTime.TryParse(claim.Value, out dateTime))
+                            context.Diffs.Add(string.Format(CultureInfo.InvariantCulture, "DateTime.TryParse(claim.Value, out dateTime), value: '{0}'", claim.Value));
 
                         break;
 
