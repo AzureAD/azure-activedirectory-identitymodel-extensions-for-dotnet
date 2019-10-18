@@ -157,6 +157,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates an unsigned JWS (Json Web Signature).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
         /// <returns>A JWS in Compact Serialization Format.</returns>
         public virtual string CreateToken(string payload)
         {
@@ -164,6 +165,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             return CreateTokenPrivate(JObject.Parse(payload), null, null, null, null);
+        }
+
+        /// <summary>
+        /// Creates an unsigned JWS (Json Web Signature).
+        /// </summary>
+        /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
+        /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the JWT token header.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <returns>A JWS in Compact Serialization Format.</returns>
+        public virtual string CreateToken(string payload, IDictionary<string, object> additionalHeaderClaims)
+        {
+            if (string.IsNullOrEmpty(payload))
+                throw LogHelper.LogArgumentNullException(nameof(payload));
+
+            if (additionalHeaderClaims == null)
+                throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
+
+            return CreateTokenPrivate(JObject.Parse(payload), null, null, null, additionalHeaderClaims);
         }
 
         /// <summary>
@@ -222,10 +242,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any()) 
+            if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any())
                 && (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any()))
                 LogHelper.LogWarning(LogMessages.IDX14114, nameof(SecurityTokenDescriptor), nameof(SecurityTokenDescriptor.Subject), nameof(SecurityTokenDescriptor.Claims));
-            
+
             JObject payload;
             if (tokenDescriptor.Subject != null)
                 payload = JObject.FromObject(JwtTokenUtilities.CreateDictionaryFromClaims(tokenDescriptor.Subject.Claims));
@@ -1162,6 +1182,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
+           
+            JwtTokenUtilities.ValidateTokenType(jsonWebToken.Typ, validationParameters);
 
             return new TokenValidationResult
             {

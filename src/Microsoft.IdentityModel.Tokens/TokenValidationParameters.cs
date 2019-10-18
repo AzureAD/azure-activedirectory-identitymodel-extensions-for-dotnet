@@ -571,5 +571,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// </summary>
         public IEnumerable<string> ValidIssuers { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
+        /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
+        /// In the case of a JWE, this property will ONLY apply to the inner token header.
+        /// </summary>
+        public IEnumerable<string> ValidTypes { get; set; }
     }
 }

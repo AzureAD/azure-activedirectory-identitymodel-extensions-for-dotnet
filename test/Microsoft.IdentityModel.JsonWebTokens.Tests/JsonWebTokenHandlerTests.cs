@@ -1808,6 +1808,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 throw new SecurityTokenException("Token does not contain the correct value for the 'email' claim.");
         }
 
+
+        [Theory, MemberData(nameof(ValidateTypeTheoryData))]
+        public void ValidateType(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateType", theoryData);
+
+            var tokenValidationResult = new JsonWebTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+            if (tokenValidationResult.Exception != null)
+                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception);
+            else
+                theoryData.ExpectedException.ProcessNoException();
+
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateTypeTheoryData = JwtSecurityTokenHandlerTests.ValidateTypeTheoryData;
+
         [Theory, MemberData(nameof(ValidateJwsTheoryData))]
         public void ValidateJWS(JwtTheoryData theoryData)
         {

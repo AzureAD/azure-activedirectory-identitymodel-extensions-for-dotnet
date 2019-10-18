@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -1553,6 +1554,109 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     }
                 };
             }
+        }
+
+
+        [Theory, MemberData(nameof(ValidateTypeTheoryData))]
+        public void ValidateType(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateType", theoryData);
+
+            try
+            {
+                theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken securityToken);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateTypeTheoryData
+        {
+            get
+            {
+                // need to use JsonWebTokenHandler to create tokens with a different 'typ' value, as JwtSecurityTokenHandler currently does not have support for additional header claims.
+                var jsonWebTokenHandler = new JsonWebTokenHandler();
+                var type = "DifferentType";
+                var jwsWithEmptyType = jsonWebTokenHandler.CreateToken(Default.PayloadString, new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, "" } });
+                var jwsWithDifferentType = jsonWebTokenHandler.CreateToken(Default.PayloadString, new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, type } });
+                var jweWithDifferentType = jsonWebTokenHandler.EncryptToken(jwsWithDifferentType, Default.SymmetricEncryptingCredentials);
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        TestId = "TypeEmptyValidTypesNull",
+                        Token = jwsWithEmptyType,
+                        ValidationParameters = ValidateTypeValidationParameters(null, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "TypeEmptyValidTypesEmpty",
+                        Token = jwsWithEmptyType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>(), null),
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidTypeException), substringExpected: "IDX10256", propertiesExpected: new Dictionary<string, object>{ { "InvalidType", null } }),
+                        TestId = "TypeEmptyValidTypesNonEmpty",
+                        Token = jwsWithEmptyType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>() { "Type" }, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "TypeNotEmptyValidTypesNull",
+                        Token = jwsWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(null, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "TypeNotEmptyValidTypesEmpty",
+                        Token = jwsWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>(), null),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWSValidTypesNonEmptyValid",
+                        Token = jwsWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>() { type }, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidTypeException), substringExpected: "IDX10257", propertiesExpected: new Dictionary<string, object>{ { "InvalidType", type } }),
+                        TestId = "JWSValidTypesNonEmptyInvalid",
+                        Token = jwsWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>() { type.ToUpper() }, null),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWEValidTypesNonEmptyValid",
+                        Token = jweWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>() { type }, Default.SymmetricEncryptingCredentials.Key),
+                    },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidTypeException), substringExpected: "IDX10257", propertiesExpected: new Dictionary<string, object>{ { "InvalidType", type } }),
+                        TestId = "JWEValidTypesNonEmptyInvalid",
+                        Token = jweWithDifferentType,
+                        ValidationParameters = ValidateTypeValidationParameters(new List<string>() { type.ToUpper() }, Default.SymmetricEncryptingCredentials.Key),
+                    }
+                };
+            }
+        }
+
+        private static TokenValidationParameters ValidateTypeValidationParameters(IEnumerable<string> validTypes, SecurityKey tokenDecryptionKey)
+        {
+            return new TokenValidationParameters
+            {
+                RequireSignedTokens = false,
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateLifetime = false,
+                ValidTypes = validTypes,
+                TokenDecryptionKey = tokenDecryptionKey
+            };
         }
 
         class ClaimComparer : IEqualityComparer<Claim>

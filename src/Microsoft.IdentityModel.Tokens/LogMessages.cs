@@ -86,6 +86,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10252 = "IDX10252: RequireSignedTokens property on ValidationParameters is set to false and the issuer signing key is null. Exiting without validating the issuer signing key.";
         public const string IDX10253 = "IDX10253: RequireSignedTokens property on ValidationParameters is set to true, but the issuer signing key is null.";
         public const string IDX10254 = "IDX10254: '{0}.{1}' failed. The virtual method '{2}.{3}' returned null. If this method was overridden, ensure a valid '{4}' is returned.";
+        public const string IDX10255 = "IDX10255: ValidTypes property on ValidationParameters is either null or empty. Exiting without validating the token type.";
+        public const string IDX10256 = "IDX10256: Unable to validate the token type. TokenValidationParameters.ValidTypes is set, but the 'typ' header claim is null or empty.";
+        public const string IDX10257 = "IDX10257: Token type validation failed. Type: '{0}'. Did not match: validationParameters.TokenTypes: '{1}'.";
+        public const string IDX10258 = "IDX10258: Token type validated. Type: '{0}'.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";

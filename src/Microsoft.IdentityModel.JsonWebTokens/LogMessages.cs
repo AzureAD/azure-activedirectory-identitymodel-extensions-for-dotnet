@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14114 = "IDX14114: Both '{0}.{1}' and '{0}.{2}' are null or empty.";
         // internal const string IDX14115 = "IDX14115:";
         internal const string IDX14116 = "IDX14116: ''{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
-        
+
         // logging
         internal const string IDX14200 = "IDX14200: Creating raw signature using the signature credentials.";
         
