@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (validationParameters.ValidTypes == null || validationParameters.ValidTypes.Count() == 0)
             {
-                LogHelper.LogInformation(TokenLogMessages.IDX10254);
+                LogHelper.LogInformation(TokenLogMessages.IDX10255);
                 return;
             }
 
