@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
     public abstract class AuthenticationProtocolMessage
     {
         private string _postTitle = "Working...";
+        private string _script = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>"; 
         private string _scriptButtonText = "Submit";
         private string _scriptDisabledText = "Script is disabled. Click Submit to continue.";
 
@@ -148,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(IssuerAddress));
 
                 _issuerAddress = value;
             }
@@ -179,7 +180,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(PostTitle));
 
                 _postTitle = value;
             }
@@ -239,7 +240,22 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets the script used when constructing the post string.
         /// </summary>
-        public string Script { get; } = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>";
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
+        public string Script
+        {
+            get
+            {
+                return _script;
+            }
+
+            set
+            {
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException(nameof(Script));
+
+                _script = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the script button text used when constructing the post string.
@@ -255,7 +271,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(ScriptButtonText));
 
                 _scriptButtonText = value;
             }
@@ -275,7 +291,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(ScriptDisabledText));
 
                 _scriptDisabledText = value;
             }
