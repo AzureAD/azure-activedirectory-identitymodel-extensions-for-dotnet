@@ -26,12 +26,14 @@ namespace Microsoft.IdentityModel.TestUtils
                     new TokenReplayTheoryData
                     {
                         TestId = $"ValidateTokenReplay: false, {nameof(ValidationDelegates.TokenReplayValidatorReturnsFalse)}",
-                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorReturnsFalse
+                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorReturnsFalse,
+                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10228:")
                     },
                     new TokenReplayTheoryData
                     {
                         TestId = $"ValidateTokenReplay: false, {nameof(ValidationDelegates.TokenReplayValidatorThrows)}",
-                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorThrows
+                        TokenReplayValidator = ValidationDelegates.TokenReplayValidatorThrows,
+                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("TokenReplayValidatorThrows")
                     },
                     new TokenReplayTheoryData
                     {

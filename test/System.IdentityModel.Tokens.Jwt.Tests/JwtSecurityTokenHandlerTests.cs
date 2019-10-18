@@ -982,12 +982,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: $"{typeof(ValidationDelegates)}.AudienceValidatorThrows"),
                         TestId = "'validateAudience == false, AudienceValidator throws'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(null, null, ValidationDelegates.AudienceValidatorThrows, false),
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10231", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", Default.Audience } }),
                         TestId = "'validateAudience == false, AudienceValidator return false'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(null, null, ValidationDelegates.AudienceValidatorReturnsFalse, false),
@@ -1077,7 +1079,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ValidationParameters = ValidateIssuerValidationParameters(null, Default.Issuers, null, true)
                     },
                     new JwtTheoryData
-                    {
+                    {                        
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IssuerValidatorThrows"),
                         TestId = "ValidationDelegates.IssuerValidatorThrows, ValidateIssuer: false",
                         Token = jwt,
                         ValidationParameters = ValidateIssuerValidationParameters(
@@ -1181,19 +1184,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10230:"),
                         TestId = $"{nameof(ValidationDelegates.LifetimeValidatorReturnsFalse)}, ValidateLifetime: false",
                         Token = Default.UnsignedJwt,
                         ValidationParameters = ValidateLifetimeValidationParameters(ValidationDelegates.LifetimeValidatorReturnsFalse, false)
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10230:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows"),
                         TestId = nameof(ValidationDelegates.LifetimeValidatorThrows),
                         Token = Default.UnsignedJwt,
-                        ValidationParameters = ValidateLifetimeValidationParameters(ValidationDelegates.LifetimeValidatorReturnsFalse, true)
+                        ValidationParameters = ValidateLifetimeValidationParameters(ValidationDelegates.LifetimeValidatorThrows, true)
                     },
                     new JwtTheoryData
-                    {
+                    {                        
+                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("LifetimeValidatorThrows"),
                         TestId = $"'{nameof(ValidationDelegates.LifetimeValidatorThrows)}, ValidateLifetime: false'",
                         Token = Default.UnsignedJwt,
                         ValidationParameters = ValidateLifetimeValidationParameters(ValidationDelegates.LifetimeValidatorThrows, false)

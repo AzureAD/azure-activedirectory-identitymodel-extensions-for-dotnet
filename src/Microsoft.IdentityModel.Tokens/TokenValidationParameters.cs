@@ -214,8 +214,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the audience.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'audience' instead of normal processing.
-        /// If <see cref="ValidateAudience"/> is false, this delegate will not be called.
+        /// If set, this delegate will be called to validate the 'audience', instead of normal processing. This means that no default 'audience' validation will occur.
+        /// Even if <see cref="ValidateAudience"/> is false, this delegate will still be called.
         /// </remarks>
         public AudienceValidator AudienceValidator { get; set; }
 
@@ -329,7 +329,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of normal processing.
+        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of normal processing. This means that no default <see cref="SecurityKey"/> validation will occur.
+        /// Even if <see cref="ValidateIssuerSigningKey"/> is false, this delegate will still be called.
         /// </remarks>
         public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
 
@@ -355,8 +356,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of normal processing.
-        /// If <see cref="ValidateIssuer"/> is false, this delegate will not be called.
+        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of normal processing. This means that no default 'issuer' validation will occur.
+        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
 
@@ -364,8 +365,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the lifetime of the token, instead of normal processing.
-        /// If <see cref="ValidateLifetime"/> is false, this delegate will not be called.
+        /// If set, this delegate will be called to validate the lifetime of the token, instead of normal processing. This means that no default lifetime validation will occur.
+        /// Even if <see cref="ValidateLifetime"/> is false, this delegate will still be called.
         /// </remarks>
         public LifetimeValidator LifetimeValidator { get; set; }
 
@@ -500,8 +501,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the token replay of the token
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the token replay of the token, instead of normal processing.
-        /// If <see cref="ValidateTokenReplay"/> is false, this delegate will not be called.
+        /// If set, this delegate will be called to validate the token replay of the token, instead of normal processing. This means no default token replay validation will occur.
+        /// Even if <see cref="ValidateTokenReplay"/> is false, this delegate will still be called.
         /// </remarks>
         public TokenReplayValidator TokenReplayValidator { get; set; }
 
@@ -515,7 +516,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a boolean to control if the audience will be validated during token validation.
         /// </summary>
         /// <remarks>Validation of the audience, mitigates forwarding attacks. For example, a site that receives a token, could not replay it to another side.
-        /// A forwarded token would contain the audience of the original site.</remarks>
+        /// A forwarded token would contain the audience of the original site.
+        /// This boolean only applies to default audience validation. If <see cref="AudienceValidator"/> is set, it will be called regardless of whether this
+        /// property is true or false.</remarks>
         [DefaultValue(true)]
         public bool ValidateAudience { get; set; }
 
@@ -528,13 +531,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// It is possible that a token issued for the same audience could be from a different tenant. For example an application could accept users from
         /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. A application that accepts tokens from fabrikam could forward them
         /// to the application that accepts tokens for contoso.
+        /// This boolean only applies to default issuer validation. If <see cref= "IssuerValidator" /> is set, it will be called regardless of whether this
+        /// property is true or false.
         /// </remarks>
         [DefaultValue(true)]
         public bool ValidateIssuer { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the lifetime will be validated during token validation.
-        /// </summary>                
+        /// </summary> 
+        /// <remarks>
+        /// This boolean only applies to default lifetime validation. If <see cref= "LifetimeValidator" /> is set, it will be called regardless of whether this
+        /// property is true or false.
+        /// </remarks>
         [DefaultValue(true)]
         public bool ValidateLifetime { get; set; }
 
@@ -542,13 +551,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
         /// </summary>
         /// <remarks>It is possible for tokens to contain the public key needed to check the signature. For example, X509Data can be hydrated into an X509Certificate,
-        /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. </remarks>
+        /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. 
+        /// This boolean only applies to default signing key validation. If <see cref= "IssuerSigningKeyValidator" /> is set, it will be called regardless of whether this
+        /// property is true or false.
+        /// </remarks>
         [DefaultValue(false)]
         public bool ValidateIssuerSigningKey { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the token replay will be validated during token validation.
-        /// </summary>                
+        /// </summary> 
+        /// <remarks>
+        /// This boolean only applies to default token replay validation. If <see cref= "TokenReplayValidator" /> is set, it will be called regardless of whether this
+        /// property is true or false.
+        /// </remarks>
         [DefaultValue(false)]
         public bool ValidateTokenReplay { get; set; }
 
