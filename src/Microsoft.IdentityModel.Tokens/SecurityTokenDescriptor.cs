@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         public EncryptingCredentials EncryptingCredentials { get; set; }
 
         /// <summary>
-        /// Gets or sets the value of the 'expiration' claim.
+        /// Gets or sets the value of the 'expiration' claim. This value should be in UTC.
         /// </summary>
         public DateTime? Expires { get; set; }
 
@@ -62,12 +62,12 @@ namespace Microsoft.IdentityModel.Tokens
         public string Issuer { get; set; }
 
         /// <summary>
-        /// Gets or sets the time the security token was issued.
+        /// Gets or sets the time the security token was issued. This value should be in UTC.
         /// </summary>
         public DateTime? IssuedAt { get; set; }
 
         /// <summary>
-        /// Gets or sets the notbefore time for the security token.
+        /// Gets or sets the notbefore time for the security token. This value should be in UTC.
         /// </summary>
         public DateTime? NotBefore { get; set; }
 

@@ -72,12 +72,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public ICollection<SamlCondition> Conditions { get; }
 
         /// <summary>
-        /// Gets or sets the earliest time instant at which the assertion is valid.
+        /// Gets or sets the earliest time instant at which the assertion is valid. This value should be in UTC.
         /// </summary>
         public DateTime NotBefore { get; set; } = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
 
         /// <summary>
-        /// Gets or sets the time instant at which the assertion has expired.
+        /// Gets or sets the time instant at which the assertion has expired. This value should be in UTC.
         /// </summary>
         public DateTime NotOnOrAfter { get; set; } = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
     }
