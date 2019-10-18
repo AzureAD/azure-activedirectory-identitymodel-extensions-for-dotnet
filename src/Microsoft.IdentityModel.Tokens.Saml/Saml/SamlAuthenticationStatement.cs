@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets or sets the instant of authentication.
+        /// Gets or sets the instant of authentication. This value should be in UTC.
         /// </summary>
         public DateTime AuthenticationInstant
         {

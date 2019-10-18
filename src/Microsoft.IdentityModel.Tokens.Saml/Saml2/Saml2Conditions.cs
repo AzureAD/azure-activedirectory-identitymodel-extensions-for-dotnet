@@ -70,7 +70,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets the earliest time instant at which the assertion is valid.
+        /// Gets or sets the earliest time instant at which the assertion is valid. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC.
         /// [Saml2Core, 2.5.1]
         /// </summary>
         /// <exception cref="ArgumentException">if 'value' is greater or equal to <see cref="NotOnOrAfter"/>.</exception>
@@ -93,7 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets the time instant at which the assertion has expired.
+        /// Gets or sets the time instant at which the assertion has expired. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC.
         /// [Saml2Core, 2.5.1]
         /// </summary>
         /// <exception cref="ArgumentException">if 'value' is less than or equal to <see cref="NotBefore"/>.</exception>

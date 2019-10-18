@@ -77,7 +77,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets a time instant before which the subject cannot be confirmed. [Saml2Core, 2.4.1.2]
+        /// Gets or sets a time instant before which the subject cannot be confirmed. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC.[Saml2Core, 2.4.1.2]
         /// </summary>
         public DateTime? NotBefore
         {
@@ -86,7 +87,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Gets or sets a time instant at which the subject can no longer be confirmed. [Saml2Core, 2.4.1.2]
+        /// Gets or sets a time instant at which the subject can no longer be confirmed. If the provided DateTime is not in UTC, it will
+        /// be converted to UTC. [Saml2Core, 2.4.1.2]
         /// </summary>
         public DateTime? NotOnOrAfter
         {

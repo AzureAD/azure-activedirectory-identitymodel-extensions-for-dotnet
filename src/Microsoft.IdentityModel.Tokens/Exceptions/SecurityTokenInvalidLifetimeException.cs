@@ -38,12 +38,12 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidLifetimeException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Gets or sets the NotBefore value that created the validation exception.
+        /// Gets or sets the NotBefore value that created the validation exception. This value is always in UTC.
         /// </summary>
         public DateTime? NotBefore { get; set; }
 
         /// <summary>
-        /// Gets or sets the Expires value that created the validation exception.
+        /// Gets or sets the Expires value that created the validation exception. This value is always in UTC.
         /// </summary>
         public DateTime? Expires { get; set; }
 

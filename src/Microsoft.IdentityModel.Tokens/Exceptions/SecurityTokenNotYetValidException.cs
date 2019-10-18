@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenNotYetValidException : SecurityTokenValidationException
     {
         /// <summary>
-        /// Gets or sets the NotBefore value that created the validation exception.
+        /// Gets or sets the NotBefore value that created the validation exception. This value is always in UTC.
         /// </summary>
         public DateTime NotBefore { get; set; }
 

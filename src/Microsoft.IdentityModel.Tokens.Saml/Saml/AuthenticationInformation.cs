@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Gets or sets the AuthenticationInstant
+        /// Gets or sets the AuthenticationInstant. This value should be in UTC.
         /// </summary>
         public DateTime AuthenticationInstant { get; set; }
 
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public string DnsName { get; set; }
 
         /// <summary>
-        /// Gets or sets the time that the session referred to in the session index MUST be considered ended.
+        /// Gets or sets the time that the session referred to in the session index MUST be considered ended. This value should be in UTC.
         /// </summary>
         public DateTime? NotOnOrAfter { get; set; }
 
