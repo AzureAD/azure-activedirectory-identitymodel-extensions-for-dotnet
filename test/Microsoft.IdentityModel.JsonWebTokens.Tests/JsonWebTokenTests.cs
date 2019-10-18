@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
@@ -42,7 +44,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenTests
     {
-        private string jObject = @"{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""jobject"": { ""string1"":""string1value"", ""string2"":""string2value"" },""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true }";
+        private static DateTime dateTime = new DateTime(2000, 01, 01, 0, 0, 0);
+        private string jObject = $@"{{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""jobject"": {{ ""string1"":""string1value"", ""string2"":""string2value"" }},""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true, ""dateTime"": ""{dateTime}"", ""dateTimeIso8061"": ""{dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)}"" }}";
         private List<Claim> payloadClaims = new List<Claim>()
         {
             new Claim("intarray", @"[1,2,3]", JsonClaimValueTypes.JsonArray, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
@@ -52,7 +55,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("float", "42.0", ClaimValueTypes.Double, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("integer", "42", ClaimValueTypes.Integer, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("nill", "", JsonClaimValueTypes.JsonNull, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
-            new Claim("bool", "true", ClaimValueTypes.Boolean, "LOCAL AUTHORITY", "LOCAL AUTHORITY")
+            new Claim("bool", "true", ClaimValueTypes.Boolean, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
+            new Claim("dateTime", dateTime.ToString(), ClaimValueTypes.String, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
+            new Claim("dateTimeIso8061", dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
         // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception 
@@ -337,6 +342,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var boolean = token.GetPayloadValue<bool>("bool");
             IdentityComparer.AreEqual(boolean, true, context);
 
+            var dateTimeValue = token.GetPayloadValue<string>("dateTime");
+            IdentityComparer.AreEqual(dateTimeValue, dateTime.ToString(), context);
+
+            var dateTimeIso8061Value = token.GetPayloadValue<DateTime>("dateTimeIso8061");
+            IdentityComparer.AreEqual(dateTimeIso8061Value, dateTime, context);
+
             try // Try to retrieve a value that doesn't exist in the header.
             {
                 token.GetPayloadValue<int>("doesnotexist");
@@ -397,6 +408,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             success = token.TryGetPayloadValue("bool", out bool boolean);
             IdentityComparer.AreEqual(boolean, true, context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            var dateTimeValue = token.GetPayloadValue<string>("dateTime");
+            IdentityComparer.AreEqual(dateTimeValue, dateTime.ToString(), context);
+            IdentityComparer.AreEqual(true, success, context);
+
+            var dateTimeIso8061Value = token.GetPayloadValue<DateTime>("dateTimeIso8061");
+            IdentityComparer.AreEqual(dateTimeIso8061Value, dateTime, context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("doesnotexist", out int doesNotExist);
@@ -491,6 +510,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                 };
             }
+        }
+
+        [Fact]
+        public void DateTimeISO8061Claim()
+        {
+            var context = new CompareContext();
+            TestUtilities.WriteHeader($"{this}.DateTimeISO8061Claim");
+
+            var encodedTokenWithDateTimeISO8061Claim = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGFpbV9hc19kYXRldGltZSI6IjIwMTktMTEtMTVUMTQ6MzE6MjEuNjEwMTMyNloifQ.yYcHSl-rNT2nHe8Nb0aWe6Qu3E0ZOn2_OUidpxuw0wk";
+            var claimA = new JwtSecurityTokenHandler().ReadJwtToken(encodedTokenWithDateTimeISO8061Claim).Claims.First();
+            var claimB = new JsonWebTokenHandler().ReadJsonWebToken(encodedTokenWithDateTimeISO8061Claim).Claims.First();
+
+            // both claims should be equal
+            IdentityComparer.AreClaimsEqual(claimA, claimB, context);
+            TestUtilities.AssertFailIfErrors(context);
+
+            // both claim value types should be DateTime
+            Assert.True(string.Equals(claimA.ValueType, ClaimValueTypes.DateTime, StringComparison.Ordinal), "ClaimValueType is not DateTime.");
+            // claim value shouldn't contain any quotes
+            Assert.DoesNotContain("\"", claimA.Value);
         }
     }
 
