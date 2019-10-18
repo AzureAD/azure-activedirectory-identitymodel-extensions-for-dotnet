@@ -71,6 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             {
                 "IssuerAddress",
                 "PostTitle",
+                "Script",
                 "ScriptButtonText",
                 "ScriptDisabledText",
             };
@@ -78,7 +79,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var context = new GetSetContext();
             foreach(string property in properties)
             {
-                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "", ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected, context);
