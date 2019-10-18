@@ -218,6 +218,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return longValue;
             }
 
+            if (claim.ValueType == ClaimValueTypes.DateTime)
+            {
+                if (DateTime.TryParse(claim.Value, out DateTime dateTimeValue))
+                    return dateTimeValue;
+            }
+
             if (claim.ValueType == JsonClaimValueTypes.Json)
                 return JObject.Parse(claim.Value);
 

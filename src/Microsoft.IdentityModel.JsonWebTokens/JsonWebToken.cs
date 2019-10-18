@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
@@ -406,6 +407,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // Boolean needs item.ToString otherwise 'true' => 'True'
                 if (jvalue.Type is JTokenType.String)
                     claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
+                // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
+                else if (jvalue.Value is DateTime dateTimeValue)
+                    claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
                     claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
             }
@@ -480,6 +484,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return ClaimValueTypes.Integer64;
             }
 
+            if (objType == typeof(DateTime))
+                return ClaimValueTypes.DateTime;
+
             if (objType == typeof(JObject))
                 return JsonClaimValueTypes.Json;
 
@@ -512,6 +519,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // Boolean needs item.ToString otherwise 'true' => 'True'
                 if (jvalue.Type is JTokenType.String)
                     return new Claim(key, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
+                // DateTime claims require special processing. jTokenValue.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
+                else if (jvalue.Value is DateTime dateTimeValue)
+                    return new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer);
                 else
                     return new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer);
             }
@@ -573,6 +583,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // Boolean needs item.ToString otherwise 'true' => 'True'
                 if (jvalue.Type is JTokenType.String)
                     value = new Claim(key, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
+                // DateTime claims require special processing. jTokenValue.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
+                else if (jvalue.Value is DateTime dateTimeValue)
+                    value = new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer);
                 else
                     value = new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer);
             }
