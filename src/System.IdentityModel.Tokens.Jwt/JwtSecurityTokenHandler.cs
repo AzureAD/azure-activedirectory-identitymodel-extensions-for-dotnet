@@ -741,6 +741,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 ValidateToken(jwtToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters, out _);
             }
             ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
+            
+            JwtTokenUtilities.ValidateTokenType(jwtToken.Header.Typ, validationParameters);
+
             var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
