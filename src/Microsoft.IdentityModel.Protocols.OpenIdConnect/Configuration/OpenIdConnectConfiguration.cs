@@ -519,6 +519,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets a bool that determines if the 'SigningKeys' property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>This method always returns false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeSigningKeys()
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Gets a bool that determines if the 'scopes_supported' (ScopesSupported) property should be serialized.
         /// This is used by Json.NET in order to conditionally serialize properties.
         /// </summary>
