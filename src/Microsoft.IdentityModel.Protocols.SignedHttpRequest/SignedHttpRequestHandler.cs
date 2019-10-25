@@ -444,8 +444,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     else if (signedHttpRequestSigningKey is AsymmetricSecurityKey asymmetricSecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23036, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
-
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23033, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
+                    
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
                     payload.Add(SignedHttpRequestClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));

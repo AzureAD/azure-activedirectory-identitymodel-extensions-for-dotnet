@@ -68,9 +68,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23030 = "IDX23030: A collection of resolved PoP keys is null or empty. Unable to validate a signed http request signature without a PoP key.";
         public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
         public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null.";
-        public const string IDX23033 = "IDX23033: Cannot create a JSON representation of an asymmetric public key, '{0}' is null or empty.";
-        public const string IDX23034 = "IDX23034: Cannot create a JSON representation of an asymmetric public key, '{0}' must be one of the following: '{1}'.";
-        public const string IDX23035 = "IDX23035: Resulting 'jwk' claim contains private key information. JsonWebKey: '{0}'.";
-        public const string IDX23036 = "IDX23036: SigningCredentials object have a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
+        public const string IDX23033 = "IDX23033: SigningCredentials object have a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
     }
 }

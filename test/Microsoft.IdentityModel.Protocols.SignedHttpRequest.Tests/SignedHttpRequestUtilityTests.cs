@@ -122,8 +122,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var rsaKey = KeyingMaterial.DefaultX509Key_2048.PrivateKey as RSA;
                 var rsaParams = rsaKey.ExportParameters(true);
-                var jsonWebKeyP256_AdditionalData = KeyingMaterial.JsonWebKeyP256;
-                jsonWebKeyP256_AdditionalData.AdditionalData.Add("key1", "value1");
+                var jsonWebKeyP256_NoKid = KeyingMaterial.JsonWebKeyP256;
+                jsonWebKeyP256_NoKid.Kid = string.Empty;
+                var jsonWebKeyP256_NoX = KeyingMaterial.JsonWebKeyP256;
+                jsonWebKeyP256_NoX.X = string.Empty;
 
                 return new TheoryData<SignedHttpRequestUtilityTheoryData>
                 {
@@ -137,8 +139,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new SignedHttpRequestUtilityTheoryData
                     {
                         JsonWebKey = KeyingMaterial.JsonWebKeySymmetric128,
-                        ExpectedException = ExpectedException.ArgumentException("IDX23034"),
+                        ExpectedException = ExpectedException.ArgumentException("IDX10707"),
                         TestId = "InvalidKty",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
+                        ExpectedException  = ExpectedException.ArgumentException("IDX10709"),
+                        TestId = "InvalidRsaNoExponent",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        JsonWebKey =jsonWebKeyP256_NoX,
+                        ExpectedException  = ExpectedException.ArgumentException("IDX10708"),
+                        TestId = "InvalidEcNoX",
                     },
                     new SignedHttpRequestUtilityTheoryData
                     {
@@ -157,31 +171,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new SignedHttpRequestUtilityTheoryData
                     {
-                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_Public,
-                        TestId = "ValidNoPrivateInfo4",
-                    },
-                    new SignedHttpRequestUtilityTheoryData
-                    {
-                        JsonWebKey = jsonWebKeyP256_AdditionalData,
-                        ExpectedJwkClaim = $@"{{""jwk"":{{""crv"":""P-256"",""kid"":""JsonWebKeyP256"",""kty"":""EC"",""x"":""{KeyingMaterial.P256_X}"",""y"":""{KeyingMaterial.P256_Y}"",""key1"":""value1""}}}}",
-                        TestId = "ValidEC256VAdditionalData",
-                    },
-                    new SignedHttpRequestUtilityTheoryData
-                    {
                         JsonWebKey = KeyingMaterial.JsonWebKeyP256,
-                        ExpectedJwkClaim = $@"{{""jwk"":{{""crv"":""P-256"",""kid"":""JsonWebKeyP256"",""kty"":""EC"",""x"":""{KeyingMaterial.P256_X}"",""y"":""{KeyingMaterial.P256_Y}""}}}}",
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""kid"":""JsonWebKeyP256"",""crv"":""P-256"",""kty"":""EC"",""x"":""{KeyingMaterial.P256_X}"",""y"":""{KeyingMaterial.P256_Y}""}}}}",
                         TestId = "ValidEC256",
                     },
                     new SignedHttpRequestUtilityTheoryData
                     {
-                        JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048,
-                        ExpectedJwkClaim = $@"{{""jwk"":{{""kid"":""{KeyingMaterial.DefaultCert_2048.Thumbprint}"",""kty"":""RSA"",""x5c"":[""{Convert.ToBase64String(KeyingMaterial.DefaultCert_2048.RawData)}""],""x5t"":""{Base64UrlEncoder.Encode(KeyingMaterial.DefaultCert_2048.GetCertHash())}""}}}}",
-                        TestId = "ValidX509",
-                    },
-                    new SignedHttpRequestUtilityTheoryData
-                    {
                         JsonWebKey = KeyingMaterial.JsonWebKeyX509_2048_As_RSA,
-                        ExpectedJwkClaim = $@"{{""jwk"":{{""e"":""{Base64UrlEncoder.Encode(rsaParams.Exponent)}"",""kid"":""{KeyingMaterial.DefaultCert_2048.Thumbprint}"",""kty"":""RSA"",""n"":""{Base64UrlEncoder.Encode(rsaParams.Modulus)}""}}}}",
+                        ExpectedJwkClaim = $@"{{""jwk"":{{""kid"":""{KeyingMaterial.DefaultCert_2048.Thumbprint}"",""e"":""{Base64UrlEncoder.Encode(rsaParams.Exponent)}"",""kty"":""RSA"",""n"":""{Base64UrlEncoder.Encode(rsaParams.Modulus)}""}}}}",
                         TestId = "ValidRsa",
                     },
                 };

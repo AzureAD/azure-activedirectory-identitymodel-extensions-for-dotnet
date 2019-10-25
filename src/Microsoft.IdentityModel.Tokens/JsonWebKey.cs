@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -394,6 +395,58 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwt));
             }
+        }
+
+        /// <summary>
+        /// Creates a JsonWebKey representation of an asymmetric public key.
+        /// </summary>
+        /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.2</remarks>
+        internal string RepresentAsAsymmetricPublicJwk()
+        {
+            JObject jwk = new JObject();
+
+            if (!string.IsNullOrEmpty(Kid))
+                jwk.Add(JsonWebKeyParameterNames.Kid, Kid);
+
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+                PopulateWithPublicEcParams(jwk);
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+                PopulateWithPublicRsaParams(jwk);
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, nameof(Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA), nameof(Kty))));
+
+            return jwk.ToString(Formatting.None);
+        }
+
+        private void PopulateWithPublicEcParams(JObject jwk)
+        {
+            if (string.IsNullOrEmpty(Crv))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Crv)), nameof(Crv)));
+
+            if (string.IsNullOrEmpty(X))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(X)), nameof(X)));
+
+            if (string.IsNullOrEmpty(Y))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Y)), nameof(Y)));
+
+            jwk.Add(JsonWebKeyParameterNames.Crv, Crv);
+            jwk.Add(JsonWebKeyParameterNames.Kty, Kty);
+            jwk.Add(JsonWebKeyParameterNames.X, X);
+            jwk.Add(JsonWebKeyParameterNames.Y, Y);
+        }
+
+        private void PopulateWithPublicRsaParams(JObject jwk)
+        {
+            if (string.IsNullOrEmpty(E))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(E)), nameof(E)));
+
+            if (string.IsNullOrEmpty(N))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(N)), nameof(N)));
+
+            jwk.Add(JsonWebKeyParameterNames.E, E);
+            jwk.Add(JsonWebKeyParameterNames.Kty, Kty);
+            jwk.Add(JsonWebKeyParameterNames.N, N);
         }
 
         /// <summary>
