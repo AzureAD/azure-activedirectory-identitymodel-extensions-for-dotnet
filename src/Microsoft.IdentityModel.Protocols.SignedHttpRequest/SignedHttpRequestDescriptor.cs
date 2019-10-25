@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public CallContext CallContext { get; }
 
         /// <summary>
-        /// Gets or sets a "cnf" claim value.
+        /// Gets or sets a "cnf" claim value as a JSON string.
         /// </summary>
         /// <remarks>
         /// If <see cref="SignedHttpRequestCreationParameters.CreateCnf"/> flag is set to <c>true</c>, <see cref="CnfClaimValue"/> can be used 

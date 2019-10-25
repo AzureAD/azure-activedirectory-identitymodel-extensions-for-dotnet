@@ -56,7 +56,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationParameters() { CreateM = false, CreateP = false, CreateU = false });
             var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
 
-
             var tvp = new TokenValidationParameters()
             {
                 ValidateAudience = false,
@@ -113,13 +112,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaim = JwtHeaderParameterNames.Typ,
                         ExpectedClaimValue = SignedHttpRequestConstants.TokenType,
                         TestId = "ExpectedTokenType",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        ExpectedClaim = JwtHeaderParameterNames.Kid,
-                        ExpectedClaimValue =  SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
-                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
-                        TestId = "ExpectedKid",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
