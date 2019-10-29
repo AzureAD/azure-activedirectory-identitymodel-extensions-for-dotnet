@@ -153,6 +153,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestCreationParameters = creationParameters,
                         SignedHttpRequestValidationParameters = validationParameters,
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkThumprint, false),
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        TestId = "ValidJwkRsaThumbprint",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = SignedHttpRequestUtilities.ToHttpRequestDataAsync(httpRequestMessage).ConfigureAwait(false).GetAwaiter().GetResult(),
                         AccessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,

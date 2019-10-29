@@ -44,8 +44,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public static class SignedHttpRequestTestUtils
     {
-        // Default access token. Created using AcessTokenPayload (with CnfJwk) and SignedHttpRequestTestUtils.DefaultSigningCredentials
-        internal static string DefaultEncodedAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJSU0EiLCJuIjoiNitGckZrdC9UQnlRL0w1ZDdvcis5UFZBb3dwc3d4VWUzZEplWUZUWTBMZ3E3ektJNU9RNVJuU3JJMFQ5eXJmblJ6RTlvT2RkNHptVmo5dHhWTEkreXlTdmluQXUzeVFEUW91MkdhNDJNTC8rSzRKcmQ1Y2xNVVBSR01iWGRWNVJsOXp6QjBzMkpvWkplZHVhNWR3b1F3MEdrUzVaOFlBWEJFelVMcnVwMDZmbkI1bjZ4NXIyeTFDLzhFYnA1Y3lFNEJqczdXNjhyVWx5SWx4MWx6WXZha3hTbmhVeFNzang3dS9tSWR5d3lHZmdpVDN0dzBGc1d2a2kvS1l1ckFQUjFCU01YaEN6elpUa01XS0U4SWFMa2hhdXc1TWR4b2p4eUJWdU5ZK0ovZWxxK0hnSi9kWks2Zzd2TU52WHoyL3ZUK1N5a0lrendpRDllU0k5VVdmc2p3PT0iLCJlIjoiQVFBQiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCJ9fX0.DqQ3L67jrUqPK9hNPAM7vnuA-Ix4Y_7pm9PiApq8xGBOOrPceMz8S7-o0N00XJzugK7mSkWryRN-MbJgyVvpY9Y1usH0dLZaz_1m0KOL3l6E0sXpbiSnQgYOXmg594xDj3Ve9iuN9BnHHtjhN0ilak6N-X85qJxI4oeVNqhdjypYoVQG1J-gb3i4dfNa34cdO8M5Nj_YZIzxzA48d_ykHMwAnnaYanfTzs5N3PTkPZcoawD50r9xdtFJmvJlR7R2PeoVa8UcxwV8-AslTwoTec_NArPXuIwrJ-D7w3Sk8tIuCaBz_booD74I1D0771IIvSEEBspFhvX07JDfw9eWFQ";
+        // Default access token. Created using AcessTokenPayload (with DefaultCnfJwkCnfJwk) and SignedHttpRequestTestUtils.DefaultSigningCredentials
+        // new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwk, false)); 
+        internal static string DefaultEncodedAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJSU0EiLCJuIjoiNi1GckZrdF9UQnlRX0w1ZDdvci05UFZBb3dwc3d4VWUzZEplWUZUWTBMZ3E3ektJNU9RNVJuU3JJMFQ5eXJmblJ6RTlvT2RkNHptVmo5dHhWTEkteXlTdmluQXUzeVFEUW91MkdhNDJNTF8tSzRKcmQ1Y2xNVVBSR01iWGRWNVJsOXp6QjBzMkpvWkplZHVhNWR3b1F3MEdrUzVaOFlBWEJFelVMcnVwMDZmbkI1bjZ4NXIyeTFDXzhFYnA1Y3lFNEJqczdXNjhyVWx5SWx4MWx6WXZha3hTbmhVeFNzang3dV9tSWR5d3lHZmdpVDN0dzBGc1d2a2lfS1l1ckFQUjFCU01YaEN6elpUa01XS0U4SWFMa2hhdXc1TWR4b2p4eUJWdU5ZLUpfZWxxLUhnSl9kWks2Zzd2TU52WHoyX3ZULVN5a0lrendpRDllU0k5VVdmc2p3IiwiZSI6IkFRQUIiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgifX19.aPR__XV6yb6soNrTMDi9VoxQgGZTCuojBGy49S-qvzQyaAYuPtl52htegtjqozQUrIuTBLDq-YUZRa2xPs5Y1dL1SWjGUu0wJadyDQzA6BUGL-67TQB-Mnwi2JIEHXYS1NWu3k09aOWhqQE-ovGgZGz7BjX4yRRAu70C09r0YG3ahaGkWHSfFJLeKG59BOmDuBlUUxe5Q8gJQR09iFY7knTPJLL3LWfM87W3chresTwNZV9eBFCRFAwAUMmPom4jee4TD7FmUuKLmTdKNdkw-Cmgj2Vf7McSK3aZtBgpu3va5O0vfD7_IBKA0SQJL3iBH4UT2Bmr5tzvyP7tix5W1A";
 
         internal static SigningCredentials DefaultSigningCredentials => KeyingMaterial.RsaSigningCreds_2048;
 
@@ -74,8 +75,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         internal static JObject DefaultJwk => new JObject
         {
             { "kty", "RSA" },
-            { "n",  KeyingMaterial.RsaParameters_2048.Modulus},
-            { "e", KeyingMaterial.RsaParameters_2048.Exponent },
+            { "n",   Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters_2048.Modulus)},
+            { "e",  Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters_2048.Exponent) },
             { JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 },
             { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
         };
@@ -92,6 +93,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwk },
         };
+
+        internal static JObject DefaultCnfJwkThumprint => new JObject
+        {
+            { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(new JsonWebKey(DefaultJwk.ToString(Formatting.None)).ComputeJwkThumbprint()) },
+        };
+
         internal static JObject DefaultCnfJwkEcdsa => new JObject
         {
             { JwtHeaderParameterNames.Jwk, DefaultJwkEcdsa },
