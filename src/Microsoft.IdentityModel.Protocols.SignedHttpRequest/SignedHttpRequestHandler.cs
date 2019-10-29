@@ -1210,7 +1210,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Resolves a PoP <see cref="SecurityKey"/> using a key identifier of a PoP key. 
         /// </summary>
-        /// <param name="kid"></param>
+        /// <param name="kid">A <see cref="ConfirmationClaimTypes.Kid"/> claim value.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
         /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -1223,10 +1223,41 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         {
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync != null)
                 return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            else if (signedHttpRequest is JsonWebToken jwtSignedHttpRequest && jwtSignedHttpRequest.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject signedHttpRequestCnf) && signedHttpRequestCnf != null)
+                return await ResolvePopKeyFromCnfReferenceAsync(kid, signedHttpRequestCnf.ToString(Formatting.None), signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else
-            {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23023)));
-            }
+        }
+
+        /// <summary>
+        /// Resolves a PoP key from a "cnf" reference and validates the reference.
+        /// </summary>
+        /// <param name="cnfReference">A reference to the root "cnf" claim, as base64url-encoded JWK thumbprint.</param>
+        /// <param name="confirmationClaim">A confirmation ("cnf") claim as a string.</param>
+        /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
+        /// <remarks><paramref name="cnfReference"/> MUST match the base64url-encoded thumbprint of a JWK resolved from the <paramref name="confirmationClaim"/>.</remarks>
+        protected virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReference, string confirmationClaim, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        {
+            // resolved PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion
+            var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+
+            JsonWebKey jwtPopKey;
+            if (popKey is JsonWebKey)
+                jwtPopKey = (JsonWebKey)popKey;
+            else
+                jwtPopKey = JsonWebKeyConverter.ConvertFromSecurityKey(popKey);
+
+            var jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwtPopKey.ComputeJwkThumbprint());
+
+            // validate reference
+            if (!string.Equals(cnfReference, jwkPopKeyThumprint, StringComparison.Ordinal))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23034, cnfReference, jwkPopKeyThumprint, confirmationClaim)));
+
+            return jwtPopKey;
         }
         #endregion
 
