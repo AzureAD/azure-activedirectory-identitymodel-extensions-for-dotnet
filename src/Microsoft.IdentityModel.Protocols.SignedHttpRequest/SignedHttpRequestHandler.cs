@@ -420,7 +420,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// If <see cref="SignedHttpRequestDescriptor.CnfClaimValue"/> is not null or empty, its value will be used as a "cnf" claim value.
-        /// Otherwise, a "cnf" claim value will be derived from the <see cref="SigningCredentials"/> member of <paramref name="signedHttpRequestDescriptor"/>.
+        /// Otherwise, a "cnf" claim value will be derived from the <see cref="SigningCredentials"/>.<see cref="SecurityKey"/> member of <paramref name="signedHttpRequestDescriptor"/>.
         /// </remarks>
         protected virtual void AddCnfClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {

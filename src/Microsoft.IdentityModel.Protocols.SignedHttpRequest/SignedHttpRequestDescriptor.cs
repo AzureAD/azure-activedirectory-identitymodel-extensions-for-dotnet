@@ -115,14 +115,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         public CallContext CallContext { get; }
 
-        /// <summary>
-        /// Gets or sets a "cnf" claim value as a JSON string.
-        /// </summary>
+        ///<summary> Gets or sets a "cnf" claim value as a JSON string.</summary>
         /// <remarks>
         /// If <see cref="SignedHttpRequestCreationParameters.CreateCnf"/> flag is set to <c>true</c>, <see cref="CnfClaimValue"/> can be used 
         /// as a "cnf" claim value when creating a SignedHttpRequest payload.
         /// If <see cref="SignedHttpRequestCreationParameters.CreateCnf"/> flag is set to <c>true</c>, and <see cref="CnfClaimValue"/> is null or empty,
-        /// a "cnf" claim value will be derived from a <see cref="SecurityKey"/>
+        /// a "cnf" claim value will be derived from a <see cref="SigningCredentials"/>.<see cref="SecurityKey"/>.
         /// </remarks>
         public string CnfClaimValue { get; set; }
 
