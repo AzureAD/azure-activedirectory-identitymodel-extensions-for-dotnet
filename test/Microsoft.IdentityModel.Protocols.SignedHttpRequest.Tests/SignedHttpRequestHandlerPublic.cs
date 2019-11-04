@@ -110,6 +110,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             AddNonceClaim(payload, signedHttpRequestDescriptor);
         }
 
+        public void AddCnfClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        {
+            AddCnfClaim(payload, signedHttpRequestDescriptor);
+        }
+
         public async Task<SecurityToken> ValidateSignedHttpRequestPublicAsync(SecurityToken signedHttpRequest, IEnumerable<SecurityKey> popKeys, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             return await ValidateSignedHttpRequestAsync(signedHttpRequest, popKeys, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);

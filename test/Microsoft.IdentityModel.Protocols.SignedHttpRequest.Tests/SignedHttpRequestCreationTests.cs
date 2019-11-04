@@ -827,6 +827,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullUri",
                     },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Q,
+                        ExpectedClaimValue = $"[[\"queryParam1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("queryParam1=value1")}\"]",
+                        HttpRequestUri = new Uri("https://www.contoso.com/path1?queryParam1=value1"),
+                        Payload = new Dictionary<string, object>() { {SignedHttpRequestClaimTypes.Q, null } },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008: Exception caught while creating the 'q' claim.", typeof(ArgumentException)),
+                        TestId = "PayloadAlreadyHasQClaim"
+                    },
                 };
             }
         }
@@ -1037,6 +1046,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullPayload",
                     },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.H,
+                        ExpectedClaimValue = $"[[\"headername1\"],\"{SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash("headername1: headerValue1")}\"]",
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
+                        {
+                            { "headerName1" , new List<string> { "headerValue1" } }
+                        },
+                        Payload = new Dictionary<string, object>() { {SignedHttpRequestClaimTypes.H, null } },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008: Exception caught while creating the 'h' claim.", typeof(ArgumentException)),
+                        TestId = "PayloadAlreadyHasHClaim"
+                    },
                 };
             }
         }
@@ -1102,6 +1123,138 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         Payload = null,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullPayload",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.B,
+                        ExpectedClaimValue = SignedHttpRequestTestUtils.CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes("abcd")),
+                        HttpRequestBody = Encoding.UTF8.GetBytes("abcd"),
+                        Payload = new Dictionary<string, object>() { {SignedHttpRequestClaimTypes.B, null } },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008: Exception caught while creating the 'b' claim.", typeof(ArgumentException)),
+                        TestId = "PayloadAlreadyHasBClaim"
+                    },
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(CreateCnfClaimTheoryData))]
+        public void CreateCnfClaim(CreateSignedHttpRequestTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateCnfClaim", theoryData);
+            try
+            {
+                var handler = new SignedHttpRequestHandlerPublic();
+                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
+
+                handler.AddCnfClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
+                var payload = JObject.Parse(handler.ConvertToJsonPublic(theoryData.Payload));
+
+                if (!payload.ContainsKey(theoryData.ExpectedClaim))
+                    context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
+
+                if (!IdentityComparer.AreStringsEqual(payload[theoryData.ExpectedClaim].ToString(Formatting.None), theoryData.ExpectedClaimValue, context))
+                    context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload[theoryData.ExpectedClaim].ToString(Formatting.None)}', but expected value was '{theoryData.ExpectedClaimValue}'");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateSignedHttpRequestTheoryData> CreateCnfClaimTheoryData
+        {
+            get
+            {
+                var testCnf = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{ConfirmationClaimTypes.Kid}"":""test""}}}}";
+                var rsaJwkFromX509Key = JsonWebKeyConverter.ConvertFromX509SecurityKey(KeyingMaterial.X509SecurityKey1, true);
+                return new TheoryData<CreateSignedHttpRequestTheoryData>
+                {
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        First = true,
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        Payload = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullPayload",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        Cnf = testCnf,
+                        ExpectedClaimValue = testCnf,
+                        TestId = "ValidManualCnfClaim",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeyRsa_1024, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyRsa_1024.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{KeyingMaterial.JsonWebKeyRsa_1024.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{KeyingMaterial.JsonWebKeyRsa_1024.N}""}}}}",
+                        TestId = "ValidJwkRsaKey",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyP256.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.Crv}"":""{KeyingMaterial.JsonWebKeyP256.Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{KeyingMaterial.JsonWebKeyP256.X}"",""{JsonWebKeyParameterNames.Y}"":""{KeyingMaterial.JsonWebKeyP256.Y}""}}}}",
+                        TestId = "ValidJwkECKey",
+                    },
+                    
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.SymmetricSecurityKey2_1024, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Sha256),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008", typeof(SignedHttpRequestCreationException)),
+                        TestId = "InvalidJwkSymmetricKey",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeySymmetric128, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Sha256),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008", typeof(ArgumentException)),
+                        TestId = "InvalidJwkSymmetricKey",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKey1, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromRSASecurityKey(KeyingMaterial.RsaSecurityKey1).ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters1.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters1.Modulus)}""}}}}",
+                        TestId = "ValidRsaKey",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKey1, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(rsaJwkFromX509Key.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{rsaJwkFromX509Key.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{rsaJwkFromX509Key.N}""}}}}",
+                        TestId = "ValidX509Key",
+                    },
+#if NET_CORE
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromECDsaSecurityKey(KeyingMaterial.Ecdsa256Key).ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.Instance.GetCrvParameterValue(KeyingMaterial.Ecdsa256Parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters.Q.Y)}""}}}}",
+                        TestId = "ValidEcdsaKey",
+                    },
+#else
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, SecurityAlgorithms.Sha256),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX10674", typeof(NotSupportedException)),
+                        TestId = "InvalidEcdsaKeyDesktop",
+                    },
+#endif
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
+                        Cnf = testCnf,
+                        Payload = new Dictionary<string, object>() { {SignedHttpRequestClaimTypes.Cnf, null } },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestCreationException), "IDX23008: Exception caught while creating the 'cnf' claim.", typeof(ArgumentException)),
+                        TestId = "InvalidPayloadAlreadyHasCnfClaim"
                     },
                 };
             }
@@ -1267,7 +1420,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             else
                 callContext.PropertyBag.Add("testId", TestId);
 
-            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters, callContext);
+            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters, callContext)
+            {
+                CnfClaimValue = Cnf
+            };
         }
 
         public CallContext CallContext { get; set; } = CallContext.Default;
@@ -1307,6 +1463,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         public string HeaderString { get; set; }
 
         public string PayloadString { get; set; }
+
+        public string Cnf { get; set; }
     }
 }
 
