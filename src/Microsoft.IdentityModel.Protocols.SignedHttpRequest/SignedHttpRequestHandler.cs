@@ -1232,15 +1232,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Resolves a PoP key from a "cnf" reference and validates the reference.
         /// </summary>
-        /// <param name="cnfReference">A reference to the root "cnf" claim, as base64url-encoded JWK thumbprint.</param>
+        /// <param name="cnfReferenceId">A reference to the root "cnf" claim, as base64url-encoded JWK thumbprint.</param>
         /// <param name="confirmationClaim">A confirmation ("cnf") claim as a string.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
         /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        /// <remarks><paramref name="cnfReference"/> MUST match the base64url-encoded thumbprint of a JWK resolved from the <paramref name="confirmationClaim"/>.</remarks>
-        protected virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReference, string confirmationClaim, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        /// <remarks><paramref name="cnfReferenceId"/> MUST match the base64url-encoded thumbprint of a JWK resolved from the <paramref name="confirmationClaim"/>.</remarks>
+        protected virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReferenceId, string confirmationClaim, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             // resolve PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion.
             var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
@@ -1254,8 +1254,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwtPopKey.ComputeJwkThumbprint());
 
             // validate reference
-            if (!string.Equals(cnfReference, jwkPopKeyThumprint, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23034, cnfReference, jwkPopKeyThumprint, confirmationClaim)));
+            if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23034, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
             return jwtPopKey;
         }
@@ -1340,7 +1340,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 foreach (var repeatedQueryParam in repeatedQueryParams)
                 {
                     if (sanitizedQueryParams.ContainsKey(repeatedQueryParam))
-                    sanitizedQueryParams.Remove(repeatedQueryParam);
+                        sanitizedQueryParams.Remove(repeatedQueryParam);
                 }
             }
 
