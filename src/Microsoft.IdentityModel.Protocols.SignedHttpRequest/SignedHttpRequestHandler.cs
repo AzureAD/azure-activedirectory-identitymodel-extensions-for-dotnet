@@ -1242,7 +1242,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <remarks><paramref name="cnfReference"/> MUST match the base64url-encoded thumbprint of a JWK resolved from the <paramref name="confirmationClaim"/>.</remarks>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReference, string confirmationClaim, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            // resolved PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion
+            // resolve PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion.
             var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             JsonWebKey jwtPopKey;
