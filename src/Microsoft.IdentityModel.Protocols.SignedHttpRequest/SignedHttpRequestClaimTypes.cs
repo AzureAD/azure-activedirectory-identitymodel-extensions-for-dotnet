@@ -77,5 +77,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         ///  https://tools.ietf.org/html/rfc7800#section-6.1.1
         /// </summary>
         public const string Cnf = "cnf";
+
+        /// <summary>
+        /// Default "nonce" claim.
+        /// </summary>
+        public const string Nonce = "nonce";
     }
 }

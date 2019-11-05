@@ -1202,7 +1202,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyP256.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.Crv}"":""{KeyingMaterial.JsonWebKeyP256.Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{KeyingMaterial.JsonWebKeyP256.X}"",""{JsonWebKeyParameterNames.Y}"":""{KeyingMaterial.JsonWebKeyP256.Y}""}}}}",
                         TestId = "ValidJwkECKey",
                     },
-                    
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = SignedHttpRequestClaimTypes.Cnf,
@@ -1300,7 +1299,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new CreateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        ExpectedClaim = ConfirmationClaimTypes.Nonce,
+                        ExpectedClaim = SignedHttpRequestClaimTypes.Nonce,
                         TestId = "ValidDefaultNonce",
                     },
                     new CreateSignedHttpRequestTheoryData

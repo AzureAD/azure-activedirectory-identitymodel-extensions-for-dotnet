@@ -57,10 +57,5 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// https://tools.ietf.org/html/rfc7800#section-6.2.2        
         /// </summary>
         public const string Kid = "kid";
-
-        /// <summary>
-        /// https://tools.ietf.org/html/rfc7800#section-3.6
-        /// </summary>
-        public const string Nonce = "nonce";
     }
 }

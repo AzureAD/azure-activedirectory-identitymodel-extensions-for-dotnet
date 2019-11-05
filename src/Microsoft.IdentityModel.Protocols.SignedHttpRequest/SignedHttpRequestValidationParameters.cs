@@ -77,8 +77,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
-    /// <param name="nonce">A value of the 'nonce' claim. Value will be <see cref="string.Empty"/> if 'nonce' claim is not found.</param>
-    /// <param name="signedHttpRequest">SignedHttpRequest.</param>
+    /// <param name="nonce">A value of the 'nonce' claim. Its value might be <see cref="string.Empty"/> if 'nonce' claim is not found.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>

@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { SignedHttpRequestClaimTypes.Q, "[[\"b\",\"a\",\"c\"],\"u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY\"]" },
             { SignedHttpRequestClaimTypes.H, "[[\"content-type\",\"etag\"],\"P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs\"]" },
             { SignedHttpRequestClaimTypes.B, "ZK-O2gzHjpsCGped6sUL2EM20Z9T-uF07LCGMA88UFw" },
-            { ConfirmationClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" }
+            { SignedHttpRequestClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" }
         };
 
         internal static string CreateAt(JObject cnf, bool encrypt, bool addCnf = true)
