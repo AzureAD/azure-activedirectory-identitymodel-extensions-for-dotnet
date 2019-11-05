@@ -776,7 +776,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKeys = await handler.ResolvePopKeyFromKeyIdentifierPublicAsync(theoryData.Kid, null, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKeys = await handler.ResolvePopKeyFromKeyIdentifierPublicAsync(theoryData.Kid, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -821,6 +821,39 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             }
                         },
                         TestId = "ValidTest",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Cnf, SignedHttpRequestTestUtils.DefaultCnfJwkThumprint)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23023"),
+                        Kid = "irrelevant",
+                        TestId = "InvalidTestCheckRecursion",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None)),
+                        Kid = "incorrect_cnf_reference",
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23034"),
+                        TestId = "InvalidCnfReference",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None)),
+                        Kid = Base64UrlEncoder.Encode(new JsonWebKey(SignedHttpRequestTestUtils.DefaultJwk.ToString(Formatting.None)).ComputeJwkThumbprint()),
+                        TestId = "ValidCnfReference",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None)),
+                        Kid = Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromRSASecurityKey(KeyingMaterial.RsaSecurityKey_2048).ComputeJwkThumbprint()),
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockResolvePopKeyFromCnfClaimAsync_returnRsa",  KeyingMaterial.RsaSecurityKey_2048 }
+                            }
+                        },
+                        TestId = "ValidCnfReferenceRsaKey",
                     },
                 };
             }

@@ -44,9 +44,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public static class SignedHttpRequestTestUtils
     {
-        // Default access token. Created using AcessTokenPayload (with DefaultCnfJwkCnfJwk) and SignedHttpRequestTestUtils.DefaultSigningCredentials
+        // Default access token. Created using AcessTokenPayload (with DefaultCnfJwk) and SignedHttpRequestTestUtils.DefaultSigningCredentials
         // new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwk, false)); 
         internal static string DefaultEncodedAccessToken = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJSU0EiLCJuIjoiNi1GckZrdF9UQnlRX0w1ZDdvci05UFZBb3dwc3d4VWUzZEplWUZUWTBMZ3E3ektJNU9RNVJuU3JJMFQ5eXJmblJ6RTlvT2RkNHptVmo5dHhWTEkteXlTdmluQXUzeVFEUW91MkdhNDJNTF8tSzRKcmQ1Y2xNVVBSR01iWGRWNVJsOXp6QjBzMkpvWkplZHVhNWR3b1F3MEdrUzVaOFlBWEJFelVMcnVwMDZmbkI1bjZ4NXIyeTFDXzhFYnA1Y3lFNEJqczdXNjhyVWx5SWx4MWx6WXZha3hTbmhVeFNzang3dV9tSWR5d3lHZmdpVDN0dzBGc1d2a2lfS1l1ckFQUjFCU01YaEN6elpUa01XS0U4SWFMa2hhdXc1TWR4b2p4eUJWdU5ZLUpfZWxxLUhnSl9kWks2Zzd2TU52WHoyX3ZULVN5a0lrendpRDllU0k5VVdmc2p3IiwiZSI6IkFRQUIiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgifX19.aPR__XV6yb6soNrTMDi9VoxQgGZTCuojBGy49S-qvzQyaAYuPtl52htegtjqozQUrIuTBLDq-YUZRa2xPs5Y1dL1SWjGUu0wJadyDQzA6BUGL-67TQB-Mnwi2JIEHXYS1NWu3k09aOWhqQE-ovGgZGz7BjX4yRRAu70C09r0YG3ahaGkWHSfFJLeKG59BOmDuBlUUxe5Q8gJQR09iFY7knTPJLL3LWfM87W3chresTwNZV9eBFCRFAwAUMmPom4jee4TD7FmUuKLmTdKNdkw-Cmgj2Vf7McSK3aZtBgpu3va5O0vfD7_IBKA0SQJL3iBH4UT2Bmr5tzvyP7tix5W1A";
+
+        // Default access token. Created using AcessTokenPayload (with DefaultCnfJwkThumprint) and SignedHttpRequestTestUtils.DefaultSigningCredentials
+        // new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkThumprint, false)); 
+        internal static string DefaultEncodedAccessTokenWithCnfThumprint = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7ImtpZCI6Il9PM3pCTG4yaXVJV1gwNmdOUnBQNWNEc3psRFAyZlp6YklaN1dMTi1WV00ifX0.nZ0SsD6rIO3agzCT9KKBhgyb9d3tOABu6J-TzaLZ32UmJT53SbjGi_njXgjyWH1BsRPrqGaAUPIXOvRQh446tSgCDmAXhKJqp_yD-7-u6xHCco1bHSF_wXJOLA81ksKi2yXetjRibGRU-9j-lfM0UuEBN2TBRmxKzBqCImMaICCDOlm3egSaKpbowszA3z09cLyKbQiAXzCf7d00FW54eaJQJsNeowVMLi4J9YM9iF3dpoUVaF29BqAYVGrxynvlJ1j2sbtYWvwRn7PRMoS4TEtorLloTu7ihBSe8cV1NaO9H2pGQJaURbf1hu6pbP7PQ4v6lYyfrkuDC0GvzSEEEA";
 
         internal static SigningCredentials DefaultSigningCredentials => KeyingMaterial.RsaSigningCreds_2048;
 
@@ -174,7 +178,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { SignedHttpRequestClaimTypes.Q, "[[\"b\",\"a\",\"c\"],\"u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY\"]" },
             { SignedHttpRequestClaimTypes.H, "[[\"content-type\",\"etag\"],\"P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs\"]" },
             { SignedHttpRequestClaimTypes.B, "ZK-O2gzHjpsCGped6sUL2EM20Z9T-uF07LCGMA88UFw" },
-            { SignedHttpRequestClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" }
+            { SignedHttpRequestClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" },
+            { ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(JsonWebKeyConverter.ConvertFromRSASecurityKey(DefaultSigningCredentials.Key as RsaSecurityKey))) }
         };
 
         internal static string CreateAt(JObject cnf, bool encrypt, bool addCnf = true)
