@@ -147,6 +147,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
+                        ConfirmationClaim = @"{""unknown_claim"": 1}",
+                        ValidatedAccessToken = accessToken,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23014"),
+                        TestId = "UnknownCnfClaim",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
                         ConfirmationClaim = string.Empty,
                         ValidatedAccessToken = accessToken,
                         ExpectedException = ExpectedException.ArgumentNullException(),
