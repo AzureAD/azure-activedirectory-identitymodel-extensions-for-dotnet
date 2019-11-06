@@ -1222,6 +1222,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        SignedHttpRequestToken = new JsonWebToken(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload + "."),
+                        PopKeys = new List<SecurityKey>() {  validPopKey },
+                        ExpectedPopKey = validPopKey,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
+                        TestId = "InvalidUnsignedRequest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         SignedHttpRequestToken = signedHttpRequest,
                         PopKeys = new List<SecurityKey>() {  validPopKey },
                         ExpectedPopKey = validPopKey,

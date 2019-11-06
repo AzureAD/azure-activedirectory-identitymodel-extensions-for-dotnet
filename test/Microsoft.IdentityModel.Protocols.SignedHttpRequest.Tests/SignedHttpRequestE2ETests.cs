@@ -31,10 +31,12 @@ using Xunit;
 using System.Collections.Generic;
 using System.Threading;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Json;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -50,6 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var handler = new SignedHttpRequestHandler();
                 var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationParameters);
+                signedHttpRequestDescriptor.CnfClaimValue = theoryData.CnfClaimValue;
                 var signedHttpRequest = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
                 var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationParameters);
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
@@ -135,6 +138,53 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 tvpWrongIssuerSigningKey.IssuerSigningKey = KeyingMaterial.RsaSecurityKey2;
                 var ecdsaSigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256);
 
+#if NET_CORE
+                var adHocRsa = RSA.Create();
+                adHocRsa.KeySize = 2048;
+#else
+                var adHocRsa = new RSACryptoServiceProvider(2048);
+#endif
+                var adHocRsaSecurityKey = new RsaSecurityKey(adHocRsa);
+                var adHocRsaSigningCredentials = new SigningCredentials(adHocRsaSecurityKey, SecurityAlgorithms.RsaSha256);
+                var adHocRsaCnfKeyId = new JObject
+                {
+                    { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromRSASecurityKey(adHocRsaSecurityKey).ComputeJwkThumbprint()) },
+                };
+
+                var incorrectCnfClaimValue = new JObject
+                {
+                    { JwtHeaderParameterNames.Jwk, new JObject
+                        {
+                            { "kty", "RSA" },
+                            { "n",   Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters2.Modulus)}, //wrong modulus
+                            { "e",  Base64UrlEncoder.Encode(KeyingMaterial.RsaParameters_2048.Exponent) },
+                            { JwtHeaderParameterNames.Alg, SecurityAlgorithms.RsaSha256 },
+                            { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
+                        }
+                    }
+                }.ToString(Formatting.None);
+
+                var symmetricSigningCredentials = new SigningCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_1024, SecurityAlgorithms.HmacSha256);
+                var symmetricKeyCnfKeyId = new JObject
+                {
+                    { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromSecurityKey(symmetricSigningCredentials.Key as SymmetricSecurityKey).ComputeJwkThumbprint()) },
+                };
+                var symmetricKeyCnfClaimValue = new JObject
+                {
+                    { ConfirmationClaimTypes.Jwe, SignedHttpRequestTestUtils.EncryptToken($@"{{""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.Octet}"",""{JsonWebKeyParameterNames.K}"":""{Base64UrlEncoder.Encode((symmetricSigningCredentials.Key as SymmetricSecurityKey).Key)}""}}") },
+                }.ToString(Formatting.None);
+
+                var x509KeyCnfKeyId = new JObject
+                {
+                    { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(JsonWebKeyConverter.ConvertFromX509SecurityKey(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, true).ComputeJwkThumbprint()) },
+                };
+
+                var ecKeyCnfKeyId = new JObject
+                {
+                    { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyP256.ComputeJwkThumbprint()) },
+                };
+                
+
                 return new TheoryData<RoundtripSignedHttpRequestTheoryData>
                 {
                     new RoundtripSignedHttpRequestTheoryData
@@ -156,7 +206,49 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkThumprint, false),
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
-                        TestId = "ValidJwkRsaThumbprint",
+                        TestId = "ValidRsaThumbprint",
+                    },
+#if NET_CORE
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkEcdsaThumbprint, false),
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256),
+                        TestId = "ValidECThumbprint",
+                    },
+#endif
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(ecKeyCnfKeyId, false),
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256),
+                        TestId = "ValidJwkECThumbprint",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(x509KeyCnfKeyId, false),
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256),
+                        TestId = "ValidJwkX509Thumbprint",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(adHocRsaCnfKeyId, false),
+                        SigningCredentials = adHocRsaSigningCredentials,
+                        TestId = "ValidAdHocJwkRsaThumbprint",
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
@@ -176,7 +268,28 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
-                        TestId = "ValidJwe",
+                        TestId = "ValidEncryptedAt",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters  = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateTs = true,
+                            ValidateM = true,
+                            ValidateP = true,
+                            ValidateU = true,
+                            ValidateH = true,
+                            ValidateB = true,
+                            ValidateQ = true,
+                            CnfDecryptionKeys = new List<SecurityKey>() { KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key }
+                        },
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(symmetricKeyCnfKeyId, false),
+                        CnfClaimValue = symmetricKeyCnfClaimValue,
+                        SigningCredentials = symmetricSigningCredentials,
+                        TestId = "ValidJweSymmetricKeyThumbprint",
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
@@ -243,6 +356,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         IsValid = false,
                         TestId = "InvalidBadPopSigningKey",
                     },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters = validationParameters,
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwkThumprint, false),
+                        SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                        CnfClaimValue = incorrectCnfClaimValue,
+                        IsValid = false,
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23034"),
+                        TestId = "InvalidCnfReference",
+                    },
                 };
             }
         }
@@ -251,6 +377,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class RoundtripSignedHttpRequestTheoryData : TheoryDataBase
     {
         public string AccessToken { get; set; }
+
+        public string CnfClaimValue { get; set; }
 
         public SignedHttpRequestValidationParameters SignedHttpRequestValidationParameters { get; set; }
 

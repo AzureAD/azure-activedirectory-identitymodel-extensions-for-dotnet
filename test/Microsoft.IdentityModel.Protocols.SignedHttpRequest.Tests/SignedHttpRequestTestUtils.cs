@@ -108,6 +108,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { JwtHeaderParameterNames.Jwk, DefaultJwkEcdsa },
         };
 
+        internal static JObject DefaultCnfJwkEcdsaThumbprint => new JObject
+        {
+            { JwtHeaderParameterNames.Kid, Base64UrlEncoder.Encode(new JsonWebKey(DefaultJwkEcdsa.ToString(Formatting.None)).ComputeJwkThumbprint()) },
+        };
+
 #if !NET_CORE
         internal static JObject DefaultJwkEcdsa => new JObject
         {
@@ -127,8 +132,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { JsonWebKeyParameterNames.Use, "sig" },
             { JsonWebKeyParameterNames.Crv, "P-256" },
             { JwtHeaderParameterNames.Kid, KeyingMaterial.Ecdsa256Key.KeyId },
-            { JsonWebKeyParameterNames.X, KeyingMaterial.Ecdsa256Parameters_Public.Q.X },
-            { JsonWebKeyParameterNames.Y, KeyingMaterial.Ecdsa256Parameters_Public.Q.Y }
+            { JsonWebKeyParameterNames.X, Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X) },
+            { JsonWebKeyParameterNames.Y, Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.Y) }
         };
 #endif
         internal static JObject DefaultJwe => new JObject
