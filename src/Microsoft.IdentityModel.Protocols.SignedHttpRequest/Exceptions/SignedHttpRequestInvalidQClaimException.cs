@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'q' claim validation.  
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during 'q' claim validation.  
     /// </summary>
     public class SignedHttpRequestInvalidQClaimException : SignedHttpRequestValidationException
     {

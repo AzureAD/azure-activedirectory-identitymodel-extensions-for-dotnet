@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Encodes and signs a http request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestDescriptor.SigningCredentials"/>.
+        /// Encodes and signs an HTTP request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestDescriptor.SigningCredentials"/>.
         /// </summary>
         /// <param name="header">A JSON representation of an HttpRequest header.</param>
         /// <param name="payload">A JSON representation of an HttpRequest payload.</param>
@@ -964,7 +964,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Resolves a collection of PoP <see cref="SecurityKey"/>(s).
         /// </summary>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -986,7 +986,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// This method expects a "cnf" claim to be present as a claim of the <paramref name="validatedAccessToken"/> ("at").
         /// </summary>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <returns>JSON representation of the 'cnf' claim.</returns>
         protected virtual string GetCnfClaimValue(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
@@ -1012,7 +1012,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="confirmationClaim">A confirmation ("cnf") claim as a string.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -1051,7 +1051,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="jwk">An asymmetric representation of a PoP key (JSON).</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual SecurityKey ResolvePopKeyFromJwk(string jwk, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
@@ -1077,7 +1077,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="jwe">An encrypted symmetric representation of a PoP key (JSON).</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param> 
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param> 
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -1130,7 +1130,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param> 
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param> 
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -1153,7 +1153,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
         /// <param name="kid">A PoP key identifier.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param> 
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param> 
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -1181,7 +1181,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param> 
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param> 
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A collection of PoP <see cref="SecurityKey"/>.</returns>
@@ -1212,7 +1212,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="kid">A <see cref="ConfirmationClaimTypes.Kid"/> claim value.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
@@ -1235,7 +1235,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="cnfReferenceId">A reference to the root "cnf" claim, as base64url-encoded JWK thumbprint.</param>
         /// <param name="confirmationClaim">A confirmation ("cnf") claim as a string.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
-        /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+        /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>

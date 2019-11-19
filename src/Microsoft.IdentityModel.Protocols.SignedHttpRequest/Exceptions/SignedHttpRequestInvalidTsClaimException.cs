@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'ts' claim validation.  
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during 'ts' claim validation.  
     /// </summary>
     public class SignedHttpRequestInvalidTsClaimException : SignedHttpRequestValidationException
     {

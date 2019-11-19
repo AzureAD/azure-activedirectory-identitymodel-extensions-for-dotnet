@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a SignedHttpRequest handler encounters an error during a signed http request creation.
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during signed http request creation.
     /// </summary>
     public class SignedHttpRequestCreationException : Exception
     {

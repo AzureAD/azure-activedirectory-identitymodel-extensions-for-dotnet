@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when signature of a SignedHttpRequest was not valid. 
+    /// This exception is thrown when signature of a SignedHttpRequest is not valid. 
     /// </summary>
     public class SignedHttpRequestInvalidSignatureException : SignedHttpRequestValidationException
     {

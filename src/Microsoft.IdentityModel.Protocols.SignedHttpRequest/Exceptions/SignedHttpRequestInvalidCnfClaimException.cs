@@ -30,7 +30,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// This exception is thrown when a SignedHttpRequest handler encounters an error during the 'cnf' claim resolution.   
+    /// This exception is thrown when a SignedHttpRequest handler encounters an error during 'cnf' claim resolution.   
     /// </summary>
     public class SignedHttpRequestInvalidCnfClaimException : SignedHttpRequestValidationException
     {

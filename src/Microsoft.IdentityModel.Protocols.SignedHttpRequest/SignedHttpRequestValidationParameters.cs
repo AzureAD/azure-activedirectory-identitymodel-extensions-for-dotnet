@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// A delegate that will take control over PoP keys resolution, if set.
     /// </summary>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
-    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
     /// <returns>A collection of resolved <see cref="SecurityKey"/>(s).</returns>
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
     /// </summary>
     /// <param name="kid">KeyIdentifier value.</param>
-    /// <param name="validatedAccessToken">An access token ("at") that was already validated during SignedHttpRequest validation process.</param>
+    /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns></returns>
