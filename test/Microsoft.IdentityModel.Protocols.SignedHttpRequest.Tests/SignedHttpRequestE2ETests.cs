@@ -293,6 +293,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new RoundtripSignedHttpRequestTheoryData
                     {
+                        SignedHttpRequestCreationParameters = creationParameters,
+                        SignedHttpRequestValidationParameters  = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateTs = true,
+                            ValidateM = true,
+                            ValidateP = true,
+                            ValidateU = true,
+                            ValidateH = true,
+                            ValidateB = true,
+                            ValidateQ = true,
+                        },
+                        TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
+                        HttpRequestData = httpRequestData,
+                        AccessToken = SignedHttpRequestTestUtils.CreateAt(x509KeyCnfKeyId, false),
+                        CnfClaimValue = new JObject
+                        {
+                            { ConfirmationClaimTypes.Jwk, $@"{{""{JsonWebKeyParameterNames.Kid}"":""{KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.KeyId}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.X5c}"":[""{Convert.ToBase64String(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.Certificate.RawData)}""]}}" },
+                        }.ToString(Formatting.None),
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256),
+                        TestId = "ValidX5cThumbprint",
+                    },
+                    new RoundtripSignedHttpRequestTheoryData
+                    {
                         SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
                         {
                             CreateCnf = false,

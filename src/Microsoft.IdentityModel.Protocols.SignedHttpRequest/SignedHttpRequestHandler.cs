@@ -1245,19 +1245,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // resolve PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion.
             var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
-            JsonWebKey jwtPopKey;
+            JsonWebKey jwkPopKey;
             if (popKey is JsonWebKey)
-                jwtPopKey = (JsonWebKey)popKey;
+                jwkPopKey = (JsonWebKey)popKey;
             else
-                jwtPopKey = JsonWebKeyConverter.ConvertFromSecurityKey(popKey);
+                jwkPopKey = JsonWebKeyConverter.ConvertFromSecurityKey(popKey);
 
-            var jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwtPopKey.ComputeJwkThumbprint());
+            string jwkPopKeyThumprint;
+            // if the cnf key is an X509SecurityKey ('x5c'), JWK thumbprint has to be calculated on its underlying RSA key.
+            if (jwkPopKey.ConvertedSecurityKey != null && jwkPopKey.ConvertedSecurityKey is X509SecurityKey)
+            {
+                var rsaJwkPopKey = JsonWebKeyConverter.ConvertFromX509SecurityKey((X509SecurityKey)jwkPopKey.ConvertedSecurityKey, true);
+                jwkPopKeyThumprint = Base64UrlEncoder.Encode(rsaJwkPopKey.ComputeJwkThumbprint());
+            }
+            else
+            {
+                jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwkPopKey.ComputeJwkThumbprint());
+            }
 
             // validate reference
             if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23034, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
-            return jwtPopKey;
+            return jwkPopKey;
         }
         #endregion
 
