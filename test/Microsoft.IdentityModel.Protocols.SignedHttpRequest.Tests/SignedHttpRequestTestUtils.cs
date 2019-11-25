@@ -187,12 +187,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(JsonWebKeyConverter.ConvertFromRSASecurityKey(DefaultSigningCredentials.Key as RsaSecurityKey))) }
         };
 
-        internal static string CreateAt(JObject cnf, bool encrypt, bool addCnf = true)
+        internal static string CreateAt(JObject cnf, bool encrypt, bool addCnf = true, bool addCnfAsString = false)
         {
             var accessToken = DefaultAccessTokenPayload;
 
-            if (addCnf)
+            if (addCnf && !addCnfAsString)
                 accessToken.Add(ConfirmationClaimTypes.Cnf, cnf);
+
+            if (addCnf && addCnfAsString)
+                accessToken.Add(ConfirmationClaimTypes.Cnf, cnf.ToString());
 
             if (encrypt)
                 return new JsonWebTokenHandler().CreateToken(accessToken.ToString(Formatting.None), DefaultSigningCredentials, KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2, new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType } });

@@ -546,6 +546,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
+                        ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwk, false, true, true)),
+                        TestId = "ValidTestCnfAsAsString",
+                    },
+                    new ResolvePopKeyTheoryData
+                    {
                         ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(SignedHttpRequestTestUtils.DefaultCnfJwk, false)),
                         TestId = "ValidTest",
                     },

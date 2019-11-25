@@ -1000,9 +1000,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // use the decrypted jwt if the jwtValidatedAccessToken is encrypted.
             if (jwtValidatedAccessToken.InnerToken != null)
                 jwtValidatedAccessToken = jwtValidatedAccessToken.InnerToken;
-
+            
             if (jwtValidatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject cnf) && cnf != null)
                 return cnf.ToString();
+            else if (jwtValidatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnfString) && !string.IsNullOrEmpty(cnfString))
+                return cnfString;
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ConfirmationClaimTypes.Cnf)));
         }
