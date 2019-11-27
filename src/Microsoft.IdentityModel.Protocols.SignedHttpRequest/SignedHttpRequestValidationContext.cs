@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="accessTokenValidationParameters">A <see cref="TokenValidationParameters"/> required for access token ("at") validation.</param>
         /// <remarks>Default <see cref="SignedHttpRequestValidationParameters"/> and <see cref="CallContext"/> will be created.</remarks>
         public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters) 
-            : this (signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationParameters(), CallContext.Default)
+            : this (signedHttpRequest, httpRequestData, accessTokenValidationParameters, new SignedHttpRequestValidationParameters(), new CallContext())
         {
         }
         /// <summary>
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestValidationParameters">A set of parameters required for validating a SignedHttpRequest.</param>
         /// <remarks>Default <see cref="CallContext"/> will be created.</remarks>
         public SignedHttpRequestValidationContext(string signedHttpRequest, HttpRequestData httpRequestData, TokenValidationParameters accessTokenValidationParameters, SignedHttpRequestValidationParameters signedHttpRequestValidationParameters)
-            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, signedHttpRequestValidationParameters, CallContext.Default)
+            : this(signedHttpRequest, httpRequestData, accessTokenValidationParameters, signedHttpRequestValidationParameters, new CallContext())
         {
         }
 

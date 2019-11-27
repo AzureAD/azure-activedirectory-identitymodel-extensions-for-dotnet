@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>
         /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials) 
-            : this(accessToken, httpRequestData, signingCredentials, new SignedHttpRequestCreationParameters(), CallContext.Default)
+            : this(accessToken, httpRequestData, signingCredentials, new SignedHttpRequestCreationParameters(), new CallContext())
         {
         }
 
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signingCredentials">A security key and algorithm that will be used to sign the (Signed)HttpRequest.</param>
         /// <param name="signedHttpRequestCreationParameters">A set of parameters required for creating a SignedHttpRequest.</param>
         public SignedHttpRequestDescriptor(string accessToken, HttpRequestData httpRequestData, SigningCredentials signingCredentials, SignedHttpRequestCreationParameters signedHttpRequestCreationParameters)
-            : this(accessToken, httpRequestData, signingCredentials, signedHttpRequestCreationParameters, CallContext.Default)
+            : this(accessToken, httpRequestData, signingCredentials, signedHttpRequestCreationParameters, new CallContext())
         {
         }
 

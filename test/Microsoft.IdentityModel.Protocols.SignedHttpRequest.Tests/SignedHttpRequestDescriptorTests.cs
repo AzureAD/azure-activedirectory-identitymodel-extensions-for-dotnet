@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var accessToken = SignedHttpRequestTestUtils.DefaultEncodedAccessToken;
             var signingCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials;
             var creationParameters = new SignedHttpRequestCreationParameters();
-            var callContext = CallContext.Default;
+            var callContext = new CallContext();
 
             Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null));
             Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null, (SignedHttpRequestCreationParameters)null));

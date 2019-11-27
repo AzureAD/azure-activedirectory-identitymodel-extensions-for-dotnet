@@ -1425,7 +1425,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             };
         }
 
-        public CallContext CallContext { get; set; } = CallContext.Default;
+        public CallContext CallContext { get; set; } = new CallContext();
 
         public object ExpectedClaimValue { get; set; }
 

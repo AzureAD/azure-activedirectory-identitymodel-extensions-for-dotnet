@@ -56,14 +56,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates a default context that doesn't capture any logs.
-        /// </summary>
-        public static CallContext Default
-        {
-            get { return new CallContext { CaptureLogs = false }; }
-        }
-
-        /// <summary>
         /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
         /// </summary>
         public Guid ActivityId { get; set; } = Guid.Empty;

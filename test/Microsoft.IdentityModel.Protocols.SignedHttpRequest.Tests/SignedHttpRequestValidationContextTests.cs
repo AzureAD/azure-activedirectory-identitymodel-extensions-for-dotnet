@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequest = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString()).EncodedToken;
             var tokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters;
             var validationParameters = new SignedHttpRequestValidationParameters();
-            var callContext = CallContext.Default;
+            var callContext = new CallContext();
 
             Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null, validationParameters, callContext));
             Assert.Throws<ArgumentNullException>("signedHttpRequest", () => new SignedHttpRequestValidationContext(null, httpRequestData, null));
