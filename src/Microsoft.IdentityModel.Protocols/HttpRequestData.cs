@@ -58,6 +58,11 @@ namespace Microsoft.IdentityModel.Protocols
         public IDictionary<string, IEnumerable<string>> Headers { get; set; }
 
         /// <summary>
+        /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
+        /// </summary>
+        public IDictionary<string, object> PropertyBag { get; set; }
+
+        /// <summary>
         /// A utility method that appends <paramref name="headers"/> to the <see cref="Headers"/>.
         /// </summary>
         /// <param name="headers">A collection of http request headers.</param>
