@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-//  Microsoft.IdentityModel.Protocols.Pop
+//  Microsoft.IdentityModel.Protocols.SignedHttpRequest
 // SignedHttpRequest range: 23000 - 23999.
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23007 = "IDX23007: HttpRequestUri is an invalid relative URI: '{0}'.";
         public const string IDX23008 = "IDX23008: Exception caught while creating the '{0}' claim. Inner exception: '{1}'.";
         public const string IDX23009 = "IDX23009: Signed http request signature validation failed. Exceptions caught: '{0}'.";
-        public const string IDX23010 = "IDX23010: Lifetime validation of the signed http request failed. Current time: '{0}', signed http request is valid until: '{1}'.";
+        public const string IDX23010 = "IDX23010: Lifetime validation of the signed http request failed. Current time: '{0}' UTC, signed http request is valid until: '{1}' UTC.";
         public const string IDX23011 = "IDX23011: '{0}' claim validation failed. Expected value: '{1}', value found: '{2}'.";
         public const string IDX23012 = "IDX23012: '{0}' claim validation failed. Expected values: '{1}' or '{2}', value found: '{3}'.";
         public const string IDX23013 = "IDX23013: 'at' token validation failed. Inner exception: '{0}'.";
