@@ -55,6 +55,8 @@ namespace Microsoft.IdentityModel.Tokens
         [JsonIgnore]
         internal string InternalId { get; } = Guid.NewGuid().ToString();
 
+        internal string DerivedKeyDesignation { get; set; } = null;
+
         /// <summary>
         /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
         /// </summary>
@@ -89,6 +91,14 @@ namespace Microsoft.IdentityModel.Tokens
         public override string ToString()
         {
             return $"{GetType()}, KeyId: '{KeyId}', InternalId: '{InternalId}'.";
+        }
+
+
+        internal string GetCacheKey()
+        {
+            string principalId = string.IsNullOrEmpty(KeyId) ? InternalId : KeyId;
+            //Always include the DerivedKeyDesignation and separator to avoid collisions.
+            return $"{GetType()}-{DerivedKeyDesignation}_{principalId}";
         }
     }
 }

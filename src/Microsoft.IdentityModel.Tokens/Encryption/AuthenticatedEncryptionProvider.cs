@@ -240,8 +240,16 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(keyBytes, hmacKey, keyLength);
             return new AuthenticatedKeys()
             {
-                AesKey = new SymmetricSecurityKey(aesKey),
+                AesKey = new SymmetricSecurityKey(aesKey)
+                {
+                    KeyId = key.KeyId,
+                    DerivedKeyDesignation = $"AES-{algorithm}"
+                },
                 HmacKey = new SymmetricSecurityKey(hmacKey)
+                {
+                    KeyId = key.KeyId,
+                    DerivedKeyDesignation = $"HMAC-{algorithm}"
+                }
             };
         }
 
