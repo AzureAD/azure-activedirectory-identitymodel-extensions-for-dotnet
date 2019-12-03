@@ -836,7 +836,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Cnf, SignedHttpRequestTestUtils.DefaultCnfJwkThumprint)),
+                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(ConfirmationClaimTypes.Cnf, SignedHttpRequestTestUtils.DefaultCnfJwkThumprint)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23023"),
                         Kid = "irrelevant",
                         TestId = "InvalidTestCheckRecursion",

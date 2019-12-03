@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.JsonWebTokens;
+
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
@@ -73,14 +75,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string B = "b";
 
         /// <summary>
-        /// The "cnf" claim might be present in SignedHttpRequest payload.
-        ///  https://tools.ietf.org/html/rfc7800#section-6.1.1
-        /// </summary>
-        public const string Cnf = "cnf";
-
-        /// <summary>
         /// Default "nonce" claim.
         /// </summary>
-        public const string Nonce = "nonce";
+        public const string Nonce = JwtRegisteredClaimNames.Nonce;
     }
 }

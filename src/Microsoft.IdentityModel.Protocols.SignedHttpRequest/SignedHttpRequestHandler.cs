@@ -388,7 +388,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CnfClaimValue))
                 {
-                    payload.Add(SignedHttpRequestClaimTypes.Cnf, JObject.Parse(signedHttpRequestDescriptor.CnfClaimValue));
+                    payload.Add(ConfirmationClaimTypes.Cnf, JObject.Parse(signedHttpRequestDescriptor.CnfClaimValue));
                 }
                 else
                 {
@@ -406,12 +406,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
-                    payload.Add(SignedHttpRequestClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));
+                    payload.Add(ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));
                 }
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.Cnf, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ConfirmationClaimTypes.Cnf, e), e));
             }
         }
         #endregion
