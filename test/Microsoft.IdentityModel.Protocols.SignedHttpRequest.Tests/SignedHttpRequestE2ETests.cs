@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var handler = new SignedHttpRequestHandler();
                 var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(theoryData.AccessToken, theoryData.HttpRequestData, theoryData.SigningCredentials, theoryData.SignedHttpRequestCreationParameters);
                 signedHttpRequestDescriptor.CnfClaimValue = theoryData.CnfClaimValue;
-                var signedHttpRequest = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
+                var signedHttpRequest = handler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
                 var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationParameters);
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 

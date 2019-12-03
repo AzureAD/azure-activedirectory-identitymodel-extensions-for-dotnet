@@ -53,9 +53,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             HashSet<string> nonceCache = new HashSet<string>();
 
             var handler = new SignedHttpRequestHandler();
-            var signedHttpRequest1 = await CreateDefaultSHRWithCustomNonce(handler, "nonce1").ConfigureAwait(false);
-            var signedHttpRequest2 = await CreateDefaultSHRWithCustomNonce(handler, "nonce2").ConfigureAwait(false);
-            var signedHttpRequest3 = await CreateDefaultSHRWithCustomNonce(handler, "nonce1").ConfigureAwait(false);
+            var signedHttpRequest1 = CreateDefaultSHRWithCustomNonce(handler, "nonce1");
+            var signedHttpRequest2 = CreateDefaultSHRWithCustomNonce(handler, "nonce2");
+            var signedHttpRequest3 = CreateDefaultSHRWithCustomNonce(handler, "nonce1");
 
             var signedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
             {
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         }
 
-        private async Task<string> CreateDefaultSHRWithCustomNonce(SignedHttpRequestHandler handler, string nonce)
+        private string CreateDefaultSHRWithCustomNonce(SignedHttpRequestHandler handler, string nonce)
         {
             var signedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
             {
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 CreateQ = false,
             };
             var descriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, signedHttpRequestCreationParameters);
-            return await handler.CreateSignedHttpRequestAsync(descriptor, CancellationToken.None).ConfigureAwait(false);
+            return handler.CreateSignedHttpRequest(descriptor);
         }
 
         [Theory, MemberData(nameof(ValidateTsClaimTheoryData))]

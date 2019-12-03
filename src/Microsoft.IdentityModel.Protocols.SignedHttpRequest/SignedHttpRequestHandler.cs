@@ -59,35 +59,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Creates a signed http request using the <paramref name="signedHttpRequestDescriptor"/>.
         /// /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
-        public async Task<string> CreateSignedHttpRequestAsync(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
+        public string CreateSignedHttpRequest(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (signedHttpRequestDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
-            var header = CreateHttpRequestHeader(signedHttpRequestDescriptor);
             var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor);
-            return await SignHttpRequestAsync(header, payload, signedHttpRequestDescriptor, cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Creates a JSON representation of a HttpRequest header.
-        /// </summary>
-        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        /// <returns>A JSON representation of an HttpRequest header.</returns>
-        protected virtual string CreateHttpRequestHeader(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            var header = new JObject
-            {
-                { JwtHeaderParameterNames.Alg, signedHttpRequestDescriptor.SigningCredentials.Algorithm },
-                { JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType }
-            };
-
-            if (signedHttpRequestDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
-                header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
-
-            return header.ToString(Formatting.None);
+            return _jwtTokenHandler.CreateToken(payload, signedHttpRequestDescriptor.SigningCredentials, new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType } });
         }
 
         /// <summary>
@@ -144,27 +123,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         protected virtual string ConvertToJson(Dictionary<string, object> payload)
         {
             return JObject.FromObject(payload).ToString(Formatting.None);
-        }
-
-        /// <summary>
-        /// Encodes and signs an HTTP request message (<paramref name="header"/>, <paramref name="payload"/>) using the <see cref="SignedHttpRequestDescriptor.SigningCredentials"/>.
-        /// </summary>
-        /// <param name="header">A JSON representation of an HttpRequest header.</param>
-        /// <param name="payload">A JSON representation of an HttpRequest payload.</param>
-        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <returns>SignedHttpRequest as a JWS in Compact Serialization Format.</returns>
-        protected virtual Task<string> SignHttpRequestAsync(string header, string payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrEmpty(header))
-                throw LogHelper.LogArgumentNullException(nameof(header));
-
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var message = $"{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header))}.{Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload))}";
-            var signature = JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials);
-            return Task.FromResult($"{message}.{signature}");
         }
 
         /// <summary>

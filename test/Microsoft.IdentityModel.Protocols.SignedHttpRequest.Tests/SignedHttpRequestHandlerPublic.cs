@@ -45,19 +45,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     /// </summary>
     public class SignedHttpRequestHandlerPublic : SignedHttpRequestHandler
     {
-        public string CreateHttpRequestHeaderPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            return CreateHttpRequestHeader(signedHttpRequestDescriptor);
-        }
-
         public string CreateHttpRequestPayloadPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             return CreateHttpRequestPayload(signedHttpRequestDescriptor);
-        }
-
-        public async Task<string> SignHttpRequestPublicAsync(string header, string payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor, CancellationToken cancellationToken)
-        {
-            return await SignHttpRequestAsync(header, payload, signedHttpRequestDescriptor, cancellationToken).ConfigureAwait(false);
         }
 
         public string ConvertToJsonPublic(Dictionary<string, object> payload)

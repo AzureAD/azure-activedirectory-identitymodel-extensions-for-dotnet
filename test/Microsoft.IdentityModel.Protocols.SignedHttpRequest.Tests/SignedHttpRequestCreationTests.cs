@@ -46,15 +46,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class SignedHttpRequestCreationTests
     {
         [Fact]
-        public async Task CreateSignedHttpRequest()
+        public void CreateSignedHttpRequest()
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateSignedHttpRequest", "", true);
 
             var handler = new SignedHttpRequestHandlerPublic();
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await handler.CreateSignedHttpRequestAsync(null, CancellationToken.None).ConfigureAwait(false));
 
             var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationParameters() { CreateM = false, CreateP = false, CreateU = false });
-            var signedHttpRequestString = await handler.CreateSignedHttpRequestAsync(signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
+            var signedHttpRequestString = handler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
 
             var tvp = new TokenValidationParameters()
             {
@@ -70,135 +69,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 context.AddDiff($"Not able to create and validate signed http request token");
 
             TestUtilities.AssertFailIfErrors(context);
-        }
-
-        [Theory, MemberData(nameof(CreateHeaderTheoryData))]
-        public void CreateHeader(CreateSignedHttpRequestTheoryData theoryData)
-        {
-            var context = TestUtilities.WriteHeader($"{this}.CreateHeader", theoryData);
-            try
-            {
-                var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
-
-                var headerString = handler.CreateHttpRequestHeaderPublic(signedHttpRequestDescriptor);
-                var header = JObject.Parse(headerString);
-
-                if (!header.ContainsKey(theoryData.ExpectedClaim))
-                    context.AddDiff($"Header doesn't contain the claim '{theoryData.ExpectedClaim}'");
-
-                if (!IdentityComparer.AreStringsEqual(header.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
-                    context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{header.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
-
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<CreateSignedHttpRequestTheoryData> CreateHeaderTheoryData
-        {
-            get
-            {
-                return new TheoryData<CreateSignedHttpRequestTheoryData>
-                {
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        First = true,
-                        ExpectedClaim = JwtHeaderParameterNames.Typ,
-                        ExpectedClaimValue = SignedHttpRequestConstants.TokenType,
-                        TestId = "ExpectedTokenType",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        ExpectedClaim = JwtHeaderParameterNames.X5t,
-                        ExpectedClaimValue =  ((X509SecurityKey)Default.AsymmetricSigningCredentials.Key).X5t,
-                        SigningCredentials = Default.AsymmetricSigningCredentials,
-                        TestId = "ExpectedX5t",
-                    },
-                };
-            }
-        }
-
-        [Theory, MemberData(nameof(SignHttpRequestTheoryData))]
-        public async void SignHttpRequest(CreateSignedHttpRequestTheoryData theoryData)
-        {
-            var context = TestUtilities.WriteHeader($"{this}.SignHttpRequest", theoryData);
-            try
-            {
-                var handler = new SignedHttpRequestHandlerPublic();
-                var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
-                var signedHttpRequestString = await handler.SignHttpRequestPublicAsync(theoryData.HeaderString, theoryData.PayloadString, signedHttpRequestDescriptor, CancellationToken.None).ConfigureAwait(false);
-
-                var tvp = new TokenValidationParameters()
-                {
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateIssuerSigningKey = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = signedHttpRequestDescriptor.SigningCredentials.Key
-                };
-                var result = new JsonWebTokenHandler().ValidateToken(signedHttpRequestString, tvp);
-
-                if (result.IsValid == false)
-                    context.AddDiff($"Not able to create and validate signed http request token");
-
-                theoryData.ExpectedException.ProcessNoException(context);
-            }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        public static TheoryData<CreateSignedHttpRequestTheoryData> SignHttpRequestTheoryData
-        {
-            get
-            {
-                return new TheoryData<CreateSignedHttpRequestTheoryData>
-                {
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        First = true,
-                        HeaderString = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "HeaderStringNull",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        HeaderString = "",
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "HeaderStringEmpty",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        HeaderString = "dummyData",
-                        PayloadString = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "PayloadStringNull",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        HeaderString = "dummyData",
-                        PayloadString = "",
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "PayloadStringEmpty",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
-                        HeaderString = "{\"alg\": \"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256\"}",
-                        PayloadString = "{\"claim\": 1}",
-                        SigningCredentials =  SignedHttpRequestTestUtils.DefaultSigningCredentials,
-                        TestId = "ValidSignedHttpRequest",
-                    },
-                };
-            }
         }
 
         [Theory, MemberData(nameof(CreateClaimCallsTheoryData))]
