@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns>A JSON string.</returns>
         protected virtual string ConvertToJson(Dictionary<string, object> payload)
         {
-            return JObject.FromObject(payload).ToString(Formatting.None);
+            return SignedHttpRequestUtilities.ConvertToJson(payload);
         }
 
         /// <summary>
@@ -1043,45 +1043,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         protected virtual async Task<SecurityKey> ResolvePopKeyFromJweAsync(string jwe, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(jwe))
-                throw LogHelper.LogArgumentNullException(nameof(jwe));
-
-            var jweJwt = _jwtTokenHandler.ReadJsonWebToken(jwe);
-
-            IEnumerable<SecurityKey> decryptionKeys;
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync != null)
-                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
+            var jwk = await SignedHttpRequestUtilities.DecryptSymmetricPopKeyAsync(_jwtTokenHandler, jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jwk, out _))
+                return jwk;
             else
-                decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeys;
-
-            if (decryptionKeys == null || !decryptionKeys.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23017)));
-
-            var tokenDecryptionParameters = new TokenValidationParameters()
-            {
-                TokenDecryptionKeys = decryptionKeys,
-                RequireSignedTokens = false,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = false,
-            };
-
-            JsonWebKey jsonWebKey;
-            try
-            {
-                var decryptedJson = _jwtTokenHandler.DecryptToken(jweJwt, tokenDecryptionParameters);
-                jsonWebKey = new JsonWebKey(decryptedJson);
-            }
-            catch (Exception e)
-            {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23018, string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null")), e), e));
-            }
-
-            if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out var symmetricKey))
-                return jsonWebKey;
-            else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23019, jsonWebKey.GetType().ToString())));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23019, jwk.GetType().ToString())));
         }
 
         /// <summary>

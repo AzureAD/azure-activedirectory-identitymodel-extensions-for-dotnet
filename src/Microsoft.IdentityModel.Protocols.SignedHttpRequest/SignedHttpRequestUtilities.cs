@@ -25,8 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -90,6 +97,53 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
 
             return httpRequestData;
+        }
+
+        /// <summary>
+        /// Converts a dictionary into a JSON string.
+        /// </summary>
+        /// <param name="payload">Payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <returns>A JSON string.</returns>
+        public static string ConvertToJson(Dictionary<string, object> payload)
+        {
+            return JObject.FromObject(payload).ToString(Formatting.None);
+        }
+
+        internal static async Task<JsonWebKey> DecryptSymmetricPopKeyAsync(JsonWebTokenHandler jwtTokenHandler, string jwe, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        {
+            if(string.IsNullOrEmpty(jwe))
+                throw LogHelper.LogArgumentNullException(nameof(jwe));
+
+            var jweJwt = jwtTokenHandler.ReadJsonWebToken(jwe);
+
+            IEnumerable<SecurityKey> decryptionKeys;
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync != null)
+                decryptionKeys = await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeysResolverAsync(jweJwt, cancellationToken).ConfigureAwait(false);
+            else
+                decryptionKeys = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.CnfDecryptionKeys;
+
+            if (decryptionKeys == null || !decryptionKeys.Any())
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23017)));
+
+            var tokenDecryptionParameters = new TokenValidationParameters()
+            {
+                TokenDecryptionKeys = decryptionKeys,
+                RequireSignedTokens = false,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = false,
+            };
+
+            try
+            {
+                var decryptedJson = jwtTokenHandler.DecryptToken(jweJwt, tokenDecryptionParameters);
+                return new JsonWebKey(decryptedJson);
+            }
+            catch (Exception e)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23018, string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null")), e), e));
+            }
         }
     }
 }
