@@ -56,8 +56,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
             var signedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
             {
-                ReplayValidatorAsync = (string nonce, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken)  => 
+                ReplayValidatorAsync = (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken)  => 
                 {
+                    var jwtSignedHttpRequest = signedHttpRequest as JsonWebToken;
+
+                    var nonce = jwtSignedHttpRequest.GetPayloadValue<string>(SignedHttpRequestClaimTypes.Nonce);
                     if (nonceCache.Contains(nonce))
                         throw new InvalidOperationException("Replay detected");
                     else
@@ -1010,7 +1013,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateU = true,
                             ValidateH = true,
                             ValidateB = true,
-                            ReplayValidatorAsync = async (string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
                                 await Task.FromResult<object>(null);

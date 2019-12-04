@@ -512,12 +512,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync != null)
-            {
-                if (jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Nonce, out string nonce))
-                    await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(nonce, jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-                else
-                    await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(string.Empty, jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            }
+                await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
                 ValidateTsClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
