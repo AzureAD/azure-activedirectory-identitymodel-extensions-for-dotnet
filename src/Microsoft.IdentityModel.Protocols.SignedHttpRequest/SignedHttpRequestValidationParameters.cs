@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
-    public delegate Task SignedHttpRequestReplayValidatorAsync(string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    public delegate Task ReplayValidatorAsync(string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A <see cref="SecurityKey"/> used to validate a signature of the <paramref name="signedHttpRequest"/>, otherwise expected to throw an appropriate exception.</returns>
-    public delegate Task<SecurityKey> SignedHttpRequestSignatureValidatorAsync(IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> SignatureValidatorAsync(IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when validating a SignedHttpRequest.
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public IEnumerable<SecurityKey> CnfDecryptionKeys { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="SignedHttpRequestSignatureValidatorAsync"/> delegate.
+        /// Gets or sets the <see cref="CnfDecryptionKeysResolverAsync"/> delegate.
         /// </summary>
         public CnfDecryptionKeysResolverAsync CnfDecryptionKeysResolverAsync { get; set; }
 
@@ -160,14 +160,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SignedHttpRequestReplayValidatorAsync"/> delegate.
+        /// Gets or sets the <see cref="ReplayValidatorAsync"/> delegate.
         /// </summary>
-        public SignedHttpRequestReplayValidatorAsync SignedHttpRequestReplayValidatorAsync { get; set; }
+        public ReplayValidatorAsync ReplayValidatorAsync { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="SignedHttpRequestSignatureValidatorAsync"/> delegate.
+        /// Gets or sets the <see cref="SignatureValidatorAsync"/> delegate.
         /// </summary>
-        public SignedHttpRequestSignatureValidatorAsync SignedHttpRequestSignatureValidatorAsync { get; set; }
+        public SignatureValidatorAsync SignatureValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Ts"/> claim should be validated or not.

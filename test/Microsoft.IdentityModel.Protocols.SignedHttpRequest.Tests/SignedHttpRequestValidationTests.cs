@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
             var signedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
             {
-                SignedHttpRequestReplayValidatorAsync = (string nonce, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken)  => 
+                ReplayValidatorAsync = (string nonce, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken)  => 
                 {
                     if (nonceCache.Contains(nonce))
                         throw new InvalidOperationException("Replay detected");
@@ -984,8 +984,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 context.AddDiff($"ValidationParameters.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null))
-                context.AddDiff($"ValidationParameters.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
+            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync != null))
+                context.AddDiff($"ValidationParameters.ReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -1010,7 +1010,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateU = true,
                             ValidateH = true,
                             ValidateB = true,
-                            SignedHttpRequestReplayValidatorAsync = async (string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            ReplayValidatorAsync = async (string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
                                 await Task.FromResult<object>(null);
@@ -1047,7 +1047,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateU = false,
                             ValidateH = false,
                             ValidateB = false,
-                            SignedHttpRequestReplayValidatorAsync = null,
+                            ReplayValidatorAsync = null,
                         },
                         CallContext = new CallContext()
                         {
@@ -1130,7 +1130,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedPopKey = validPopKey,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            SignedHttpRequestSignatureValidatorAsync = (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            SignatureValidatorAsync = (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 throw new NotImplementedException();
                             }
@@ -1153,7 +1153,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedPopKey = validPopKey,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            SignedHttpRequestSignatureValidatorAsync = async (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            SignatureValidatorAsync = async (IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequestToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 return await Task.FromResult(popKeys.First());
                             }
