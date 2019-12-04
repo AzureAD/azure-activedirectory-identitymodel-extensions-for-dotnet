@@ -51,18 +51,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    public delegate Task<SecurityKey> PopKeysResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
     /// </summary>
     /// <param name="kid">KeyIdentifier value.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param> 
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
     /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
-    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
@@ -124,9 +125,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public HttpClient HttpClientForJkuResourceRetrieval { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="PopKeysResolverAsync"/> delegate.
+        /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
         /// </summary>
-        public PopKeysResolverAsync PopKeysResolverAsync { get; set; }
+        public PopKeyResolverAsync PopKeyResolverAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverFromKeyIdAsync"/> delegate.

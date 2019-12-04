@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            PopKeysResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            PopKeyResolverAsync = async (SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["trackPopKeyResolver"] = true;
                                 return await Task.FromResult<SecurityKey>(null);
@@ -791,7 +791,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            PopKeyResolverFromKeyIdAsync = (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            PopKeyResolverFromKeyIdAsync = (string kid, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 throw new NotImplementedException();
                             }
@@ -803,7 +803,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            PopKeyResolverFromKeyIdAsync = async (string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            PopKeyResolverFromKeyIdAsync = async (string kid, SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 return await Task.FromResult(SignedHttpRequestTestUtils.DefaultSigningCredentials.Key);
                             }

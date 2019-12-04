@@ -863,8 +863,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (signedHttpRequestValidationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
 
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeysResolverAsync != null)
-                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeysResolverAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverAsync != null)
+                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             var cnf = GetCnfClaimValue(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext);
             return await ResolvePopKeyFromCnfClaimAsync(cnf, signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
@@ -1046,7 +1046,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         internal virtual async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync != null)
-                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync(kid, signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else if (signedHttpRequest != null && signedHttpRequest.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject signedHttpRequestCnf) && signedHttpRequestCnf != null)
                 return await ResolvePopKeyFromCnfReferenceAsync(kid, signedHttpRequestCnf.ToString(Formatting.None), validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else

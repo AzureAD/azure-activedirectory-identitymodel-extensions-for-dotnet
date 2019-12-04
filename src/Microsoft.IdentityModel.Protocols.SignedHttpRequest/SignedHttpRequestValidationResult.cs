@@ -24,7 +24,6 @@
 // THE SOFTWARE.
 //
 
-using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
