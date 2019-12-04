@@ -623,7 +623,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 {"mockGetPopKeysFromJkuAsync_returnNull", null }
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23032"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23031"),
                         TestId = "InvalidNullReturned",
                     },
                     new ResolvePopKeyTheoryData
@@ -845,7 +845,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None)),
                         Kid = "incorrect_cnf_reference",
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23034"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23033"),
                         TestId = "InvalidCnfReference",
                     },
                     new ResolvePopKeyTheoryData

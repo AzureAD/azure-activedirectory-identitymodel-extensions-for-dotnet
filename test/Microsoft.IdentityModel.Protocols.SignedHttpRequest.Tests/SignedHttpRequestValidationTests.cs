@@ -1116,7 +1116,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         SignedHttpRequestToken = signedHttpRequest,
                         PopKey =  invalidPopKey,
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23035"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23034"),
                         TestId = "InvalidPopKeySignatureValidationFails",
                     },
                     new ValidateSignedHttpRequestTheoryData

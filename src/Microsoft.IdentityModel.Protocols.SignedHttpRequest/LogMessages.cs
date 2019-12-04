@@ -35,7 +35,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     internal static class LogMessages
     {
-        public const string IDX23000 = "IDX23000: CryptoProviderFactory returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX23001 = "IDX23001: HttpRequestUri must be absolute when creating or validating the 'u' claim. HttpRequestUri: '{0}'.";
         public const string IDX23002 = "IDX23002: The HTTP Method must be an uppercase HTTP verb. HttpMethod: '{0}'.";
         public const string IDX23003 = "IDX23003: The signed http request does not contain the '{0}' claim or the claim value is null. This claim is required to validate a signed http request.";
@@ -65,11 +64,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23027 = "IDX23027: Header: '{0}' was not found in the request headers: '{1}'. Unable to validate the 'h' claim.";
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' was not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
         public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Unsigned query parameters: '{0}'.";
-        public const string IDX23030 = "IDX23030: A collection of resolved PoP keys is null or empty. Unable to validate a signed http request signature without a PoP key.";
-        public const string IDX23031 = "IDX23031: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
-        public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null.";
-        public const string IDX23033 = "IDX23033: SigningCredentials object has a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
-        public const string IDX23034 = "IDX23034: Unable to validate the 'cnf' claim reference. Thumbprint of the JWK used to sign the SignedHttpRequest (root 'cnf' claim) does not match the expected thumbprint ('at' -> 'cnf' -> 'kid'). Expected value: '{0}', actual value: '{1}'. Root 'cnf' claim value: '{2}'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
-        public const string IDX23035 = "IDX23035: Signed http request signature validation failed. SignedHttpRequest: '{0}'";
+        public const string IDX23030 = "IDX23030: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
+        public const string IDX23031 = "IDX23031: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null.";
+        public const string IDX23032 = "IDX23032: SigningCredentials object has a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
+        public const string IDX23033 = "IDX23033: Unable to validate the 'cnf' claim reference. Thumbprint of the JWK used to sign the SignedHttpRequest (root 'cnf' claim) does not match the expected thumbprint ('at' -> 'cnf' -> 'kid'). Expected value: '{0}', actual value: '{1}'. Root 'cnf' claim value: '{2}'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
+        public const string IDX23034 = "IDX23034: Signed http request signature validation failed. SignedHttpRequest: '{0}'";
     }
 }

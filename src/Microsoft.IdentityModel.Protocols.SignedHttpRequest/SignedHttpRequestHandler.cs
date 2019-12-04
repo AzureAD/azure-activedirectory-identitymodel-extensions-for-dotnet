@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     else if (signedHttpRequestSigningKey is AsymmetricSecurityKey asymmetricSecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23033, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23032, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
                     
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
@@ -439,10 +439,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
 
                 // read signed http request as JWT
-                var jwtSignedHttpRequest = _jwtTokenHandler.ReadJsonWebToken(signedHttpRequestValidationContext.SignedHttpRequest);
+                var signedHttpRequest = _jwtTokenHandler.ReadJsonWebToken(signedHttpRequestValidationContext.SignedHttpRequest);
 
                 // read access token ("at")
-                if (!jwtSignedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
+                if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.At)));
 
                 // validate access token ("at")
@@ -451,13 +451,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 
                 // resolve PoP key (confirmation key)
-                var popKey = await ResolvePopKeyAsync(jwtSignedHttpRequest, tokenValidationResult.SecurityToken as JsonWebToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                var popKey = await ResolvePopKeyAsync(signedHttpRequest, tokenValidationResult.SecurityToken as JsonWebToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 // validate signed http request signature
-                jwtSignedHttpRequest.SigningKey = await ValidateSignatureAsync(jwtSignedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                signedHttpRequest.SigningKey = await ValidateSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 // validate signed http request payload
-                var validatedSignedHttpRequest = await ValidateSignedHttpRequestPayloadAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                var validatedSignedHttpRequest = await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
                 return new SignedHttpRequestValidationResult()
                 {
@@ -465,7 +465,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     AccessToken = accessToken,
                     ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
                     SecurityToken = tokenValidationResult.SecurityToken,
-                    SignedHttpRequest = jwtSignedHttpRequest.EncodedToken,
+                    SignedHttpRequest = signedHttpRequest.EncodedToken,
                     ValidatedSignedHttpRequest = validatedSignedHttpRequest
                 };
             }
@@ -508,7 +508,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         protected virtual async Task<SecurityToken> ValidateSignedHttpRequestPayloadAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23031, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23030, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync != null)
                 await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
@@ -563,7 +563,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23009, ex.ToString()), ex));
             }
 
-            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23035, signedHttpRequest.EncodedToken)));
+            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23034, signedHttpRequest.EncodedToken)));
         }
 
         /// <summary>
@@ -1011,7 +1011,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             if (popKeys == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23032)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23031)));
 
             foreach (var key in popKeys)
             {
@@ -1108,7 +1108,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             // validate reference
             if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23034, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23033, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
             return jwkPopKey;
         }

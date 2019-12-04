@@ -375,7 +375,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = KeyingMaterial.X509SigningCreds_SelfSigned2048_SHA512,
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23035"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23034"),
                         IsValid = false,
                         TestId = "InvalidBadPopSigningKey",
                     },
@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SigningCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials,
                         CnfClaimValue = incorrectCnfClaimValue,
                         IsValid = false,
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23034"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23033"),
                         TestId = "InvalidCnfReference",
                     },
                 };
