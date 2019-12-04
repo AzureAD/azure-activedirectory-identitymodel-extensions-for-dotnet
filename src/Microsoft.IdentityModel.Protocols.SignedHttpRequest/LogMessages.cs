@@ -70,5 +70,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23032 = "IDX23032: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null.";
         public const string IDX23033 = "IDX23033: SigningCredentials object has a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
         public const string IDX23034 = "IDX23034: Unable to validate the 'cnf' claim reference. Thumbprint of the JWK used to sign the SignedHttpRequest (root 'cnf' claim) does not match the expected thumbprint ('at' -> 'cnf' -> 'kid'). Expected value: '{0}', actual value: '{1}'. Root 'cnf' claim value: '{2}'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
+        public const string IDX23035 = "IDX23035: Signed http request signature validation failed. SignedHttpRequest: '{0}'";
     }
 }

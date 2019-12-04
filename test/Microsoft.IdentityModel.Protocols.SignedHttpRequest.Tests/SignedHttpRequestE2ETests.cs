@@ -375,7 +375,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
                         SigningCredentials = KeyingMaterial.X509SigningCreds_SelfSigned2048_SHA512,
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23035"),
                         IsValid = false,
                         TestId = "InvalidBadPopSigningKey",
                     },

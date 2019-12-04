@@ -101,14 +101,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             AddCnfClaim(payload, signedHttpRequestDescriptor);
         }
 
-        public async Task<SecurityToken> ValidateSignedHttpRequestPayloadPublicAsync(SecurityToken signedHttpRequest, IEnumerable<SecurityKey> popKeys, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        public async Task<SecurityToken> ValidateSignedHttpRequestPayloadPublicAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            return await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, popKeys, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            return await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<SecurityKey> ValidateSignedHttpRequestSignaturePublicAsync(JsonWebToken signedHttpRequest, IEnumerable<SecurityKey> popKeys, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        public async Task<SecurityKey> ValidateSignaturePublicAsync(JsonWebToken signedHttpRequest, SecurityKey popKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            return await ValidateSignedHttpRequestSignatureAsync(signedHttpRequest, popKeys, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            return await ValidateSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
         public void ValidateTsClaimPublic(JsonWebToken jwtSignedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
@@ -146,9 +146,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             ValidateBClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
         }
 
-        public async Task<IEnumerable<SecurityKey>> ResolvePopKeysPublicAsync(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        public async Task<SecurityKey> ResolvePopKeyPublicAsync(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            return await ResolvePopKeysAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            return await ResolvePopKeyAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
         public string GetCnfClaimValuePublic(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
@@ -264,23 +264,23 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 base.ValidateBClaim(signedHttpRequest, signedHttpRequestValidationContext);
         }
 
-        internal override async Task<SecurityKey> ValidateSignedHttpRequestSignatureAsync(JsonWebToken signedHttpRequest, IEnumerable<SecurityKey> popKeys, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal override async Task<SecurityKey> ValidateSignatureAsync(JsonWebToken signedHttpRequest, SecurityKey popKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockValidateSignedHttpRequestSignatureAsync"))
                 return SignedHttpRequestTestUtils.DefaultSigningCredentials.Key;
             else
-                return await base.ValidateSignedHttpRequestSignatureAsync(signedHttpRequest, popKeys, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                return await base.ValidateSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        internal override async Task<IEnumerable<SecurityKey>> ResolvePopKeysAsync(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal override async Task<SecurityKey> ResolvePopKeyAsync(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyAsync_returnValidKey"))
             {
-                return new List<SecurityKey>() { SignedHttpRequestTestUtils.DefaultSigningCredentials.Key };
+                return SignedHttpRequestTestUtils.DefaultSigningCredentials.Key;
             }
             else if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyAsync_returnInvalidKey"))
             {
-                return new List<SecurityKey>() { KeyingMaterial.RsaSecurityKey1 };
+                return KeyingMaterial.RsaSecurityKey1;
             }
             else if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyAsync_returnNullKey"))
             {
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
             else
             {
-                return await base.ResolvePopKeysAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                return await base.ResolvePopKeyAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             }
         }
 

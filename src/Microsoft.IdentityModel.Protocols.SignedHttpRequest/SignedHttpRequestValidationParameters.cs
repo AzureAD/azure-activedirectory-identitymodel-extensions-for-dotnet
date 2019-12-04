@@ -40,18 +40,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     /// <param name="jweCnf">A 'cnf' claim represented as a <see cref="SecurityToken"/>.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns></returns>
+    /// <returns>A collection of cnf decryption keys.</returns>
     public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(SecurityToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
-    /// A delegate that will take control over PoP keys resolution, if set.
+    /// A delegate that will take control over PoP key resolution, if set.
     /// </summary>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.></param>
-    /// <returns>A collection of resolved <see cref="SecurityKey"/>(s).</returns>
-    public delegate Task<IEnumerable<SecurityKey>> PopKeysResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
+    public delegate Task<SecurityKey> PopKeysResolverAsync(SecurityToken signedHttpRequest, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to resolve a <see cref="SecurityKey"/> from a 'cnf' claim that contains only the 'kid' claim.
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns></returns>
+    /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
     /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
     public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
@@ -76,12 +76,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
     /// </summary>
-    /// <param name="popKeys">A collection of resolved PoP keys.</param>
+    /// <param name="popKey">A resolved PoP key.</param>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A <see cref="SecurityKey"/> used to validate a signature of the <paramref name="signedHttpRequest"/>, otherwise expected to throw an appropriate exception.</returns>
-    public delegate Task<SecurityKey> SignatureValidatorAsync(IEnumerable<SecurityKey> popKeys, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+    public delegate Task<SecurityKey> SignatureValidatorAsync(SecurityKey popKey, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when validating a SignedHttpRequest.
