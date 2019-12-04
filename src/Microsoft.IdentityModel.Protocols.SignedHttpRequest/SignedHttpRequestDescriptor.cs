@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 //
 
+using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -106,6 +107,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the SignedHttpRequest token header.
+        /// The 'alg', 'kid', and 'x5t' claims are added by default based on the provided <see cref="SigningCredentials"/> and SHOULD NOT be included in this dictionary as this
+        /// will result in an exception being thrown.  
+        /// </summary>
+        public IDictionary<string, object> AdditionalHeaderClaims { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom payload claims that need to be added to the SignedHttpRequest token payload.
+        /// Default SignedHttpRequest payload claims (<see cref="SignedHttpRequestClaimTypes"/>) will NOT be overwritten by <see cref="AdditionalPayloadClaims"/>.
+        /// </summary>
+        public IDictionary<string, object> AdditionalPayloadClaims { get; set; }
+
+        /// <summary>
         /// Gets an access token that contains the 'cnf' claim.
         /// </summary>
         public string AccessToken { get; }
@@ -123,6 +137,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// a "cnf" claim value will be derived from a <see cref="SigningCredentials"/>.<see cref="SecurityKey"/>.
         /// </remarks>
         public string CnfClaimValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets a custom value that will be set when creating a <see cref="SignedHttpRequestClaimTypes.Nonce"/> claim.
+        /// </summary>
+        /// <remarks>This value will be added to a SignedHttpRequest payload only when <see cref="SignedHttpRequestCreationParameters.CreateNonce"/> is set to <c>true</c>.</remarks>
+        public string CustomNonceValue { get; set; }
 
         /// <summary>
         /// A structure that represents an outgoing http request.

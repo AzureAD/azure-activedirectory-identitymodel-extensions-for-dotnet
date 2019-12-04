@@ -93,7 +93,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             var signedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
             {
-                CustomNonceCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add(SignedHttpRequestClaimTypes.Nonce, nonce),
                 CreateM = false,
                 CreateP = false,
                 CreateU = false,
@@ -102,6 +101,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 CreateQ = false,
             };
             var descriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, signedHttpRequestCreationParameters);
+            descriptor.CustomNonceValue = nonce;
             return handler.CreateSignedHttpRequest(descriptor);
         }
 

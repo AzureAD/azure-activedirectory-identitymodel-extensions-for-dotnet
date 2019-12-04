@@ -27,14 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -70,6 +66,45 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+
+        [Fact]
+        public void CreateSignedHttpRequestWithAdditionalHeaderClaims()
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateSignedHttpRequestWithAdditionalHeaderClaims", "", true);
+
+            var handler = new SignedHttpRequestHandlerPublic();
+
+            // The 'alg', 'kid', and 'x5t' claims are added by default based on the provided <see cref="SigningCredentials"/> and SHOULD NOT be included in this dictionary as this
+            /// will result in an exception being thrown.  
+            var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationParameters() { CreateM = false, CreateP = false, CreateU = false })
+            {
+                AdditionalHeaderClaims = new Dictionary<string, object>() { { "kid", "kid_is_not_allowd" } }
+            };
+            Assert.Throws<SecurityTokenException>(() => handler.CreateSignedHttpRequest(signedHttpRequestDescriptor));
+
+            // allowed additional header claims 
+            signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(SignedHttpRequestTestUtils.DefaultEncodedAccessToken, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultSigningCredentials, new SignedHttpRequestCreationParameters() { CreateM = false, CreateP = false, CreateU = false })
+            {
+                AdditionalHeaderClaims = new Dictionary<string, object>() { { "additionalHeaderClaim1", "val1" }, { "additionalHeaderClaim2", "val2" } }
+            };
+            var signedHttpRequestString = handler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+
+            var tvp = new TokenValidationParameters()
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = false,
+                ValidateLifetime = false,
+                IssuerSigningKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
+            };
+            var result = new JsonWebTokenHandler().ValidateToken(signedHttpRequestString, tvp);
+
+            if (result.IsValid == false)
+                context.AddDiff($"Not able to create and validate signed http request token");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
 
         [Theory, MemberData(nameof(CreateClaimCallsTheoryData))]
         public void CreateClaimCalls(CreateSignedHttpRequestTheoryData theoryData)
@@ -126,8 +161,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateQ = false,
                             CreateTs = false,
                             CreateU = false,
-                            CustomNonceCreator = null,
-                            AdditionalClaimCreator = null
                         },
                         TestId = "NoClaimsCreated",
                     },
@@ -145,9 +178,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateQ = true,
                             CreateTs = true,
                             CreateU = true,
-                            CustomNonceCreator = null,
-                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("additionalClaim", "additionalClaimValue"),
                         },
+                        AdditionalPayloadClaims = new Dictionary<string, object>() { {"additionalClaim", "additionalClaimValue" } },
                         HttpRequestBody = Guid.NewGuid().ToByteArray(),
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>()
                         {
@@ -1144,7 +1176,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (theoryData.SignedHttpRequestCreationParameters.CustomNonceCreator != null)
+                if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CustomNonceValue))
                 {
                     if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                         context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
@@ -1174,12 +1206,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        ExpectedClaim = "customNonce",
-                        ExpectedClaimValue = "customNonceValue",
-                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
-                        {
-                            CustomNonceCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("customNonce", "customNonceValue"),
-                        },
+                        ExpectedClaim = "nonce",
+                        ExpectedClaimValue = "nonce1",
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters(),
+                        CustomNonceValue = "nonce1",
                         TestId = "ValidCustomNonce",
                     },
                     new CreateSignedHttpRequestTheoryData
@@ -1204,18 +1234,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
                 var payload = JObject.Parse(payloadString);
 
-                if (theoryData.SignedHttpRequestCreationParameters.AdditionalClaimCreator != null)
+                if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null)
                 {
                     if (!payload.ContainsKey(theoryData.ExpectedClaim))
                         context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
                     if (!IdentityComparer.AreStringsEqual(payload.Value<string>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue, context))
                         context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<string>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
-                }
-                else
-                {
-                    if (payload.ContainsKey(theoryData.ExpectedClaim))
-                        context.AddDiff($"Payload shouldn't contain the claim '{theoryData.ExpectedClaim}'");
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -1244,8 +1269,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateU = false,
                             CreateM = false,
                             CreateP = false,
-                            AdditionalClaimCreator = (IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor) => payload.Add("customClaim", "customClaimValue"),
                         },
+                        AdditionalPayloadClaims = new Dictionary<string, object>() { { "customClaim", "customClaimValue" } },
                         TestId = "ValidAdditionalClaim",
                     },
                     new CreateSignedHttpRequestTheoryData
@@ -1258,7 +1283,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             CreateM = false,
                             CreateP = false,
                         },
-                        TestId = "DelegateNotSet",
+                        AdditionalPayloadClaims = new Dictionary<string, object>() { { SignedHttpRequestClaimTypes.M, "will_not_be_overwritten" },  {"customClaim", "customClaimValue" } },
+                        TestId = "ValidAdditionalClaims",
+                    },
+                    new CreateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters()
+                        {
+                            CreateU = false,
+                            CreateM = false,
+                            CreateP = false,
+                        },
+                        TestId = "AdditionalCustomClaimsNotSet",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
@@ -1291,11 +1327,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
             return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters, callContext)
             {
-                CnfClaimValue = Cnf
+                AdditionalHeaderClaims = AdditionalHeaderClaims,
+                AdditionalPayloadClaims = AdditionalPayloadClaims,
+                CnfClaimValue = Cnf,
+                CustomNonceValue = CustomNonceValue,
             };
         }
 
+        public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
+
+        public Dictionary<string, object> AdditionalPayloadClaims { get; set; }
+
         public CallContext CallContext { get; set; } = new CallContext();
+
+        public string CustomNonceValue { get; set; }
 
         public object ExpectedClaimValue { get; set; }
 

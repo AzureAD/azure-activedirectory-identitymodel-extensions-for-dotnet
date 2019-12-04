@@ -50,7 +50,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
 
-        private readonly JsonWebTokenHandler _jwtTokenHandler = new JsonWebTokenHandler();
+        private readonly JsonWebTokenHandler _jwtTokenHandler = new JsonWebTokenHandler()
+        {
+            SetDefaultTimesOnTokenCreation = false
+        };
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
         private readonly HttpClient _defaultHttpClient = new HttpClient();
 
@@ -66,7 +69,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
             var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor);
-            return _jwtTokenHandler.CreateToken(payload, signedHttpRequestDescriptor.SigningCredentials, new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType } });
+
+            var additionalHeaderClaims = signedHttpRequestDescriptor.AdditionalHeaderClaims ?? new Dictionary<string, object>();
+            // set the "typ" header claim to "pop"
+            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.2
+            additionalHeaderClaims[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
+
+            return _jwtTokenHandler.CreateToken(payload, signedHttpRequestDescriptor.SigningCredentials, additionalHeaderClaims);
         }
 
         /// <summary>
@@ -75,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
-        /// Users can utilize <see cref="SignedHttpRequestCreationParameters.AdditionalClaimCreator"/> to create additional claim(s) and add them to the signed http request.
+        /// Users can utilize <see cref="SignedHttpRequestDescriptor.AdditionalPayloadClaims"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
         protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
@@ -110,7 +119,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateCnf)
                 AddCnfClaim(payload, signedHttpRequestDescriptor);
 
-            signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.AdditionalClaimCreator?.Invoke(payload, signedHttpRequestDescriptor);
+            if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null && signedHttpRequestDescriptor.AdditionalPayloadClaims.Any())
+            {
+                foreach (var additionalPayloadClaim in signedHttpRequestDescriptor.AdditionalPayloadClaims)
+                {
+                    if (!payload.ContainsKey(additionalPayloadClaim.Key))
+                        payload.Add(additionalPayloadClaim.Key, additionalPayloadClaim.Value);
+                }
+            }
 
             return SignedHttpRequestUtilities.ConvertToJson(payload);
         }
@@ -348,15 +364,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateNonce"/> is set to <c>true</c>.
-        /// Users can utilize <see cref="SignedHttpRequestCreationParameters.CustomNonceCreator"/> to override the default behavior.
+        /// Users can utilize <see cref="SignedHttpRequestDescriptor.CustomNonceValue"/> to provide a custom nonce value.
         /// </remarks>
         internal virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CustomNonceCreator != null)
-                signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CustomNonceCreator(payload, signedHttpRequestDescriptor);
+            if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CustomNonceValue))
+                payload.Add(SignedHttpRequestClaimTypes.Nonce, signedHttpRequestDescriptor.CustomNonceValue);
             else
                 payload.Add(SignedHttpRequestClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
         }

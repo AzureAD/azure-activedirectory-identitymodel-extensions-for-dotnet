@@ -26,24 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
-    /// <summary>
-    /// A delegate that will be called to create and add additional claim(s), if set.
-    /// </summary>
-    /// <param name="payload">A SignedHttpRequest payload.</param>
-    /// <param name="signedHttpRequestDescriptor">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
-    public delegate void AdditionalClaimCreator(IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor);
-
-    /// <summary>
-    /// A delegate that will be called to create and add the nonce claim, overriding the default behavior.
-    /// </summary>
-    /// <param name="payload">A SignedHttpRequest payload.</param>
-    /// <param name="signedHttpRequestDescriptor">A structure for wrapping parameters needed for SignedHttpRequest creation.</param>
-    public delegate void CustomNonceCreator(IDictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor);
-
     /// <summary>
     /// Defines a set of parameters that are used by a <see cref="SignedHttpRequestHandler"/> when creating a SignedHttpRequest.
     /// </summary>
@@ -104,16 +89,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateB { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets the <see cref="AdditionalClaimCreator"/> delegate.
-        /// </summary>
-        public AdditionalClaimCreator AdditionalClaimCreator { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="CustomNonceCreator"/> delegate. 
-        /// </summary>
-        public CustomNonceCreator CustomNonceCreator { get; set; }
 
         /// <summary>
         /// Default value for the <see cref="TimeAdjustment"/>.
