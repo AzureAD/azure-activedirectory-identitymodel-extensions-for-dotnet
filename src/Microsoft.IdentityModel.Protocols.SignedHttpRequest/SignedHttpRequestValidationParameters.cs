@@ -30,21 +30,11 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
-    /// <summary>
-    /// A delegate that will be called to validate a custom claim, if set. 
-    /// </summary>
-    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
-    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
-    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-    /// <returns>Expected to throw an appropriate exception if custom claim validation failed.</returns>
-    public delegate Task AdditionalClaimValidatorAsync(SecurityToken signedHttpRequest , SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
-
     /// <summary>
     /// A delegate that will be called to retrieve a collection of <see cref="SecurityKey"/>s used for the 'cnf' claim decryption.
     /// </summary>
@@ -112,11 +102,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUnsignedHeaders { get; set; } = true;
-
-        /// <summary>
-        /// Gets or sets the <see cref="AdditionalClaimValidatorAsync"/> delegate.
-        /// </summary>
-        public AdditionalClaimValidatorAsync AdditionalClaimValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.

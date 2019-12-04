@@ -983,10 +983,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
                 context.AddDiff($"ValidationParameters.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
 
-            methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_AdditionalClaimValidatorCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null))
-                context.AddDiff($"ValidationParameters.AdditionalClaimValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null}, AdditionalClaimValidator call status: {methodCalledStatus}.");
-
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
             if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null))
                 context.AddDiff($"ValidationParameters.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
@@ -1014,11 +1010,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateU = true,
                             ValidateH = true,
                             ValidateB = true,
-                            AdditionalClaimValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
-                            {
-                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_AdditionalClaimValidatorCall"] = true;
-                                await Task.FromResult<object>(null);
-                            },
                             SignedHttpRequestReplayValidatorAsync = async (string nonce, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
                             {
                                 signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
@@ -1056,7 +1047,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateU = false,
                             ValidateH = false,
                             ValidateB = false,
-                            AdditionalClaimValidatorAsync = null,
                             SignedHttpRequestReplayValidatorAsync = null,
                         },
                         CallContext = new CallContext()

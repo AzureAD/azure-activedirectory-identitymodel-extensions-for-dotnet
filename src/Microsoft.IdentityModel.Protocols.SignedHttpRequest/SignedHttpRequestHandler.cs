@@ -504,8 +504,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns></returns>
         /// <remarks>
         /// The library doesn't provide any caching logic for replay validation purposes.
-        /// <see cref="SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync"/> delegate can be utilized for replay validation.
-        /// Users can utilize <see cref="SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync"/> to validate additional signed http request claim(s).
+        /// <see cref="SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync"/> delegate can be utilized for replay validation
         /// </remarks>
         protected virtual async Task<SecurityToken> ValidateSignedHttpRequestPayloadAsync(SecurityToken signedHttpRequest, IEnumerable<SecurityKey> popKeys, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
@@ -540,9 +539,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
                 ValidateBClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
-
-            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync != null)
-                await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AdditionalClaimValidatorAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             return jwtSignedHttpRequest;
         }
