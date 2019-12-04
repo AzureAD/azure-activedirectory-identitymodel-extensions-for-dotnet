@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public TokenValidationParameters AccessTokenValidationParameters { get; }
 
         /// <summary>
-        /// An opaque context used to store work when working with authentication artifacts.
+        /// An opaque context used to store work and logs when working with authentication artifacts. 
         /// </summary>
         public CallContext CallContext { get; }
 

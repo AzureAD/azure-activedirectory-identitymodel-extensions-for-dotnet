@@ -43,27 +43,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signingCredentials = SignedHttpRequestTestUtils.DefaultSigningCredentials;
             var creationParameters = new SignedHttpRequestCreationParameters();
             var callContext = new CallContext();
-
             Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null, (SignedHttpRequestCreationParameters)null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null, (CallContext)null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null, null, null));
+            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(null, httpRequestData, null, null));
             Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(string.Empty, httpRequestData, null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(string.Empty, httpRequestData, null, (SignedHttpRequestCreationParameters)null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(string.Empty, httpRequestData, null, (CallContext)null));
-            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(string.Empty, httpRequestData, null, null, null));
-            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestDescriptor(accessToken, null, null, creationParameters, callContext));
+            Assert.Throws<ArgumentNullException>("accessToken", () => new SignedHttpRequestDescriptor(string.Empty, httpRequestData, null, null));
             Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestDescriptor(accessToken, null, null));
-            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestDescriptor(accessToken, null, null, (SignedHttpRequestCreationParameters)null));
-            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestDescriptor(accessToken, null, null, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("httpRequestData", () => new SignedHttpRequestDescriptor(accessToken, null, null, null));
             Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, null));
-            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, null, (SignedHttpRequestCreationParameters)null));
-            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, null, (CallContext)null));
-            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, null, creationParameters, callContext));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestCreationParameters", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, (SignedHttpRequestCreationParameters)null));
-            Assert.Throws<ArgumentNullException>("signedHttpRequestCreationParameters", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, null, callContext));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, creationParameters, null));
-            Assert.Throws<ArgumentNullException>("callContext", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, (CallContext)null));
+            Assert.Throws<ArgumentNullException>("signingCredentials", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, null, null));
+            Assert.Throws<ArgumentNullException>("signedHttpRequestCreationParameters", () => new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, null));
 
             // no exceptions
             var signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials);
@@ -71,28 +59,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.Equal(accessToken, signedHttpRequestDescriptor.AccessToken);
             Assert.Equal(signingCredentials, signedHttpRequestDescriptor.SigningCredentials);
             Assert.NotNull(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters);
-            Assert.NotNull(signedHttpRequestDescriptor.CallContext);
 
             signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, creationParameters);
             Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
             Assert.Equal(accessToken, signedHttpRequestDescriptor.AccessToken);
             Assert.Equal(signingCredentials, signedHttpRequestDescriptor.SigningCredentials);
             Assert.Equal(creationParameters, signedHttpRequestDescriptor.SignedHttpRequestCreationParameters);
-            Assert.NotNull(signedHttpRequestDescriptor.CallContext);
-
-            signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, callContext);
-            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
-            Assert.Equal(accessToken, signedHttpRequestDescriptor.AccessToken);
-            Assert.Equal(signingCredentials, signedHttpRequestDescriptor.SigningCredentials);
-            Assert.Equal(callContext, signedHttpRequestDescriptor.CallContext);
-            Assert.NotNull(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters);
-
-            signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(accessToken, httpRequestData, signingCredentials, creationParameters, callContext);
-            Assert.Equal(httpRequestData, signedHttpRequestDescriptor.HttpRequestData);
-            Assert.Equal(accessToken, signedHttpRequestDescriptor.AccessToken);
-            Assert.Equal(signingCredentials, signedHttpRequestDescriptor.SigningCredentials);
-            Assert.Equal(creationParameters, signedHttpRequestDescriptor.SignedHttpRequestCreationParameters);
-            Assert.Equal(callContext, signedHttpRequestDescriptor.CallContext);
         }
     }
 }

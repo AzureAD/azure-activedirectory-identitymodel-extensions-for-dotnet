@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var handler = new SignedHttpRequestHandlerPublic();
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var payloadString = handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
+                var payloadString = handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor, theoryData.CallContext);
                 var payload = JObject.Parse(payloadString);
 
                 foreach (var payloadItem in payload)
@@ -265,8 +265,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
 
-                if (!IdentityComparer.AreEqual(payload.Value<long>(theoryData.ExpectedClaim), theoryData.ExpectedClaimValue))
-                    context.AddDiff($"Value of '{theoryData.ExpectedClaim}' claim is '{payload.Value<long>(theoryData.ExpectedClaim)}', but expected value was '{theoryData.ExpectedClaimValue}'");
+                var delta = 5;
+                var expectedTs = (long)theoryData.ExpectedClaimValue;
+                var actualTs = payload.Value<long>(theoryData.ExpectedClaim);
+                if (Math.Abs(expectedTs - actualTs) > delta)
+                {
+                    context.AddDiff($"Expected ts '{expectedTs}' was not the same as the actual ts '{actualTs}' within a tolerance of '{delta}' seconds.");
+                }
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -282,20 +287,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             get
             {
-                var timeNow = new DateTime(2019, 01, 01, 01, 01, 01, 01);
+                var timeNow = DateTime.UtcNow;
                 return new TheoryData<CreateSignedHttpRequestTheoryData>
                 {
                     new CreateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        CallContext = new CallContext() { PropertyBag = new Dictionary<string, object>() { {"MockAddTsClaim", timeNow } } },
                         ExpectedClaim = SignedHttpRequestClaimTypes.Ts,
                         ExpectedClaimValue = (long)(timeNow - EpochTime.UnixEpoch).TotalSeconds,
                         TestId = "ValidTs",
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        CallContext = new CallContext() { PropertyBag = new Dictionary<string, object>() { {"MockAddTsClaim", timeNow } } },
                         SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters() { TimeAdjustment = TimeSpan.FromMinutes(-1) },
                         ExpectedClaim = SignedHttpRequestClaimTypes.Ts,
                         ExpectedClaimValue = (long)(timeNow - EpochTime.UnixEpoch).TotalSeconds - 60,
@@ -303,7 +306,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        CallContext = new CallContext() { PropertyBag = new Dictionary<string, object>() { {"MockAddTsClaim", timeNow } } },
                         SignedHttpRequestCreationParameters = new SignedHttpRequestCreationParameters() { TimeAdjustment = TimeSpan.FromMinutes(1) },
                         ExpectedClaim = SignedHttpRequestClaimTypes.Ts,
                         ExpectedClaimValue = (long)(timeNow - EpochTime.UnixEpoch).TotalSeconds + 60,
@@ -1231,7 +1233,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var handler = new SignedHttpRequestHandlerPublic();
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor);
+                var payloadString =  handler.CreateHttpRequestPayloadPublic(signedHttpRequestDescriptor, theoryData.CallContext);
                 var payload = JObject.Parse(payloadString);
 
                 if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null)
@@ -1319,13 +1321,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Headers = HttpRequestHeaders
             };
 
-            var callContext = CallContext;
-            if (callContext.PropertyBag == null)
-                callContext.PropertyBag = new Dictionary<string, object>() { { "testId", TestId } };
-            else
-                callContext.PropertyBag.Add("testId", TestId);
-
-            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters, callContext)
+            return new SignedHttpRequestDescriptor(Token, httpRequestData, SigningCredentials, SignedHttpRequestCreationParameters)
             {
                 AdditionalHeaderClaims = AdditionalHeaderClaims,
                 AdditionalPayloadClaims = AdditionalPayloadClaims,

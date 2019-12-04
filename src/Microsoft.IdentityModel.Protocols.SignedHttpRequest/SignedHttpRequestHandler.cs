@@ -63,12 +63,24 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
+        /// <remarks>Default <see cref="CallContext"/> will be created.</remarks>
         public string CreateSignedHttpRequest(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        {
+            return CreateSignedHttpRequest(signedHttpRequestDescriptor, new CallContext());
+        }
+
+        /// <summary>
+        /// Creates a signed http request using the <paramref name="signedHttpRequestDescriptor"/>.
+        /// /// </summary>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="callContext" >An opaque context used to store work and logs when working with authentication artifacts.</param>
+        /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
+        public string CreateSignedHttpRequest(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
             if (signedHttpRequestDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
-            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor);
+            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
 
             var additionalHeaderClaims = signedHttpRequestDescriptor.AdditionalHeaderClaims ?? new Dictionary<string, object>();
             // set the "typ" header claim to "pop"
@@ -82,11 +94,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Creates a JSON representation of a HttpRequest payload.
         /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        /// <param name="callContext" >An opaque context used to store work and logs when working with authentication artifacts.</param> 
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
         /// Users can utilize <see cref="SignedHttpRequestDescriptor.AdditionalPayloadClaims"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
-        protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
 

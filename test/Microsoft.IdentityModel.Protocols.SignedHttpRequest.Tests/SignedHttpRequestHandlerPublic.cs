@@ -47,9 +47,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     /// </summary>
     public class SignedHttpRequestHandlerPublic : SignedHttpRequestHandler
     {
-        public string CreateHttpRequestPayloadPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        public string CreateHttpRequestPayloadPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
-            return CreateHttpRequestPayload(signedHttpRequestDescriptor);
+            return CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
         }
 
         public void AddAtClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
@@ -188,22 +188,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         #region Mock methods
-        internal override void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            if (signedHttpRequestDescriptor.CallContext.PropertyBag != null && signedHttpRequestDescriptor.CallContext.PropertyBag.TryGetValue("MockAddTsClaim", out object DateTimeNow))
-            {
-                if (payload == null)
-                    throw LogHelper.LogArgumentNullException(nameof(payload));
-
-                var signedHttpRequestCreationTime = ((DateTime)DateTimeNow).Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment);
-                payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
-            }
-            else
-            {
-                base.AddTsClaim(payload, signedHttpRequestDescriptor);
-            }
-        }
-
         internal override void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("onlyTrack_ValidateTsClaimCall"))
