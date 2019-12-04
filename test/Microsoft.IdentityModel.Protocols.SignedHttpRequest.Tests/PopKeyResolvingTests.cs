@@ -528,8 +528,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        ValidatedAccessToken = new JwtSecurityToken(SignedHttpRequestTestUtils.CreateAt(null, false)),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
+                        ValidatedAccessToken = new JsonWebToken(SignedHttpRequestTestUtils.CreateAt(null, false)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23003"),
                         TestId = "InvalidNullAccessToken",
                     },
                     new ResolvePopKeyTheoryData
@@ -923,9 +923,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public string Token { get; set; } = SignedHttpRequestTestUtils.DefaultEncodedAccessToken;
 
-        public SecurityToken SignedHttpRequestToken { get; set; }
+        public JsonWebToken SignedHttpRequestToken { get; set; }
 
-        public SecurityToken ValidatedAccessToken { get; set; }
+        public JsonWebToken ValidatedAccessToken { get; set; }
 
         public string PopKeyString { get; set; }
 

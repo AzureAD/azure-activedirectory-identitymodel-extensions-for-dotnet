@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -45,8 +44,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public class SignedHttpRequestValidationTests
     {
-        private readonly static string _encodedTokenHelper = "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJwb3AifQ.eyJhdCI6eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJSU0EiLCJuIjoiNitGckZrdC9UQnlRL0w1ZDdvcis5UFZBb3dwc3d4VWUzZEplWUZUWTBMZ3E3ektJNU9RNVJuU3JJMFQ5eXJmblJ6RTlvT2RkNHptVmo5dHhWTEkreXlTdmluQXUzeVFEUW91MkdhNDJNTC8rSzRKcmQ1Y2xNVVBSR01iWGRWNVJsOXp6QjBzMkpvWkplZHVhNWR3b1F3MEdrUzVaOFlBWEJFelVMcnVwMDZmbkI1bjZ4NXIyeTFDLzhFYnA1Y3lFNEJqczdXNjhyVWx5SWx4MWx6WXZha3hTbmhVeFNzang3dS9tSWR5d3lHZmdpVDN0dzBGc1d2a2kvS1l1ckFQUjFCU01YaEN6elpUa01XS0U4SWFMa2hhdXc1TWR4b2p4eUJWdU5ZK0ovZWxxK0hnSi9kWks2Zzd2TU52WHoyL3ZUK1N5a0lrendpRDllU0k5VVdmc2p3PT0iLCJlIjoiQVFBQiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCJ9fX0sIm0iOiJHRVQiLCJ1Ijoid3d3LmNvbnRvc28uY29tIiwicCI6Ii9wYXRoMSIsInEiOiJbW1wiYlwiLFwiYVwiLFwiY1wiXSxcInU0TGdrR1VXaFA5TXNLckVqQTRkaXpJbGxEWGx1RGt1NlpxQ2V5dVItSllcIl0iLCJoIjoiW1tcImNvbnRlbnQtdHlwZVwiLFwiZXRhZ1wiXSxcIlA2ejVYTjR0VHpIa2Z3ZTNYTzFZdlZVSXVyU3VodmhfVUcxME5fai1hR3NcIl0iLCJiIjoiWkstTzJnekhqcHNDR3BlZDZzVUwyRU0yMFo5VC11RjA3TENHTUE4OFVGdyIsIm5vbmNlIjoiODFkYTQ5MGY0NmMzNDk0ZWJhOGM2ZTI1YTQ1YTRkMGYiLCJ0cyI6MTU2OTk0NDc2OSwiZXhwIjoxNTY5OTczNTc4LjAsImlhdCI6MTU2OTk2OTk3OCwibmJmIjoxNTY5OTY5OTc4fQ.OiLM-S_Da8gwKw3dxXI-4TMyH9JZuKCdJnr_1xyFg1UbhKe2kuWA9J6nBtuAWHXUxHpvwwHNYcEjB6eNMJFEHnAVwEvaMgJCmI0dG6xof201riSKqflFJxh2fq7z2clReWpLLmP0o1S1LGSx74g5cubl90ivQ7MoYPeyIMoSTfGwsTGXKAnf4MnCIt3Ykp0KbTj6WHnS1LmtSCTBGXslV7jD28ikjF3w5Xk2Nv6WmUJAYNhGC3fiUnzqt3buiyynhF4sXbYxKDLYPeUWH-oZVEFuaGC2nnTA_5-aS0yHPmcj-CDRanHAZA9Y-UFMyFm9oO-QffHc-ZL8mcIfx-Kmfg";
-
         [Fact]
         public async void SignedHttpRequestReplayValidation()
         {
@@ -162,18 +159,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidTsClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
                     },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        SignedHttpRequestToken = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "NullToken",
-                    },
                 };
             }
         }
@@ -249,13 +234,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.M, null)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidMClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        HttpRequestMethod = "GET",
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -350,13 +328,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.U, null)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidUClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        HttpRequestUri = new Uri("https://www.contoso.com"),
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -468,13 +439,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.P, null)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        HttpRequestUri = new Uri("https://www.contoso.com/path1"),
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
@@ -742,13 +706,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
                         SignedHttpRequestToken = null,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullToken",
@@ -923,13 +880,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        HttpRequestUri = new Uri("https://www.contoso.com/path1"),
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
                         SignedHttpRequestToken = null,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullToken",
@@ -992,18 +942,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidBClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
                     },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        SignedHttpRequestToken = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "NullToken",
-                    },
                 };
             }
         }
@@ -1015,7 +953,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             var handler = new SignedHttpRequestHandlerPublic();
-             var signedHttpRequest = await handler.ValidateSignedHttpRequestPublicAsync(theoryData.SignedHttpRequestToken, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+             var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadPublicAsync(theoryData.SignedHttpRequestToken, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
             if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
@@ -1052,9 +990,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
             if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null))
                 context.AddDiff($"ValidationParameters.SignedHttpRequestReplayValidatorAsync={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestReplayValidatorAsync != null}, ReplayValidator call status: {methodCalledStatus}.");
-
-            if (signedHttpRequest.SigningKey == null)
-                context.AddDiff("signedHttpRequest.SigningKey == null");
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -1179,13 +1114,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
-                        SignedHttpRequestToken = new JwtSecurityToken(_encodedTokenHelper),
-                        PopKeys = new List<SecurityKey>() {  validPopKey },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestValidationException), "IDX23031"),
-                        TestId = "InvalidTokenType",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
                         SignedHttpRequestToken = signedHttpRequest,
                         PopKeys = null,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23030"),
@@ -1465,7 +1393,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public SecurityKey ExpectedPopKey { get; set; }
 
-        internal SecurityToken SignedHttpRequestToken { get; set; }
+        internal JsonWebToken SignedHttpRequestToken { get; set; }
     }
 }
 
