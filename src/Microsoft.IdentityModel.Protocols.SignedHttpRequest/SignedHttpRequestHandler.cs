@@ -912,7 +912,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 validatedAccessToken = validatedAccessToken.InnerToken;
             
             if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject cnf) && cnf != null)
-                return cnf.ToString();
+                return cnf.ToString(Formatting.None);
             else if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnfString) && !string.IsNullOrEmpty(cnfString))
                 return cnfString;
             else
