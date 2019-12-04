@@ -54,7 +54,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23017 = "IDX23017: No decryption keys found. Unable to decrypt a key found in the 'jwe' claim without decryption keys.";
         public const string IDX23018 = "IDX23018: Unable to decrypt a 'jwe' claim. Decryption keys used: '{0}'. Inner exception: '{1}'.";
         public const string IDX23019 = "IDX23019: A security key resolved from the 'jwe' claim is not a symmetric key. Resolved key type: '{0}'.";
-        public const string IDX23020 = "IDX23020: Only one PoP key should be resolved using the 'jku' claim. Number of resolved keys: '{0}'.";
         public const string IDX23021 = "IDX23021: Unable to resolve a PoP key from the 'jku' claim. Unable to match kid '{0}' against '{1}'.";
         public const string IDX23022 = "IDX23022: Exception caught while retrieving a jwk set from: '{0}'. Inner exception: '{1}'.";
         public const string IDX23023 = "IDX23023: Unable to resolve a PoP key using only the 'kid' claim. To utilize 'cnf' claim reference, a 'cnf' claim must be included as a root element of SignedHttpRequest. To manually resolve a PoP key using the 'kid', set the 'PopKeyResolverFromKeyIdentifierAsync' delegate on 'SignedHttpRequestValidationParameters'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
@@ -65,9 +64,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23028 = "IDX23028: Query parameter: '{0}' was not found in the request query parameters: '{1}'. Unable to validate the 'q' claim.";
         public const string IDX23029 = "IDX23029: The request contains unsigned query parameters and SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters is set to 'false'. Unsigned query parameters: '{0}'.";
         public const string IDX23030 = "IDX23030: Unable to cast a '{0}' into a '{1}'. '{0}': '{2}'.";
-        public const string IDX23031 = "IDX23031: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned null.";
+        public const string IDX23031 = "IDX23031: Unable to resolve a PoP key from the 'jku' claim. GetPopKeysFromJkuAsync method returned no keys.";
         public const string IDX23032 = "IDX23032: SigningCredentials object has a key that is not a JsonWebKey or an AsymmetricKey. Unable to create a 'cnf' claim from '{0}'. Use 'SignedHttpRequestDescriptor.CnfClaimValue' to manually set a 'cnf' claim value, or set 'SignedHttpRequestCreationParameters.CreateCnf' flag to false.";
         public const string IDX23033 = "IDX23033: Unable to validate the 'cnf' claim reference. Thumbprint of the JWK used to sign the SignedHttpRequest (root 'cnf' claim) does not match the expected thumbprint ('at' -> 'cnf' -> 'kid'). Expected value: '{0}', actual value: '{1}'. Root 'cnf' claim value: '{2}'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
         public const string IDX23034 = "IDX23034: Signed http request signature validation failed. SignedHttpRequest: '{0}'";
+        public const string IDX23035 = "IDX23035: Unable to resolve a PoP key from the 'jku' claim. Multiple keys are found in the referenced JWK Set document and the 'cnf' claim doesn't contain a 'kid' value.";
     }
 }

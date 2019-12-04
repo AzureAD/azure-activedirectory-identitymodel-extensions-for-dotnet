@@ -119,13 +119,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        MethodToCall = "trackResolvePopKeyFromJkuKid",
+                        MethodToCall = "trackResolvePopKeyFromJku",
                         ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJkuKid.ToString(Formatting.None),
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
                             {
-                                { "trackResolvePopKeyFromJkuKid", false }
+                                { "trackResolvePopKeyFromJku", false }
                             }
                         },
                         ValidatedAccessToken = accessToken,
@@ -422,7 +422,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, null, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (popKey == null)
                     context.AddDiff("Resolved Pop key is null.");
@@ -453,7 +453,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 {"mockGetPopKeysFromJkuAsync_return0Keys", null }
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23031"),
                         TestId = "InvalidZeroKeysReturned",
                     },
                     new ResolvePopKeyTheoryData
@@ -465,20 +465,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 {"mockGetPopKeysFromJkuAsync_returnNull", null }
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23031"),
                         TestId = "InvalidNullReturned",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        CallContext = new CallContext()
-                        {
-                            PropertyBag = new Dictionary<string, object>()
-                            {
-                                {"mockGetPopKeysFromJkuAsync_return2Keys", null }
-                            }
-                        },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23020"),
-                        TestId = "InvalidTwoKeysReturned",
                     },
                     new ResolvePopKeyTheoryData
                     {
@@ -566,7 +554,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, theoryData.Kid, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, JObject.Parse($@"{{""kid"": ""{theoryData.Kid}""}}"), null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (popKey == null)
                     context.AddDiff("Resolved Pop key is null.");
@@ -590,18 +578,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         First = true,
-                        Kid = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "InvalidKidNull",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
-                        Kid = string.Empty,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "InvalidEmptyKid",
-                    },
-                    new ResolvePopKeyTheoryData
-                    {
                         Kid = "irelevantForThisTest",
                         CallContext = new CallContext()
                         {
@@ -610,7 +586,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 {"mockGetPopKeysFromJkuAsync_return0Keys", null }
                             }
                         },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23021"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23031"),
                         TestId = "InvalidZeroKeysReturned",
                     },
                     new ResolvePopKeyTheoryData
@@ -628,12 +604,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        Kid = SignedHttpRequestTestUtils.DefaultSigningCredentials.Kid,
+                        Kid ="bad_kid",
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
                             {
-                                {"mockGetPopKeysFromJkuAsync_returnWrongKey", null }
+                                {"mockGetPopKeysFromJkuAsync_return2Keys", null }
                             }
                         },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23021"),

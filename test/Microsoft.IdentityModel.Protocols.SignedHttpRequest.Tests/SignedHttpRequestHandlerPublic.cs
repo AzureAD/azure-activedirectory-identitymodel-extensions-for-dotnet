@@ -33,6 +33,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
@@ -171,14 +172,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return await ResolvePopKeyFromJweAsync(jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
       
-        public async Task<SecurityKey> ResolvePopKeyFromJkuPublicAsync(string jkuSetUrl, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal async Task<SecurityKey> ResolvePopKeyFromJkuPublicAsync(string jkuSetUrl, JObject cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            return await ResolvePopKeyFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-        }
-       
-        public async Task<SecurityKey> ResolvePopKeyFromJkuPublicAsync(string jkuSetUrl, string kid, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
-        {
-            return await ResolvePopKeyFromJkuAsync(jkuSetUrl, kid, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            return await ResolvePopKeyFromJkuAsync(jkuSetUrl, cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IList<SecurityKey>> GetPopKeysFromJkuPublicAsync(string jkuSetUrl, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
@@ -374,7 +370,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return await base.ResolvePopKeyFromJweAsync(jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        internal override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, JObject cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJku"))
             {
@@ -382,18 +378,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 return null;
             }
 
-            return await base.ResolvePopKeyFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-        }
-
-        internal override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, string kid, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
-        {
-            if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJkuKid"))
-            {
-                signedHttpRequestValidationContext.CallContext.PropertyBag["trackResolvePopKeyFromJkuKid"] = true;
-                return null;
-            }
-
-            return await base.ResolvePopKeyFromJkuAsync(jkuSetUrl, kid, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            return await base.ResolvePopKeyFromJkuAsync(jkuSetUrl, cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
         internal override async Task<SecurityKey> ResolvePopKeyFromKeyIdentifierAsync(string kid, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)

@@ -911,25 +911,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(confirmationClaim));
 
             var cnf = JObject.Parse(confirmationClaim);
+
             if (cnf.TryGetValue(ConfirmationClaimTypes.Jwk, StringComparison.Ordinal, out var jwk))
-            {
                 return ResolvePopKeyFromJwk(jwk.ToString(), signedHttpRequestValidationContext);
-            }
             else if (cnf.TryGetValue(ConfirmationClaimTypes.Jwe, StringComparison.Ordinal, out var jwe))
-            {
                 return await ResolvePopKeyFromJweAsync(jwe.ToString(), signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            }
             else if (cnf.TryGetValue(ConfirmationClaimTypes.Jku, StringComparison.Ordinal, out var jku))
-            {
-                if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
-                    return await ResolvePopKeyFromJkuAsync(jku.ToString(), kid.ToString(), signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-                else
-                    return await ResolvePopKeyFromJkuAsync(jku.ToString(), signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            }
+                return await ResolvePopKeyFromJkuAsync(jku.ToString(), cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
-            {
                 return await ResolvePopKeyFromKeyIdentifierAsync(kid.ToString(), signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            }
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23014, cnf.ToString())));
         }
@@ -975,51 +965,41 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP JWK set.
-        /// The method throws an exception is there is more than one resolved PoP key.
-        /// </summary>
-        /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
-        /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
-        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
-        {
-            var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            var popKeyCount = popKeys != null ? popKeys.Count : 0;
-
-            if (popKeyCount == 0)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23020, popKeyCount.ToString())));
-            else if (popKeyCount > 1)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23020, popKeyCount.ToString())));
-            else
-                return popKeys[0];
-        }
-
-        /// <summary>
         /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP key.  
         /// </summary>
         /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
-        /// <param name="kid">A PoP key identifier.</param>
+        /// <param name="cnf">A confirmation ("cnf") claim as a JObject.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, string kid, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, JObject cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(kid))
-                throw LogHelper.LogArgumentNullException(nameof(kid));
-
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
-            if (popKeys == null)
+            if (popKeys == null || popKeys.Count == 0)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23031)));
 
-            foreach (var key in popKeys)
+            if (popKeys.Count == 1)
             {
-                if (string.Equals(key.KeyId, kid.ToString(), StringComparison.Ordinal))
-                    return key;
+                return popKeys[0];
             }
+            // If there are multiple keys in the referenced JWK Set document, a "kid" member MUST also be included
+            // with the referenced key's JWK also containing the same "kid" value.
+            // https://tools.ietf.org/html/rfc7800#section-3.5
+            else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
+            {
+                foreach (var key in popKeys)
+                {
+                    if (string.Equals(key.KeyId, kid.ToString(), StringComparison.Ordinal))
+                        return key;
+                }
 
-            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23021, kid, string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23021, kid, string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
+            }
+            else
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23035)));
+            }
         }
 
         /// <summary>
