@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14303 = "IDX14303: Claim with name '{0}' does not exist in the header.";
         internal const string IDX14304 = "IDX14304: Claim with name '{0}' does not exist in the payload.";
         internal const string IDX14305 = "IDX14305: Unable to convert the '{0}' claim to the following type: '{1}'. Claim type was: '{2}'.";
+        internal const string IDX14306 = "IDX14306: JWE Ciphertext cannot be an empty string.";
 #pragma warning restore 1591
     }
 }
