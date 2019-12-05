@@ -334,7 +334,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Computes a hash over the <see cref="JsonWebKey"/>.
+        /// Computes a sha256 hash over the <see cref="JsonWebKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
         /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
