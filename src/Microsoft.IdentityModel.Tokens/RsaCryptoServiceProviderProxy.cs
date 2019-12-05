@@ -102,6 +102,8 @@ namespace Microsoft.IdentityModel.Tokens
                 try
                 {
                     _rsa = new RSACryptoServiceProvider(csp);
+                    // since we created a new RsaCryptoServiceProvider we need to dispose it
+                    _disposeRsa = true;
                 }
                 catch (CryptographicException) when (isMono)
                 {
@@ -109,9 +111,6 @@ namespace Microsoft.IdentityModel.Tokens
                     // The solution is to simply not level up the provider as this workaround is not needed on mono.
                     _rsa = rsa;
                 }
-
-                // since we created a new RsaCryptoServiceProvider we need to dispose it
-                _disposeRsa = true;
             }
             else
             {
