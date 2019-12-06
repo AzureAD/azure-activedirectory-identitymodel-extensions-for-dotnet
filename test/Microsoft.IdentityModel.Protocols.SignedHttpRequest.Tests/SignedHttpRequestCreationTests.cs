@@ -939,13 +939,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new CreateSignedHttpRequestTheoryData
                     {
-                        ExpectedClaim = SignedHttpRequestClaimTypes.H,
-                        HttpRequestHeaders = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "NullHeaders",
-                    },
-                    new CreateSignedHttpRequestTheoryData
-                    {
                         Payload = null,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullPayload",
@@ -1348,7 +1341,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public string HttpRequestMethod { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public byte[] HttpRequestBody { get; set; }
 

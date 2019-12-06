@@ -880,7 +880,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public string HttpRequestMethod { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public byte[] HttpRequestBody { get; set; }
 

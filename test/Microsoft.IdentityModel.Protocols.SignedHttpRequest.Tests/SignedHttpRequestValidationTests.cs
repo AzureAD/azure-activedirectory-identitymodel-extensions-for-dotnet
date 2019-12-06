@@ -688,13 +688,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        HttpRequestHeaders = null,
-                        SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, null)),
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "NullHeaders",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, "notAnArray")),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23003"),
@@ -706,12 +699,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, null)),
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23003"),
                         TestId = "InvalidClaimNotPresent",
-                    },
-                    new ValidateSignedHttpRequestTheoryData
-                    {
-                        SignedHttpRequestToken = null,
-                        ExpectedException = ExpectedException.ArgumentNullException(),
-                        TestId = "NullToken",
                     },
                 };
             }
@@ -883,6 +870,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         SignedHttpRequestToken = null,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "NullToken",
@@ -1353,7 +1341,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public string HttpRequestMethod { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public byte[] HttpRequestBody { get; set; }
 

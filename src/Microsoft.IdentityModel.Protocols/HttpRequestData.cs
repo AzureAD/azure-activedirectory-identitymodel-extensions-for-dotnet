@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     public class HttpRequestData
     {
+        private IDictionary<string, IEnumerable<string>> _headers = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// Gets or sets the http request URI. 
         /// </summary>
@@ -55,8 +57,17 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Gets or sets the collection of http request headers.
         /// </summary>
-        public IDictionary<string, IEnumerable<string>> Headers { get; set; }
-
+        public IDictionary<string, IEnumerable<string>> Headers
+        {
+            get
+            {
+                return _headers;
+            }
+            set
+            {
+                _headers = value ?? throw new ArgumentNullException(nameof(Headers));
+            }
+        }
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
         /// </summary>
@@ -68,10 +79,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="headers">A collection of http request headers.</param>
         public void AppendHeaders(HttpHeaders headers)
         {
-            if (Headers == null)
-                Headers = new Dictionary<string, IEnumerable<string>>(StringComparer.OrdinalIgnoreCase);
-
-            if (headers == null || !headers.Any())
+            if (headers == null)
                 return;
 
             foreach (var header in headers)

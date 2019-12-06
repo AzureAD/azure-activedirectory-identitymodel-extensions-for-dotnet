@@ -311,9 +311,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            if (signedHttpRequestDescriptor.HttpRequestData.Headers == null)
-                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Headers));
-
             var sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
             List<string> headerNameList = new List<string>();
@@ -768,15 +765,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>     
         internal virtual void ValidateHClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            var httpRequestHeaders = signedHttpRequestValidationContext.HttpRequestData.Headers;
-
-            if (httpRequestHeaders == null)
-                throw LogHelper.LogArgumentNullException(nameof(httpRequestHeaders));
-
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out JArray hClaim) || hClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.H)));
 
-            var sanitizedHeaders = SanitizeHeaders(httpRequestHeaders);
+            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestValidationContext.HttpRequestData.Headers);
 
             string hClaimBase64UrlEncodedHash = string.Empty;
             string expectedBase64UrlEncodedHash = string.Empty;

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -194,7 +195,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new SignedHttpRequestUtilityTheoryData
                     {
                         First = true,
-                        HttpRequestHeaders = null,
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         HttpHeaders = null,
                         ExpectedHttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         TestId = "Valid1",
@@ -214,7 +215,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new SignedHttpRequestUtilityTheoryData
                     {
-                        HttpRequestHeaders = null,
+                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         HttpHeaders = SignedHttpRequestTestUtils.CreateHttpHeaders(new List<KeyValuePair<string, string>>()
                         {
                             new KeyValuePair<string, string> ("h1", "value1")
@@ -261,6 +262,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             { "h1", new List<string> { "value1", "value2" } },
                         },
                         TestId = "Valid5",
+                    },
+                    new SignedHttpRequestUtilityTheoryData
+                    {
+                        HttpRequestHeaders = null,
+                        HttpHeaders = null,
+                        ExpectedException = ExpectedException.ArgumentNullException(),
+                        TestId = "InvalidNullHeaders",
                     },
                 };
             }
@@ -445,11 +453,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public JsonWebKey JsonWebKey { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> HttpRequestHeaders { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public string ExpectedJwkClaim { get; set; }
 
-        public IDictionary<string, IEnumerable<string>> ExpectedHttpRequestHeaders { get; set; }
+        public IDictionary<string, IEnumerable<string>> ExpectedHttpRequestHeaders { get; set; } = new Dictionary<string, IEnumerable<string>>();
 
         public HttpRequestData ExpectedHttpRequestData { get; set; }
 
