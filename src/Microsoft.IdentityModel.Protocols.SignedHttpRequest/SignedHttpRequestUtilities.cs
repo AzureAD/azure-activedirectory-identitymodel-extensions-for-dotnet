@@ -99,16 +99,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return httpRequestData;
         }
 
-        /// <summary>
-        /// Converts a dictionary into a JSON string.
-        /// </summary>
-        /// <param name="payload">Payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <returns>A JSON string.</returns>
-        public static string ConvertToJson(Dictionary<string, object> payload)
-        {
-            return JObject.FromObject(payload).ToString(Formatting.None);
-        }
-
         internal static async Task<JsonWebKey> DecryptSymmetricPopKeyAsync(JsonWebTokenHandler jwtTokenHandler, string jwe, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if(string.IsNullOrEmpty(jwe))

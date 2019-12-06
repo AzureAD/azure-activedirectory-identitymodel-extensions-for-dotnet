@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddAtClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -260,7 +260,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddTsClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddMClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddUClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!theoryData.Payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -482,7 +482,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddPClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -582,7 +582,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddQClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -754,7 +754,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddHClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -976,7 +976,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddBClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -1051,7 +1051,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddCnfClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");
@@ -1173,7 +1173,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
                 handler.AddNonceClaimPublic(theoryData.Payload, signedHttpRequestDescriptor);
-                var payload = JObject.Parse(SignedHttpRequestUtilities.ConvertToJson(theoryData.Payload));
+                var payload = JObject.FromObject(theoryData.Payload);
 
                 if (!payload.ContainsKey(theoryData.ExpectedClaim))
                     context.AddDiff($"Payload doesn't contain the claim '{theoryData.ExpectedClaim}'");

@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 }
             }
 
-            return SignedHttpRequestUtilities.ConvertToJson(payload);
+            return JObject.FromObject(payload).ToString(Formatting.None);
         }
 
         /// <summary>
