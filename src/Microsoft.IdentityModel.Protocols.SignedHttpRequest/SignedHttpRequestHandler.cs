@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment);
-            payload.Add(SignedHttpRequestClaimTypes.Ts, (long)(signedHttpRequestCreationTime - EpochTime.UnixEpoch).TotalSeconds);
+            payload.Add(SignedHttpRequestClaimTypes.Ts, EpochTime.GetIntDate(signedHttpRequestCreationTime));
         }
 
         /// <summary>
