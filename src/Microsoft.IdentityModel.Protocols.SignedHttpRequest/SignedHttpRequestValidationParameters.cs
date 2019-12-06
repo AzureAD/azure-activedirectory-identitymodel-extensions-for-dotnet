@@ -44,6 +44,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public delegate Task<IEnumerable<SecurityKey>> CnfDecryptionKeysResolverAsync(SecurityToken jweCnf, CancellationToken cancellationToken);
 
     /// <summary>
+    /// A delegate that returns an HttpClient that will be used to retrieve a JWK Set while resolving a PoP key from a 'jku' claim.
+    /// </summary>
+    /// <returns>An HttpClient used to retrieve a JWK Set.</returns>
+    public delegate HttpClient HttpClientProvider();
+
+    /// <summary>
     /// A delegate that will take control over PoP key resolution, if set.
     /// </summary>
     /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
@@ -119,10 +125,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public static readonly TimeSpan DefaultSignedHttpRequestLifetime = TimeSpan.FromMinutes(5);
 
         /// <summary>
-        /// Gets or sets a custom HttpClient when obtaining a JWK set using the 'jku' claim.
+        /// Gets or sets the <see cref="HttpClientProvider"/> delegate.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks> s
-        public HttpClient HttpClientForJkuResourceRetrieval { get; set; }
+        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks>
+        public HttpClientProvider HttpClientProvider { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.

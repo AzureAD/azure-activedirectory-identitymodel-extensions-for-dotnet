@@ -1024,7 +1024,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             try
             {
-                var httpClient = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.HttpClientForJkuResourceRetrieval ?? _defaultHttpClient;
+                var httpClient = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.HttpClientProvider?.Invoke() ?? _defaultHttpClient;
                 var response = await httpClient.GetAsync(jkuSetUrl, cancellationToken).ConfigureAwait(false);
                 var jsonWebKey = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var jsonWebKeySet = new JsonWebKeySet(jsonWebKey);
