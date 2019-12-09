@@ -277,16 +277,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             List<string> queryParamNameList = new List<string>();
             try
             {
-                var lastQueryParam = sanitizedQueryParams.LastOrDefault();
+                var firstQueryParam = true;
                 foreach (var queryParam in sanitizedQueryParams)
                 {
+                    if (!firstQueryParam)
+                        stringBuffer.Append("&");
+
+                    stringBuffer.Append($"{queryParam.Key}={queryParam.Value}");
+
                     queryParamNameList.Add(queryParam.Key);
-                    var encodedValue = $"{queryParam.Key}={queryParam.Value}";
-
-                    if (!queryParam.Equals(lastQueryParam))
-                        encodedValue += "&";
-
-                    stringBuffer.Append(encodedValue);
+                    firstQueryParam = false;
                 }
 
                 var base64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
@@ -316,17 +316,17 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             List<string> headerNameList = new List<string>();
             try
             {
-                var lastHeader = sanitizedHeaders.LastOrDefault();
+                var firstHeader = true;
                 foreach (var header in sanitizedHeaders)
                 {
                     var headerName = header.Key.ToLower();
                     headerNameList.Add(headerName);
 
-                    var encodedValue = $"{headerName}: {header.Value}";
-                    if (header.Equals(lastHeader))
-                        stringBuffer.Append(encodedValue);
-                    else
-                        stringBuffer.Append(encodedValue + _newlineSeparator);
+                    if (!firstHeader)
+                        stringBuffer.Append(_newlineSeparator);
+
+                    stringBuffer.Append($"{headerName}: {header.Value}");
+                    firstHeader = false;
                 }
 
                 var base64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
@@ -720,7 +720,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             try
             {
                 StringBuilder stringBuffer = new StringBuilder();
-                var lastQueryParam = qClaimQueryParamNames.LastOrDefault();
+                var firstQueryParam = true;
                 foreach (var queryParamName in qClaimQueryParamNames)
                 {
                     if (!sanitizedQueryParams.TryGetValue(queryParamName, out var queryParamsValue))
@@ -729,12 +729,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     }
                     else
                     {
-                        var encodedValue = $"{queryParamName}={queryParamsValue}";
+                        if (!firstQueryParam)
+                            stringBuffer.Append("&");
 
-                        if (!queryParamName.Equals(lastQueryParam))
-                            encodedValue += "&";
-
-                        stringBuffer.Append(encodedValue);
+                        stringBuffer.Append($"{queryParamName}={queryParamsValue}");
+                        firstQueryParam = false;
 
                         // remove the query param from the dictionary to mark it as covered.
                         sanitizedQueryParams.Remove(queryParamName);
@@ -787,7 +786,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             try
             {
                 StringBuilder stringBuffer = new StringBuilder();
-                var lastHeader = hClaimHeaderNames.LastOrDefault();
+                var firstHeader = true;
                 foreach (var headerName in hClaimHeaderNames)
                 {
                     if (!sanitizedHeaders.TryGetValue(headerName, out var headerValue))
@@ -796,11 +795,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     }
                     else
                     {
-                        var encodedValue = $"{headerName}: {headerValue}";
-                        if (headerName.Equals(lastHeader))
-                            stringBuffer.Append(encodedValue);
-                        else
-                            stringBuffer.Append(encodedValue + _newlineSeparator);
+                        if (!firstHeader)
+                            stringBuffer.Append(_newlineSeparator);
+
+                        stringBuffer.Append($"{headerName}: {headerValue}");
+                        firstHeader = false;
 
                         // remove the header from the dictionary to mark it as covered.
                         sanitizedHeaders.Remove(headerName);
