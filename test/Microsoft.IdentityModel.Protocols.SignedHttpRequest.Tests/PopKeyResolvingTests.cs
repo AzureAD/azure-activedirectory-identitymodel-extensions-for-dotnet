@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         First = true,
                         MethodToCall = "trackResolvePopKeyFromJwk",
-                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwk.ToString(Formatting.None),
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwk,
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         MethodToCall = "trackResolvePopKeyFromJwe",
-                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwe.ToString(Formatting.None),
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultCnfJwe,
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         MethodToCall = "trackResolvePopKeyFromJku",
-                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJku.ToString(Formatting.None),
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJku,
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         MethodToCall = "trackResolvePopKeyFromJku",
-                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJkuKid.ToString(Formatting.None),
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultJkuKid,
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         MethodToCall = "trackResolvePopKeyFromKid",
-                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultKid.ToString(Formatting.None),
+                        ConfirmationClaim = SignedHttpRequestTestUtils.DefaultKid,
                         CallContext = new CallContext()
                         {
                             PropertyBag = new Dictionary<string, object>()
@@ -147,14 +147,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        ConfirmationClaim = @"{""unknown_claim"": 1}",
+                        ConfirmationClaim = JObject.Parse(@"{""unknown_claim"": 1}"),
                         ValidatedAccessToken = accessToken,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidCnfClaimException), "IDX23014"),
                         TestId = "UnknownCnfClaim",
                     },
                     new ResolvePopKeyTheoryData
                     {
-                        ConfirmationClaim = string.Empty,
+                        ConfirmationClaim = null,
                         ValidatedAccessToken = accessToken,
                         ExpectedException = ExpectedException.ArgumentNullException(),
                         TestId = "InvalidCnfClaim",
@@ -872,7 +872,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public CallContext CallContext { get; set; } = new CallContext();
 
-        public string ConfirmationClaim { get; set; }
+        internal JObject ConfirmationClaim { get; set; }
 
         public string MethodToCall { get; set; }
 
