@@ -449,7 +449,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
 
                 // read signed http request as JWT
-                var signedHttpRequest = _jwtTokenHandler.ReadJsonWebToken(signedHttpRequestValidationContext.SignedHttpRequest);
+                var signedHttpRequest = ReadSignedHttpRequest(signedHttpRequestValidationContext);
 
                 // read access token ("at")
                 if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
@@ -487,6 +487,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     Exception = ex
                 };
             }
+        }
+
+        /// <summary>
+        /// Reads a SignedHttpRequest as a <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <returns>A SignedHttpRequest as a <see cref="JsonWebToken"/>.</returns>
+        internal virtual JsonWebToken ReadSignedHttpRequest(SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        {
+            return _jwtTokenHandler.ReadJsonWebToken(signedHttpRequestValidationContext.SignedHttpRequest);
         }
 
         /// <summary>
