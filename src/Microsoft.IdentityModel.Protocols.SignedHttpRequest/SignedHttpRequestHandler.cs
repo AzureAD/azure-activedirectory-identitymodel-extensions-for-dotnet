@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         #region SignedHttpRequest creation
         /// <summary>
         /// Creates a signed http request using the <paramref name="signedHttpRequestDescriptor"/>.
-        /// /// </summary>
+        /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
         /// <remarks>Default <see cref="CallContext"/> will be created.</remarks>
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
         /// <summary>
         /// Creates a signed http request using the <paramref name="signedHttpRequestDescriptor"/>.
-        /// /// </summary>
+        /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <param name="callContext" >An opaque context used to store work and logs when working with authentication artifacts.</param>
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
