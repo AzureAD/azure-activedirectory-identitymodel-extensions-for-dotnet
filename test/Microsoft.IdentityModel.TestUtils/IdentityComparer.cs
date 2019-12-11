@@ -677,6 +677,42 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreStingEnumDictionariesEqual(IDictionary<string, IEnumerable<string>> dictionary1, IDictionary<string, IEnumerable<string>> dictionary2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(dictionary1, dictionary2, localContext))
+                return context.Merge(localContext);
+
+            if (dictionary1.Count != dictionary2.Count)
+                localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
+
+            int numMatched = 0;
+            foreach (string key in dictionary1.Keys)
+            {
+                if (dictionary2.ContainsKey(key))
+                {
+                    var obj1 = dictionary1[key];
+                    var obj2 = dictionary2[key];
+                    if (obj1.GetType().BaseType == typeof(System.ValueType))
+                    {
+                        if (!obj1.Equals(obj2))
+                            localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
+                    }
+                    else
+                    {
+                        if (AreEqual(obj1, obj2, context))
+                            numMatched++;
+                    }
+                }
+                else
+                {
+                    localContext.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                }
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreStringDictionariesEqual(Object object1, Object object2, CompareContext context)
         {
             IDictionary<string, string> dictionary1 = (IDictionary<string, string>)object1;

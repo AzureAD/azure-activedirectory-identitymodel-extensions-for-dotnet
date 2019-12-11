@@ -185,5 +185,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <see cref="RSA"/> instance used to initialize the key.
         /// </summary>
         public RSA Rsa { get; private set; }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="RsaSecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+            if (Parameters.Exponent == null)
+            {
+                if (Rsa == null)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Rsa)), nameof(Rsa)));
+
+                Parameters = Rsa.ExportParameters(false);
+            }
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(Parameters.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(Parameters.Modulus)}""}}";
+            return Utility.GenerateSha256Hash(canonicalJwk);
+        }
     }
 }

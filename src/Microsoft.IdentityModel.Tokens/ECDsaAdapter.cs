@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.Tokens
                 var ecParams = new ECParameters
                 {
                     Curve = GetNamedECCurve(jsonWebKey.Crv),
-                    Q = {X = Base64UrlEncoder.DecodeBytes(jsonWebKey.X), Y = Base64UrlEncoder.DecodeBytes(jsonWebKey.Y)}
+                    Q = { X = Base64UrlEncoder.DecodeBytes(jsonWebKey.X), Y = Base64UrlEncoder.DecodeBytes(jsonWebKey.Y) }
                 };
 
                 if (usePrivateKey)
@@ -373,11 +373,27 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        internal string GetCrvParameterValue(ECCurve curve)
+        {
+            if (curve.Oid == null)
+                throw LogHelper.LogArgumentNullException(nameof(curve.Oid));
+
+            if (string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP256.Oid.FriendlyName, StringComparison.Ordinal))
+                return JsonWebKeyECTypes.P256;
+            else if (string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP384.Oid.FriendlyName, StringComparison.Ordinal))
+                return JsonWebKeyECTypes.P384;
+            else if (string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP521.Oid.FriendlyName, StringComparison.Ordinal))
+                return JsonWebKeyECTypes.P521;
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curve.Oid.FriendlyName ?? "null")));
+        }
+            
+
         /// <summary>
         /// Tests if user application's runtime supports <see cref="ECParameters"/> structure.
         /// </summary>
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
-        private bool SupportsECParameters()
+        internal bool SupportsECParameters()
         {
             try
             {

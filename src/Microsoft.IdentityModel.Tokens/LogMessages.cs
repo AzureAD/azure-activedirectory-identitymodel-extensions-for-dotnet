@@ -195,6 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on .NET 4.5 and .NET 4.5.1 targets. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10694 = "IDX10694: JsonWebKeyConverter threw attempting to convert JsonWebKey: '{0}'. Exception: '{1}'.";
+        public const string IDX10695 = "IDX10695: Unable to create a JsonWebKey from an ECDsa object. Required ECParameters structure is not supported by .NET Framework < 4.7.";
 
         // security keys
         public const string IDX10700 = "IDX10700: {0} is unable to use 'rsaParameters'. {1} is null.";
@@ -202,6 +203,12 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10702 = "IDX10702:"
         public const string IDX10703 = "IDX10703: Cannot create a '{0}', key length is zero.";
         public const string IDX10704 = "IDX10704: Cannot verify the key size. The SecurityKey is not or cannot be converted to an AsymmetricSecuritKey. SecurityKey: '{0}'.";
+        public const string IDX10705 = "IDX10705: Cannot create a JWK thumbprint, '{0}' is null or empty.";
+        public const string IDX10706 = "IDX10706: Cannot create a JWK thumbprint, '{0}' must be one of the following: '{1}'.";
+        public const string IDX10707 = "IDX10707: Cannot create a JSON representation of an asymmetric public key, '{0}' must be one of the following: '{1}'.";
+        public const string IDX10708 = "IDX10708: Cannot create a JSON representation of an EC public key, '{0}' is null or empty.";
+        public const string IDX10709 = "IDX10709: Cannot create a JSON representation of an RSA public key, '{0}' is null or empty.";
+        public const string IDX10710 = "IDX10710: Computing a JWK thumbprint is supported only on SymmetricSecurityKey, JsonWebKey, RsaSecurityKey, X509SecurityKey, and ECDsaSecurityKey.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"

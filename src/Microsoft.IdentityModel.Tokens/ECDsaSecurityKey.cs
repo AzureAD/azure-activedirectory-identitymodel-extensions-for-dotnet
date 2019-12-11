@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -106,6 +107,27 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return ECDsa.KeySize;
             }
+        }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="ECDsaSecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+#if NETSTANDARD2_0
+            if (ECDsaAdapter.Instance.SupportsECParameters())
+            {
+                if (ECDsa == null)
+                    throw LogHelper.LogArgumentNullException(nameof(ECDsa));
+
+                ECParameters parameters = ECDsa.ExportParameters(false);
+                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.Instance.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
+                return Utility.GenerateSha256Hash(canonicalJwk);
+            }
+#endif
+            throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
         }
     }
 }

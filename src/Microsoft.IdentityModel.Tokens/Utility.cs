@@ -268,5 +268,13 @@ namespace Microsoft.IdentityModel.Tokens
                 byteArray[i] = 0;
             }
         }
+
+        internal static byte[] GenerateSha256Hash(string input)
+        {
+            using (var hash = SHA256.Create())
+            {
+                return hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+            }
+        }
     }
 }

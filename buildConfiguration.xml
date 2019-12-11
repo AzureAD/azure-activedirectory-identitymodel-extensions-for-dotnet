@@ -15,6 +15,7 @@
       <project name="Microsoft.IdentityModel.Protocols" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+      <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
       <project name="Microsoft.IdentityModel.KeyVaultExtensions" />
       <project name="Microsoft.IdentityModel.ManagedKeyVaultSecurityKey" />
     </src>
@@ -31,6 +32,7 @@
       <project name="Microsoft.IdentityModel.Protocols.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
+      <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.KeyVaultExtensions.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests" test="yes" />
     </test>

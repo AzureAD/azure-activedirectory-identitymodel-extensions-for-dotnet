@@ -306,6 +306,15 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string P521_Y = "AZ8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW";
         public static string P521_Invalid = "AAAAAAA----Z8DlNxsA6eCj_JL9Rz8uU4eacd-XX--ek8-VCOgv3YNRPeN_2PJauJL7q9Pg1MSe8zEaLIRhM4SGWJ4SI1rMhlW";
 
+#if NET_CORE
+        public static ECParameters Ecdsa256Parameters;
+        public static ECParameters Ecdsa256Parameters_Public;
+        public static ECParameters Ecdsa384Parameters;
+        public static ECParameters Ecdsa384Parameters_Public;
+        public static ECParameters Ecdsa521Parameters;
+        public static ECParameters Ecdsa521Parameters_Public;
+#endif
+
         static KeyingMaterial()
         {
             X509Certificate1 = new X509Certificate2(Convert.FromBase64String("MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng"));
@@ -468,9 +477,16 @@ namespace Microsoft.IdentityModel.TestUtils
             var Ecdsa384 = ECDsa.Create(ECCurve.NamedCurves.nistP384);
             var Ecdsa521 = ECDsa.Create(ECCurve.NamedCurves.nistP521);
 
-            var Ecdsa256_Public = ECDsa.Create(Ecdsa256.ExportParameters(false));
-            var Ecdsa384_Public = ECDsa.Create(Ecdsa384.ExportParameters(false));
-            var Ecdsa521_Public = ECDsa.Create(Ecdsa521.ExportParameters(false));
+            Ecdsa256Parameters = Ecdsa256.ExportParameters(true);
+            Ecdsa256Parameters_Public = Ecdsa256.ExportParameters(false);
+            Ecdsa384Parameters = Ecdsa384.ExportParameters(true);
+            Ecdsa384Parameters_Public = Ecdsa384.ExportParameters(false);
+            Ecdsa521Parameters = Ecdsa521.ExportParameters(true);
+            Ecdsa521Parameters_Public = Ecdsa521.ExportParameters(false);
+
+            var Ecdsa256_Public = ECDsa.Create(Ecdsa256Parameters_Public);
+            var Ecdsa384_Public = ECDsa.Create(Ecdsa384Parameters_Public);
+            var Ecdsa521_Public = ECDsa.Create(Ecdsa521Parameters_Public);
 
             Ecdsa256Key = new ECDsaSecurityKey(Ecdsa256) { KeyId = "ECDsa256Key" };
             Ecdsa384Key = new ECDsaSecurityKey(Ecdsa384) { KeyId = "ECDsa384Key" };
@@ -879,7 +895,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static JsonWebKey JsonWebKeyP521_Invalid_D => CreateJsonWebKeyEC(JsonWebKeyECTypes.P521, "JsonWebKeyP521_Invalid_D", P521_Invalid, P521_X, P521_Y);
 
-        private static JsonWebKey CreateJsonWebKeyEC(string crv, string kid, string D, string X, string Y)
+        public static JsonWebKey CreateJsonWebKeyEC(string crv, string kid, string D, string X, string Y)
         {
             return new JsonWebKey
             {
@@ -934,6 +950,33 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+        public static JsonWebKey JsonWebKeyX509_2048_As_RSA
+        {
+            get
+            {
+                var rsaKey = DefaultX509Key_2048.PrivateKey as RSA;
+                var rsaParams = rsaKey.ExportParameters(true);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                    Kid = DefaultCert_2048.Thumbprint,
+                    QI = Base64UrlEncoder.Encode(rsaParams.InverseQ),
+                    P = Base64UrlEncoder.Encode(rsaParams.P),
+                    Q = Base64UrlEncoder.Encode(rsaParams.Q),
+                    E = Base64UrlEncoder.Encode(rsaParams.Exponent),
+                    N = Base64UrlEncoder.Encode(rsaParams.Modulus),
+                    DP = Base64UrlEncoder.Encode(rsaParams.DP),
+                    DQ = Base64UrlEncoder.Encode(rsaParams.DQ),
+                    D = Base64UrlEncoder.Encode(rsaParams.D)
+                };
+
+                return jsonWebKey;
+            }
+        }
+
+
+
         public static JsonWebKey JsonWebKeyX509_2048_Public
         {
             get
@@ -950,6 +993,25 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+        public static JsonWebKey JsonWebKeyX509_2048_Public_As_RSA
+        {
+            get
+            {
+                var rsaKey = DefaultX509Key_2048_Public.PublicKey as RSA;
+                var rsaParams = rsaKey.ExportParameters(false);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                    Kid = DefaultCert_2048_Public.Thumbprint,
+                    E = Base64UrlEncoder.Encode(rsaParams.Exponent),
+                    N = Base64UrlEncoder.Encode(rsaParams.Modulus),
+                };
+
+                return jsonWebKey;
+            }
+        }
+
         public static JsonWebKey JsonWebKeyX509_2048_With_KeyId
         {
             get
@@ -962,6 +1024,31 @@ namespace Microsoft.IdentityModel.TestUtils
                 };
 
                 jsonWebKey.X5c.Add(Convert.ToBase64String(DefaultCert_2048.RawData));
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_2048_As_RSA_With_KeyId
+        {
+            get
+            {
+                var rsaKey = DefaultX509Key_2048.PrivateKey as RSA;
+                var rsaParams = rsaKey.ExportParameters(true);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                    Kid = DefaultX509Key_2048_KeyId,
+                    QI = Base64UrlEncoder.Encode(rsaParams.InverseQ),
+                    P = Base64UrlEncoder.Encode(rsaParams.P),
+                    Q = Base64UrlEncoder.Encode(rsaParams.Q),
+                    E = Base64UrlEncoder.Encode(rsaParams.Exponent),
+                    N = Base64UrlEncoder.Encode(rsaParams.Modulus),
+                    DP = Base64UrlEncoder.Encode(rsaParams.DP),
+                    DQ = Base64UrlEncoder.Encode(rsaParams.DQ),
+                    D = Base64UrlEncoder.Encode(rsaParams.D)
+                };
+
                 return jsonWebKey;
             }
         }
