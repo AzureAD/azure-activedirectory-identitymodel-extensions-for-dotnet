@@ -178,6 +178,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Computes a sha256 hash over the <see cref="X509SecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+            return new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint();
+        }
+
+        /// <summary>
         /// Returns a bool indicating if this key is equivalent to another key.
         /// </summary>
         /// <return>true if the keys are equal; otherwise, false.</return>

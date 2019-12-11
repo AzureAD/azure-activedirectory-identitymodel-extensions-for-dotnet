@@ -1080,29 +1080,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // resolve PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion.
             var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
-            JsonWebKey jwkPopKey;
-            if (popKey is JsonWebKey)
-                jwkPopKey = (JsonWebKey)popKey;
-            else
-                jwkPopKey = JsonWebKeyConverter.ConvertFromSecurityKey(popKey);
-
             string jwkPopKeyThumprint;
             // if the cnf key is an X509SecurityKey ('x5c'), JWK thumbprint has to be calculated on its underlying RSA key.
-            if (jwkPopKey.ConvertedSecurityKey != null && jwkPopKey.ConvertedSecurityKey is X509SecurityKey)
-            {
-                var rsaJwkPopKey = JsonWebKeyConverter.ConvertFromX509SecurityKey((X509SecurityKey)jwkPopKey.ConvertedSecurityKey, true);
-                jwkPopKeyThumprint = Base64UrlEncoder.Encode(rsaJwkPopKey.ComputeJwkThumbprint());
-            }
+            if (popKey is JsonWebKey jwtPopKey && jwtPopKey.ConvertedSecurityKey is X509SecurityKey)
+                jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwtPopKey.ConvertedSecurityKey.ComputeJwkThumbprint());
             else
-            {
-                jwkPopKeyThumprint = Base64UrlEncoder.Encode(jwkPopKey.ComputeJwkThumbprint());
-            }
+                jwkPopKeyThumprint = Base64UrlEncoder.Encode(popKey.ComputeJwkThumbprint());
 
             // validate reference
             if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23033, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
-            return jwkPopKey;
+            return popKey;
         }
         #endregion
 

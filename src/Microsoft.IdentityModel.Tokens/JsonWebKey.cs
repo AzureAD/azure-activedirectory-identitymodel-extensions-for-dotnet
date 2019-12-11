@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
@@ -338,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
         /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
-        public byte[] ComputeJwkThumbprint()
+        public override byte[] ComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Kty)), nameof(Kty)));
@@ -359,7 +358,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(K)), nameof(K)));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{K}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}""}}";
-            return HashCanonicalJwkBytes(canonicalJwk);
+            return Utility.GenerateSha256Hash(canonicalJwk);
         }
 
         private byte[] ComputeRsaThumbprint()
@@ -371,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(N)), nameof(N)));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{E}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.N}"":""{N}""}}";
-            return HashCanonicalJwkBytes(canonicalJwk);
+            return Utility.GenerateSha256Hash(canonicalJwk);
         }
 
         private byte[] ComputeECThumbprint()
@@ -386,15 +385,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Y)), nameof(Y)));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.X}"":""{X}"",""{JsonWebKeyParameterNames.Y}"":""{Y}""}}";
-            return HashCanonicalJwkBytes(canonicalJwk);
-        }
-
-        private byte[] HashCanonicalJwkBytes(string canonicalJwt)
-        {
-            using (var hash = SHA256.Create())
-            {
-                return hash.ComputeHash(Encoding.UTF8.GetBytes(canonicalJwt));
-            }
+            return Utility.GenerateSha256Hash(canonicalJwk);
         }
 
         /// <summary>

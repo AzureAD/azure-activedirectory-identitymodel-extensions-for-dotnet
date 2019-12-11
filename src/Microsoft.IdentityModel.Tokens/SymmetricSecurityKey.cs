@@ -80,5 +80,19 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get { return _key.CloneByteArray(); }
         }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="SymmetricSecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+            if (Key == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Key)), nameof(Key)));
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{Base64UrlEncoder.Encode(Key)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.Octet}""}}";
+            return Utility.GenerateSha256Hash(canonicalJwk);
+        }
     }
 }

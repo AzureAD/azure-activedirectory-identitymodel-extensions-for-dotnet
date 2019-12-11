@@ -208,6 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10707 = "IDX10707: Cannot create a JSON representation of an asymmetric public key, '{0}' must be one of the following: '{1}'.";
         public const string IDX10708 = "IDX10708: Cannot create a JSON representation of an EC public key, '{0}' is null or empty.";
         public const string IDX10709 = "IDX10709: Cannot create a JSON representation of an RSA public key, '{0}' is null or empty.";
+        public const string IDX10710 = "IDX10710: Computing a JWK thumbprint is supported only on SymmetricSecurityKey, JsonWebKey, RsaSecurityKey, X509SecurityKey, and ECDsaSecurityKey.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
