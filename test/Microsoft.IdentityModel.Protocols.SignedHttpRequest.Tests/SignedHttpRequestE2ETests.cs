@@ -65,9 +65,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Assert.NotNull(result);
                 Assert.NotNull(result.SignedHttpRequest);
                 Assert.NotNull(result.ValidatedSignedHttpRequest);
-                Assert.NotNull(result.AccessToken);
-                Assert.NotNull(result.SecurityToken);
-                Assert.NotNull(result.ClaimsIdentity);
+                Assert.NotNull(result.AccessTokenValidationResult);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }

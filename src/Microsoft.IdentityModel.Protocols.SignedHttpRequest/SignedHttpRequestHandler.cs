@@ -472,9 +472,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 return new SignedHttpRequestValidationResult()
                 {
                     IsValid = true,
-                    AccessToken = accessToken,
-                    ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
-                    SecurityToken = tokenValidationResult.SecurityToken,
+                    AccessTokenValidationResult = tokenValidationResult,
                     SignedHttpRequest = signedHttpRequest.EncodedToken,
                     ValidatedSignedHttpRequest = validatedSignedHttpRequest
                 };
@@ -484,7 +482,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 return new SignedHttpRequestValidationResult()
                 {
                     IsValid = false,
-                    Exception = ex
+                    Exception = ex,
                 };
             }
         }

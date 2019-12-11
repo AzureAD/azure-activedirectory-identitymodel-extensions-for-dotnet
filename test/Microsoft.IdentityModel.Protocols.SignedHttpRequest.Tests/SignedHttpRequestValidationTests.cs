@@ -1272,11 +1272,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         ExpectedSignedHttpRequestValidationResult = new SignedHttpRequestValidationResult()
                         {
-                            AccessToken = encodedEncryptedAccessToken,
+                            AccessTokenValidationResult = new TokenValidationResult()
+                            {
+                                IsValid = true,
+                                SecurityToken = validatedToken,
+                                ClaimsIdentity = resultingClaimsIdentity
+                            },
+                            IsValid = true,
                             SignedHttpRequest = signedHttpRequestWithEncryptedAt.EncodedToken,
                             ValidatedSignedHttpRequest = signedHttpRequestWithEncryptedAt,
-                            SecurityToken = validatedToken,
-                            ClaimsIdentity = resultingClaimsIdentity
+
                         },
                         TestId = "ValidEncryptedAcccessToken",
                     },
@@ -1295,11 +1300,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         ExpectedSignedHttpRequestValidationResult = new SignedHttpRequestValidationResult()
                         {
-                            AccessToken = encodedAccessToken,
+                            AccessTokenValidationResult = new TokenValidationResult()
+                            {
+                                IsValid = true,
+                                SecurityToken = validatedToken,
+                                ClaimsIdentity = resultingClaimsIdentity
+                            },
+                            IsValid = true,
                             SignedHttpRequest = signedHttpRequest.EncodedToken,
                             ValidatedSignedHttpRequest = signedHttpRequest,
-                            SecurityToken = validatedToken,
-                            ClaimsIdentity = resultingClaimsIdentity
                         },
                         TestId = "ValidTest",
                     }

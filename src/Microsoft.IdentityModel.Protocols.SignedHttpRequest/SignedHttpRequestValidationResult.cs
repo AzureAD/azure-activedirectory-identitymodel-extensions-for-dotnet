@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 //
 
+using System;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
@@ -31,12 +32,22 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// Contains artifacts obtained when a SignedHttpRequest is validated.
     /// </summary>
-    public class SignedHttpRequestValidationResult : TokenValidationResult
+    public class SignedHttpRequestValidationResult
     {
         /// <summary>
-        /// Gets or sets the AccessToken in its original encoded form.
+        /// Gets or sets the access token validation result.
         /// </summary>
-        public string AccessToken { get; set; }
+        public TokenValidationResult AccessTokenValidationResult { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Exception"/> that occurred during validation of the SignedHttpRequest.
+        /// </summary>
+        public Exception Exception { get; set; }
+
+        /// <summary>
+        /// True if the SignedHttpRequest was successfully validated, false otherwise.
+        /// </summary>
+        public bool IsValid { get; set; }
 
         /// <summary>
         /// Gets or sets SignedHttpRequest in its original encoded form.
