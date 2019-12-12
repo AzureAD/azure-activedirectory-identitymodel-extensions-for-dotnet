@@ -40,6 +40,10 @@
     {
       "file": "SignedHttpRequestTestUtils.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "JsonWebKeyTests.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
     }
   ]
 }
