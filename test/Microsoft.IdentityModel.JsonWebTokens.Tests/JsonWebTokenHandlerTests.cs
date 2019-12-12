@@ -834,6 +834,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "EncryptedKey" } },
             };
+
+            // if the algorithm being used for decryption is not direct (but rather key wrapping), we need to ignore the EncryptionKey property 
+            // on the jwtToken as it will not match. 
+            if (!JwtConstants.DirectKeyUseAlg.Equals(theoryData.TokenDescriptor.EncryptingCredentials.Alg, StringComparison.Ordinal))
+                context.PropertiesToIgnoreWhenComparing[typeof(JsonWebToken)].Add("EncryptionKey");
+
             IdentityComparer.AreEqual(jwtToken, jwtTokenToCompare, context);
 
             foreach (var key in theoryData.TokenDescriptor.AdditionalHeaderClaims.Keys)

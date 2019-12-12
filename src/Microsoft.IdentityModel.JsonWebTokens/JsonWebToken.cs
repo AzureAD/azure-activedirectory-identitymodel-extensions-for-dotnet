@@ -201,6 +201,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? string.Empty;
 
         /// <summary>
+        /// Gets or sets the <see cref="SecurityKey"/> that encrypted this JWE.
+        /// </summary>
+        /// <remarks><see cref="JsonWebTokenHandler"/>.DecryptToken(...) sets this value when a <see cref="SecurityKey"/> is used to successfully decrypt a JWE.</remarks>
+        public SecurityKey EncryptionKey { get; set; }
+        
+        /// <summary>
         /// Gets the EncryptedKey from the original raw data of this instance when it was created.
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
@@ -280,8 +286,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public override SecurityKey SecurityKey { get; }
 
         /// <summary>
-        /// Not implemented.
+        /// Gets or sets the <see cref="SecurityKey"/> that signed this instance.
         /// </summary>
+        /// <remarks><see cref="JsonWebTokenHandler"/>.ValidateSignature(...) sets this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
         public override SecurityKey SigningKey
         {
             set;

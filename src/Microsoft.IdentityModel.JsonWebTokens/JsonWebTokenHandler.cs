@@ -648,6 +648,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 try
                 {
                     decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
+                    jwtToken.EncryptionKey = key;
                     decryptionSucceeded = true;
                     break;
                 }
@@ -924,7 +925,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     yield return key;
         }
 
-        private IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        /// <summary>
+        /// Gets all decryption keys for a token.
+        /// </summary>
+        /// <param name="jwtToken"></param>
+        /// <param name="validationParameters"></param>
+        /// <returns></returns>
+        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
 
