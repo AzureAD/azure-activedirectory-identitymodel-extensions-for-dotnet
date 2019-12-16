@@ -56,21 +56,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw new ArgumentNullException(nameof(jwtEncodedString));
 
-            int count = 1;
-            int next = -1;
-            while ((next = jwtEncodedString.IndexOf('.', next + 1)) != -1)
-            {
-                count++;
-                if (count >= JwtConstants.JwsSegmentCount)
-                    break;
-            }
-
-            // JWS or JWE
-            if (count == JwtConstants.JwsSegmentCount || count == JwtConstants.JweSegmentCount)
-            {
-                var tokenParts = jwtEncodedString.Split('.');
+            // Max number of segments is set to JwtConstants.MaxJwtSegmentCount + 1 so that we know if there were more than 5 segments present.
+            // In the case where JwtEncodedString has greater than 5 segments, the length of tokenParts will always be 6.
+            var tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenParts.Length == JwtConstants.JwsSegmentCount || tokenParts.Length == JwtConstants.JweSegmentCount)
                 Decode(tokenParts, jwtEncodedString);
-            }
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, jwtEncodedString)));
         }
@@ -421,13 +411,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Decodes the payload and signature from the JWE parts.
         /// </summary>
         /// <param name="tokenParts">Parts of the JWE including the header.</param>
-        /// <remarks>Assumes Header has already been set.</remarks>
+        /// <remarks>
+        /// Assumes Header has already been set.
+        /// According to the JWE documentation (https://tools.ietf.org/html/rfc7516#section-2), it is possible for the EncryptedKey, InitializationVector, and AuthenticationTag to be empty strings.
+        /// </remarks>
         private void DecodeJwe(string[] tokenParts)
         {
             EncodedHeader = tokenParts[0];
             EncryptedKey = tokenParts[1];
             InitializationVector = tokenParts[2];
-            Ciphertext = tokenParts[3];
+            Ciphertext = !string.IsNullOrWhiteSpace(tokenParts[3]) ? tokenParts[3] : throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
             AuthenticationTag = tokenParts[4];
         }
 

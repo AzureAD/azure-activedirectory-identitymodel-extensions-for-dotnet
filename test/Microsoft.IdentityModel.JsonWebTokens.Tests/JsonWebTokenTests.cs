@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt.Tests;
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
@@ -513,6 +514,98 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         }.ToString(Formatting.None)
                     },
                 };
+            }
+        }
+
+        // Test ensures that we only try to populate a JsonWebToken from a string if it is a properly formatted JWT. More specifically, we only want to try and decode
+        // a JWT token if it has the correct number of (JWE or JWS) token parts.
+        [Theory, MemberData(nameof(ParseTokenTheoryData))]
+        public void ParseToken(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ParseToken", theoryData);
+            try
+            {
+                var tokenFromEncodedString = new JsonWebToken(theoryData.Token);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ParseTokenTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<JwtTheoryData>();
+
+                JwtTestData.InvalidNumberOfSegmentsData("IDX14100:", theoryData);
+                JwtTestData.ValidEncodedSegmentsData(theoryData);
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.InvalidHeader),
+                    Token = EncodedJwts.InvalidHeader,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.InvalidPayload),
+                    Token = EncodedJwts.InvalidPayload,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14101:", inner: typeof(JsonReaderException))
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWSEmptyHeader),
+                    Token = EncodedJwts.JWSEmptyHeader,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWSEmptyPayload),
+                    Token = EncodedJwts.JWSEmptyPayload,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14101:", inner: typeof(JsonReaderException))
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWEEmptyHeader),
+                    Token = EncodedJwts.JWEEmptyHeader,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWEEmptyEncryptedKey),
+                    Token = EncodedJwts.JWEEmptyEncryptedKey,
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWEEmptyIV),
+                    Token = EncodedJwts.JWEEmptyIV,
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWEEmptyCiphertext),
+                    Token = EncodedJwts.JWEEmptyCiphertext,
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14306:")
+                });
+
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(EncodedJwts.JWEEmptyAuthenticationTag),
+                    Token = EncodedJwts.JWEEmptyAuthenticationTag,
+                });
+
+                return theoryData;
             }
         }
 
