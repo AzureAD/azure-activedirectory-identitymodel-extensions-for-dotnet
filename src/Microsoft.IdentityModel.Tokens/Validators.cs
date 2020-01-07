@@ -53,12 +53,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (!validationParameters.ValidateAudience)
-            {
-                LogHelper.LogWarning(LogMessages.IDX10233);
-                return;
-            }
-
             if (validationParameters.AudienceValidator != null)
             {
                 if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
@@ -67,6 +61,12 @@ namespace Microsoft.IdentityModel.Tokens
                         InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
                     });
 
+                return;
+            }
+
+            if (!validationParameters.ValidateAudience)
+            {
+                LogHelper.LogWarning(LogMessages.IDX10233);
                 return;
             }
 
@@ -127,14 +127,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            if (validationParameters.IssuerValidator != null)
+                return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
+
             if (!validationParameters.ValidateIssuer)
             {
                 LogHelper.LogInformation(LogMessages.IDX10235);
                 return issuer;
             }
-
-            if (validationParameters.IssuerValidator != null)
-                return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
 
             if (string.IsNullOrWhiteSpace(issuer))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10211)
@@ -188,16 +188,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            if (validationParameters.IssuerSigningKeyValidator != null)
+            {
+                if (!validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)) { SigningKey = securityKey });
+            }
+
             if (!validationParameters.ValidateIssuerSigningKey)
             {
                 LogHelper.LogInformation(LogMessages.IDX10237);
                 return;
-            }
-
-            if (validationParameters.IssuerSigningKeyValidator != null)
-            {
-                if (!validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)){ SigningKey = securityKey });
             }
 
             if (!validationParameters.RequireSignedTokens && securityKey == null)
@@ -250,18 +250,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (!validationParameters.ValidateLifetime)
-            {
-                LogHelper.LogInformation(LogMessages.IDX10238);
-                return;
-            }
-
             if (validationParameters.LifetimeValidator != null)
             {
                 if (!validationParameters.LifetimeValidator(notBefore, expires, securityToken, validationParameters))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken))
                         { NotBefore = notBefore, Expires = expires });
 
+                return;
+            }
+
+            if (!validationParameters.ValidateLifetime)
+            {
+                LogHelper.LogInformation(LogMessages.IDX10238);
                 return;
             }
 
@@ -304,16 +304,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (!validationParameters.ValidateTokenReplay)
-            {
-                LogHelper.LogInformation(LogMessages.IDX10246);
-                return;
-            }
-
             if (validationParameters.TokenReplayValidator != null)
             {
                 if (!validationParameters.TokenReplayValidator(expirationTime, securityToken, validationParameters))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken)));
+                return;
+            }
+
+            if (!validationParameters.ValidateTokenReplay)
+            {
+                LogHelper.LogInformation(LogMessages.IDX10246);
                 return;
             }
 

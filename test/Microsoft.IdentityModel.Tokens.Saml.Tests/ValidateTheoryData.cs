@@ -106,6 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
+                ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(),
                 TestId = "AudienceValidator throws, validateAudience false",
                 ValidationParameters = new TokenValidationParameters
                 {
