@@ -30,11 +30,11 @@ Write-Host "root:           " $root;
 Write-Host "PSScriptRoot:   " $PSScriptRoot;
 
 $date = Get-Date
-$dateTimeStamp = ($date.ToString("yy")-13).ToString() + $date.ToString("MMddHHmmss")
+$dateTimeStamp = ($date.ToString("yy")-19).ToString() + $date.ToString("MMddHHmmss")
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 
 $assemblyVersion = [string]$buildConfiguration.SelectSingleNode("root/assemblyVersion").InnerText
-$assemblyFileVersion = $assemblyVersion + "." + ($date.ToString("yy")-13).ToString() + $date.ToString("MMdd")
+$assemblyFileVersion = $assemblyVersion + "." + ($date.ToString("yy")-19).ToString() + $date.ToString("MMdd")
 $assemblyInformationalVersion = $assemblyVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD)
 Write-Host "assemblyVersion: "  $assemblyVersion
 Write-Host "assemblyFileVersion: " $assemblyFileVersion
