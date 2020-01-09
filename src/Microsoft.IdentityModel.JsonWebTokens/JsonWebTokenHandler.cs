@@ -648,7 +648,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 try
                 {
                     decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
-                    jwtToken.EncryptionKey = key;
+                    jwtToken.EncryptionKeyId = key.KeyId;
                     decryptionSucceeded = true;
                     break;
                 }

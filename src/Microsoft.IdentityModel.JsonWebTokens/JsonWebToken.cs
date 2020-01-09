@@ -201,10 +201,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? string.Empty;
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityKey"/> that encrypted this JWE.
+        /// Gets or sets the key id of the <see cref="SecurityKey"/> that encrypted this JWE.
         /// </summary>
         /// <remarks><see cref="JsonWebTokenHandler"/>.DecryptToken(...) sets this value when a <see cref="SecurityKey"/> is used to successfully decrypt a JWE.</remarks>
-        public SecurityKey EncryptionKey { get; set; }
+        public string EncryptionKeyId { get; set; }
         
         /// <summary>
         /// Gets the EncryptedKey from the original raw data of this instance when it was created.
