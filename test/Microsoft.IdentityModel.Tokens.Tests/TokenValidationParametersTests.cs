@@ -42,8 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 38)
-                Assert.True(false, "Number of properties has changed from 38 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 39)
+                Assert.True(false, "Number of properties has changed from 39 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -103,6 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
+            Assert.True(validationParametersInline.IgnoreTrailingSlashWhenValidatingAudience);
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
             validationParametersSets.ActorValidationParameters = actorValidationParameters;
@@ -144,8 +145,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 38)
-                Assert.True(false, "Number of public fields has changed from 38 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 39)
+                Assert.True(false, "Number of public fields has changed from 39 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -156,6 +157,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                         //new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
                         new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
+                        new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
                         new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                         new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
@@ -173,6 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     Object = validationParameters,
                 };
+
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors("TokenValidationParametersTests: GetSets", context.Errors);
             Assert.Null(validationParameters.AudienceValidator);
