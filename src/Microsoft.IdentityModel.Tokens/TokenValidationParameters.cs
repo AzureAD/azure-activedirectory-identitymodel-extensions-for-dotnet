@@ -145,15 +145,14 @@ namespace Microsoft.IdentityModel.Tokens
         protected TokenValidationParameters(TokenValidationParameters other)
         {
             if (other == null)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("other"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other)));
 
             ActorValidationParameters = other.ActorValidationParameters?.Clone();
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
             CryptoProviderFactory = other.CryptoProviderFactory;
+            IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
@@ -204,6 +203,12 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateLifetime = true;
             ValidateTokenReplay = false;
         }
+
+        /// <summary>
+        /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
 
         /// <summary>
         /// Gets or sets <see cref="TokenValidationParameters"/>.

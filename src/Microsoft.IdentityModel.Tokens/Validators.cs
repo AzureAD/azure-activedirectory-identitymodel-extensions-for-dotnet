@@ -28,6 +28,7 @@
 using Microsoft.IdentityModel.Logging;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -76,31 +77,48 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10208) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
 
-            foreach (string audience in audiences)
-            {
-                if (string.IsNullOrWhiteSpace(audience))
-                {
-                    continue;
-                }
+            // create enumeration of all valid audiences from validationParameters
+            var validationParametersAudiences = validationParameters.ValidAudiences == null
+                ? new [] { validationParameters.ValidAudience }
+                : string.IsNullOrWhiteSpace(validationParameters.ValidAudience)
+                    ? validationParameters.ValidAudiences
+                    : validationParameters.ValidAudiences.Concat(new[] { validationParameters.ValidAudience });
 
-                if (validationParameters.ValidAudiences != null)
+            foreach (string tokenAudience in audiences)
+            {
+                if (string.IsNullOrWhiteSpace(tokenAudience))
+                    continue;
+
+                foreach (string validAudience in validationParametersAudiences)
                 {
-                    foreach (string str in validationParameters.ValidAudiences)
+                    if (string.IsNullOrWhiteSpace(validAudience))
+                        continue;
+
+                    if (validAudience.Length == tokenAudience.Length)
                     {
-                        if (string.Equals(audience, str, StringComparison.Ordinal))
+                        if (string.Equals(validAudience, tokenAudience, StringComparison.Ordinal))
                         {
-                            LogHelper.LogInformation(LogMessages.IDX10234, audience);
+                            LogHelper.LogInformation(LogMessages.IDX10234, tokenAudience);
                             return;
                         }
                     }
-                }
-
-                if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
-                {
-                    if (string.Equals(audience, validationParameters.ValidAudience, StringComparison.Ordinal))
+                    else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience)
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10234, audience);
-                        return;
+                        var length = (validAudience.Length == tokenAudience.Length + 1 && validAudience.EndsWith("/"))
+                                        ? validAudience.Length - 1
+                                        : (tokenAudience.Length == validAudience.Length + 1 && tokenAudience.EndsWith("/"))
+                                            ? tokenAudience.Length - 1
+                                            : -1;
+
+                        // the length of the audiences is different by more than 1 and neither ends in a "/"
+                        if (length == -1)
+                            continue;
+
+                        if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
+                        {
+                            LogHelper.LogInformation(LogMessages.IDX10234, tokenAudience);
+                            return;
+                        }
                     }
                 }
             }
