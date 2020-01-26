@@ -96,13 +96,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return false;
             }
 
-            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
-            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
-            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
+            int tokenPartsCount = CountTokenSegments(token);
+
+            if (tokenPartsCount == JwtConstants.JwsSegmentCount)
                 return JwtTokenUtilities.RegexJws.IsMatch(token);
-            else if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            else if (tokenPartsCount == JwtConstants.JweSegmentCount)
                 return JwtTokenUtilities.RegexJwe.IsMatch(token);
 
             LogHelper.LogInformation(LogMessages.IDX14107);
@@ -116,6 +114,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public virtual bool CanValidateToken
         {
             get { return true; }
+        }
+
+        private int CountTokenSegments(string token)
+        {
+            if (String.IsNullOrEmpty(token))
+                return 0;
+
+            // Counts number of Jwt segments, capped to MaxJwtSegmentCount + 1 to allow detecting when number of segments is too large.
+            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
+            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
+            int tokenPartsCount = 1;
+            for (int i = 0; i < token.Length && tokenPartsCount < JwtConstants.MaxJwtSegmentCount + 1; i++)
+            {
+                if (token[i] == '.')
+                    tokenPartsCount++;
+            }
+            return tokenPartsCount;
         }
 
         private JObject CreateDefaultJWEHeader(EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
@@ -1133,13 +1148,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (token.Length > MaximumTokenSizeInBytes)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes))) };
 
-            var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
+            var tokenPartsCount = CountTokenSegments(token);
+
+            if (tokenPartsCount != JwtConstants.JwsSegmentCount && tokenPartsCount != JwtConstants.JweSegmentCount)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token))) };
 
             try
             {
-                if (tokenParts.Length == JwtConstants.JweSegmentCount)
+                if (tokenPartsCount == JwtConstants.JweSegmentCount)
                 {
                     var jwtToken = new JsonWebToken(token);
                     var decryptedJwt = DecryptToken(jwtToken, validationParameters);
@@ -1182,7 +1198,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
-           
+
             JwtTokenUtilities.ValidateTokenType(jsonWebToken.Typ, validationParameters);
 
             return new TokenValidationResult
