@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
         /// </summary>
-        public IEnumerable<Claim> Claims
+        public virtual IEnumerable<Claim> Claims
         {
             get
             {

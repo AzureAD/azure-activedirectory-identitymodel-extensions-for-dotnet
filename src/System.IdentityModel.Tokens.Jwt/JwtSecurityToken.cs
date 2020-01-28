@@ -338,21 +338,6 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'iat' claim { iat, 'value' } from the <see cref="JwtPayload"/>.
-        /// This value is converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
-        /// </summary>
-        /// <remarks>If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime IssuedAt
-        {
-            get
-            {
-                if (Payload != null)
-                    return EpochTime.DateTime(Convert.ToInt64(Math.Truncate(Convert.ToDouble(Payload.Iat)), CultureInfo.InvariantCulture));
-                return DateTime.MinValue;
-            }
-        }
-
-        /// <summary>
         /// Gets the 'value' of the 'issuer' claim { iss, 'value' }.
         /// </summary>
         /// <remarks>If the 'issuer' claim is not found, an empty string is returned.</remarks>
