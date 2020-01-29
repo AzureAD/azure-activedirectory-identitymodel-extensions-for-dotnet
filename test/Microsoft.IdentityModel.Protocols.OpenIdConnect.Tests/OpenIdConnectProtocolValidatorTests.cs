@@ -1039,7 +1039,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                         TestId = "ValidatedIdToken.chash is not a string, but array",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
@@ -1051,7 +1051,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
                         TestId = "Multiple chashes",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
@@ -1417,7 +1417,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(new OidcProtocolValidatorTheoryData
                 {
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21311:"),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidAtHashException), "IDX21312:"),
                     ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                     TestId = "multiple at_hash claims",
                     ValidationContext = new OpenIdConnectProtocolValidationContext()

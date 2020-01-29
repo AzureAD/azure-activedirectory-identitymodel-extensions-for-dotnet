@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Security.Claims;
 
 namespace System.IdentityModel.Tokens.Jwt
 {

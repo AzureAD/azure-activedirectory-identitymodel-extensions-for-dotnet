@@ -47,12 +47,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21303 = "IDX21303: Validating hash of OIDC protocol message. Expected: '{0}'.";
         internal const string IDX21304 = "IDX21304: Validating 'c_hash' using id_token and code.";
         internal const string IDX21305 = "IDX21305: OpenIdConnectProtocolValidationContext.ProtocolMessage.Code is null, there is no 'code' in the OpenIdConnect Response to validate.";
-        internal const string IDX21306 = "IDX21306: The 'c_hash' claim was not a string in the 'id_token', but a 'code' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        // internal const string IDX21306 = "";
         internal const string IDX21307 = "IDX21307: The 'c_hash' claim was not found in the id_token, but a 'code' was in the OpenIdConnectMessage, id_token: '{0}'";
         internal const string IDX21308 = "IDX21308: 'Azp' claim exists in the 'id_token' but 'ciient_id' is null. Cannot validate the 'azp' claim.";
         internal const string IDX21309 = "IDX21309: Validating 'at_hash' using id_token and access_token.";
         internal const string IDX21310 = "IDX21310: OpenIdConnectProtocolValidationContext.ProtocolMessage.AccessToken is null, there is no 'token' in the OpenIdConnect Response to validate.";
-        internal const string IDX21311 = "IDX21311: The 'at_hash' claim was not a string in the 'id_token', but an 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
+        // internal const string IDX21311 = "";
         internal const string IDX21312 = "IDX21312: The 'at_hash' claim was not found in the 'id_token', but a 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX21313 = "IDX21313: The id_token: '{0}' is not valid. Delegate threw exception, see inner exception for more details.";
         internal const string IDX21314 = "IDX21314: OpenIdConnectProtocol requires the jwt token to have an '{0}' claim. The jwt did not contain an '{0}' claim, jwt: '{1}'.";

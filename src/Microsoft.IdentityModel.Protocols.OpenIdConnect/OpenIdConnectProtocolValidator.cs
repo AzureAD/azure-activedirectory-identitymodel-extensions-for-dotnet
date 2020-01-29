@@ -314,17 +314,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             ValidateNonce(validationContext);
 
             // only if 'at_hash' claim exist. 'at_hash' is not required in token response.
-            object atHashClaim;
-            if (validationContext.ValidatedJsonWebToken != null)
-            {
-                if (validationContext.ValidatedJsonWebToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out atHashClaim))
-                    ValidateAtHash(validationContext);
-            } else // validationContext.ValidatedIdToken != null
-            {
-                if (validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out atHashClaim))
-                    ValidateAtHash(validationContext);
-            }
+            var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+           if (validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out string _))
+                ValidateAtHash(validationContext);
         }
 
         /// <summary>
@@ -371,25 +364,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (string.IsNullOrEmpty(sub))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21345));
-
-            if (validationContext.ValidatedJsonWebToken != null)
-            {
-                if (string.IsNullOrEmpty(validationContext.ValidatedJsonWebToken.Subject))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21346));
-
-                if (!string.Equals(validationContext.ValidatedJsonWebToken.Subject, sub, StringComparison.Ordinal))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21338, validationContext.ValidatedJsonWebToken.Subject, sub)));
-            }
 #pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-            else // validationContext.ValidatedIdToken != null
-            {
-                if (string.IsNullOrEmpty(validationContext.ValidatedIdToken.Payload.Sub))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21346));
-
-                if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub, StringComparison.Ordinal))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21338, validationContext.ValidatedIdToken.Payload.Sub, sub)));
-            }
+            var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            if (string.IsNullOrEmpty(validatedToken.Subject))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21346));
+
+            if (!string.Equals(validatedToken.Subject, sub, StringComparison.Ordinal))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21338, validatedToken.Subject, sub)));                       
         }
 
         /// <summary>
@@ -407,12 +389,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
 
             if (validationContext.ValidatedJsonWebToken != null)
-                ValidateIdJsonWebToken(validationContext);
+                ValidateJsonWebToken(validationContext);
             else // validationContext.ValidatedIdToken != null
                 ValidateIdJwtSecurityToken(validationContext);
         }
 
-        private void ValidateIdJsonWebToken(OpenIdConnectProtocolValidationContext validationContext)
+        private void ValidateJsonWebToken(OpenIdConnectProtocolValidationContext validationContext)
         {
             // if user sets the custom validator, we call the delegate. The default checks for multiple audiences and azp are not executed.
             if (JsonWebTokenValidator != null)
@@ -427,71 +409,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 return;
             }
-            else
-            {
-                var idToken = validationContext.ValidatedJsonWebToken;
-
-                // required claims
-                if (!idToken.Audiences.Any())
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
-
-                if (idToken.ValidTo.Equals(DateTime.MinValue))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
-
-                if (idToken.IssuedAt.Equals(DateTime.MinValue))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
-
-                if (idToken.Issuer.Equals(string.Empty))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
-
-                // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
-                if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Subject)))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
-
-                // optional claims
-                if (RequireAcr && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Acr, out string _))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21315, idToken)));
-
-                if (RequireAmr && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Amr, out string _))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21316, idToken)));
-
-                if (RequireAuthTime && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.AuthTime, out string _))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21317, idToken)));
-
-                string azp = null;
-                if (RequireAzp && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Azp, out azp))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21318, idToken)));
-
-                // if multiple audiences are present in the id_token, 'azp' claim should be present
-                if (Enumerable.Count(idToken.Audiences) > 1 && string.IsNullOrEmpty(azp))
-                {
-                    LogHelper.LogWarning(LogMessages.IDX21339);
-                }
-
-                // if 'azp' claim exist, it should be equal to 'client_id' of the application
-                if (!string.IsNullOrEmpty(azp))
-                {
-                    if (string.IsNullOrEmpty(validationContext.ClientId))
-                    {
-                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21308));
-                    }
-                    else if (!string.Equals(azp, validationContext.ClientId, StringComparison.Ordinal))
-                    {
-                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21340, azp, validationContext.ClientId)));
-                    }
-                }
-            }
+            ValidateIJsonWebToken(validationContext);
         }
 
         private void ValidateIdJwtSecurityToken(OpenIdConnectProtocolValidationContext validationContext)
         {
 #pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
             // if user sets the custom validator, we call the delegate. The default checks for multiple audiences and azp are not executed.
-            if (this.IdTokenValidator != null)
+            if (IdTokenValidator != null)
             {
                 try
                 {
-                    this.IdTokenValidator(validationContext.ValidatedIdToken, validationContext);
+                    IdTokenValidator(validationContext.ValidatedIdToken, validationContext);
                 }
                 catch (Exception ex)
                 {
@@ -499,57 +428,62 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 return;
             }
-            else
-            {
-                JwtSecurityToken idToken = validationContext.ValidatedIdToken;
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                // required claims
-                if (idToken.Payload.Aud.Count == 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
+            ValidateIJsonWebToken(validationContext);
+        }
 
-                if (!idToken.Payload.Exp.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
+        private void ValidateIJsonWebToken(OpenIdConnectProtocolValidationContext validationContext)
+        {
+#pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            var idToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            // required claims
+            if (!idToken.Audiences.Any())
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
 
-                if (!idToken.Payload.Iat.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
+            if (idToken.ValidTo.Equals(DateTime.MinValue))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
 
-                if (idToken.Payload.Iss == null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
+            if (idToken.IssuedAt.Equals(DateTime.MinValue))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
 
-                // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
-                if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
+            if (string.IsNullOrEmpty(idToken.Issuer))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
-                // optional claims
-                if (RequireAcr && string.IsNullOrWhiteSpace(idToken.Payload.Acr))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21315, idToken)));
+            // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
+            if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Subject)))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
 
-                if (RequireAmr && idToken.Payload.Amr.Count == 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21316, idToken)));
+            // optional claims
+            if (RequireAcr && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Acr, out string _))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21315, idToken)));
 
-                if (RequireAuthTime && !(idToken.Payload.AuthTime.HasValue))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21317, idToken)));
+            if (RequireAmr && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Amr, out string _))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21316, idToken)));
 
-                if (RequireAzp && string.IsNullOrWhiteSpace(idToken.Payload.Azp))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21318, idToken)));
+            if (RequireAuthTime && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.AuthTime, out string _))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21317, idToken)));
 
-                // if multiple audiences are present in the id_token, 'azp' claim should be present
-                if (idToken.Payload.Aud.Count > 1 && string.IsNullOrEmpty(idToken.Payload.Azp))
+            string azp = null;
+            if (RequireAzp && !idToken.TryGetPayloadValue(JwtRegisteredClaimNames.Azp, out azp))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21318, idToken)));
+
+            // if multiple audiences are present in the id_token, 'azp' claim should be present
+            if (idToken.Audiences.Count() > 1 && string.IsNullOrEmpty(azp))
+            {
+                LogHelper.LogWarning(LogMessages.IDX21339);
+            }
+
+            // if 'azp' claim exist, it should be equal to 'client_id' of the application
+            if (!string.IsNullOrEmpty(azp))
+            {
+                if (string.IsNullOrEmpty(validationContext.ClientId))
                 {
-                    LogHelper.LogWarning(LogMessages.IDX21339);
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21308));
                 }
-
-                // if 'azp' claim exist, it should be equal to 'client_id' of the application
-                if (!string.IsNullOrEmpty(idToken.Payload.Azp))
+                else if (!string.Equals(azp, validationContext.ClientId, StringComparison.Ordinal))
                 {
-                    if (string.IsNullOrEmpty(validationContext.ClientId))
-                    {
-                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21308));
-                    }
-                    else if (!string.Equals(idToken.Payload.Azp, validationContext.ClientId, StringComparison.Ordinal))
-                    {
-                        throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21340, idToken.Payload.Azp, validationContext.ClientId)));
-                    }
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21340, azp, validationContext.ClientId)));
                 }
             }
         }
@@ -658,27 +592,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             string chash;
-            if (validationContext.ValidatedJsonWebToken != null)
-            {
-                if (!validationContext.ValidatedJsonWebToken.TryGetPayloadValue(JwtRegisteredClaimNames.CHash, out  chash))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedJsonWebToken)));
-            }
-            else // validationContext.ValidatedIdToken != null
-            {
-                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out var cHashClaim))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedIdToken)));
-                chash = cHashClaim as string;
-                if (chash == null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21306, validationContext.ValidatedIdToken)));
-            }
-
+            var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
+            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.CHash, out  chash))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken)));
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
             try
             {
-                if (validationContext.ValidatedJsonWebToken != null)
-                    ValidateHash(chash, validationContext.ProtocolMessage.Code, validationContext.ValidatedJsonWebToken.Alg);
-                else // validationContext.ValidatedIdToken != null
-                    ValidateHash(chash, validationContext.ProtocolMessage.Code, validationContext.ValidatedIdToken.Header.Alg);
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                ValidateHash(chash, validationContext.ProtocolMessage.Code, validatedToken.Alg);
             }
             catch (OpenIdConnectProtocolException ex)
             {
@@ -716,29 +636,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
 
             string atHash;
-            if (validationContext.ValidatedJsonWebToken != null)
-            {
-                if (!validationContext.ValidatedJsonWebToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out atHash))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validationContext.ValidatedJsonWebToken)));
-
-            }
-            else // validationContext.ValidatedIdToken != null
-            {
-                if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.AtHash, out var atHashClaim))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validationContext.ValidatedIdToken)));
-
-                atHash = atHashClaim as string;
-                if (atHash == null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21311, validationContext.ValidatedIdToken)));
-            }
-           
+            var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
+            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out atHash))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken)));
+#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
             try
             {
-                if (validationContext.ValidatedJsonWebToken != null)
-                    ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validationContext.ValidatedJsonWebToken.Alg);
-                else if (validationContext.ValidatedIdToken != null)
-                    ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validationContext.ValidatedIdToken.Header.Alg);
-#pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validatedToken.Alg);
             }
             catch (OpenIdConnectProtocolException ex)
             {
@@ -791,14 +695,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21349, RequireNonce)));
 
             if (!string.Equals(nonceFoundInJwt, validationContext.Nonce, StringComparison.Ordinal))
-            {
-                if (validationContext.ValidatedJsonWebToken != null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedJsonWebToken)));
-                else // validationContext.ValidatedIdToken != null
 #pragma warning disable 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken)));
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
-            }
 
             if (RequireTimeStampInNonce)
             {
