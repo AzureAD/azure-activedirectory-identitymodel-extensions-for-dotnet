@@ -1057,7 +1057,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     },
                     new OidcProtocolValidatorJsonWebTokenTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21307:"),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolInvalidCHashException), "IDX21306:"),
                         TestId = "ValidatedIdToken.chash is not a string, but array",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {

@@ -591,11 +591,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 return;
             }
 
-            string chash;
             var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
-            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.CHash, out  chash))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken)));
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.CHash, out object cHashClaim))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validatedToken)));
+
+            var chash = cHashClaim as string;
+            if (chash == null)
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21306, validatedToken)));
+            
             try
             {
                 ValidateHash(chash, validationContext.ProtocolMessage.Code, validatedToken.Alg);
@@ -635,11 +639,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 return;
             }
 
-            string atHash;
             var validatedToken = validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken;
-            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out atHash))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validationContext.ValidatedJsonWebToken ?? validationContext.ValidatedIdToken)));
 #pragma warning restore 0618 // 'OpenIdConnectProtocolValidationContext.ValidatedIdToken' is obsolete.
+            if (!validatedToken.TryGetPayloadValue(JwtRegisteredClaimNames.AtHash, out object atHashClaim))
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21312, validatedToken)));
+            
+            var atHash = atHashClaim as string;
+            if (atHash == null)
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21311, validatedToken)));
+            
             try
             {
                 ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validatedToken.Alg);
