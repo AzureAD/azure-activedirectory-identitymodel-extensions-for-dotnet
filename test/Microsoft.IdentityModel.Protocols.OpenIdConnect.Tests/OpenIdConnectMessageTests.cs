@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Linq;
+using Newtonsoft.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
-                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject?.ToString());
+                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
                 IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
                 IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();

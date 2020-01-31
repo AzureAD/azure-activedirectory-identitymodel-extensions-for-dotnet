@@ -128,6 +128,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="json">The JSON object from which the instance is created.</param>
+        [Obsolete("The 'OpenIdConnectMessage(object json)' constructor is obsolete. Please use 'OpenIdConnectMessage(string json)' instead.")]
+        public OpenIdConnectMessage(object json)
+        {
+            if (json == null)
+                throw LogHelper.LogArgumentNullException(nameof(json));
+
+            var jObject = JObject.Parse(json.ToString());
+            SetJsonParameters(jObject);
+        }
+
         private void SetJsonParameters(JObject json)
         {
             if (json == null)
