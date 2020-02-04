@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <SrcTargets>net45;net451;net461;netstandard1.4;netstandard2.0</SrcTargets>
-    <SrcStandardTargets>netstandard1.4;netstandard2.0</SrcStandardTargets>
+    <SrcTargets>net45;net451;net461;netstandard2.0</SrcTargets>
+    <SrcStandardTargets>netstandard2.0</SrcStandardTargets>
   </PropertyGroup>
 </Project>

@@ -40,11 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
     /// </summary>
     public class WsFederationConfigurationRetriever : IConfigurationRetriever<WsFederationConfiguration>
     {
-#if NETSTANDARD1_4
-        private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#else
         private static readonly XmlReaderSettings SafeSettings = new XmlReaderSettings { XmlResolver = null, DtdProcessing = DtdProcessing.Prohibit, ValidationType = ValidationType.None };
-#endif
 
         /// <summary>
         /// Retrieves a populated <see cref="WsFederationConfiguration"/> given an address.

@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Tokens
             return PrivateKeyStatus.Unknown;
         }
 
-#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>

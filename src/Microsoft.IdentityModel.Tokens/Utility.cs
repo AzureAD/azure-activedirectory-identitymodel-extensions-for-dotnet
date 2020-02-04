@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return false;
             }
-#if NET461 || NETSTANDARD1_4
+#if NET461 
             return uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase); //Uri.UriSchemeHttps is internal in dnxcore
 #else
             return uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase);

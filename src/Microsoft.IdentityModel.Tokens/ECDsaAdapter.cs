@@ -62,9 +62,6 @@ namespace Microsoft.IdentityModel.Tokens
                 CreateECDsaFunction = CreateECDsaUsingECParams;
             else
                 CreateECDsaFunction = CreateECDsaUsingCNGKey;
-#elif NETSTANDARD1_4
-            if (SupportsCNGKey())
-                CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #elif DESKTOP
             CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #endif
