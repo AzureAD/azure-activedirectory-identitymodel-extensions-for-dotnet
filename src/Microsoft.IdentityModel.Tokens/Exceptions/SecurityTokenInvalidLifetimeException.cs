@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when 'lifetime' of a token was not valid.
     /// </summary>
+    [Serializable]
     public class SecurityTokenInvalidLifetimeException : SecurityTokenValidationException
     {
         /// <summary>
@@ -73,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(message, innerException)
         {
         }
-#if DESKTOPNET45
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidLifetimeException"/> class.
         /// </summary>
@@ -83,6 +82,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
     }
 }

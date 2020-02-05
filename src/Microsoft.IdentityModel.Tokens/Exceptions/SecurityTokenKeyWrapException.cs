@@ -26,16 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    #if DESKTOPNET45
-        [Serializable]
-    #endif
-
     /// <summary>
     /// Represents a key wrap exception when encryption failed.
     /// </summary>
+    [Serializable]
     public class SecurityTokenKeyWrapException : SecurityTokenException
     {
         /// <summary>
@@ -66,16 +64,14 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
-        /// Initializes a new instance of the <see cref="KeyWrapWrapException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenKeyWrapException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected KeyWrapWrapException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenKeyWrapException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
-#endif
     }
 }

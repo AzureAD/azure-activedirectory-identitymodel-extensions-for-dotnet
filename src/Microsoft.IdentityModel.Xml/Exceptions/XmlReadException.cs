@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Xml
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when a problem occurs reading XML.
     /// </summary>
+    [Serializable]
     public class XmlReadException : XmlException
     {
         /// <summary>
@@ -61,7 +60,6 @@ namespace Microsoft.IdentityModel.Xml
             : base(message, innerException)
         {}
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlReadException"/> class.
         /// </summary>
@@ -70,6 +68,5 @@ namespace Microsoft.IdentityModel.Xml
         protected XmlReadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
-#endif
     }
 }

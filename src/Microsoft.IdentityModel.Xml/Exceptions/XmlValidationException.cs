@@ -26,16 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Xml
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
-
     /// <summary>
     /// This exception is thrown when a problem occurs when validating the XML &lt;Signature>.
     /// </summary>
+    [Serializable]
     public class XmlValidationException : XmlException
     {
         /// <summary>
@@ -66,7 +64,6 @@ namespace Microsoft.IdentityModel.Xml
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlValidationException"/> class.
         /// </summary>
@@ -76,6 +73,5 @@ namespace Microsoft.IdentityModel.Xml
             : base(info, context)
         {
         }
-#endif
     }
 }

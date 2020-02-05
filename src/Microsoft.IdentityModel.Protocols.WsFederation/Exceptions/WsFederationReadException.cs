@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when processing Ws Federation metadata.
     /// </summary>
+    [Serializable]
     public class WsFederationReadException : WsFederationException
     {
         /// <summary>
@@ -61,7 +60,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             : base(message, innerException)
         { }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationReadException"/> class.
         /// </summary>
@@ -70,6 +68,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         protected WsFederationReadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
-#endif
     }
 }

@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
     /// This exception is thrown when an OpenIdConnect protocol handler encounters an invalid state.
     /// </summary>
-#if DESKTOPNET45
     [Serializable]
-#endif
     public class OpenIdConnectProtocolInvalidStateException : OpenIdConnectProtocolException
     {
         /// <summary>
@@ -63,7 +62,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectProtocolInvalidStateException"/> class.
         /// </summary>
@@ -73,6 +71,5 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             : base(info, context)
         {
         }
-#endif
     }
 }

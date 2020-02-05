@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// Represents a Ws Federation exception.
     /// </summary>
+    [Serializable]
     public class WsFederationException : Exception
     {
         /// <summary>
@@ -64,7 +63,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="WsFederationException"/> class.
         /// </summary>
@@ -74,7 +72,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             : base(info, context)
         {
         }
-#endif
-
     }
 }

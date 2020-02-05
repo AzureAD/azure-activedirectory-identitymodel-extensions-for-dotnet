@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when a security is missing an ExpirationTime.
     /// </summary>
+    [Serializable]
     public class SamlSecurityTokenException : SecurityTokenException
     {
         /// <summary>
@@ -61,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             : base(message, innerException)
         {}
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SamlSecurityTokenException"/> class.
         /// </summary>
@@ -70,6 +68,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         protected SamlSecurityTokenException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
-#endif
     }
 }

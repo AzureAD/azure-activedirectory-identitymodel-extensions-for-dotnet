@@ -26,16 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
-
     /// <summary>
     /// This exception is thrown when an add to the TokenReplayCache fails.
     /// </summary>
+    [Serializable]
     public class SecurityTokenReplayAddFailedException : SecurityTokenValidationException
     {
         /// <summary>
@@ -65,7 +63,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenReplayAddFailedException"/> class.
         /// </summary>
@@ -75,7 +72,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
-
     }
 }
