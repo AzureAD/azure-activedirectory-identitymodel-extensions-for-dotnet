@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="ECDsaAdapter"/> class.
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">
-        /// <see cref="ECDsa"/> creation is not supported by NETSTANDARD1.4, when running on platforms other than Windows.
+        /// <see cref="ECDsa"/> creation is not supported by some platforms.
         /// For more details, see https://aka.ms/IdentityModel/create-ecdsa.
         /// </exception>
         internal ECDsaAdapter()
