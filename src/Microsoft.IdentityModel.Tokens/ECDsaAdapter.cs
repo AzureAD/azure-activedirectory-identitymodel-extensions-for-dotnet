@@ -205,36 +205,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the size of key in bits.
-        /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
-        /// <returns>Size of the key in bits.</returns>
-        private int GetKeySize(string curveId)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException(nameof(curveId));
-
-            int keySize;
-            switch (curveId)
-            {
-                case JsonWebKeyECTypes.P256:
-                    keySize = 256;
-                    break;
-                case JsonWebKeyECTypes.P384:
-                    keySize = 384;
-                    break;
-                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
-                case JsonWebKeyECTypes.P521:
-                    keySize = 521;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
-            }
-
-            return keySize;
-        }
-
-        /// <summary>
         /// Magic numbers identifying ECDSA blob types
         /// </summary>
         private enum KeyBlobMagicNumber : uint
