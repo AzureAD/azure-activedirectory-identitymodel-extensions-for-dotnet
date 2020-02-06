@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// Thrown when JWE compression fails.
     /// </summary>
+    [Serializable]
     public class SecurityTokenCompressionFailedException : SecurityTokenException
     {
         /// <summary>
@@ -61,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenCompressionFailedException"/> class.
         /// </summary>
@@ -71,7 +69,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
-
     }
 }

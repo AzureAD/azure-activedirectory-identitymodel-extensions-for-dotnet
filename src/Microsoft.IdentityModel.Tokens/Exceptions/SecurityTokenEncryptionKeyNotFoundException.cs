@@ -26,16 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when a security token contained a key identifier but the key was not found by the runtime 
     /// when decrypting a token.
     /// </summary>
+    [Serializable]
     public class SecurityTokenEncryptionKeyNotFoundException : SecurityTokenDecryptionFailedException
     {
         /// <summary>
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(message, innerException)
         {
         }
-#if DESKTOPNET45
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenEncryptionKeyNotFoundException"/> class.
         /// </summary>
@@ -74,6 +73,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
     }
 }

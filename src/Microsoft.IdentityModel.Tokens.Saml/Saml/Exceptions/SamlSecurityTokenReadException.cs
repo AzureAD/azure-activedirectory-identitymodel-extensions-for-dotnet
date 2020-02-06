@@ -26,15 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// This exception is thrown when reading a <see cref="SamlSecurityToken"/>.
     /// </summary>
+    [Serializable]
     public class SamlSecurityTokenReadException : SamlSecurityTokenException
     {
         /// <summary>
@@ -61,7 +60,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             : base(message, innerException)
         {}
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SamlSecurityTokenReadException"/> class.
         /// </summary>
@@ -70,6 +68,5 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         protected SamlSecurityTokenReadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {}
-#endif
     }
 }

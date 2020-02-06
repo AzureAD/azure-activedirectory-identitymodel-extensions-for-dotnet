@@ -26,16 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-#if DESKTOPNET45
-        [Serializable]
-#endif
     /// <summary>
     /// Throw this exception when a received Security token has an effective time 
     /// in the future.
     /// </summary>
+    [Serializable]
     public class SecurityTokenNotYetValidException : SecurityTokenValidationException
     {
         /// <summary>
@@ -67,7 +66,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenNotYetValidException"/> class.
         /// </summary>
@@ -77,7 +75,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
-
     }
 }

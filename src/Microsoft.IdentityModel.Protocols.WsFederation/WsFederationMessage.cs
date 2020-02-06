@@ -251,12 +251,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             string token = null;
             using (var sr = new StringReader(Wresult))
             {
-
-#if NETSTANDARD1_4
-                var xmlReader = XmlReader.Create(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit });
-#else
                 var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit };
-#endif
                 if (xmlReader.Settings != null)
                     xmlReader.Settings.DtdProcessing = DtdProcessing.Prohibit;
 
@@ -322,11 +317,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (token == null)
                     throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
 
-#if NETSTANDARD1_4
-                return Wresult.Contains("%0D") ? GetToken(Wresult) : token;
-#else
                 return token;
-#endif
             }
         }
 

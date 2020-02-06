@@ -26,17 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-
-#if DESKTOPNET45
-        [Serializable]
-#endif
-
     /// <summary>
     /// Represents a security token validation exception.
     /// </summary>
+    [Serializable]
     public class SecurityTokenValidationException : SecurityTokenException
     {
         /// <summary>
@@ -67,7 +64,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if DESKTOPNET45
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenValidationException"/> class.
         /// </summary>
@@ -77,7 +73,5 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
-#endif
-
     }
 }

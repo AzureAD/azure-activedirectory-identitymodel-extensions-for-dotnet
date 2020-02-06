@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="ECDsaAdapter"/> class.
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">
-        /// <see cref="ECDsa"/> creation is not supported by NETSTANDARD1.4, when running on platforms other than Windows.
+        /// <see cref="ECDsa"/> creation is not supported by some platforms.
         /// For more details, see https://aka.ms/IdentityModel/create-ecdsa.
         /// </exception>
         internal ECDsaAdapter()
@@ -61,9 +61,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (SupportsECParameters())
                 CreateECDsaFunction = CreateECDsaUsingECParams;
             else
-                CreateECDsaFunction = CreateECDsaUsingCNGKey;
-#elif NETSTANDARD1_4
-            if (SupportsCNGKey())
                 CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #elif DESKTOP
             CreateECDsaFunction = CreateECDsaUsingCNGKey;
@@ -205,36 +202,6 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
             }
             return keyByteCount;
-        }
-
-        /// <summary>
-        /// Returns the size of key in bits.
-        /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
-        /// <returns>Size of the key in bits.</returns>
-        private int GetKeySize(string curveId)
-        {
-            if (string.IsNullOrEmpty(curveId))
-                throw LogHelper.LogArgumentNullException(nameof(curveId));
-
-            int keySize;
-            switch (curveId)
-            {
-                case JsonWebKeyECTypes.P256:
-                    keySize = 256;
-                    break;
-                case JsonWebKeyECTypes.P384:
-                    keySize = 384;
-                    break;
-                case JsonWebKeyECTypes.P512: // treat 512 as 521. 512 doesn't exist, but we released with "512" instead of "521", so don't break now.
-                case JsonWebKeyECTypes.P521:
-                    keySize = 521;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
-            }
-
-            return keySize;
         }
 
         /// <summary>
