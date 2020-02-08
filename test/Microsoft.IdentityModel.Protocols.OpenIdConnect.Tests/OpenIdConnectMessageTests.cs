@@ -238,10 +238,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
             var context = new CompareContext();
-// there is no net452 target, we bind to net451
+// there is no net452 target, we bind to net45
 #if NET452
-            if(!message.SkuTelemetryValue.Equals("ID_NET451"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+            if(!message.SkuTelemetryValue.Equals("ID_NET45"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
 #elif NET461
             if (!message.SkuTelemetryValue.Equals("ID_NET461"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
@@ -506,10 +506,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
 
             var context = new CompareContext();
-// there is no net452 target, we bind to net451
+// there is no net452 target, we bind to net45
 #if NET452
-            if (!message.SkuTelemetryValue.Equals("ID_NET451"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET451");
+            if (!message.SkuTelemetryValue.Equals("ID_NET45"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
 #elif NET461
             if (!message.SkuTelemetryValue.Equals("ID_NET461"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");

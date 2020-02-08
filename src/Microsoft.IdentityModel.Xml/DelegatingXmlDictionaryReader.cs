@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Xml
             get => UseInnerReader.Prefix;
         }
 
-#if NET45 || NET451
+#if NET45
         /// <summary>
         /// Gets the quotation mark character used to enclose the attribute node. (" or ')
         /// </summary>
@@ -290,7 +290,7 @@ namespace Microsoft.IdentityModel.Xml
             get => UseInnerReader.XmlSpace;
         }
 
-#if NET45 || NET451
+#if NET45
         /// <summary>
         /// Closes the reader and changes the System.Xml.XmlReader.ReadState
         /// to Closed.

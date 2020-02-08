@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Xml
             set => _internalWriter = value ?? throw LogArgumentNullException(nameof(value));
         }
 
-#if NET45 || NET451
+#if NET45
         /// <summary>
         /// Closes the underlying stream.
         /// </summary>

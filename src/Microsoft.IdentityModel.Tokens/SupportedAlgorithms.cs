@@ -185,8 +185,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool IsSupportedRsaPss(SecurityKey key)
         {
-#if NET45 || NET451
-            // RSA-PSS is not available on .NET 4.5 and .NET 4.5.1
+#if NET45
+            // RSA-PSS is not available on .NET 4.5
             LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
 #elif NET461 || NETSTANDARD2_0

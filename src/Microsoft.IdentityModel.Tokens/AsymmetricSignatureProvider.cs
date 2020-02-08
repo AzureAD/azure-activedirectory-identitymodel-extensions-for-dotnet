@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#if NET45 || NET451
+#if NET45
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the type of the HashAlgorithm (as a string)
