@@ -83,7 +83,10 @@ namespace Microsoft.IdentityModel.Tokens
             // Level up the provider type only if:
             // 1. it is PROV_RSA_FULL or PROV_RSA_SCHANNEL which denote CSPs that only understand Sha1 algorithms
             // 2. it is not associated with a hardware key
-            if ((rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_FULL || rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_SCHANNEL) && !rsa.CspKeyContainerInfo.HardwareDevice)
+            // 3. we are not running on mono (which reports PROV_RSA_FULL but doesn't need a workaround)
+            var isSha1Provider = rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_FULL || rsa.CspKeyContainerInfo.ProviderType == PROV_RSA_SCHANNEL;
+            var isMono = Type.GetType("Mono.Runtime") != null;
+            if (isSha1Provider && !rsa.CspKeyContainerInfo.HardwareDevice)
             {
                 var csp = new CspParameters();
                 csp.ProviderType = PROV_RSA_AES;
@@ -96,10 +99,18 @@ namespace Microsoft.IdentityModel.Tokens
                 // With this flag, a CryptographicException is thrown instead.
                 csp.Flags |= CspProviderFlags.UseExistingKey;
 
-                _rsa = new RSACryptoServiceProvider(csp);
-
-                // since we created a new RsaCryptoServiceProvider we need to dispose it
-                _disposeRsa = true;
+                try
+                {
+                    _rsa = new RSACryptoServiceProvider(csp);
+                    // since we created a new RsaCryptoServiceProvider we need to dispose it
+                    _disposeRsa = true;
+                }
+                catch (CryptographicException) when (isMono)
+                {
+                    // On mono, this exception is expected behavior.
+                    // The solution is to simply not level up the provider as this workaround is not needed on mono.
+                    _rsa = rsa;
+                }
             }
             else
             {
