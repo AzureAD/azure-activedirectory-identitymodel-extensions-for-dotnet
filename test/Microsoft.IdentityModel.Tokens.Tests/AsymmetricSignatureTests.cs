@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class AsymmetricSignatureTests
     {
-        // Throw for NET45 and NET451 targets for derived RSA types.
+        // Throw for NET45 target for derived RSA types.
         [Fact]
         public void UnsupportedRSATypes()
         {

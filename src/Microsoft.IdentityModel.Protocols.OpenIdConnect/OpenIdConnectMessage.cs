@@ -529,8 +529,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string SkuTelemetryValue { get; set; } =
 #if NET45
             "ID_NET45";
-#elif NET451
-            "ID_NET451";
 #elif NET461
             "ID_NET461";
 #elif NETSTANDARD2_0

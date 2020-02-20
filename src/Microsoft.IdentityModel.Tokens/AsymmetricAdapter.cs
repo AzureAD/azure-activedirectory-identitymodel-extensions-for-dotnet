@@ -29,7 +29,7 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
-#if NET45 || NET451
+#if NET45
 using System.Reflection;
 #endif
 
@@ -47,10 +47,10 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class AsymmetricAdapter : IDisposable
     {
-#if NET45 || NET451
-        // For users that have built targeting 4.5.1, 4.5.2 or 4.6.0 they will bind to our 4.5.1 target.
+#if NET45
+        // For users that have built targeting 4.5.1, 4.5.2 or 4.6.0 they will bind to our 4.5 target.
         // It is possible for the application to pass the call to X509Certificate2.GetRSAPublicKey() or X509Certificate2.GetRSAPrivateKey()
-        // which returns RSACng(). Our 4.5.1 target doesn't know about this type and sees it as RSA, then things start to go bad.
+        // which returns RSACng(). Our 4.5 target doesn't know about this type and sees it as RSA, then things start to go bad.
         // We use reflection to detect that 4.6+ is available and access the appropriate signing or verifying methods.
         private static Type _hashAlgorithmNameType = typeof(object).Assembly.GetType("System.Security.Cryptography.HashAlgorithmName", false);
         private static Type _rsaSignaturePaddingType = typeof(object).Assembly.GetType("System.Security.Cryptography.RSASignaturePadding", false);
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-        // This constructor will be used by NET45 and NET451 for signing and for RSAKeyWrap
+        // This constructor will be used by NET45 for signing and for RSAKeyWrap
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, bool requirePrivateKey)
         {
             HashAlgorithm = hashAlgorithm;
@@ -165,9 +165,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal byte[] Decrypt(byte[] data)
         {
-            // NET45 and NET451 should have been passed RsaCryptoServiceProvider, DecryptValue may fail
+            // NET45 should have been passed RsaCryptoServiceProvider, DecryptValue may fail
             // We don't have 'lightup' for decryption / encryption.
-#if NET45 || NET451
+#if NET45
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Decrypt(data, _useRSAOeapPadding);
             else
@@ -223,9 +223,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal byte[] Encrypt(byte[] data)
         {
-            // NET45 and NET451 should have been passed RsaCryptoServiceProvider, EncryptValue may fail
+            // NET45 should have been passed RsaCryptoServiceProvider, EncryptValue may fail
             // We don't have 'lightup' for decryption / encryption.
-#if NET45 || NET451
+#if NET45
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Encrypt(data, _useRSAOeapPadding);
             else
@@ -298,9 +298,9 @@ namespace Microsoft.IdentityModel.Tokens
             // This case required the user to get a RSA object by calling
             // X509Certificate2.GetRSAPrivateKey() OR X509Certificate2.GetRSAPublicKey()
             // This requires 4.6+ to be installed. If a dependent library is targeting 4.5, 4.5.1, 4.5.2 or 4.6
-            // they will use one of these two targets Net45 or Net451, but the type is RSACng.
+            // they will use Net45, but the type is RSACng.
             // The 'lightup' code will bind to the correct operators.
-#if NET45 || NET451
+#if NET45
             else if (rsa.GetType().ToString().Equals(_rsaCngTypeName, StringComparison.Ordinal) && IsRsaCngSupported())
             {
                 _lightUpHashAlgorithmName = GetLightUpHashAlgorithmName();
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                // In NET45 or NET451 we only support RSACryptoServiceProvider or "System.Security.Cryptography.RSACng"
+                // In NET45 we only support RSACryptoServiceProvider or "System.Security.Cryptography.RSACng"
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, typeof(RSACryptoServiceProvider).ToString(), _rsaCngTypeName, rsa.GetType().ToString())));
             }
 #endif
@@ -404,7 +404,7 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
 
         // Put all the 'lightup' code here.
-#if NET45 || NET451
+#if NET45
         private string GetLightUpHashAlgorithmName()
         {
             if (HashAlgorithm.HashSize == 256)
