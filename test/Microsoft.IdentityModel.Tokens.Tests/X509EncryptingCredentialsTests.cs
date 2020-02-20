@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new X509EncryptingCredentialsTheoryData
                 {
                     Certificate = Default.Certificate,
-                    Alg = String.Empty,
+                    Alg = string.Empty,
                     Enc = SecurityAlgorithms.Aes128CbcHmacSha256,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'alg'"),
                     TestId = "EmptyAlgString"
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     Certificate = Default.Certificate,
                     Alg = SecurityAlgorithms.RsaOaepKeyWrap,
-                    Enc = String.Empty,
+                    Enc = string.Empty,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'enc'"),
                     TestId = "EmptyEncString"
                 },

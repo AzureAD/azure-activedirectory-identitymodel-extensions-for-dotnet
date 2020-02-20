@@ -373,8 +373,8 @@ namespace Microsoft.IdentityModel.Xml
         public override void WriteXmlnsAttribute(string prefix, string @namespace)
         {
             UseInnerWriter.WriteXmlnsAttribute(prefix, @namespace);
-            TracingWriter?.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
-            InternalWriter?.WriteAttributeString(prefix, String.Empty, @namespace, String.Empty);
+            TracingWriter?.WriteAttributeString(prefix, string.Empty, @namespace, string.Empty);
+            InternalWriter?.WriteAttributeString(prefix, string.Empty, @namespace, string.Empty);
         }
 
         /// <summary>

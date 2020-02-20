@@ -56,11 +56,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (attribute == null)
                     throw LogArgumentNullException(nameof(attribute));
 
-                _friendlyName = attribute.FriendlyName ?? String.Empty;
+                _friendlyName = attribute.FriendlyName ?? string.Empty;
                 _name = attribute.Name;
-                _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.OriginalString;
-                _valueType = attribute.AttributeValueXsiType ?? String.Empty;
-                _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
+                _nameFormat = attribute.NameFormat == null ? string.Empty : attribute.NameFormat.OriginalString;
+                _valueType = attribute.AttributeValueXsiType ?? string.Empty;
+                _originalIssuer = attribute.OriginalIssuer ?? string.Empty;
 
                 ComputeHashCode();
             }

@@ -250,7 +250,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(qualifiedString));
 
             string name = qualifiedString;
-            string prefix = String.Empty;
+            string prefix = string.Empty;
 
             int colon = qualifiedString.IndexOf(':');
             if (colon > -1)

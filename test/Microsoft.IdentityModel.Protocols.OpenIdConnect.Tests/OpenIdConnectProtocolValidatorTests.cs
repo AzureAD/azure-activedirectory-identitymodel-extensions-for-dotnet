@@ -911,7 +911,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     new OidcProtocolValidatorTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(ArgumentNullException), "IDX10000:"),
-                        TestId = "ValidatedIdToken.Header.alg == string.empty",
+                        TestId = "ValidatedIdToken.Header.alg == string.Empty",
                         ValidationContext = new OpenIdConnectProtocolValidationContext
                         {
                             ProtocolMessage = new OpenIdConnectMessage { Code = code },

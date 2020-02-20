@@ -54,12 +54,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw LogArgumentNullException(nameof(attribute));
                 }
 
-                FriendlyName = String.Empty;
+                FriendlyName = string.Empty;
                 Name = attribute.Name;
-                NameFormat = String.Empty;
-                Namespace = attribute.Namespace ?? String.Empty;
-                ValueType = attribute.AttributeValueXsiType ?? String.Empty;
-                OriginalIssuer = attribute.OriginalIssuer ?? String.Empty;
+                NameFormat = string.Empty;
+                Namespace = attribute.Namespace ?? string.Empty;
+                ValueType = attribute.AttributeValueXsiType ?? string.Empty;
+                OriginalIssuer = attribute.OriginalIssuer ?? string.Empty;
 
                 ComputeHashCode();
             }

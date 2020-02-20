@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 return new SamlActionTestSet
                 {
-                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), String.Empty)
+                    Xml = XmlGenerator.SamlActionXml(SamlConstants.Namespace, Default.SamlAction.Namespace.ToString(), string.Empty)
                 };
             }
         }

@@ -253,7 +253,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Claims = null,
                     SigningCredentials = null,
                 },
-                String.Empty,
+                string.Empty,
                 ExpectedException.ArgumentNullException()
             );
 
@@ -264,19 +264,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
 
             JwtSecurityTokenTestVariation outerValidJweDirect = CreateVariationOnToken(EncodedJwts.ValidJweDirect);
-            dataSet.Add("ValidJweDirect- Construct by parts", outerValidJweDirect, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJweDirect- Construct by parts", outerValidJweDirect, innerToken, string.Empty, ExpectedException.NoExceptionExpected);
             dataSet.Add("ValidJweDirect- Construct by string", outerValidJweDirect, null, EncodedJwts.ValidJweDirect, ExpectedException.NoExceptionExpected);
 
             JwtSecurityTokenTestVariation outerValidJweDirect2 = CreateVariationOnToken(EncodedJwts.ValidJweDirect2);
-            dataSet.Add("ValidJweDirect2- Construct by parts", outerValidJweDirect2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJweDirect2- Construct by parts", outerValidJweDirect2, innerToken, string.Empty, ExpectedException.NoExceptionExpected);
             dataSet.Add("ValidJweDirect2- Construct by string", outerValidJweDirect2, null, EncodedJwts.ValidJweDirect2, ExpectedException.NoExceptionExpected);
 
             JwtSecurityTokenTestVariation outerValidJwe = CreateVariationOnToken(EncodedJwts.ValidJwe);
-            dataSet.Add("ValidJwe- Construct by parts", outerValidJwe, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJwe- Construct by parts", outerValidJwe, innerToken, string.Empty, ExpectedException.NoExceptionExpected);
             dataSet.Add("ValidJwe- Construct by string", outerValidJwe, null, EncodedJwts.ValidJwe, ExpectedException.NoExceptionExpected);
 
             JwtSecurityTokenTestVariation outerValidJwe2 = CreateVariationOnToken(EncodedJwts.ValidJwe2);
-            dataSet.Add("ValidJwe2- Construct by parts", outerValidJwe2, innerToken, String.Empty, ExpectedException.NoExceptionExpected);
+            dataSet.Add("ValidJwe2- Construct by parts", outerValidJwe2, innerToken, string.Empty, ExpectedException.NoExceptionExpected);
             dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
             // Hand in a valid variation. We should fail before the variation is used.

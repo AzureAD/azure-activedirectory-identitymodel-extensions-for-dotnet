@@ -949,14 +949,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace ", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", Default.Audience } }),
-                        TestId = "'ValidAudiences == string.empty'",
+                        TestId = "'ValidAudiences == string.Empty'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(null, new List<string>{ string.Empty }, null, true),
                     },
                     new JwtTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), substringExpected: "IDX10208: Unable to validate audience. ", propertiesExpected: new Dictionary<string, object>{ { "InvalidAudience", Default.Audience } }),
-                        TestId = "'ValidAudience string.empty, validAudiences whitespace'",
+                        TestId = "'ValidAudience string.Empty, validAudiences whitespace'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(string.Empty, new List<string>{ "    " }, null, true),
                     },

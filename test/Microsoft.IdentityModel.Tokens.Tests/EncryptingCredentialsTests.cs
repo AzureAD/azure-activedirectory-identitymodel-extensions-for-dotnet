@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new EncryptingCredentialsTheoryData
                 {
                     Key = Default.AsymmetricEncryptionKeyPublic,
-                    Alg = String.Empty,
+                    Alg = string.Empty,
                     Enc = SecurityAlgorithms.Aes128CbcHmacSha256,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'alg'"),
                     TestId = "EmptyAlgString"
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     Key = Default.AsymmetricEncryptionKeyPublic,
                     Alg = SecurityAlgorithms.RsaOaepKeyWrap,
-                    Enc = String.Empty,
+                    Enc = string.Empty,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'enc'"),
                     TestId = "EmptyEncString"
                 },
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new EncryptingCredentialsTheoryData
                 {
                     Key = Default.SymmetricEncryptionKey128,
-                    Enc = String.Empty,
+                    Enc = string.Empty,
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000: The parameter 'enc'"),
                     TestId = "EmptyEncString"
                 },

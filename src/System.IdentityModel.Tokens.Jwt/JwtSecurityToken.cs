@@ -219,7 +219,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Actort;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -234,7 +235,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Header != null)
                     return Header.Alg;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -248,6 +250,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Aud;
+
                 return new List<string>();
             }
         }
@@ -264,6 +267,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Claims;
+
                 return new List<Claim>();
             }
         }
@@ -278,7 +282,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Header != null)
                     return Header.Cty;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -292,7 +297,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Header != null)
                     return Header.Enc;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
         /// <summary>
@@ -312,7 +318,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Base64UrlEncode();
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -331,7 +338,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Jti;
-                return String.Empty;
+
+                return string.Empty;
 
             }
         }
@@ -346,7 +354,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Iss;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -362,6 +371,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (InnerToken != null)
                     return InnerToken.Payload;
+
                 return _payload;
             }
             internal set
@@ -385,7 +395,8 @@ namespace System.IdentityModel.Tokens.Jwt
             { 
                 if (Header != null)
                     return Header.Kid;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -480,7 +491,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Header != null)
                     return Header.Typ;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -508,7 +520,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Sub;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
@@ -522,6 +535,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.ValidFrom;
+
                 return DateTime.MinValue;
             }
         }
@@ -536,6 +550,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.ValidTo;
+
                 return DateTime.MinValue;
             }
         }
@@ -550,6 +565,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.IssuedAt;
+
                 return DateTime.MinValue;
             }
         }
@@ -564,7 +580,8 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Header != null)
                     return Header.X5t;
-                return String.Empty;
+
+                return string.Empty;
             }
         }
 
