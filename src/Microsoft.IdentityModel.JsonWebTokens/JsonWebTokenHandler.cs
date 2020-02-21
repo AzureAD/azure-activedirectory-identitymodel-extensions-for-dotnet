@@ -484,7 +484,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 var now = EpochTime.GetIntDate(DateTime.UtcNow);
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Exp, out _))
-                    payload.Add(JwtRegisteredClaimNames.Exp, now + TimeSpan.FromMinutes(TokenLifetimeInMinutes).TotalSeconds);
+                    payload.Add(JwtRegisteredClaimNames.Exp, now + TokenLifetimeInMinutes * 60);
 
                 if (!payload.TryGetValue(JwtRegisteredClaimNames.Iat, out _))
                     payload.Add(JwtRegisteredClaimNames.Iat, now);
