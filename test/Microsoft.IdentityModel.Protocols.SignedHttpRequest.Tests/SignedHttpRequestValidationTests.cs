@@ -1074,6 +1074,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signingKey = await handler.ValidateSignaturePublicAsync(theoryData.SignedHttpRequestToken, theoryData.PopKey, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
                 IdentityComparer.AreSecurityKeysEqual(signingKey, theoryData.ExpectedPopKey, context);
                 theoryData.ExpectedException.ProcessNoException(context);
+
+                if (CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(theoryData.PopKey, theoryData.SigningAlgorithm, theoryData.TypeOfSignatureProvider, false, out _))
+                    context.AddDiff($"Signature provider with a key: '{theoryData.PopKey.KeyId}' is found in the cache. Signature providers created for validating SignedHttpRequest should not be present in the cache.");
             }
             catch (Exception ex)
             {
@@ -1087,8 +1090,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             get
             {
+                var validPopKey = new RsaSecurityKey(KeyingMaterial.RsaParameters_2048) { KeyId = "UniquePoPKey1" };
                 var signedHttpRequest = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None));
-                var validPopKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key;
                 var invalidPopKey = KeyingMaterial.RsaSecurityKey1;
                 return new TheoryData<ValidateSignedHttpRequestTheoryData>
                 {
@@ -1370,6 +1373,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         public SecurityKey ExpectedPopKey { get; set; }
 
         internal JsonWebToken SignedHttpRequestToken { get; set; }
+
+        public string TypeOfSignatureProvider { get; set; } = typeof(AsymmetricSignatureProvider).ToString();
+
+        public string SigningAlgorithm { get; set; } = SecurityAlgorithms.RsaSha256;
     }
 }
 

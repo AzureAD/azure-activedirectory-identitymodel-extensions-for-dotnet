@@ -573,7 +573,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             try
             {
-                if (_jwtTokenHandler.ValidateSignature(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature), popKey, signedHttpRequest.Alg, new TokenValidationParameters()))
+                // disable caching of PoP (verifying) signature providers
+                var tokenValidationParameters = new TokenValidationParameters()
+                {
+                    CryptoProviderFactory = new CryptoProviderFactory()
+                    {
+                        CacheSignatureProviders = false
+                    }
+                };
+
+                if (_jwtTokenHandler.ValidateSignature(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature), popKey, signedHttpRequest.Alg, tokenValidationParameters))
                     return popKey;
             }
             catch (Exception ex)
