@@ -41,6 +41,9 @@ namespace System.IdentityModel.Tokens.Jwt
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
     /// </summary>
+    /// <remarks>
+    /// We recommend using the <see cref="JsonWebTokenHandler"/> class over the JwtSecurityTokenHandler class as it is newer, faster, and has more functionality.
+    /// </remarks>
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
 

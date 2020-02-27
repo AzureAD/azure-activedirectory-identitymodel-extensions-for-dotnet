@@ -32,7 +32,7 @@ using System.Security.Claims;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Interface for a json web token (JWT).
+    /// Interface for a JSON Web Token (JWT).
     /// </summary>
     public interface IJsonWebToken : ISecurityToken
     {

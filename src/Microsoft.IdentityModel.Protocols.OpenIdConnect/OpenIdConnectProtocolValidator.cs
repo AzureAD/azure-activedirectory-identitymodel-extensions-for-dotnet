@@ -451,7 +451,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
 
             // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
-            if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Subject)))
+            if (RequireSub && string.IsNullOrWhiteSpace(idToken.Subject))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
 
             // optional claims

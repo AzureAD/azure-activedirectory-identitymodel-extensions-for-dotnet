@@ -43,6 +43,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
     /// See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
+    /// <remarks>
+    /// We recommend using the JsonWebTokenHandler class over the System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler class as it is newer, faster, and has more functionality.
+    /// </remarks>
     public class JsonWebTokenHandler : TokenHandler, ISecurityTokenValidator
     {
         private List<string> _defaultHeaderParameters = new List<string>()

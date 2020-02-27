@@ -49,6 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
         /// <remarks>
         /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>
+        /// We recommend using the <see cref="JsonWebToken"/> class over the JwtSecurityToken class as it is newer, faster, and has more functionality.
         /// </remarks>
         public JwtSecurityToken(string jwtEncodedString)
         {

@@ -35,12 +35,12 @@ namespace Microsoft.IdentityModel.Tokens
     public interface ISecurityToken
     {
         /// <summary>
-        /// This must be implemented to get the Id of this <see cref="SecurityToken"/>.
+        /// This must be implemented to get the Id of this <see cref="ISecurityToken"/>.
         /// </summary>
         string Id { get; }
 
         /// <summary>
-        /// This must be implemented to get the issuer of this <see cref="SecurityToken"/>.
+        /// This must be implemented to get the issuer of this <see cref="ISecurityToken"/>.
         /// </summary>
         string Issuer { get; }
 
@@ -52,16 +52,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// This must be implemented to get or set the <see cref="SecurityKey"/> that signed this instance.
         /// </summary>
-        /// <remarks><see cref="ISecurityTokenValidator"/>.ValidateToken(...) can this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
+        /// <remarks><see cref="ISecurityTokenValidator"/>.ValidateToken(...) can set this value when a <see cref="SecurityKey"/> is used to successfully validate a signature.</remarks>
         SecurityKey SigningKey { get; set; }
 
         /// <summary>
-        /// This must be implemented to get the time when this <see cref="SecurityToken"/> was Valid.
+        /// This must be implemented to get the time when this <see cref="ISecurityToken"/> starts to be valid.
         /// </summary>
         DateTime ValidFrom { get; }
 
         /// <summary>
-        /// This must be implemented to get the time when this <see cref="SecurityToken"/> is no longer Valid.
+        /// This must be implemented to get the time when this <see cref="ISecurityToken"/> is no longer valid.
         /// </summary>
         DateTime ValidTo { get; }
     }

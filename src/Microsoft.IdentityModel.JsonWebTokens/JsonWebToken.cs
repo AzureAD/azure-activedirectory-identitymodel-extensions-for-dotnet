@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS or JWE Compact serialization format.</exception>
         /// <remarks>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// We recommend using the JsonWebToken class over the System.IdentityModel.Tokens.Jwt.JwtSecurityToken class as it is newer, faster, and has more functionality.
         /// </remarks>
         public JsonWebToken(string jwtEncodedString)
         {
