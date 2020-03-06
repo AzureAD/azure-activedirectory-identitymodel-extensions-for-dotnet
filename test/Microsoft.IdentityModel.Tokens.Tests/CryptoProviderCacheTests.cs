@@ -233,7 +233,63 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         CryptoProviderCache = sharedCache,
                         SignatureProvider = new AsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm),
                         TestId = "AsymmetricSignatureProviderAddedSecondTime"
-                    }
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey1, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                    },
+                    // test signing signature provider
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, ALG.RsaSha256, true),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048_Public, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.JsonWebKeyRsa_2048_Public, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public)
+                    },
+                    // test symmetric signature provider
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_384, ALG.HmacSha384, true),
+                        TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_256)
+                    },
+#if NET_CORE
+                    // ecdsa signature provider should be added to the cache on core
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.Ecdsa256Key_Public, ALG.EcdsaSha256, false),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                    },
+#else
+                    // ecdsa signature provider should NOT be added to the cache on desktop
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = false,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.Ecdsa256Key_Public, ALG.EcdsaSha256, false),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                    },
+#endif
                 };
 
                 return theoryData;

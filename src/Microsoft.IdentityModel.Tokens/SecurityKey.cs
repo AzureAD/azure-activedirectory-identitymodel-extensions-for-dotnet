@@ -37,11 +37,23 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class SecurityKey
     {
         private CryptoProviderFactory _cryptoProviderFactory;
+        private readonly Lazy<string> _internalId;
 
         internal SecurityKey(SecurityKey key)
         {
             _cryptoProviderFactory = key._cryptoProviderFactory;
             KeyId = key.KeyId;
+            _internalId = new Lazy<string>(() =>
+            {
+                try
+                {
+                    return Base64UrlEncoder.Encode(ComputeJwkThumbprint());
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            });
         }
 
         /// <summary>
@@ -50,10 +62,21 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityKey()
         {
             _cryptoProviderFactory = CryptoProviderFactory.Default;
+            _internalId = new Lazy<string>(() =>
+            {
+                try
+                {
+                    return Base64UrlEncoder.Encode(ComputeJwkThumbprint());
+                }
+                catch
+                {
+                    return string.Empty;
+                }
+            });
         }
 
         [JsonIgnore]
-        internal string InternalId { get; } = Guid.NewGuid().ToString();
+        internal virtual string InternalId { get => _internalId.Value; }
 
         /// <summary>
         /// This must be overridden to get the size of this <see cref="SecurityKey"/>.

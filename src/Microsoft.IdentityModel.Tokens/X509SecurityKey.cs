@@ -177,6 +177,8 @@ namespace Microsoft.IdentityModel.Tokens
             get; private set;
         }
 
+        internal override string InternalId => X5t;
+
         /// <summary>
         /// Computes a sha256 hash over the <see cref="X509SecurityKey"/>.
         /// </summary>
