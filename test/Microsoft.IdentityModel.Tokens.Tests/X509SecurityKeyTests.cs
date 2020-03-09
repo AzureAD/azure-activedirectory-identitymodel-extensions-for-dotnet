@@ -141,6 +141,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     "CustomProvider:" + SecurityAlgorithms.RsaSsaPssSha256Signature),
             };
         }
+
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.True(KeyingMaterial.DefaultX509Key_2048.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an X509SecurityKey.");
+        }
+
     }
 
     public class X509SecurityKeyTheoryData : TheoryDataBase

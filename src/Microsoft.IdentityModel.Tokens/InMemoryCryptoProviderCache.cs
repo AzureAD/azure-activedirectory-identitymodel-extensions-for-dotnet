@@ -90,14 +90,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// For some security key types, in some runtimes, it's not possible to extract public key material and create <see cref="SecurityKey.InternalId"/>.
+        /// For some security key types, in some runtimes, it's not possible to extract public key material and create an <see cref="SecurityKey.InternalId"/>.
         /// In these cases, <see cref="SecurityKey.InternalId"/> will be an empty string, and these keys should not be cached.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
         /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
         private bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
         {
-            if (string.IsNullOrEmpty(signatureProvider?.Key?.InternalId))
+            if (signatureProvider.Key.InternalId.Length == 0)
                 return false;
             else
                 return true;

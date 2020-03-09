@@ -154,6 +154,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
+        }
+
+
         public static TheoryData<SecurityKeyTheoryData> CreateInternalIdsTheoryData
         {
             get

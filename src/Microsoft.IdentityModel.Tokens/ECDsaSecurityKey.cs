@@ -110,6 +110,20 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Determines whether the <see cref="ECDsaSecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+#if NETSTANDARD2_0
+            if (ECDsaAdapter.Instance.SupportsECParameters())
+                return true;
+#endif
+            return false;
+        }
+
+        /// <summary>
         /// Computes a sha256 hash over the <see cref="ECDsaSecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
@@ -119,9 +133,6 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD2_0
             if (ECDsaAdapter.Instance.SupportsECParameters())
             {
-                if (ECDsa == null)
-                    throw LogHelper.LogArgumentNullException(nameof(ECDsa));
-
                 ECParameters parameters = ECDsa.ExportParameters(false);
                 var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.Instance.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
                 return Utility.GenerateSha256Hash(canonicalJwk);

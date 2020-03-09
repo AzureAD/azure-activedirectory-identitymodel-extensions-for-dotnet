@@ -292,13 +292,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                                                 ALG.HmacSha256Signature,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
                                                 KEY.SymmetricSecurityKey2_256,
-                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
+                                                EE.CryptographicException("Inner CryptographicException")),
+
                 new SignatureProviderTheoryData("SymmetricSecurityKey13",
                                                 ALG.HmacSha256Signature,
                                                 ALG.HmacSha256Signature,
                                                 KEY.SymmetricSecurityKey2_256,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
-                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
+                                                EE.CryptographicException("Inner CryptographicException")),
 
                 new SignatureProviderTheoryData("UnknownKeyType1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10621:")),
                 new SignatureProviderTheoryData("UnknownKeyType2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),

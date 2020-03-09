@@ -329,19 +329,18 @@ namespace Microsoft.IdentityModel.TestUtils
             _agorithm = algorithm;
             _keyBytes = keyBytes;
         }
+        public override byte[] Key => _keyBytes;
 
-        public override byte[] Key
+        public override int KeySize
         {
             get
             {
                 if (_throwOnKeyProperty != null)
                     throw _throwOnKeyProperty;
 
-                return _keyBytes;
+                return _key.KeySize;
             }
         }
-
-        public override int KeySize { get { return _key.KeySize; } }
     }
 
     public class NotAsymmetricOrSymmetricSecurityKey : SecurityKey
