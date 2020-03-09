@@ -66,7 +66,10 @@ function ClearBaselineFiles($root)
 
 if ($env:VSINSTALLDIR)
 {
-    $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin\amd64";
+    if (Test-Path($env:VSINSTALLDIR+"\MSBuild\Current\Bin"))
+    {
+        $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin";
+    }
 }
 
 WriteSectionHeader("build.ps1 - parameters");
