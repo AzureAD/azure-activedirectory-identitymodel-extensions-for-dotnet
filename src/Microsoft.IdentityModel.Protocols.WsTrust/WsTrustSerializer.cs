@@ -292,6 +292,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 {
                     trustRequest.UseKey = ReadUseKey(reader, serializationContext);
                 }
+                else if (reader.IsStartElement(WsTrustElements.ProofEncryption, serializationContext.TrustConstants.Namespace))
+                {
+                    // TODO Read proof encryption key
+                    reader.Read();
+                }
                 else if (reader.IsLocalName(WsPolicyElements.AppliesTo))
                 {
                     foreach (var @namespace in WsPolicyConstants.KnownNamespaces)
@@ -670,7 +675,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public void WriteProofEncryptionKey(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityKey proofEncryptionKey)
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryptionKey, nameof(proofEncryptionKey));
-            writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedProofToken, serializationContext.TrustConstants.Namespace);
+            writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.ProofEncryption, serializationContext.TrustConstants.Namespace);
+
+            // TODO Write proof encryption key
 
             writer.WriteEndElement();
         }
