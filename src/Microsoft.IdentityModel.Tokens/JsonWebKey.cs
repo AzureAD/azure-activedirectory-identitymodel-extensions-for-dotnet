@@ -374,10 +374,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool CanComputeOctThumbprint()
         {
-            if (string.IsNullOrEmpty(K))
-                return false;
-            else
-                return true;
+            return !string.IsNullOrEmpty(K);
         }
 
         private byte[] ComputeOctThumbprint()
@@ -391,10 +388,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool CanComputeRsaThumbprint()
         {
-            if (string.IsNullOrEmpty(E) || string.IsNullOrEmpty(N))
-                return false;
-            else
-                return true;
+            return !(string.IsNullOrEmpty(E) || string.IsNullOrEmpty(N));
         }
 
         private byte[] ComputeRsaThumbprint()
@@ -411,10 +405,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool CanComputeECThumbprint()
         {
-            if (string.IsNullOrEmpty(Crv) || string.IsNullOrEmpty(X) || string.IsNullOrEmpty(Y))
-                return false;
-            else
-                return true;
+            return !(string.IsNullOrEmpty(Crv) || string.IsNullOrEmpty(X) || string.IsNullOrEmpty(Y));
         }
 
         private byte[] ComputeECThumbprint()

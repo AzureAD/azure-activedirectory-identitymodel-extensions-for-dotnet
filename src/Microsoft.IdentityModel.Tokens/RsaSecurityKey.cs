@@ -193,10 +193,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
-            if (Rsa != null || (Parameters.Exponent != null && Parameters.Modulus != null))
-                return true;
-            else
-                return false;
+            return (Rsa != null || (Parameters.Exponent != null && Parameters.Modulus != null));
         }
 
         /// <summary>

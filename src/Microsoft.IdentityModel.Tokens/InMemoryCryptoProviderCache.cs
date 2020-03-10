@@ -97,10 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
         private bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
         {
-            if (signatureProvider.Key.InternalId.Length == 0)
-                return false;
-            else
-                return true;
+            return signatureProvider.Key.InternalId.Length != 0;
         }
 
         /// <summary>
