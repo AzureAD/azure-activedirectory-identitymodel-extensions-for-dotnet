@@ -168,11 +168,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                         DigestAlgorithm = SecurityAlgorithms.Sha256Digest,
                         Digest = Guid.NewGuid().ToString()
                     },
-                    ProofEncryptionKey = Default.AsymmetricEncryptionKeyPublic,
                     RequestType = trustConstants.WsTrustActions.Issue,
                     SignWith = SecurityAlgorithms.Aes128CbcHmacSha256,
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
-                    UseKey = new UseKey(WsDefaults.SecurityTokenReference) { SignatureId = Guid.NewGuid().ToString() }
+                    UseKey = new UseKey(WsDefaults.SecurityTokenReference) { SignatureId = Guid.NewGuid().ToString() },
+
+                    // TODO Enable this once SecurityKeys are serialized and deserialized
+                    // ProofEncryptionKey = Default.AsymmetricEncryptionKeyPublic,
                 };
 
                 wsTrustRequest.AdditionalXmlElements.Add(xmlElement);
