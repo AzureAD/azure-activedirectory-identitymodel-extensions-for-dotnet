@@ -32,12 +32,14 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
     /// <summary>
-    /// Defines the auth:AdditionalContext element.
+    /// Represents the contents of the AdditionalContext element used to convey desired properties of the token.
+    /// <para>see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html </para>
     /// </summary>
     public class AdditionalContext
     {
         /// <summary>
-        /// 
+        /// Creates an instance of <see cref="AdditionalContext"/>.
+        /// <para>AdditionalContext element used to convey desired properties of the token.</para>
         /// </summary>
         public AdditionalContext()
         {
@@ -55,11 +57,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         }
 
         /// <summary>
-        /// Gets the Collection of items.
+        /// Gets the List of <see cref="ContextItem"/>.
         /// </summary>
         public IList<ContextItem> Items
         {
-            get; set;
+            get;
         }
     }
 }

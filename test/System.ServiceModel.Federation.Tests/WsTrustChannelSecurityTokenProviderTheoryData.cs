@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.IdentityModel.TestUtils;
+
+namespace System.ServiceModel.Federation.Tests
+{
+    public class WsTrustChannelSecurityTokenProviderTheoryData : TheoryDataBase
+    {
+        public bool CacheIssuedTokens { get; set; }
+        public int IssuedTokenRenewalThresholdPercentage { get; set; }
+        public TimeSpan MaxIssuedTokenCachingTime { get; set; }
+    }
+}

@@ -25,36 +25,46 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Xml;
+using System;
+using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Tokens;
-using static Microsoft.IdentityModel.Logging.LogHelper;
-
-#pragma warning disable 1591
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
+    /// <summary>
+    /// The <see cref="SecurityTokenElement"/> is used to represent a <see cref="SecurityToken"/> to provide serialization for key material and security tokens.
+    /// </summary>
     public class SecurityTokenElement
     {
         /// <summary>
-        /// 
+        /// Creates an instance of <see cref="SecurityTokenElement"/>.
         /// </summary>
-        public SecurityTokenElement(SecurityToken securityToken, SecurityTokenHandler securityTokenHandler)
+        /// <param name="securityToken">The <see cref="SecurityToken"/>that will be serialized.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityToken"/> is null.</exception>
+        public SecurityTokenElement(SecurityToken securityToken)
         {
-            SecurityToken = securityToken ?? throw LogArgumentNullException(nameof(securityToken));
-            SecurityTokenHandler = securityTokenHandler ?? throw LogArgumentNullException(nameof(securityTokenHandler));
+            SecurityToken = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="SecurityTokenElement"/>.
+        /// </summary>
+        /// <param name="securityTokenReference">the <see cref="SecurityTokenReference"/> that will be serialized.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityTokenReference"/> is null.</exception>
+        public SecurityTokenElement(SecurityTokenReference securityTokenReference)
+        {
+            SecurityTokenReference = securityTokenReference ?? throw LogHelper.LogArgumentNullException(nameof(securityTokenReference));
+        }
+
+        /// <summary>
+        /// Gets the <see cref="SecurityToken"/>.
+        /// </summary>
         public SecurityToken SecurityToken { get; }
 
-        public SecurityTokenHandler SecurityTokenHandler { get; }
-
-        public void WriteTo(XmlDictionaryWriter writer)
-        {
-            if (SecurityTokenHandler.TryWriteSourceData(writer, SecurityToken))
-                return;
-
-            SecurityTokenHandler.WriteToken(writer, SecurityToken);
-        }
+        /// <summary>
+        /// Gets the <see cref="SecurityTokenReference"/>.
+        /// </summary>
+        public SecurityTokenReference SecurityTokenReference { get; }
     }
-#pragma warning restore 1591
 }
