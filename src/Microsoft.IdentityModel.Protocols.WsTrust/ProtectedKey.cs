@@ -36,19 +36,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     public class ProtectedKey
     {        
         /// <summary>
-        /// Use this constructor if we want to send the key material in clear text.
-        /// </summary>
-        /// <param name="secret">The key material that needs to be protected.</param>
-        public ProtectedKey(byte[] secret)
-        {
-            Secret = secret;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public ProtectedKey() { }
-        /// <summary>
         /// Use this constructor if we want to send the key material encrypted.
         /// </summary>
         /// <param name="secret">The key material that needs to be protected.</param>

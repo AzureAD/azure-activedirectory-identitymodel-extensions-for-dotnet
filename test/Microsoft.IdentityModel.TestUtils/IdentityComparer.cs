@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (binarySecret2 == null)
                 localContext.Diffs.Add("binarySecret2 == null");
 
-            AreStringsEqual(binarySecret1.Type, binarySecret2.Type, localContext);
+            AreStringsEqual(binarySecret1.EncodingType, binarySecret2.EncodingType, localContext);
             AreBytesEqual(binarySecret1.Data, binarySecret2.Data, localContext);
 
             context.Merge(localContext);

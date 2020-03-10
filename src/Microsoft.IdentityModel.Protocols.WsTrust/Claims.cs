@@ -25,29 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsFed;
-
-#pragma warning disable 1591
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// This class is used to represent the Request Claims collection inside RequestSecurityToken.
-    /// Indicate whether the claim is optional or not. 
+    /// Represents the contents of the Claims element.
+    /// The Claims element contains specific claims that are being requested.
+    /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
     public class Claims
     {
-        public Claims() { }
-
+        /// <summary>
+        /// Creates an instance of <see cref="Claims"/>
+        /// </summary>
+        /// <param name="dialect">a uri that defines the dialect of the claims.</param>
+        /// <param name="claimTypes">a list of <see cref="ClaimType"/>.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="dialect"/> is null or empty, <paramref name="claimTypes"/> is null.</exception>
         public Claims(string dialect, IList<ClaimType> claimTypes)
         {
-            Dialect = dialect;
-            ClaimTypes = claimTypes;
+            Dialect = string.IsNullOrEmpty(dialect) ? throw LogHelper.LogArgumentNullException(nameof(dialect)) : dialect;
+            ClaimTypes = claimTypes ?? throw LogHelper.LogArgumentNullException(nameof(claimTypes));
         }
 
-        public IList<ClaimType> ClaimTypes { get; } = new List<ClaimType>();
+        /// <summary>
+        /// Gets the list of <see cref="ClaimType"/>.
+        /// </summary>
+        public IList<ClaimType> ClaimTypes { get; }
 
+        /// <summary>
+        /// Gets the dialect of these claims.
+        /// </summary>
         public string Dialect { get; set;  }
     }
 }

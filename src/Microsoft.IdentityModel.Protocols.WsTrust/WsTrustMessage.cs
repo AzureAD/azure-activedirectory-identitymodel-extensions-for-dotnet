@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsAddressing;
 using Microsoft.IdentityModel.Protocols.WsFed;
 using Microsoft.IdentityModel.Protocols.WsPolicy;
+using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 using System;
@@ -38,63 +39,78 @@ using System.Xml;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Contains all the possible elements of WsTrust RST / RSTR message
+    /// Defines supported elements of WsTrust Request and Response messages.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
-    public class WsTrustMessage : IXmlOpenItem
+    abstract public class WsTrustMessage : IXmlOpenItem
     {
+        private SecurityTokenElement _actAs;
+        private AdditionalContext _additionalContext;
         private AppliesTo _appliesTo;
         private string _authenticationType;
         private BinaryExchange _binaryExchange;
         private string _canonicalizationAlgorithm;
         private string _context;
+        private SecurityTokenReference _delegateTo;
+        private SecurityTokenElement _encryption;
         private string _encryptionAlgorithm;
         private string _encryptWith;
+        private EndpointReference _issuer;
         private Entropy _entropy;
         private int? _keySizeInBits;
+        private string _keyType;
         private string _keyWrapAlgorithm;
         private Lifetime _lifetime;
+        private SecurityTokenElement _onBehalfOf;
+        private Participants _participants;
+        private PolicyReference _policyReference;
+        private SecurityTokenElement _proofEncryption;
         private Claims _requestClaims;
+        private WsTrustRequest _secondaryParameters;
         private string _signatureAlgorithm;
         private string _signWith;
         private string _tokenType;
+        private WsTrustVersion _wsTrustVersion;
         private UseKey _useKey;
 
         /// <summary>
-        /// 
+        /// Gets or sets a SecurityTokenElement representing the ActAs element used to convey information about the identity to be represented in the token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust.html </para>
         /// </summary>
-        public WsTrustMessage()
+        /// <exception cref="ArgumentNullException">Thrown if ActAs is null.</exception>
+        public SecurityTokenElement ActAs
         {
+            get => _actAs;
+            set => _actAs = value ?? throw LogHelper.LogArgumentNullException(nameof(ActAs));
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets a value representing the AdditionalContext used to convey desired properties of the token.
+        /// <para>see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html </para>
         /// </summary>
-        public AdditionalContext AdditionalContext { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if AdditionalContext is null.</exception>
+        public AdditionalContext AdditionalContext
+        {
+            get => _additionalContext;
+            set => _additionalContext = value ?? throw LogHelper.LogArgumentNullException(nameof(AdditionalContext));
+        }
 
         /// <summary>
-        /// Gets or sets the optional element contains the actor.
-        /// on to act as another.
+        /// Gets or sets a value representing the AppliesTo element that specifies the scope for which the security token is desired.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html#_Toc162064962 </para>
         /// </summary>
-        public string ActAs { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool AllowPostdating { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if AppliesTo is null.</exception>
         public AppliesTo AppliesTo
         {
             get => _appliesTo;
-            set => _appliesTo = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            set => _appliesTo = value ?? throw LogHelper.LogArgumentNullException(nameof(AppliesTo));
         }
 
         /// <summary>
-        /// Gets or sets the optional element indicates the type of authencation desired,
-        /// specified as a URI.
+        /// Gets or sets a string representing the AuthenticationType element that indicates the type of authencation desired, usually specified as a URI.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if AuthenticationType is null or empty.</exception>
         public string AuthenticationType
         {
             get => _authenticationType;
@@ -102,8 +118,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the binary data that is exchanged.
+        /// Gets or sets a value representing the BinaryExchange element that is used to exchange binary blobs as part of the existing negotiation.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if BinaryExchange is null.</exception>
         public BinaryExchange BinaryExchange
         {
             get => _binaryExchange;
@@ -111,13 +129,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityTokenElement"/> that is to be cancelled.
+        /// Gets or sets a string representing the CanonicalizationAlgorithm desired method to use in the returned token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public SecurityTokenElement CancelTarget { get; set; }
-
-        /// <summary>
-        /// Gets or sets the CanonicalizationAlgorithm.
-        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if CanonicalizationAlgorithm is null or empty.</exception>
         public string CanonicalizationAlgorithm
         {
             get => _canonicalizationAlgorithm;
@@ -125,8 +140,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// The optional element requests a specific set of claim types requested by the client.
+        /// Gets or sets a value representing the Claims element used to request a specific set of claims.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if Claims is null.</exception>
         public Claims Claims
         {
             get => _requestClaims;
@@ -134,13 +151,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets a string that represents the desired algorithm to use when computed keys are used.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public string ComputedKeyAlgorithm { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if ComputedKeyAlgorithm is null or empty.</exception>
+        public string ComputedKeyAlgorithm
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// 
+        /// Gets or sets a string that reprents the Context attribute that established for a set of RSTR messages.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if Context is null or empty.</exception>
         public string Context
         {
             get => _context;
@@ -148,39 +173,53 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or Sets a boolean that specifies if the returned token should
-        /// be delegatable.
+        /// Gets or sets a boolean that specifies if the returned token should be delegatable.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public bool? Delegatable { get; set; }
-
-        /// <summary>
-        /// Gets or Sets the Identity to which the Issued Token is delegated to.
-        /// </summary>
-        public SecurityTokenElement DelegateTo { get; set; }
-
-        /// <summary>
-        /// Gets or Sets a boolean that specifies if the Issued Token should
-        /// be marked forwardable.
-        /// </summary>
-        public bool? Forwardable { get; set; }
-
-        /// <summary>
-        /// Gets or sets entropy to send
-        /// </summary>
-        public Entropy Entropy
+        public bool? Delegatable
         {
-            get => _entropy;
-            set => _entropy = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            get;
+            set;
         }
 
         /// <summary>
-        /// The optional element provides that provides information on the token/key to use when encrypting
+        /// Gets or sets the Identity to which the Issued Token is delegated to.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public SecurityTokenElement Encryption { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if DelegateTo is null or empty.</exception>
+        public SecurityTokenReference DelegateTo
+        {
+            get => _delegateTo;
+            set => _delegateTo = value ?? throw LogHelper.LogArgumentNullException(nameof(DelegateTo));
+        }
 
         /// <summary>
-        /// Gets or sets the EncryptionAlgorithm that is used to encrypt the token returned.
+        /// Gets or sets a value repsenting the Entropy element that is used to provide proposed key material.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if Entropy is null.</exception>
+        public Entropy Entropy
+        {
+            get => _entropy;
+            set => _entropy = value ?? throw LogHelper.LogArgumentNullException(nameof(Entropy));
+        }
+
+        /// <summary>
+        /// Gets or sets a value that represents the Encryption element that indicates the requestor desires any secrects to be encrypted with a specific token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if Encryption is null.</exception>
+        public SecurityTokenElement Encryption
+        {
+            get => _encryption;
+            set => _encryption = value ?? throw LogHelper.LogArgumentNullException(nameof(Encryption));
+        }
+
+        /// <summary>
+        /// Gets or sets a string that indicates the desired EncryptionAlgorithm to use.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if EncryptionAlgorithm is null or empty.</exception>
         public string EncryptionAlgorithm
         {
             get => _encryptionAlgorithm;
@@ -188,42 +227,65 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the encryption algorithm to use.
+        /// Gets or sets a string that indicates the desired encryption algorithm to use with the issued security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        /// <exception cref="ArgumentNullException"> if value is null or an empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if EncryptWith is null or an empty.</exception>
         public string EncryptWith
         {
             get => _encryptWith;
-            set => _encryptWith = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(value)) : value;
+            set => _encryptWith = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(EncryptWith)) : value;
+        }
+
+        /// <summary>
+        /// Gets or sets a boolean that specifies if the Issued Token should be marked forwardable.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        public bool? Forwardable
+        {
+            get;
+            set;
         }
 
         /// <summary>
         /// Gets or sets this element that defines the KeySize element inside the RequestSecurityToken message
         /// It is specified in bits.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if KeySizeInBits is &lt; 0.</exception>
         public int? KeySizeInBits
         {
             get => _keySizeInBits;
-            set => _keySizeInBits = (value.HasValue && value.Value < 0) ? throw LogHelper.LogExceptionMessage(new ArgumentException("must be greater than 0", nameof(value))) : value;
+            set => _keySizeInBits = (value.HasValue && value.Value < 0) ? throw LogHelper.LogExceptionMessage(new ArgumentException("must be greater than 0", nameof(KeySizeInBits))) : value;
         }
 
         /// <summary>
-        /// Gets or sets the KeyType.
+        /// Gets or sets a string that indicates the desired type of key in the security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public string KeyType { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if KeyType is null or empty.</exception>
+        public string KeyType
+        {
+            get => _keyType;
+            set => _keyType = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(KeyType)) : value;
+        }
 
         /// <summary>
-        /// Gets or sets wst:KeyWrapAlgorithm.
+        /// Gets or sets a string that indicates the desired key wrapping algorithm.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if KeyWrapAlgorithm is null or empty.</exception>
         public string KeyWrapAlgorithm
         {
             get => _keyWrapAlgorithm;
-            set => _keyWrapAlgorithm = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(value)) : value;
+            set => _keyWrapAlgorithm = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(KeyWrapAlgorithm)) : value;
         }
 
         /// <summary>
-        /// Gets or sets the Lifetime.
+        /// Gets or sets the a value that represents the Lifetime element used to specify the desired valid time range.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if Lifetime is null or empty.</exception>
         public Lifetime Lifetime
         {
             get => _lifetime;
@@ -231,53 +293,76 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets/Sets the Issuer of the OnBehalfOf token.
+        /// Gets or sets an EndpointReference that represents the Issuer element used to specify the issuer of the security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public EndpointReference Issuer { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if Issuer is null.</exception>
+        public EndpointReference Issuer
+        {
+            get => _issuer;
+            set => _issuer = value ?? throw LogHelper.LogArgumentNullException(nameof(Issuer));
+        }
 
         /// <summary>
-        ///
+        /// Gets or sets an EndpointReference that represents the Issuer element used to specify the issuer of the security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public SecurityToken OnBehalfOf { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if OnBehalfOf is null.</exception>
+        public SecurityTokenElement OnBehalfOf
+        {
+            get => _onBehalfOf;
+            set => _onBehalfOf = value ?? throw LogHelper.LogArgumentNullException(nameof(OnBehalfOf));
+        }
 
         /// <summary>
-        /// 
+        /// Gets or sets an value that represents the Participants element used to specify the parcipants sharing the security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public Participants Participants { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if Participants is null.</exception>
+        public Participants Participants
+        {
+            get => _participants;
+            set => _participants = value ?? throw LogHelper.LogArgumentNullException(nameof(Participants));
+        }
 
         /// <summary>
-        /// 
+        /// Gets or sets an value that represents the PolicyReference element used to specify the parcipants sharing the security token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public PolicyReference PolicyReference { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if PolicyReference is null.</exception>
+        public PolicyReference PolicyReference
+        {
+            get => _policyReference;
+            set => _policyReference = value ?? throw LogHelper.LogArgumentNullException(nameof(PolicyReference));
+        }
 
         /// <summary>
-        /// Gets or sets the <see cref="SecurityKey" /> that will send to the STS to encrypt the proof token.
+        /// Gets or sets a SecurityTokenElement that represents the ProofEncryption element used to specify the any secrets in  proof-of-possession tokens to be encrypted for the specified token.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public SecurityKey ProofEncryptionKey { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if ProofEncryption is null.</exception>
+        public SecurityTokenElement ProofEncryption
+        {
+            get => _proofEncryption;
+            set => _proofEncryption = value ?? throw LogHelper.LogArgumentNullException(nameof(ProofEncryption));
+        }
 
         /// <summary>
-        /// Gets or sets the Renewing element inside the RequestSecurityToken message.
+        /// Gets of sets a WsTrustRequest that represents the Secondary element for which the requestor is not the originator.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public Renewing Renewing { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if SecondaryParameters is null.</exception>
+        public WsTrustRequest SecondaryParameters
+        {
+            get => _secondaryParameters;
+            set => _secondaryParameters = value ?? throw LogHelper.LogArgumentNullException(nameof(SecondaryParameters));
+        }
 
         /// <summary>
-        /// Gets or sets the RenewTarget element inside the RequestSecurityToken message.
+        /// Gets or sets a string that represents the SignatureAlgorithm that indicates the desired signature algorithm to signe the issued security token with.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public SecurityTokenElement RenewTarget { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string RequestType { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public WsTrustRequest SecondaryParameters { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if ComputedKeyAlgorithm is null or empty.</exception>
         public string SignatureAlgorithm
         {
             get => _signatureAlgorithm;
@@ -285,8 +370,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets a string that represents the SignWith element that indicates the desired signature algorithm to be used with the issued security token by the receiver.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if ComputedKeyAlgorithm is null or empty.</exception>
         public string SignWith
         {
             get => _signWith;
@@ -294,8 +381,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the TokenType.
+        /// Gets or sets a string that represents the TokenType element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">if TokenType is null or empty.</exception>
         public string TokenType
         {
             get => _tokenType;
@@ -303,13 +392,20 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the WsTrustVesion.
         /// </summary>
-        public WsTrustVersion WsTrustVersion { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown if ComputedKeyAlgorithm is null or empty.</exception>
+        public WsTrustVersion WsTrustVersion
+        {
+            get => _wsTrustVersion;
+            set => _wsTrustVersion = value ?? throw LogHelper.LogArgumentNullException(nameof(WsTrustVersion));
+        }
 
         /// <summary>
-        /// 
+        /// Gets or sets an value that represents the UseKey element used to specify that the requestor wishes to use an existing key rather than create a new one.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown if UseKey is null or empty.</exception>
         public UseKey UseKey
         {
             get => _useKey;
@@ -317,17 +413,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or Sets the Security Token to be Validated.
-        /// </summary>
-        public SecurityTokenElement ValidateTarget { get; set; }
-
-        /// <summary>
-        /// 
+        /// Gets additional attributes that should be added to or were found when reading or writing a trust message.
         /// </summary>
         public IList<XmlAttribute> AdditionalXmlAttributes { get; } = new List<XmlAttribute>();
 
         /// <summary>
-        /// 
+        /// Gets additional elements that should be added to or were found when reading or writing a trust message.
         /// </summary>
         public IList<XmlElement> AdditionalXmlElements { get; } = new List<XmlElement>();
     }
