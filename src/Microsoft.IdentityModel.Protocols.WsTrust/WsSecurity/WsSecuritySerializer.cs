@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             //      ...
             //  </wsse:SecurityTokenReference>
 
-            var xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
+            XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
             var securityTokenReference = new SecurityTokenReference
             {
                 Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, serializationContext.SecurityConstants.Namespace),

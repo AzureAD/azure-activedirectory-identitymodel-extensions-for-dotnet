@@ -26,7 +26,16 @@ namespace System.ServiceModel.Federation
         {
             // If token requirement matches SAML token return the custom SAML token provider
             // that performs custom work to serve up the token
-            return new WSTrustChannelSecurityTokenProvider(tokenRequirement);
+            var tokenProvider = new WSTrustChannelSecurityTokenProvider(tokenRequirement);
+
+            if (ClientCredentials is WsTrustChannelClientCredentials wsTrustChannelClientCredentials)
+            {
+                tokenProvider.CacheIssuedTokens = wsTrustChannelClientCredentials.CacheIssuedTokens;
+                tokenProvider.MaxIssuedTokenCachingTime = wsTrustChannelClientCredentials.MaxIssuedTokenCachingTime;
+                tokenProvider.IssuedTokenRenewalThresholdPercentage = wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage;
+            }
+
+            return tokenProvider;
         }
     }
 }
