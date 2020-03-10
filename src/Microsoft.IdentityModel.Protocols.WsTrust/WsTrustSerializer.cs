@@ -348,9 +348,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         private void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
         {
+            var isEmptyElement = reader.IsEmptyElement;
             var doc = new XmlDocument();
             doc.Load(reader.ReadSubtree());
             trustRequest.AdditionalXmlElements.Add(doc.DocumentElement);
+
+            if (isEmptyElement)
+            {
+                // ReadSubTree will advance the reader to the current element's end element. If the reader is at
+                // an empty element, it won't advance and the deserializer will be stuck on the empty unknown element.
+                reader.Read();
+            }
         }
 
         public RequestedProofToken ReadRequestedProofToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
