@@ -33,20 +33,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// The Entropy used in both token request message and token response message. 
     /// </summary>
-    public class Entropy : ProtectedKey
+    public class Entropy
     {
         /// <summary>
         /// 
         /// </summary>
         internal Entropy()
-        { }
-
-        /// <summary>
-        /// Constructor for sending entropy in binary secret format.
-        /// </summary>
-        /// <param name="secret">The key material.</param>
-        public Entropy( byte[] secret )
-            : base( secret )
         {
         }
 
@@ -70,7 +62,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="secret">The key material.</param>
         /// <param name="wrappingCredentials">The encrypting credentials used to encrypt the key material.</param>
         public Entropy( byte[] secret, EncryptingCredentials wrappingCredentials )
-            : base( secret, wrappingCredentials )
         {
         }
 
@@ -79,9 +70,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="protectedKey">The protected key which can be either binary secret or encrypted key.</param>
         public Entropy( ProtectedKey protectedKey )
-            : base( GetKeyBytesFromProtectedKey( protectedKey ), GetWrappingCredentialsFromProtectedKey( protectedKey ) )
         {
         }
+
+        /// <summary>
+        /// Get the <see cref="ProtectedKey"/>
+        /// </summary>
+        public ProtectedKey ProtectedKey { get; }
 
         static byte[] GetKeyBytesFromProtectedKey( ProtectedKey protectedKey )
         {

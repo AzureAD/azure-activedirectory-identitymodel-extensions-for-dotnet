@@ -25,33 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Protocols.WsTrust
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    public class AllowPostdating
-    {
-        /// <summary>
-        /// </summary>
-        /// <paramref name="allow"/>
-        /// <paramref name="ok"/>
-        public AllowPostdating(bool? allow, bool? ok)
-        {
-            Allow = allow;
-            OK = ok;
-        }
+using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool? Allow { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool? OK { get; set; }
-    }
-}
+[assembly: AssemblyInformationalVersion("0.0.1")]
+[assembly: AssemblyFileVersion("0.0.1")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
+[assembly: AssemblyVersion("0.0.1")]
+[assembly: CLSCompliant(false)]
+[assembly: ComVisible(false)]

@@ -31,47 +31,72 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Used in the RequestSecurityToken or RequestSecurityTokenResponse to indicated the desired or 
-    /// required lifetime of a token. Everything here is stored in UTC format.
+    /// Represents the contents of the Lifetime element.
+    /// A Lifetime can be used to represent the creation and expiration times of a security token.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public class Lifetime
     {
+        private DateTime? _created;
+        private DateTime? _expires;
+
         /// <summary>
-        /// Instantiates a LifeTime object with token creation and expiration time in Utc.
+        /// Creates an instance of <see cref="Lifetime"/>.
+        /// <para>>A Lifetime can be used to represent the creation and expiration times of a security token.</para>
         /// </summary>
-        /// <param name="created">Token creation time in Utc.</param>
-        /// <param name="expires">Token expiration time in Utc.</param>
-        /// <exception cref="ArgumentException">When the given expiration time is 
-        /// before the given creation time.</exception>
-        public Lifetime( DateTime created, DateTime expires )
-            : this( (DateTime?)created, (DateTime?)expires )
+        public Lifetime()
         {
         }
 
         /// <summary>
-        /// Instantiates a LifeTime object with token creation and expiration time in Utc.
+        /// Creates an instance of a <see cref="Lifetime"/>.
+        /// <para>A Lifetime can be used to represent the creation and expiration times of a security token.</para>
         /// </summary>
-        /// <param name="created">Token creation time in Utc.</param>
-        /// <param name="expires">Token expiration time in Utc.</param>
-        /// <exception cref="ArgumentException">When the given expiration time is 
-        /// before the given creation time.</exception>
-        public Lifetime( DateTime? created, DateTime? expires )
+        /// <param name="created">creation time, will be converted to UTC.</param>
+        /// <param name="expires">expiration time will be converted to UTC.</param>
+        /// <remarks>Value will be stored in UTC.</remarks>
+        public Lifetime(DateTime created, DateTime expires)
+            : this((DateTime?)created, (DateTime?)expires)
         {
-            if ( created.HasValue && expires.HasValue && expires.Value <= created.Value )
-                throw LogHelper.LogExceptionMessage(new ArgumentException("expires < created"));
-
-            Created = created;
-            Expires = expires;
         }
 
         /// <summary>
-        /// Gets the token creation time in UTC time.
+        /// Creates an instance of a <see cref="Lifetime"/>.
+        /// A Lifetime can be used to represent the creation and expiration times of a security token.
         /// </summary>
-        public DateTime? Created { get; set; }
+        /// <param name="created">creation time, will be converted to UTC.</param>
+        /// <param name="expires">expiration time will be converted to UTC.</param>
+        /// <remarks>Value will be stored in UTC.</remarks>
+        public Lifetime(DateTime? created, DateTime? expires)
+        {
+            if (created.HasValue && expires.HasValue && expires.Value <= created.Value)
+                LogHelper.LogWarning(LogMessages.IDX15500);
+
+            if (created.HasValue)
+                Created = created.Value.ToUniversalTime();
+
+            if (expires.HasValue)
+                Expires = expires.Value.ToUniversalTime();
+        }
 
         /// <summary>
-        /// Gets the token expiration time in UTC time.
+        /// Gets or sets the creation time.
         /// </summary>
-        public DateTime? Expires { get; set; }
+        /// <remarks>Value will be stored in UTC.</remarks>
+        public DateTime? Created
+        {
+            get => _created;
+            set => _created = (value.HasValue) ? _created = value.Value.ToUniversalTime() : value;
+        }
+
+        /// <summary>
+        /// Gets or sets the expiration time.
+        /// </summary>
+        /// <remarks>Value will be stored in UTC.</remarks>
+        public DateTime? Expires
+        {
+            get => _expires;
+            set => _expires = (value.HasValue) ? _expires = value.Value.ToUniversalTime() : value;
+        }
     }
 }
