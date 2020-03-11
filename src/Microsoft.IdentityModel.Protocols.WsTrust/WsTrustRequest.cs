@@ -27,14 +27,49 @@
 
 #pragma warning disable 1591
 
-using Microsoft.IdentityModel.Xml;
+using System;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
+    /// <summary>
+    /// Represents the contents of a WsTrustRequest message.
+    /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
+    /// </summary>
     public class WsTrustRequest : WsTrustMessage
     {
+        private string _requestType;
+
+        /// <summary>
+        /// Constructor for <see cref="WsTrustRequest"/>.
+        /// This constructor is useful when deserializing from xml.
+        /// </summary>
         public WsTrustRequest()
         {
+        }
+
+        /// <summary>
+        /// Constructor for <see cref="WsTrustRequest"/>
+        /// <paramref name="requestType">the type of this request.</paramref>
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if <paramref name="requestType"/> is null or empty string.</exception>
+        public WsTrustRequest(string requestType)
+        {
+            RequestType = requestType;
+        }
+
+        /// <summary>
+        /// Gets or sets if the token requested can be postdated.
+        /// </summary>
+        public bool? AllowPostdating { get; set; }
+
+        /// <summary>
+        /// Gets the request type.
+        /// </summary>
+        public string RequestType
+        {
+            get => _requestType;
+            set => _requestType = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(RequestType)) : value;
         }
     }
 }

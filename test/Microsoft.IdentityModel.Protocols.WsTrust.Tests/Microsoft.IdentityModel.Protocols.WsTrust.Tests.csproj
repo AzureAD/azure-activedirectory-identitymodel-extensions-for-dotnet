@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <Import Project="..\..\build\commonTest.props" />
+
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.Protocols.WsTrust.Tests</AssemblyName>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -7,23 +8,21 @@
     <Description>Microsoft.IdentityModel.Protocols.WsTrust.Tests</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Protocols.WsTrust.Tests</PackageId>
-    <ProjectGuid>{B3673E98-A22D-4906-AA5C-273E4E6EB205}</ProjectGuid>
     <SignAssembly>true</SignAssembly>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
+ 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.WsTrust\Microsoft.IdentityModel.Protocols.WsTrust.csproj" />
-    <ProjectReference Include="..\Microsoft.IdentityModel.Protocols.WsFederation.Tests\Microsoft.IdentityModel.Protocols.WsFederation.Tests.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
   </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-  </ItemGroup>
+ 
 </Project>

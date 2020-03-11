@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         public virtual EndpointReference ReadEndpointReference(XmlDictionaryReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, WsAddressingElements.EndpointReference);
-            foreach (var @namespace in WsAddressingConstants.KnownNamespaces)
+            foreach (string @namespace in WsAddressingConstants.KnownNamespaces)
             {
                 if (reader.IsNamespaceUri(@namespace))
                 {
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                     while (reader.IsStartElement())
                     {
                         bool isInnerEmptyElement = reader.IsEmptyElement;
-                        var subtreeReader = reader.ReadSubtree();
+                        XmlReader subtreeReader = reader.ReadSubtree();
                         var doc = new XmlDocument
                         {
                             PreserveWhitespace = true
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
                 }
             }
 
-            throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15002, WsAddressingElements.EndpointReference, WsAddressingConstants.Addressing200408.Namespace, WsAddressingConstants.Addressing10.Namespace, reader.NamespaceURI)));
+            throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15001, WsAddressingElements.EndpointReference, WsAddressingConstants.Addressing200408.Namespace, WsAddressingConstants.Addressing10.Namespace, reader.NamespaceURI)));
         }
 
         public void WriteEndpointReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, EndpointReference endpointReference)

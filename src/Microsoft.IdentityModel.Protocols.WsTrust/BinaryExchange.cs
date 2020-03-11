@@ -32,7 +32,8 @@ using Microsoft.IdentityModel.Protocols.WsSecurity;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Represents the contents of the BinaryExchange element.  
+    /// Represents the contents of the BinaryExchange element.
+    /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
     public class BinaryExchange
     {
@@ -41,9 +42,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="binaryData">Binary data exchanged.</param>
         /// <param name="valueType">Uri representing the value type of the binary data.</param>
-        /// <exception cref="ArgumentNullException">Input parameter 'binaryData' or 'valueType' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="binaryData"/> or <paramref name="valueType"/>.</exception>
+        /// <remarks>Default encoding type is: "http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1/#Base64Binary".
+        /// for possible values see: "http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html#wssecurity".</remarks>
         public BinaryExchange( byte[] binaryData, Uri valueType )
-            : this( binaryData, valueType, new Uri( WsSecurityEncodingTypes.WsSecurity10.Base64 ) )
+            : this( binaryData, valueType, new Uri( WsSecurityEncodingTypes.WsSecurity11.Base64 ) )
         {
         }
 
@@ -53,10 +56,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="binaryData">Binary data exchanged.</param>
         /// <param name="valueType">Uri representing the value type of the binary data.</param>
         /// <param name="encodingType">Encoding type to be used for encoding teh </param>
-        /// <exception cref="ArgumentNullException">Input parameter 'binaryData', 'valueType' or 'encodingType' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="binaryData"/>, <paramref name="valueType"/> or <paramref name="encodingType"/> is null.</exception>
         public BinaryExchange( byte[] binaryData, Uri valueType, Uri encodingType )
         {
-            // [TODO - brentsch] should we allow strings instead of Uri 
             BinaryData = binaryData ?? throw LogHelper.LogArgumentNullException(nameof(binaryData));
             ValueType = valueType ?? throw LogHelper.LogArgumentNullException(nameof(ValueType)); ;
             EncodingType = encodingType ?? throw LogHelper.LogArgumentNullException(nameof(EncodingType)); ;

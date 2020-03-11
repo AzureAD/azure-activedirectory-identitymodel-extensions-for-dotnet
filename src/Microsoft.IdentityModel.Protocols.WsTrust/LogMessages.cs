@@ -31,11 +31,14 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Log messages for WsTrust
+    /// Log messages for WsTrust IDX15000 to IDX15999
     /// </summary>
     internal static class LogMessages
     {
-        internal const string IDX15001 = "IDX15001: Unknown Ws-Trust namespace. Expecting Element: '{0}' to be in one of three namespaces: '{1}', '{2}', '{3}'. Found namespace '{4}'.";
-        internal const string IDX15002 = "IDX15002: Unknown Ws-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'.";
+        internal const string IDX15000 = "IDX15000: Unknown Ws-Trust namespace. Expecting Element: '{0}' to be in one of three namespaces: '{1}', '{2}', '{3}'. Found namespace '{4}'.";
+        internal const string IDX15001 = "IDX15001: Unknown Ws-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'.";
+
+        // IDX15100 - specific WsTrustReadRequest errors
+        internal const string IDX15100 = "IDX15100: WsTrustRequest must start with a '{0}' element.";
     }
 }

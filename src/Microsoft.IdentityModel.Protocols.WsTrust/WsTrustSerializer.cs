@@ -47,9 +47,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class WsTrustSerializer
     {
-        private WsSecuritySerializer _wsSecuritySerializer = new WsSecuritySerializer();
-        private WsFedSerializer _wsFedSerializer = new WsFedSerializer();
-        private WsPolicySerializer _wsPolicySerializer = new WsPolicySerializer();
+        private readonly WsSecuritySerializer _wsSecuritySerializer = new WsSecuritySerializer();
+        private readonly WsFedSerializer _wsFedSerializer = new WsFedSerializer();
+        private readonly WsPolicySerializer _wsPolicySerializer = new WsPolicySerializer();
 
         internal const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffffZ";
 
@@ -76,9 +76,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.Claims, serializationContext.TrustConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
-            var attributes = XmlAttributeHolder.ReadAttributes(reader);
+            XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
 
-            var dialect = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Dialect, serializationContext.TrustConstants.Namespace);
+            string dialect = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Dialect, serializationContext.TrustConstants.Namespace);
             reader.ReadStartElement();
             var claimTypes = new List<ClaimType>();
             while (reader.IsStartElement())
@@ -149,11 +149,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             reader.MoveToContent();
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
-            foreach (var tokenHandler in SecurityTokenHandlers)
+            foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
             {
                 if (tokenHandler.CanReadToken(reader))
                 {
-                    var token = tokenHandler.ReadToken(reader);
+                    SecurityToken token = tokenHandler.ReadToken(reader);
                     if (!isEmptyElement)
                         reader.ReadEndElement();
 
@@ -174,11 +174,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             var binarySecret = new BinarySecret();
             if (!reader.IsEmptyElement)
             {
-                var attributes = XmlAttributeHolder.ReadAttributes(reader);
-                binarySecret.Type = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
+                XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
+                string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
+                if (!string.IsNullOrEmpty(encodingType))
+                    binarySecret.EncodingType = encodingType;
 
                 reader.ReadStartElement();
-                var data = reader.ReadContentAsBase64();
+                byte[] data = reader.ReadContentAsBase64();
                 if (data != null)
                     binarySecret.Data = data;
 
@@ -204,12 +206,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
-            var retVal = _wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext);
+            SecurityTokenReference tokenReference = _wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext);
 
             if (!isEmptyElement)
                 reader.ReadEndElement();
 
-            return retVal;
+            return tokenReference;
         }
 
         public WsTrustRequest ReadRequest(XmlDictionaryReader reader)
@@ -226,8 +228,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             else
                 throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX15001, WsTrustConstants.TrustFeb2005, WsTrustConstants.Trust13, WsTrustConstants.Trust14, reader.NamespaceURI)));
 
-            var xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
-            var trustRequest = new WsTrustRequest
+            XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
+
+            var trustRequest = new WsTrustRequest()
             {
                 Context = XmlAttributeHolder.GetAttribute(xmlAttributes, WsTrustAttributes.Context, serializationContext.TrustConstants.Namespace)
             };
@@ -299,7 +302,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
                 else if (reader.IsLocalName(WsPolicyElements.AppliesTo))
                 {
-                    foreach (var @namespace in WsPolicyConstants.KnownNamespaces)
+                    foreach (string @namespace in WsPolicyConstants.KnownNamespaces)
                     {
                         if (reader.IsNamespaceUri(@namespace))
                         {
@@ -316,7 +319,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
                 else if (reader.IsLocalName(WsFedElements.AdditionalContext))
                 {
-                    foreach (var @namespace in WsFedConstants.KnownAuthNamespaces)
+                    foreach (string @namespace in WsFedConstants.KnownAuthNamespaces)
                     {
                         if (reader.IsNamespaceUri(@namespace))
                         {
@@ -353,7 +356,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         private void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
         {
-            var isEmptyElement = reader.IsEmptyElement;
+            bool isEmptyElement = reader.IsEmptyElement;
             var doc = new XmlDocument();
             doc.Load(reader.ReadSubtree());
             trustRequest.AdditionalXmlElements.Add(doc.DocumentElement);
@@ -376,7 +379,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             // brentsch - TODO, add additional scenarios for Requested proof token;
 
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.RequestedProofToken, serializationContext.TrustConstants.Namespace);
-            var isEmptyElement = reader.IsEmptyElement;
+            bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
 
             var proofToken = new RequestedProofToken();
@@ -397,7 +400,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             reader.ReadStartElement();
             reader.MoveToContent();
             RequestedSecurityToken requestedSecurityToken = new RequestedSecurityToken();
-            foreach (var tokenHandler in SecurityTokenHandlers)
+            foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
             {
                 // brentsch - TODO need to remember value if handler can't be found.
                 // perhaps add delegate?
@@ -519,7 +522,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
                 else if (reader.IsLocalName(WsPolicyElements.AppliesTo))
                 {
-                    foreach (var @namespace in WsPolicyConstants.KnownNamespaces)
+                    foreach (string @namespace in WsPolicyConstants.KnownNamespaces)
                     {
                         if (reader.IsNamespaceUri(@namespace))
                         {
@@ -551,7 +554,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:UseKey>
 
             bool isEmptyElement = reader.IsEmptyElement;
-            var attributes = XmlAttributeHolder.ReadAttributes(reader);
+            XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
             string signatureId = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Sig, serializationContext.TrustConstants.Namespace);
 
             reader.ReadStartElement();
@@ -593,8 +596,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
             WsUtils.ValidateParamsForWritting(writer, serializationContext, binarySecret, nameof(binarySecret));
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace);
-            if (!string.IsNullOrEmpty(binarySecret.Type))
-                writer.WriteAttributeString(WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace, binarySecret.Type);
+            if (!string.IsNullOrEmpty(binarySecret.EncodingType))
+                writer.WriteAttributeString(WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace, binarySecret.EncodingType);
 
             writer.WriteBase64(binarySecret.Data, 0, binarySecret.Data.Length);
             writer.WriteEndElement();
@@ -611,7 +614,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (!string.IsNullOrEmpty(claims.Dialect))
                 writer.WriteAttributeString(WsTrustAttributes.Dialect, claims.Dialect);
 
-            foreach (var claimType in claims.ClaimTypes)
+            foreach (ClaimType claimType in claims.ClaimTypes)
                 _wsFedSerializer.WriteClaimType(writer, serializationContext, claimType);
 
             writer.WriteEndElement();
@@ -661,7 +664,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, securityToken, nameof(securityToken));
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.OnBehalfOf, serializationContext.TrustConstants.Namespace);
-            foreach (var tokenHandler in SecurityTokenHandlers)
+            foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
             {
                 if (tokenHandler.CanWriteSecurityToken(securityToken))
                 {
@@ -746,7 +749,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (trustRequest.UseKey != null)
                 WriteUseKey(writer, serializationContext, trustRequest.UseKey);
 
-            foreach (var xmlElement in trustRequest.AdditionalXmlElements)
+            foreach (XmlElement xmlElement in trustRequest.AdditionalXmlElements)
                 xmlElement.WriteTo(writer);
 
             writer.WriteEndElement();
@@ -766,7 +769,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             // <RequestSecurityTokenResponseCollection>
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestSecurityTokenResponseCollection, serializationContext.TrustConstants.Namespace);
 
-            foreach (var response in trustResponse.RequestSecurityTokenResponseCollection)
+            foreach (RequestSecurityTokenResponse response in trustResponse.RequestSecurityTokenResponseCollection)
             {
                 // <RequestSecurityTokenResponse>
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestSecurityTokenResponse, serializationContext.TrustConstants.Namespace);
@@ -839,7 +842,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, requestedSecurityToken, nameof(requestedSecurityToken));
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedSecurityToken, serializationContext.TrustConstants.Namespace);
-            foreach (var tokenHandler in SecurityTokenHandlers)
+            foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
             {
                 if (tokenHandler.CanWriteSecurityToken(requestedSecurityToken.SecurityToken))
                 {

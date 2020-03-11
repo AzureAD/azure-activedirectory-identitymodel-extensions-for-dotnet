@@ -80,11 +80,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// 
         /// </summary>
-        public bool AllowPostdating { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public AppliesTo AppliesTo
         {
             get => _appliesTo;
@@ -264,11 +259,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets or sets the RenewTarget element inside the RequestSecurityToken message.
         /// </summary>
         public SecurityTokenElement RenewTarget { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string RequestType { get; set; }
 
         /// <summary>
         /// 

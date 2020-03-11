@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 var doc = new XmlDocument();
                 doc.LoadXml("<UnknownElement attribute1=\"1\">this is an unknownElement</UnknownElement>");
                 var xmlElement = doc.DocumentElement;
-                var wsTrustRequest = new WsTrustRequest()
+                var wsTrustRequest = new WsTrustRequest(trustConstants.WsTrustActions.Issue)
                 {
                     AdditionalContext = additionalContext,
                     AppliesTo = WsDefaults.AppliesTo,
@@ -168,7 +168,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                         DigestAlgorithm = SecurityAlgorithms.Sha256Digest,
                         Digest = Guid.NewGuid().ToString()
                     },
-                    RequestType = trustConstants.WsTrustActions.Issue,
                     SignWith = SecurityAlgorithms.Aes128CbcHmacSha256,
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
                     UseKey = new UseKey(WsDefaults.SecurityTokenReference) { SignatureId = Guid.NewGuid().ToString() },

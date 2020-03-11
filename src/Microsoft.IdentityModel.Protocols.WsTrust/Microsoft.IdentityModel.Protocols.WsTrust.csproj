@@ -12,14 +12,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Wcf\**" />
-    <EmbeddedResource Remove="Wcf\**" />
-    <None Remove="Wcf\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="WsSecurityPolicy\WSSecurityPolicy.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
@@ -33,18 +25,6 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or  '$(TargetFramework)' == 'net451' Or  '$(TargetFramework)' == 'net461'">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-    <Folder Include="Protocols\" />
-    <Folder Include="WsSecurityPolicy\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.ServiceModel">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.1\System.ServiceModel.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

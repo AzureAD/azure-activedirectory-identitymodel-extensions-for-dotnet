@@ -25,58 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
+using System.ComponentModel;
+
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// This defines the Renewing element inside the RequestSecurityToken message. 
+    /// Represents the contents of a Renewing element in a RequestSecurityToken message.
+    /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
     /// <remarks>
-    /// The presence of Renewing element indicates the token issuer that the requested token
-    /// can be renewed if allow attribute is true, and the token can be renewed after
-    /// it expires if ok is true.
+    /// The Renewing element is used to indicate a preference if token can be renewed
+    /// or renewed after expiration.
     /// </remarks>
     public class Renewing
     {
         /// <summary>
-        /// Initializes a renewing object with specified allow and OK attributes.
+        /// Constructs default <see cref="Renewing"/> element.
         /// </summary>
-        public Renewing(bool allowRenewal)
-        : this (allowRenewal, false)
-        {
-        }
+        public Renewing() {}
 
         /// <summary>
-        /// Initializes a renewing object with specified allow and OK attributes.
+        /// Gets or sets if a token should allow requests for renewal.
         /// </summary>
-        public Renewing( bool allowRenewal, bool okForRenewalAfterExpiration )
-        {
-            AllowRenewal = allowRenewal;
-            OkForRenewalAfterExpiration = okForRenewalAfterExpiration;
-        }
+        [DefaultValue(true)]
+        public bool Allow { get; set; } = true;
 
         /// <summary>
-        /// Returns true if it is allowed to renew this token.
+        /// Gets of sets if a token can be renewed after expiration.
         /// </summary>
-        /// <remarks>
-        /// This optional boolean attribute is used to request a renewable token. Default value is true. 
-        /// </remarks>
-        /// <devdocs>
-        /// Please refer to section 7 in the WS-Trust spec for more details.
-        /// </devdocs>
-        public bool AllowRenewal { get; }
-
-
-        /// <summary>
-        /// Returns true if the requested token can be renewed after it expires.
-        /// </summary>
-        /// <remarks>
-        /// This optional boolean attriubte is used to indicate that a renewable token is acceptable if
-        /// the requested duration exceeds the limit of the issuance service. That is, if true, then the 
-        /// token can be renewed after their expiration. Default value is false for security reason. 
-        /// </remarks>
-        /// <devdocs>
-        /// Please refer to section 7 in the WS-Trust spec for more details.
-        /// </devdocs>
-        public bool OkForRenewalAfterExpiration { get; }
+        [DefaultValue(false)]
+        public bool RenewAfterExpiration { get; set; } = false;
     }
 }
