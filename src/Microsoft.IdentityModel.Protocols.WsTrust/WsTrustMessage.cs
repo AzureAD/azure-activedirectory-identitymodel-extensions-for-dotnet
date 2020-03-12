@@ -134,8 +134,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public string ComputedKeyAlgorithm { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets the Context.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if Context is null or empty.</exception>
         public string Context
         {
             get => _context;
@@ -284,8 +285,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the TokenType.
+        /// Gets or set the token type.
         /// </summary>
+        /// <exception cref="ArgumentNullException">if TokenType is null or empty.</exception>
         public string TokenType
         {
             get => _tokenType;

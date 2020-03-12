@@ -25,49 +25,68 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// The Entropy used in both token request message and token response message. 
+    /// Represents the contents of a RequestedSecurityToken element.
+    /// <see cref="RequestedSecurityToken"/> represents the security token returned in a WsTrust response.
+    /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
     public class RequestedSecurityToken
     {
+        private SecurityToken _securityToken;
+        private string _token;
+
         /// <summary>
-        /// 
+        /// Creates an instance of <see cref="RequestedSecurityToken"/>.
+        /// This constructor is useful when deserializing from a stream such as xml.
         /// </summary>
         public RequestedSecurityToken()
         {
         }
 
         /// <summary>
-        /// 
+        /// Creates an instance of <see cref="RequestedSecurityToken"/>.
         /// </summary>
+        /// <param name="token">a security token</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception>
         public RequestedSecurityToken(string token)
         {
             Token = token;
         }
 
         /// <summary>
-        /// 
+        /// Creates an instance of <see cref="RequestedSecurityToken"/>.
         /// </summary>
-        public RequestedSecurityToken(SecurityToken securitytoken)
+        /// <param name="securityToken">a <see cref="SecurityToken"/>.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="securityToken"/> is null.</exception>
+        public RequestedSecurityToken(SecurityToken securityToken)
         {
-            SecurityToken = securitytoken;
+            SecurityToken = securityToken;
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets the token.
         /// </summary>
-        public string Token { get; set; }
+        /// <exception cref="ArgumentNullException">if Token is null or empty string.</exception>
+        public string Token
+        {
+            get => _token;
+            set => _token = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(Token)) : value; }
 
 
         /// <summary>
-        /// 
+        /// Gets or set the <see cref="SecurityToken"/>.
         /// </summary>
-        public SecurityToken SecurityToken { get; set; }
-
-        //ComputedKey
+        /// <exception cref="ArgumentNullException">if SecurityToken is null.</exception>
+        public SecurityToken SecurityToken
+        {
+            get => _securityToken;
+            set => _securityToken = value ?? throw LogHelper.LogArgumentNullException(nameof(SecurityToken));
+        }
     }
 }

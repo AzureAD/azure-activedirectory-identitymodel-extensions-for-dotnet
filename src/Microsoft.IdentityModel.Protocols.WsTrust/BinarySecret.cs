@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Represents the contents of the BinarySecret element.
+    /// Represents the contents of a BinarySecret element.
     /// A binary secret represents key material that will be serialized with a request.
     /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
