@@ -4,10 +4,12 @@
 
 #pragma warning disable 1591
 
+using System.Collections.Generic;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Caching;
 using System.ServiceModel.Security;
 using System.ServiceModel.Security.Tokens;
 using System.Text;
@@ -26,14 +28,111 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WSTrustChannelSecurityTokenProvider : SecurityTokenProvider
     {
+        internal const bool DefaultCacheIssuedTokens = true;
+        internal static readonly TimeSpan DefaultMaxIssuedTokenCachingTime = TimeSpan.MaxValue;
+        internal const int DefaultIssuedTokenRenewalThresholdPercentage = 60;
+
+        private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
+        private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
+        private ISecurityTokenCache<WsTrustRequest> _cache;
+
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
+            _cache = new InMemoryWSTrustSecurityTokenCache<WsTrustRequest>(new WsTrustRequestComparer());
         }
 
         public SecurityTokenRequirement SecurityTokenRequirement
         {
             get;
+        }
+
+        /// <summary>
+        /// Gets or sets the cache used for storing issued security tokens.
+        /// </summary>
+        public ISecurityTokenCache<WsTrustRequest> IssuedTokensCache
+        {
+            get => _cache;
+            set => _cache = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets or sets whether issued tokens should be cached and reused within their expiry periods.
+        /// </summary>
+        public bool CacheIssuedTokens { get; set; } = DefaultCacheIssuedTokens;
+
+        /// <summary>
+        /// Gets or sets the maximum time an issued token will be cached before renewing it.
+        /// </summary>
+        public TimeSpan MaxIssuedTokenCachingTime
+        {
+            get => _maxIssuedTokenCachingTime;
+            set => _maxIssuedTokenCachingTime = value <= TimeSpan.Zero
+                ? throw new ArgumentOutOfRangeException(nameof(value), "TimeSpan must be greater than TimeSpan.Zero.") // TODO - Get exception messages from resources
+                : value;
+        }
+
+        /// <summary>
+        /// Gets or sets the percentage of the issued token's lifetime at which it should be renewed instead of cached.
+        /// </summary>
+        public int IssuedTokenRenewalThresholdPercentage
+        {
+            get => _issuedTokenRenewalThresholdPercentage;
+            set => _issuedTokenRenewalThresholdPercentage = (value <= 0 || value > 100)
+                ? throw new ArgumentOutOfRangeException(nameof(value), "Issued token renewal threshold percentage must be greater than or equal to 1 and less than or equal to 100.")
+                : value;
+        }
+
+        private SecurityToken GetCachedTokenForRequest(WsTrustRequest request)
+        {
+            if (CacheIssuedTokens)
+            {
+                SecurityToken cachedToken = IssuedTokensCache?.GetSecurityToken(request);
+                if (IsSecurityTokenUnexpired(cachedToken))
+                {
+                    return cachedToken;
+                }
+            }
+
+            return null;
+        }
+
+        private bool IsSecurityTokenUnexpired(SecurityToken cachedToken)
+        {
+            if (cachedToken == null)
+            {
+                return false;
+            }
+
+            DateTime fromTime = cachedToken.ValidFrom.ToUniversalTime();
+            DateTime toTime = cachedToken.ValidTo.ToUniversalTime();
+
+            long interval = fromTime.Ticks - toTime.Ticks;
+            long effectiveInterval = (long)((IssuedTokenRenewalThresholdPercentage / (double)100) * interval);
+            DateTime effectiveExpiration = AddTicks(fromTime, Math.Min(effectiveInterval, MaxIssuedTokenCachingTime.Ticks));
+
+            return effectiveExpiration > DateTime.UtcNow;
+        }
+
+        private DateTime AddTicks(DateTime time, long ticks)
+        {
+            if (ticks > 0 && DateTime.MaxValue.Subtract(time).Ticks <= ticks)
+            {
+                return DateTime.MaxValue;
+            }
+            if (ticks < 0 && time.Subtract(DateTime.MinValue).Ticks <= -ticks)
+            {
+                return DateTime.MinValue;
+            }
+            return time.AddTicks(ticks);
+        }
+
+        private void CacheToken(WsTrustRequest request, SecurityToken token)
+        {
+            if (CacheIssuedTokens)
+            {
+                IssuedTokensCache?.CacheSecurityToken(request, token);
+            }
         }
 
         /// <summary>
@@ -44,6 +143,8 @@ namespace System.ServiceModel.Federation
             // Send WsTrust messge to STS
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
+
+            // Note that WsTrustRequestComparer needs to compare any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestComparer accordingly.
             var wsTrustRequest = new WsTrustRequest()
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
@@ -57,6 +158,13 @@ namespace System.ServiceModel.Federation
                 RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
                 TokenType = SecurityTokenRequirement.TokenType
             };
+
+            // Check whether an unexpired token has been cached for this request and, if so, return it
+            SecurityToken cachedToken = GetCachedTokenForRequest(wsTrustRequest);
+            if (cachedToken != null)
+            {
+                return cachedToken;
+            }
 
             WsTrustResponse trustResponse = null;
             using (var memeoryStream = new MemoryStream())
@@ -108,14 +216,64 @@ namespace System.ServiceModel.Federation
                 var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
                 dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
                 GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
-                return new GenericXmlSecurityToken(dom.DocumentElement,
+                var securityToken = new GenericXmlSecurityToken(dom.DocumentElement,
                                                    proofToken,
                                                    DateTime.UtcNow,
                                                    DateTime.UtcNow + TimeSpan.FromDays(1),
                                                    securityKeyIdentifierClause,
                                                    securityKeyIdentifierClause,
                                                    null);
+
+                CacheToken(wsTrustRequest, securityToken);
+                return securityToken;
             }
+        }
+
+        protected override void CancelTokenCore(TimeSpan timeout, SecurityToken token)
+        {
+            if (CacheIssuedTokens)
+            {
+                IssuedTokensCache.RemoveSecurityToken(token);
+            }
+        }
+
+        /// <summary>
+        /// This comparer determines whether two WsTrustRequests prepared by WsTrustChannelSecurityTokenProvider.
+        /// In the interest of simplicity and performance, it is not a general-purpose WsTrustRequest comparer. Instead,
+        /// this type compares properties known to be of interest to WsTrustChannelSecurityTokenProvider
+        /// </summary>
+        private class WsTrustRequestComparer : IEqualityComparer<WsTrustRequest>
+        {
+            public bool Equals(WsTrustRequest request, WsTrustRequest otherRequest)
+            {
+                if (request is null)
+                {
+                    return otherRequest is null;
+                }
+
+                if (otherRequest is null)
+                {
+                    return false;
+                }
+
+                if (!string.Equals(request.RequestType, otherRequest.RequestType, StringComparison.Ordinal) ||
+                    !string.Equals(request.Context, otherRequest.Context, StringComparison.Ordinal) ||
+                    !string.Equals(request.TokenType, otherRequest.TokenType, StringComparison.Ordinal) ||
+                    !string.Equals(request.KeyType, otherRequest.KeyType, StringComparison.Ordinal) ||
+                    (!request.AppliesTo.EndpointReference?.Uri.Equals(otherRequest.AppliesTo.EndpointReference?.Uri) ?? (otherRequest.AppliesTo.EndpointReference is null)))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            public int GetHashCode(WsTrustRequest request) =>
+                request.RequestType?.GetHashCode() ?? "NoRequestType".GetHashCode()
+                ^ request.Context?.GetHashCode() ?? "NoContext".GetHashCode()
+                ^ request.AppliesTo.EndpointReference?.Uri.GetHashCode() ?? "NoAppliesToEndpoint".GetHashCode()
+                ^ request.TokenType?.GetHashCode() ?? "NoTokenType".GetHashCode()
+                ^ request.KeyType?.GetHashCode() ?? "NoKeyType".GetHashCode();
         }
     }
 }
