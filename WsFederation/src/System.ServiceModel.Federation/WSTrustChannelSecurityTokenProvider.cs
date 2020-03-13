@@ -34,12 +34,52 @@ namespace System.ServiceModel.Federation
 
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
-        private ISecurityTokenCache<WsTrustRequest> _cache;
+        private ISecurityTokenResponseCache<WsTrustRequest, WsTrustResponse> _cache;
+        private readonly WsTrustRequest _wsTrustRequest;
+        private readonly ChannelFactory<IRequestChannel> _channelFactory;
 
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-            _cache = new InMemoryWSTrustSecurityTokenCache<WsTrustRequest>(new WsTrustRequestComparer());
+            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequest, WsTrustResponse>(new WsTrustRequestComparer());
+
+            IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
+
+            _wsTrustRequest = CreateWsTrustRequest(issuedTokenParameters);
+            _channelFactory = CreateChannelFactory(issuedTokenParameters);
+        }
+
+        protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory(IssuedSecurityTokenParameters issuedTokenParameters)
+        {
+            var factory = new ChannelFactory<IRequestChannel>(issuedTokenParameters.IssuerBinding, issuedTokenParameters.IssuerAddress);
+
+            // Temporary as test STS is not trusted.
+            // This code should be removed.
+            factory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
+            factory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication();
+            factory.Credentials.ServiceCertificate.SslCertificateAuthentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
+
+            return factory;
+        }
+
+        private WsTrustRequest CreateWsTrustRequest(IssuedSecurityTokenParameters issuedTokenParameters)
+        {
+            EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
+
+            // Note that WsTrustRequestComparer needs to compare any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestComparer accordingly.
+            return new WsTrustRequest()
+            {
+                AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
+                Context = Guid.NewGuid().ToString(),
+                KeyType = issuedTokenParameters.KeyType == SecurityKeyType.AsymmetricKey
+                                                        ? WsTrustKeyTypes.Trust13.PublicKey
+                                                        : issuedTokenParameters.KeyType == SecurityKeyType.SymmetricKey
+                                                        ? WsTrustKeyTypes.Trust13.Symmetric
+                                                        : WsTrustKeyTypes.Trust13.Bearer,
+                //ProofEncryption = new Microsoft.IdentityModel.Xml.SecurityTokenElement()
+                RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
+                TokenType = SecurityTokenRequirement.TokenType
+            };
         }
 
         public SecurityTokenRequirement SecurityTokenRequirement
@@ -50,7 +90,7 @@ namespace System.ServiceModel.Federation
         /// <summary>
         /// Gets or sets the cache used for storing issued security tokens.
         /// </summary>
-        public ISecurityTokenCache<WsTrustRequest> IssuedTokensCache
+        public ISecurityTokenResponseCache<WsTrustRequest, WsTrustResponse> IssuedTokensCache
         {
             get => _cache;
             set => _cache = value ?? throw new ArgumentNullException(nameof(value));
@@ -83,22 +123,30 @@ namespace System.ServiceModel.Federation
                 : value;
         }
 
-        private SecurityToken GetCachedTokenForRequest(WsTrustRequest request)
+        public string TokenContext
+        {
+            get => _wsTrustRequest.Context;
+            set => _wsTrustRequest.Context = value;
+        }
+
+        private WsTrustResponse GetCachedResponse(WsTrustRequest request)
         {
             if (CacheIssuedTokens)
             {
-                SecurityToken cachedToken = IssuedTokensCache?.GetSecurityToken(request);
-                if (IsSecurityTokenUnexpired(cachedToken))
+                WsTrustResponse response = IssuedTokensCache?.GetSecurityTokenResponse(request);
+                if (IsSecurityTokenResponseUnexpired(response))
                 {
-                    return cachedToken;
+                    return response;
                 }
             }
 
             return null;
         }
 
-        private bool IsSecurityTokenUnexpired(SecurityToken cachedToken)
+        private bool IsSecurityTokenResponseUnexpired(WsTrustResponse cachedResponse)
         {
+            var cachedToken = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.RequestedSecurityToken?.SecurityToken;
+
             if (cachedToken == null)
             {
                 return false;
@@ -127,11 +175,11 @@ namespace System.ServiceModel.Federation
             return time.AddTicks(ticks);
         }
 
-        private void CacheToken(WsTrustRequest request, SecurityToken token)
+        private void CacheSecurityTokenResponse(WsTrustRequest request, WsTrustResponse response)
         {
             if (CacheIssuedTokens)
             {
-                IssuedTokensCache?.CacheSecurityToken(request, token);
+                IssuedTokensCache?.CacheSecurityTokenResponse(request, response);
             }
         }
 
@@ -140,51 +188,23 @@ namespace System.ServiceModel.Federation
         /// </summary>
         protected override SecurityToken GetTokenCore(TimeSpan timeout)
         {
-            // Send WsTrust messge to STS
-            IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
-            EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
-
-            // Note that WsTrustRequestComparer needs to compare any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestComparer accordingly.
-            var wsTrustRequest = new WsTrustRequest()
+            WsTrustResponse trustResponse = GetCachedResponse(_wsTrustRequest);
+            if (trustResponse is null)
             {
-                AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
-                Context = Guid.NewGuid().ToString(),
-                KeyType = issuedTokenParameters.KeyType == SecurityKeyType.AsymmetricKey
-                                                        ? WsTrustKeyTypes.Trust13.PublicKey
-                                                        : issuedTokenParameters.KeyType == SecurityKeyType.SymmetricKey
-                                                        ? WsTrustKeyTypes.Trust13.Symmetric
-                                                        : WsTrustKeyTypes.Trust13.Bearer,
-                //ProofEncryption = new Microsoft.IdentityModel.Xml.SecurityTokenElement()
-                RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
-                TokenType = SecurityTokenRequirement.TokenType
-            };
+                using (var memeoryStream = new MemoryStream())
+                {
+                    var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
+                    var serializer = new WsTrustSerializer();
+                    serializer.WriteRequest(writer, WsTrustVersion.Trust13, _wsTrustRequest);
+                    writer.Flush();
+                    var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
 
-            // Check whether an unexpired token has been cached for this request and, if so, return it
-            SecurityToken cachedToken = GetCachedTokenForRequest(wsTrustRequest);
-            if (cachedToken != null)
-            {
-                return cachedToken;
-            }
+                    var channel = _channelFactory.CreateChannel();
+                    var reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
+                    trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
 
-            WsTrustResponse trustResponse = null;
-            using (var memeoryStream = new MemoryStream())
-            {
-                var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
-                var serializer = new WsTrustSerializer();
-                serializer.WriteRequest(writer, WsTrustVersion.Trust13, wsTrustRequest);
-                writer.Flush();
-                var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
-                var factory = new ChannelFactory<IRequestChannel>(issuedTokenParameters.IssuerBinding, issuedTokenParameters.IssuerAddress);
-
-                // Temporary as test STS is not trusted.
-                // This code should be removed.
-                factory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
-                factory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication();
-                factory.Credentials.ServiceCertificate.SslCertificateAuthentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
-
-                var channel = factory.CreateChannel();
-                var reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
-                trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
+                    CacheSecurityTokenResponse(_wsTrustRequest, trustResponse);
+                }
             }
 
             // Create GenericXmlSecurityToken
@@ -224,16 +244,7 @@ namespace System.ServiceModel.Federation
                                                    securityKeyIdentifierClause,
                                                    null);
 
-                CacheToken(wsTrustRequest, securityToken);
                 return securityToken;
-            }
-        }
-
-        protected override void CancelTokenCore(TimeSpan timeout, SecurityToken token)
-        {
-            if (CacheIssuedTokens)
-            {
-                IssuedTokensCache.RemoveSecurityToken(token);
             }
         }
 
