@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
     /// Represents the contents of the Lifetime element.
-    /// A Lifetime can be used to represent the creation and expire times of a security token.
+    /// A Lifetime can be used to represent the creation and expiration times of a security token.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public class Lifetime
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         /// <summary>
         /// Creates an instance of <see cref="Lifetime"/>.
-        /// <para>>A Lifetime can be used to represent the creation and expire times of a security token.</para>
+        /// <para>>A Lifetime can be used to represent the creation and expiration times of a security token.</para>
         /// </summary>
         public Lifetime()
         {
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         /// <summary>
         /// Creates an instance of a <see cref="Lifetime"/>.
-        /// <para>A Lifetime can be used to represent the creation and expire times of a security token.</para>
+        /// <para>A Lifetime can be used to represent the creation and expiration times of a security token.</para>
         /// </summary>
         /// <param name="created">creation time, will be converted to UTC.</param>
         /// <param name="expires">expiration time will be converted to UTC.</param>
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         /// <summary>
         /// Creates an instance of a <see cref="Lifetime"/>.
-        /// A Lifetime can be used to represent the creation and expire times of a security token.
+        /// A Lifetime can be used to represent the creation and expiration times of a security token.
         /// </summary>
         /// <param name="created">creation time, will be converted to UTC.</param>
         /// <param name="expires">expiration time will be converted to UTC.</param>
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets the expires time.
+        /// Gets or sets the expiration time.
         /// </summary>
         /// <remarks>Value will be stored in UTC.</remarks>
         public DateTime? Expires

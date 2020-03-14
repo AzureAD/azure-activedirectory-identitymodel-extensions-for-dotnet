@@ -74,6 +74,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //      </auth:ClaimType>
             // </trust:Claims>
 
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.Claims, serializationContext.TrustConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
             XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
@@ -107,6 +110,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //      </t:BinarySecret>
             //  </t:Entropy>
 
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.Entropy, serializationContext.TrustConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
@@ -126,6 +132,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //      <wsu:Created xmlns:wsu="...">2017-04-23T16:11:17.348Z</wsu:Created>
             //      <wsu:Expires xmlns:wsu="...">2017-04-23T17:11:17.348Z</wsu:Expires>
             //  </t:Lifetime>
+
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
 
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.Lifetime, serializationContext.TrustConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
@@ -383,6 +392,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             //  </t:RequestedProofToken>
             // brentsch - TODO, add additional scenarios for Requested proof token;
 
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.RequestedProofToken, serializationContext.TrustConstants.Namespace);
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
@@ -429,6 +441,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         public RequestSecurityTokenResponse ReadRequestSeurityTokenResponse(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.RequestSecurityTokenResponse, serializationContext.TrustConstants.Namespace);
             return ReadResponseInternal(reader, serializationContext);
         }
