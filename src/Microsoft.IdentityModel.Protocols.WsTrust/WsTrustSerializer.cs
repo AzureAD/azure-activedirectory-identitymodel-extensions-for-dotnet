@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             return lifetime;
         }
 
-        public virtual SecurityToken ReadOnBehalfOf(XmlDictionaryReader reader)
+        public virtual SecurityTokenElement ReadOnBehalfOf(XmlDictionaryReader reader)
         {
             reader.MoveToContent();
             bool isEmptyElement = reader.IsEmptyElement;
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     if (!isEmptyElement)
                         reader.ReadEndElement();
 
-                    return token;
+                    return new SecurityTokenElement(token);
                 }
             }
 
@@ -354,6 +354,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             return trustRequest;
         }
 
+        /// <summary>
+        /// TODO - We need a pluggable model here so users can plug in for custom elements.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="trustRequest"></param>
         private void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
         {
             bool isEmptyElement = reader.IsEmptyElement;
@@ -550,7 +555,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public UseKey ReadUseKey(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:UseKey Sig="...">
-            //      SecurityTokenReference - optional
+            //      SecurityTokenReference / SecurityToken
             //  </t:UseKey>
 
             bool isEmptyElement = reader.IsEmptyElement;
@@ -558,10 +563,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             string signatureId = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Sig, serializationContext.TrustConstants.Namespace);
 
             reader.ReadStartElement();
-            UseKey useKey = new UseKey();
+            UseKey useKey = null;
 
             if (reader.IsStartElement() && reader.IsLocalName(WsSecurityElements.SecurityTokenReference))
-                useKey.SecurityTokenReference = _wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext);
+                useKey = new UseKey(new SecurityTokenElement(_wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext)));
 
             if (!string.IsNullOrEmpty(signatureId))
                 useKey.SignatureId = signatureId;
@@ -660,24 +665,35 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             writer.WriteEndElement();
         }
 
-        public void WriteOnBehalfOf(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityToken securityToken)
+        public void WriteOnBehalfOf(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement securityTokenElement)
         {
-            WsUtils.ValidateParamsForWritting(writer, serializationContext, securityToken, nameof(securityToken));
+            //  <t:OnBehalfOf>
+            //      one of
+            //      <wsse:SecurityTokenReference>
+            //      <wsa:EndpointReference>
+            //      <SecurityToken>
+            //  </t:OnBehalfOf>
+
+            // TODO write references, etc.
+            WsUtils.ValidateParamsForWritting(writer, serializationContext, securityTokenElement, nameof(securityTokenElement));
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.OnBehalfOf, serializationContext.TrustConstants.Namespace);
-            foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
+            if (securityTokenElement.SecurityToken != null)
             {
-                if (tokenHandler.CanWriteSecurityToken(securityToken))
+                foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
                 {
-                    if (!tokenHandler.TryWriteSourceData(writer, securityToken))
-                        tokenHandler.WriteToken(writer, securityToken);
+                    if (tokenHandler.CanWriteSecurityToken(securityTokenElement.SecurityToken))
+                    {
+                        if (!tokenHandler.TryWriteSourceData(writer, securityTokenElement.SecurityToken))
+                            tokenHandler.WriteToken(writer, securityTokenElement.SecurityToken);
+                    }
                 }
             }
 
             writer.WriteEndElement();
         }
-        public void WriteProofEncryptionKey(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityKey proofEncryptionKey)
+        public void WriteProofEncryption(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement proofEncryption)
         {
-            WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryptionKey, nameof(proofEncryptionKey));
+            WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryption, nameof(proofEncryption));
             writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.ProofEncryption, serializationContext.TrustConstants.Namespace);
 
             // TODO Write proof encryption key
@@ -743,8 +759,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (trustRequest.PolicyReference != null)
                 _wsPolicySerializer.WritePolicyReference(writer, serializationContext, trustRequest.PolicyReference);
 
-            if (trustRequest.ProofEncryptionKey != null)
-                WriteProofEncryptionKey(writer, serializationContext, trustRequest.ProofEncryptionKey);
+            if (trustRequest.ProofEncryption != null)
+                WriteProofEncryption(writer, serializationContext, trustRequest.ProofEncryption);
 
             if (trustRequest.UseKey != null)
                 WriteUseKey(writer, serializationContext, trustRequest.UseKey);
@@ -881,8 +897,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             if (!string.IsNullOrEmpty(useKey.SignatureId))
                 writer.WriteAttributeString(WsTrustAttributes.Sig, useKey.SignatureId);
 
-            if (useKey.SecurityTokenReference != null)
-                _wsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, useKey.SecurityTokenReference);
+            if (useKey.SecurityTokenElement.SecurityTokenReference != null)
+                _wsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, useKey.SecurityTokenElement.SecurityTokenReference);
 
             writer.WriteEndElement();
         }

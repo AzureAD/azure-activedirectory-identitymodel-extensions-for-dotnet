@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     EncryptWith = SecurityAlgorithms.Aes256Encryption,
                     KeySizeInBits = 256,
                     KeyType = trustConstants.WsTrustKeyTypes.Symmetric,
-                    OnBehalfOf = saml2SecurityToken,
+                    OnBehalfOf = new SecurityTokenElement(saml2SecurityToken),
                     PolicyReference = new PolicyReference
                     {
                         Uri = "MSExchange.SharingCalendarFreeBusy",
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     },
                     SignWith = SecurityAlgorithms.Aes128CbcHmacSha256,
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
-                    UseKey = new UseKey(WsDefaults.SecurityTokenReference) { SignatureId = Guid.NewGuid().ToString() },
+                    UseKey = new UseKey(new SecurityTokenElement(WsDefaults.SecurityTokenReference)) { SignatureId = Guid.NewGuid().ToString() },
 
                     // TODO Enable this once SecurityKeys are serialized and deserialized
                     // ProofEncryptionKey = Default.AsymmetricEncryptionKeyPublic,

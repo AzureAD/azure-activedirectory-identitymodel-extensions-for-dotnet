@@ -25,16 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
+    /// <summary>
+    /// Abstract class for for singleton pattern for multipule WsTrust  Actions, KeyTypes, Namesapces, Prefered Prefix.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class WsTrustConstants<T> : WsTrustConstants where T : new()
     {
         private static T _instance;
 
+        /// <summary>
+        /// Implements singleton pattern.
+        /// </summary>
         public static T Instance
         {
             get
@@ -48,16 +53,25 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides constants for WS-Trust Feb2005, 1.3 and 1.4.
+    /// Values for constants for WsTrust Feb2005, 1.3 and 1.4.
     /// </summary>
     public abstract class WsTrustConstants : WsConstantsBase
     {
         private static IList<string> _knownNamespaces = null;
 
+        /// <summary>
+        /// Gets version specific WsTrust Actions.
+        /// </summary>
         public WsTrustActions WsTrustActions { get; protected set; }
 
+        /// <summary>
+        /// Gets version specific WsTrust KeyTypes.
+        /// </summary>
         public WsTrustKeyTypes WsTrustKeyTypes { get; protected set; }
 
+        /// <summary>
+        /// Gets a list of all supported namespaces
+        /// </summary>
         public static IList<string> KnownNamespaces
         {
             get
@@ -69,18 +83,34 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Gets the an instance of WsTrust Feb2005 Constants.
+        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// </summary>
         public static WsTrustFeb2005Constants TrustFeb2005 => WsTrustFeb2005Constants.Instance;
 
+        /// <summary>
+        /// Gets the an instance of WsTrust 1.3 Constants.
+        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// </summary>
         public static WsTrust13Constants Trust13 => WsTrust13Constants.Instance;
 
+        /// <summary>
+        /// Gets the an instance of WsTrust 1.4 Constants.
+        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// </summary>
         public static WsTrust14Constants Trust14 => WsTrust14Constants.Instance;
     }
 
     /// <summary>
-    /// Provides constants for WS-Trust Feb2005.
+    /// Provides constants for WsTrust Feb2005.
     /// </summary>
     public class WsTrustFeb2005Constants : WsTrustConstants<WsTrustFeb2005Constants>
     {
+        /// <summary>
+        /// Creates an instance of <see cref="WsTrustFeb2005Constants"/>.
+        /// <para>The property <see cref="WsTrustConstants.TrustFeb2005"/> maintains a singleton instance of constants for WsTrust Feb2005.</para>
+        /// </summary>
         public WsTrustFeb2005Constants()
         {
             Namespace = "http://schemas.xmlsoap.org/ws/2005/02/trust";
@@ -91,10 +121,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides constants for WS-Trust 1.3.
+    /// Provides constants for WsTrust 1.3.
     /// </summary>
     public class WsTrust13Constants : WsTrustConstants<WsTrust13Constants>
     {
+        /// <summary>
+        /// Creates an instance of <see cref="WsTrust13Constants"/>.
+        /// <para>The property <see cref="WsTrustConstants.Trust13"/> maintains a singleton instance of constants for WsTrust 1.3.</para>
+        /// </summary>
         public WsTrust13Constants()
         {
             Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
@@ -105,10 +139,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides constants for WS-Trust 1.4.
+    /// Provides constants for WsTrust 1.3.
     /// </summary>
     public class WsTrust14Constants : WsTrustConstants<WsTrust14Constants>
     {
+        /// <summary>
+        /// Creates an instance of <see cref="WsTrust14Constants"/>.
+        /// <para>The property <see cref="WsTrustConstants.Trust14"/> maintains a singleton instance of constants for WsTrust 1.4.</para>
+        /// </summary>
         public WsTrust14Constants()
         {
             Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200802";
