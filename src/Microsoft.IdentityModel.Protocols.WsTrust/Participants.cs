@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class Participants
     {
-        private object _primary;
+        private SecurityTokenElement _primary;
 
         /// <summary>
         /// Creates an instance of <see cref="Participants"/>.
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="primary">the primary participant of the security token.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="primary"/> is null.</exception>
-        public Participants(object primary)
+        public Participants(SecurityTokenElement primary)
         {
             Primary = primary;
         }
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <remarks>while no specific type is required, a security token or endpoint reference are common.</remarks>
         /// <exception cref="ArgumentNullException">if value is null.</exception>
-        public object Primary
+        public SecurityTokenElement Primary
         {
             get => _primary;
             set => _primary = value ?? throw LogHelper.LogArgumentNullException(nameof(Primary));
@@ -75,6 +75,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets the colllection of additional Participants.
         /// </summary>
-        public ICollection<object> AdditionalParticipants { get; } = new Collection<object>();
+        public ICollection<SecurityTokenElement> AdditionalParticipants { get; } = new Collection<SecurityTokenElement>();
     }
 }

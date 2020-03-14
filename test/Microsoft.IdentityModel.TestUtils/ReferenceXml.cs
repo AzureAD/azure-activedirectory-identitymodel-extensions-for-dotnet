@@ -28,6 +28,7 @@
 using System;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsFederation;
+using Microsoft.IdentityModel.Protocols.WsTrust;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -42,11 +43,33 @@ namespace Microsoft.IdentityModel.TestUtils
         #region ExclusiveCanonicalizationTransform
         #endregion
 
+        #region BinarySecret
+        public static string GetBinarySecret(string prefix, string ns, string type, string value)
+        {
+            return LogHelper.FormatInvariant(
+                @"<{0}:BinarySecret Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:BinarySecret>",
+                prefix,
+                ns,
+                type,
+                value);
+        }
+        #endregion
+
         #region Lifetime
+        public static string GetLifeTime(WsTrustConstants trustConstants, string created, string expires)
+        {
+            return LogHelper.FormatInvariant(
+                @"<{0}:Lifetime xmlns:{0}=""{1}""><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
+                trustConstants.Prefix,
+                trustConstants.Namespace,
+                created,
+                expires);
+        }
+
         public static string GetLifeTime(string prefix, string ns, string created, string expires)
         {
             return LogHelper.FormatInvariant(
-                @"<{0}:Lifetime {1}><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
+                @"<{0}:Lifetime xmlns:{0}=""{1}""><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
                 prefix,
                 ns,
                 created,

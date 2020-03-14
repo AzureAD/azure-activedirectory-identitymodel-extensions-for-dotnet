@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrustFeb2005KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of actions for WsTrust Feb2005.</para>
+        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of KeyTypes for WsTrust Feb2005.</para>
         /// </summary>
         public WsTrustFeb2005KeyTypes()
         {
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrustFeb2005KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of actions for WsTrust 1.4.</para>
+        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of KeyTypes for WsTrust 1.3.</para>
         /// </summary>
         public WsTrust13KeyTypes()
         {
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust14KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.Trust14"/>  maintains a singleton instance of actions for WsTrust 1.4.</para>
+        /// <para>The property <see cref="WsTrustKeyTypes.Trust14"/>  maintains a singleton instance of KeyTypes for WsTrust 1.4.</para>
         /// </summary>
         public WsTrust14KeyTypes()
         {

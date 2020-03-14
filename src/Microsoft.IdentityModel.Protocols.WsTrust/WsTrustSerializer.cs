@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml;
@@ -60,6 +61,46 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 new SamlSecurityTokenHandler(),
                 new Saml2SecurityTokenHandler()
             };
+        }
+
+        public BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        {
+            //  <t:BinarySecret Type="...">
+            //      ...
+            //  </t:BinarySecret>
+
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
+            XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace);
+
+            var binarySecret = new BinarySecret();
+            try
+            {
+                if (!reader.IsEmptyElement)
+                {
+                    XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
+                    string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
+                    if (!string.IsNullOrEmpty(encodingType))
+                        binarySecret.EncodingType = encodingType;
+
+                    reader.ReadStartElement();
+                    byte[] data = reader.ReadContentAsBase64();
+                    if (data != null)
+                        binarySecret.Data = data;
+
+                    reader.ReadEndElement();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is XmlReadException)
+                    throw;
+
+                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.BinarySecret, ex);
+            }
+
+            return binarySecret;
         }
 
         public virtual Claims ReadClaims(XmlDictionaryReader reader, WsSerializationContext serializationContext)
@@ -137,18 +178,30 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 throw LogHelper.LogArgumentNullException(nameof(serializationContext));
 
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.Lifetime, serializationContext.TrustConstants.Namespace);
-            bool isEmptyElement = reader.IsEmptyElement;
-            reader.ReadStartElement();
+
             var lifetime = new Lifetime(null, null);
 
-            if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Created))
-                lifetime.Created = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+            try
+            {
+                bool isEmptyElement = reader.IsEmptyElement;
+                reader.ReadStartElement();
 
-            if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Expires))
-                lifetime.Expires = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Created))
+                    lifetime.Created = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
 
-            if (!isEmptyElement)
-                reader.ReadEndElement();
+                if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Expires))
+                    lifetime.Expires = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+
+                if (!isEmptyElement)
+                    reader.ReadEndElement();
+            }
+            catch (Exception ex)
+            {
+                if (ex is XmlReadException)
+                    throw;
+
+                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.Lifetime, ex);
+            }
 
             return lifetime;
         }
@@ -172,31 +225,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
             // brentsch - TODO localize error message
             throw LogHelper.LogExceptionMessage(new WsTrustReadException("unable to read token"));
-        }
-
-        internal BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
-        {
-            //  <t:BinarySecret Type="...">
-            //      ...
-            //  </t:BinarySecret>
-
-            var binarySecret = new BinarySecret();
-            if (!reader.IsEmptyElement)
-            {
-                XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
-                string encodingType = XmlAttributeHolder.GetAttribute(attributes, WsTrustAttributes.Type, serializationContext.TrustConstants.Namespace);
-                if (!string.IsNullOrEmpty(encodingType))
-                    binarySecret.EncodingType = encodingType;
-
-                reader.ReadStartElement();
-                byte[] data = reader.ReadContentAsBase64();
-                if (data != null)
-                    binarySecret.Data = data;
-
-                reader.ReadEndElement();
-            }
-
-            return binarySecret;
         }
 
         public SecurityTokenReference ReadReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)

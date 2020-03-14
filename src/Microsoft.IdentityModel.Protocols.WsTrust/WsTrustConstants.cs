@@ -70,6 +70,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public WsTrustKeyTypes WsTrustKeyTypes { get; protected set; }
 
         /// <summary>
+        /// Gets version specific WsTrust KeyTypes.
+        /// </summary>
+        public WsTrustBinarySecretTypes WsTrustBinarySecretTypes { get; protected set; }
+
+        /// <summary>
         /// Gets a list of all supported namespaces
         /// </summary>
         public static IList<string> KnownNamespaces
@@ -116,6 +121,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             Namespace = "http://schemas.xmlsoap.org/ws/2005/02/trust";
             Prefix = "t";
             WsTrustActions = WsTrustActions.TrustFeb2005;
+            WsTrustBinarySecretTypes = WsTrustBinarySecretTypes.TrustFeb2005;
             WsTrustKeyTypes = WsTrustKeyTypes.TrustFeb2005;
         }
     }
@@ -134,6 +140,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200512";
             Prefix = "trust";
             WsTrustActions = WsTrustActions.Trust13;
+            WsTrustBinarySecretTypes = WsTrustBinarySecretTypes.Trust13;
             WsTrustKeyTypes = WsTrustKeyTypes.Trust13;
         }
     }
@@ -152,6 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             Namespace = "http://docs.oasis-open.org/ws-sx/ws-trust/200802";
             Prefix = "tr";
             WsTrustActions = WsTrustActions.Trust14;
+            WsTrustBinarySecretTypes = WsTrustBinarySecretTypes.Trust14;
             WsTrustKeyTypes = WsTrustKeyTypes.Trust14;
         }
     }
