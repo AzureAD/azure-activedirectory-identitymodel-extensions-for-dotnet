@@ -253,6 +253,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         public WsTrustRequest ReadRequest(XmlDictionaryReader reader)
         {
+            //  <t:RequestSecurityToken Context="..." xmlns:t="...">
+            //      <t:TokenType>...</t:TokenType>
+            //      <t:RequestType>...</t:RequestType>
+            //      <t:SecondaryParameters>...</t:SecondaryParameters>
+            //      ...
+            //  </t:RequestSecurityToken>
+
             XmlUtil.CheckReaderOnEntry(reader, WsTrustElements.RequestSecurityToken);
 
             WsSerializationContext serializationContext;
@@ -263,28 +270,40 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             else if (reader.IsNamespaceUri(WsTrustConstants.Trust14.Namespace))
                 serializationContext = new WsSerializationContext(WsTrustVersion.Trust14);
             else
-                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX15001, WsTrustConstants.TrustFeb2005, WsTrustConstants.Trust13, WsTrustConstants.Trust14, reader.NamespaceURI)));
+                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(LogMessages.IDX15000, WsTrustConstants.TrustFeb2005, WsTrustConstants.Trust13, WsTrustConstants.Trust14, reader.NamespaceURI)));
+
+            bool isEmptyElement = reader.IsEmptyElement;
 
             XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
+            var trustRequest = new WsTrustRequest(serializationContext.TrustActions.Issue);
+            string context = XmlAttributeHolder.GetAttribute(xmlAttributes, WsTrustAttributes.Context, serializationContext.TrustConstants.Namespace);
+            if (!string.IsNullOrEmpty(context))
+                trustRequest.Context = context;
 
-            var trustRequest = new WsTrustRequest()
+            try
             {
-                Context = XmlAttributeHolder.GetAttribute(xmlAttributes, WsTrustAttributes.Context, serializationContext.TrustConstants.Namespace)
-            };
+                reader.MoveToContent();
+                reader.ReadStartElement();
+                ReadRequest(reader, trustRequest, serializationContext);
+            }
+            catch(Exception ex)
+            {
+                if (ex is XmlReadException)
+                    throw LogHelper.LogExceptionMessage(ex);
 
-            reader.MoveToContent();
-            reader.ReadStartElement();
-            ReadRequest(reader, serializationContext, trustRequest);
+                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.BinarySecret, ex);
+            }
 
-            // brentsch TODO - need to store unknown elements.
+
+            if (!isEmptyElement)
+                reader.ReadEndElement();
+
             return trustRequest;
         }
 
-        internal WsTrustRequest ReadRequest(XmlDictionaryReader reader, WsSerializationContext serializationContext, WsTrustRequest trustRequest)
+        private void ReadRequest(XmlDictionaryReader reader, WsTrustRequest trustRequest, WsSerializationContext serializationContext)
         {
             // brentsch - TODO, PERF - create a collection of strings assuming only single elements
-
-            bool isEmptyElement = reader.IsEmptyElement;
             while (reader.IsStartElement())
             {
                 bool processed = false;
@@ -384,11 +403,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     ReadUnknownElement(reader, trustRequest);
                 }
             }
-
-            if (!isEmptyElement)
-                reader.ReadEndElement();
-
-            return trustRequest;
         }
 
         /// <summary>

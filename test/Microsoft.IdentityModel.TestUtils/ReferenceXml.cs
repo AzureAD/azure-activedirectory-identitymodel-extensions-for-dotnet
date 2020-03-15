@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Protocols.WsTrust;
@@ -53,6 +54,18 @@ namespace Microsoft.IdentityModel.TestUtils
                 type,
                 value);
         }
+
+        public static XmlDictionaryReader GetBinarySecretReader(WsTrustConstants trustConstants, string type, string value)
+        {
+            return XmlUtilities.CreateDictionaryReader(
+                LogHelper.FormatInvariant(
+                    @"<{0}:BinarySecret Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:BinarySecret>",
+                    trustConstants.Prefix,
+                    trustConstants.Namespace,
+                    type,
+                    value));
+        }
+
         #endregion
 
         #region Lifetime
@@ -66,15 +79,29 @@ namespace Microsoft.IdentityModel.TestUtils
                 expires);
         }
 
-        public static string GetLifeTime(string prefix, string ns, string created, string expires)
+        public static XmlDictionaryReader GetLifeTimeReader(WsTrustConstants trustConstants, string created, string expires)
         {
-            return LogHelper.FormatInvariant(
+            return XmlUtilities.CreateDictionaryReader(
+                LogHelper.FormatInvariant(
                 @"<{0}:Lifetime xmlns:{0}=""{1}""><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
-                prefix,
-                ns,
+                trustConstants.Prefix,
+                trustConstants.Namespace,
                 created,
-                expires);
+                expires));
         }
+
+        #endregion
+
+        #region RequestSecurityToken
+        public static XmlDictionaryReader GetWsRequestReader(WsTrustConstants trustConstants)
+        {
+            return XmlUtilities.CreateDictionaryReader(
+                LogHelper.FormatInvariant(
+                    @"<{0}:RequestSecurityToken xmlns:{0}=""{1}"" Id=""uuid-bdda680b-0921-4060-ac39-3429dc8ce7b5""><{0}:RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</{0}:RequestType></{0}:RequestSecurityToken>",
+                    trustConstants.Prefix,
+                    trustConstants.Namespace));
+        }
+
         #endregion
 
         #region Wresult

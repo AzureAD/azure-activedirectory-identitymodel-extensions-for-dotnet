@@ -88,21 +88,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     new WsTrustSerializerTheoryData
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.TrustFeb2005.WsTrustBinarySecretTypes.AsymmetricKey),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetBinarySecret(WsTrustConstants.TrustFeb2005.Prefix, WsTrustConstants.TrustFeb2005.Namespace, WsTrustConstants.TrustFeb2005.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256)),
+                        Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.TrustFeb2005, WsTrustConstants.TrustFeb2005.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
                         TestId = "TrustFeb2005",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.TrustFeb2005)
                     },
                     new WsTrustSerializerTheoryData
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetBinarySecret(WsTrustConstants.Trust13.Prefix, WsTrustConstants.Trust13.Namespace, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256)),
+                        Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
                         TestId = "Trust13",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
                     new WsTrustSerializerTheoryData
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust14.WsTrustBinarySecretTypes.AsymmetricKey),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetBinarySecret(WsTrustConstants.Trust14.Prefix, WsTrustConstants.Trust14.Namespace, WsTrustConstants.Trust14.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256)),
+                        Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust14, WsTrustConstants.Trust14.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
                         TestId = "Trust14",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
                     },
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(System.Xml.XmlException)),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetBinarySecret(WsTrustConstants.Trust13.Prefix, WsTrustConstants.Trust13.Namespace, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, "KeyingMaterial.SelfSigned2048_SHA256")),
+                        Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, "xxx"),
                         TestId = "EncodingError",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetBinarySecret(WsTrustConstants.Trust13.Prefix, WsTrustConstants.Trust13.Namespace, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256)),
+                        Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
                         TestId = "Trust13_14",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
                     },
@@ -147,6 +147,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             get
             {
+                DateTime createdDateTime = DateTime.UtcNow;
+                DateTime expiresDateTime = createdDateTime + TimeSpan.FromDays(1);
+                string created = XmlConvert.ToString(createdDateTime, XmlDateTimeSerializationMode.Utc);
+                string expires = XmlConvert.ToString(expiresDateTime, XmlDateTimeSerializationMode.Utc);
+                Lifetime lifetime = new Lifetime(createdDateTime, expiresDateTime);
+
                 return new TheoryData<WsTrustSerializerTheoryData>
                 {
                     new WsTrustSerializerTheoryData
@@ -163,52 +169,108 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     },
                     new WsTrustSerializerTheoryData
                     {
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.TrustFeb2005.Prefix, WsTrustConstants.TrustFeb2005.Namespace, "2017-04-23T16:11:17.348Z", "2017-04-23T17:11:17.348Z")),
+                        Lifetime = new Lifetime(createdDateTime, expiresDateTime),
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.TrustFeb2005, created, expires),
                         TestId = "TrustFeb2005",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.TrustFeb2005)
                     },
                     new WsTrustSerializerTheoryData
                     {
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.Trust13.Prefix, WsTrustConstants.Trust13.Namespace, "2017-04-23T16:11:17.348Z", "2017-04-23T17:11:17.348Z")),
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, created, expires),
                         TestId = "Trust13",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
                     new WsTrustSerializerTheoryData
                     {
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.Trust14.Prefix, WsTrustConstants.Trust14.Namespace, "2017-04-23T16:11:17.348Z", "2017-04-23T17:11:17.348Z")),
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust14, created, expires),
                         TestId = "Trust14",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
                     },
                     new WsTrustSerializerTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.Trust14, "2017-04-23T16:11:17.348Z", "2017-04-23T17:11:17.348Z")),
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust14, created, expires),
                         TestId = "Trust14_13",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
                     new WsTrustSerializerTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)),
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.Trust13, "2017-04-23T16:11:17.348Z", "xxx")),
-                        TestId = "ParseErrorCreate",
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, created, "xxx"),
+                        TestId = "CreateParseError",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
                     new WsTrustSerializerTheoryData
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)),
-                        Lifetime = new Lifetime(XmlConvert.ToDateTime("2017-04-23T16:11:17.348Z", XmlDateTimeSerializationMode.Utc), XmlConvert.ToDateTime("2017-04-23T17:11:17.348Z", XmlDateTimeSerializationMode.Utc)),
-                        Reader = XmlUtilities.CreateDictionaryReader(ReferenceXml.GetLifeTime(WsTrustConstants.Trust13, "xxx", "2017-04-23T17:11:17.348Z")),
-                        TestId = "ParseErrorExpire",
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, "xxx", expires),
+                        TestId = "ExpireParseError",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     }
                 };
             }
         }
+
+        [Theory, MemberData(nameof(ReadRequestTheoryData))]
+        public void ReadRequest(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadRequest", theoryData);
+
+            try
+            {
+                var wsTrustRequest = theoryData.WsTrustSerializer.ReadRequest(theoryData.Reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(theoryData.WsTrustRequest, wsTrustRequest, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadRequestTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        First = true,
+                        TestId = "ReaderNull",
+                    }
+                };
+
+                XmlDictionaryReader reader = ReferenceXml.GetWsRequestReader(WsTrustConstants.Trust13);
+                reader.ReadStartElement();
+                reader.ReadStartElement();
+                theoryData.Add(new WsTrustSerializerTheoryData
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX30022:"),
+                    Reader = reader,
+                    TestId = "ReaderNotOnStartElement"
+                });
+
+                theoryData.Add(new WsTrustSerializerTheoryData
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX30024:"),
+                    Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, XmlConvert.ToString(DateTime.UtcNow, XmlDateTimeSerializationMode.Utc), XmlConvert.ToString(DateTime.UtcNow + TimeSpan.FromDays(1), XmlDateTimeSerializationMode.Utc)),
+                    TestId = "ReaderNotOnRequestSecurityToken"
+                });
+
+
+                return theoryData;
+            }
+        }
+
     }
 
     public class WsTrustSerializerTheoryData : TheoryDataBase
@@ -218,6 +280,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         public Lifetime Lifetime { get; set; }
 
         public WsSerializationContext WsSerializationContext { get; set; }
+
+        public WsTrustRequest WsTrustRequest { get; set; }
 
         public WsTrustSerializer WsTrustSerializer { get; set; } = new WsTrustSerializer();
 
