@@ -27,6 +27,7 @@
 
 using System;
 using System.Xml;
+using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
@@ -48,6 +49,57 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 context.AddDiff("wsTrustSerializer.SecurityTokenHandlers.Count != 2");
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAttachedReferenceTheoryData))]
+        public void ReadAttachedReference(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAttachedReference", theoryData);
+
+            try
+            {
+                var attachedReference = theoryData.WsTrustSerializer.ReadRequestedAttachedReference(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(attachedReference, theoryData.Reference, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadAttachedReferenceTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        Reader = ReferenceXml.GetRequestSecurityTokenReader(WsTrustConstants.Trust13, ReferenceXml.Saml2Valid),
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
         }
 
         [Theory, MemberData(nameof(ReadBinarySecrectTheoryData))]
@@ -73,56 +125,158 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             {
                 return new TheoryData<WsTrustSerializerTheoryData>
                 {
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
                         First = true,
                         TestId = "SerializationContextNull"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("reader"),
                         TestId = "ReaderNull",
                         WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.TrustFeb2005)
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.TrustFeb2005.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.TrustFeb2005, WsTrustConstants.TrustFeb2005.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
-                        TestId = "TrustFeb2005",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.TrustFeb2005)
+                        TestId = "TrustFeb2005"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
-                        TestId = "Trust13",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        TestId = "Trust13"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust14)
                     {
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust14.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust14, WsTrustConstants.Trust14.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
-                        TestId = "Trust14",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
+                        TestId = "Trust14"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(System.Xml.XmlException)),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, "xxx"),
-                        TestId = "EncodingError",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        TestId = "EncodingError"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust14)
                     {
                         ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
-                        TestId = "Trust13_14",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
+                        TestId = "Trust13_14"
                     },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement"
+                    }
                 };
+            }
+        }
+
+        [Theory, MemberData(nameof(ReadClaimsTheoryData))]
+        public void ReadClaims(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadClaims", theoryData);
+
+            try
+            {
+                var claims = theoryData.WsTrustSerializer.ReadClaims(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(claims, theoryData.Claims, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadClaimsTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReadEntropyTheoryData))]
+        public void ReadEntropy(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadEntropy", theoryData);
+
+            try
+            {
+                var entropy = theoryData.WsTrustSerializer.ReadEntropy(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(entropy, theoryData.Entropy, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadEntropyTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        Reader = ReferenceXml.GetRequestSecurityTokenReader(WsTrustConstants.Trust13, ReferenceXml.Saml2Valid),
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
             }
         }
 
@@ -147,72 +301,121 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             get
             {
-                DateTime createdDateTime = DateTime.UtcNow;
-                DateTime expiresDateTime = createdDateTime + TimeSpan.FromDays(1);
-                string created = XmlConvert.ToString(createdDateTime, XmlDateTimeSerializationMode.Utc);
-                string expires = XmlConvert.ToString(expiresDateTime, XmlDateTimeSerializationMode.Utc);
-                Lifetime lifetime = new Lifetime(createdDateTime, expiresDateTime);
+                DateTime created = DateTime.UtcNow;
+                DateTime expires = created + TimeSpan.FromDays(1);
+                Lifetime lifetime = new Lifetime(created, expires);
 
                 return new TheoryData<WsTrustSerializerTheoryData>
                 {
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
                         First = true,
                         TestId = "SerializationContextNull"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("reader"),
-                        TestId = "ReaderNull",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        TestId = "ReaderNull"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.TrustFeb2005)
                     {
-                        Lifetime = new Lifetime(createdDateTime, expiresDateTime),
+                        Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.TrustFeb2005, created, expires),
-                        TestId = "TrustFeb2005",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.TrustFeb2005)
+                        TestId = "TrustFeb2005"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, created, expires),
-                        TestId = "Trust13",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        TestId = "Trust13"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust14)
                     {
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust14, created, expires),
-                        TestId = "Trust14",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust14)
+                        TestId = "Trust14"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
+                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust14, created, expires),
-                        TestId = "Trust14_13",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        TestId = "Trust14_13"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)),
+                        ExpectedException = ExpectedException.XmlReadException("IDX30017:", typeof(FormatException)),
                         Lifetime = lifetime,
-                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, created, "xxx"),
-                        TestId = "CreateParseError",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, XmlConvert.ToString(created, XmlDateTimeSerializationMode.Utc), "xxx"),
+                        TestId = "CreateParseError"
                     },
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)),
+                        ExpectedException = ExpectedException.XmlReadException("IDX30017:", typeof(FormatException)),
                         Lifetime = lifetime,
-                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, "xxx", expires),
-                        TestId = "ExpireParseError",
-                        WsSerializationContext = new WsSerializationContext(WsTrustVersion.Trust13)
+                        Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, "xxx", XmlConvert.ToString(expires, XmlDateTimeSerializationMode.Utc)),
+                        TestId = "ExpireParseError"
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
+                        Lifetime = lifetime,
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement"
                     }
                 };
+            }
+        }
+
+        [Theory, MemberData(nameof(ReadOnBehalfOfTheoryData))]
+        public void ReadOnBehalfOf(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadOnBehalfOf", theoryData);
+
+            try
+            {
+                var onBehalfOf = theoryData.WsTrustSerializer.ReadOnBehalfOf(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(onBehalfOf, theoryData.OnBehalfOf, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadOnBehalfOfTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        Reader = ReferenceXml.GetRequestSecurityTokenReader(WsTrustConstants.Trust13, ReferenceXml.Saml2Valid),
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
             }
         }
 
@@ -223,9 +426,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var wsTrustRequest = theoryData.WsTrustSerializer.ReadRequest(theoryData.Reader);
+                var request = theoryData.WsTrustSerializer.ReadRequest(theoryData.Reader);
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(theoryData.WsTrustRequest, wsTrustRequest, context);
+                IdentityComparer.AreEqual(request, theoryData.WsTrustRequest, context);
             }
             catch (Exception ex)
             {
@@ -241,7 +444,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             {
                 var theoryData = new TheoryData<WsTrustSerializerTheoryData>
                 {
-                    new WsTrustSerializerTheoryData
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                     {
                         ExpectedException = ExpectedException.ArgumentNullException("reader"),
                         First = true,
@@ -249,35 +452,258 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     }
                 };
 
-                XmlDictionaryReader reader = ReferenceXml.GetWsRequestReader(WsTrustConstants.Trust13);
+                XmlDictionaryReader reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1));
                 reader.ReadStartElement();
                 reader.ReadStartElement();
-                theoryData.Add(new WsTrustSerializerTheoryData
+                theoryData.Add(new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                 {
                     ExpectedException = ExpectedException.XmlReadException("IDX30022:"),
                     Reader = reader,
                     TestId = "ReaderNotOnStartElement"
                 });
 
-                theoryData.Add(new WsTrustSerializerTheoryData
+                theoryData.Add(new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
                 {
                     ExpectedException = ExpectedException.XmlReadException("IDX30024:"),
-                    Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, XmlConvert.ToString(DateTime.UtcNow, XmlDateTimeSerializationMode.Utc), XmlConvert.ToString(DateTime.UtcNow + TimeSpan.FromDays(1), XmlDateTimeSerializationMode.Utc)),
-                    TestId = "ReaderNotOnRequestSecurityToken"
+                    Reader = ReferenceXml.RandomElementReader,
+                    TestId = "ReaderNotOnCorrectElement"
                 });
-
 
                 return theoryData;
             }
         }
 
+        [Theory, MemberData(nameof(ReadRequestedProofTokenTheoryData))]
+        public void ReadRequestedProofToken(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadRequestedProofToken", theoryData);
+
+            try
+            {
+                var requestedProofToken = theoryData.WsTrustSerializer.ReadRequestedProofToken(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(requestedProofToken, theoryData.RequestedProofToken, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadRequestedProofTokenTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        Reader = ReferenceXml.GetRequestSecurityTokenReader(WsTrustConstants.Trust13, ReferenceXml.Saml2Valid),
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+        [Theory, MemberData(nameof(ReadRequestedSecurityTokenTheoryData))]
+        public void ReadRequestedSecurityToken(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadRequestedSecurityToken", theoryData);
+
+            try
+            {
+                var requestedSecurityToken = theoryData.WsTrustSerializer.ReadRequestedSecurityToken(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(requestedSecurityToken, theoryData.RequestedSecurityToken, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadRequestedSecurityTokenTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReadUnattachedReferenceTheoryData))]
+        public void ReadUnattachedReference(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadUnattachedReference", theoryData);
+
+            try
+            {
+                var unattachedReference = theoryData.WsTrustSerializer.ReadRequestedUnattachedReference(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(unattachedReference, theoryData.Reference, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadUnattachedReferenceTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ReadUseKeyTheoryData))]
+        public void ReadUseKey(WsTrustSerializerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadUseKey", theoryData);
+
+            try
+            {
+                var useKey = theoryData.WsTrustSerializer.ReadUseKey(theoryData.Reader, theoryData.WsSerializationContext);
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(useKey, theoryData.UseKey, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustSerializerTheoryData> ReadUseKeyTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<WsTrustSerializerTheoryData>
+                {
+                    new WsTrustSerializerTheoryData(ReferenceXml.RandomElementReader)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("serializationContext"),
+                        First = true,
+                        TestId = "SerializationContextNull",
+                        WsSerializationContext = null
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        Reader = null,
+                        TestId = "ReaderNull",
+                    },
+                    new WsTrustSerializerTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.XmlReadException(),
+                        Reader = ReferenceXml.RandomElementReader,
+                        TestId = "ReaderNotOnCorrectElement",
+                    }
+                };
+
+                return theoryData;
+            }
+        }
     }
 
     public class WsTrustSerializerTheoryData : TheoryDataBase
     {
+        public WsTrustSerializerTheoryData() { }
+
+        public WsTrustSerializerTheoryData(WsTrustVersion trustVersion)
+        {
+            WsSerializationContext = new WsSerializationContext(trustVersion);
+        }
+        public WsTrustSerializerTheoryData(XmlDictionaryReader reader)
+        {
+            Reader = reader;
+        }
+
         public BinarySecret BinarySecret { get; set; }
 
+        public Claims Claims { get; set; }
+
+        public Entropy Entropy { get; set; }
+
         public Lifetime Lifetime { get; set; }
+
+        public SecurityTokenElement OnBehalfOf { get; set; }
+
+        public SecurityTokenReference Reference { get; set; }
+
+        public RequestedSecurityToken RequestedProofToken { get; set; }
+
+        public RequestedSecurityToken RequestedSecurityToken { get; set; }
+
+        public UseKey UseKey { get; set; }
 
         public WsSerializationContext WsSerializationContext { get; set; }
 

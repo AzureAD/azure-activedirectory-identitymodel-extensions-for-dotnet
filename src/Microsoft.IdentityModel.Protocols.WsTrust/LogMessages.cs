@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         // IDX15100 - specific WsTrustReadRequest errors
         internal const string IDX15100 = "IDX15100: WsTrustRequest must start with a '{0}' element.";
+        internal const string IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'.";
 
         // IDX15500 - class creation errors and warnings
         internal const string IDX15500 = "IDX15500: Lifetime constructed with expires <= created.";

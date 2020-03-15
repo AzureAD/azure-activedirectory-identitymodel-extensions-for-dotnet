@@ -71,18 +71,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at at expected element.</exception>
         public static void CheckReaderOnEntry(XmlReader reader, string element)
         {
-            if (reader == null)
-                throw LogArgumentNullException(nameof(reader));
-
-            if (string.IsNullOrEmpty(element))
-                throw LogArgumentNullException(nameof(element));
-
-            // IsStartElement calls reader.MoveToContent().
-            if (!reader.IsStartElement())
-                throw LogReadException(LogMessages.IDX30022, reader.NodeType);
-
-            if (!string.Equals(reader.LocalName, element, StringComparison.OrdinalIgnoreCase))
-                throw LogReadException(LogMessages.IDX30024, element, reader.LocalName);
+            CheckReaderOnEntry(reader, element, null);
         }
 
         /// <summary>

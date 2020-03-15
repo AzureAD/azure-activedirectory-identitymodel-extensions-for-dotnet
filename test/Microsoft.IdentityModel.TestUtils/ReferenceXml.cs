@@ -79,6 +79,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 expires);
         }
 
+        public static XmlDictionaryReader GetLifeTimeReader(WsTrustConstants trustConstants, DateTime created, DateTime expires)
+        {
+            return GetLifeTimeReader(trustConstants, XmlConvert.ToString(created, XmlDateTimeSerializationMode.Utc), XmlConvert.ToString(expires, XmlDateTimeSerializationMode.Utc));
+        }
+
         public static XmlDictionaryReader GetLifeTimeReader(WsTrustConstants trustConstants, string created, string expires)
         {
             return XmlUtilities.CreateDictionaryReader(
@@ -93,16 +98,19 @@ namespace Microsoft.IdentityModel.TestUtils
         #endregion
 
         #region RequestSecurityToken
-        public static XmlDictionaryReader GetWsRequestReader(WsTrustConstants trustConstants)
+        public static XmlDictionaryReader GetRequestSecurityTokenReader(WsTrustConstants trustConstants, string token)
         {
             return XmlUtilities.CreateDictionaryReader(
                 LogHelper.FormatInvariant(
-                    @"<{0}:RequestSecurityToken xmlns:{0}=""{1}"" Id=""uuid-bdda680b-0921-4060-ac39-3429dc8ce7b5""><{0}:RequestType>http://schemas.xmlsoap.org/ws/2005/02/trust/Issue</{0}:RequestType></{0}:RequestSecurityToken>",
+                    @"<{0}:RequestedSecurityToken xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityToken>",
                     trustConstants.Prefix,
-                    trustConstants.Namespace));
+                    trustConstants.Namespace,
+                    token));
         }
 
         #endregion
+
+        public static XmlDictionaryReader RandomElementReader => XmlUtilities.CreateDictionaryReader(@"<z:SomeRandomElement xmlns:z=""http://some.random.namespace.xsd"" >SomeRamdonValue</z:SomeRandomElement>");
 
         #region Wresult
 
