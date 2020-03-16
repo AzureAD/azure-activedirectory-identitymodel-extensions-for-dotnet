@@ -41,7 +41,7 @@ namespace System.ServiceModel.Federation
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse>(EqualityComparer<WsTrustRequestKey>.Default);
+            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse>();
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
@@ -236,15 +236,13 @@ namespace System.ServiceModel.Federation
                 var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
                 dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
                 GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
-                var securityToken = new GenericXmlSecurityToken(dom.DocumentElement,
+                return new GenericXmlSecurityToken(dom.DocumentElement,
                                                    proofToken,
                                                    DateTime.UtcNow,
                                                    DateTime.UtcNow + TimeSpan.FromDays(1),
                                                    securityKeyIdentifierClause,
                                                    securityKeyIdentifierClause,
                                                    null);
-
-                return securityToken;
             }
         }
 
