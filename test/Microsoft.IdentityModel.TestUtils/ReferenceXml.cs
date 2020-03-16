@@ -98,14 +98,50 @@ namespace Microsoft.IdentityModel.TestUtils
         #endregion
 
         #region RequestSecurityToken
-        public static XmlDictionaryReader GetRequestSecurityTokenReader(WsTrustConstants trustConstants, string token)
+
+        public static string GetRequestSecurityToken(WsTrustConstants trustConstants, string token, bool includeNamespace=true)
         {
-            return XmlUtilities.CreateDictionaryReader(
-                LogHelper.FormatInvariant(
-                    @"<{0}:RequestedSecurityToken xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityToken>",
+
+            if (includeNamespace)
+                return LogHelper.FormatInvariant(
+                     @"<{0}:RequestedSecurityToken xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityToken>",
+                        trustConstants.Prefix,
+                        trustConstants.Namespace,
+                        token);
+            else
+                return LogHelper.FormatInvariant(
+                     @"<{0}:RequestedSecurityToken >{1}</{0}:RequestedSecurityToken>",
+                     trustConstants.Prefix,
+                     token);
+
+        }
+
+        public static XmlDictionaryReader GetRequestSecurityTokenReader(WsTrustConstants trustConstants, string token, bool includeNamespace=true)
+        {
+            return XmlUtilities.CreateDictionaryReader(GetRequestSecurityToken(trustConstants, token, includeNamespace));
+        }
+
+        #endregion
+
+        #region RequestSecurityToken
+        public static string GetRequestSecurityTokenResponse(WsTrustConstants trustConstants, string token, bool includeNamespace = true)
+        {
+            if (includeNamespace)
+                return LogHelper.FormatInvariant(
+                    @"<{0}:RequestedSecurityTokenResponse xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityTokenResponse>",
                     trustConstants.Prefix,
                     trustConstants.Namespace,
-                    token));
+                    GetRequestSecurityToken(trustConstants, token, false));
+            else
+                return LogHelper.FormatInvariant(
+                    @"<{0}:RequestedSecurityTokenResponse >{1}</{0}:RequestedSecurityTokenResponse>",
+                    trustConstants.Prefix,
+                    GetRequestSecurityToken(trustConstants, token, false));
+        }
+
+        public static XmlDictionaryReader GetRequestSecurityTokenResponseReader(WsTrustConstants trustConstants, string token, bool includeNamespace=true)
+        {
+            return XmlUtilities.CreateDictionaryReader(GetRequestSecurityTokenResponse(trustConstants, token, includeNamespace));
         }
 
         #endregion

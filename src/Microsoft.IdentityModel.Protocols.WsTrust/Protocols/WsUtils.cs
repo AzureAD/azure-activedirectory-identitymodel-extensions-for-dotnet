@@ -25,10 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
     /// Utilities for working with WS-* 
@@ -38,20 +40,42 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Checks standard items on a write call.
         /// </summary>
-        /// <param name="writer">the <see cref="XmlWriter"/>to check.</param>
-        /// <param name="context">the expected element.</param>
-        /// <param name="obj"></param>
-        /// <param name="objName"></param>
-        internal static void ValidateParamsForWritting(XmlWriter writer, WsSerializationContext context, object obj, string objName)
+        public static void ValidateParamsForWritting(XmlWriter writer, WsSerializationContext serializationContext, object obj, string objName)
         {
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
 
-            if (context == null)
-                throw LogHelper.LogArgumentNullException(nameof(context));
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
 
             if (obj == null)
                 throw LogHelper.LogArgumentNullException(objName);
+        }
+
+        /// <summary>
+        /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <param name="element">the expected element.</param>
+        /// <param name="serializationContext">the expected namespace.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at expected element.</exception>
+        public static void CheckReaderOnEntry(XmlReader reader, string element, WsSerializationContext serializationContext)
+        {
+            if (serializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(serializationContext));
+
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            // IsStartElement calls reader.MoveToContent().
+            if (!reader.IsStartElement())
+                throw XmlUtil.LogReadException(LogMessages.IDX30022, reader.NodeType);
+
+            if (!reader.IsStartElement(element, serializationContext.TrustConstants.Namespace))
+                throw XmlUtil.LogReadException(LogMessages.IDX30011, serializationContext.TrustConstants.Namespace, element, reader.NamespaceURI, reader.LocalName);
         }
     }
 }
