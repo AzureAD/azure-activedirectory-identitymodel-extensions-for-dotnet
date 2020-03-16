@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens;
+﻿using System.Collections.Generic;
 using System.ServiceModel.Caching;
-using System.ServiceModel.Security.Tokens;
-using System.Text;
-using System.Xml;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.ServiceModel.Federation.Tests
@@ -41,6 +37,47 @@ namespace System.ServiceModel.Federation.Tests
 
             cache.CacheSecurityTokenResponse("Token1", updatedToken);
             Assert.Equal(updatedToken, cache.GetSecurityTokenResponse("Token1"));
+        }
+
+        [Fact]
+        public async Task SetAndGetTokensAsync()
+        {
+            var cache = new InMemorySecurityTokenResponseCache<string, string>(EqualityComparer<string>.Default);
+
+            string token1 = "1T";
+            string token2 = "2T";
+            string token3 = "3T";
+            string updatedToken = "UT";
+
+            await cache.CacheSecurityTokenResponseAsync("Token1", token1);
+            await cache.CacheSecurityTokenResponseAsync("Token2", token2);
+            await cache.CacheSecurityTokenResponseAsync("Token3", token3);
+
+            Assert.Equal(token1, await cache.GetSecurityTokenResponseAsync("Token1"));
+            Assert.Equal(token2, await cache.GetSecurityTokenResponseAsync("Token2"));
+            Assert.Equal(token3, await cache.GetSecurityTokenResponseAsync("Token3"));
+            Assert.Null(await cache.GetSecurityTokenResponseAsync("Token4"));
+
+            Assert.True(await cache.RemoveSecurityTokenResponseAsync(token2));
+            Assert.False(await cache.RemoveSecurityTokenResponseAsync(updatedToken));
+            Assert.True(await cache.RemoveSecurityTokenResponseByKeyAsync("Token3"));
+            Assert.False(await cache.RemoveSecurityTokenResponseByKeyAsync("token4"));
+
+            Assert.Equal(token1, await cache.GetSecurityTokenResponseAsync("Token1"));
+            Assert.Null(await cache.GetSecurityTokenResponseAsync("Token2"));
+            Assert.Null(await cache.GetSecurityTokenResponseAsync("Token3"));
+
+            await cache.CacheSecurityTokenResponseAsync("Token1", updatedToken);
+            Assert.Equal(updatedToken, await cache.GetSecurityTokenResponseAsync("Token1"));
+        }
+
+        [Fact]
+        public void ExceptionsThrownForErrorConditions()
+        {
+            var cache = new InMemorySecurityTokenResponseCache<string, string>(EqualityComparer<string>.Default);
+
+            Assert.Throws<ArgumentNullException>(() => cache.CacheSecurityTokenResponse("Token1", null));
+            Assert.ThrowsAsync<ArgumentNullException>(() => cache.CacheSecurityTokenResponseAsync("Token1", null));
         }
     }
 }
