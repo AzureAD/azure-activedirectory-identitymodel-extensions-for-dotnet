@@ -199,8 +199,8 @@ namespace System.ServiceModel.Federation
                     writer.Flush();
                     var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
 
-                    var channel = _channelFactory.CreateChannel();
-                    var reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
+                    IRequestChannel channel = _channelFactory.CreateChannel();
+                    Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
                     trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
 
                     CacheSecurityTokenResponse(_wsTrustRequest, trustResponse);
