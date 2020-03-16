@@ -67,7 +67,7 @@ namespace System.ServiceModel.Federation
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
 
             // Note that WsTrustRequestKey needs to capture any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestKey accordingly.
-            return new WsTrustRequest()
+            return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
                 Context = Guid.NewGuid().ToString(),
