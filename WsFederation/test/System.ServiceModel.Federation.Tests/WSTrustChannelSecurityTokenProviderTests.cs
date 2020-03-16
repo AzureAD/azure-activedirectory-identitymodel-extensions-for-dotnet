@@ -157,12 +157,12 @@ namespace System.ServiceModel.Federation.Tests
         public void WsTrustRequestKeyEqualsReturnsFalseForOtherObjectTypes()
         {
             // Create initial request key
-            var requestKey1 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest());
-            var requestKey2 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest());
+            var requestKey1 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue));
+            var requestKey2 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue));
 
             Assert.True(requestKey1.Equals(requestKey2));
             Assert.False(requestKey1.Equals(null));
-            Assert.False(requestKey1.Equals(new WsTrustRequest()));
+            Assert.False(requestKey1.Equals(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)));
         }
     }
 }
