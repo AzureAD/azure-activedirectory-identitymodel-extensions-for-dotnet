@@ -39,12 +39,11 @@ using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
     /// Reads and writes WS-Trust requests and responses.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public class WsTrustSerializer
     {
@@ -54,6 +53,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
         internal const string GeneratedDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffffZ";
 
+        /// <summary>
+        /// Creates an instance of <see cref="WsTrustSerializer"/>.
+        /// <para>Reads and writes Ws-Trust elements using <see cref="XmlDictionaryReader"/> and <see cref="XmlDictionaryWriter"/>.</para>
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
         public WsTrustSerializer()
         {
             SecurityTokenHandlers = new Collection<SecurityTokenHandler>
@@ -63,6 +67,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             };
         }
 
+        /// <summary>
+        /// Reads the &lt;BinarySecret&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a BinarySecret element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="BinarySecret"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;BinarySecret&gt;.</exception>
         public BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:BinarySecret Type="...">
@@ -99,6 +113,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;Claims&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a Claims element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="Claims"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;Claims&gt;.</exception>
         public virtual Claims ReadClaims(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             // <trust:Claims
@@ -147,6 +171,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;Entropy&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a Entropy element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="Entropy"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;Entropy&gt;.</exception>
         public Entropy ReadEntropy(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:Entropy>
@@ -180,6 +214,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;Lifetime&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a Lifetime element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="Lifetime"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;Lifetime&gt;.</exception>
         public Lifetime ReadLifetime(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:Lifetime>
@@ -215,6 +259,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;OnBehalfOf&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a OnBehalfOf element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="SecurityTokenElement"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;OnBehalfOf&gt;.</exception>
         public virtual SecurityTokenElement ReadOnBehalfOf(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:OnBehalfOf>
@@ -280,6 +334,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;RequestSecurityToken&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a RequestSecurityToken element.</param>
+        /// <returns>A <see cref="WsTrustRequest"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestSecurityToken&gt;.</exception>
         public WsTrustRequest ReadRequest(XmlDictionaryReader reader)
         {
             //  <t:RequestSecurityToken Context="..." xmlns:t="...">
@@ -433,6 +495,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;RequestSecurityTokenResponse&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a RequestSecurityTokenResponse element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="RequestSecurityTokenResponse"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestSecurityTokenResponse&gt;.</exception>
         public RequestSecurityTokenResponse ReadRequestSeurityTokenResponse(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             WsUtils.CheckReaderOnEntry(reader, WsTrustElements.RequestSecurityTokenResponse, serializationContext);
@@ -512,6 +584,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;RequestedAttachedReference&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a RequestSecurityTokenResponse element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="SecurityTokenReference"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedAttachedReference&gt;.</exception>
         public SecurityTokenReference ReadRequestedAttachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedAttachedReference>
@@ -536,11 +618,15 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Reads the RequestedR
+        /// Reads the &lt;RequestedProofToken&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="serializationContext"></param>
-        /// <returns></returns>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a RequestedProofToken element.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <returns>A <see cref="RequestedProofToken"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedProofToken&gt;.</exception>
         public RequestedProofToken ReadRequestedProofToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedProofToken>
@@ -576,15 +662,15 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Reads the RequestedSecurityToken element and returns a <see cref="RequestedSecurityToken"/>.
+        /// Reads the &lt;RequestedSecurityToken&gt; element.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
         /// <param name="reader">an <see cref="XmlDictionaryReader"/> positioned at a RequestedSecurityToken element.</param>
         /// <param name="serializationContext">a <see cref="WsSerializationContext"/> that contains information about expected namespaces.</param>
         /// <returns>A <see cref="RequestedSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> or <paramref name="reader"/> is null.</exception>
-        /// <exception cref="XmlReadException">Thrown if reader is not positioned at a StartElement with name ReauestSecurityToken.</exception>
-        /// <exception cref="XmlReadException">Thrown if an exception occurs while reading.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedSecurityToken&gt;.</exception>
         public RequestedSecurityToken ReadRequestedSecurityToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedSecurityToken>
@@ -632,6 +718,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;RequestedUnattachedReference&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">an <see cref="XmlDictionaryReader"/> positioned at a RequestedUnattachedReference element.</param>
+        /// <param name="serializationContext">a <see cref="WsSerializationContext"/> that contains information about expected namespaces.</param>
+        /// <returns>A <see cref="SecurityTokenReference"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedUnattachedReference&gt;.</exception>
         public SecurityTokenReference ReadRequestedUnattachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedUnattachedReference>
@@ -655,6 +751,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;RequestSecurityTokenResponse&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlDictionaryReader"/> positioned at a RequestSecurityTokenResponse element.</param>
+        /// <returns>A <see cref="WsTrustResponse"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestSecurityTokenResponse&gt;.</exception>
         public WsTrustResponse ReadResponse(XmlDictionaryReader reader)
         {
             //  <t:RequestSecurityTokenResponse Context="..." xmlns:t="...">
@@ -740,6 +844,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Reads the &lt;UseKey&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="reader">an <see cref="XmlDictionaryReader"/> positioned at a UseKey element.</param>
+        /// <param name="serializationContext">a <see cref="WsSerializationContext"/> that contains information about expected namespaces.</param>
+        /// <returns>A <see cref="UseKey"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;UseKey&gt;.</exception>
         public UseKey ReadUseKey(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:UseKey Sig="...">
@@ -777,8 +891,24 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+
+        /// <summary>
+        /// Gets the collection of <see cref="SecurityTokenHandler"/> to serialize <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <remarks>Users expecting custom or additional types of SecurityTokens should add <see cref="SecurityTokenHandler"/>.</remarks>
         public ICollection<SecurityTokenHandler> SecurityTokenHandlers { get; private set; }
 
+        /// <summary>
+        /// Writes a &lt;BinarySecret&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="binarySecret">The <see cref="BinarySecret"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="binarySecret"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteBinarySecret(XmlDictionaryWriter writer, WsSerializationContext serializationContext, BinarySecret binarySecret)
         {
             //  <t:BinarySecret Type="...">
@@ -805,6 +935,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;Claims&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="claims">The <see cref="Claims"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="claims"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteClaims(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Claims claims)
         {
             //  <t:Claims Dialect="...">
@@ -833,6 +974,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;Entropy&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="entropy">The <see cref="Entropy"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="entropy"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteEntropy(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Entropy entropy)
         {
             //  <t:Entropy>
@@ -860,6 +1012,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;Lifetime&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="lifetime">The <see cref="Lifetime"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="lifetime"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteLifetime(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Lifetime lifetime)
         {
             //  <t:Lifetime>
@@ -897,6 +1060,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;OnBehalfOf&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="onBehalfOf">The <see cref="SecurityTokenElement"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="onBehalfOf"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteOnBehalfOf(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement onBehalfOf)
         {
             //  <t:OnBehalfOf>
@@ -935,6 +1109,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;ProofEncryption&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="proofEncryption">The <see cref="SecurityTokenElement"/> to write as a RequestedProofEncryption element.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="proofEncryption"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteProofEncryption(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement proofEncryption)
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryption, nameof(proofEncryption));
@@ -956,6 +1141,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestSecurityToken&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="wsTrustVersion">A <see cref="WsTrustVersion"/> defines version of Ws-Trust use.</param>
+        /// <param name="trustRequest">The <see cref="WsTrustRequest"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="wsTrustVersion"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="trustRequest"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequest(XmlDictionaryWriter writer, WsTrustVersion wsTrustVersion, WsTrustRequest trustRequest)
         {
             if (writer == null)
@@ -1040,6 +1236,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestSecurityTokenResponse&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="wsTrustVersion">A <see cref="WsTrustVersion"/> defines specification versions that are expected.</param>
+        /// <param name="requestSecurityTokenResponse">The <see cref="RequestSecurityTokenResponse"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="wsTrustVersion"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestSecurityTokenResponse"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequestSecurityTokenResponse(XmlDictionaryWriter writer, WsTrustVersion wsTrustVersion, RequestSecurityTokenResponse requestSecurityTokenResponse)
         {
             if (writer == null)
@@ -1110,6 +1317,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestedAttachedReference&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="securityTokenReference">The <see cref="SecurityTokenReference"/> to write as a RequestedAttachedReference element.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityTokenReference"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequestedAttachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             //  <t:RequestedAttachedReference>
@@ -1124,6 +1342,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestedProofToken&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="requestedProofToken">The <see cref="RequestedProofToken"/> to write as a RequestedAttachedReference.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestedProofToken"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequestedProofToken(XmlDictionaryWriter writer, WsSerializationContext serializationContext, RequestedProofToken requestedProofToken)
         {
             //  <t:RequestedProofToken>
@@ -1140,6 +1369,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestedSecurityToken&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="requestedSecurityToken">The <see cref="RequestedSecurityToken"/> to write as a RequestedAttachedReference.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestedSecurityToken"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequestedSecurityToken(XmlDictionaryWriter writer, WsSerializationContext serializationContext, RequestedSecurityToken requestedSecurityToken)
         {
             //  <t:RequestedSecurityToken>
@@ -1164,6 +1404,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestedUnattachedReference&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="securityTokenReference">The <see cref="SecurityTokenReference"/> to write as a RequestedUnattachedReference.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityTokenReference"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteRequestedUnattachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             //  <t:RequestedUnattachedReference>
@@ -1178,6 +1429,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             writer.WriteEndElement();
         }
 
+        /// <summary>
+        /// Writes a &lt;RequestSecurityTokenResponse&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryWriter"/> to write the element into.</param>
+        /// <param name="wsTrustVersion">A <see cref="WsTrustVersion"/> defines version of Ws-Trust use.</param>
+        /// <param name="trustResponse">The <see cref="WsTrustResponse"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="wsTrustVersion"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="trustResponse"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteResponse(XmlDictionaryWriter writer, WsTrustVersion wsTrustVersion, WsTrustResponse trustResponse)
         {
             if (writer == null)
@@ -1213,6 +1475,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        /// <summary>
+        /// Writes a &lt;UseKey&gt; element.
+        /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
+        /// </summary>
+        /// <param name="writer">A <see cref="XmlDictionaryReader"/> to write the element into.</param>
+        /// <param name="serializationContext">A <see cref="WsSerializationContext"/> defines specification versions that are expected.</param>
+        /// <param name="useKey">The <see cref="UseKey"/> to write.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="writer"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="useKey"/> is null.</exception>
+        /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
         public void WriteUseKey(XmlDictionaryWriter writer, WsSerializationContext serializationContext, UseKey useKey)
         {
             //  <t:UseKey Sig="...">
