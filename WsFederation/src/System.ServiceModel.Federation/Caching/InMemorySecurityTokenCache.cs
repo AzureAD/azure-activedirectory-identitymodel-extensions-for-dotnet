@@ -17,6 +17,12 @@ namespace System.ServiceModel.Caching
         private readonly ConcurrentDictionary<TKey, TValue> _dictionary;
 
         /// <summary>
+        /// Creates a new instance of the InMemorySecurityTokenResponseCache type, using the default comparer
+        /// for TKey to compare keys.
+        /// </summary>
+        public InMemorySecurityTokenResponseCache() : this(EqualityComparer<TKey>.Default) { }
+
+        /// <summary>
         /// Creates a new instance of the InMemorySecurityTokenResponseCache type. 
         /// </summary>
         /// <param name="comparer">The comparer to use for comparing TKey instances.</param>
