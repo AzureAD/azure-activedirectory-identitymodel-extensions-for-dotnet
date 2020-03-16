@@ -34,14 +34,14 @@ namespace System.ServiceModel.Federation
 
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
-        private ISecurityTokenResponseCache<WsTrustRequest, WsTrustResponse> _cache;
+        private ISecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse> _cache;
         private readonly WsTrustRequest _wsTrustRequest;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
 
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequest, WsTrustResponse>(new WsTrustRequestComparer());
+            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse>(EqualityComparer<WsTrustRequestKey>.Default);
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
@@ -66,7 +66,7 @@ namespace System.ServiceModel.Federation
         {
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
 
-            // Note that WsTrustRequestComparer needs to compare any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestComparer accordingly.
+            // Note that WsTrustRequestKey needs to capture any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestKey accordingly.
             return new WsTrustRequest()
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
@@ -90,7 +90,7 @@ namespace System.ServiceModel.Federation
         /// <summary>
         /// Gets or sets the cache used for storing issued security tokens.
         /// </summary>
-        public ISecurityTokenResponseCache<WsTrustRequest, WsTrustResponse> IssuedTokensCache
+        public ISecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse> IssuedTokensCache
         {
             get => _cache;
             set => _cache = value ?? throw new ArgumentNullException(nameof(value));
@@ -133,7 +133,7 @@ namespace System.ServiceModel.Federation
         {
             if (CacheIssuedTokens)
             {
-                WsTrustResponse response = IssuedTokensCache?.GetSecurityTokenResponse(request);
+                WsTrustResponse response = IssuedTokensCache?.GetSecurityTokenResponse(new WsTrustRequestKey(request));
                 if (IsSecurityTokenResponseUnexpired(response))
                 {
                     return response;
@@ -155,7 +155,7 @@ namespace System.ServiceModel.Federation
             DateTime fromTime = cachedToken.ValidFrom.ToUniversalTime();
             DateTime toTime = cachedToken.ValidTo.ToUniversalTime();
 
-            long interval = fromTime.Ticks - toTime.Ticks;
+            long interval = toTime.Ticks - fromTime.Ticks;
             long effectiveInterval = (long)((IssuedTokenRenewalThresholdPercentage / (double)100) * interval);
             DateTime effectiveExpiration = AddTicks(fromTime, Math.Min(effectiveInterval, MaxIssuedTokenCachingTime.Ticks));
 
@@ -179,7 +179,7 @@ namespace System.ServiceModel.Federation
         {
             if (CacheIssuedTokens)
             {
-                IssuedTokensCache?.CacheSecurityTokenResponse(request, response);
+                IssuedTokensCache?.CacheSecurityTokenResponse(new WsTrustRequestKey(request), response);
             }
         }
 
@@ -249,42 +249,48 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
-        /// This comparer determines whether two WsTrustRequests prepared by WsTrustChannelSecurityTokenProvider.
-        /// In the interest of simplicity and performance, it is not a general-purpose WsTrustRequest comparer. Instead,
-        /// this type compares properties known to be of interest to WsTrustChannelSecurityTokenProvider
+        /// This immutable type is used as a key in WSTrustChannelSecurityTokenProvider response caches. Using this
+        /// type as the key (instead of WsTrustRequest directly) prevents responses' keys from changing after the responses
+        /// have been cached. It also make it easy to store and compare only the properties of WsTrustRequest that are of
+        /// interest to WsTrustChannelSecurityTokenProvider.
         /// </summary>
-        private class WsTrustRequestComparer : IEqualityComparer<WsTrustRequest>
+        public class WsTrustRequestKey
         {
-            public bool Equals(WsTrustRequest request, WsTrustRequest otherRequest)
+            private readonly string _requestType;
+            private readonly string _context;
+            private readonly string _tokenType;
+            private readonly string _keyType;
+            private readonly string _appliesToUri;
+
+            public WsTrustRequestKey(WsTrustRequest request)
             {
-                if (request is null)
-                {
-                    return otherRequest is null;
-                }
-
-                if (otherRequest is null)
-                {
-                    return false;
-                }
-
-                if (!string.Equals(request.RequestType, otherRequest.RequestType, StringComparison.Ordinal) ||
-                    !string.Equals(request.Context, otherRequest.Context, StringComparison.Ordinal) ||
-                    !string.Equals(request.TokenType, otherRequest.TokenType, StringComparison.Ordinal) ||
-                    !string.Equals(request.KeyType, otherRequest.KeyType, StringComparison.Ordinal) ||
-                    (!request.AppliesTo.EndpointReference?.Uri.Equals(otherRequest.AppliesTo.EndpointReference?.Uri) ?? (otherRequest.AppliesTo.EndpointReference is null)))
-                {
-                    return false;
-                }
-
-                return true;
+                _requestType = request.RequestType;
+                _context = request.Context;
+                _tokenType = request.TokenType;
+                _keyType = request.KeyType;
+                _appliesToUri = request.AppliesTo?.EndpointReference?.Uri.ToString();
             }
 
-            public int GetHashCode(WsTrustRequest request) =>
-                request.RequestType?.GetHashCode() ?? "NoRequestType".GetHashCode()
-                ^ request.Context?.GetHashCode() ?? "NoContext".GetHashCode()
-                ^ request.AppliesTo.EndpointReference?.Uri.GetHashCode() ?? "NoAppliesToEndpoint".GetHashCode()
-                ^ request.TokenType?.GetHashCode() ?? "NoTokenType".GetHashCode()
-                ^ request.KeyType?.GetHashCode() ?? "NoKeyType".GetHashCode();
+            public override bool Equals(object obj)
+            {
+                if (!(obj is WsTrustRequestKey other))
+                {
+                    return false;
+                }
+
+                return string.Equals(_requestType, other._requestType, StringComparison.Ordinal) &&
+                    string.Equals(_context, other._context, StringComparison.Ordinal) &&
+                    string.Equals(_tokenType, other._tokenType, StringComparison.Ordinal) &&
+                    string.Equals(_keyType, other._keyType, StringComparison.Ordinal) &&
+                    string.Equals(_appliesToUri, other._appliesToUri, StringComparison.Ordinal);
+            }
+
+            public override int GetHashCode() =>
+                _requestType?.GetHashCode() ?? "NoRequestType".GetHashCode()
+                ^ _context?.GetHashCode() ?? "NoContext".GetHashCode()
+                ^ _appliesToUri?.GetHashCode() ?? "NoAppliesToEndpoint".GetHashCode()
+                ^ _tokenType?.GetHashCode() ?? "NoTokenType".GetHashCode()
+                ^ _keyType?.GetHashCode() ?? "NoKeyType".GetHashCode();
         }
     }
 }
