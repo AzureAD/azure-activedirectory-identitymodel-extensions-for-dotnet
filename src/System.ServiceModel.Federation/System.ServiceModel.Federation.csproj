@@ -15,14 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Reference Microsoft.IdentityModel.Protocols.WsTrust with a project reference because some of this project's
-         tests are leveraging Microsoft.IdentityModel.TestUtils which references Microsoft.IdentityModel.Protocols.WsTrust
-         with a project reference and NuGet has a bug in scenarios where the same project is referenced both as a package
-         and as a project.
-
-         Also, using a project reference better aligns this project with how other Wilson projects reference
-         Microsoft.IdentityModel.Protocols.WsTrust, which will make it easier to merge this project into that solution. -->
     <ProjectReference Include="..\Microsoft.IdentityModel.Protocols.WsTrust\Microsoft.IdentityModel.Protocols.WsTrust.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <PackageReference Include="System.Private.ServiceModel" Version="$(WCFVersion)" />
     <PackageReference Include="System.ServiceModel.Http" Version="$(WCFVersion)" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="$(WCFVersion)" />
