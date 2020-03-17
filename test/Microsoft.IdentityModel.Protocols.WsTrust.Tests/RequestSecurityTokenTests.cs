@@ -32,7 +32,6 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsFed;
 using Microsoft.IdentityModel.Protocols.WsPolicy;
-using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -43,42 +42,8 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
-    public class WsTrustTests
+    public class RequestSecurityTokenTests
     {
-        [Fact]
-        public void StringIntern()
-        {
-            TestUtilities.WriteHeader($"{this}.StringIntern");
-            var context = new CompareContext("StringIntern");
-
-            // WsTrustActions
-            CheckRefs(context, "WsTrustFeb2005Actions.Cancel", (new WsTrustFeb2005Actions()).Cancel, WsTrustActions.TrustFeb2005.Cancel, WsTrustFeb2005Actions.Instance.Cancel);
-            CheckRefs(context, "WsTrust13Actions.Cancel", (new WsTrust13Actions()).Cancel, WsTrustActions.Trust13.Cancel, WsTrust13Actions.Instance.Cancel);
-            CheckRefs(context, "WsTrust14Actions.Cancel", (new WsTrust14Actions()).Cancel, WsTrustActions.Trust14.Cancel, WsTrust14Actions.Instance.Cancel);
-
-            CheckRefs(context, "WsTrustFeb2005Actions.Issue", (new WsTrustFeb2005Actions()).Issue, WsTrustActions.TrustFeb2005.Issue, WsTrustFeb2005Actions.Instance.Issue);
-            CheckRefs(context, "WsTrust13Actions.Issue", (new WsTrust13Actions()).Issue, WsTrustActions.Trust13.Issue, WsTrust13Actions.Instance.Issue);
-            CheckRefs(context, "WsTrust14Actions.Issue", (new WsTrust14Actions()).Issue, WsTrustActions.Trust14.Issue, WsTrust14Actions.Instance.Issue);
-
-            CheckRefs(context, "WsTrustFeb2005Actions.Validate", (new WsTrustFeb2005Actions()).Validate, WsTrustActions.TrustFeb2005.Validate, WsTrustFeb2005Actions.Instance.Validate);
-            CheckRefs(context, "WsTrust13Actions.Validate", (new WsTrust13Actions()).Validate, WsTrustActions.Trust13.Validate, WsTrust13Actions.Instance.Validate);
-            CheckRefs(context, "WsTrust14Actions.Validate", (new WsTrust14Actions()).Validate, WsTrustActions.Trust14.Validate, WsTrust14Actions.Instance.Validate);
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        private void CheckRefs(CompareContext context, string title, string string1, string string2, string string3)
-        {
-            if (!object.ReferenceEquals(string1, string2))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string1, string2)");
-
-            if (!object.ReferenceEquals(string1, string3))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string1, string3)");
-
-            if (!object.ReferenceEquals(string2, string3))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string2, string3)");
-        }
-
         [Theory, MemberData(nameof(ReadAndWriteRequestTheoryData))]
         public void ReadAndWriteRequest(WsTrustTheoryData theoryData)
         {
@@ -224,36 +189,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 };
             }
         }
-   
-        [Theory, MemberData(nameof(ReadAndWriteResponseTheoryData))]
-        public void ReadAndWriteResponse(WsTrustTheoryData theoryData)
+
+        [Theory, MemberData(nameof(ReadRequestTheoryData))]
+        public void ReadRequest(WsTrustTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ReadAndWriteResponse", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ReadRequest", theoryData);
 
             try
             {
-                var memeoryStream = new MemoryStream();
-                var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
-                var serializer = new WsTrustSerializer();
-                serializer.WriteResponse(writer, theoryData.WsTrustVersion, theoryData.WsTrustResponse);
-                writer.Flush();
-                var bytes = memeoryStream.ToArray();
-                var xml = Encoding.UTF8.GetString(bytes);
-                var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
-                var response = serializer.ReadResponse(reader);
-                IdentityComparer.AreEqual(response, theoryData.WsTrustResponse, context);
-                var validationParameters = new TokenValidationParameters
-                {
-                    IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false
-                };
-
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                var token = response.RequestSecurityTokenResponseCollection[0].RequestedSecurityToken.SecurityToken as Saml2SecurityToken;
-                var cp = tokenHandler.ValidateToken(token.Assertion.CanonicalString, validationParameters, out SecurityToken securityToken);
+                var request = theoryData.WsTrustSerializer.ReadRequest(theoryData.Reader);
                 theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(request, theoryData.WsTrustRequest, context);
             }
             catch (Exception ex)
             {
@@ -263,47 +209,85 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadAndWriteResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestTheoryData
         {
             get
             {
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                var tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
-                var samlToken = tokenHandler.CreateToken(tokenDescriptor);
-                var signedToken = tokenHandler.WriteToken(samlToken);
-                var signedSamlToken = tokenHandler.ReadToken(signedToken);
+                var theoryData = new TheoryData<WsTrustTheoryData>
+                {
+                    new WsTrustTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("reader"),
+                        First = true,
+                        TestId = "ReaderNull",
+                    }
+                };
+
+                XmlDictionaryReader reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1));
+                reader.ReadStartElement();
+                reader.ReadStartElement();
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX30022:"),
+                    Reader = reader,
+                    TestId = "ReaderNotOnStartElement"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX30024:"),
+                    Reader = ReferenceXml.RandomElementReader,
+                    TestId = "ReaderNotOnCorrectElement"
+                });
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(WriteRequestTheoryData))]
+        public void WriteRequest(WsTrustTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.WriteRequest", theoryData);
+            try
+            {
+                theoryData.WsTrustSerializer.WriteRequest(theoryData.Writer, theoryData.WsTrustVersion, theoryData.WsTrustRequest);
+                //IdentityComparer.AreEqual(lifetime, theoryData.Lifetime, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<WsTrustTheoryData> WriteRequestTheoryData
+        {
+            get
+            {
                 return new TheoryData<WsTrustTheoryData>
                 {
-                    new WsTrustTheoryData
+                    new WsTrustTheoryData(new MemoryStream())
                     {
+                        ExpectedException = ExpectedException.ArgumentNullException("wsTrustVersion"),
                         First = true,
-                        WsTrustResponse = new WsTrustResponse(new RequestSecurityTokenResponse
-                        {
-                            AppliesTo = WsDefaults.AppliesTo,
-                            AttachedReference = WsDefaults.SecurityTokenReference,
-                            Entropy = new Entropy(new BinarySecret(Guid.NewGuid().ToByteArray(), WsSecurity11EncodingTypes.Instance.Base64)),
-                            Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
-                            KeyType = WsDefaults.KeyType,
-                            RequestedProofToken = new RequestedProofToken(new BinarySecret(Guid.NewGuid().ToByteArray())),
-                            RequestedSecurityToken = new RequestedSecurityToken(signedSamlToken),
-                            TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
-                            UnattachedReference = WsDefaults.SecurityTokenReference
-                        }),
-                        TestId = "WsTrustResponseWithSaml2SecurityToken",
-                        WsTrustVersion = WsTrustVersion.Trust13
+                        TestId = "WsTrustVersionNull",
+                        WsTrustRequest = new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue),
+                    },
+                    new WsTrustTheoryData(WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("writer"),
+                        TestId = "WriterNull",
+                        WsTrustRequest = new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue),
+                    },
+                    new WsTrustTheoryData(new MemoryStream(), WsTrustVersion.Trust13)
+                    {
+                        ExpectedException = ExpectedException.ArgumentNullException("trustRequest"),
+                        TestId = "WsTrustRequestNull"
                     }
                 };
             }
         }
-    }
-
-    public class WsTrustTheoryData : TheoryDataBase
-    {
-        public WsTrustVersion WsTrustVersion { get; set; }
-
-        public WsTrustRequest WsTrustRequest { get; set; }
-
-        public WsTrustResponse WsTrustResponse { get; set; }
     }
 }
 
