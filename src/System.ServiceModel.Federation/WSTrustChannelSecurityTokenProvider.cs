@@ -123,6 +123,9 @@ namespace System.ServiceModel.Federation
                 : value;
         }
 
+        // TODO: For the time being, this is just public property that passes access through to the WsTrustRequest's Context propery
+        //       so that users can user the context for correlation purposes. In the future, it will be better to have users provide
+        //       token context as part of IssuedTokenParameters and expose it here as a read-only property.
         public string TokenContext
         {
             get => _wsTrustRequest.Context;
