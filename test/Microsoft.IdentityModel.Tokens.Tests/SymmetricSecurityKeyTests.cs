@@ -88,6 +88,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return dataset;
             }
         }
+
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.True(KEY.DefaultSymmetricSecurityKey_256.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on a SymmetricSecurityKey.");
+        }
     }
 }
 

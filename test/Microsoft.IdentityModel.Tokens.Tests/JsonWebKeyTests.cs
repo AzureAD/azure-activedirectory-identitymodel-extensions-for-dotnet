@@ -257,6 +257,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData))]
+        public void CanComputeJwkThumbprint(JwkThumbprintTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CanComputeJwkThumbprint", theoryData);
+            if (theoryData.CanComputeJwkThumbprint != theoryData.JWK.CanComputeJwkThumbprint())
+                context.AddDiff($"theoryData.CanComputeJwkThumbprint ({theoryData.CanComputeJwkThumbprint}) != theoryData.JWK.CanComputeJwkThumbprint ({theoryData.JWK.CanComputeJwkThumbprint()})");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<JwkThumbprintTheoryData> ComputeJwkThumbprintTheoryData
         {
             get
@@ -267,6 +277,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         First = true,
                         JWK = new JsonWebKey() { },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Kty' is null or empty."),
                         TestId = "InvalidKtyIsNull",
                     },
@@ -276,6 +287,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             Kty = string.Empty
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Kty' is null or empty."),
                         TestId = "InvalidKtyIsEmpty",
                     },
@@ -285,6 +297,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             Kty = "INVALID_DATA"
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10706: Cannot create a JWK thumbprint, 'Kty'"),
                         TestId = "InvalidKtyNotAsExpected",
                     },
@@ -294,6 +307,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             Kty = JsonWebAlgorithmsKeyTypes.RSA
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'E'"),
                         TestId = "InvalidEIsNullOrEmpty"
                     },
@@ -304,6 +318,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             Kty = JsonWebAlgorithmsKeyTypes.RSA,
                             E = "AQAB"
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'N'"),
                         TestId = "InvalidNIsNullOrEmpty"
                     },
@@ -313,6 +328,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             Kty = JsonWebAlgorithmsKeyTypes.Octet
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'K'"),
                         TestId = "InvalidKIsNullOrEmpty"
                     },
@@ -322,6 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Crv'"),
                         TestId = "InvalidCrvIsNullOrEmpty"
                     },
@@ -332,6 +349,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
                             Crv = "P-256"
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'X'"),
                         TestId = "InvalidCrvIsNullOrEmpty"
                     },
@@ -343,6 +361,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             Crv = "P-256",
                             X = "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
                         },
+                        CanComputeJwkThumbprint = false,
                         ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Y'"),
                         TestId = "InvalidCrvIsNullOrEmpty"
                     },
@@ -354,6 +373,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             E = "AQAB",
                             N = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw"
                         },
+                        CanComputeJwkThumbprint = true,
                         ExpectedBase64UrlEncodedJwkThumbprint = "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
                         TestId = "ValidRsa"
                     },
@@ -366,6 +386,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             X = "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
                             Y = "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"
                         },
+                        CanComputeJwkThumbprint = true,
                         ExpectedBase64UrlEncodedJwkThumbprint = "oKIywvGUpTVTyxMQ3bwIIeQUudfr_CkLMjCE19ECD-U",
                         TestId = "ValidEc"
                     },
@@ -376,6 +397,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             Kty = JsonWebAlgorithmsKeyTypes.Octet,
                             K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=" // KeyingMaterial.DefaultSymmetricKeyEncoded_256
                         },
+                        CanComputeJwkThumbprint = true,
                         ExpectedBase64UrlEncodedJwkThumbprint = "uQcNOQPV2rRRS-R_VQnj7gRR_19AaHlGbU0f9F5hkUs",
                         TestId = "ValidOctet"
                     },
@@ -388,6 +410,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public JsonWebKey JWK { get; set; }
 
             public string ExpectedBase64UrlEncodedJwkThumbprint { get; set; }
+
+            public bool CanComputeJwkThumbprint { get; set; }
         }
     }
 }

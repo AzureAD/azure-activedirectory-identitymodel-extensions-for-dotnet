@@ -84,9 +84,20 @@ namespace Microsoft.IdentityModel.Tokens
             return string.Format(CultureInfo.InvariantCulture,
                                  "{0}-{1}-{2}-{3}",
                                  securityKey.GetType(),
-                                 string.IsNullOrEmpty(securityKey.KeyId) ? securityKey.InternalId : securityKey.KeyId,
+                                 securityKey.InternalId,
                                  algorithm,
                                  typeofProvider);
+        }
+
+        /// <summary>
+        /// For some security key types, in some runtimes, it's not possible to extract public key material and create an <see cref="SecurityKey.InternalId"/>.
+        /// In these cases, <see cref="SecurityKey.InternalId"/> will be an empty string, and these keys should not be cached.
+        /// </summary>
+        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
+        /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
+        private bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
+        {
+            return signatureProvider.Key.InternalId.Length != 0;
         }
 
         /// <summary>
@@ -94,12 +105,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to cache.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
-        /// <returns>true if the <see cref="SignatureProvider"/> was added, false if the cache already contained the <see cref="SignatureProvider"/></returns>
+        /// <returns>
+        /// <c>true</c> if the <see cref="SignatureProvider"/> was added, <c>false</c> if the cache already contained the <see cref="SignatureProvider"/> or if <see cref="SignatureProvider"/> should not be cached.
+        /// </returns>
         /// <remarks>if the <see cref="SignatureProvider"/> is added <see cref="SignatureProvider.CryptoProviderCache"/> will be set to 'this'.</remarks>
         public override bool TryAdd(SignatureProvider signatureProvider)
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
+
+            if (!ShouldCacheSignatureProvider(signatureProvider))
+                return false;
 
             var cacheKey = GetCacheKey(signatureProvider);
             if (signatureProvider.WillCreateSignatures)

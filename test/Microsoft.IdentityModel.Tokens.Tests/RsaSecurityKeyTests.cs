@@ -189,6 +189,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return dataset;
             }
         }
+
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.True(KeyingMaterial.DefaultRsaSecurityKey1.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an RSASecurityKey.");
+        }
     }
 }
 

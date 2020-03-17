@@ -134,5 +134,121 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
+
+        [Theory, MemberData(nameof(CreateInternalIdsTheoryData))]
+        public void CreateInternalIds(SecurityKeyTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateInternalIds", theoryData);
+            try
+            {
+                if (theoryData.ExpectedInternalId != theoryData.SecurityKey.InternalId)
+                    context.AddDiff($"ExpectedInternalId: '{theoryData.ExpectedInternalId}'; actual InternalId: '{theoryData.SecurityKey.InternalId}'");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
+        }
+
+
+        public static TheoryData<SecurityKeyTheoryData> CreateInternalIdsTheoryData
+        {
+            get
+            {
+                return new TheoryData<SecurityKeyTheoryData>
+                {
+                    new SecurityKeyTheoryData
+                    {
+                        First = true,
+                        SecurityKey = KeyingMaterial.RsaSecurityKey_2048,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.RsaSecurityKey_2048.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                    },
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.RsaSecurityKey_2048_Public,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.RsaSecurityKey_2048_Public.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048_Public)
+                    },
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_64,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.DefaultSymmetricSecurityKey_64.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_64)
+                    },
+                     // X509SecurityKey should have InternalId set to its x5t.
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.DefaultX509Key_2048,
+                        ExpectedInternalId = KeyingMaterial.DefaultX509Key_2048.X5t,
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048)
+                    },
+                    // custom derived SecurityKey should have InternalId set to an empty string.
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = new CustomSecurityKey(),
+                        ExpectedInternalId = string.Empty,
+                        TestId = nameof(CustomSecurityKey)
+                    },
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyRsa_2048_Public.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public)
+                    },
+#if NET_CORE
+                    // EcdsaSecurityKey should have InternalId set to its jwk thumbprint on core.
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Key_Public.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                    },
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.Ecdsa256Key,
+                        ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Key.ComputeJwkThumbprint()),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key)
+                    },
+#else
+                    // EcdsaSecurityKey should have InternalId set to an empty string on desktop.
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
+                        ExpectedInternalId = string.Empty,
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public) + "_emptyInternalId"
+                    },
+                    new SecurityKeyTheoryData
+                    {
+                        SecurityKey = KeyingMaterial.Ecdsa256Key,
+                        ExpectedInternalId = string.Empty,
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key) + "_emptyInternalId"
+                    },
+#endif
+                };
+            }
+        }
+
+        public class SecurityKeyTheoryData : TheoryDataBase
+        {
+            public SecurityKey SecurityKey { get; set; }
+
+            public string ExpectedInternalId { get; set; }
+        }
+
+        class CustomSecurityKey : SecurityKey
+        {
+            public override int KeySize => 1;
+        }
     }
 }

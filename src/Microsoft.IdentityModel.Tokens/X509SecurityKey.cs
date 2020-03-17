@@ -177,6 +177,19 @@ namespace Microsoft.IdentityModel.Tokens
             get; private set;
         }
 
+        internal override string InternalId => X5t;
+
+
+        /// <summary>
+        /// Determines whether the <see cref="X509SecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+            return (PublicKey as RSA) != null ? true : false;
+        }
+
         /// <summary>
         /// Computes a sha256 hash over the <see cref="X509SecurityKey"/>.
         /// </summary>

@@ -37,11 +37,13 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class SecurityKey
     {
         private CryptoProviderFactory _cryptoProviderFactory;
+        private Lazy<string> _internalId;
 
         internal SecurityKey(SecurityKey key)
         {
             _cryptoProviderFactory = key._cryptoProviderFactory;
             KeyId = key.KeyId;
+            SetInternalId();
         }
 
         /// <summary>
@@ -50,10 +52,11 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityKey()
         {
             _cryptoProviderFactory = CryptoProviderFactory.Default;
+            SetInternalId();
         }
 
         [JsonIgnore]
-        internal string InternalId { get; } = Guid.NewGuid().ToString();
+        internal virtual string InternalId { get => _internalId.Value; }
 
         /// <summary>
         /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
@@ -92,6 +95,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Determines whether the <see cref="SecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public virtual bool CanComputeJwkThumbprint()
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Computes a sha256 hash over the <see cref="SecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
@@ -99,6 +112,20 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual byte[] ComputeJwkThumbprint()
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10710)));
+        }
+
+        /// <summary>
+        /// Sets the <see cref="InternalId"/> to value of <see cref="SecurityKey"/>'s JWK thumbprint if it can be computed, otherwise sets the <see cref="InternalId"/> to <see cref="string.Empty"/>.
+        /// </summary>
+        private void SetInternalId()
+        {
+            _internalId = new Lazy<string>(() =>
+            {
+                if (CanComputeJwkThumbprint())
+                    return Base64UrlEncoder.Encode(ComputeJwkThumbprint());
+                else
+                    return string.Empty;
+            });
         }
     }
 }

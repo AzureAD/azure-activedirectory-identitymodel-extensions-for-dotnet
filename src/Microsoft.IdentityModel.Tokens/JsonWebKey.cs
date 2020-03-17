@@ -333,6 +333,26 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Determines whether the <see cref="JsonWebKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+            if (string.IsNullOrEmpty(Kty))
+                return false;
+
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+                return CanComputeECThumbprint();
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+                return CanComputeRsaThumbprint();
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+                return CanComputeOctThumbprint();
+            else
+                return false;
+        }
+
+        /// <summary>
         /// Computes a sha256 hash over the <see cref="JsonWebKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
@@ -352,6 +372,11 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, nameof(Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA, JsonWebAlgorithmsKeyTypes.Octet), nameof(Kty))));
         }
 
+        private bool CanComputeOctThumbprint()
+        {
+            return !string.IsNullOrEmpty(K);
+        }
+
         private byte[] ComputeOctThumbprint()
         {
             if (string.IsNullOrEmpty(K))
@@ -359,6 +384,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{K}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
+        }
+
+        private bool CanComputeRsaThumbprint()
+        {
+            return !(string.IsNullOrEmpty(E) || string.IsNullOrEmpty(N));
         }
 
         private byte[] ComputeRsaThumbprint()
@@ -371,6 +401,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{E}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.N}"":""{N}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
+        }
+
+        private bool CanComputeECThumbprint()
+        {
+            return !(string.IsNullOrEmpty(Crv) || string.IsNullOrEmpty(X) || string.IsNullOrEmpty(Y));
         }
 
         private byte[] ComputeECThumbprint()
