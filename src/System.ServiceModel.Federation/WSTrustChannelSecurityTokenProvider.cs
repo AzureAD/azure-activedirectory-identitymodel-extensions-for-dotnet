@@ -4,12 +4,10 @@
 
 #pragma warning disable 1591
 
-using System.Collections.Generic;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.IO;
 using System.ServiceModel.Channels;
-using System.ServiceModel.Caching;
 using System.ServiceModel.Security;
 using System.ServiceModel.Security.Tokens;
 using System.Text;
@@ -19,6 +17,9 @@ using Microsoft.IdentityModel.Protocols.WsPolicy;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Tokens.Saml2;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace System.ServiceModel.Federation
 {
@@ -34,14 +35,14 @@ namespace System.ServiceModel.Federation
 
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
-        private ISecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse> _cache;
+        private IDistributedCache _cache;
         private readonly WsTrustRequest _wsTrustRequest;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
 
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-            _cache = new InMemorySecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse>();
+            _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
@@ -66,7 +67,8 @@ namespace System.ServiceModel.Federation
         {
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
 
-            // Note that WsTrustRequestKey needs to capture any properties that are set here. If WsTrustRequest creation logic changes here, update WsTrustRequestKey accordingly.
+            // Note that the GetCacheKeyFromRequest method needs to capture any properties that are set here.
+            // If WsTrustRequest creation logic changes here, update GetCacheKeyFromRequest accordingly.
             return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
@@ -90,7 +92,7 @@ namespace System.ServiceModel.Federation
         /// <summary>
         /// Gets or sets the cache used for storing issued security tokens.
         /// </summary>
-        public ISecurityTokenResponseCache<WsTrustRequestKey, WsTrustResponse> IssuedTokensCache
+        protected IDistributedCache IssuedTokensCache
         {
             get => _cache;
             set => _cache = value ?? throw new ArgumentNullException(nameof(value));
@@ -136,27 +138,63 @@ namespace System.ServiceModel.Federation
         {
             if (CacheIssuedTokens)
             {
-                WsTrustResponse response = IssuedTokensCache?.GetSecurityTokenResponse(new WsTrustRequestKey(request));
-                if (IsSecurityTokenResponseUnexpired(response))
+                string cacheKey = GetCacheKeyFromRequest(request);
+                byte[] responseBytes = IssuedTokensCache?.Get(cacheKey);
+
+                if (responseBytes != null)
                 {
-                    return response;
+                    var serializer = new WsTrustSerializer();
+                    using (var reader = XmlDictionaryReader.CreateBinaryReader(responseBytes, XmlDictionaryReaderQuotas.Max))
+                    {
+                        var response = serializer.ReadResponse(reader);
+
+                        if (IsSecurityTokenResponseUnexpired(response))
+                        {
+                            return response;
+                        }
+                    }
                 }
             }
 
             return null;
         }
 
+        private void CacheSecurityTokenResponse(WsTrustRequest request, WsTrustResponse response)
+        {
+            if (CacheIssuedTokens && IssuedTokensCache != null)
+            {
+                string cacheKey = GetCacheKeyFromRequest(request);
+                var serializer = new WsTrustSerializer();
+
+                using (var ms = new MemoryStream())
+                using (var writer = XmlDictionaryWriter.CreateBinaryWriter(ms))
+                {
+                    serializer.WriteResponse(writer, WsTrustVersion.Trust13, response);
+                    writer.Flush();
+                    IssuedTokensCache?.Set(cacheKey, ms.ToArray());
+                }
+            }
+        }
+
         private bool IsSecurityTokenResponseUnexpired(WsTrustResponse cachedResponse)
         {
-            var cachedToken = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.RequestedSecurityToken?.SecurityToken;
+            // The lifetime property should be on the RSTR.RequestedSecurityToken token rather than on the RSTR directly. Once that property is moved,
+            // this will need updated to retrieve the lifetime from cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.RequestedSecurityToken?.Lifetime
+            // instead of from cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime.
+            var responseLifetime = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
 
-            if (cachedToken == null)
+            if (responseLifetime == null || responseLifetime.Expires == null)
             {
+                // A null lifetime could represent an invalid response or a valid response
+                // with an unspecified expiration. Similarly, a response lifetime without an expiration
+                // time represents an unspecified expiration. In any of these cases, err on the side of
+                // retrieving a new response instead of possibly using an invalid or expired one.
                 return false;
             }
 
-            DateTime fromTime = cachedToken.ValidFrom.ToUniversalTime();
-            DateTime toTime = cachedToken.ValidTo.ToUniversalTime();
+            // If a response's lifetime doesn't specify a created time, conservatively assume the response was just created.
+            DateTime fromTime = responseLifetime.Created?.ToUniversalTime() ?? DateTime.UtcNow;
+            DateTime toTime = responseLifetime.Expires.Value.ToUniversalTime();
 
             long interval = toTime.Ticks - fromTime.Ticks;
             long effectiveInterval = (long)((IssuedTokenRenewalThresholdPercentage / (double)100) * interval);
@@ -176,14 +214,6 @@ namespace System.ServiceModel.Federation
                 return DateTime.MinValue;
             }
             return time.AddTicks(ticks);
-        }
-
-        private void CacheSecurityTokenResponse(WsTrustRequest request, WsTrustResponse response)
-        {
-            if (CacheIssuedTokens)
-            {
-                IssuedTokensCache?.CacheSecurityTokenResponse(new WsTrustRequestKey(request), response);
-            }
         }
 
         /// <summary>
@@ -250,48 +280,18 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
-        /// This immutable type is used as a key in WSTrustChannelSecurityTokenProvider response caches. Using this
-        /// type as the key (instead of WsTrustRequest directly) prevents responses' keys from changing after the responses
-        /// have been cached. It also make it easy to store and compare only the properties of WsTrustRequest that are of
-        /// interest to WsTrustChannelSecurityTokenProvider.
+        /// Create a string unique to the provided WsTrustRequest to be used for caching.
         /// </summary>
-        public class WsTrustRequestKey
-        {
-            private readonly string _requestType;
-            private readonly string _context;
-            private readonly string _tokenType;
-            private readonly string _keyType;
-            private readonly string _appliesToUri;
-
-            public WsTrustRequestKey(WsTrustRequest request)
-            {
-                _requestType = request.RequestType;
-                _context = request.Context;
-                _tokenType = request.TokenType;
-                _keyType = request.KeyType;
-                _appliesToUri = request.AppliesTo?.EndpointReference?.Uri.ToString();
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (!(obj is WsTrustRequestKey other))
-                {
-                    return false;
-                }
-
-                return string.Equals(_requestType, other._requestType, StringComparison.Ordinal) &&
-                    string.Equals(_context, other._context, StringComparison.Ordinal) &&
-                    string.Equals(_tokenType, other._tokenType, StringComparison.Ordinal) &&
-                    string.Equals(_keyType, other._keyType, StringComparison.Ordinal) &&
-                    string.Equals(_appliesToUri, other._appliesToUri, StringComparison.Ordinal);
-            }
-
-            public override int GetHashCode() =>
-                _requestType?.GetHashCode() ?? "NoRequestType".GetHashCode()
-                ^ _context?.GetHashCode() ?? "NoContext".GetHashCode()
-                ^ _appliesToUri?.GetHashCode() ?? "NoAppliesToEndpoint".GetHashCode()
-                ^ _tokenType?.GetHashCode() ?? "NoTokenType".GetHashCode()
-                ^ _keyType?.GetHashCode() ?? "NoKeyType".GetHashCode();
-        }
+        /// <param name="request">The WsTrustRequest to be used as a cache key.</param>
+        /// <returns>A deterministic string corresponding to the provided request.</returns>
+        private string GetCacheKeyFromRequest(WsTrustRequest request) =>
+            // For now, only a few request properties are used by WSTrustChannelSecurityTokenProvider.
+            // If this list grows long in the future, it may be preferable to just serialize the request.
+            // For the time being, though, this is a quicker and more succinct option.
+$@"RequestType:{request.RequestType}
+Context:{request.Context}
+AppliesTo:{request.AppliesTo?.EndpointReference?.Uri.ToString()}
+TokenType:{request.TokenType}
+KeyType:{request.KeyType}";
     }
 }

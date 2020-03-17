@@ -2,7 +2,6 @@
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Federation.Tests.Mocks;
 using System.Threading;
-using Microsoft.IdentityModel.Protocols.WsTrust;
 using Xunit;
 
 namespace System.ServiceModel.Federation.Tests
@@ -21,7 +20,7 @@ namespace System.ServiceModel.Federation.Tests
                 MaxIssuedTokenCachingTime = TimeSpan.FromDays(1)
             };
 
-            IdentityModel.Selectors.SecurityTokenRequirement tokenRequirements = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
+            SecurityTokenRequirement tokenRequirements = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
 
             var tokenProvider = credentials.CreateSecurityTokenManager().CreateSecurityTokenProvider(tokenRequirements) as WSTrustChannelSecurityTokenProvider;
 
@@ -46,7 +45,7 @@ namespace System.ServiceModel.Federation.Tests
         public void CachedResponsesAreReused()
         {
             // Create providers
-            IdentityModel.Selectors.SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
+            SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
             var provider1 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
             var provider2 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
             {
@@ -73,7 +72,7 @@ namespace System.ServiceModel.Federation.Tests
             var provider2 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
             {
                 // Share cache
-                IssuedTokensCache = provider1.IssuedTokensCache
+                TestIssuedTokensCache = provider1.TestIssuedTokensCache
             };
 
             // Get initial tokens
@@ -150,19 +149,7 @@ namespace System.ServiceModel.Federation.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => provider.IssuedTokenRenewalThresholdPercentage = 0);
             Assert.Throws<ArgumentOutOfRangeException>(() => provider.IssuedTokenRenewalThresholdPercentage = -1);
             Assert.Throws<ArgumentOutOfRangeException>(() => provider.IssuedTokenRenewalThresholdPercentage = 101);
-            Assert.Throws<ArgumentNullException>(() => provider.IssuedTokensCache = null);
-        }
-
-        [Fact]
-        public void WsTrustRequestKeyEqualsReturnsFalseForOtherObjectTypes()
-        {
-            // Create initial request key
-            var requestKey1 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue));
-            var requestKey2 = new WSTrustChannelSecurityTokenProvider.WsTrustRequestKey(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue));
-
-            Assert.True(requestKey1.Equals(requestKey2));
-            Assert.False(requestKey1.Equals(null));
-            Assert.False(requestKey1.Equals(new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)));
+            Assert.Throws<ArgumentNullException>(() => provider.TestIssuedTokensCache = null);
         }
     }
 }
