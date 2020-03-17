@@ -9,6 +9,8 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 {
     class MockRequestChannel : IRequestChannel
     {
+        public TimeSpan TokenLifetime { get; set; } = TimeSpan.FromMinutes(10);
+
         public Message Request(Message message)
         {
             // Get test SAML2 token
@@ -32,7 +34,8 @@ namespace System.ServiceModel.Federation.Tests.Mocks
                         ValueType = "ValueType"
                     },
                     TokenType = "TokenType"
-                }
+                },
+                Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow.Add(TokenLifetime))
             });
 
             // Return a message object with the WsTrustResponse as its body
