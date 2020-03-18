@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         #endregion
 
-        #region RequestSecurityToken
+        #region RequestSecurityTokenResponse
         public static string GetRequestSecurityTokenResponse(WsTrustConstants trustConstants, string token, bool includeNamespace = true)
         {
             if (includeNamespace)
