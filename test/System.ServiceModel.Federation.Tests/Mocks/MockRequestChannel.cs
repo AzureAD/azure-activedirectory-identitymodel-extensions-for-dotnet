@@ -13,18 +13,11 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
         public Message Request(Message message)
         {
-            // Get test SAML2 token
-            var tokenHandler = new Saml2SecurityTokenHandler();
-            SecurityTokenDescriptor tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
-            SecurityToken samlToken = tokenHandler.CreateToken(tokenDescriptor);
-            string signedToken = tokenHandler.WriteToken(samlToken);
-            SecurityToken signedSamlToken = tokenHandler.ReadToken(signedToken);
-
-            // Create mock WsTrustResponse containing the SAML2 token
+            // Create mock WsTrustResponse containing the SAML2 token and the specified lifetime
+            DateTime issuedAt = DateTime.UtcNow;
             var response = new WsTrustResponse(new RequestSecurityTokenResponse
             {
-                RequestedSecurityToken = new RequestedSecurityToken(signedSamlToken),
-                RequestedProofToken = new RequestedProofToken(new BinarySecret(Guid.NewGuid().ToByteArray())),
+                RequestedSecurityToken = new RequestedSecurityToken(GetSaml2Token(issuedAt)),
                 AttachedReference = new SecurityTokenReference
                 {
                     KeyIdentifier = new KeyIdentifier
@@ -35,13 +28,28 @@ namespace System.ServiceModel.Federation.Tests.Mocks
                     },
                     TokenType = "TokenType"
                 },
-                Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow.Add(TokenLifetime))
+                Lifetime = new Lifetime(issuedAt, issuedAt.Add(TokenLifetime))
             });
 
             // Return a message object with the WsTrustResponse as its body
             return Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueFinal, new WsTrustResponseBodyWriter(response));
         }
 
+        /// <summary>
+        /// Create a test SAML2 token. This creates new tokens instead of using reference tokens from TestUtil
+        /// so that the tokens will all have separate IDs which makes it easier to distinguish new tokens from
+        /// cached tokens.
+        /// </summary>
+        /// <param name="issuedAt">The time to use for the token's IssuedAt property</param>
+        /// <returns>A test token with a unique ID and the specified IssuedAt</returns>
+        private SecurityToken GetSaml2Token(DateTime issuedAt)
+        {
+            var tokenHandler = new Saml2SecurityTokenHandler();
+            SecurityTokenDescriptor tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
+            tokenDescriptor.IssuedAt = issuedAt;
+            tokenDescriptor.Expires = issuedAt.Add(TokenLifetime);
+            return tokenHandler.CreateToken(tokenDescriptor);
+        }
 
         public EndpointAddress RemoteAddress => throw new NotImplementedException();
 
