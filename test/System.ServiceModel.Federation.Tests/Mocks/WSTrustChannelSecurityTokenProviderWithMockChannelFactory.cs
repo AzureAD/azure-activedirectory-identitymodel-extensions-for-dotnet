@@ -11,6 +11,10 @@ namespace System.ServiceModel.Federation.Tests.Mocks
     /// </summary>
     class WSTrustChannelSecurityTokenProviderWithMockChannelFactory : WSTrustChannelSecurityTokenProvider
     {
+        public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement, string requestContext) :
+            base(tokenRequirement, requestContext)
+        { }
+
         public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement) :
             base(tokenRequirement)
         { }

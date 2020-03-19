@@ -39,13 +39,17 @@ namespace System.ServiceModel.Federation
         private readonly WsTrustRequest _wsTrustRequest;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
 
-        public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
+        public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement) : this(tokenRequirement, null)
+        { }
+
+        public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement, string requestContext)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
             _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
+            RequestContext = requestContext ?? Guid.NewGuid().ToString();
             _wsTrustRequest = CreateWsTrustRequest(issuedTokenParameters);
             _channelFactory = CreateChannelFactory(issuedTokenParameters);
         }
@@ -72,7 +76,7 @@ namespace System.ServiceModel.Federation
             return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
-                Context = Guid.NewGuid().ToString(),
+                Context = RequestContext,
                 KeyType = issuedTokenParameters.KeyType == SecurityKeyType.AsymmetricKey
                                                         ? WsTrustKeyTypes.Trust13.PublicKey
                                                         : issuedTokenParameters.KeyType == SecurityKeyType.SymmetricKey
@@ -85,6 +89,14 @@ namespace System.ServiceModel.Federation
         }
 
         public SecurityTokenRequirement SecurityTokenRequirement
+        {
+            get;
+        }
+
+        /// <summary>
+        /// A context string used in outgoing WsTrustRequests that may be useful for correlating requests.
+        /// </summary>
+        public string RequestContext
         {
             get;
         }
@@ -123,15 +135,6 @@ namespace System.ServiceModel.Federation
             set => _issuedTokenRenewalThresholdPercentage = (value <= 0 || value > 100)
                 ? throw new ArgumentOutOfRangeException(nameof(value), "Issued token renewal threshold percentage must be greater than or equal to 1 and less than or equal to 100.")
                 : value;
-        }
-
-        // TODO: For the time being, this is just public property that passes access through to the WsTrustRequest's Context propery
-        //       so that users can user the context for correlation purposes. In the future, it will be better to have users provide
-        //       token context as part of IssuedTokenParameters and expose it here as a read-only property.
-        public string TokenContext
-        {
-            get => _wsTrustRequest.Context;
-            set => _wsTrustRequest.Context = value;
         }
 
         private WsTrustResponse GetCachedResponse(WsTrustRequest request)
@@ -178,9 +181,6 @@ namespace System.ServiceModel.Federation
 
         private bool IsSecurityTokenResponseUnexpired(WsTrustResponse cachedResponse)
         {
-            // The lifetime property should be on the RSTR.RequestedSecurityToken token rather than on the RSTR directly. Once that property is moved,
-            // this will need updated to retrieve the lifetime from cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.RequestedSecurityToken?.Lifetime
-            // instead of from cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime.
             var responseLifetime = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
 
             if (responseLifetime == null || responseLifetime.Expires == null)

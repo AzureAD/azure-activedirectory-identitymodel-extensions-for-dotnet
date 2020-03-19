@@ -37,6 +37,11 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
+        /// The context to use in outgoing WsTrustRequests. Useful for correlation WSTrust actions.
+        /// </summary>
+        internal string RequestContext { get; set; }
+
+        /// <summary>
         /// Gets or sets whether issued tokens should be cached and reused within their expiry periods.
         /// </summary>
         public bool CacheIssuedTokens { get; set; } = WSTrustChannelSecurityTokenProvider.DefaultCacheIssuedTokens;
