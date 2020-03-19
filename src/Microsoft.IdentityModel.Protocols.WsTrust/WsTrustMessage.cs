@@ -169,7 +169,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public string Context
         {
             get => _context;
-            set => _context = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(value)) : value;
+            // Permit this to be null since the Context attribute is optional.
+            set => _context = value;
         }
 
         /// <summary>
