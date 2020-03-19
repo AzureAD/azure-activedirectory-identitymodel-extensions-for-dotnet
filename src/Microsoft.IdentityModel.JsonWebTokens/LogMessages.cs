@@ -58,7 +58,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         // logging
         internal const string IDX14200 = "IDX14200: Creating raw signature using the signature credentials.";
-        
+        internal const string IDX14201 = "IDX14201: Creating raw signature using the signature credentials. Caching SignatureProvider: '{0}'.";
+
         // parsing
         internal const string IDX14300 = "IDX14300: Could not parse '{0}' : '{1}' as a '{2}'.";
         internal const string IDX14301 = "IDX14301: Unable to parse the header into a JSON object. \nHeader: '{0}'.";

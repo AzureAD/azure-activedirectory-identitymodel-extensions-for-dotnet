@@ -56,6 +56,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public static Regex RegexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
 
+        internal static IList<string> DefaultHeaderParameters = new List<string>()
+        {
+            JwtHeaderParameterNames.Alg,
+            JwtHeaderParameterNames.Kid,
+            JwtHeaderParameterNames.X5t,
+            JwtHeaderParameterNames.Enc,
+            JwtHeaderParameterNames.Zip
+        };
+
         internal static Dictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
         {
             var payload = new Dictionary<string, object>();
@@ -113,11 +122,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, (signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()), (signingCredentials.Algorithm ?? "Null"))));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10637, signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(), signingCredentials.Algorithm ?? "Null")));
 
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX14200);
+                return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
+            }
+            finally
+            {
+                cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+            }
+        }
+
+        /// <summary>
+        /// Produces a signature over the 'input'.
+        /// </summary>
+        /// <param name="input">String to be signed</param>
+        /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
+        /// <param name="cacheProvider">should the <see cref="SignatureProvider"/> be cached.</param>
+        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
+        /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
+        public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials, bool cacheProvider)
+        {
+            if (input == null)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (signingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
+
+            var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
+            var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm, cacheProvider);
+            if (signatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10637, signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(), signingCredentials.Algorithm ?? "Null")));
+
+            try
+            {
+                LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14201, cacheProvider));
                 return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
             }
             finally
