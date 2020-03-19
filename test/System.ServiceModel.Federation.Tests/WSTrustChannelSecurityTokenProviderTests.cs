@@ -28,9 +28,18 @@ namespace System.ServiceModel.Federation.Tests
                 var tokenProvider = credentials.CreateSecurityTokenManager().CreateSecurityTokenProvider(tokenRequirements) as WSTrustChannelSecurityTokenProvider;
 
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(tokenProvider.CacheIssuedTokens, theoryData.CacheIssuedTokens, context);
-                IdentityComparer.AreEqual(tokenProvider.MaxIssuedTokenCachingTime, theoryData.MaxIssuedTokenCachingTime, context);
-                IdentityComparer.AreEqual(tokenProvider.IssuedTokenRenewalThresholdPercentage, theoryData.IssuedTokenRenewalThresholdPercentage, context);
+                if (tokenProvider.CacheIssuedTokens != theoryData.CacheIssuedTokens)
+                {
+                    context.AddDiff($"Expected CacheIssuedTokens: {theoryData.CacheIssuedTokens}; actual CacheIssuedTokens: {tokenProvider.CacheIssuedTokens}");
+                }
+                if (tokenProvider.MaxIssuedTokenCachingTime != theoryData.MaxIssuedTokenCachingTime)
+                {
+                    context.AddDiff($"Expected MaxIssuedTokenCachingTime: {theoryData.MaxIssuedTokenCachingTime}; actual MaxIssuedTokenCachingTime: {tokenProvider.MaxIssuedTokenCachingTime}");
+                }
+                if (tokenProvider.IssuedTokenRenewalThresholdPercentage != theoryData.IssuedTokenRenewalThresholdPercentage)
+                {
+                    context.AddDiff($"Expected IssuedTokenRenewalThresholdPercentage: {theoryData.IssuedTokenRenewalThresholdPercentage}; actual IssuedTokenRenewalThresholdPercentage: {tokenProvider.IssuedTokenRenewalThresholdPercentage}");
+                }
             }
             catch (Exception ex)
             {
