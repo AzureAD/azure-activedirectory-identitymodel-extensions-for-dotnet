@@ -14,14 +14,35 @@ namespace System.ServiceModel.Federation
 
         public SecurityBindingElement SecurityBindingElement { get; }
 
+        public string WSTrustContext
+        {
+            get;
+            set;
+        }
+
         public override BindingElement Clone()
         {
-            return new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement);
+            return new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement)
+            {
+                WSTrustContext = WSTrustContext
+            };
         }
 
         public override T GetProperty<T>(BindingContext context)
         {
             return SecurityBindingElement.GetProperty<T>(context);
+        }
+
+        public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
+        {
+            if (context.BindingParameters.Contains(typeof(WsTrustChannelClientCredentials)))
+            {
+                var credentials = context.BindingParameters[typeof(WsTrustChannelClientCredentials)] as WsTrustChannelClientCredentials;
+                credentials.RequestContext = WSTrustContext;
+            }
+
+            var channelFactory = base.BuildChannelFactory<TChannel>(context);
+            return channelFactory;
         }
     }
 }

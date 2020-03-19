@@ -130,11 +130,10 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Confirm that caches can be shared if contexts are the same
-                var provider3 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                var provider3 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement, provider1.RequestContext)
                 {
                     // Share cache and context
-                    TestIssuedTokensCache = provider1.TestIssuedTokensCache,
-                    TokenContext = provider1.TokenContext
+                    TestIssuedTokensCache = provider1.TestIssuedTokensCache
                 };
                 data.Add(new ProviderCachingTheoryData
                 {

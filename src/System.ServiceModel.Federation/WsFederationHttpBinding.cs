@@ -23,6 +23,12 @@ namespace System.ServiceModel.Federation
             get;
         }
 
+        public string WSTrustContext
+        {
+            get;
+            set;
+        }
+
         private SecurityBindingElement SecurityBindingElement { get; set; }
 
         protected override SecurityBindingElement CreateMessageSecurity()
@@ -54,14 +60,8 @@ namespace System.ServiceModel.Federation
         public override BindingElementCollection CreateBindingElements()
         {
             var bindingElementCollection = base.CreateBindingElements();
-            bindingElementCollection.Insert(0, new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement));
+            bindingElementCollection.Insert(0, new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement) { WSTrustContext = WSTrustContext });
             return bindingElementCollection;
-        }
-
-        public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingParameterCollection parameters)
-        {
-            var channelFactory = base.BuildChannelFactory<TChannel>(parameters);
-            return channelFactory;
         }
 
         protected override TransportBindingElement GetTransport()
