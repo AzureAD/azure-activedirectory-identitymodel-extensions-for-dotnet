@@ -45,15 +45,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebTokenHandler : TokenHandler
     {
-        private List<string> _defaultHeaderParameters = new List<string>()
-        {
-            JwtHeaderParameterNames.Alg,
-            JwtHeaderParameterNames.Kid,
-            JwtHeaderParameterNames.X5t,
-            JwtHeaderParameterNames.Enc,
-            JwtHeaderParameterNames.Zip
-        };
-
         /// <summary>
         /// Gets the Base64Url encoded string representation of the following JWT header: 
         /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
@@ -138,9 +129,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private JObject CreateDefaultJWSHeader(SigningCredentials signingCredentials)
         {
             var header = new JObject()
-                {
-                    { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm }
-                };
+            {
+                { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm }
+            };
 
             if (signingCredentials.Key.KeyId != null)
                 header.Add(JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId);
@@ -462,9 +453,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private string CreateTokenPrivate(JObject payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims)
         {
-
-            if (additionalHeaderClaims != null && additionalHeaderClaims.Count > 0 && additionalHeaderClaims.Keys.Intersect(_defaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, nameof(additionalHeaderClaims), string.Join(", ", _defaultHeaderParameters))));
+            if (additionalHeaderClaims != null && additionalHeaderClaims.Count > 0 && additionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, nameof(additionalHeaderClaims), string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters))));
 
             var rawHeader = Base64UrlEncodedUnsignedJWSHeader;
             // If there's no additional header claims to be added to the header and the token will be signed, try to retrieve a header value from the cache.
@@ -1343,7 +1333,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10647, (key == null ? "Null" : key.ToString()), (algorithm == null ? "Null" : algorithm))));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), algorithm ?? "Null")));
 
             try
             {

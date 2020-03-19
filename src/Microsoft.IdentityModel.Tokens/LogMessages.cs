@@ -139,6 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10634 = "IDX10634: Unable to create the SignatureProvider.\nAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         // public const string IDX10635 = "IDX10635:";
         public const string IDX10636 = "IDX10636: CryptoProviderFactory.CreateForVerifying returned null for key: '{0}', signatureAlgorithm: '{1}'.";
+        public const string IDX10637 = "IDX10637: CryptoProviderFactory.CreateForSigning returned null for key: '{0}', signatureAlgorithm: '{1}'.";
         public const string IDX10638 = "IDX10638: Cannot create the SignatureProvider, 'key.HasPrivateKey' is false, cannot create signatures. Key: {0}.";
         public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         // public const string IDX10641 = "IDX10641:";

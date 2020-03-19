@@ -80,15 +80,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (signedHttpRequestDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
-            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
+            if (signedHttpRequestDescriptor.SigningCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.SigningCredentials));
 
-            var additionalHeaderClaims = signedHttpRequestDescriptor.AdditionalHeaderClaims ?? new Dictionary<string, object>();
+            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
+            var header = new JObject();
+            if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null && signedHttpRequestDescriptor.AdditionalHeaderClaims.Count != 0)
+            {
+                if (signedHttpRequestDescriptor.AdditionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(JsonWebTokens.LogMessages.IDX14116, nameof(signedHttpRequestDescriptor.AdditionalHeaderClaims), string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters))));
+
+                header.Merge(JObject.FromObject(signedHttpRequestDescriptor.AdditionalHeaderClaims));
+            }
+
             // set the "typ" header claim to "pop"
             // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.2
-            additionalHeaderClaims[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
+            header[JwtHeaderParameterNames.Alg] = signedHttpRequestDescriptor.SigningCredentials.Algorithm;
+            header[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
 
-            return _jwtTokenHandler.CreateToken(payload, signedHttpRequestDescriptor.SigningCredentials, additionalHeaderClaims);
+            var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None))) + "." + Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload));
+
+            return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
         }
+
 
         /// <summary>
         /// Creates a JSON representation of a HttpRequest payload.
@@ -419,7 +433,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
                     else
                         throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23032, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
-                    
+
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
                     payload.Add(ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));
@@ -571,10 +585,29 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (popKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(popKey));
 
+            if (popKey.CryptoProviderFactory == null)
+                throw LogHelper.LogArgumentNullException(nameof(popKey.CryptoProviderFactory));
+
             try
             {
-                if (_jwtTokenHandler.ValidateSignature(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature), popKey, signedHttpRequest.Alg, new TokenValidationParameters()))
-                    return popKey;
+                if (popKey.CryptoProviderFactory.IsSupportedAlgorithm(signedHttpRequest.Alg, popKey))
+                {
+                    SignatureProvider signatureProvider = null;
+                    try
+                    {
+                        signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, signedHttpRequest.Alg, false);
+                        if (signatureProvider == null)
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), signedHttpRequest.Alg ?? "Null")));
+
+                        if (signatureProvider.Verify(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature)))
+                            return popKey;
+                    }
+                    finally
+                    {
+                        if (signatureProvider != null)
+                            popKey.CryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
+                    }
+                }
             }
             catch (Exception ex)
             {
