@@ -49,7 +49,7 @@ namespace System.ServiceModel.Federation
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
-            RequestContext = requestContext ?? Guid.NewGuid().ToString();
+            RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
             _wsTrustRequest = CreateWsTrustRequest(issuedTokenParameters);
             _channelFactory = CreateChannelFactory(issuedTokenParameters);
         }

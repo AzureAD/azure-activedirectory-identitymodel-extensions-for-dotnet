@@ -14,6 +14,9 @@ namespace System.ServiceModel.Federation
 
         public SecurityBindingElement SecurityBindingElement { get; }
 
+        /// <summary>
+        /// Gets or sets a context string used in outgoing WsTrust requests that may be useful for correlating requests.
+        /// </summary>
         public string WSTrustContext
         {
             get;

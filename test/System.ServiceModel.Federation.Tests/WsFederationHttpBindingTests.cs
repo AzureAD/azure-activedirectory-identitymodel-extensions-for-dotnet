@@ -40,7 +40,16 @@ namespace System.ServiceModel.Federation.Tests
                     context.AddDiff($"Expected KeyType: {theoryData.IssuedSecurityTokenParametersKeyType}; actual KeyType: {issuedSecurityTokenParameters.KeyType}");
                 }
 
-                if (theoryData.RequestContext != null)
+                // Confirm that if a request context was specified, it was used. Otherwise, a random GUID is used
+                // as the context.
+                if (string.IsNullOrEmpty(theoryData.RequestContext))
+                {
+                    if (!Guid.TryParse(provider.RequestContext, out _))
+                    {
+                        context.AddDiff($"Expected a random guid Context; actual Context: {provider.RequestContext}");
+                    }
+                }
+                else
                 {
                     if (!string.Equals(provider.RequestContext, theoryData.RequestContext))
                     {
