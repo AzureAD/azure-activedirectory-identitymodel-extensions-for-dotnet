@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
             {
                 CryptoProviderCache?.TryRemove(this);
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
             LogHelper.LogInformation(LogMessages.IDX10642, input);
@@ -209,7 +209,6 @@ namespace Microsoft.IdentityModel.Tokens
                 CryptoProviderCache?.TryRemove(this);
                 throw;
             }
-
         }
 
         /// <summary>
@@ -236,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
             {
                 CryptoProviderCache?.TryRemove(this);
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
 
@@ -283,7 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
             {
                 CryptoProviderCache?.TryRemove(this);
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(typeof(SymmetricSignatureProvider).ToString()));
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
             LogHelper.LogInformation(LogMessages.IDX10643, input);
