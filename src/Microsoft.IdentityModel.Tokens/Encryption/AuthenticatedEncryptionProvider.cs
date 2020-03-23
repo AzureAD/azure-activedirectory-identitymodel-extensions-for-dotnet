@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="iv"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="authenticationTag"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the signature over authenticationTag fails to verify.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the signature over the authenticationTag fails to verify.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the AES crypto operation threw. See inner exception.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
@@ -239,12 +239,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
-            {
-                _disposed = true;
-                if (disposing && _symmetricSignatureProvider != null)
-                    _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider);
-            }
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            if (disposing && _symmetricSignatureProvider != null)
+                _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider);
         }
 
         /// <summary>
