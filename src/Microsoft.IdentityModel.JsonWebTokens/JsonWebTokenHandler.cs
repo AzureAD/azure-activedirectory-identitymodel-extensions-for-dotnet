@@ -671,15 +671,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private byte[] DecryptToken(JsonWebToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
-            var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Enc);
-            if (decryptionProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, jwtToken.Enc)));
+            using (var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Enc))
+            {
+                if (decryptionProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, jwtToken.Enc)));
 
-            return decryptionProvider.Decrypt(
-                    Base64UrlEncoder.DecodeBytes(jwtToken.Ciphertext),
-                    Encoding.ASCII.GetBytes(jwtToken.EncodedHeader),
-                    Base64UrlEncoder.DecodeBytes(jwtToken.InitializationVector),
-                    Base64UrlEncoder.DecodeBytes(jwtToken.AuthenticationTag));
+                return decryptionProvider.Decrypt(
+                        Base64UrlEncoder.DecodeBytes(jwtToken.Ciphertext),
+                        Encoding.ASCII.GetBytes(jwtToken.EncodedHeader),
+                        Base64UrlEncoder.DecodeBytes(jwtToken.InitializationVector),
+                        Base64UrlEncoder.DecodeBytes(jwtToken.AuthenticationTag));
+            }
         }
 
         /// <summary>
@@ -813,37 +815,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (additionalHeaderClaims != null)
                     header.Merge(JObject.FromObject(additionalHeaderClaims));
 
-                var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc);
-                if (encryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
-
-                byte[] plainText;
-                if (!string.IsNullOrEmpty(compressionAlgorithm))
+                using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(encryptingCredentials.Key, encryptingCredentials.Enc))
                 {
+                    if (encryptionProvider == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
+
+                    byte[] plainText;
+                    if (!string.IsNullOrEmpty(compressionAlgorithm))
+                    {
+                        try
+                        {
+                            plainText = CompressToken(innerJwt, compressionAlgorithm);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
+                        }
+                    }
+                    else
+                    {
+                        plainText = Encoding.UTF8.GetBytes(innerJwt);
+                    }
+
                     try
                     {
-                        plainText = CompressToken(innerJwt, compressionAlgorithm);
+                        var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
+                        var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
+                        return string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
+
                     }
                     catch (Exception ex)
                     {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                     }
-                }
-                else
-                {
-                    plainText = Encoding.UTF8.GetBytes(innerJwt);
-                }
-
-                try
-                {
-                    var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
-                    var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
-                    return string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
-
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                 }
             }
             else
@@ -865,40 +869,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 var kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
                 var wrappedKey = kwProvider.WrapKey(symmetricKey.Key);
-                var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc);
-                if (encryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
 
-                var header = CreateDefaultJWEHeader(encryptingCredentials, compressionAlgorithm);
-                if (additionalHeaderClaims != null)
-                    header.Merge(JObject.FromObject(additionalHeaderClaims));
-
-                byte[] plainText;
-                if (!string.IsNullOrEmpty(compressionAlgorithm))
+                using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(symmetricKey, encryptingCredentials.Enc))
                 {
+                    if (encryptionProvider == null)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
+
+                    var header = CreateDefaultJWEHeader(encryptingCredentials, compressionAlgorithm);
+                    if (additionalHeaderClaims != null)
+                        header.Merge(JObject.FromObject(additionalHeaderClaims));
+
+                    byte[] plainText;
+                    if (!string.IsNullOrEmpty(compressionAlgorithm))
+                    {
+                        try
+                        {
+                            plainText = CompressToken(innerJwt, compressionAlgorithm);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
+                        }
+                    }
+                    else
+                    {
+                        plainText = Encoding.UTF8.GetBytes(innerJwt);
+                    }
+
                     try
                     {
-                        plainText = CompressToken(innerJwt, compressionAlgorithm);
+                        var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
+                        var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
+                        return string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
                     }
                     catch (Exception ex)
                     {
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenCompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, compressionAlgorithm), ex));
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                     }
-                }
-                else
-                {
-                    plainText = Encoding.UTF8.GetBytes(innerJwt);
-                }
-
-                try
-                {
-                    var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
-                    var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
-                    return string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
                 }
             }
         }
