@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Provides authenticated encryption and decryption services.
     /// </summary>
-    public class AuthenticatedEncryptionProvider
+    public class AuthenticatedEncryptionProvider : IDisposable
     {
         private struct AuthenticatedKeys
         {
@@ -44,11 +44,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         private AuthenticatedKeys _authenticatedkeys;
+        private CryptoProviderFactory _cryptoProviderFactory;
+        private bool _disposed;
         private string _hmacAlgorithm;
         private SymmetricSignatureProvider _symmetricSignatureProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
+        /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
         /// <param name="algorithm">The encryption algorithm to apply.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
@@ -56,7 +59,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">key size is not large enough.</exception>
         /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
         /// <exception cref="ArgumentException">a symmetricSignatureProvider is not created.</exception>
-        /// </summary>
         public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -71,18 +73,22 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateKeySize(key, algorithm);
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
             _hmacAlgorithm = GetHmacAlgorithm(algorithm);
-            _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
-            if (_symmetricSignatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
-
             Key = key;
             Algorithm = algorithm;
+            _cryptoProviderFactory = key.CryptoProviderFactory;
+            if (key.CryptoProviderFactory.GetType() == typeof(CryptoProviderFactory))
+                _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm, false) as SymmetricSignatureProvider;
+            else
+                _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
+
+            if (_symmetricSignatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
         }
 
         /// <summary>
         /// Gets the encryption algorithm that is being used.
         /// </summary>
-        public string Algorithm { get; private set; }
+        public string Algorithm { get; }
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="AuthenticatedEncryptionProvider"/>.
@@ -93,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
-        public SecurityKey Key { get; private set; }
+        public SecurityKey Key { get; }
 
         /// <summary>
         /// Encrypts the 'plaintext'
@@ -118,7 +124,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><see cref="AuthenticatedEncryptionResult"/>containing ciphertext, iv, authenticationtag.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="plaintext"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the AES crypto operation threw. See inner exception for details.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
             if (plaintext == null || plaintext.Length == 0)
@@ -126,6 +133,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (authenticatedData == null || authenticatedData.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             Aes aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
@@ -169,8 +179,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="iv"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="authenticationTag"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">signature over authenticationTag fails to verify.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">AES crypto operation threw. See inner exception.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the signature over authenticationTag fails to verify.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the AES crypto operation threw. See inner exception.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             if (ciphertext == null || ciphertext.Length == 0)
@@ -184,6 +195,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (authenticationTag == null || authenticationTag.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticationTag));
+
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
             // Verify authentication Tag
             byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
@@ -207,6 +221,29 @@ namespace Microsoft.IdentityModel.Tokens
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
+            }
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases managed resources.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                if (disposing && _symmetricSignatureProvider != null)
+                    _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider);
             }
         }
 
