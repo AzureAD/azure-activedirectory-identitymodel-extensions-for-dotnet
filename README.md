@@ -28,7 +28,7 @@ We built and tested asp.net core with 6.5.0 without issues.\
 We also upgraded in place existing applications to 6.5.0 without issues.\
 This of course does not mean you will not hit issues, but we took it seriously.
 
-Any questions or compatibility problems please open issues [here] (https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
+Any questions or compatibility problems please open issues [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
 ## Thank you for using our product
 The IdentityModel Team.
