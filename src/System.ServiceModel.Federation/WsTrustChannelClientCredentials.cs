@@ -34,12 +34,28 @@ namespace System.ServiceModel.Federation
         protected WsTrustChannelClientCredentials(WsTrustChannelClientCredentials other)
             : base(other)
         {
+            ClientCredentials = other.ClientCredentials;
+            RequestContext = other.RequestContext;
+            CacheIssuedTokens = other.CacheIssuedTokens;
+            MaxIssuedTokenCachingTime = other.MaxIssuedTokenCachingTime;
+            IssuedTokenRenewalThresholdPercentage = other.IssuedTokenRenewalThresholdPercentage;
+        }
+
+        public WsTrustChannelClientCredentials(ClientCredentials clientCredentials)
+        {
+            ClientCredentials = clientCredentials;
         }
 
         /// <summary>
         /// The context to use in outgoing WsTrustRequests. Useful for correlation WSTrust actions.
         /// </summary>
         internal string RequestContext { get; set; }
+
+        /// <summary>
+        ///  The client credentials from BindingParameters passed by ChannelFactory. There might be
+        ///  other credentials configured on this instance so used as a fallback.
+        /// </summary>
+        internal ClientCredentials ClientCredentials { get; set; }
 
         /// <summary>
         /// Gets or sets whether issued tokens should be cached and reused within their expiry periods.
@@ -79,7 +95,7 @@ namespace System.ServiceModel.Federation
         /// <returns>WSTrustChannelSecurityTokenManager</returns>
         public override SecurityTokenManager CreateSecurityTokenManager()
         {
-            return new WsTrustChannelSecurityTokenManager(this);
+            return new WsTrustChannelSecurityTokenManager((WsTrustChannelClientCredentials)Clone());
         }
     }
 }

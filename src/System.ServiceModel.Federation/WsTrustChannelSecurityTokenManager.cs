@@ -5,6 +5,7 @@
 #pragma warning disable 1591
 
 using System.IdentityModel.Selectors;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace System.ServiceModel.Federation
 {
@@ -13,9 +14,18 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WsTrustChannelSecurityTokenManager : ClientCredentialsSecurityTokenManager
     {
+        private WsTrustChannelClientCredentials _wsTrustChannelClientCredentials;
+        private SecurityTokenManager _clientCredentialsSecurityTokenManager;
+
         public WsTrustChannelSecurityTokenManager(WsTrustChannelClientCredentials clientCredentials)
             : base(clientCredentials)
-        { }
+        {
+            _wsTrustChannelClientCredentials = clientCredentials;
+            if (_wsTrustChannelClientCredentials.ClientCredentials != null)
+            {
+                _clientCredentialsSecurityTokenManager = _wsTrustChannelClientCredentials.ClientCredentials.CreateSecurityTokenManager();
+            }
+        }
 
         /// <summary>
         /// Make use of this extensibility point for returning a custom SecurityTokenProvider when SAML tokens are specified in the tokenRequirement
@@ -26,16 +36,26 @@ namespace System.ServiceModel.Federation
         {
             // If token requirement matches SAML token return the custom SAML token provider
             // that performs custom work to serve up the token
-            var tokenProvider = (ClientCredentials is WsTrustChannelClientCredentials wsTrustChannelClientCredentials) ?
-                new WSTrustChannelSecurityTokenProvider(tokenRequirement, wsTrustChannelClientCredentials.RequestContext)
+            if (tokenRequirement.TokenType.Equals(Saml2Constants.OasisWssSaml2TokenProfile11))
+            {
+                return new WSTrustChannelSecurityTokenProvider(tokenRequirement, _wsTrustChannelClientCredentials.RequestContext)
                 {
-                    CacheIssuedTokens = wsTrustChannelClientCredentials.CacheIssuedTokens,
-                    MaxIssuedTokenCachingTime = wsTrustChannelClientCredentials.MaxIssuedTokenCachingTime,
-                    IssuedTokenRenewalThresholdPercentage = wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage
-                }
-                : new WSTrustChannelSecurityTokenProvider(tokenRequirement);
-
-            return tokenProvider;
+                    CacheIssuedTokens = _wsTrustChannelClientCredentials.CacheIssuedTokens,
+                    MaxIssuedTokenCachingTime = _wsTrustChannelClientCredentials.MaxIssuedTokenCachingTime,
+                    IssuedTokenRenewalThresholdPercentage = _wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage
+                };
+            }
+            // If the original ChannelFactory had a ClientCredentials instance, defer to that
+            else if (_clientCredentialsSecurityTokenManager != null)
+            {
+                return _clientCredentialsSecurityTokenManager.CreateSecurityTokenProvider(tokenRequirement);
+            }
+            // This means ClientCredentials was replaced with WsTrustChannelClientCredentials in the ChannelFactory so defer
+            // to base class to create other token providers.
+            else
+            {
+                return base.CreateSecurityTokenProvider(tokenRequirement);
+            }
         }
     }
 }
