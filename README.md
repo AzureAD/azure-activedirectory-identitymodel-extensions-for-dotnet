@@ -4,10 +4,35 @@ Windows Azure Active Directory IdentityModel Extensions for .Net
 IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
 
 ## Versions
-Current version - 5.4.0
-Minimum recommended version - 5.2.2
+Current version - 6.5.0 \
+Minimum recommended version - 5.5.0
 
-For details browse to: [Releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases).
+You can find the release notes for each version [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases). Older versions can be found [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes).
+
+## Note about 6.5.0
+If you noticed, we bumped the release from 5.5.0 to 6.5.0.\
+We were maintaining two releases from two different branches.\
+dev - 6.x\
+dev5x - 5.x
+
+Internally at Microsoft we were quickly required to remove all 3rd party libraries as IdentityModel is all about securing resources.\
+Since there were some breaking changes, given the time-line we had to maintain two releases.
+
+Both of these branches were public and moved forward mostly in lock-step.\
+Once we finished our SignedHttpRequest functionality in the 6.x branch, we realized the delta between 5.x aqnd 6.x was too large to maintain in both branches.\
+We decided now was the time to switch to a single release branch.\
+Since internally the versioning was at 6.4.2, we needed to release at 6.5.0.
+
+## There are some small breaking changes
+We built and tested asp.net core with 6.5.0 without issues.\
+We also upgraded in place existing applications to 6.5.0 without issues.\
+This of course does not mean you will not hit issues, but we took it seriously.
+
+Any questions or compatibility problems please open issues [here] (https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
+
+## Thank you for using our product
+The IdentityModel Team.
+
 
 ## Security Vulnerability in Microsoft.IdentityModel.Tokens 5.1.0
 IdentityModel Extensions library Microsoft.IdentityModel.Tokens has a known security vulnerability affecting version 5.1.0. Please update to >= 5.1.1 immediately. An updated package is available on NuGet. For more details, see the [security notice](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/master/SECURITY_NOTICE.md).
@@ -27,7 +52,7 @@ The scenarios supported by IdentityModel extensions for .NET are described in [S
 - [Azure Active Directory with ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/azure-active-directory/?view=aspnetcore-2.1)
 - [Developing ASP.NET Apps with Azure Active Directory](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory)
 - [Validating tokens](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
-- more generally, the librarie's [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
+- more generally, the library's [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
 - the [reference documentation](https://docs.microsoft.com/en-us/dotnet/api/overview/azure/activedirectory/client?view=azure-dotnet) 
 
 
