@@ -1,4 +1,6 @@
-﻿using System.ServiceModel.Channels;
+﻿using System.Collections.ObjectModel;
+using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
 
 namespace System.ServiceModel.Federation
 {
@@ -38,14 +40,40 @@ namespace System.ServiceModel.Federation
 
         public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
         {
-            if (context.BindingParameters.Contains(typeof(WsTrustChannelClientCredentials)))
+            WsTrustChannelClientCredentials trustCredentials = Find<WsTrustChannelClientCredentials>(context.BindingParameters);
+            if (trustCredentials == null)
             {
-                var credentials = context.BindingParameters[typeof(WsTrustChannelClientCredentials)] as WsTrustChannelClientCredentials;
-                credentials.RequestContext = WSTrustContext;
+                var clientCredentials = Find<ClientCredentials>(context.BindingParameters);
+                if (clientCredentials != null)
+                {
+                    trustCredentials = new WsTrustChannelClientCredentials(clientCredentials);
+                    context.BindingParameters.Remove(typeof(ClientCredentials));
+                    context.BindingParameters.Add(trustCredentials);
+                }
+                else
+                {
+                    trustCredentials = new WsTrustChannelClientCredentials();
+                    context.BindingParameters.Add(trustCredentials);
+                }
             }
 
+            trustCredentials.RequestContext = WSTrustContext;
             var channelFactory = base.BuildChannelFactory<TChannel>(context);
             return channelFactory;
+        }
+
+        private T Find<T>(BindingParameterCollection bindingParameterCollection)
+        {
+            for (int i = 0; i < bindingParameterCollection.Count; i++)
+            {
+                object settings = bindingParameterCollection[i];
+                if (settings is T)
+                {
+                    return (T)(object)settings;
+                }
+            }
+
+            return default(T);
         }
     }
 }
