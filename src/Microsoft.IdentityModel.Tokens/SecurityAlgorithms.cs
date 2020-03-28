@@ -78,6 +78,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string EcdsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384";
         public const string EcdsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512";
 
+        public const string HmacSha1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
+
         // See: https://tools.ietf.org/html/rfc6931#section-2.2.2
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
         public const string HmacSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
