@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
