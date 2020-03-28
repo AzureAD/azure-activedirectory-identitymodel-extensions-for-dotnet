@@ -673,7 +673,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
             if (bytes1.Length != bytes2.Length)
             {
-                localContext.Diffs.Add("(bytes1.Length != bytes2.Length)");
+                localContext.Diffs.Add($"(bytes1.Length: '{bytes1.Length}' != bytes2.Length: '{bytes2.Length}'");
             }
             else
             {
@@ -681,9 +681,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     if (bytes1[i] != bytes2[i])
                     {
-                        localContext.Diffs.Add($"'{bytes1}'");
+                        localContext.Diffs.Add($"'{bytes1[i]}':'{i}'");
                         localContext.Diffs.Add("!=");
-                        localContext.Diffs.Add($"'{bytes2}'");
+                        localContext.Diffs.Add($"'{bytes2[i]}':'{i}'");
                     }
                 }
             }
