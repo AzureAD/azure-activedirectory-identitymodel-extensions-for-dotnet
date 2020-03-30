@@ -95,42 +95,42 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference128_1,
-                        TestId = "PSHA1.Reference128_1"
+                        TestId = "PSHA1_Reference128_1"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference128_2,
-                        TestId = "PSHA1.Reference128_2"
+                        TestId = "PSHA1_Reference128_2"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference128_3,
-                        TestId = "PSHA1.Reference128_3"
+                        TestId = "PSHA1_Reference128_3"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference128_4,
-                        TestId = "PSHA1.Reference128_4"
+                        TestId = "PSHA1_Reference128_4"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference256_1,
-                        TestId = "PSHA1.Reference256_1"
+                        TestId = "PSHA1_Reference256_1"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference256_2,
-                        TestId = "PSHA1.Reference256_2"
+                        TestId = "PSHA1_Reference256_2"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference512_1,
-                        TestId = "PSHA1.Reference512_1"
+                        TestId = "PSHA1_Reference512_1"
                     },
                     new DerivedKeyTheoryData
                     {
                         ComputedKeyMaterial = PSHA1.Reference512_2,
-                        TestId = "PSHA1.Reference512_2"
+                        TestId = "PSHA1_Reference512_2"
                     }
                 };
 
