@@ -17,9 +17,6 @@ using Microsoft.IdentityModel.Protocols.WsPolicy;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Tokens.Saml2;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
 
 namespace System.ServiceModel.Federation
 {
@@ -35,7 +32,6 @@ namespace System.ServiceModel.Federation
 
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
-        private IDistributedCache _cache;
         private readonly WsTrustRequest _wsTrustRequest;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
 
@@ -45,7 +41,6 @@ namespace System.ServiceModel.Federation
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement, string requestContext)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-            _cache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
 
             IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
@@ -102,12 +97,16 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
-        /// Gets or sets the cache used for storing issued security tokens.
+        /// Gets or sets the cached security token response
         /// </summary>
-        protected IDistributedCache IssuedTokensCache
+        private WsTrustResponse CachedResponse
         {
-            get => _cache;
-            set => _cache = value ?? throw new ArgumentNullException(nameof(value));
+            // TODO : At some point, it may be valuable to replace this with a cache (Microsoft.Extensions.Caching.Distributed.IDistributedCache, perhaps)
+            //        so that caches can be shared between token providers. For the time being, this is just an in-memory WsTrustResponse since a
+            //        WSTrustChannelSecurityTokenProvider will only ever use a single WsTrustRequest. If caches can be shared, though, then this would
+            //        be replaced with a more full-featured cache allowing multiple providers to cache tokens in a single cache object.
+            get;
+            set;
         }
 
         /// <summary>
@@ -137,45 +136,31 @@ namespace System.ServiceModel.Federation
                 : value;
         }
 
-        private WsTrustResponse GetCachedResponse(WsTrustRequest request)
+        private WsTrustResponse GetCachedResponse()
         {
             if (CacheIssuedTokens)
             {
-                string cacheKey = GetCacheKeyFromRequest(request);
-                byte[] responseBytes = IssuedTokensCache?.Get(cacheKey);
+                WsTrustResponse response = CachedResponse;
 
-                if (responseBytes != null)
+                // If cached responses are read from shared caches in the future, then that cache should be read here
+                // and, if necessary, translated (perhaps via deserialization) into a WsTrustResponse.
+                if (response != null && IsSecurityTokenResponseUnexpired(response))
                 {
-                    var serializer = new WsTrustSerializer();
-                    using (var reader = XmlDictionaryReader.CreateBinaryReader(responseBytes, XmlDictionaryReaderQuotas.Max))
-                    {
-                        var response = serializer.ReadResponse(reader);
-
-                        if (IsSecurityTokenResponseUnexpired(response))
-                        {
-                            return response;
-                        }
-                    }
+                    return response;
                 }
             }
 
             return null;
         }
 
-        private void CacheSecurityTokenResponse(WsTrustRequest request, WsTrustResponse response)
+        private void CacheSecurityTokenResponse(WsTrustResponse response)
         {
-            if (CacheIssuedTokens && IssuedTokensCache != null)
+            if (CacheIssuedTokens)
             {
-                string cacheKey = GetCacheKeyFromRequest(request);
-                var serializer = new WsTrustSerializer();
-
-                using (var ms = new MemoryStream())
-                using (var writer = XmlDictionaryWriter.CreateBinaryWriter(ms))
-                {
-                    serializer.WriteResponse(writer, WsTrustVersion.Trust13, response);
-                    writer.Flush();
-                    IssuedTokensCache?.Set(cacheKey, ms.ToArray());
-                }
+                // If cached respones are stored in a shared cache in the future, that cache should be written
+                // to here, possibly including serializing the WsTrustResponse if the cache stores byte[] (as
+                // IDistributedCache does).
+                CachedResponse = response;
             }
         }
 
@@ -221,7 +206,7 @@ namespace System.ServiceModel.Federation
         /// </summary>
         protected override SecurityToken GetTokenCore(TimeSpan timeout)
         {
-            WsTrustResponse trustResponse = GetCachedResponse(_wsTrustRequest);
+            WsTrustResponse trustResponse = GetCachedResponse();
             if (trustResponse is null)
             {
                 using (var memeoryStream = new MemoryStream())
@@ -236,7 +221,7 @@ namespace System.ServiceModel.Federation
                     Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
                     trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
 
-                    CacheSecurityTokenResponse(_wsTrustRequest, trustResponse);
+                    CacheSecurityTokenResponse(trustResponse);
                 }
             }
 
@@ -278,20 +263,5 @@ namespace System.ServiceModel.Federation
                                                    null);
             }
         }
-
-        /// <summary>
-        /// Create a string unique to the provided WsTrustRequest to be used for caching.
-        /// </summary>
-        /// <param name="request">The WsTrustRequest to be used as a cache key.</param>
-        /// <returns>A deterministic string corresponding to the provided request.</returns>
-        private string GetCacheKeyFromRequest(WsTrustRequest request) =>
-            // For now, only a few request properties are used by WSTrustChannelSecurityTokenProvider.
-            // If this list grows long in the future, it may be preferable to just serialize the request.
-            // For the time being, though, this is a quicker and more succinct option.
-$@"RequestType:{request.RequestType}
-Context:{request.Context}
-AppliesTo:{request.AppliesTo?.EndpointReference?.Uri.ToString()}
-TokenType:{request.TokenType}
-KeyType:{request.KeyType}";
     }
 }
