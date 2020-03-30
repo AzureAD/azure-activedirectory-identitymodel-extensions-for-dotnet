@@ -129,32 +129,6 @@ namespace System.ServiceModel.Federation.Tests
                     ShouldShareToken = false
                 });
 
-                // Confirm that caches can be shared if contexts are the same
-                var provider3 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement, provider1.RequestContext)
-                {
-                    // Share cache and context
-                    TestIssuedTokensCache = provider1.TestIssuedTokensCache
-                };
-                data.Add(new ProviderCachingTheoryData
-                {
-                    Provider1 = provider1,
-                    Provider2 = provider3,
-                    ShouldShareToken = true
-                });
-
-                // Confirm that different contexts will result in not re-using tokens
-                var provider4 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
-                {
-                    // Share cache but not context
-                    TestIssuedTokensCache = provider1.TestIssuedTokensCache
-                };
-                data.Add(new ProviderCachingTheoryData
-                {
-                    Provider1 = provider1,
-                    Provider2 = provider4,
-                    ShouldShareToken = false
-                });
-
                 // Confirm that no caching occurs when caching is disabled
                 var provider5 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
                 provider5.CacheIssuedTokens = false;
@@ -165,7 +139,7 @@ namespace System.ServiceModel.Federation.Tests
                     ShouldShareToken = false
                 });
 
-                // Confirm that tokens are cached longer than MaxIssuedTokenCachingTime
+                // Confirm that tokens are not cached longer than MaxIssuedTokenCachingTime
                 var provider6 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
                 {
                     MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(2)
@@ -239,11 +213,6 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 101,
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
-                },
-                new ErrorConditionTheoryData
-                {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => (p as WSTrustChannelSecurityTokenProviderWithMockChannelFactory).TestIssuedTokensCache = null,
-                    ExpectedException = ExpectedException.ArgumentNullException("value")
                 }
             };
         }
