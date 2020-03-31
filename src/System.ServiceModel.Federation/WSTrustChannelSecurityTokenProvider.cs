@@ -26,6 +26,12 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WSTrustChannelSecurityTokenProvider : SecurityTokenProvider
     {
+        public const int DefaultPublicKeySize = 1024;
+        private const string Namespace = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement";
+        private const string IssuedSecurityTokenParametersProperty = Namespace + "/IssuedSecurityTokenParameters";
+        private const string SecurityAlgorithmSuiteProperty = Namespace + "/SecurityAlgorithmSuite";
+        private const string TargetAddressProperty = Namespace + "/TargetAddress";
+
         internal const bool DefaultCacheIssuedTokens = true;
         internal static readonly TimeSpan DefaultMaxIssuedTokenCachingTime = TimeSpan.MaxValue;
         internal const int DefaultIssuedTokenRenewalThresholdPercentage = 60;
@@ -34,6 +40,7 @@ namespace System.ServiceModel.Federation
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
         private readonly WsTrustRequest _wsTrustRequest;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
+        private readonly SecurityAlgorithmSuite _securityAlgorithmSuite;
 
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement) : this(tokenRequirement, null)
         { }
@@ -41,8 +48,8 @@ namespace System.ServiceModel.Federation
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement, string requestContext)
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
-
-            IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
+            SecurityTokenRequirement.TryGetProperty(SecurityAlgorithmSuiteProperty, out _securityAlgorithmSuite);
+            IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
 
             RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
             _wsTrustRequest = CreateWsTrustRequest(issuedTokenParameters);
@@ -64,7 +71,7 @@ namespace System.ServiceModel.Federation
 
         private WsTrustRequest CreateWsTrustRequest(IssuedSecurityTokenParameters issuedTokenParameters)
         {
-            EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress");
+            EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>(TargetAddressProperty);
 
             // Note that the GetCacheKeyFromRequest method needs to capture any properties that are set here.
             // If WsTrustRequest creation logic changes here, update GetCacheKeyFromRequest accordingly.
@@ -204,7 +211,7 @@ namespace System.ServiceModel.Federation
         /// <summary>
         /// Calls out to the STS, if necessary to get a token
         /// </summary>
-        protected override SecurityToken GetTokenCore(TimeSpan timeout)
+        protected override System.IdentityModel.Tokens.SecurityToken GetTokenCore(TimeSpan timeout)
         {
             WsTrustResponse trustResponse = GetCachedResponse();
             if (trustResponse is null)
@@ -240,11 +247,7 @@ namespace System.ServiceModel.Federation
                     PreserveWhitespace = true
                 };
 
-                BinarySecretSecurityToken proofToken = null;
-                if (trustResponse.RequestSecurityTokenResponseCollection[0].RequestedProofToken != null)
-                    proofToken = new BinarySecretSecurityToken(trustResponse.RequestSecurityTokenResponseCollection[0].RequestedProofToken.BinarySecret.Data);
-
-                WsSecuritySerializer wsSecuritySerializer = new WsSecuritySerializer();
+                IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(_wsTrustRequest, response);
                 SecurityTokenReference securityTokenReference = new SecurityTokenReference
                 {
                     Id = response.AttachedReference.KeyIdentifier.Value,
@@ -257,11 +260,95 @@ namespace System.ServiceModel.Federation
                 return new GenericXmlSecurityToken(dom.DocumentElement,
                                                    proofToken,
                                                    DateTime.UtcNow,
-                                                   DateTime.UtcNow + TimeSpan.FromDays(1),
+                                                   DateTime.UtcNow + TimeSpan.FromDays(1),  // TODO - This should be based on response.Lifetime
                                                    securityKeyIdentifierClause,
                                                    securityKeyIdentifierClause,
                                                    null);
             }
+        }
+
+        /// <summary>
+        /// Get a proof token from a WsTrust request/response pair based on section 4.4.3 of the WS-Trust 1.3 spec.
+        /// How the proof token is retrieved depends on whether the requestor or issuer provide key material:
+        /// Requestor   |   Issuer                  | Results
+        /// -------------------------------------------------
+        /// Entropy     | No key material           | No proof token returned, requestor entropy used
+        /// Entropy     | Entropy                   | Computed key algorithm returned and key computed based on request and response entropy
+        /// Entropy     | Rejects requestor entropy | Proof token in response used as key
+        /// No entropy  | Issues key                | Proof token in response used as key
+        /// No entropy  | No key material           | No proof token
+        /// </summary>
+        /// <param name="request">The WS-Trust request (RST).</param>
+        /// <param name="response">The WS-Trust response (RSTR).</param>
+        /// <returns>The proof token or null if there is no proof token.</returns>
+        private BinarySecretSecurityToken GetProofToken(WsTrustRequest request, RequestSecurityTokenResponse response)
+        {
+            string keyType = response.KeyType ?? request.KeyType;
+
+            if (response.RequestedProofToken?.BinarySecret != null)
+            {
+                // If the response includes a proof token, use it as the security token's proof token.
+                // This scenario will occur if the request does not include entropy or if the issuer rejects the requestor's entropy.
+                return new BinarySecretSecurityToken(response.RequestedProofToken.BinarySecret.Data);
+            }
+            else if (response.RequestedProofToken?.ComputedKeyAlgorithm != null)
+            {
+                // If the response includes a computed key algorithm, compute the proof token based on requestor and issuer entropy.
+                // This scenario will occur if the requestor and issuer both provide key material.
+                if (string.Equals(response.RequestedProofToken.ComputedKeyAlgorithm, WsTrustKeyTypes.Trust13.PSHA1, StringComparison.Ordinal))
+                {
+                    byte[] issuerEntropy = response.Entropy?.BinarySecret?.Data ?? response.Entropy?.ProtectedKey?.Secret;
+                    if (issuerEntropy == null)
+                    {
+                        throw new InvalidOperationException("Computed key proof tokens require issuer to supply key material via entropy.");
+                    }
+
+                    byte[] requestorEntropy = request.Entropy?.BinarySecret?.Data ?? request.Entropy?.ProtectedKey?.Secret;
+                    if (requestorEntropy == null)
+                    {
+                        throw new InvalidOperationException("Computed key proof tokens require requestor to supply key material via entropy.");
+                    }
+
+                    int keySizeInBits = response.KeySizeInBits ?? 0; // RSTR key size has precedence
+                    if (keySizeInBits == 0)
+                    {
+                        keySizeInBits = request.KeySizeInBits ?? 0; // Followed by RST
+                    }
+                    if (keySizeInBits == 0)
+                    {
+                        keySizeInBits = string.Equals(keyType, WsTrustKeyTypes.Trust13.Symmetric, StringComparison.Ordinal)
+                            ? _securityAlgorithmSuite.DefaultSymmetricKeyLength // Symmetric keys should default to a length cooresponding to the algorithm in use
+                            : DefaultPublicKeySize; // Asymmetric keys default to 1024 bits
+                    }
+                    if (keySizeInBits == 0)
+                    {
+                        throw new InvalidOperationException("No key size provided.");
+                    }
+
+                    return new BinarySecretSecurityToken(KeyGenerator.ComputeCombinedKey(issuerEntropy, requestorEntropy, keySizeInBits));
+                }
+                else
+                {
+                    throw new NotSupportedException("Only PSHA1 computed keys are supported.");
+                }
+            }
+            else if (request.Entropy != null)
+            {
+                // If the response does not have a proof token or computed key value, but the request proposed entropy,
+                // then the requestor's entropy is used as the proof token.
+                if (request.Entropy.BinarySecret != null)
+                {
+                    return new BinarySecretSecurityToken(request.Entropy.BinarySecret.Data);
+                }
+                else if (request.Entropy.ProtectedKey != null)
+                {
+                    return new BinarySecretSecurityToken(request.Entropy.ProtectedKey.Secret);
+                }
+            }
+
+            // If we get here, then no key material has been supplied (by either issuer or requestor),
+            // so there is no proof token.
+            return null;
         }
     }
 }
