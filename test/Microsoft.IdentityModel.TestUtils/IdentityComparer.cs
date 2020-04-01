@@ -274,6 +274,22 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreIntsEqual(int i1, int i2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            if (i1 == i2)
+            {
+                return true;
+            }
+            else
+            {
+                localContext.Diffs.Add($"'{i1}' != '{i2}'");
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreKeyInfoEnumsEqual(object object1, object object2, CompareContext context)
         {
             return AreEnumsEqual<KeyInfo>(object1 as IEnumerable<KeyInfo>, object2 as IEnumerable<KeyInfo>, context, AreEqual);

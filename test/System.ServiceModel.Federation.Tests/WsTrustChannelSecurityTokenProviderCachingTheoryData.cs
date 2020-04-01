@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.TestUtils;
 
 namespace System.ServiceModel.Federation.Tests
 {
-    public class WsTrustChannelSecurityTokenProviderTheoryData : TheoryDataBase
+    public class WsTrustChannelSecurityTokenProviderCachingTheoryData : TheoryDataBase
     {
         public bool CacheIssuedTokens { get; set; }
         public int IssuedTokenRenewalThresholdPercentage { get; set; }
