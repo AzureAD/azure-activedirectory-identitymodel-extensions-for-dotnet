@@ -73,8 +73,6 @@ namespace System.ServiceModel.Federation
         {
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>(TargetAddressProperty);
 
-            // Note that the GetCacheKeyFromRequest method needs to capture any properties that are set here.
-            // If WsTrustRequest creation logic changes here, update GetCacheKeyFromRequest accordingly.
             return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
