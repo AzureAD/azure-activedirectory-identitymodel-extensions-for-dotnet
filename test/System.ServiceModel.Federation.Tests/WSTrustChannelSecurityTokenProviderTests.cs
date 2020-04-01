@@ -2,16 +2,24 @@
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Federation.Tests.Mocks;
 using System.Threading;
+using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using SecurityToken = System.IdentityModel.Tokens.SecurityToken;
+using SymmetricSecurityKey = System.IdentityModel.Tokens.SymmetricSecurityKey;
 
 namespace System.ServiceModel.Federation.Tests
 {
     public class WSTrustChannelSecurityTokenProviderTests
     {
+        private static byte[] TestEntropy1 { get; } = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        private static byte[] TestEntropy2 { get; } = new byte[] { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+        private static byte[] TestEntropy3 { get; } = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
+        private static byte[] TestEntropy4 { get; } = new byte[] { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
         [Theory, MemberData(nameof(CachingSettingsFromClientCredentialsTheoryData))]
-        public void CachingSettingsAreInheritedFromClientCredentials(WsTrustChannelSecurityTokenProviderTheoryData theoryData)
+        public void CachingSettingsAreInheritedFromClientCredentials(WsTrustChannelSecurityTokenProviderCachingTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CachingSettingsAreInheritedFromClientCredentials", theoryData);
 
@@ -49,30 +57,30 @@ namespace System.ServiceModel.Federation.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustChannelSecurityTokenProviderTheoryData> CachingSettingsFromClientCredentialsTheoryData
+        public static TheoryData<WsTrustChannelSecurityTokenProviderCachingTheoryData> CachingSettingsFromClientCredentialsTheoryData
         {
-            get => new TheoryData<WsTrustChannelSecurityTokenProviderTheoryData>
+            get => new TheoryData<WsTrustChannelSecurityTokenProviderCachingTheoryData>
             {
-                new WsTrustChannelSecurityTokenProviderTheoryData
+                new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 80,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(1)
                 },
-                new WsTrustChannelSecurityTokenProviderTheoryData
+                new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = true,
                     IssuedTokenRenewalThresholdPercentage = 100,
                     MaxIssuedTokenCachingTime = TimeSpan.MaxValue
                 },
-                new WsTrustChannelSecurityTokenProviderTheoryData
+                new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 0,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(1),
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
                 },
-                new WsTrustChannelSecurityTokenProviderTheoryData
+                new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 10,
@@ -161,6 +169,121 @@ namespace System.ServiceModel.Federation.Tests
 
                 return data;
             }
+        }
+
+        [Theory, MemberData(nameof(ProofTokenTheoryData))]
+        public void ProofTokenGeneration(ProofTokenGenerationTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ProofToken", theoryData);
+
+            try
+            {
+                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
+                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                provider.SetResponseSettings(theoryData.ResponseSettings);
+                if (theoryData.RequestEntropy != null)
+                {
+                    provider.SetRequestEntropyAndKeySize(theoryData.RequestEntropy, theoryData.RequestKeySize);
+                }
+
+                GenericXmlSecurityToken token = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
+
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                if (theoryData.ExpectedProofKey is null)
+                {
+                    IdentityComparer.AreIntsEqual(token.SecurityKeys.Count, 0, context);
+                }
+                else
+                {
+                    if (IdentityComparer.AreIntsEqual(token.SecurityKeys.Count, 1, context))
+                    {
+                        var key = token.SecurityKeys[0] as SymmetricSecurityKey;
+                        IdentityComparer.AreBytesEqual(key.GetSymmetricKey(), theoryData.ExpectedProofKey, context);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ProofTokenGenerationTheoryData> ProofTokenTheoryData
+        {
+            get => new TheoryData<ProofTokenGenerationTheoryData>
+            {
+                //new ProofTokenGenerationTheoryData
+                //{
+                //    // Bearer token scenario
+                //    RequestEntropy = null,
+                //    ResponseSettings = new MockResponseSettings
+                //    {
+                //        Entropy = null,
+                //        ProofToken = null
+                //    },
+                //    ExpectedProofKey = null
+                //},
+                //new ProofTokenGenerationTheoryData
+                //{
+                //    // Client-supplied key material
+                //    RequestEntropy = new Entropy(new BinarySecret(TestEntropy1)),
+                //    ResponseSettings = new MockResponseSettings
+                //    {
+                //        Entropy = null,
+                //        ProofToken = null
+                //    },
+                //    ExpectedProofKey = TestEntropy1
+                //},
+                //new ProofTokenGenerationTheoryData
+                //{
+                //    // Server-supplied key material
+                //    ResponseSettings = new MockResponseSettings
+                //    {
+                //        Entropy = null,
+                //        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
+                //    },
+                //    ExpectedProofKey = TestEntropy2
+                //},
+                new ProofTokenGenerationTheoryData
+                {
+                    // Computed key, default key size
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 128)
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Computed key, key size from response
+                    RequestKeySize = 512,
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy3)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy4)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1),
+                        KeySizeInBits = 256
+                    },
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256)
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Computed key, key size from request
+                    RequestKeySize = 192,
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy1)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy3)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 192)
+                },
+            };
         }
 
         [Theory, MemberData(nameof(ErrorConditionTheoryData))]
