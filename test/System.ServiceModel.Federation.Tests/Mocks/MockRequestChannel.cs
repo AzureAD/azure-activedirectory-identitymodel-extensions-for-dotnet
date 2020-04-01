@@ -11,6 +11,13 @@ namespace System.ServiceModel.Federation.Tests.Mocks
     {
         public TimeSpan TokenLifetime { get; set; } = TimeSpan.FromMinutes(10);
 
+        public MockResponseSettings ResponseSettings { get; }
+
+        public MockRequestChannel(MockResponseSettings responseSettings)
+        {
+            ResponseSettings = responseSettings;
+        }
+
         public Message Request(Message message)
         {
             // Create mock WsTrustResponse containing the SAML2 token and the specified lifetime
@@ -30,6 +37,30 @@ namespace System.ServiceModel.Federation.Tests.Mocks
                 },
                 Lifetime = new Lifetime(issuedAt, issuedAt.Add(TokenLifetime))
             });
+
+            if (ResponseSettings != null)
+            {
+                if (ResponseSettings.Entropy != null)
+                {
+                    response.RequestSecurityTokenResponseCollection[0].Entropy = ResponseSettings.Entropy;
+                }
+                if (ResponseSettings.KeySizeInBits != null)
+                {
+                    response.RequestSecurityTokenResponseCollection[0].KeySizeInBits = ResponseSettings.KeySizeInBits;
+                }
+                if (ResponseSettings.KeyType != null)
+                {
+                    response.RequestSecurityTokenResponseCollection[0].KeyType = ResponseSettings.KeyType;
+                }
+                if (ResponseSettings.Lifetime != null)
+                {
+                    response.RequestSecurityTokenResponseCollection[0].Lifetime = ResponseSettings.Lifetime;
+                }
+                if (ResponseSettings.ProofToken != null)
+                {
+                    response.RequestSecurityTokenResponseCollection[0].RequestedProofToken = ResponseSettings.ProofToken;
+                }
+            }
 
             // Return a message object with the WsTrustResponse as its body
             return Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueFinal, new WsTrustResponseBodyWriter(response));
