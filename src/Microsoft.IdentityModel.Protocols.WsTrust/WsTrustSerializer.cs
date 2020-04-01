@@ -645,8 +645,18 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 // TODO, add additional scenarios for Requested proof token;
                 var proofToken = new RequestedProofToken();
-                if (reader.IsStartElement(WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace))
-                    proofToken.BinarySecret = ReadBinarySecrect(reader, serializationContext);
+
+                while (reader.IsStartElement())
+                {
+                    if (reader.IsStartElement(WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace))
+                        proofToken.BinarySecret = ReadBinarySecrect(reader, serializationContext);
+
+                    if (reader.IsStartElement(WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace))
+                        proofToken.ComputedKeyAlgorithm = reader.ReadString();
+
+                    if (!isEmptyElement)
+                        reader.ReadEndElement();
+                }
 
                 if (!isEmptyElement)
                     reader.ReadEndElement();
@@ -1379,6 +1389,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedProofToken, serializationContext.TrustConstants.Namespace);
                 if (requestedProofToken.BinarySecret != null)
                     WriteBinarySecret(writer, serializationContext, requestedProofToken.BinarySecret);
+                if (!string.IsNullOrEmpty(requestedProofToken.ComputedKeyAlgorithm))
+                {
+                    writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace);
+                    writer.WriteString(requestedProofToken.ComputedKeyAlgorithm);
+                    writer.WriteEndElement();
+                }
 
                 writer.WriteEndElement();
             }
