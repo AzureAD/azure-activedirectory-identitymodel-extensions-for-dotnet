@@ -526,6 +526,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     {
                         tokenResponse.Lifetime = ReadLifetime(reader, serializationContext);
                     }
+                    else if (reader.IsStartElement(WsTrustElements.KeySize, serializationContext.TrustConstants.Namespace))
+                    {
+                        tokenResponse.KeySizeInBits = XmlUtil.ReadIntElement(reader);
+                    }
                     else if (reader.IsStartElement(WsTrustElements.KeyType, serializationContext.TrustConstants.Namespace))
                     {
                         tokenResponse.KeyType = XmlUtil.ReadStringElement(reader);
@@ -1292,6 +1296,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 //  <RequestedSecurityToken>
                 if (requestSecurityTokenResponse.RequestedSecurityToken != null)
                     WriteRequestedSecurityToken(writer, serializationContext, requestSecurityTokenResponse.RequestedSecurityToken);
+
+                // <KeySize>
+                if (requestSecurityTokenResponse.KeySizeInBits.HasValue)
+                {
+                    writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.KeySize, serializationContext.TrustConstants.Namespace);
+                    writer.WriteValue(requestSecurityTokenResponse.KeySizeInBits.Value);
+                    writer.WriteEndElement();
+                }
 
                 // <KeyType>
                 if (!string.IsNullOrEmpty(requestSecurityTokenResponse.KeyType))
