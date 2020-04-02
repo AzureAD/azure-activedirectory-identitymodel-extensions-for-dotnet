@@ -21,7 +21,7 @@ namespace System.ServiceModel.Federation.Tests
         [Theory, MemberData(nameof(CachingSettingsFromClientCredentialsTheoryData))]
         public void CachingSettingsAreInheritedFromClientCredentials(WsTrustChannelSecurityTokenProviderCachingTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.CachingSettingsAreInheritedFromClientCredentials", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.CachingSettingsAreInheritedFromClientCredentials", theoryData);
 
             try
             {
@@ -138,8 +138,10 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Confirm that no caching occurs when caching is disabled
-                var provider5 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
-                provider5.CacheIssuedTokens = false;
+                var provider5 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                {
+                    CacheIssuedTokens = false
+                };
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider5,

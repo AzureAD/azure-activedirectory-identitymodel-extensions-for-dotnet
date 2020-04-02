@@ -649,13 +649,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 while (reader.IsStartElement())
                 {
                     if (reader.IsStartElement(WsTrustElements.BinarySecret, serializationContext.TrustConstants.Namespace))
+                    {
                         proofToken.BinarySecret = ReadBinarySecrect(reader, serializationContext);
+                    }
 
                     if (reader.IsStartElement(WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace))
-                        proofToken.ComputedKeyAlgorithm = reader.ReadString();
-
-                    if (!isEmptyElement)
-                        reader.ReadEndElement();
+                    {
+                        proofToken.ComputedKeyAlgorithm = XmlUtil.ReadStringElement(reader);
+                    }
                 }
 
                 if (!isEmptyElement)
