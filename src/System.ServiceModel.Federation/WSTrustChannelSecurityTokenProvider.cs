@@ -354,7 +354,7 @@ namespace System.ServiceModel.Federation
                     }
                     if (keySizeInBits == 0)
                     {
-                        keySizeInBits = _securityAlgorithmSuite.DefaultSymmetricKeyLength; // Symmetric keys should default to a length cooresponding to the algorithm in use
+                        keySizeInBits = _securityAlgorithmSuite?.DefaultSymmetricKeyLength ?? 0; // Symmetric keys should default to a length cooresponding to the algorithm in use
                     }
                     if (keySizeInBits == 0)
                     {
