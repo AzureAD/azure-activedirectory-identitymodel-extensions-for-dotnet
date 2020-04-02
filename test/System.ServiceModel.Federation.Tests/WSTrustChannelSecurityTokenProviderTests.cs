@@ -1,10 +1,12 @@
 ﻿using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Federation.Tests.Mocks;
+using System.ServiceModel.Security;
 using System.Threading;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.XmlEnc;
 using Xunit;
 using SecurityToken = System.IdentityModel.Tokens.SecurityToken;
 using SymmetricSecurityKey = System.IdentityModel.Tokens.SymmetricSecurityKey;
@@ -180,7 +182,10 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
-                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
+                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(
+                    new BasicHttpBinding(),
+                    keyType: theoryData.RequestKeyType,
+                    securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite);
                 var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
                 provider.SetResponseSettings(theoryData.ResponseSettings);
                 if (theoryData.RequestEntropy != null)
@@ -217,38 +222,62 @@ namespace System.ServiceModel.Federation.Tests
         {
             get => new TheoryData<ProofTokenGenerationTheoryData>
             {
-                //new ProofTokenGenerationTheoryData
-                //{
-                //    // Bearer token scenario
-                //    RequestEntropy = null,
-                //    ResponseSettings = new MockResponseSettings
-                //    {
-                //        Entropy = null,
-                //        ProofToken = null
-                //    },
-                //    ExpectedProofKey = null
-                //},
-                //new ProofTokenGenerationTheoryData
-                //{
-                //    // Client-supplied key material
-                //    RequestEntropy = new Entropy(new BinarySecret(TestEntropy1)),
-                //    ResponseSettings = new MockResponseSettings
-                //    {
-                //        Entropy = null,
-                //        ProofToken = null
-                //    },
-                //    ExpectedProofKey = TestEntropy1
-                //},
-                //new ProofTokenGenerationTheoryData
-                //{
-                //    // Server-supplied key material
-                //    ResponseSettings = new MockResponseSettings
-                //    {
-                //        Entropy = null,
-                //        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
-                //    },
-                //    ExpectedProofKey = TestEntropy2
-                //},
+                new ProofTokenGenerationTheoryData
+                {
+                    // No key material
+                    RequestEntropy = null,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = null
+                    },
+                    ExpectedProofKey = null
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Bearer token scenario
+                    RequestEntropy = null,
+                    RequestKeyType = SecurityKeyType.BearerKey,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = null
+                    },
+                    ExpectedProofKey = null
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Client-supplied key material
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy1)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = null
+                    },
+                    ExpectedProofKey = TestEntropy1
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Client-supplied asymmetric key material
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy3)),
+                    RequestKeyType = SecurityKeyType.AsymmetricKey,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = null
+                    },
+                    ExpectedProofKey = TestEntropy3
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Server-supplied key material
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
+                    },
+                    ExpectedProofKey = TestEntropy2
+                },
                 new ProofTokenGenerationTheoryData
                 {
                     // Computed key, default key size
@@ -258,7 +287,7 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 128)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256)
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -276,15 +305,138 @@ namespace System.ServiceModel.Federation.Tests
                 new ProofTokenGenerationTheoryData
                 {
                     // Computed key, key size from request
-                    RequestKeySize = 192,
+                    RequestKeySize = 1024,
                     RequestEntropy = new Entropy(new BinarySecret(TestEntropy1)),
                     ResponseSettings = new MockResponseSettings
                     {
                         Entropy = new Entropy(new BinarySecret(TestEntropy3)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 192)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024)
                 },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Computed key, key size from non-default SecurityAlgorithmSuite
+                    RequestSecurityAlgorithmSuite = SecurityAlgorithmSuite.TripleDes,
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy3)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192)
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw if computed key and entropy are both present in response
+                    RequestEntropy = null,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy1))
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw if computed key and proof token are both present in response
+                    RequestEntropy = null,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy1))
+                        {
+                            ComputedKeyAlgorithm = WsTrustKeyTypes.Trust13.PSHA1
+                        }
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw if computed key with asymmetric token
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
+                    RequestKeyType = SecurityKeyType.AsymmetricKey,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for unsupported computed key algorithm
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.Symmetric)
+                    },
+                    ExpectedException = new ExpectedException(typeof(NotSupportedException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for bearer with server entropy
+                    RequestKeyType = SecurityKeyType.BearerKey,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = null
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for bearer with proof token
+                    RequestKeyType = SecurityKeyType.BearerKey,
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = null,
+                        ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for missing issuer entropy
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for missing requestor entropy
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for incomplete issuer entropy
+                    RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new ProtectedKey(TestEntropy1, null)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                },
+                new ProofTokenGenerationTheoryData
+                {
+                    // Throw for incomplete requestor entropy
+                    RequestEntropy = new Entropy(new ProtectedKey(TestEntropy1, null)),
+                    ResponseSettings = new MockResponseSettings
+                    {
+                        Entropy = new Entropy(new BinarySecret(TestEntropy1)),
+                        ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
+                    },
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                }
             };
         }
 
