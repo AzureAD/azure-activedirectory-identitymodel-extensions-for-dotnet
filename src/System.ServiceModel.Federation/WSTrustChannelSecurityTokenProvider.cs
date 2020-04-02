@@ -27,7 +27,6 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WSTrustChannelSecurityTokenProvider : SecurityTokenProvider
     {
-        public const int DefaultPublicKeySize = 1024;
         private const string Namespace = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement";
         private const string IssuedSecurityTokenParametersProperty = Namespace + "/IssuedSecurityTokenParameters";
         private const string SecurityAlgorithmSuiteProperty = Namespace + "/SecurityAlgorithmSuite";
@@ -282,32 +281,72 @@ namespace System.ServiceModel.Federation
         /// <returns>The proof token or null if there is no proof token.</returns>
         private BinarySecretSecurityToken GetProofToken(WsTrustRequest request, RequestSecurityTokenResponse response)
         {
-            string keyType = response.KeyType ?? request.KeyType;
+            // According to the WS-Trust 1.3 spec, symmetric is the default key type
+            string keyType = response.KeyType ?? request.KeyType ?? WsTrustKeyTypes.Trust13.Symmetric;
 
+            // Encrypted keys and encrypted entropy are not supported, currently, as they should
+            // only be needed by unsupported message security scenarios.
+            if (response.RequestedProofToken?.EncryptedKey != null)
+            {
+                throw new NotSupportedException("Encrypted keys for proof tokens are not supported.");
+            }
+
+            // Bearer scenarios have no proof token
+            if (string.Equals(keyType, WsTrustKeyTypes.Trust13.Bearer, StringComparison.Ordinal))
+            {
+                if (response.RequestedProofToken != null || response.Entropy != null)
+                {
+                    throw new InvalidOperationException("Bearer key scenarios should not include a proof token or issuer entropy in the response.");
+                }
+
+                return null;
+            }
+
+            // If the response includes a proof token, use it as the security token's proof.
+            // This scenario will occur if the request does not include entropy or if the issuer rejects the requestor's entropy.
             if (response.RequestedProofToken?.BinarySecret != null)
             {
-                // If the response includes a proof token, use it as the security token's proof token.
-                // This scenario will occur if the request does not include entropy or if the issuer rejects the requestor's entropy.
+                // Confirm that a computed key algorithm isn't also specified
+                if (!string.IsNullOrEmpty(response.RequestedProofToken.ComputedKeyAlgorithm) || response.Entropy != null)
+                {
+                    throw new InvalidOperationException("An RSTR containing a proof token should not also have a computed key algorithm or issuer entropy.");
+                }
+
                 return new BinarySecretSecurityToken(response.RequestedProofToken.BinarySecret.Data);
             }
+            // If the response includes a computed key algorithm, compute the proof token based on requestor and issuer entropy.
+            // This scenario will occur if the requestor and issuer both provide key material.
             else if (response.RequestedProofToken?.ComputedKeyAlgorithm != null)
             {
-                // If the response includes a computed key algorithm, compute the proof token based on requestor and issuer entropy.
-                // This scenario will occur if the requestor and issuer both provide key material.
+                if (!string.Equals(keyType, WsTrustKeyTypes.Trust13.Symmetric, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("Computed key proof tokens are only supported with symmetric key types.");
+                }
+
                 if (string.Equals(response.RequestedProofToken.ComputedKeyAlgorithm, WsTrustKeyTypes.Trust13.PSHA1, StringComparison.Ordinal))
                 {
-                    byte[] issuerEntropy = response.Entropy?.BinarySecret?.Data ?? response.Entropy?.ProtectedKey?.Secret;
+                    // Confirm that no encrypted entropy was provided as that is currently not supported.
+                    // If we wish to support it in the future, most of the work will be in the WSTrust serializer;
+                    // this code would just have to use protected key's .Secret property to get the key material.
+                    if (response.Entropy?.ProtectedKey != null || request.Entropy?.ProtectedKey != null)
+                    {
+                        throw new NotSupportedException("Protected key entropy is not supported.");
+                    }
+
+                    // Get issuer and requestor entropy
+                    byte[] issuerEntropy = response.Entropy?.BinarySecret?.Data;
                     if (issuerEntropy == null)
                     {
                         throw new InvalidOperationException("Computed key proof tokens require issuer to supply key material via entropy.");
                     }
 
-                    byte[] requestorEntropy = request.Entropy?.BinarySecret?.Data ?? request.Entropy?.ProtectedKey?.Secret;
+                    byte[] requestorEntropy = request.Entropy?.BinarySecret?.Data;
                     if (requestorEntropy == null)
                     {
                         throw new InvalidOperationException("Computed key proof tokens require requestor to supply key material via entropy.");
                     }
 
+                    // Get key size
                     int keySizeInBits = response.KeySizeInBits ?? 0; // RSTR key size has precedence
                     if (keySizeInBits == 0)
                     {
@@ -315,9 +354,7 @@ namespace System.ServiceModel.Federation
                     }
                     if (keySizeInBits == 0)
                     {
-                        keySizeInBits = string.Equals(keyType, WsTrustKeyTypes.Trust13.Symmetric, StringComparison.Ordinal)
-                            ? _securityAlgorithmSuite.DefaultSymmetricKeyLength // Symmetric keys should default to a length cooresponding to the algorithm in use
-                            : DefaultPublicKeySize; // Asymmetric keys default to 1024 bits
+                        keySizeInBits = _securityAlgorithmSuite.DefaultSymmetricKeyLength; // Symmetric keys should default to a length cooresponding to the algorithm in use
                     }
                     if (keySizeInBits == 0)
                     {
@@ -331,22 +368,22 @@ namespace System.ServiceModel.Federation
                     throw new NotSupportedException("Only PSHA1 computed keys are supported.");
                 }
             }
+            // If the response does not have a proof token or computed key value, but the request proposed entropy,
+            // then the requestor's entropy is used as the proof token.
             else if (request.Entropy != null)
             {
-                // If the response does not have a proof token or computed key value, but the request proposed entropy,
-                // then the requestor's entropy is used as the proof token.
+                if (request.Entropy.ProtectedKey != null)
+                {
+                    throw new NotSupportedException("Protected key entropy is not supported.");
+                }
+
                 if (request.Entropy.BinarySecret != null)
                 {
                     return new BinarySecretSecurityToken(request.Entropy.BinarySecret.Data);
                 }
-                else if (request.Entropy.ProtectedKey != null)
-                {
-                    return new BinarySecretSecurityToken(request.Entropy.ProtectedKey.Secret);
-                }
             }
 
-            // If we get here, then no key material has been supplied (by either issuer or requestor),
-            // so there is no proof token.
+            // If we get here, then no key material has been supplied (by either issuer or requestor), so there is no proof token.
             return null;
         }
     }
