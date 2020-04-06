@@ -196,7 +196,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets or sets a value repsenting the Entropy element that is used to provide proposed key material.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown if Entropy is null.</exception>
         public Entropy Entropy
         {
             get;
