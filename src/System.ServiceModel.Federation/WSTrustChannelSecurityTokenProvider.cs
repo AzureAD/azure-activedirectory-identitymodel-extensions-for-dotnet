@@ -313,13 +313,8 @@ namespace System.ServiceModel.Federation
                 dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
 
                 // Get attached and unattached references
-                SecurityTokenReference securityTokenReference = new SecurityTokenReference
-                {
-                    Id = response.AttachedReference.KeyIdentifier.Value,
-                    TokenType = response.AttachedReference.TokenType
-                };
-                var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
-                GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
+                GenericXmlSecurityKeyIdentifierClause internalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.AttachedReference);
+                GenericXmlSecurityKeyIdentifierClause externalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.UnattachedReference);
 
                 // Get proof token
                 IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
@@ -332,10 +327,27 @@ namespace System.ServiceModel.Federation
                                                    proofToken,
                                                    created,
                                                    expires,
-                                                   securityKeyIdentifierClause,
-                                                   securityKeyIdentifierClause,
+                                                   internalSecurityKeyIdentifierClause,
+                                                   externalSecurityKeyIdentifierClause,
                                                    null);
             }
+        }
+
+        private static GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference tokenReference)
+        {
+            if (tokenReference == null)
+            {
+                return null;
+            }
+
+            SecurityTokenReference securityTokenReference = new SecurityTokenReference
+            {
+                Id = tokenReference.KeyIdentifier.Value,
+                TokenType = tokenReference.TokenType
+            };
+            var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
+            GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
+            return securityKeyIdentifierClause;
         }
 
         /// <summary>
