@@ -55,7 +55,13 @@ namespace System.ServiceModel.Federation
             SecurityTokenRequirement.TryGetProperty(SecurityAlgorithmSuiteProperty, out _securityAlgorithmSuite);
             _issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
 
-            // Default to combined entropy unless another option is specified in the issuer's security binding element
+            // Default to combined entropy unless another option is specified in the issuer's security binding element.
+            // In previous versions of .NET WsTrust token providers, it was possible to set the default key entropy mode in client credentials.
+            // That scenario does not seem to be needed in .NET Core WsTrust scenarios, so key entropy mode is simply being read from the issuer's
+            // security binding element. If, in the future, it's necessary to change the default (if some scenarios don't have a security binding
+            // element, for example), that could be done by adding a DefaultKeyEntropyMode property to WsTrustChannelCredentials and moving
+            // the code that calculates KeyEntropyMode out to WsTrustChannelSecurityTokenManager since it can set this property
+            // when it creates the provider and fall back to the credentials' default value if no security binding element is present.
             KeyEntropyMode = SecurityKeyEntropyMode.CombinedEntropy;
             if (SecurityTokenRequirement.TryGetProperty(IssuerBindingProperty, out Binding issuerBinding))
             {
