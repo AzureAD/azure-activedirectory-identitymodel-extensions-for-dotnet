@@ -203,13 +203,13 @@ namespace System.ServiceModel.Federation.Tests
                     new BasicHttpBinding(),
                     keyType: theoryData.RequestKeyType,
                     securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite);
-
-                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
-                provider.SetResponseSettings(theoryData.ResponseSettings);
-                if (theoryData.RequestEntropy != null)
+                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
                 {
-                    provider.SetRequestEntropyAndKeySize(theoryData.RequestEntropy, theoryData.RequestKeySize);
-                }
+                    CacheIssuedTokens = false,
+                    RequestEntropy = theoryData.RequestEntropy,
+                    RequestKeySizeInBits = theoryData.RequestKeySize
+                };
+                provider.SetResponseSettings(theoryData.ResponseSettings);
 
                 GenericXmlSecurityToken token = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
 
@@ -224,7 +224,42 @@ namespace System.ServiceModel.Federation.Tests
                     if (IdentityComparer.AreIntsEqual(token.SecurityKeys.Count, 1, context))
                     {
                         var key = token.SecurityKeys[0] as SymmetricSecurityKey;
-                        IdentityComparer.AreBytesEqual(key.GetSymmetricKey(), theoryData.ExpectedProofKey, context);
+                        if (theoryData.ExpectedProofKey.Length > 0)
+                        {
+                            // If the proof key is knowable, confirm it is correct
+                            IdentityComparer.AreBytesEqual(key.GetSymmetricKey(), theoryData.ExpectedProofKey, context);
+                        }
+
+                        // If there is a proof key, get a second token and make sure the proof key either
+                        // changes or doesn't change depending on whether the entropy was specified explicitly or randomly generated.
+                        GenericXmlSecurityToken token2 = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
+                        var key2 = token2.SecurityKeys[0] as SymmetricSecurityKey;
+                        var keyBytes = key.GetSymmetricKey();
+                        var key2Bytes = key2.GetSymmetricKey();
+
+                        if (IdentityComparer.AreIntsEqual(keyBytes.Length, key2Bytes.Length, context))
+                        {
+                            var identicalKeys = true;
+                            for (var i = 0; i < keyBytes.Length; i++)
+                            {
+                                if (keyBytes[i] != key2Bytes[i])
+                                {
+                                    identicalKeys = false;
+                                }
+                            }
+
+                            var expectedIdentical = theoryData.ExpectedProofKey.Length > 0;
+                            if (identicalKeys && !expectedIdentical)
+                            {
+                                // Fail if the same key was returned twice when random entropy should be generated for each token
+                                context.AddDiff("Two calls to WSTrustChannelSecurityTokenProvider without specific requestor entropy should have had different proof keys, but actually had the same proof keys");
+                            }
+                            if (!identicalKeys && expectedIdentical)
+                            {
+                                // Fail if different keys were returned when entropy was specified (which should have resulted in a deterministic key)
+                                context.AddDiff("Two calls to WSTrustChannelSecurityTokenProvider with specific requestor entropy should have had identical proof keys, but actually had different proof keys");
+                            }
+                        }
                     }
                 }
             }
@@ -242,15 +277,9 @@ namespace System.ServiceModel.Federation.Tests
             {
                 new ProofTokenGenerationTheoryData
                 {
-                    // No key material
-                    RequestEntropy = null,
-                    ResponseSettings = new MockResponseSettings
-                    {
-                        Entropy = null,
-                        ProofToken = null
-                    },
-                    ExpectedProofKey = null,
-                    TestId = "Test1"
+                    // Default scenario
+                    ExpectedProofKey = new byte[0], // Empty proof key means the proof key should be present but the value is unpredictable
+                    TestId = "Symmetric, default entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -263,7 +292,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedProofKey = null,
-                    TestId = "Test2"
+                    TestId = "Bearer"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -275,7 +304,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedProofKey = TestEntropy1,
-                    TestId = "Test3"
+                    TestId = "Client-supplied key material, symmetric key"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -288,7 +317,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedProofKey = TestEntropy3,
-                    TestId = "Test4"
+                    TestId = "Client-supplied key material, asymmetric key"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -299,7 +328,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
                     ExpectedProofKey = TestEntropy2,
-                    TestId = "Test5"
+                    TestId = "Server-supplied key material"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -311,7 +340,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256),
-                    TestId = "Test6"
+                    TestId = "Computed key, default key size"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -325,7 +354,7 @@ namespace System.ServiceModel.Federation.Tests
                         KeySizeInBits = 256
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256),
-                    TestId = "Test7"
+                    TestId = "Computed key, key size from issuer"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -338,7 +367,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024),
-                    TestId = "Test8"
+                    TestId = "Computed key, key size from requestor"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -351,7 +380,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192),
-                    TestId = "Test9"
+                    TestId = "Computed key, key size from non-default security algorithm suite"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -363,7 +392,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy1))
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test10"
+                    TestId = "Negative test: computed key algorithm and issuer entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -377,7 +406,7 @@ namespace System.ServiceModel.Federation.Tests
                         }
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test11"
+                    TestId = "Negative test: computed key algorithm and proof token"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -390,7 +419,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test12"
+                    TestId = "Negative test: computed key with asymmetric key type"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -402,7 +431,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.Symmetric)
                     },
                     ExpectedException = new ExpectedException(typeof(NotSupportedException)),
-                    TestId = "Test13"
+                    TestId = "Negative test: unsupported computed key algorithm"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -414,7 +443,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test14"
+                    TestId = "Negative test: bearer key type with server entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -426,7 +455,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test15"
+                    TestId = "Negative test: bearer key type and proof token"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -437,18 +466,18 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test16"
+                    TestId = "Negative test: computed key with no issuer entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
-                    // Throw for missing requestor entropy
+                    // Computed key with missing requestor entropy uses random entropy
                     ResponseSettings = new MockResponseSettings
                     {
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test17"
+                    ExpectedProofKey = new byte[0], // Empty proof key means the proof key should be present but the value is unpredictable
+                    TestId = "Computed key with default requestor entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -460,7 +489,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test18"
+                    TestId = "Negative test: computed key with incomplete issuer entropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -472,7 +501,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Test19"
+                    TestId = "Negative test: computed key with incomplete requestor entropy"
                 }
             };
         }
