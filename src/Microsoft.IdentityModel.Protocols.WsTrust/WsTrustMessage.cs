@@ -56,7 +56,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         private string _encryptionAlgorithm;
         private string _encryptWith;
         private EndpointReference _issuer;
-        private Entropy _entropy;
         private int? _keySizeInBits;
         private string _keyType;
         private string _keyWrapAlgorithm;
@@ -200,8 +199,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if Entropy is null.</exception>
         public Entropy Entropy
         {
-            get => _entropy;
-            set => _entropy = value ?? throw LogHelper.LogArgumentNullException(nameof(Entropy));
+            get;
+            set;
         }
 
         /// <summary>

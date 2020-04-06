@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
+using System.ComponentModel;
 
 namespace System.ServiceModel.Federation
 {
@@ -27,8 +28,10 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WSTrustChannelSecurityTokenProvider : SecurityTokenProvider
     {
+        private const int DefaultPublicKeySize = 1024;
         private const string Namespace = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement";
         private const string IssuedSecurityTokenParametersProperty = Namespace + "/IssuedSecurityTokenParameters";
+        private const string IssuerBindingProperty = Namespace + "/IssuerBinding";
         private const string SecurityAlgorithmSuiteProperty = Namespace + "/SecurityAlgorithmSuite";
         private const string TargetAddressProperty = Namespace + "/TargetAddress";
 
@@ -36,9 +39,10 @@ namespace System.ServiceModel.Federation
         internal static readonly TimeSpan DefaultMaxIssuedTokenCachingTime = TimeSpan.MaxValue;
         internal const int DefaultIssuedTokenRenewalThresholdPercentage = 60;
 
+        private readonly IssuedSecurityTokenParameters _issuedTokenParameters;
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
-        private readonly WsTrustRequest _wsTrustRequest;
+        private SecurityKeyEntropyMode _keyEntropyMode;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
         private readonly SecurityAlgorithmSuite _securityAlgorithmSuite;
 
@@ -49,16 +53,26 @@ namespace System.ServiceModel.Federation
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
             SecurityTokenRequirement.TryGetProperty(SecurityAlgorithmSuiteProperty, out _securityAlgorithmSuite);
-            IssuedSecurityTokenParameters issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
+            _issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
+
+            // Default to combined entropy unless another option is specified in the issuer's security binding element
+            KeyEntropyMode = SecurityKeyEntropyMode.CombinedEntropy;
+            if (SecurityTokenRequirement.TryGetProperty(IssuerBindingProperty, out Binding issuerBinding))
+            {
+                SecurityBindingElement securityBindingElement = issuerBinding.CreateBindingElements().Find<SecurityBindingElement>();
+                if (securityBindingElement != null)
+                {
+                    KeyEntropyMode = securityBindingElement.KeyEntropyMode;
+                }
+            }
 
             RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
-            _wsTrustRequest = CreateWsTrustRequest(issuedTokenParameters);
-            _channelFactory = CreateChannelFactory(issuedTokenParameters);
+            _channelFactory = CreateChannelFactory();
         }
 
-        protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory(IssuedSecurityTokenParameters issuedTokenParameters)
+        protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory()
         {
-            var factory = new ChannelFactory<IRequestChannel>(issuedTokenParameters.IssuerBinding, issuedTokenParameters.IssuerAddress);
+            var factory = new ChannelFactory<IRequestChannel>(_issuedTokenParameters.IssuerBinding, _issuedTokenParameters.IssuerAddress);
 
             // Temporary as test STS is not trusted.
             // This code should be removed.
@@ -69,20 +83,47 @@ namespace System.ServiceModel.Federation
             return factory;
         }
 
-        private WsTrustRequest CreateWsTrustRequest(IssuedSecurityTokenParameters issuedTokenParameters)
+        protected virtual WsTrustRequest CreateWsTrustRequest()
         {
             EndpointAddress target = SecurityTokenRequirement.GetProperty<EndpointAddress>(TargetAddressProperty);
+
+            int keySize;
+            string keyType;
+
+            switch (_issuedTokenParameters.KeyType)
+            {
+                case SecurityKeyType.AsymmetricKey:
+                    keySize = DefaultPublicKeySize;
+                    keyType = WsTrustKeyTypes.Trust13.PublicKey;
+                    break;
+                case SecurityKeyType.SymmetricKey:
+                    keySize = _securityAlgorithmSuite.DefaultSymmetricKeyLength;
+                    keyType = WsTrustKeyTypes.Trust13.Symmetric;
+                    break;
+                case SecurityKeyType.BearerKey:
+                    keySize = 0;
+                    keyType = WsTrustKeyTypes.Trust13.Bearer;
+                    break;
+                default:
+                    throw new InvalidOperationException("Invalid key type");
+            }
+
+            Entropy entropy = null;
+            if (_issuedTokenParameters.KeyType != SecurityKeyType.BearerKey &&
+                (KeyEntropyMode == SecurityKeyEntropyMode.ClientEntropy || KeyEntropyMode == SecurityKeyEntropyMode.CombinedEntropy))
+            {
+                byte[] entropyBytes = new byte[keySize / 8];
+                KeyGenerator.FillRandomBytes(entropyBytes);
+                entropy = new Entropy(new BinarySecret(entropyBytes));
+            }
 
             return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
                 Context = RequestContext,
-                KeyType = issuedTokenParameters.KeyType == SecurityKeyType.AsymmetricKey
-                                                        ? WsTrustKeyTypes.Trust13.PublicKey
-                                                        : issuedTokenParameters.KeyType == SecurityKeyType.SymmetricKey
-                                                        ? WsTrustKeyTypes.Trust13.Symmetric
-                                                        : WsTrustKeyTypes.Trust13.Bearer,
-                //ProofEncryption = new Microsoft.IdentityModel.Xml.SecurityTokenElement()
+                Entropy = entropy,
+                KeySizeInBits = keySize,
+                KeyType = keyType,
                 RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
                 TokenType = SecurityTokenRequirement.TokenType
             };
@@ -141,7 +182,23 @@ namespace System.ServiceModel.Federation
                 : value;
         }
 
-        private WsTrustResponse GetCachedResponse()
+        /// <summary>
+        /// Gets or sets the desired key entroy mode to use when making requests to the STS.
+        /// </summary>
+        public SecurityKeyEntropyMode KeyEntropyMode
+        {
+            get => _keyEntropyMode;
+            set
+            {
+                if (!Enum.IsDefined(typeof(SecurityKeyEntropyMode), value))
+                {
+                    throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(SecurityKeyEntropyMode));
+                }
+                _keyEntropyMode = value;
+            }
+        }
+
+        private WsTrustResponse GetCachedResponse(WsTrustRequest request)
         {
             if (CacheIssuedTokens)
             {
@@ -158,7 +215,7 @@ namespace System.ServiceModel.Federation
             return null;
         }
 
-        private void CacheSecurityTokenResponse(WsTrustResponse response)
+        private void CacheSecurityTokenResponse(WsTrustRequest request, WsTrustResponse response)
         {
             if (CacheIssuedTokens)
             {
@@ -211,14 +268,15 @@ namespace System.ServiceModel.Federation
         /// </summary>
         protected override System.IdentityModel.Tokens.SecurityToken GetTokenCore(TimeSpan timeout)
         {
-            WsTrustResponse trustResponse = GetCachedResponse();
+            var request = CreateWsTrustRequest();
+            WsTrustResponse trustResponse = GetCachedResponse(request);
             if (trustResponse is null)
             {
                 using (var memeoryStream = new MemoryStream())
                 {
                     var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
                     var serializer = new WsTrustSerializer();
-                    serializer.WriteRequest(writer, WsTrustVersion.Trust13, _wsTrustRequest);
+                    serializer.WriteRequest(writer, WsTrustVersion.Trust13, request);
                     writer.Flush();
                     var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
 
@@ -226,7 +284,7 @@ namespace System.ServiceModel.Federation
                     Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
                     trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
 
-                    CacheSecurityTokenResponse(trustResponse);
+                    CacheSecurityTokenResponse(request, trustResponse);
                 }
             }
 
@@ -245,7 +303,7 @@ namespace System.ServiceModel.Federation
                     PreserveWhitespace = true
                 };
 
-                IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(_wsTrustRequest, response);
+                IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
                 SecurityTokenReference securityTokenReference = new SecurityTokenReference
                 {
                     Id = response.AttachedReference.KeyIdentifier.Value,
