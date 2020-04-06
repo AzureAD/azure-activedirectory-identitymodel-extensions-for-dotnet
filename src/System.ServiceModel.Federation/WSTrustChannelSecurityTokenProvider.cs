@@ -293,6 +293,8 @@ namespace System.ServiceModel.Federation
             using (var stream = new MemoryStream())
             {
                 var response = trustResponse.RequestSecurityTokenResponseCollection[0];
+
+                // Get security token
                 var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
                 var tokenHandler = new Saml2SecurityTokenHandler();
                 tokenHandler.TryWriteSourceData(writer, response.RequestedSecurityToken.SecurityToken);
@@ -302,21 +304,28 @@ namespace System.ServiceModel.Federation
                 {
                     PreserveWhitespace = true
                 };
+                dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
 
-                IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
+                // Get attached and unattached references
                 SecurityTokenReference securityTokenReference = new SecurityTokenReference
                 {
                     Id = response.AttachedReference.KeyIdentifier.Value,
                     TokenType = response.AttachedReference.TokenType
                 };
-
                 var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
-                dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
                 GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
+
+                // Get proof token
+                IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
+
+                // Get lifetime
+                var created = response.Lifetime?.Created ?? DateTime.UtcNow;
+                var expires = response.Lifetime?.Expires ?? created.AddDays(1);
+
                 return new GenericXmlSecurityToken(dom.DocumentElement,
                                                    proofToken,
-                                                   DateTime.UtcNow,
-                                                   DateTime.UtcNow + TimeSpan.FromDays(1),  // TODO - This should be based on response.Lifetime
+                                                   created,
+                                                   expires,
                                                    securityKeyIdentifierClause,
                                                    securityKeyIdentifierClause,
                                                    null);
