@@ -39,6 +39,16 @@ namespace System.ServiceModel.Federation.Tests.Mocks
                     },
                     TokenType = "TokenType"
                 },
+                UnattachedReference = new SecurityTokenReference
+                {
+                    KeyIdentifier = new KeyIdentifier
+                    {
+                        EncodingType = WsSecurityEncodingTypes.WsSecurity11.Base64,
+                        Id = "KeyIdentifier2",
+                        ValueType = "ValueType2"
+                    },
+                    TokenType = "TokenType2"
+                },
                 Lifetime = new Lifetime(issuedAt, issuedAt.Add(TokenLifetime))
             });
 
