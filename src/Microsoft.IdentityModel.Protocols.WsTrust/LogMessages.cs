@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         internal const string IDX15001 = "IDX15001: Unknown Ws-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'.";
 
         // IDX15100 - specific WsTrustReadRequest errors
-        internal const string IDX15100 = "IDX15100: WsTrustRequest must start with a '{0}' element.";
+        // internal const string IDX15100 = "IDX15100: WsTrustRequest must start with a '{0}' element.";
         internal const string IDX15101 = "IDX15101: Unable to read OnBehalfOf Element. Unable to read token: '{0}'.";
 
         // IDX15500 - class creation errors and warnings
