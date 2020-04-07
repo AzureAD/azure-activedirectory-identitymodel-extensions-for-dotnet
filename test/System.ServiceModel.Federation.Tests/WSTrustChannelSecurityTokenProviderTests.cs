@@ -333,6 +333,7 @@ namespace System.ServiceModel.Federation.Tests
                 new ProofTokenGenerationTheoryData
                 {
                     // Computed key, default key size
+                    RequestKeySize = 0,
                     RequestEntropy = new Entropy(new BinarySecret(TestEntropy2)),
                     ResponseSettings = new MockResponseSettings
                     {
@@ -373,6 +374,7 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     // Computed key, key size from non-default SecurityAlgorithmSuite
                     RequestSecurityAlgorithmSuite = SecurityAlgorithmSuite.TripleDes,
+                    RequestKeySize = 0,
                     RequestEntropy = new Entropy(new BinarySecret(TestEntropy3)),
                     ResponseSettings = new MockResponseSettings
                     {
