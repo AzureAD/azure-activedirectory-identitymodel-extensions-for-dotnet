@@ -1,4 +1,8 @@
-﻿using System.IdentityModel.Selectors;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Federation.Tests.Mocks;
 using System.ServiceModel.Security;
@@ -6,7 +10,6 @@ using System.Threading;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.XmlEnc;
 using Xunit;
 using SecurityToken = System.IdentityModel.Tokens.SecurityToken;
 using SymmetricSecurityKey = System.IdentityModel.Tokens.SymmetricSecurityKey;
@@ -42,10 +45,12 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     context.AddDiff($"Expected CacheIssuedTokens: {theoryData.CacheIssuedTokens}; actual CacheIssuedTokens: {tokenProvider.CacheIssuedTokens}");
                 }
+
                 if (tokenProvider.MaxIssuedTokenCachingTime != theoryData.MaxIssuedTokenCachingTime)
                 {
                     context.AddDiff($"Expected MaxIssuedTokenCachingTime: {theoryData.MaxIssuedTokenCachingTime}; actual MaxIssuedTokenCachingTime: {tokenProvider.MaxIssuedTokenCachingTime}");
                 }
+
                 if (tokenProvider.IssuedTokenRenewalThresholdPercentage != theoryData.IssuedTokenRenewalThresholdPercentage)
                 {
                     context.AddDiff($"Expected IssuedTokenRenewalThresholdPercentage: {theoryData.IssuedTokenRenewalThresholdPercentage}; actual IssuedTokenRenewalThresholdPercentage: {tokenProvider.IssuedTokenRenewalThresholdPercentage}");
@@ -67,27 +72,31 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 80,
-                    MaxIssuedTokenCachingTime = TimeSpan.FromDays(1)
+                    MaxIssuedTokenCachingTime = TimeSpan.FromDays(1),
+                    TestId = "MaxIssuedTokenCachingTime_OneDay"
                 },
                 new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = true,
                     IssuedTokenRenewalThresholdPercentage = 100,
-                    MaxIssuedTokenCachingTime = TimeSpan.MaxValue
+                    MaxIssuedTokenCachingTime = TimeSpan.MaxValue,
+                    TestId = "MaxIssuedTokenCachingTime_OneDay"
                 },
                 new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 0,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "ThresholdPercentage0"
                 },
                 new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 10,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(-1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "TimeSpan_Negative"
                 }
             };
         }
@@ -127,7 +136,8 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     Provider1 = provider1,
                     Provider2 = provider1,
-                    ShouldShareToken = true
+                    ShouldShareToken = true,
+                    TestId = "Test1"
                 });
 
                 // Simple negative case
@@ -136,7 +146,8 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     Provider1 = provider1,
                     Provider2 = provider2,
-                    ShouldShareToken = false
+                    ShouldShareToken = false,
+                    TestId = "Test2"
                 });
 
                 // Confirm that no caching occurs when caching is disabled
@@ -144,11 +155,13 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     CacheIssuedTokens = false
                 };
+
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider5,
                     Provider2 = provider5,
-                    ShouldShareToken = false
+                    ShouldShareToken = false,
+                    TestId = "Test3"
                 });
 
                 // Confirm that tokens are not cached longer than MaxIssuedTokenCachingTime
@@ -156,19 +169,23 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(2)
                 };
+
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider6,
                     Provider2 = provider6,
                     WaitBetweenGetTokenCallsMS = 500,
-                    ShouldShareToken = true
+                    ShouldShareToken = true,
+                    TestId = "Test4"
                 });
+
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider6,
                     Provider2 = provider6,
                     WaitBetweenGetTokenCallsMS = 2500,
-                    ShouldShareToken = false
+                    ShouldShareToken = false,
+                    TestId = "Test5"
                 });
 
                 return data;
@@ -178,7 +195,7 @@ namespace System.ServiceModel.Federation.Tests
         [Theory, MemberData(nameof(ProofTokenTheoryData))]
         public void ProofTokenGeneration(ProofTokenGenerationTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.ProofToken", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ProofTokenGeneration", theoryData);
 
             try
             {
@@ -186,6 +203,7 @@ namespace System.ServiceModel.Federation.Tests
                     new BasicHttpBinding(),
                     keyType: theoryData.RequestKeyType,
                     securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite);
+
                 var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
                 provider.SetResponseSettings(theoryData.ResponseSettings);
                 if (theoryData.RequestEntropy != null)
@@ -231,7 +249,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = null
                     },
-                    ExpectedProofKey = null
+                    ExpectedProofKey = null,
+                    TestId = "Test1"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -243,7 +262,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = null
                     },
-                    ExpectedProofKey = null
+                    ExpectedProofKey = null,
+                    TestId = "Test2"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -254,7 +274,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = null
                     },
-                    ExpectedProofKey = TestEntropy1
+                    ExpectedProofKey = TestEntropy1,
+                    TestId = "Test3"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -266,7 +287,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = null
                     },
-                    ExpectedProofKey = TestEntropy3
+                    ExpectedProofKey = TestEntropy3,
+                    TestId = "Test4"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -276,7 +298,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
-                    ExpectedProofKey = TestEntropy2
+                    ExpectedProofKey = TestEntropy2,
+                    TestId = "Test5"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -287,7 +310,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256),
+                    TestId = "Test6"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -300,7 +324,8 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1),
                         KeySizeInBits = 256
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256),
+                    TestId = "Test7"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -312,7 +337,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy3)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024),
+                    TestId = "Test8"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -324,7 +350,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192)
+                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192),
+                    TestId = "Test9"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -335,7 +362,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy1))
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test10"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -348,7 +376,8 @@ namespace System.ServiceModel.Federation.Tests
                             ComputedKeyAlgorithm = WsTrustKeyTypes.Trust13.PSHA1
                         }
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test11"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -360,7 +389,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test12"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -371,7 +401,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.Symmetric)
                     },
-                    ExpectedException = new ExpectedException(typeof(NotSupportedException))
+                    ExpectedException = new ExpectedException(typeof(NotSupportedException)),
+                    TestId = "Test13"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -382,7 +413,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = null
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test14"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -393,7 +425,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = null,
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test15"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -403,7 +436,8 @@ namespace System.ServiceModel.Federation.Tests
                     {
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test16"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -413,7 +447,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test17"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -424,7 +459,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new ProtectedKey(TestEntropy1, null)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test18"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -435,7 +471,8 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
+                    TestId = "Test19"
                 }
             };
         }
@@ -469,27 +506,32 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.MaxIssuedTokenCachingTime = TimeSpan.Zero,
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
-                    First = true
+                    First = true,
+                    TestId = "Test1"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(-1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "Test2"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 0,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "Test3"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = -1,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "Test4"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 101,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value")
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    TestId = "Test5"
                 }
             };
         }
