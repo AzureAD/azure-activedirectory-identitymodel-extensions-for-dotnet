@@ -1,4 +1,8 @@
-﻿using System.IdentityModel.Selectors;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.IdentityModel.Selectors;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security.Tokens;
@@ -13,7 +17,7 @@ namespace System.ServiceModel.Federation.Tests
         [Theory, MemberData(nameof(SecurityKeyTheoryData))]
         public void BindingPropertiesPropagated(WsFederationHttpBindingTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.SecurityKeyTypePropagated", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.BindingPropertiesPropagated", theoryData);
 
             try
             {
@@ -69,38 +73,42 @@ namespace System.ServiceModel.Federation.Tests
         {
             get => new TheoryData<WsFederationHttpBindingTheoryData>
             {
-                                new WsFederationHttpBindingTheoryData
+                new WsFederationHttpBindingTheoryData
                 {
                     IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
                     IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
-                    RequestContext = "DummyContext"
+                    RequestContext = "DummyContext",
+                    TestId="Test1"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
                     First = true,
                     IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
                     IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
-                    RequestContext = null
+                    RequestContext = null,
+                    TestId="Test2"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
                     IssuedTokenParametersSecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_56,
                     IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.SymmetricKey,
-                    RequestContext = null
+                    RequestContext = null,
+                    TestId="Test3"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
                     IssuedTokenParametersSecurityKey = null,
                     IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.BearerKey,
-                    RequestContext = null
+                    RequestContext = null,
+                    TestId="Test4"
                 },
-
                 new WsFederationHttpBindingTheoryData
                 {
                     IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
                     IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
-                    RequestContext = string.Empty
-                },
+                    RequestContext = string.Empty,
+                    TestId="Test5"
+                }
             };
         }
 
