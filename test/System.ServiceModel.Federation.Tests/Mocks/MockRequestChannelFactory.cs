@@ -9,14 +9,23 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 {
     class MockRequestChannelFactory: ChannelFactory<IRequestChannel>
     {
-        public MockResponseSettings ResponseSettings { get; set; }
+        private MockResponseSettings _responseSettings;
+
+        public MockResponseSettings ResponseSettings
+        {
+            get => _responseSettings;
+            set
+            {
+                _responseSettings = value;
+                Channel = new MockRequestChannel(_responseSettings);
+            }
+        }
+
+        public MockRequestChannel Channel { get; private set; } = new MockRequestChannel(null);
 
         public MockRequestChannelFactory() : base(new ServiceEndpoint(new ContractDescription("Name")) { Address = new EndpointAddress("http://localhost") })
         { }
 
-        public override IRequestChannel CreateChannel(EndpointAddress address, Uri via)
-        {
-            return new MockRequestChannel(ResponseSettings);
-        }
+        public override IRequestChannel CreateChannel(EndpointAddress address, Uri via) => Channel;
     }
 }
