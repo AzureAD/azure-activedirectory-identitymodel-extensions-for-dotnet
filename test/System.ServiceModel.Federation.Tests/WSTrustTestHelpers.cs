@@ -15,6 +15,7 @@ namespace System.ServiceModel.Federation.Tests
     static class WSTrustTestHelpers
     {
         const string TargetAddressUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress";
+        const string IssuerBindingUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuerBinding";
         const string IssuedTokenParametersUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters";
         const string SecurityAlgorithmSuiteUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/SecurityAlgorithmSuite";
 
@@ -31,7 +32,8 @@ namespace System.ServiceModel.Federation.Tests
             string tokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
             string targetAddress = "http://localhost",
             SecurityKeyType keyType = SecurityKeyType.BearerKey,
-            SecurityAlgorithmSuite securityAlgorithmSuite = null)
+            SecurityAlgorithmSuite securityAlgorithmSuite = null,
+            MessageSecurityVersion defauiltMessageSecurityVersion = null)
         {
             var requirements = new SecurityTokenRequirement
             {
@@ -42,9 +44,10 @@ namespace System.ServiceModel.Federation.Tests
             {
                 IssuerAddress = new EndpointAddress(issuerAddress),
                 KeyType = keyType,
-                IssuerBinding = issuerBinding
+                IssuerBinding = issuerBinding,
+                DefaultMessageSecurityVersion = defauiltMessageSecurityVersion
             };
-
+            requirements.Properties.Add(IssuerBindingUri, issuerBinding);
             requirements.Properties.Add(TargetAddressUri, new EndpointAddress(targetAddress));
             requirements.Properties.Add(IssuedTokenParametersUri, issuedTokenParameters);
             requirements.Properties.Add(SecurityAlgorithmSuiteUri, securityAlgorithmSuite ?? DefaultSecurityAlgorithmSuite);
