@@ -33,6 +33,7 @@ namespace System.ServiceModel.Federation
         private const string IssuedSecurityTokenParametersProperty = Namespace + "/IssuedSecurityTokenParameters";
         private const string IssuerBindingProperty = Namespace + "/IssuerBinding";
         private const string SecurityAlgorithmSuiteProperty = Namespace + "/SecurityAlgorithmSuite";
+        private const string SecurityBindingElementProperty = Namespace + "/SecurityBindingElement";
         private const string TargetAddressProperty = Namespace + "/TargetAddress";
 
         internal const bool DefaultCacheIssuedTokens = true;
@@ -43,6 +44,8 @@ namespace System.ServiceModel.Federation
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
         private SecurityKeyEntropyMode _keyEntropyMode;
+        private MessageSecurityVersion _messageSecurityVersion;
+        private Binding _issuerBinding;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
         private readonly SecurityAlgorithmSuite _securityAlgorithmSuite;
 
@@ -53,8 +56,16 @@ namespace System.ServiceModel.Federation
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
             SecurityTokenRequirement.TryGetProperty(SecurityAlgorithmSuiteProperty, out _securityAlgorithmSuite);
+            SecurityTokenRequirement.TryGetProperty(IssuerBindingProperty, out _issuerBinding);
             _issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
+            InitializeKeyEntropyMode();
+            InitializeMessageSecurityVersion();
+            RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
+            _channelFactory = CreateChannelFactory();
+        }
 
+        private void InitializeKeyEntropyMode()
+        {
             // Default to combined entropy unless another option is specified in the issuer's security binding element.
             // In previous versions of .NET WsTrust token providers, it was possible to set the default key entropy mode in client credentials.
             // That scenario does not seem to be needed in .NET Core WsTrust scenarios, so key entropy mode is simply being read from the issuer's
@@ -63,17 +74,44 @@ namespace System.ServiceModel.Federation
             // the code that calculates KeyEntropyMode out to WsTrustChannelSecurityTokenManager since it can set this property
             // when it creates the provider and fall back to the credentials' default value if no security binding element is present.
             KeyEntropyMode = SecurityKeyEntropyMode.CombinedEntropy;
-            if (SecurityTokenRequirement.TryGetProperty(IssuerBindingProperty, out Binding issuerBinding))
+            SecurityBindingElement securityBindingElement = IssuerBinding?.CreateBindingElements().Find<SecurityBindingElement>();
+            if (securityBindingElement != null)
             {
-                SecurityBindingElement securityBindingElement = issuerBinding.CreateBindingElements().Find<SecurityBindingElement>();
-                if (securityBindingElement != null)
+                KeyEntropyMode = securityBindingElement.KeyEntropyMode;
+            }
+        }
+
+        /// <summary>
+        /// Set initial MessageSecurityVersion based on (in priority order):
+        ///  1. The message security version of the issuer binding's security binding element.
+        ///  2. The provided DefaultMessageSecurityVersion from issued token parameters.
+        ///  3. The message security version of the outer security binding element (from the security token requirement).
+        ///  4. MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11
+        /// </summary>
+        private void InitializeMessageSecurityVersion()
+        {
+            SecurityBindingElement issuerSecurityBindingElement = IssuerBinding?.CreateBindingElements().Find<SecurityBindingElement>();
+            MessageSecurityVersion messageSecurityVersion = issuerSecurityBindingElement?.MessageSecurityVersion;
+
+            if (messageSecurityVersion == null)
+            {
+                messageSecurityVersion = _issuedTokenParameters.DefaultMessageSecurityVersion;
+            }
+
+            if (messageSecurityVersion == null)
+            {
+                if (SecurityTokenRequirement.TryGetProperty(SecurityBindingElementProperty, out SecurityBindingElement outerSecurityBindingElement))
                 {
-                    KeyEntropyMode = securityBindingElement.KeyEntropyMode;
+                    messageSecurityVersion = outerSecurityBindingElement.MessageSecurityVersion;
                 }
             }
 
-            RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
-            _channelFactory = CreateChannelFactory();
+            if (messageSecurityVersion == null)
+            {
+                messageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11;
+            }
+
+            MessageSecurityVersion = messageSecurityVersion;
         }
 
         protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory()
@@ -100,15 +138,15 @@ namespace System.ServiceModel.Federation
             {
                 case SecurityKeyType.AsymmetricKey:
                     keySize = DefaultPublicKeySize;
-                    keyType = WsTrustKeyTypes.Trust13.PublicKey;
+                    keyType = WsTrustKeyTypes.PublicKey;
                     break;
                 case SecurityKeyType.SymmetricKey:
                     keySize = _securityAlgorithmSuite.DefaultSymmetricKeyLength;
-                    keyType = WsTrustKeyTypes.Trust13.Symmetric;
+                    keyType = WsTrustKeyTypes.Symmetric;
                     break;
                 case SecurityKeyType.BearerKey:
                     keySize = 0;
-                    keyType = WsTrustKeyTypes.Trust13.Bearer;
+                    keyType = WsTrustKeyTypes.Bearer;
                     break;
                 default:
                     throw new InvalidOperationException("Invalid key type");
@@ -129,7 +167,7 @@ namespace System.ServiceModel.Federation
                 Context = RequestContext,
                 KeySizeInBits = keySize,
                 KeyType = keyType,
-                RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
+                RequestType = WsTrustActions.Issue,
                 TokenType = SecurityTokenRequirement.TokenType
             };
 
@@ -185,6 +223,24 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
+        /// Gets or sets the version of message security protocols to use.
+        /// </summary>
+        public MessageSecurityVersion MessageSecurityVersion
+        {
+            get => _messageSecurityVersion;
+            set => _messageSecurityVersion = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets or sets the issuer binding.
+        /// </summary>
+        public Binding IssuerBinding
+        {
+            get => _issuerBinding;
+            set => _issuerBinding = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
         /// Gets or sets the percentage of the issued token's lifetime at which it should be renewed instead of cached.
         /// </summary>
         public int IssuedTokenRenewalThresholdPercentage
@@ -207,6 +263,79 @@ namespace System.ServiceModel.Federation
                     throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(SecurityKeyEntropyMode));
 
                 _keyEntropyMode = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the WsTrustVersion for the current MessageSecurityVersion.
+        /// </summary>
+        private WsTrustVersion WsTrustVersion
+        {
+            get
+            {
+                var trustVersion = MessageSecurityVersion.TrustVersion;
+
+                if (trustVersion == TrustVersion.WSTrust13)
+                {
+                    return WsTrustVersion.Trust13;
+                }
+
+                if (trustVersion == TrustVersion.WSTrustFeb2005)
+                {
+                    return WsTrustVersion.TrustFeb2005;
+                }
+
+                throw new ArgumentException("Unsupported trust version");
+            }
+        }
+
+        /// <summary>
+        /// Gets the WsTrustKeyTypes for the current MessageSecurityVersion.
+        /// </summary>
+        private WsTrustKeyTypes WsTrustKeyTypes
+        {
+            get
+            {
+                var version = WsTrustVersion;
+                if (version is WsTrust14Version)
+                {
+                    return WsTrustKeyTypes.Trust14;
+                }
+                if (version is WsTrust13Version)
+                {
+                    return WsTrustKeyTypes.Trust13;
+                }
+                if (version is WsTrustFeb2005Version)
+                {
+                    return WsTrustKeyTypes.TrustFeb2005;
+                }
+
+                throw new ArgumentException("Unsupported trust version");
+            }
+        }
+
+        /// <summary>
+        /// Gets the WsTrustActions for the current MessageSecurityVersion.
+        /// </summary>
+        private WsTrustActions WsTrustActions
+        {
+            get
+            {
+                var version = WsTrustVersion;
+                if (version is WsTrust14Version)
+                {
+                    return WsTrustActions.Trust14;
+                }
+                if (version is WsTrust13Version)
+                {
+                    return WsTrustActions.Trust13;
+                }
+                if (version is WsTrustFeb2005Version)
+                {
+                    return WsTrustActions.TrustFeb2005;
+                }
+
+                throw new ArgumentException("Unsupported trust version");
             }
         }
 
@@ -282,12 +411,12 @@ namespace System.ServiceModel.Federation
                 {
                     var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
                     var serializer = new WsTrustSerializer();
-                    serializer.WriteRequest(writer, WsTrustVersion.Trust13, request);
+                    serializer.WriteRequest(writer, WsTrustVersion, request);
                     writer.Flush();
                     var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
 
                     IRequestChannel channel = _channelFactory.CreateChannel();
-                    Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
+                    Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.IssueRequest, reader));
                     trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
 
                     CacheSecurityTokenResponse(request, trustResponse);
@@ -339,7 +468,7 @@ namespace System.ServiceModel.Federation
             }
         }
 
-        private static GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference tokenReference)
+        private GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference tokenReference)
         {
             if (tokenReference == null)
                 return null;
@@ -349,8 +478,7 @@ namespace System.ServiceModel.Federation
                 Id = tokenReference.KeyIdentifier.Value,
                 TokenType = tokenReference.TokenType
             };
-
-            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13));
+            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion));
         }
 
         /// <summary>
@@ -370,7 +498,7 @@ namespace System.ServiceModel.Federation
         private BinarySecretSecurityToken GetProofToken(WsTrustRequest request, RequestSecurityTokenResponse response)
         {
             // According to the WS-Trust 1.3 spec, symmetric is the default key type
-            string keyType = response.KeyType ?? request.KeyType ?? WsTrustKeyTypes.Trust13.Symmetric;
+            string keyType = response.KeyType ?? request.KeyType ?? WsTrustKeyTypes.Symmetric;
 
             // Encrypted keys and encrypted entropy are not supported, currently, as they should
             // only be needed by unsupported message security scenarios.
@@ -378,7 +506,7 @@ namespace System.ServiceModel.Federation
                 throw new NotSupportedException("Encrypted keys for proof tokens are not supported.");
 
             // Bearer scenarios have no proof token
-            if (string.Equals(keyType, WsTrustKeyTypes.Trust13.Bearer, StringComparison.Ordinal))
+            if (string.Equals(keyType, WsTrustKeyTypes.Bearer, StringComparison.Ordinal))
             {
                 if (response.RequestedProofToken != null || response.Entropy != null)
                     throw new InvalidOperationException("Bearer key scenarios should not include a proof token or issuer entropy in the response.");
@@ -400,10 +528,12 @@ namespace System.ServiceModel.Federation
             // This scenario will occur if the requestor and issuer both provide key material.
             else if (response.RequestedProofToken?.ComputedKeyAlgorithm != null)
             {
-                if (!string.Equals(keyType, WsTrustKeyTypes.Trust13.Symmetric, StringComparison.Ordinal))
+                if (!string.Equals(keyType, WsTrustKeyTypes.Symmetric, StringComparison.Ordinal))
+                {
                     throw new InvalidOperationException("Computed key proof tokens are only supported with symmetric key types.");
+                }
 
-                if (string.Equals(response.RequestedProofToken.ComputedKeyAlgorithm, WsTrustKeyTypes.Trust13.PSHA1, StringComparison.Ordinal))
+                if (string.Equals(response.RequestedProofToken.ComputedKeyAlgorithm, WsTrustKeyTypes.PSHA1, StringComparison.Ordinal))
                 {
                     // Confirm that no encrypted entropy was provided as that is currently not supported.
                     // If we wish to support it in the future, most of the work will be in the WSTrust serializer;
