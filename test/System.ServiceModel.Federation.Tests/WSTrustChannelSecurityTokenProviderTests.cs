@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Channels;
@@ -109,6 +110,9 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
+                // If necessary, do just-in-time prep (like setting short timeouts dependent on when the test runs)
+                theoryData.JustInTimePrep?.Invoke();
+
                 SecurityToken token1 = theoryData.Provider1.GetToken(TimeSpan.FromMinutes(1));
                 Thread.Sleep(theoryData.WaitBetweenGetTokenCallsMS);
                 SecurityToken token2 = theoryData.Provider2.GetToken(TimeSpan.FromMinutes(1));
@@ -187,6 +191,84 @@ namespace System.ServiceModel.Federation.Tests
                     WaitBetweenGetTokenCallsMS = 2500,
                     ShouldShareToken = false,
                     TestId = "Test5"
+                });
+
+                // Confirm that tokens are not cached longer than their lifetime
+                var provider7 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                {
+                    IssuedTokenRenewalThresholdPercentage = 95
+                };
+
+                data.Add(new ProviderCachingTheoryData
+                {
+                    Provider1 = provider7,
+                    Provider2 = provider7,
+                    WaitBetweenGetTokenCallsMS = 500,
+                    ShouldShareToken = true,
+                    TestId = "Test6",
+                    JustInTimePrep = () =>
+                    {
+                        provider7.SetResponseSettings(new MockResponseSettings
+                        {
+                            Lifetime = new Lifetime(DateTime.Now, DateTime.Now.AddSeconds(3))
+                        });
+                    }
+                });
+
+                data.Add(new ProviderCachingTheoryData
+                {
+                    Provider1 = provider7,
+                    Provider2 = provider7,
+                    WaitBetweenGetTokenCallsMS = 2500,
+                    ShouldShareToken = false,
+                    TestId = "Test7"
+                });
+
+                // Confirm that null created time is interpreted as DateTime.Now
+                var provider8 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                {
+                    IssuedTokenRenewalThresholdPercentage = 95
+                };
+
+                data.Add(new ProviderCachingTheoryData
+                {
+                    Provider1 = provider8,
+                    Provider2 = provider8,
+                    WaitBetweenGetTokenCallsMS = 500,
+                    ShouldShareToken = true,
+                    TestId = "Test8",
+                    JustInTimePrep = () =>
+                    {
+                        provider8.SetResponseSettings(new MockResponseSettings
+                        {
+                            Lifetime = new Lifetime(null, DateTime.UtcNow.AddSeconds(3))
+                        });
+                    }
+                });
+
+                data.Add(new ProviderCachingTheoryData
+                {
+                    Provider1 = provider8,
+                    Provider2 = provider8,
+                    WaitBetweenGetTokenCallsMS = 2500,
+                    ShouldShareToken = false,
+                    TestId = "Test9"
+                });
+
+                // Confirm that null expired time is interpreted as always expired
+                var provider9 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                provider9.SetResponseSettings(new MockResponseSettings
+                {
+                    Lifetime = new Lifetime(DateTime.Now, null)
+                });
+
+                data.Add(new ProviderCachingTheoryData
+                {
+                    Provider1 = provider9,
+                    Provider2 = provider9,
+                    WaitBetweenGetTokenCallsMS = 500,
+                    ShouldShareToken = false,
+                    TestId = "Test10"
                 });
 
                 return data;
@@ -706,6 +788,30 @@ namespace System.ServiceModel.Federation.Tests
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 101,
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
                     TestId = "Test5"
+                },
+                new ErrorConditionTheoryData
+                {
+                    Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuerBinding = null,
+                    ExpectedException = ExpectedException.ArgumentNullException("value"),
+                    TestId = "Test6 (set IssuerBinding to null)"
+                },
+                new ErrorConditionTheoryData
+                {
+                    Action = (WSTrustChannelSecurityTokenProvider p) => p.MessageSecurityVersion = null,
+                    ExpectedException = ExpectedException.ArgumentNullException("value"),
+                    TestId = "Test7 (set MessageSecurityVersion to null)"
+                },
+                new ErrorConditionTheoryData
+                {
+                    Action = (WSTrustChannelSecurityTokenProvider p) => p.KeyEntropyMode = (SecurityKeyEntropyMode)6,
+                    ExpectedException = new ExpectedException(typeof(InvalidEnumArgumentException)),
+                    TestId = "Test8 (set KeyEntropyMode to invalid enum value)"
+                },
+                new ErrorConditionTheoryData
+                {
+                    Action = (WSTrustChannelSecurityTokenProvider p) => p = new WSTrustChannelSecurityTokenProvider(null),
+                    ExpectedException = ExpectedException.ArgumentNullException("tokenRequirement"),
+                    TestId = "Test9 (create WSTrustChannelSecurityTokenProvider with null requirements)"
                 }
             };
         }
