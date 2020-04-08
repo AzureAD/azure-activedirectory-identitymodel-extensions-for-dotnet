@@ -15,5 +15,6 @@ namespace System.ServiceModel.Federation.Tests
         public int WaitBetweenGetTokenCallsMS { get; set; }
 
         public bool ShouldShareToken { get; set; }
+        public Action JustInTimePrep { get; set; }
     }
 }
