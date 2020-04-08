@@ -14,6 +14,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
     class MockRequestChannel : IRequestChannel
     {
         public TimeSpan TokenLifetime { get; set; } = TimeSpan.FromMinutes(10);
+        public string LastActionSent { get; private set; }
 
         public MockResponseSettings ResponseSettings { get; }
 
@@ -24,6 +25,8 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
         public Message Request(Message message)
         {
+            LastActionSent = message.Headers.Action;
+
             // Create mock WsTrustResponse containing the SAML2 token and the specified lifetime
             DateTime issuedAt = DateTime.UtcNow;
             var response = new WsTrustResponse(new RequestSecurityTokenResponse
