@@ -18,6 +18,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
         public Entropy RequestEntropy { get; set; }
 
         public int? RequestKeySizeInBits { get; set; }
+        public MockRequestChannelFactory ChannelFactory { get; } = new MockRequestChannelFactory();
 
         public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement, string requestContext) :
             base(tokenRequirement, requestContext)
@@ -29,7 +30,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
         // Override channel factory creation with a mock channel factory so that it's possible to test WSTrustChannelSecurityTokenProvider
         // without actually making requests to an STS for tokens.
-        protected override ChannelFactory<IRequestChannel> CreateChannelFactory() => new MockRequestChannelFactory();
+        protected override ChannelFactory<IRequestChannel> CreateChannelFactory() => ChannelFactory;
 
         protected override WsTrustRequest CreateWsTrustRequest()
         {
@@ -43,6 +44,8 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
             return request;
         }
+
+        public WsTrustRequest GetWsTrustRequest() => CreateWsTrustRequest();
 
         public void SetResponseSettings(MockResponseSettings responseSettings)
         {

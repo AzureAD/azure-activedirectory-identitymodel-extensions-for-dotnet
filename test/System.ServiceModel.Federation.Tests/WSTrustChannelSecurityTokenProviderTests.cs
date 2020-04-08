@@ -4,6 +4,7 @@
 
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Federation.Tests.Mocks;
 using System.ServiceModel.Security;
 using System.Threading;
@@ -509,6 +510,147 @@ namespace System.ServiceModel.Federation.Tests
             };
         }
 
+        [Theory, MemberData(nameof(MessageSecurityVersionTheoryData))]
+        public void MessageSecurityVersionRetrieval(MessageSecurityVersionTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.MessageSecurityVersionRetrieval", theoryData);
+
+            try
+            {
+                // Construct issuer binding
+                var issuerBindingElements = new BasicHttpBinding().CreateBindingElements();
+                if (theoryData.IssuerBindingSecurityVersion != null)
+                {
+                    var securityBindingElement = SecurityBindingElement.CreateUserNameOverTransportBindingElement();
+                    securityBindingElement.MessageSecurityVersion = theoryData.IssuerBindingSecurityVersion;
+                    issuerBindingElements.Insert(0, securityBindingElement);
+                }
+
+                // Construct outer security binding element
+                SecurityBindingElement outerSecurityBindingElement = null;
+                if (theoryData.OuterBindingSecurityVersion != null)
+                {
+                    outerSecurityBindingElement = SecurityBindingElement.CreateUserNameOverTransportBindingElement();
+                    outerSecurityBindingElement.MessageSecurityVersion = theoryData.OuterBindingSecurityVersion;
+                }
+
+                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new CustomBinding(issuerBindingElements),
+                    defauiltMessageSecurityVersion: theoryData.DefaultMessageSecurityVersion,
+                    securityBindingElement: outerSecurityBindingElement);
+
+                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                var request = provider.GetWsTrustRequest();
+
+                GenericXmlSecurityToken token = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
+
+                // Confirm that the provider's message security version is as expected
+                if (provider.MessageSecurityVersion != theoryData.ExpectedMessageSecurityVersion)
+                {
+                    context.AddDiff($"Unexpected message security version on token provider. Expected {theoryData.ExpectedMessageSecurityVersion}; actual {provider.MessageSecurityVersion}");
+                }
+
+                // Confirm that the correct security version action was used in the outgoing request
+                var expectedIssueAction = GetWsTrustIssueAction(theoryData.ExpectedMessageSecurityVersion);
+                if (!string.Equals(request.RequestType, expectedIssueAction, StringComparison.Ordinal))
+                {
+                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedIssueAction}; actual {request.RequestType}");
+                }
+
+                // Confirm that the correct security version action was used in the outgoing request's message header
+                var actionUsed = provider.ChannelFactory.Channel.LastActionSent;
+                var expectedIssueRequestAction = GetWsTrustIssueRequestAction(theoryData.ExpectedMessageSecurityVersion);
+                if (!string.Equals(actionUsed, expectedIssueRequestAction, StringComparison.Ordinal))
+                {
+                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedIssueRequestAction}; actual {actionUsed}");
+                }
+
+                // Confirm that the correct key type was used in the outgoing request
+                var expectedKeyType = GetWsTrustBearerKeyType(theoryData.ExpectedMessageSecurityVersion);
+                if (!string.Equals(request.KeyType, expectedKeyType, StringComparison.Ordinal))
+                {
+                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedKeyType}; actual {request.KeyType}");
+                }
+
+                // Confirm that the correct WsTrust version was used in the outgoing request
+                var expectedTrustVersion = GetWsTrustVersion(theoryData.ExpectedMessageSecurityVersion);
+                if (request.WsTrustVersion != expectedTrustVersion)
+                {
+                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedTrustVersion}; actual {request.WsTrustVersion}");
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<MessageSecurityVersionTheoryData> MessageSecurityVersionTheoryData
+        {
+            get => new TheoryData<MessageSecurityVersionTheoryData>
+            {
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust 1.3 message security version in issuer binding security binding element",
+                    IssuerBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust Feb. 2005 message security version in issuer binding security binding element",
+                    IssuerBindingSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
+                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust 1.3 default message security version",
+                    IssuerBindingSecurityVersion = null,
+                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust Feb. 2005 default message security version",
+                    IssuerBindingSecurityVersion = null,
+                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust 1.3 message security version in outer security binding element",
+                    IssuerBindingSecurityVersion = null,
+                    DefaultMessageSecurityVersion = null,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "WSTrust Feb. 2005 message security version in outer security binding element",
+                    IssuerBindingSecurityVersion = null,
+                    DefaultMessageSecurityVersion = null,
+                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
+                },
+                new MessageSecurityVersionTheoryData
+                {
+                    TestId = "Default to WSTrust Feb. 2005",
+                    IssuerBindingSecurityVersion = null,
+                    DefaultMessageSecurityVersion = null,
+                    OuterBindingSecurityVersion = null,
+                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11
+                }
+            };
+        }
+
         [Theory, MemberData(nameof(ErrorConditionTheoryData))]
         public void ExceptionsAreThrownForErrorConditions(ErrorConditionTheoryData theoryData)
         {
@@ -566,6 +708,88 @@ namespace System.ServiceModel.Federation.Tests
                     TestId = "Test5"
                 }
             };
+        }
+
+        private string GetWsTrustIssueAction(MessageSecurityVersion messageSecurityVersion)
+        {
+            var trustVersion = messageSecurityVersion?.TrustVersion;
+
+            if (trustVersion is null)
+            {
+                return null;
+            }
+            if (trustVersion == TrustVersion.WSTrust13)
+            {
+                return WsTrustActions.Trust13.Issue;
+            }
+
+            if (trustVersion == TrustVersion.WSTrustFeb2005)
+            {
+                return WsTrustActions.TrustFeb2005.Issue;
+            }
+
+            throw new ArgumentException("Unsupported trust version");
+        }
+
+        private string GetWsTrustIssueRequestAction(MessageSecurityVersion messageSecurityVersion)
+        {
+            var trustVersion = messageSecurityVersion?.TrustVersion;
+
+            if (trustVersion is null)
+            {
+                return null;
+            }
+            if (trustVersion == TrustVersion.WSTrust13)
+            {
+                return WsTrustActions.Trust13.IssueRequest;
+            }
+
+            if (trustVersion == TrustVersion.WSTrustFeb2005)
+            {
+                return WsTrustActions.TrustFeb2005.IssueRequest;
+            }
+
+            throw new ArgumentException("Unsupported trust version");
+        }
+
+        private string GetWsTrustBearerKeyType(MessageSecurityVersion messageSecurityVersion)
+        {
+            var trustVersion = messageSecurityVersion?.TrustVersion;
+
+            if (trustVersion is null)
+            {
+                return null;
+            }
+            if (trustVersion == TrustVersion.WSTrust13)
+            {
+                return WsTrustKeyTypes.Trust13.Bearer;
+            }
+            if (trustVersion == TrustVersion.WSTrustFeb2005)
+            {
+                return WsTrustKeyTypes.TrustFeb2005.Bearer;
+            }
+
+            throw new ArgumentException("Unsupported trust version");
+        }
+
+        private WsTrustVersion GetWsTrustVersion(MessageSecurityVersion messageSecurityVersion)
+        {
+            var trustVersion = messageSecurityVersion?.TrustVersion;
+
+            if (trustVersion is null)
+            {
+                return null;
+            }
+            if (trustVersion == TrustVersion.WSTrust13)
+            {
+                return WsTrustVersion.Trust13;
+            }
+            if (trustVersion == TrustVersion.WSTrustFeb2005)
+            {
+                return WsTrustVersion.TrustFeb2005;
+            }
+
+            throw new ArgumentException("Unsupported trust version");
         }
     }
 }

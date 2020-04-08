@@ -18,6 +18,7 @@ namespace System.ServiceModel.Federation.Tests
         const string IssuerBindingUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuerBinding";
         const string IssuedTokenParametersUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters";
         const string SecurityAlgorithmSuiteUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/SecurityAlgorithmSuite";
+        const string SecurityBindingElementUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/SecurityBindingElement";
 
         // SecurityAlgorithmSuite.Default isn't exposed publicly because customers aren't expected to need to specify it explicitly.
         // Getting the default algorithm suite here as a testing convenience.
@@ -33,7 +34,8 @@ namespace System.ServiceModel.Federation.Tests
             string targetAddress = "http://localhost",
             SecurityKeyType keyType = SecurityKeyType.BearerKey,
             SecurityAlgorithmSuite securityAlgorithmSuite = null,
-            MessageSecurityVersion defauiltMessageSecurityVersion = null)
+            MessageSecurityVersion defauiltMessageSecurityVersion = null,
+            SecurityBindingElement securityBindingElement = null)
         {
             var requirements = new SecurityTokenRequirement
             {
@@ -51,6 +53,10 @@ namespace System.ServiceModel.Federation.Tests
             requirements.Properties.Add(TargetAddressUri, new EndpointAddress(targetAddress));
             requirements.Properties.Add(IssuedTokenParametersUri, issuedTokenParameters);
             requirements.Properties.Add(SecurityAlgorithmSuiteUri, securityAlgorithmSuite ?? DefaultSecurityAlgorithmSuite);
+            if (securityBindingElement != null)
+            {
+                requirements.Properties.Add(SecurityBindingElementUri, securityBindingElement);
+            }
 
             return requirements;
         }
