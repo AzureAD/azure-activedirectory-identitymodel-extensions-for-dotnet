@@ -202,7 +202,8 @@ namespace System.ServiceModel.Federation.Tests
                 SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(
                     new BasicHttpBinding(),
                     keyType: theoryData.RequestKeyType,
-                    securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite);
+                    securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite,
+                    defauiltMessageSecurityVersion: MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10);
                 var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
                 {
                     CacheIssuedTokens = false,
