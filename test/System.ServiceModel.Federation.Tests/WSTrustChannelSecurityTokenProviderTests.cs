@@ -279,7 +279,7 @@ namespace System.ServiceModel.Federation.Tests
                 {
                     // Default scenario
                     ExpectedProofKey = new byte[0], // Empty proof key means the proof key should be present but the value is unpredictable
-                    TestId = "Symmetric, default entropy"
+                    TestId = "SymmetricDefaultEntropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -304,7 +304,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedProofKey = TestEntropy1,
-                    TestId = "Client-supplied key material, symmetric key"
+                    TestId = "ClientSuppliedKeyMaterial_SymmetricKey"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -317,7 +317,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedProofKey = TestEntropy3,
-                    TestId = "Client-supplied key material, asymmetric key"
+                    TestId = "ClientSuppliedKeyMaterial_AsymmetricKey"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -328,7 +328,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
                     ExpectedProofKey = TestEntropy2,
-                    TestId = "Server-supplied key material"
+                    TestId = "ServerSuppliedKeyMaterial"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -341,7 +341,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256),
-                    TestId = "Computed key, default key size"
+                    TestId = "ComputedKey_DefaultKeySize"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -355,7 +355,7 @@ namespace System.ServiceModel.Federation.Tests
                         KeySizeInBits = 256
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256),
-                    TestId = "Computed key, key size from issuer"
+                    TestId = "ComputedKey_KeySizeFromIssuer"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -368,7 +368,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024),
-                    TestId = "Computed key, key size from requestor"
+                    TestId = "ComputedKey_KeySizeFromRequestor"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -382,7 +382,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192),
-                    TestId = "Computed key, key size from non-default security algorithm suite"
+                    TestId = "ComputedKey_KeySizeFromNonDefaultSecurityAlgorithmSuite"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -408,7 +408,7 @@ namespace System.ServiceModel.Federation.Tests
                         }
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: computed key algorithm and proof token"
+                    TestId = "NegativeTest_ComputedKey_AlgorithmAndProofToken"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -421,7 +421,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: computed key with asymmetric key type"
+                    TestId = "NegativeTest_ComputedKeyWithAsymmetricKeyType"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -433,7 +433,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.Symmetric)
                     },
                     ExpectedException = new ExpectedException(typeof(NotSupportedException)),
-                    TestId = "Negative test: unsupported computed key algorithm"
+                    TestId = "NegativeTest_UnsupportedComputedKeyAlgorithm"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -445,7 +445,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = null
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: bearer key type with server entropy"
+                    TestId = "NegativeTest_BearerKeyTypeWithServerEntropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -457,7 +457,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(new BinarySecret(TestEntropy2))
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: bearer key type and proof token"
+                    TestId = "NegativeTest_BearerKeyTypeAndProofToken"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -468,7 +468,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: computed key with no issuer entropy"
+                    TestId = "NegativeTest_ComputedKeyWithNoIssuerEntropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -479,7 +479,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedProofKey = new byte[0], // Empty proof key means the proof key should be present but the value is unpredictable
-                    TestId = "Computed key with default requestor entropy"
+                    TestId = "ComputedKey_DefaultRequestorEntropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -491,7 +491,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: computed key with incomplete issuer entropy"
+                    TestId = "NegativeTest_ComputedKeyWithIncompleteIssuerEntropy"
                 },
                 new ProofTokenGenerationTheoryData
                 {
@@ -503,7 +503,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException)),
-                    TestId = "Negative test: computed key with incomplete requestor entropy"
+                    TestId = "NegativeTest_ComputedKeyWithIncompleteRequestorEntropy"
                 }
             };
         }
