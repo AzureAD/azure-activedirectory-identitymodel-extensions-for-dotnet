@@ -55,6 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         private SecurityTokenElement _encryption;
         private string _encryptionAlgorithm;
         private string _encryptWith;
+        private Entropy _entropy;
         private EndpointReference _issuer;
         private int? _keySizeInBits;
         private string _keyType;
@@ -198,8 +199,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         public Entropy Entropy
         {
-            get;
-            set;
+            get => _entropy;
+            set => _entropy = value ?? throw LogHelper.LogArgumentNullException(nameof(Entropy));
         }
 
         /// <summary>

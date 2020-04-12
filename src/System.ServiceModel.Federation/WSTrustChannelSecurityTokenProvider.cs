@@ -123,25 +123,32 @@ namespace System.ServiceModel.Federation
                 entropy = new Entropy(new BinarySecret(entropyBytes));
             }
 
-            return new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
+            var trustRequest = new WsTrustRequest(WsTrustConstants.Trust13.WsTrustActions.Issue)
             {
                 AppliesTo = new AppliesTo(new EndpointReference(target.Uri.OriginalString)),
                 Context = RequestContext,
-                Entropy = entropy,
                 KeySizeInBits = keySize,
                 KeyType = keyType,
                 RequestType = WsTrustConstants.Trust13.WsTrustActions.Issue,
                 TokenType = SecurityTokenRequirement.TokenType
             };
+
+            if (entropy != null)
+                trustRequest.Entropy = entropy;
+
+            return trustRequest;
         }
 
+        /// <summary>
+        /// Gets the <see cref="SecurityTokenRequirement"/>
+        /// </summary>
         public SecurityTokenRequirement SecurityTokenRequirement
         {
             get;
         }
 
         /// <summary>
-        /// A context string used in outgoing WsTrustRequests that may be useful for correlating requests.
+        /// Gets a string used as a context sent in WsTrustRequests that is useful for correlating requests.
         /// </summary>
         public string RequestContext
         {
@@ -197,25 +204,20 @@ namespace System.ServiceModel.Federation
             set
             {
                 if (!Enum.IsDefined(typeof(SecurityKeyEntropyMode), value))
-                {
                     throw new InvalidEnumArgumentException(nameof(value), (int)value, typeof(SecurityKeyEntropyMode));
-                }
+
                 _keyEntropyMode = value;
             }
         }
 
         private WsTrustResponse GetCachedResponse(WsTrustRequest request)
         {
-            if (CacheIssuedTokens)
+            if (CacheIssuedTokens && CachedResponse != null)
             {
-                WsTrustResponse response = CachedResponse;
-
                 // If cached responses are read from shared caches in the future, then that cache should be read here
                 // and, if necessary, translated (perhaps via deserialization) into a WsTrustResponse.
-                if (response != null && IsSecurityTokenResponseUnexpired(response))
-                {
-                    return response;
-                }
+                if (!IsWsTrustResponseExpired(CachedResponse))
+                    return CachedResponse;
             }
 
             return null;
@@ -232,9 +234,9 @@ namespace System.ServiceModel.Federation
             }
         }
 
-        private bool IsSecurityTokenResponseUnexpired(WsTrustResponse cachedResponse)
+        private bool IsWsTrustResponseExpired(WsTrustResponse response)
         {
-            var responseLifetime = cachedResponse?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
+            var responseLifetime = response?.RequestSecurityTokenResponseCollection?[0]?.Lifetime;
 
             if (responseLifetime == null || responseLifetime.Expires == null)
             {
@@ -259,20 +261,18 @@ namespace System.ServiceModel.Federation
         private DateTime AddTicks(DateTime time, long ticks)
         {
             if (ticks > 0 && DateTime.MaxValue.Subtract(time).Ticks <= ticks)
-            {
                 return DateTime.MaxValue;
-            }
+
             if (ticks < 0 && time.Subtract(DateTime.MinValue).Ticks <= -ticks)
-            {
                 return DateTime.MinValue;
-            }
+
             return time.AddTicks(ticks);
         }
 
         /// <summary>
         /// Calls out to the STS, if necessary to get a token
         /// </summary>
-        protected override System.IdentityModel.Tokens.SecurityToken GetTokenCore(TimeSpan timeout)
+        protected override IdentityModel.Tokens.SecurityToken GetTokenCore(TimeSpan timeout)
         {
             var request = CreateWsTrustRequest();
             WsTrustResponse trustResponse = GetCachedResponse(request);
@@ -310,11 +310,17 @@ namespace System.ServiceModel.Federation
                 {
                     PreserveWhitespace = true
                 };
+
                 dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
 
                 // Get attached and unattached references
-                GenericXmlSecurityKeyIdentifierClause internalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.AttachedReference);
-                GenericXmlSecurityKeyIdentifierClause externalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.UnattachedReference);
+                GenericXmlSecurityKeyIdentifierClause internalSecurityKeyIdentifierClause = null;
+                if (response.AttachedReference != null)
+                    internalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.AttachedReference);
+
+                GenericXmlSecurityKeyIdentifierClause externalSecurityKeyIdentifierClause = null;
+                if (response.UnattachedReference != null)
+                    externalSecurityKeyIdentifierClause = GetSecurityKeyIdentifierForTokenReference(response.UnattachedReference);
 
                 // Get proof token
                 IdentityModel.Tokens.SecurityToken proofToken = GetProofToken(request, response);
@@ -336,18 +342,15 @@ namespace System.ServiceModel.Federation
         private static GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference tokenReference)
         {
             if (tokenReference == null)
-            {
                 return null;
-            }
 
             SecurityTokenReference securityTokenReference = new SecurityTokenReference
             {
                 Id = tokenReference.KeyIdentifier.Value,
                 TokenType = tokenReference.TokenType
             };
-            var element = WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13);
-            GenericXmlSecurityKeyIdentifierClause securityKeyIdentifierClause = new GenericXmlSecurityKeyIdentifierClause(element);
-            return securityKeyIdentifierClause;
+
+            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion.Trust13));
         }
 
         /// <summary>
@@ -372,17 +375,13 @@ namespace System.ServiceModel.Federation
             // Encrypted keys and encrypted entropy are not supported, currently, as they should
             // only be needed by unsupported message security scenarios.
             if (response.RequestedProofToken?.EncryptedKey != null)
-            {
                 throw new NotSupportedException("Encrypted keys for proof tokens are not supported.");
-            }
 
             // Bearer scenarios have no proof token
             if (string.Equals(keyType, WsTrustKeyTypes.Trust13.Bearer, StringComparison.Ordinal))
             {
                 if (response.RequestedProofToken != null || response.Entropy != null)
-                {
                     throw new InvalidOperationException("Bearer key scenarios should not include a proof token or issuer entropy in the response.");
-                }
 
                 return null;
             }
@@ -393,9 +392,7 @@ namespace System.ServiceModel.Federation
             {
                 // Confirm that a computed key algorithm isn't also specified
                 if (!string.IsNullOrEmpty(response.RequestedProofToken.ComputedKeyAlgorithm) || response.Entropy != null)
-                {
                     throw new InvalidOperationException("An RSTR containing a proof token should not also have a computed key algorithm or issuer entropy.");
-                }
 
                 return new BinarySecretSecurityToken(response.RequestedProofToken.BinarySecret.Data);
             }
@@ -404,9 +401,7 @@ namespace System.ServiceModel.Federation
             else if (response.RequestedProofToken?.ComputedKeyAlgorithm != null)
             {
                 if (!string.Equals(keyType, WsTrustKeyTypes.Trust13.Symmetric, StringComparison.Ordinal))
-                {
                     throw new InvalidOperationException("Computed key proof tokens are only supported with symmetric key types.");
-                }
 
                 if (string.Equals(response.RequestedProofToken.ComputedKeyAlgorithm, WsTrustKeyTypes.Trust13.PSHA1, StringComparison.Ordinal))
                 {
@@ -414,37 +409,27 @@ namespace System.ServiceModel.Federation
                     // If we wish to support it in the future, most of the work will be in the WSTrust serializer;
                     // this code would just have to use protected key's .Secret property to get the key material.
                     if (response.Entropy?.ProtectedKey != null || request.Entropy?.ProtectedKey != null)
-                    {
                         throw new NotSupportedException("Protected key entropy is not supported.");
-                    }
 
                     // Get issuer and requestor entropy
                     byte[] issuerEntropy = response.Entropy?.BinarySecret?.Data;
                     if (issuerEntropy == null)
-                    {
                         throw new InvalidOperationException("Computed key proof tokens require issuer to supply key material via entropy.");
-                    }
 
                     byte[] requestorEntropy = request.Entropy?.BinarySecret?.Data;
                     if (requestorEntropy == null)
-                    {
                         throw new InvalidOperationException("Computed key proof tokens require requestor to supply key material via entropy.");
-                    }
 
                     // Get key size
                     int keySizeInBits = response.KeySizeInBits ?? 0; // RSTR key size has precedence
                     if (keySizeInBits == 0)
-                    {
                         keySizeInBits = request.KeySizeInBits ?? 0; // Followed by RST
-                    }
+
                     if (keySizeInBits == 0)
-                    {
                         keySizeInBits = _securityAlgorithmSuite?.DefaultSymmetricKeyLength ?? 0; // Symmetric keys should default to a length cooresponding to the algorithm in use
-                    }
+
                     if (keySizeInBits == 0)
-                    {
                         throw new InvalidOperationException("No key size provided.");
-                    }
 
                     return new BinarySecretSecurityToken(KeyGenerator.ComputeCombinedKey(issuerEntropy, requestorEntropy, keySizeInBits));
                 }
@@ -458,14 +443,10 @@ namespace System.ServiceModel.Federation
             else if (request.Entropy != null)
             {
                 if (request.Entropy.ProtectedKey != null)
-                {
                     throw new NotSupportedException("Protected key entropy is not supported.");
-                }
 
                 if (request.Entropy.BinarySecret != null)
-                {
                     return new BinarySecretSecurityToken(request.Entropy.BinarySecret.Data);
-                }
             }
 
             // If we get here, then no key material has been supplied (by either issuer or requestor), so there is no proof token.
