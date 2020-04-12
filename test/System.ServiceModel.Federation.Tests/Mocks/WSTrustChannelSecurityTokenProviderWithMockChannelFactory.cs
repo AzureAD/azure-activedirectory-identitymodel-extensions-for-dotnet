@@ -5,7 +5,6 @@
 using System.IdentityModel.Selectors;
 using System.Reflection;
 using System.ServiceModel.Channels;
-using System.ServiceModel.Security.Tokens;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 
 namespace System.ServiceModel.Federation.Tests.Mocks
@@ -17,6 +16,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
     class WSTrustChannelSecurityTokenProviderWithMockChannelFactory : WSTrustChannelSecurityTokenProvider
     {
         public Entropy RequestEntropy { get; set; }
+
         public int? RequestKeySizeInBits { get; set; }
 
         public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement, string requestContext) :
@@ -29,22 +29,17 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
         // Override channel factory creation with a mock channel factory so that it's possible to test WSTrustChannelSecurityTokenProvider
         // without actually making requests to an STS for tokens.
-        protected override ChannelFactory<IRequestChannel> CreateChannelFactory() =>
-            new MockRequestChannelFactory();
+        protected override ChannelFactory<IRequestChannel> CreateChannelFactory() => new MockRequestChannelFactory();
 
         protected override WsTrustRequest CreateWsTrustRequest()
         {
             WsTrustRequest request = base.CreateWsTrustRequest();
 
             if (RequestEntropy != null)
-            {
                 request.Entropy = RequestEntropy;
-            }
 
             if (RequestKeySizeInBits.HasValue)
-            {
                 request.KeySizeInBits = RequestKeySizeInBits;
-            }
 
             return request;
         }
@@ -54,6 +49,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
             var channelFactory = typeof(WSTrustChannelSecurityTokenProvider)
                 .GetField("_channelFactory", BindingFlags.Instance | BindingFlags.NonPublic)
                 .GetValue(this) as MockRequestChannelFactory;
+
             channelFactory.ResponseSettings = responseSettings;
         }
     }

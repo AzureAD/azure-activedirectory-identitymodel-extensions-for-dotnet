@@ -255,7 +255,7 @@ namespace System.ServiceModel.Federation
             long effectiveInterval = (long)((IssuedTokenRenewalThresholdPercentage / (double)100) * interval);
             DateTime effectiveExpiration = AddTicks(fromTime, Math.Min(effectiveInterval, MaxIssuedTokenCachingTime.Ticks));
 
-            return effectiveExpiration > DateTime.UtcNow;
+            return effectiveExpiration < DateTime.UtcNow;
         }
 
         private DateTime AddTicks(DateTime time, long ticks)
