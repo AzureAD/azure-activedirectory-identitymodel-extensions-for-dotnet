@@ -374,7 +374,7 @@ namespace System.ServiceModel.Federation
                 // with an unspecified expiration. Similarly, a response lifetime without an expiration
                 // time represents an unspecified expiration. In any of these cases, err on the side of
                 // retrieving a new response instead of possibly using an invalid or expired one.
-                return false;
+                return true;
             }
 
             // If a response's lifetime doesn't specify a created time, conservatively assume the response was just created.
