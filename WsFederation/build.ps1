@@ -5,7 +5,7 @@ param(
     [string]$root=$PSScriptRoot,
     [string]$runTests="NO",
     [string]$failBuildOnTest="YES",
-    [string]$slnFile="WsFederation.sln",
+    [string]$slnFile="wstrust.sln",
     [switch]$runApiCompat,
     [switch]$generateContractAssemblies)
 
@@ -42,6 +42,9 @@ function RemoveFolder($folder)
 
 function CreateArtifactsRoot($folder)
 {
+    Write-Host "============================"
+    Write-Host ""
+    Write-Host ">>> CreateArtifactsRoot $folder | Out-Null"
     RemoveFolder($folder)
     Write-Host ">>> mkdir $folder | Out-Null"
     mkdir $folder | Out-Null
@@ -66,7 +69,10 @@ function ClearBaselineFiles($root)
 
 if ($env:VSINSTALLDIR)
 {
-    $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin\amd64";
+    if (Test-Path($env:VSINSTALLDIR+"\MSBuild\Current\Bin"))
+    {
+        $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin";
+    }
 }
 
 WriteSectionHeader("build.ps1 - parameters");
