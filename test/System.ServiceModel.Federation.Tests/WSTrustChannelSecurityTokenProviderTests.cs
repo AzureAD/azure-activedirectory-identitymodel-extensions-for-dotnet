@@ -791,27 +791,21 @@ namespace System.ServiceModel.Federation.Tests
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuerBinding = null,
-                    ExpectedException = ExpectedException.ArgumentNullException("value"),
-                    TestId = "Test6 (set IssuerBinding to null)"
-                },
-                new ErrorConditionTheoryData
-                {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.MessageSecurityVersion = null,
                     ExpectedException = ExpectedException.ArgumentNullException("value"),
-                    TestId = "Test7 (set MessageSecurityVersion to null)"
+                    TestId = "Test6 (set MessageSecurityVersion to null)"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p.KeyEntropyMode = (SecurityKeyEntropyMode)6,
                     ExpectedException = new ExpectedException(typeof(InvalidEnumArgumentException)),
-                    TestId = "Test8 (set KeyEntropyMode to invalid enum value)"
+                    TestId = "Test7 (set KeyEntropyMode to invalid enum value)"
                 },
                 new ErrorConditionTheoryData
                 {
                     Action = (WSTrustChannelSecurityTokenProvider p) => p = new WSTrustChannelSecurityTokenProvider(null),
                     ExpectedException = ExpectedException.ArgumentNullException("tokenRequirement"),
-                    TestId = "Test9 (create WSTrustChannelSecurityTokenProvider with null requirements)"
+                    TestId = "Test8 (create WSTrustChannelSecurityTokenProvider with null requirements)"
                 }
             };
         }

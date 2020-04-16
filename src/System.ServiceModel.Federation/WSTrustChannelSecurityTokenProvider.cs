@@ -31,7 +31,6 @@ namespace System.ServiceModel.Federation
         private const int DefaultPublicKeySize = 1024;
         private const string Namespace = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement";
         private const string IssuedSecurityTokenParametersProperty = Namespace + "/IssuedSecurityTokenParameters";
-        private const string IssuerBindingProperty = Namespace + "/IssuerBinding";
         private const string SecurityAlgorithmSuiteProperty = Namespace + "/SecurityAlgorithmSuite";
         private const string SecurityBindingElementProperty = Namespace + "/SecurityBindingElement";
         private const string TargetAddressProperty = Namespace + "/TargetAddress";
@@ -45,7 +44,6 @@ namespace System.ServiceModel.Federation
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
         private SecurityKeyEntropyMode _keyEntropyMode;
         private MessageSecurityVersion _messageSecurityVersion;
-        private Binding _issuerBinding;
         private readonly ChannelFactory<IRequestChannel> _channelFactory;
         private readonly SecurityAlgorithmSuite _securityAlgorithmSuite;
 
@@ -56,7 +54,6 @@ namespace System.ServiceModel.Federation
         {
             SecurityTokenRequirement = tokenRequirement ?? throw new ArgumentNullException(nameof(tokenRequirement));
             SecurityTokenRequirement.TryGetProperty(SecurityAlgorithmSuiteProperty, out _securityAlgorithmSuite);
-            SecurityTokenRequirement.TryGetProperty(IssuerBindingProperty, out _issuerBinding);
             _issuedTokenParameters = SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>(IssuedSecurityTokenParametersProperty);
             InitializeKeyEntropyMode();
             InitializeMessageSecurityVersion();
@@ -116,7 +113,7 @@ namespace System.ServiceModel.Federation
 
         protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory()
         {
-            var factory = new ChannelFactory<IRequestChannel>(_issuedTokenParameters.IssuerBinding, _issuedTokenParameters.IssuerAddress);
+            var factory = new ChannelFactory<IRequestChannel>(IssuerBinding, _issuedTokenParameters.IssuerAddress);
 
             // Temporary as test STS is not trusted.
             // This code should be removed.
@@ -233,12 +230,11 @@ namespace System.ServiceModel.Federation
         }
 
         /// <summary>
-        /// Gets or sets the issuer binding.
+        /// Gets the issuer binding from the issued token parameters.
         /// </summary>
         public Binding IssuerBinding
         {
-            get => _issuerBinding;
-            set => _issuerBinding = value ?? throw new ArgumentNullException(nameof(value));
+            get => _issuedTokenParameters?.IssuerBinding;
         }
 
         /// <summary>
