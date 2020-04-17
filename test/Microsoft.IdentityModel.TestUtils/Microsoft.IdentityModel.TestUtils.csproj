@@ -26,6 +26,10 @@
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.Primitives" Version="4.7.0"/>
+  </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="NETStandard.Library" Version="$(NetStandardVersion)" />
   </ItemGroup>

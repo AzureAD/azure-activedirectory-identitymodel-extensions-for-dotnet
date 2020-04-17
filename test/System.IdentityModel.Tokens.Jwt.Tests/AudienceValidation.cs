@@ -28,8 +28,9 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
+
+using MI_SecurityToken = Microsoft.IdentityModel.Tokens.SecurityToken;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -52,7 +53,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             tokenDescriptor.Audience = null;
             var jwt = handler.CreateEncodedJwt(tokenDescriptor);
 
-            SecurityToken token = null;
+            MI_SecurityToken token = null;
             var claimsPrincipal = handler.ValidateToken(jwt, Default.AsymmetricSignTokenValidationParameters, out token);
             var jwtToken = token as JwtSecurityToken;
             var audiences = jwtToken.Audiences;

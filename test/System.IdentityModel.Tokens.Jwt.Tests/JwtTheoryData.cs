@@ -28,6 +28,8 @@
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 
+using MI_SecurityToken = Microsoft.IdentityModel.Tokens.SecurityToken;
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtTheoryData : TheoryDataBase
@@ -38,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public bool CanRead { get; set; } = true;
 
-        public SecurityToken SecurityToken { get; set; }
+        public MI_SecurityToken SecurityToken { get; set; }
 
         public string Token { get; set; }
 

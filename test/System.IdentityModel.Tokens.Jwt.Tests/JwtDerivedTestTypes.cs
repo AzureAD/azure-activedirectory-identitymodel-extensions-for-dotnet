@@ -30,6 +30,9 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+using MI_SecurityToken = Microsoft.IdentityModel.Tokens.SecurityToken;
+using MI_SecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;
+
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     /// <summary>
@@ -103,7 +106,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public JwtSecurityToken Jwt { get; set; }
 
-        public override SecurityToken ReadToken(string jwtEncodedString)
+        public override MI_SecurityToken ReadToken(string jwtEncodedString)
         {
             ReadTokenCalled = true;
             return new DerivedJwtSecurityToken(jwtEncodedString);
@@ -125,7 +128,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return base.ValidateIssuer(issuer, jwt, validationParameters);
         }
 
-        protected override void ValidateIssuerSecurityKey(SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
+        protected override void ValidateIssuerSecurityKey(MI_SecurityKey securityKey, JwtSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             DerivedJwtSecurityToken derivedJwt = securityToken as DerivedJwtSecurityToken;
             Assert.NotNull(derivedJwt);
@@ -150,7 +153,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return Jwt;
         }
 
-        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out MI_SecurityToken validatedToken)
         {
             return base.ValidateToken(securityToken, validationParameters, out validatedToken);
         }
@@ -178,7 +181,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             base.ValidateLifetime(DateTime.UtcNow, DateTime.UtcNow, jwt, validationParameters);
         }
 
-        public void ValidateSigningTokenPublic(SecurityKey securityKey, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
+        public void ValidateSigningTokenPublic(MI_SecurityKey securityKey, JwtSecurityToken jwt, TokenValidationParameters validationParameters)
         {
             base.ValidateIssuerSecurityKey(securityKey, jwt, validationParameters);
         }

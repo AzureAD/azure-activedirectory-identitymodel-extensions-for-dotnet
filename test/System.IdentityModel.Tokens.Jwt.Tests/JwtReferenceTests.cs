@@ -30,6 +30,8 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+using MI_SecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -143,8 +145,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             public string EncodedData { get; set; }
             public string EncodedSignature { get; set; }
             public bool DeterministicSignatures { get; set; }
-            public SecurityKey PrivateKey { get; set; }
-            public SecurityKey PublicKey { get; set; }
+            public MI_SecurityKey PrivateKey { get; set; }
+            public MI_SecurityKey PublicKey { get; set; }
             public string TestId { get; set; }
 
             public override string ToString()

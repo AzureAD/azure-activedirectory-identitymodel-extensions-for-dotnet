@@ -33,6 +33,8 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+using MI_SecurityToken = Microsoft.IdentityModel.Tokens.SecurityToken;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -66,7 +68,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedSecurityToken = null;
+            MI_SecurityToken validatedSecurityToken = null;
             var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
 
             JwtSecurityToken validatedJwt = validatedSecurityToken as JwtSecurityToken;
@@ -157,7 +159,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 };
             validationParameters.IssuerSigningKey = validateKey;
 
-            SecurityToken validatedSecurityToken = null;
+            MI_SecurityToken validatedSecurityToken = null;
             var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
 
             validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
@@ -232,12 +234,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var encodedJwt5 = handler.WriteToken(jwtToken5);
             var encodedJwt6 = handler.WriteToken(jwtToken6);
 
-            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, theoryData.ValidationParameters, out SecurityToken validatedJwtToken1);
-            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, theoryData.ValidationParameters, out SecurityToken validatedJwtToken2);
-            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, theoryData.ValidationParameters, out SecurityToken validatedJwtToken3);
-            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, theoryData.ValidationParameters, out SecurityToken validatedJwtToken4);
-            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, theoryData.ValidationParameters, out SecurityToken validatedJwtToken5);
-            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out SecurityToken validatedJwtToken6);
+            var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken1);
+            var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken2);
+            var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken3);
+            var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken4);
+            var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken5);
+            var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out MI_SecurityToken validatedJwtToken6);
             var context = new CompareContext();
             var localContext = new CompareContext
             {
@@ -454,22 +456,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var encodedJwt5 = handler.WriteToken(jwtToken5);
             var encodedJwt6 = handler.WriteToken(jwtToken6);
 
-            SecurityToken validatedJwtToken1 = null;
+            MI_SecurityToken validatedJwtToken1 = null;
             var claimsPrincipal1 = handler.ValidateToken(encodedJwt1, theoryData.ValidationParameters, out validatedJwtToken1);
 
-            SecurityToken validatedJwtToken2 = null;
+            MI_SecurityToken validatedJwtToken2 = null;
             var claimsPrincipal2 = handler.ValidateToken(encodedJwt2, theoryData.ValidationParameters, out validatedJwtToken2);
 
-            SecurityToken validatedJwtToken3 = null;
+            MI_SecurityToken validatedJwtToken3 = null;
             var claimsPrincipal3 = handler.ValidateToken(encodedJwt3, theoryData.ValidationParameters, out validatedJwtToken3);
 
-            SecurityToken validatedJwtToken4 = null;
+            MI_SecurityToken validatedJwtToken4 = null;
             var claimsPrincipal4 = handler.ValidateToken(encodedJwt4, theoryData.ValidationParameters, out validatedJwtToken4);
 
-            SecurityToken validatedJwtToken5 = null;
+            MI_SecurityToken validatedJwtToken5 = null;
             var claimsPrincipal5 = handler.ValidateToken(encodedJwt5, theoryData.ValidationParameters, out validatedJwtToken5);
 
-            SecurityToken validatedJwtToken6 = null;
+            MI_SecurityToken validatedJwtToken6 = null;
             var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
@@ -722,7 +724,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 );
             try
             {
-                SecurityToken token = null;
+                MI_SecurityToken token = null;
                 var claimsPrincipal = handler.ValidateToken(jweCreatedInMemory.RawData, validationParameters, out token);
                 ee.ProcessNoException();
                 var outerToken = token as JwtSecurityToken;
@@ -906,7 +908,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.InboundClaimTypeMap.Clear();
             try
             {
-                SecurityToken token = null;
+                MI_SecurityToken token = null;
                 var claimsPrincipal = handler.ValidateToken(jweToken, validationParameters, out token);
                 ee.ProcessNoException();
                 var outerToken = token as JwtSecurityToken;
@@ -1050,7 +1052,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.InboundClaimFilter.Add("iss");
             handler.InboundClaimFilter.Add("nbf");
 
-            SecurityToken validatedToken;
+            MI_SecurityToken validatedToken;
             ClaimsPrincipal claimsPrincipal = handler.ValidateToken(encodedJwt, Default.AsymmetricSignTokenValidationParameters, out validatedToken);
             var context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(claimsPrincipal.Claims, claims, context);
@@ -1080,7 +1082,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = false,
             };
 
-            SecurityToken validatedJwt = null;
+            MI_SecurityToken validatedJwt = null;
             var claimsPrincipal = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedJwt);
             var expectedIdentity = JsonClaims.ClaimsIdentityDistributedClaims(
                 Default.Issuer,
@@ -1091,7 +1093,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             jwtToken = new JwtSecurityToken( new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
             encodedJwt = jwtHandler.WriteToken(jwtToken);
-            SecurityToken validatedToken;
+            MI_SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedToken);
             IdentityComparer.AreEqual(
                 cp.FindFirst(typeof(Entity).ToString()),
@@ -1116,7 +1118,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.GetDefaultRoleClaims(null));
             JwtSecurityToken jwtToken = handler.CreateJwtSecurityToken(Default.Issuer, Default.Audience, subject, utcNow, expire, utcNow);
 
-            SecurityToken securityToken;
+            MI_SecurityToken securityToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
             CheckForRoles(ClaimSets.GetDefaultRoles(), new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }, principal);
             ClaimsIdentity expectedIdentity =
@@ -1157,7 +1159,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = false
             };
 
-            SecurityToken validatedToken = null;
+            MI_SecurityToken validatedToken = null;
 
             jwtToken.InnerToken.Header[JwtHeaderParameterNames.Cty] = "JWS";
             var jwt = handler.WriteToken(jwtToken);
@@ -1169,12 +1171,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             principal = handler.ValidateToken(jwt, validationParameters, out validatedToken);
         }
 
-        private static string NameClaimTypeDelegate(SecurityToken jwt, string issuer)
+        private static string NameClaimTypeDelegate(MI_SecurityToken jwt, string issuer)
         {
             return _nameClaimTypeForDelegate;
         }
 
-        private static string RoleClaimTypeDelegate(SecurityToken jwt, string issuer)
+        private static string RoleClaimTypeDelegate(MI_SecurityToken jwt, string issuer)
         {
             return _roleClaimTypeForDelegate;
         }
@@ -1218,7 +1220,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validationParameters.NameClaimTypeRetriever = NameClaimTypeDelegate;
             validationParameters.RoleClaimTypeRetriever = RoleClaimTypeDelegate;
 
-            SecurityToken validatedToken;
+            MI_SecurityToken validatedToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             CheckNamesAndRole(new string[] { delegateName, defaultName, validationParameterName }, new string[] { delegateRole, defaultRole, validationParameterRole }, principal, _nameClaimTypeForDelegate, _roleClaimTypeForDelegate);
 

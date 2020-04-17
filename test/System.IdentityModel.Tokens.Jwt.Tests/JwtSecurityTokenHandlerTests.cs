@@ -34,6 +34,9 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
+using MI_SecurityToken = Microsoft.IdentityModel.Tokens.SecurityToken;
+using MI_SecurityKey = Microsoft.IdentityModel.Tokens.SecurityKey;
+
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -46,7 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var context = new CompareContext();
             try
             {
-                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validatedToken).Identity as ClaimsIdentity;
+                var claimsIdentity = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out MI_SecurityToken validatedToken).Identity as ClaimsIdentity;
                 Assert.True(claimsIdentity.Actor != null);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -167,12 +170,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             TestUtilities.WriteHeader($"{this}.BootstrapContext", theoryData);
 
-            var claimsPrincipal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken securityToken);
+            var claimsPrincipal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out MI_SecurityToken securityToken);
             var bootstrapContext = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as string;
             if (theoryData.ValidationParameters.SaveSigninToken)
             {
                 Assert.NotNull(bootstrapContext);
-                Assert.True(IdentityComparer.AreEqual(claimsPrincipal, theoryData.TokenHandler.ValidateToken(bootstrapContext, theoryData.ValidationParameters, out SecurityToken validatedToken)));
+                Assert.True(IdentityComparer.AreEqual(claimsPrincipal, theoryData.TokenHandler.ValidateToken(bootstrapContext, theoryData.ValidationParameters, out MI_SecurityToken validatedToken)));
             }
             else
             {
@@ -527,7 +530,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadTimesExpressedAsDoubles", theoryData);
             try
             {
-                var principal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken validToken);
+                var principal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out MI_SecurityToken validToken);
 
                 var jwtToken1 = validToken as JwtSecurityToken;
                 var jwtToken2 = theoryData.SecurityToken as JwtSecurityToken;
@@ -605,7 +608,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         private void RunClaimMappingVariation(JwtSecurityToken jwt, JwtSecurityTokenHandler tokenHandler, TokenValidationParameters validationParameters, IEnumerable<Claim> expectedClaims, string identityName)
         {
-            SecurityToken validatedToken;
+            MI_SecurityToken validatedToken;
             ClaimsPrincipal cp = tokenHandler.ValidateToken(jwt.RawData, validationParameters, out validatedToken);
             ClaimsIdentity identity = cp.Identity as ClaimsIdentity;
 
@@ -678,7 +681,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateAudience = false,
                 ValidateIssuer = false
             };
-            SecurityToken token;
+            MI_SecurityToken token;
             var identity = handler.ValidateToken(incomingToken.RawData, validationParameters, out token);
             Assert.False(identity.HasClaim(c => c.Type == "unwantedClaim"));
             Assert.False(identity.HasClaim(c => c.Type == "jwtClaim"));
@@ -870,7 +873,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             try
             {
-                SecurityToken securityToken;
+                MI_SecurityToken securityToken;
                 theoryData.TokenHandler.ValidateToken((theoryData.SecurityToken as JwtSecurityToken).RawData, theoryData.ValidationParameters, out securityToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
@@ -1127,7 +1130,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     // TokenReplayValidator is provided.
                     // This test tests TokenReplayValidator.
-                    tokenValidator.ValidateToken(token, tvp, out SecurityToken validatedToken);
+                    tokenValidator.ValidateToken(token, tvp, out MI_SecurityToken validatedToken);
                     theoryData.ExpectedException.ProcessNoException(context.Diffs);
                 }
             }
@@ -1250,7 +1253,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         TestId = "SigningKey null, SigningKeys single key",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
-                        ValidationParameters = ValidateSignatureValidationParameters(null, new List<SecurityKey> { KeyingMaterial.X509SecurityKey_LocalSts })
+                        ValidationParameters = ValidateSignatureValidationParameters(null, new List<MI_SecurityKey> { KeyingMaterial.X509SecurityKey_LocalSts })
                     },
                     new JwtTheoryData
                     {
@@ -1283,7 +1286,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(substringExpected: "IDX10500:"),
                         TestId = "SigningKeys empty",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_LocalSts, "ALLParts"),
-                        ValidationParameters = ValidateSignatureValidationParameters(null, new List<SecurityKey>())
+                        ValidationParameters = ValidateSignatureValidationParameters(null, new List<MI_SecurityKey>())
                     },
                     new JwtTheoryData
                     {
@@ -1402,22 +1405,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys)
+        private static TokenValidationParameters ValidateSignatureValidationParameters(MI_SecurityKey signingKey, IEnumerable<MI_SecurityKey> signingKeys)
         {
             return ValidateSignatureValidationParameters(signingKey, signingKeys, true);
         }
 
-        private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens)
+        private static TokenValidationParameters ValidateSignatureValidationParameters(MI_SecurityKey signingKey, IEnumerable<MI_SecurityKey> signingKeys, bool requireSignedTokens)
         {
             return ValidateSignatureValidationParameters(signingKey, signingKeys, requireSignedTokens, null);
         }
 
-        private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator)
+        private static TokenValidationParameters ValidateSignatureValidationParameters(MI_SecurityKey signingKey, IEnumerable<MI_SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator)
         {
             return ValidateSignatureValidationParameters(signingKey, signingKeys, requireSignedTokens, signatureValidator, null);
         }
 
-        private static TokenValidationParameters ValidateSignatureValidationParameters(SecurityKey signingKey, IEnumerable<SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator, TokenReader tokenReader)
+        private static TokenValidationParameters ValidateSignatureValidationParameters(MI_SecurityKey signingKey, IEnumerable<MI_SecurityKey> signingKeys, bool requireSignedTokens, SignatureValidator signatureValidator, TokenReader tokenReader)
         {
             return new TokenValidationParameters()
             {
@@ -1569,7 +1572,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             try
             {
-                theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken securityToken);
+                theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out MI_SecurityToken securityToken);
                 theoryData.ExpectedException.ProcessNoException();
             }
             catch (Exception ex)
@@ -1651,7 +1654,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        private static TokenValidationParameters ValidateTypeValidationParameters(IEnumerable<string> validTypes, SecurityKey tokenDecryptionKey)
+        private static TokenValidationParameters ValidateTypeValidationParameters(IEnumerable<string> validTypes, MI_SecurityKey tokenDecryptionKey)
         {
             return new TokenValidationParameters
             {
