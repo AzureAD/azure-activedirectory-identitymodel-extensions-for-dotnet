@@ -41,6 +41,8 @@ using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using System.Xml;
+using System.ServiceModel.Description;
+using System.Net;
 
 #if !CrossVersionTokenValidation
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -156,7 +158,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(Claims).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimType).ToString(), CompareAllPublicProperties },
                 { typeof(EndpointReference).ToString(), CompareAllPublicProperties },
-                { typeof(Entropy).ToString(), CompareAllPublicProperties },                                
+                { typeof(Entropy).ToString(), CompareAllPublicProperties },
                 { typeof(KeyIdentifier).ToString(), CompareAllPublicProperties },
                 { typeof(Lifetime).ToString(), CompareLifetime },
                 { typeof(List<ClaimType>).ToString(), AreClaimTypeEnumsEqual },
@@ -180,6 +182,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(WsTrustRequest).ToString(), CompareAllPublicProperties },
                 { typeof(WsTrustResponse).ToString(), CompareAllPublicProperties },
                 { typeof(UseKey).ToString(), CompareAllPublicProperties },
+                { "System.IdentityModel.Tokens.UserNameSecurityToken", CompareSecurityTokenToCredentials },
+                { "System.IdentityModel.Tokens.SspiSecurityToken", CompareSecurityTokenToCredentials }
 #endif
             };
 
@@ -1069,6 +1073,71 @@ namespace Microsoft.IdentityModel.TestUtils
             }
 
             return context.Merge(localContext);
+        }
+
+        public static bool CompareSecurityTokenToCredentials(object object1, object object2, CompareContext context)
+        {
+            var securityToken = (System.IdentityModel.Tokens.SecurityToken)object1;
+            var clientCredentils = (ClientCredentials)object2;
+            var localContext = new CompareContext(context);
+
+            if (securityToken.GetType().FullName.Equals("System.IdentityModel.Tokens.UserNameSecurityToken"))
+            {
+                string tokenUserName = (string)TestUtilities.GetProperty(securityToken, "UserName") ?? string.Empty;
+                string tokenPassword = (string)TestUtilities.GetProperty(securityToken, "Password") ?? string.Empty;
+                if (!tokenUserName.Equals(clientCredentils.UserName.UserName, StringComparison.Ordinal))
+                    localContext.Diffs.Add($"UserNameSecurityToken.UserName: {tokenUserName}");
+                if (!tokenPassword.Equals(clientCredentils.UserName.Password, StringComparison.Ordinal))
+                    localContext.Diffs.Add($"UserNameSecurityToken.Password: {tokenPassword}");
+
+                return localContext.Merge(context);
+            }
+
+            if (securityToken.GetType().FullName.Equals("System.IdentityModel.Tokens.SspiSecurityToken"))
+            {
+                var credential = (NetworkCredential)TestUtilities.GetProperty(securityToken, "NetworkCredential");
+                if (credential == null && clientCredentils.Windows.ClientCredential == null)
+                {
+                    return true;
+                }
+
+                if (credential == null || clientCredentils.Windows.ClientCredential == null)
+                {
+                    if(credential == null)
+                    {
+                        localContext.Diffs.Add("SspiSecurityToken.NetworkCredential: null");
+                    }
+                    else
+                    {
+                        localContext.Diffs.Add("ClientCredentils.Windows.ClientCredential: null");
+                    }
+
+                    return localContext.Merge(context);
+                }
+
+                if (!credential.UserName.Equals(clientCredentils.Windows.ClientCredential.UserName, StringComparison.Ordinal))
+                {
+                    localContext.Diffs.Add($"SspiSecurityToken.NetworkCredential.UserName: {credential.UserName}");
+                    localContext.Diffs.Add($"ClientCredentils.Windows.ClientCredential.UserName: {clientCredentils.Windows.ClientCredential.UserName}");
+                }
+
+                if (!credential.Password.Equals(clientCredentils.Windows.ClientCredential.Password, StringComparison.Ordinal))
+                {
+                    localContext.Diffs.Add($"SspiSecurityToken.NetworkCredential.Password: {credential.Password}");
+                    localContext.Diffs.Add($"ClientCredentils.Windows.ClientCredential.Password: {clientCredentils.Windows.ClientCredential.Password}");
+                }
+
+                if (!credential.Domain.Equals(clientCredentils.Windows.ClientCredential.Domain, StringComparison.Ordinal))
+                {
+                    localContext.Diffs.Add($"SspiSecurityToken.NetworkCredential.Domain: {credential.Domain}");
+                    localContext.Diffs.Add($"ClientCredentils.Windows.ClientCredential.Domain: {clientCredentils.Windows.ClientCredential.Domain}");
+                }
+
+                return localContext.Merge(context);
+            }
+
+            localContext.Diffs.Add($"TokenType: ${securityToken.GetType().FullName}");
+            return localContext.Merge(context);
         }
 
         public static string BuildStringDiff(string label, object str1, object str2)
