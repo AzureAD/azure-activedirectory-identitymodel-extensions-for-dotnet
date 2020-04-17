@@ -10,9 +10,11 @@ namespace System.ServiceModel.Federation.Tests
 {
     public class ClientCredentialsWrappingTests
     {
-        [Fact]
-        public void WrapsClientCredentials()
+        [Theory, MemberData(nameof(CredentialsTheoryData))]
+        public void WrapsClientCredentials(ClientCredentialsTheoryData theoryData)
         {
+            var context = TestUtilities.WriteHeader($"{this}.WrapsClientCredentials", theoryData);
+
             var issuedTokenParameters = new IssuedTokenParameters
             {
                 IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
@@ -28,45 +30,77 @@ namespace System.ServiceModel.Federation.Tests
             });
             var clientCredentialCapturingBindingElement = new ClientCredentialCapturingBindingElement();
             binding.Elements.Insert(1, clientCredentialCapturingBindingElement);
-
-            var clientCredentials = new ClientCredentials();
-            clientCredentials.UserName.UserName = "Foo";
-            clientCredentials.UserName.Password = "Bar";
-            var cf = binding.BuildChannelFactory<IRequestChannel>(clientCredentials);
+            var cf = binding.BuildChannelFactory<IRequestChannel>(theoryData.ClientCredentials);
             Assert.NotNull(clientCredentialCapturingBindingElement.CapturedCredentials);
             Assert.IsType<WsTrustChannelClientCredentials>(clientCredentialCapturingBindingElement.CapturedCredentials);
             var stm = clientCredentialCapturingBindingElement.CapturedCredentials.CreateSecurityTokenManager();
-            var tokenRequirementType = typeof(ClientCredentials).Assembly.GetType("System.ServiceModel.Security.Tokens.InitiatorServiceModelSecurityTokenRequirement");
-            var initiatorTokenRequirement = (SecurityTokenRequirement)Activator.CreateInstance(tokenRequirementType);
-            initiatorTokenRequirement.TokenType = "http://schemas.microsoft.com/ws/2006/05/identitymodel/tokens/UserName";
-            var provider = stm.CreateSecurityTokenProvider(initiatorTokenRequirement);
+            var provider = stm.CreateSecurityTokenProvider(theoryData.TokenRequirement);
             var token = provider.GetToken(Timeout.InfiniteTimeSpan);
-            Assert.Equal("UserNameSecurityToken", token.GetType().Name);
-            Assert.Equal("Foo", (string)token.GetType().GetProperty("UserName").GetValue(token));
-            Assert.Equal("Bar", (string)token.GetType().GetProperty("Password").GetValue(token));
+            IdentityComparer.AreEqual(token.GetType(), theoryData.TokenType, context);
+            IdentityComparer.AreEqual(token, theoryData.ClientCredentials, context);
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
-        public void ProvidesOtherTokenProviders()
+        [Theory, MemberData(nameof(WSTrustCredentialsTheoryData))]
+        public void ProvidesOtherTokenProviders(ClientCredentialsTheoryData theoryData)
         {
-            var credentials = new WsTrustChannelClientCredentials();
+            var context = TestUtilities.WriteHeader($"{this}.ProvidesOtherTokenProviders", theoryData);
+
+            var stm = theoryData.ClientCredentials.CreateSecurityTokenManager();
+            var provider = stm.CreateSecurityTokenProvider(theoryData.TokenRequirement);
+            var token = provider.GetToken(Timeout.InfiniteTimeSpan);
+            IdentityComparer.AreEqual(token.GetType(), theoryData.TokenType, context);
+            IdentityComparer.AreEqual(token, theoryData.ClientCredentials, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ClientCredentialsTheoryData> WSTrustCredentialsTheoryData
+        {
+            get => CreateTheoryData<WsTrustChannelClientCredentials>();
+        }
+
+        public static TheoryData<ClientCredentialsTheoryData> CredentialsTheoryData
+        {
+            get => CreateTheoryData<ClientCredentials>();
+        }
+
+        private static TheoryData<ClientCredentialsTheoryData> CreateTheoryData<T>() where T : ClientCredentials, new()
+        {
+            var theoryData = new TheoryData<ClientCredentialsTheoryData>();
+            ClientCredentials credentials = new T();
             credentials.UserName.UserName = "Foo";
             credentials.UserName.Password = "Bar";
-            var stm = credentials.CreateSecurityTokenManager();
             var tokenRequirementType = typeof(ClientCredentials).Assembly.GetType("System.ServiceModel.Security.Tokens.InitiatorServiceModelSecurityTokenRequirement");
             var initiatorTokenRequirement = (SecurityTokenRequirement)Activator.CreateInstance(tokenRequirementType);
             initiatorTokenRequirement.TokenType = "http://schemas.microsoft.com/ws/2006/05/identitymodel/tokens/UserName";
-            var provider = stm.CreateSecurityTokenProvider(initiatorTokenRequirement);
-            var token = provider.GetToken(Timeout.InfiniteTimeSpan);
-            Assert.Equal("UserNameSecurityToken", token.GetType().Name);
-            Assert.Equal("Foo", (string)token.GetType().GetProperty("UserName").GetValue(token));
-            Assert.Equal("Bar", (string)token.GetType().GetProperty("Password").GetValue(token));
+            theoryData.Add(new ClientCredentialsTheoryData
+            {
+                TestId = "UserNameAuthentication",
+                ClientCredentials = credentials,
+                TokenType = typeof(ClientCredentials).Assembly.GetType("System.IdentityModel.Tokens.UserNameSecurityToken"),
+                TokenRequirement = initiatorTokenRequirement
+            });
+            credentials = new T();
+            credentials.Windows.ClientCredential.UserName = "Foz";
+            credentials.Windows.ClientCredential.Password = "Baz";
+            credentials.Windows.ClientCredential.Domain = "Bab";
+            initiatorTokenRequirement = (SecurityTokenRequirement)Activator.CreateInstance(tokenRequirementType);
+            initiatorTokenRequirement.TokenType = "http://schemas.microsoft.com/ws/2006/05/servicemodel/tokens/SspiCredential";
+            theoryData.Add(new ClientCredentialsTheoryData
+            {
+                TestId = "WindowsAuthentication",
+                ClientCredentials = credentials,
+                TokenType = typeof(ClientCredentials).Assembly.GetType("System.ServiceModel.Security.Tokens.SspiSecurityToken"),
+                TokenRequirement = initiatorTokenRequirement
+            });
+            return theoryData;
         }
     }
 
     internal class ClientCredentialCapturingBindingElement : BindingElement
     {
-        
         public ClientCredentialCapturingBindingElement()
         {
         }
@@ -80,9 +114,9 @@ namespace System.ServiceModel.Federation.Tests
                 throw new ArgumentNullException(nameof(context));
             }
 
-            foreach(var item in context.BindingParameters)
+            foreach (var item in context.BindingParameters)
             {
-                if(item is ClientCredentials clientCredentials)
+                if (item is ClientCredentials clientCredentials)
                 {
                     CapturedCredentials = clientCredentials;
                     break;

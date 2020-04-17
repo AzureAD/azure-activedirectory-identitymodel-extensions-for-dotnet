@@ -69,7 +69,7 @@ namespace System.ServiceModel.Federation
                 object settings = bindingParameterCollection[i];
                 if (settings is T)
                 {
-                    return (T)(object)settings;
+                    return (T)settings;
                 }
             }
 

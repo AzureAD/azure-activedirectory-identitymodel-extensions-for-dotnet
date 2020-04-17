@@ -5,6 +5,7 @@
 #pragma warning disable 1591
 
 using System.IdentityModel.Selectors;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace System.ServiceModel.Federation
@@ -36,7 +37,9 @@ namespace System.ServiceModel.Federation
         {
             // If token requirement matches SAML token return the custom SAML token provider
             // that performs custom work to serve up the token
-            if (tokenRequirement.TokenType.Equals(Saml2Constants.OasisWssSaml2TokenProfile11))
+            if (Saml2Constants.OasisWssSaml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
+                Saml2Constants.Saml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
+                SamlConstants.OasisWssSamlTokenProfile11.Equals(tokenRequirement.TokenType))
             {
                 return new WSTrustChannelSecurityTokenProvider(tokenRequirement, _wsTrustChannelClientCredentials.RequestContext)
                 {
