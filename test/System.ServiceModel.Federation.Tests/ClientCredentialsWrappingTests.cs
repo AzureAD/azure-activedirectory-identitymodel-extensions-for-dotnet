@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Selectors;
+﻿/*
+using System.IdentityModel.Selectors;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.Threading;
@@ -153,3 +154,4 @@ namespace System.ServiceModel.Federation.Tests
         }
     }
 }
+*/
