@@ -41,7 +41,7 @@ using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using System.Xml;
-using System.ServiceModel.Description;
+//using System.ServiceModel.Description;
 using System.Net;
 
 #if !CrossVersionTokenValidation
@@ -182,8 +182,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(WsTrustRequest).ToString(), CompareAllPublicProperties },
                 { typeof(WsTrustResponse).ToString(), CompareAllPublicProperties },
                 { typeof(UseKey).ToString(), CompareAllPublicProperties },
-                { "System.IdentityModel.Tokens.UserNameSecurityToken", CompareSecurityTokenToCredentials },
-                { "System.IdentityModel.Tokens.SspiSecurityToken", CompareSecurityTokenToCredentials }
+//                { "System.IdentityModel.Tokens.UserNameSecurityToken", CompareSecurityTokenToCredentials },
+//                { "System.IdentityModel.Tokens.SspiSecurityToken", CompareSecurityTokenToCredentials }
 #endif
             };
 
@@ -1075,6 +1075,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        /*
         public static bool CompareSecurityTokenToCredentials(object object1, object object2, CompareContext context)
         {
             var securityToken = (System.IdentityModel.Tokens.SecurityToken)object1;
@@ -1139,6 +1140,7 @@ namespace Microsoft.IdentityModel.TestUtils
             localContext.Diffs.Add($"TokenType: ${securityToken.GetType().FullName}");
             return localContext.Merge(context);
         }
+        */
 
         public static string BuildStringDiff(string label, object str1, object str2)
         {
