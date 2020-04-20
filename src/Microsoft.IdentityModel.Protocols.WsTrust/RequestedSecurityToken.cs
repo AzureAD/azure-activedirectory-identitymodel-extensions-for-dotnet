@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -40,6 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     {
         private SecurityToken _securityToken;
         private string _token;
+        private XmlElement _xmlElement;
 
         /// <summary>
         /// Creates an instance of <see cref="RequestedSecurityToken"/>.
@@ -60,6 +62,15 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
+        ///
+        /// </summary>
+        /// <param name="xmlElement"></param>
+        public RequestedSecurityToken(XmlElement xmlElement)
+        {
+            _xmlElement = xmlElement;
+        }
+
+        /// <summary>
         /// Creates an instance of <see cref="RequestedSecurityToken"/>.
         /// </summary>
         /// <param name="securityToken">a <see cref="SecurityToken"/>.</param>
@@ -76,7 +87,18 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public string Token
         {
             get => _token;
-            set => _token = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(Token)) : value; }
+            set => _token = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(Token)) : value;
+        }
+
+        /// <summary>
+        /// Gets or sets the token.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">if TokenElement is null.</exception>
+        public XmlElement TokenElement
+        {
+            get => _xmlElement;
+            set => _xmlElement = value ?? throw LogHelper.LogArgumentNullException(nameof(TokenElement));
+        }
 
 
         /// <summary>

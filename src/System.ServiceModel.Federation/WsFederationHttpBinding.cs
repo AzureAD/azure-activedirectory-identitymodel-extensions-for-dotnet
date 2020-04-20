@@ -6,6 +6,7 @@
 
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Security.Tokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace System.ServiceModel.Federation
@@ -13,12 +14,12 @@ namespace System.ServiceModel.Federation
     public class WsFederationHttpBinding : WSHttpBinding
     {
         // binding is always TransportWithMessageCredentialy
-        public WsFederationHttpBinding(IssuedTokenParameters issuedTokenParameters) : base(SecurityMode.TransportWithMessageCredential)
+        public WsFederationHttpBinding(IssuedSecurityTokenParameters issuedTokenParameters) : base(SecurityMode.TransportWithMessageCredential)
         {
-            IssuedTokenParameters = issuedTokenParameters ?? throw new ArgumentNullException(nameof(issuedTokenParameters));
+            IssuedSecurityTokenParameters = issuedTokenParameters ?? throw new ArgumentNullException(nameof(issuedTokenParameters));
         }
 
-        public IssuedTokenParameters IssuedTokenParameters
+        public IssuedSecurityTokenParameters IssuedSecurityTokenParameters
         {
             get;
         }
@@ -36,25 +37,23 @@ namespace System.ServiceModel.Federation
 
         protected override SecurityBindingElement CreateMessageSecurity()
         {
-            var issuedSecurityTokenParameters = IssuedTokenParameters.CreateIssuedSecurityTokenParameters();
-            issuedSecurityTokenParameters.KeyType = IssuedTokenParameters.SecurityKey is AsymmetricSecurityKey
-                                                        ? SecurityKeyType.AsymmetricKey
-                                                        : IssuedTokenParameters.SecurityKey is Microsoft.IdentityModel.Tokens.SymmetricSecurityKey
-                                                        ? SecurityKeyType.SymmetricKey
-                                                        : SecurityKeyType.BearerKey;
-
-            issuedSecurityTokenParameters.RequireDerivedKeys = false;
+            IssuedSecurityTokenParameters.RequireDerivedKeys = false;
             var result = new TransportSecurityBindingElement
             {
                 IncludeTimestamp = true,
-                // TODO - brentsch - need to update versions available to include WSSecurity1.1 and WsTrust 1.3.
-                MessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
             };
 
-            if (issuedSecurityTokenParameters.KeyType == SecurityKeyType.BearerKey)
-                result.EndpointSupportingTokenParameters.Signed.Add(issuedSecurityTokenParameters);
+            // TODO - result.MessageSecurityVersion is hard coded to work with current sample.
+            if (IssuedSecurityTokenParameters.KeyType == SecurityKeyType.BearerKey)
+            {
+                result.EndpointSupportingTokenParameters.Signed.Add(IssuedSecurityTokenParameters);
+                result.MessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10;
+            }
             else
-                result.EndpointSupportingTokenParameters.Endorsing.Add(issuedSecurityTokenParameters);
+            {
+                result.EndpointSupportingTokenParameters.Endorsing.Add(IssuedSecurityTokenParameters);
+                result.MessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10;
+            }
 
             SecurityBindingElement = result;
             return result;
@@ -63,7 +62,7 @@ namespace System.ServiceModel.Federation
         public override BindingElementCollection CreateBindingElements()
         {
             var bindingElementCollection = base.CreateBindingElements();
-            bindingElementCollection.Insert(0, new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement) { WSTrustContext = WSTrustContext });
+            bindingElementCollection.Insert(0, new WsFederationBindingElement(IssuedSecurityTokenParameters, SecurityBindingElement) { WSTrustContext = WSTrustContext });
             return bindingElementCollection;
         }
 
