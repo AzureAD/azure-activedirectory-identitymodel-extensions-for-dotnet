@@ -35,17 +35,19 @@ namespace System.ServiceModel.Federation
         /// <returns>The appropriate SecurityTokenProvider</returns>
         public override SecurityTokenProvider CreateSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
-            // If token requirement matches SAML token return the custom SAML token provider
-            // that performs custom work to serve up the token
+            // TODO - use logic as per desktop to determine if SecurityTokenProvider is for IssuedToken
+            // see: IsIssuedSecurityTokenRequirement
             if (Saml2Constants.OasisWssSaml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
                 Saml2Constants.Saml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
                 SamlConstants.OasisWssSamlTokenProfile11.Equals(tokenRequirement.TokenType))
             {
+                // pass issuedtokenRequirements
                 return new WSTrustChannelSecurityTokenProvider(tokenRequirement, _wsTrustChannelClientCredentials.RequestContext)
                 {
                     CacheIssuedTokens = _wsTrustChannelClientCredentials.CacheIssuedTokens,
                     MaxIssuedTokenCachingTime = _wsTrustChannelClientCredentials.MaxIssuedTokenCachingTime,
-                    IssuedTokenRenewalThresholdPercentage = _wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage
+                    IssuedTokenRenewalThresholdPercentage = _wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage,
+                    WsTrustChannelClientCredentials = _wsTrustChannelClientCredentials.Clone() as WsTrustChannelClientCredentials
                 };
             }
             // If the original ChannelFactory had a ClientCredentials instance, defer to that

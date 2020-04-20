@@ -19,6 +19,8 @@ using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using System.ComponentModel;
+using System.ServiceModel.Description;
+using Microsoft.IdentityModel.Protocols;
 
 namespace System.ServiceModel.Federation
 {
@@ -44,7 +46,7 @@ namespace System.ServiceModel.Federation
         private int _issuedTokenRenewalThresholdPercentage = DefaultIssuedTokenRenewalThresholdPercentage;
         private SecurityKeyEntropyMode _keyEntropyMode;
         private MessageSecurityVersion _messageSecurityVersion;
-        private readonly ChannelFactory<IRequestChannel> _channelFactory;
+        //private readonly ChannelFactory<IRequestChannel> _channelFactory;
         private readonly SecurityAlgorithmSuite _securityAlgorithmSuite;
 
         public WSTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement) : this(tokenRequirement, null)
@@ -58,7 +60,6 @@ namespace System.ServiceModel.Federation
             InitializeKeyEntropyMode();
             InitializeMessageSecurityVersion();
             RequestContext = string.IsNullOrEmpty(requestContext) ? Guid.NewGuid().ToString() : requestContext;
-            _channelFactory = CreateChannelFactory();
         }
 
         private void InitializeKeyEntropyMode()
@@ -111,17 +112,14 @@ namespace System.ServiceModel.Federation
             MessageSecurityVersion = messageSecurityVersion;
         }
 
+        internal WsTrustChannelClientCredentials WsTrustChannelClientCredentials { get; set; }
+
         protected virtual ChannelFactory<IRequestChannel> CreateChannelFactory()
         {
-            var factory = new ChannelFactory<IRequestChannel>(IssuerBinding, _issuedTokenParameters.IssuerAddress);
-
-            // Temporary as test STS is not trusted.
-            // This code should be removed.
-            factory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
-            factory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication();
-            factory.Credentials.ServiceCertificate.SslCertificateAuthentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
-
-            return factory;
+            var channelFactory = new ChannelFactory<IRequestChannel>(IssuerBinding, _issuedTokenParameters.IssuerAddress);
+            channelFactory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
+            channelFactory.Endpoint.EndpointBehaviors.Add(WsTrustChannelClientCredentials.Clone());
+            return channelFactory;
         }
 
         protected virtual WsTrustRequest CreateWsTrustRequest()
@@ -411,11 +409,11 @@ namespace System.ServiceModel.Federation
                     serializer.WriteRequest(writer, WsTrustVersion, request);
                     writer.Flush();
                     var reader = XmlDictionaryReader.CreateTextReader(memeoryStream.ToArray(), XmlDictionaryReaderQuotas.Max);
-
-                    IRequestChannel channel = _channelFactory.CreateChannel();
-                    Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.IssueRequest, reader));
+                    var channelFactory = CreateChannelFactory();
+                    IRequestChannel channel = channelFactory.CreateChannel();
+                    Message reply = channel.Request(Message.CreateMessage(MessageVersion.Soap12WSAddressing10, WsTrustActions.Trust13.IssueRequest, reader));
                     trustResponse = serializer.ReadResponse(reply.GetReaderAtBodyContents());
-
+                    // TODO - we need to handle faults.
                     CacheSecurityTokenResponse(request, trustResponse);
                 }
             }
@@ -425,19 +423,6 @@ namespace System.ServiceModel.Federation
             using (var stream = new MemoryStream())
             {
                 RequestSecurityTokenResponse response = trustResponse.RequestSecurityTokenResponseCollection[0];
-
-                // Get security token
-                var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                tokenHandler.TryWriteSourceData(writer, response.RequestedSecurityToken.SecurityToken);
-                writer.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-                var dom = new XmlDocument
-                {
-                    PreserveWhitespace = true
-                };
-
-                dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
 
                 // Get attached and unattached references
                 GenericXmlSecurityKeyIdentifierClause internalSecurityKeyIdentifierClause = null;
@@ -455,7 +440,7 @@ namespace System.ServiceModel.Federation
                 DateTime created = response.Lifetime?.Created ?? DateTime.UtcNow;
                 DateTime expires = response.Lifetime?.Expires ?? created.AddDays(1);
 
-                return new GenericXmlSecurityToken(dom.DocumentElement,
+                return new GenericXmlSecurityToken(response.RequestedSecurityToken.TokenElement,
                                                    proofToken,
                                                    created,
                                                    expires,
@@ -465,17 +450,15 @@ namespace System.ServiceModel.Federation
             }
         }
 
-        private GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference tokenReference)
+        private GenericXmlSecurityKeyIdentifierClause GetSecurityKeyIdentifierForTokenReference(SecurityTokenReference securityTokenReference)
         {
-            if (tokenReference == null)
+            if (securityTokenReference == null)
                 return null;
 
-            SecurityTokenReference securityTokenReference = new SecurityTokenReference
-            {
-                Id = tokenReference.KeyIdentifier.Value,
-                TokenType = tokenReference.TokenType
-            };
-            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, WsTrustVersion));
+            // TODO - this is hard coded to work with existing sample.
+            // we need use the versions that are on the outer binding.
+            WsSerializationContext wsSerializationContext = new WsSerializationContext(WsTrustVersion, WsAddressingVersion.Addressing10, WsSecurityVersion.Security10);
+            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, wsSerializationContext));
         }
 
         /// <summary>

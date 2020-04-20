@@ -21,12 +21,12 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
-                var issuedTokenParameters = new IssuedTokenParameters
+                var issuedTokenParameters = new IssuedSecurityTokenParameters
                 {
                     IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
                     IssuerBinding = new WSHttpBinding(SecurityMode.Transport),
-                    SecurityKey = theoryData.IssuedTokenParametersSecurityKey,
-                    Target = "https://localhost",
+                    //SecurityKey = theoryData.IssuedTokenParametersSecurityKey,
+                    //Target = "https://localhost",
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
