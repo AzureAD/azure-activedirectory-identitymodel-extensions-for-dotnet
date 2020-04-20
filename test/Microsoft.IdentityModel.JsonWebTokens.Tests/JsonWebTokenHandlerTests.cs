@@ -1945,6 +1945,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Feature is off pending additional memory tests.
+        /*
         // Test checks that headers created with additional claims are not added to JsonWebTokenManager.KeyToHeaderCache.
         [Fact]
         public void HeaderCacheTest()
@@ -1970,6 +1972,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+        */
 
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
         public void JWECompressionTest(CreateTokenTheoryData theoryData)
