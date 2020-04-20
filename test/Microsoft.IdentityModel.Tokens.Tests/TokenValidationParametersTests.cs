@@ -74,6 +74,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     { "CustomKey", "CustomValue" }
                 };
 
+            var validTypes = new List<string> { "ValidType1", "ValidType2", "ValidType3" };
+
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
                 ActorValidationParameters = actorValidationParameters,
@@ -92,6 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ValidAudiences = validAudiences,
                 ValidIssuer = validIssuer,
                 ValidIssuers = validIssuers,
+                ValidTypes = validTypes
             };
 
             Assert.True(object.ReferenceEquals(actorValidationParameters, validationParametersInline.ActorValidationParameters));
@@ -122,13 +125,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidAudiences = validAudiences;
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
+            validationParametersSets.ValidTypes = validTypes;
 
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
-
-            TokenValidationParameters tokenValidationParametersCloned = validationParametersInline.Clone() as TokenValidationParameters;
-            IdentityComparer.AreEqual(tokenValidationParametersCloned, validationParametersInline, compareContext);
-            //tokenValidationParametersCloned.AudienceValidator(new string[]{"bob"}, JwtTestTokens.Simple();
+            IdentityComparer.AreEqual(validationParametersInline.Clone() as TokenValidationParameters, validationParametersInline, compareContext);
 
             string id = Guid.NewGuid().ToString();
             DerivedTokenValidationParameters derivedValidationParameters = new DerivedTokenValidationParameters(id, validationParametersInline);
@@ -136,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             IdentityComparer.AreEqual(derivedValidationParameters, derivedValidationParametersCloned, compareContext);
             IdentityComparer.AreEqual(derivedValidationParameters.InternalString, derivedValidationParametersCloned.InternalString, compareContext);
 
-            TestUtilities.AssertFailIfErrors("TokenValidationParameters", compareContext.Diffs);
+            TestUtilities.AssertFailIfErrors(compareContext);
         }
 
         [Fact]

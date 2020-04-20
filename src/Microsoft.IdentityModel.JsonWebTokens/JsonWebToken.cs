@@ -332,20 +332,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private void Decode(string[] tokenParts, string rawData)
         {
             LogHelper.LogInformation(LogMessages.IDX14106, rawData);
-            if (!JsonWebTokenManager.RawHeaderToJObjectCache.TryGetValue(tokenParts[0], out var header))
+            try
             {
-                try
-                {
-                    Header = JObject.Parse(Base64UrlEncoder.Decode(tokenParts[0]));
-                    JsonWebTokenManager.RawHeaderToJObjectCache.TryAdd(tokenParts[0], Header);
-                }
-                catch (Exception ex)
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, tokenParts[0], rawData), ex));
-                }
+                Header = JObject.Parse(Base64UrlEncoder.Decode(tokenParts[0]));
             }
-            else
-                Header = header;
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, tokenParts[0], rawData), ex));
+            }
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
                 DecodeJwe(tokenParts);

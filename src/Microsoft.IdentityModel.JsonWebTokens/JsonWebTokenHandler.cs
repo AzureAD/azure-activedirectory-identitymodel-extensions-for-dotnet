@@ -458,11 +458,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var rawHeader = Base64UrlEncodedUnsignedJWSHeader;
             // If there's no additional header claims to be added to the header and the token will be signed, try to retrieve a header value from the cache.
-            if ((additionalHeaderClaims == null || additionalHeaderClaims.Count == 0) && signingCredentials != null && !JsonWebTokenManager.KeyToHeaderCache.TryGetValue(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), out rawHeader))
+            if ((additionalHeaderClaims == null || additionalHeaderClaims.Count == 0) && signingCredentials != null)
             {
                 var header = CreateDefaultJWSHeader(signingCredentials);
                 rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
-                JsonWebTokenManager.KeyToHeaderCache.TryAdd(JsonWebTokenManager.GetHeaderCacheKey(signingCredentials), rawHeader);
             } // Otherwise, if there is no outer JWT header, add additional header claims to this header.
             else if (additionalHeaderClaims != null && additionalHeaderClaims.Count != 0)
             {

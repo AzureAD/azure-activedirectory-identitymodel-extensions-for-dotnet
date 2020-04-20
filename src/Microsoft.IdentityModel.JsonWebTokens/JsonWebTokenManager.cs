@@ -33,6 +33,8 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
+    // Feature is off pending additional memory tests.
+    /*
     internal static class JsonWebTokenManager
     {
         internal static ConcurrentDictionary<string, string> KeyToHeaderCache = new ConcurrentDictionary<string, string>();
@@ -51,4 +53,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return GetHeaderCacheKey(signingCredentials.Key, signingCredentials.Algorithm);
         }
     }
+    */
 }
