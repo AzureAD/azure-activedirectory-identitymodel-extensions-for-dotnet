@@ -28,6 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsFed;
@@ -677,6 +679,28 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
+        private static XmlElement ReadXmlElement(XmlReader reader)
+        {
+            string elementName = reader.LocalName;
+            string elementNs = reader.NamespaceURI;
+            reader.MoveToContent();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (XmlWriter writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false))
+                {
+                    writer.WriteNode(reader, true);
+                    writer.Flush();
+                }
+
+                ms.Seek(0, SeekOrigin.Begin);
+                XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
+                XmlDocument dom = new XmlDocument();
+                dom.PreserveWhitespace = true;
+                dom.Load(memoryReader);
+                return  dom.DocumentElement;
+            }
+        }
+
         /// <summary>
         /// Reads the &lt;RequestedSecurityToken&gt; element.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
@@ -698,31 +722,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
             try
             {
-                bool isEmptyElement = reader.IsEmptyElement;
-                bool wasTokenRead = false;
+                if (reader.IsEmptyElement)
+                    throw XmlUtil.LogReadException("RequestedSecurityToken: reader.IsEmptyElement == true");
+
                 reader.ReadStartElement();
                 reader.MoveToContent();
-                RequestedSecurityToken requestedSecurityToken = new RequestedSecurityToken();
-
-                foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
-                {
-                    // brentsch - TODO need to remember value if handler can't be found.
-                    // perhaps add delegate?
-                    if (tokenHandler.CanReadToken(reader))
-                    {
-                        requestedSecurityToken = new RequestedSecurityToken(tokenHandler.ReadToken(reader));
-                        wasTokenRead = true;
-                        break;
-                    }
-                }
-
-                // brentsch - TODO TEST
-                if (!wasTokenRead && !isEmptyElement)
-                    reader.Skip();
-
-                if (!isEmptyElement)
-                    reader.ReadEndElement();
-
+                XmlElement xmlElement = ReadXmlElement(reader);
+                RequestedSecurityToken requestedSecurityToken = new RequestedSecurityToken(xmlElement);
+                reader.ReadEndElement();
                 return requestedSecurityToken;
             }
             catch(Exception ex)

@@ -28,14 +28,16 @@
 using System;
 using System.Net;
 using System.Net.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Federation;
 using System.ServiceModel.Security;
-using Microsoft.IdentityModel.Protocols.WsTrust;
-using Microsoft.IdentityModel.Tokens;
+using System.ServiceModel.Security.Tokens;
+using System.Threading;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
 #pragma warning disable CS3003 // Binding, EndpointAddress not CLS-compliant
@@ -48,41 +50,47 @@ namespace WsFederationClient
     /// </summary>
     class Program
     {
-        static string _authority = "https://127.0.0.1:5443/WsTrust13/transportIWA";
-        static string _target = "https://127.0.0.1:443/IssuedTokenUsingTls";
+        static string _wsFedMetadata = "<put metadata address here>";
+        static string _saml11 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1";
+        static string _saml20 = "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0";
 
         static void Main(string[] args)
         {
-            ServicePointManager.ServerCertificateValidationCallback = RemoteCertificateValidationCallback;
+            ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
 
+            BaseAddress = @"<put base address here>";
+            ServiceAddress = "https://127.0.0.1:443/IssuedTokenUsingTls";
+            //ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindBySubjectName, "RelyingParty");
+            UpnIdentity = "<put upnidentity here, this is the UPN of the user account that ADFS is running as>";
+            UsernameMixed = "trust/13/usernamemixed";
+            WindowsMixed = "trust/13/windowsmixed";
+            WindowsTransport = "trust/13/windowsTransport";
+
+            System.ServiceModel.Security.Tokens.IssuedSecurityTokenParameters istp = new System.ServiceModel.Security.Tokens.IssuedSecurityTokenParameters();
             var federationBinding = new WsFederationHttpBinding(
-                new IssuedTokenParameters
+                new IssuedSecurityTokenParameters
                 {
-                    IssuerAddress = new EndpointAddress(new Uri(_authority)),
-                    IssuerBinding = new WSHttpBinding(SecurityMode.Transport),
-                    SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray()),
-                    Target = _target,
+                    IssuerAddress = new EndpointAddress(new Uri(BaseAddress + UsernameMixed)),
+                    IssuerBinding = StsBinding(false, false),
+                    //SecurityKey = new SymmetricSecurityKey(Guid.NewGuid().ToByteArray()),
+                    //Target = ServiceAddress,
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 });
 
-            // Create the channel factory for the IRequestReply message exchange pattern.
-            var factory = new ChannelFactory<IRequestReply>(federationBinding, new EndpointAddress(new Uri(_target)));
-
-            // this code needs to be integrated into WCF so that users will not need to swap out the ClientCredentials.
-            factory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
-            factory.Endpoint.EndpointBehaviors.Add(new WsTrustChannelClientCredentials());
-
-            factory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;
-            factory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
+            var channelFactory = new ChannelFactory<IRequestReply>(federationBinding, new EndpointAddress(new Uri(ServiceAddress)));
+            channelFactory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
+            channelFactory.Endpoint.EndpointBehaviors.Add(new WsTrustChannelClientCredentials());
+            channelFactory.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None;
+            channelFactory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
             {
                 CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.None
             };
 
-            //var channel1 = federationBinding.BuildChannelFactory<IRequestReply>(federationBinding.new System.ServiceModel.Channels.BindingParameterCollection());
+            channelFactory.Credentials.UserName.UserName = "<put username here>";
+            channelFactory.Credentials.UserName.Password = "<put passord here>";
+            channelFactory.Credentials.Windows.ClientCredential = new NetworkCredential();
 
-            // Create the channel.
-            var channel = factory.CreateChannel();
-
+            var channel = channelFactory.CreateChannel();
             try
             {
                 var outboundMessage = "Hello";
@@ -98,8 +106,76 @@ namespace WsFederationClient
             Console.ReadKey();
         }
 
-        public static bool RemoteCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        public static EndpointAddress EndpointAddress { get; set; }
+
+        public static string BaseAddress { get; set; }
+
+        public static string UsernameMixed { get; set; }
+
+        public static X509Certificate2 ServiceCert { get; set; }
+
+        public static string ServiceAddress { get; set; }
+
+        public static string WindowsMixed { get; set; }
+
+        public static string WindowsTransport { get; set; }
+
+        public static string UpnIdentity { get; set; }
+
+        public static Binding StsBinding(bool usernameCredentials, bool mixedMode)
         {
+            WS2007HttpBinding binding = new WS2007HttpBinding();
+            if (usernameCredentials)
+            {
+                binding.Security.Message.EstablishSecurityContext = false;
+                binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
+                binding.Security.Message.ClientCredentialType = MessageCredentialType.UserName;
+                binding.Security.Mode = SecurityMode.TransportWithMessageCredential;
+                EndpointAddress = new EndpointAddress(BaseAddress + UsernameMixed);
+            }
+            else
+            {
+                binding.Security.Message.EstablishSecurityContext = false;
+                if (mixedMode)
+                {
+                    binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.None;
+                    binding.Security.Message.ClientCredentialType = MessageCredentialType.Windows;
+                    binding.Security.Mode = SecurityMode.TransportWithMessageCredential;
+                    binding.Security.Message.NegotiateServiceCredential = false;
+                    EndpointAddress = new EndpointAddress(new Uri(BaseAddress + WindowsMixed), EndpointIdentity.CreateUpnIdentity(UpnIdentity), new AddressHeader[0]);
+                }
+                else
+                {
+                    binding.Security.Transport.ClientCredentialType = HttpClientCredentialType.Windows;
+                    binding.Security.Mode = SecurityMode.Transport;
+                    EndpointAddress = new EndpointAddress(new Uri(BaseAddress + WindowsTransport), EndpointIdentity.CreateUpnIdentity(UpnIdentity), new AddressHeader[0]);
+                }
+            }
+
+            return binding;
+        }
+
+        public static void GetFedMetadata()
+        {
+            WsFederationConfigurationRetriever wsFederationConfigurationRetriever = new WsFederationConfigurationRetriever();
+            ConfigurationManager<WsFederationConfiguration> configurationManager = new ConfigurationManager<WsFederationConfiguration>(_wsFedMetadata, wsFederationConfigurationRetriever);
+            try
+            {
+                var configuration = WsFederationConfigurationRetriever.GetAsync(_wsFedMetadata, CancellationToken.None).GetAwaiter().GetResult();
+                var config = configurationManager.GetConfigurationAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Caught exception getting WsFedMetadata from: '{_wsFedMetadata}'. Exception: '{ex}'.");
+            }
+
+        }
+
+        static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None)
+                return true;
+
             return true;
         }
     }

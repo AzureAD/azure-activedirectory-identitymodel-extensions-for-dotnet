@@ -1,18 +1,19 @@
 ﻿using System.Collections.ObjectModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
+using System.ServiceModel.Security.Tokens;
 
 namespace System.ServiceModel.Federation
 {
     internal class WsFederationBindingElement : BindingElement
     {
-        public WsFederationBindingElement(IssuedTokenParameters issuedTokenParameters, SecurityBindingElement securityBindingElement)
+        public WsFederationBindingElement(IssuedSecurityTokenParameters issuedTokenParameters, SecurityBindingElement securityBindingElement)
         {
-            IssuedTokenParameters = issuedTokenParameters;
+            IssuedSecurityTokenParameters = issuedTokenParameters;
             SecurityBindingElement = securityBindingElement;
         }
 
-        public IssuedTokenParameters IssuedTokenParameters { get; }
+        public IssuedSecurityTokenParameters IssuedSecurityTokenParameters { get; }
 
         public SecurityBindingElement SecurityBindingElement { get; }
 
@@ -27,7 +28,7 @@ namespace System.ServiceModel.Federation
 
         public override BindingElement Clone()
         {
-            return new WsFederationBindingElement(IssuedTokenParameters, SecurityBindingElement)
+            return new WsFederationBindingElement(IssuedSecurityTokenParameters, SecurityBindingElement)
             {
                 WSTrustContext = WSTrustContext
             };
