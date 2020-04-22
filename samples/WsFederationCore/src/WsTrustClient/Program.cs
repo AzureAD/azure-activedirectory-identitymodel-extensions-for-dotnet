@@ -6,7 +6,7 @@ namespace WsTrustClient
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello WsTrustClient");
+            Console.WriteLine("Placeholder for WsTrustClient");
         }
     }
 }
