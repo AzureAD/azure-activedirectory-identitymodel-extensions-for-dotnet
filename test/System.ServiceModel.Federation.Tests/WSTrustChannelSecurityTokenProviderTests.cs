@@ -12,13 +12,14 @@ using System.Threading;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 using SecurityToken = System.IdentityModel.Tokens.SecurityToken;
 using SymmetricSecurityKey = System.IdentityModel.Tokens.SymmetricSecurityKey;
 
 namespace System.ServiceModel.Federation.Tests
 {
-    public class WSTrustChannelSecurityTokenProviderTests
+    public class WsTrustChannelSecurityTokenProviderTests
     {
         private static byte[] TestEntropy1 { get; } = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         private static byte[] TestEntropy2 { get; } = new byte[] { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
@@ -32,31 +33,31 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
-                var credentials = new WsTrustChannelClientCredentials()
+                WsTrustTokenParameters wsTrustTokenParameters = new WsTrustTokenParameters
                 {
                     CacheIssuedTokens = theoryData.CacheIssuedTokens,
+                    IssuerBinding = new BasicHttpBinding(),
                     IssuedTokenRenewalThresholdPercentage = theoryData.IssuedTokenRenewalThresholdPercentage,
-                    MaxIssuedTokenCachingTime = theoryData.MaxIssuedTokenCachingTime
+                    MaxIssuedTokenCachingTime = theoryData.MaxIssuedTokenCachingTime,
+                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
-                SecurityTokenRequirement tokenRequirements = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
-                var tokenProvider = credentials.CreateSecurityTokenManager().CreateSecurityTokenProvider(tokenRequirements) as WSTrustChannelSecurityTokenProvider;
+                var credentials = new WsTrustChannelClientCredentials()
+                {
+                };
+
+                SecurityTokenRequirement tokenRequirements = WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters);
+                var tokenProvider = credentials.CreateSecurityTokenManager().CreateSecurityTokenProvider(tokenRequirements) as WsTrustChannelSecurityTokenProvider;
 
                 theoryData.ExpectedException.ProcessNoException(context);
-                if (tokenProvider.CacheIssuedTokens != theoryData.CacheIssuedTokens)
-                {
-                    context.AddDiff($"Expected CacheIssuedTokens: {theoryData.CacheIssuedTokens}; actual CacheIssuedTokens: {tokenProvider.CacheIssuedTokens}");
-                }
+                if (tokenProvider.WsTrustTokenParameters.CacheIssuedTokens != theoryData.CacheIssuedTokens)
+                    context.AddDiff($"Expected CacheIssuedTokens: {theoryData.CacheIssuedTokens}; actual CacheIssuedTokens: {tokenProvider.WsTrustTokenParameters.CacheIssuedTokens}");
 
-                if (tokenProvider.MaxIssuedTokenCachingTime != theoryData.MaxIssuedTokenCachingTime)
-                {
-                    context.AddDiff($"Expected MaxIssuedTokenCachingTime: {theoryData.MaxIssuedTokenCachingTime}; actual MaxIssuedTokenCachingTime: {tokenProvider.MaxIssuedTokenCachingTime}");
-                }
+                if (tokenProvider.WsTrustTokenParameters.MaxIssuedTokenCachingTime != theoryData.MaxIssuedTokenCachingTime)
+                    context.AddDiff($"Expected MaxIssuedTokenCachingTime: {theoryData.MaxIssuedTokenCachingTime}; actual MaxIssuedTokenCachingTime: {tokenProvider.WsTrustTokenParameters.MaxIssuedTokenCachingTime}");
 
-                if (tokenProvider.IssuedTokenRenewalThresholdPercentage != theoryData.IssuedTokenRenewalThresholdPercentage)
-                {
-                    context.AddDiff($"Expected IssuedTokenRenewalThresholdPercentage: {theoryData.IssuedTokenRenewalThresholdPercentage}; actual IssuedTokenRenewalThresholdPercentage: {tokenProvider.IssuedTokenRenewalThresholdPercentage}");
-                }
+                if (tokenProvider.WsTrustTokenParameters.IssuedTokenRenewalThresholdPercentage != theoryData.IssuedTokenRenewalThresholdPercentage)
+                    context.AddDiff($"Expected IssuedTokenRenewalThresholdPercentage: {theoryData.IssuedTokenRenewalThresholdPercentage}; actual IssuedTokenRenewalThresholdPercentage: {tokenProvider.WsTrustTokenParameters.IssuedTokenRenewalThresholdPercentage}");
             }
             catch (Exception ex)
             {
@@ -82,14 +83,14 @@ namespace System.ServiceModel.Federation.Tests
                     CacheIssuedTokens = true,
                     IssuedTokenRenewalThresholdPercentage = 100,
                     MaxIssuedTokenCachingTime = TimeSpan.MaxValue,
-                    TestId = "MaxIssuedTokenCachingTime_OneDay"
+                    TestId = "MaxIssuedTokenCachingTime_MaxValue"
                 },
                 new WsTrustChannelSecurityTokenProviderCachingTheoryData
                 {
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 0,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IssuedTokenRenewalThresholdPercentage"),
                     TestId = "ThresholdPercentage0"
                 },
                 new WsTrustChannelSecurityTokenProviderCachingTheoryData
@@ -97,7 +98,7 @@ namespace System.ServiceModel.Federation.Tests
                     CacheIssuedTokens = false,
                     IssuedTokenRenewalThresholdPercentage = 10,
                     MaxIssuedTokenCachingTime = TimeSpan.FromDays(-1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("MaxIssuedTokenCachingTime"),
                     TestId = "TimeSpan_Negative"
                 }
             };
@@ -133,10 +134,16 @@ namespace System.ServiceModel.Federation.Tests
             get
             {
                 var data = new TheoryData<ProviderCachingTheoryData>();
-                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
+                WsTrustTokenParameters wsTrustTokenParameters = new WsTrustTokenParameters
+                {
+                    CacheIssuedTokens = true,
+                    IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
+                    IssuerBinding = new BasicHttpBinding(),
+                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
+                };
 
                 // Simple positive case
-                var provider1 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                var provider1 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider1,
@@ -146,35 +153,34 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Simple negative case
-                var provider2 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
-                data.Add(new ProviderCachingTheoryData
+                wsTrustTokenParameters = new WsTrustTokenParameters
                 {
-                    Provider1 = provider1,
-                    Provider2 = provider2,
-                    ShouldShareToken = false,
-                    TestId = "Test2"
-                });
-
-                // Confirm that no caching occurs when caching is disabled
-                var provider5 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
-                {
-                    CacheIssuedTokens = false
+                    CacheIssuedTokens = false,
+                    IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
+                    IssuerBinding = new BasicHttpBinding(),
+                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
+                var provider2 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
-                    Provider1 = provider5,
-                    Provider2 = provider5,
+                    Provider1 = provider2,
+                    Provider2 = provider2,
                     ShouldShareToken = false,
                     TestId = "Test3"
                 });
 
                 // Confirm that tokens are not cached longer than MaxIssuedTokenCachingTime
-                var provider6 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                wsTrustTokenParameters = new WsTrustTokenParameters
                 {
-                    MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(2)
+                    CacheIssuedTokens = true,
+                    IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
+                    IssuerBinding = new BasicHttpBinding(),
+                    MaxIssuedTokenCachingTime = TimeSpan.FromMilliseconds(100),
+                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
+                var provider6 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider6,
@@ -193,16 +199,11 @@ namespace System.ServiceModel.Federation.Tests
                     TestId = "Test5"
                 });
 
-                // Confirm that tokens are not cached longer than their lifetime
-                var provider7 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
-                {
-                    IssuedTokenRenewalThresholdPercentage = 95
-                };
-
+                var provider7 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
-                    Provider1 = provider7,
-                    Provider2 = provider7,
+                    Provider1 = provider6,
+                    Provider2 = provider6,
                     WaitBetweenGetTokenCallsMS = 500,
                     ShouldShareToken = true,
                     TestId = "Test6",
@@ -224,16 +225,11 @@ namespace System.ServiceModel.Federation.Tests
                     TestId = "Test7"
                 });
 
-                // Confirm that null created time is interpreted as DateTime.Now
-                var provider8 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
-                {
-                    IssuedTokenRenewalThresholdPercentage = 95
-                };
-
+                var provider8 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
-                    Provider1 = provider8,
-                    Provider2 = provider8,
+                    Provider1 = provider7,
+                    Provider2 = provider7,
                     WaitBetweenGetTokenCallsMS = 500,
                     ShouldShareToken = true,
                     TestId = "Test8",
@@ -256,7 +252,7 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Confirm that null expired time is interpreted as always expired
-                var provider9 = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                var provider9 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 provider9.SetResponseSettings(new MockResponseSettings
                 {
                     Lifetime = new Lifetime(DateTime.Now, null)
@@ -282,23 +278,27 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
-                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(
-                    new BasicHttpBinding(),
-                    keyType: theoryData.RequestKeyType,
-                    securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite,
-                    defauiltMessageSecurityVersion: MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10);
-                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement)
+                SecurityTokenRequirement tokenRequirement = WsTrustTestHelpers.CreateSecurityRequirement(
+                    new WsTrustTokenParameters
+                    {
+                        KeyType = theoryData.RequestKeyType,
+                        IssuerAddress = new EndpointAddress("https://localhost"),
+                        IssuerBinding = new BasicHttpBinding(),
+                        TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
+                    },
+                    securityAlgorithmSuite: theoryData.RequestSecurityAlgorithmSuite
+                );
+
+                var provider = new MockWsTrustChannelSecurityTokenProvider(tokenRequirement)
                 {
-                    CacheIssuedTokens = false,
                     RequestEntropy = theoryData.RequestEntropy,
                     RequestKeySizeInBits = theoryData.RequestKeySize
                 };
+
                 provider.SetResponseSettings(theoryData.ResponseSettings);
 
                 GenericXmlSecurityToken token = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
-
                 theoryData.ExpectedException.ProcessNoException(context);
-
                 if (theoryData.ExpectedProofKey is null)
                 {
                     IdentityComparer.AreIntsEqual(token.SecurityKeys.Count, 0, context);
@@ -593,9 +593,9 @@ namespace System.ServiceModel.Federation.Tests
         }
 
         [Theory, MemberData(nameof(MessageSecurityVersionTheoryData))]
-        public void MessageSecurityVersionRetrieval(MessageSecurityVersionTheoryData theoryData)
+        public void MessageSecurityVersion(MessageSecurityVersionTheoryData theoryData)
         {
-            CompareContext context = TestUtilities.WriteHeader($"{this}.MessageSecurityVersionRetrieval", theoryData);
+            CompareContext context = TestUtilities.WriteHeader($"{this}.MessageSecurityVersion", theoryData);
 
             try
             {
@@ -616,11 +616,18 @@ namespace System.ServiceModel.Federation.Tests
                     outerSecurityBindingElement.MessageSecurityVersion = theoryData.OuterBindingSecurityVersion;
                 }
 
-                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new CustomBinding(issuerBindingElements),
-                    defauiltMessageSecurityVersion: theoryData.DefaultMessageSecurityVersion,
-                    securityBindingElement: outerSecurityBindingElement);
+                SecurityTokenRequirement tokenRequirement = WsTrustTestHelpers.CreateSecurityRequirement(
+                    new WsTrustTokenParameters
+                    {
+                        IssuerAddress = new EndpointAddress("https://localhost"),
+                        IssuerBinding = new CustomBinding(issuerBindingElements),
+                        MessageSecurityVersion = theoryData.IssuerBindingSecurityVersion,
+                        TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
+                    },
+                    securityBindingElement: outerSecurityBindingElement
+                ); ;
 
-                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                var provider = new MockWsTrustChannelSecurityTokenProvider(tokenRequirement);
                 var request = provider.GetWsTrustRequest();
 
                 GenericXmlSecurityToken token = provider.GetToken(TimeSpan.FromMinutes(1)) as GenericXmlSecurityToken;
@@ -639,7 +646,7 @@ namespace System.ServiceModel.Federation.Tests
                 }
 
                 // Confirm that the correct security version action was used in the outgoing request's message header
-                var actionUsed = provider.ChannelFactory.Channel.LastActionSent;
+                var actionUsed = (provider.ChannelFactory as MockRequestChannelFactory).Channel.LastActionSent;
                 var expectedIssueRequestAction = GetWsTrustIssueRequestAction(theoryData.ExpectedMessageSecurityVersion);
                 if (!string.Equals(actionUsed, expectedIssueRequestAction, StringComparison.Ordinal))
                 {
@@ -676,59 +683,18 @@ namespace System.ServiceModel.Federation.Tests
             {
                 new MessageSecurityVersionTheoryData
                 {
-                    TestId = "WSTrust 1.3 message security version in issuer binding security binding element",
-                    IssuerBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
+                    First = false,
+                    TestId = "WSTrust13_IssuerBinding_Different",
+                    IssuerBindingSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11,
+                    ExpectedMessageSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
                 },
                 new MessageSecurityVersionTheoryData
                 {
-                    TestId = "WSTrust Feb. 2005 message security version in issuer binding security binding element",
-                    IssuerBindingSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
-                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
-                },
-                new MessageSecurityVersionTheoryData
-                {
-                    TestId = "WSTrust 1.3 default message security version",
-                    IssuerBindingSecurityVersion = null,
-                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
-                },
-                new MessageSecurityVersionTheoryData
-                {
-                    TestId = "WSTrust Feb. 2005 default message security version",
-                    IssuerBindingSecurityVersion = null,
-                    DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
-                },
-                new MessageSecurityVersionTheoryData
-                {
-                    TestId = "WSTrust 1.3 message security version in outer security binding element",
-                    IssuerBindingSecurityVersion = null,
-                    DefaultMessageSecurityVersion = null,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10
-                },
-                new MessageSecurityVersionTheoryData
-                {
-                    TestId = "WSTrust Feb. 2005 message security version in outer security binding element",
-                    IssuerBindingSecurityVersion = null,
-                    DefaultMessageSecurityVersion = null,
-                    OuterBindingSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
-                },
-                new MessageSecurityVersionTheoryData
-                {
-                    TestId = "Default to WSTrust Feb. 2005",
-                    IssuerBindingSecurityVersion = null,
-                    DefaultMessageSecurityVersion = null,
-                    OuterBindingSecurityVersion = null,
-                    ExpectedMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11
+                    TestId = "WSTrustFeb2005_IssuerBinding_Different",
+                    IssuerBindingSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10,
+                    OuterBindingSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10,
+                    ExpectedMessageSecurityVersion = ServiceModel.MessageSecurityVersion.WSSecurity10WSTrustFebruary2005WSSecureConversationFebruary2005WSSecurityPolicy11BasicSecurityProfile10
                 }
             };
         }
@@ -741,8 +707,8 @@ namespace System.ServiceModel.Federation.Tests
             try
             {
                 // Create provider
-                SecurityTokenRequirement tokenRequirement = WSTrustTestHelpers.CreateSecurityRequirement(new BasicHttpBinding());
-                var provider = new WSTrustChannelSecurityTokenProviderWithMockChannelFactory(tokenRequirement);
+                SecurityTokenRequirement tokenRequirement = WsTrustTestHelpers.CreateSecurityRequirement(new WsTrustTokenParameters { IssuerBinding = new BasicHttpBinding() });
+                var provider = new MockWsTrustChannelSecurityTokenProvider(tokenRequirement);
 
                 theoryData.Action(provider);
             }
@@ -760,52 +726,52 @@ namespace System.ServiceModel.Federation.Tests
             {
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.MaxIssuedTokenCachingTime = TimeSpan.Zero,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.MaxIssuedTokenCachingTime = TimeSpan.Zero,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("MaxIssuedTokenCachingTime"),
                     First = true,
-                    TestId = "Test1"
+                    TestId = "MaxIssuedTokenCachingTime_0"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(-1),
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
-                    TestId = "Test2"
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.MaxIssuedTokenCachingTime = TimeSpan.FromSeconds(-1),
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("MaxIssuedTokenCachingTime"),
+                    TestId = "MaxIssuedTokenCachingTime_Negative1Sec"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 0,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
-                    TestId = "Test3"
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.IssuedTokenRenewalThresholdPercentage = 0,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IssuedTokenRenewalThresholdPercentage"),
+                    TestId = "IssuedTokenRenewalThresholdPercentage_0"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = -1,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
-                    TestId = "Test4"
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.IssuedTokenRenewalThresholdPercentage = -1,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IssuedTokenRenewalThresholdPercentage"),
+                    TestId = "IssuedTokenRenewalThresholdPercentage_Negative1Sec"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.IssuedTokenRenewalThresholdPercentage = 101,
-                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("value"),
-                    TestId = "Test5"
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.IssuedTokenRenewalThresholdPercentage = 101,
+                    ExpectedException = ExpectedException.ArgumentOutOfRangeException("IssuedTokenRenewalThresholdPercentage"),
+                    TestId = "IssuedTokenRenewalThresholdPercentage_LargerThan100Percent"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.MessageSecurityVersion = null,
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.WsTrustTokenParameters.MessageSecurityVersion = null,
                     ExpectedException = ExpectedException.ArgumentNullException("value"),
-                    TestId = "Test6 (set MessageSecurityVersion to null)"
+                    TestId = "MessageSecurityVersion_Null"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p.KeyEntropyMode = (SecurityKeyEntropyMode)6,
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p.KeyEntropyMode = (SecurityKeyEntropyMode)6,
                     ExpectedException = new ExpectedException(typeof(InvalidEnumArgumentException)),
-                    TestId = "Test7 (set KeyEntropyMode to invalid enum value)"
+                    TestId = "KeyEntropyMode_Enum_Invalid"
                 },
                 new ErrorConditionTheoryData
                 {
-                    Action = (WSTrustChannelSecurityTokenProvider p) => p = new WSTrustChannelSecurityTokenProvider(null),
+                    Action = (WsTrustChannelSecurityTokenProvider p) => p = new WsTrustChannelSecurityTokenProvider(null),
                     ExpectedException = ExpectedException.ArgumentNullException("tokenRequirement"),
-                    TestId = "Test8 (create WSTrustChannelSecurityTokenProvider with null requirements)"
+                    TestId = "WSTrustChannelSecurityTokenProvider_Null_Requirements"
                 }
             };
         }

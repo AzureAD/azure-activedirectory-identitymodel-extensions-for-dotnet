@@ -6,4 +6,3 @@ rd /s/q %USERPROFILE%\.nuget\packages\System.ServiceModel.Http
 rd /s/q %USERPROFILE%\.nuget\packages\System.ServiceModel.NetTcp
 rd /s/q %USERPROFILE%\.nuget\packages\System.ServiceModel.Primitives
 rd /s/q %USERPROFILE%\.nuget\packages\System.ServiceModel.Security
-del /s/q packages/wcflocal/*.*

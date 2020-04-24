@@ -1,37 +1,27 @@
-﻿using System.Collections.ObjectModel;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
-using System.ServiceModel.Security.Tokens;
 
 namespace System.ServiceModel.Federation
 {
     internal class WsFederationBindingElement : BindingElement
     {
-        public WsFederationBindingElement(IssuedSecurityTokenParameters issuedTokenParameters, SecurityBindingElement securityBindingElement)
+        public WsFederationBindingElement(WsTrustTokenParameters wsTrustTokenParameters, SecurityBindingElement securityBindingElement)
         {
-            IssuedSecurityTokenParameters = issuedTokenParameters;
+            WsTrustTokenParameters = wsTrustTokenParameters;
             SecurityBindingElement = securityBindingElement;
         }
 
-        public IssuedSecurityTokenParameters IssuedSecurityTokenParameters { get; }
+        public WsTrustTokenParameters WsTrustTokenParameters { get; }
 
         public SecurityBindingElement SecurityBindingElement { get; }
 
-        /// <summary>
-        /// Gets or sets a context string used in outgoing WsTrust requests that may be useful for correlating requests.
-        /// </summary>
-        public string WSTrustContext
-        {
-            get;
-            set;
-        }
-
         public override BindingElement Clone()
         {
-            return new WsFederationBindingElement(IssuedSecurityTokenParameters, SecurityBindingElement)
-            {
-                WSTrustContext = WSTrustContext
-            };
+            return new WsFederationBindingElement(WsTrustTokenParameters, SecurityBindingElement);
         }
 
         public override T GetProperty<T>(BindingContext context)
@@ -58,8 +48,8 @@ namespace System.ServiceModel.Federation
                 }
             }
 
-            trustCredentials.RequestContext = WSTrustContext;
             var channelFactory = base.BuildChannelFactory<TChannel>(context);
+
             return channelFactory;
         }
 

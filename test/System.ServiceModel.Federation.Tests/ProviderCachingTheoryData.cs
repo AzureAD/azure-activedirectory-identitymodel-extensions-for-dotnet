@@ -8,9 +8,9 @@ namespace System.ServiceModel.Federation.Tests
 {
     public class ProviderCachingTheoryData : TheoryDataBase
     {
-        public WSTrustChannelSecurityTokenProvider Provider1 { get; set; }
+        public WsTrustChannelSecurityTokenProvider Provider1 { get; set; }
 
-        public WSTrustChannelSecurityTokenProvider Provider2 { get; set; }
+        public WsTrustChannelSecurityTokenProvider Provider2 { get; set; }
 
         public int WaitBetweenGetTokenCallsMS { get; set; }
 

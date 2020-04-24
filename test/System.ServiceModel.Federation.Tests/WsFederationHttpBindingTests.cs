@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IdentityModel.Selectors;
+using System.IdentityModel.Tokens;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security.Tokens;
@@ -21,27 +22,25 @@ namespace System.ServiceModel.Federation.Tests
 
             try
             {
-                var issuedTokenParameters = new IssuedSecurityTokenParameters
+                var wsTrustTokenParameters = new WsTrustTokenParameters
                 {
                     IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
                     IssuerBinding = new WSHttpBinding(SecurityMode.Transport),
-                    //SecurityKey = theoryData.IssuedTokenParametersSecurityKey,
-                    //Target = "https://localhost",
+                    KeyType = theoryData.KeyType,
+                    RequestContext = theoryData.RequestContext,
+                    Target = "https://localhost",
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
-                var binding = new WsFederationHttpBinding(issuedTokenParameters)
-                {
-                    WSTrustContext = theoryData.RequestContext
-                };
-                var provider = GetProviderForBinding(binding) as WSTrustChannelSecurityTokenProvider;
+                var binding = new WsFederationHttpBinding(wsTrustTokenParameters);
+                var provider = GetProviderForBinding(binding) as WsTrustChannelSecurityTokenProvider;
 
                 IssuedSecurityTokenParameters issuedSecurityTokenParameters = provider?.SecurityTokenRequirement.GetProperty<IssuedSecurityTokenParameters>("http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuedSecurityTokenParameters");
 
                 theoryData.ExpectedException.ProcessNoException(context);
-                if (issuedSecurityTokenParameters.KeyType != theoryData.IssuedSecurityTokenParametersKeyType)
+                if (issuedSecurityTokenParameters.KeyType != theoryData.KeyType)
                 {
-                    context.AddDiff($"Expected KeyType: {theoryData.IssuedSecurityTokenParametersKeyType}; actual KeyType: {issuedSecurityTokenParameters.KeyType}");
+                    context.AddDiff($"Expected KeyType: {theoryData.KeyType}; actual KeyType: {issuedSecurityTokenParameters.KeyType}");
                 }
 
                 // Confirm that if a request context was specified, it was used. Otherwise, a random GUID is used
@@ -75,37 +74,32 @@ namespace System.ServiceModel.Federation.Tests
             {
                 new WsFederationHttpBindingTheoryData
                 {
-                    IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
-                    IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
+                    First = true,
+                    KeyType = SecurityKeyType.AsymmetricKey,
                     RequestContext = "DummyContext",
                     TestId="Test1"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
-                    First = true,
-                    IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
-                    IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
+                    KeyType = SecurityKeyType.AsymmetricKey,
                     RequestContext = null,
                     TestId="Test2"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
-                    IssuedTokenParametersSecurityKey = KeyingMaterial.DefaultSymmetricSecurityKey_56,
-                    IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.SymmetricKey,
+                    KeyType = SecurityKeyType.SymmetricKey,
                     RequestContext = null,
                     TestId="Test3"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
-                    IssuedTokenParametersSecurityKey = null,
-                    IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.BearerKey,
+                    KeyType = SecurityKeyType.BearerKey,
                     RequestContext = null,
                     TestId="Test4"
                 },
                 new WsFederationHttpBindingTheoryData
                 {
-                    IssuedTokenParametersSecurityKey = KeyingMaterial.RsaSecurityKey_1024,
-                    IssuedSecurityTokenParametersKeyType = System.IdentityModel.Tokens.SecurityKeyType.AsymmetricKey,
+                    KeyType = SecurityKeyType.AsymmetricKey,
                     RequestContext = string.Empty,
                     TestId="Test5"
                 }

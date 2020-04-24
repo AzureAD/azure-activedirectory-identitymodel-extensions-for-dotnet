@@ -5,27 +5,27 @@
 #pragma warning disable 1591
 
 using System.IdentityModel.Selectors;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace System.ServiceModel.Federation
 {
     /// <summary>
-    /// Returns a WSTrustChannelSecurityTokenProvider to obtain token Saml
+    /// WsTrustChannelSecurityTokenProvider uses WsTrust to obtain a token from an IdentityProvider
     /// </summary>
     public class WsTrustChannelSecurityTokenManager : ClientCredentialsSecurityTokenManager
     {
         private WsTrustChannelClientCredentials _wsTrustChannelClientCredentials;
-        private SecurityTokenManager _clientCredentialsSecurityTokenManager;
 
-        public WsTrustChannelSecurityTokenManager(WsTrustChannelClientCredentials clientCredentials)
-            : base(clientCredentials)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="wsTrustChannelClientCredentials"></param>
+        public WsTrustChannelSecurityTokenManager(WsTrustChannelClientCredentials wsTrustChannelClientCredentials)
+            : base(wsTrustChannelClientCredentials)
         {
-            _wsTrustChannelClientCredentials = clientCredentials;
-            if (_wsTrustChannelClientCredentials.ClientCredentials != null)
-            {
-                _clientCredentialsSecurityTokenManager = _wsTrustChannelClientCredentials.ClientCredentials.CreateSecurityTokenManager();
-            }
+            _wsTrustChannelClientCredentials = wsTrustChannelClientCredentials ?? throw LogHelper.LogArgumentNullException(nameof(wsTrustChannelClientCredentials));
         }
 
         /// <summary>
@@ -35,25 +35,24 @@ namespace System.ServiceModel.Federation
         /// <returns>The appropriate SecurityTokenProvider</returns>
         public override SecurityTokenProvider CreateSecurityTokenProvider(SecurityTokenRequirement tokenRequirement)
         {
-            // TODO - use logic as per desktop to determine if SecurityTokenProvider is for IssuedToken
-            // see: IsIssuedSecurityTokenRequirement
+            if (tokenRequirement == null)
+                throw LogHelper.LogArgumentNullException(nameof(tokenRequirement));
+
+            // TODO - we should check the value of the IssuedTokenType on WsTrustTokenParameters
             if (Saml2Constants.OasisWssSaml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
                 Saml2Constants.Saml2TokenProfile11.Equals(tokenRequirement.TokenType) ||
                 SamlConstants.OasisWssSamlTokenProfile11.Equals(tokenRequirement.TokenType))
             {
                 // pass issuedtokenRequirements
-                return new WSTrustChannelSecurityTokenProvider(tokenRequirement, _wsTrustChannelClientCredentials.RequestContext)
+                return new WsTrustChannelSecurityTokenProvider(tokenRequirement)
                 {
-                    CacheIssuedTokens = _wsTrustChannelClientCredentials.CacheIssuedTokens,
-                    MaxIssuedTokenCachingTime = _wsTrustChannelClientCredentials.MaxIssuedTokenCachingTime,
-                    IssuedTokenRenewalThresholdPercentage = _wsTrustChannelClientCredentials.IssuedTokenRenewalThresholdPercentage,
-                    WsTrustChannelClientCredentials = _wsTrustChannelClientCredentials.Clone() as WsTrustChannelClientCredentials
+                    ClientCredentials = _wsTrustChannelClientCredentials.ClientCredentials
                 };
             }
             // If the original ChannelFactory had a ClientCredentials instance, defer to that
-            else if (_clientCredentialsSecurityTokenManager != null)
+            else if (_wsTrustChannelClientCredentials.SecurityTokenManager != null)
             {
-                return _clientCredentialsSecurityTokenManager.CreateSecurityTokenProvider(tokenRequirement);
+                return _wsTrustChannelClientCredentials.SecurityTokenManager.CreateSecurityTokenProvider(tokenRequirement);
             }
             // This means ClientCredentials was replaced with WsTrustChannelClientCredentials in the ChannelFactory so defer
             // to base class to create other token providers.
