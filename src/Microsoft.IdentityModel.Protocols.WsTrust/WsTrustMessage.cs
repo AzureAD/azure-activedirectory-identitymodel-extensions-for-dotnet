@@ -25,16 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsAddressing;
 using Microsoft.IdentityModel.Protocols.WsFed;
 using Microsoft.IdentityModel.Protocols.WsPolicy;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
-using System;
-using System.Collections.Generic;
-using System.Xml;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
@@ -390,6 +389,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             set => _tokenType = (string.IsNullOrEmpty(value)) ? throw LogHelper.LogArgumentNullException(nameof(value)) : value;
         }
 
+        // TODO - can this be determined from the version of the request passed in the ctor of WsTrustRequest or when creating a WsTrustResponse.
         /// <summary>
         /// Gets or sets the WsTrustVesion.
         /// </summary>
