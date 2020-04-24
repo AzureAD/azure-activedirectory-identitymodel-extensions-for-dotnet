@@ -32,10 +32,8 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.ServiceModel.Description;
 using System.ServiceModel.Federation;
 using System.ServiceModel.Security;
-using System.ServiceModel.Security.Tokens;
 using WcfUtilities;
 
 #pragma warning disable CS3003 // Binding, EndpointAddress not CLS-compliant
@@ -77,8 +75,6 @@ namespace WsFederationClient
                      SecurityMode.TransportWithMessageCredential);
 
             var channelFactory = new ChannelFactory<IRequestReply>(serviceBinding, new EndpointAddress(ServiceAddress));
-            channelFactory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
-            channelFactory.Endpoint.EndpointBehaviors.Add(new WsTrustChannelClientCredentials());
 
             // TODO find out why this needs to be set to none.
             channelFactory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
@@ -140,7 +136,7 @@ namespace WsFederationClient
         {
             return BindingUtilities.SetMaxTimeout(
                 new WsFederationHttpBinding(
-                    new IssuedSecurityTokenParameters
+                    new WsTrustTokenParameters
                     {
                         IssuerAddress = issuerAddress,
                         IssuerBinding = issuerBinding,
@@ -186,7 +182,7 @@ namespace WsFederationClient
                 });
         }
 
-        static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return true;
         }

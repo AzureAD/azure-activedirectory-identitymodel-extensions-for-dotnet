@@ -14,17 +14,13 @@ namespace System.ServiceModel.Federation
     /// </summary>
     public class WsTrustChannelClientCredentials : ClientCredentials
     {
-        private TimeSpan _maxIssuedTokenCachingTime = WSTrustChannelSecurityTokenProvider.DefaultMaxIssuedTokenCachingTime;
-        private int _issuedTokenRenewalThresholdPercentage = WSTrustChannelSecurityTokenProvider.DefaultIssuedTokenRenewalThresholdPercentage;
-
         /// <summary>
         /// Default constructor
+        /// TODO - do we need this ctor
         /// </summary>
         public WsTrustChannelClientCredentials()
             : base()
         {
-            // Set SupportInteractive to false to suppress Cardspace UI
-            //SupportInteractive = false;
         }
 
         /// <summary>
@@ -35,54 +31,24 @@ namespace System.ServiceModel.Federation
             : base(other)
         {
             ClientCredentials = other.ClientCredentials;
-            RequestContext = other.RequestContext;
-            CacheIssuedTokens = other.CacheIssuedTokens;
-            MaxIssuedTokenCachingTime = other.MaxIssuedTokenCachingTime;
-            IssuedTokenRenewalThresholdPercentage = other.IssuedTokenRenewalThresholdPercentage;
-        }
-
-        public WsTrustChannelClientCredentials(ClientCredentials clientCredentials)
-        {
-            ClientCredentials = clientCredentials;
+            SecurityTokenManager = other.SecurityTokenManager;
         }
 
         /// <summary>
-        /// The context to use in outgoing WsTrustRequests. Useful for correlation WSTrust actions.
+        ///
         /// </summary>
-        internal string RequestContext { get; set; }
+        /// <param name="clientCredentials"></param>
+        public WsTrustChannelClientCredentials(ClientCredentials clientCredentials)
+        {
+            // TODO - throw on null
+            ClientCredentials = clientCredentials;
+        }
 
         /// <summary>
         ///  The client credentials from BindingParameters passed by ChannelFactory. There might be
         ///  other credentials configured on this instance so used as a fallback.
         /// </summary>
-        internal ClientCredentials ClientCredentials { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether issued tokens should be cached and reused within their expiry periods.
-        /// </summary>
-        public bool CacheIssuedTokens { get; set; } = WSTrustChannelSecurityTokenProvider.DefaultCacheIssuedTokens;
-
-        /// <summary>
-        /// Gets or sets the maximum time an issued token will be cached before renewing it.
-        /// </summary>
-        public TimeSpan MaxIssuedTokenCachingTime
-        {
-            get => _maxIssuedTokenCachingTime;
-            set => _maxIssuedTokenCachingTime = value <= TimeSpan.Zero
-                ? throw new ArgumentOutOfRangeException(nameof(value), "TimeSpan must be greater than TimeSpan.Zero.") // TODO - Get exception messages from resources
-                : value;
-        }
-
-        /// <summary>
-        /// Gets or sets the percentage of the issued token's lifetime at which it should be renewed instead of cached.
-        /// </summary>
-        public int IssuedTokenRenewalThresholdPercentage
-        {
-            get => _issuedTokenRenewalThresholdPercentage;
-            set => _issuedTokenRenewalThresholdPercentage = (value <= 0 || value > 100)
-                ? throw new ArgumentOutOfRangeException(nameof(value), "Issued token renewal threshold percentage must be greater than or equal to 1 and less than or equal to 100.")
-                : value;
-        }
+        public ClientCredentials ClientCredentials { get; private set; }
 
         protected override ClientCredentials CloneCore()
         {
@@ -95,7 +61,12 @@ namespace System.ServiceModel.Federation
         /// <returns>WSTrustChannelSecurityTokenManager</returns>
         public override SecurityTokenManager CreateSecurityTokenManager()
         {
+            if (ClientCredentials != null)
+                SecurityTokenManager = ClientCredentials.CreateSecurityTokenManager();
+    
             return new WsTrustChannelSecurityTokenManager((WsTrustChannelClientCredentials)Clone());
         }
+
+        internal SecurityTokenManager SecurityTokenManager { get; private set; }
     }
 }

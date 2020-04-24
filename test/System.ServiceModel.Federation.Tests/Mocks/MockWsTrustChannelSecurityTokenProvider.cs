@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IdentityModel.Selectors;
-using System.Reflection;
 using System.ServiceModel.Channels;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 
@@ -13,24 +12,21 @@ namespace System.ServiceModel.Federation.Tests.Mocks
     /// Test class that overrides WSTrustChannelSecurityTokenProvider's CreateChannelFactory method
     /// to allow testing WSTrustChannelSecurityTokenProvider without actually sending any WCF messages.
     /// </summary>
-    class WSTrustChannelSecurityTokenProviderWithMockChannelFactory : WSTrustChannelSecurityTokenProvider
+    class MockWsTrustChannelSecurityTokenProvider : WsTrustChannelSecurityTokenProvider
     {
         public Entropy RequestEntropy { get; set; }
 
         public int? RequestKeySizeInBits { get; set; }
-        public MockRequestChannelFactory ChannelFactory { get; } = new MockRequestChannelFactory();
 
-        public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement, string requestContext) :
-            base(tokenRequirement, requestContext)
-        { }
+        private MockRequestChannelFactory _mockRequestChannelFactory = new MockRequestChannelFactory();
 
-        public WSTrustChannelSecurityTokenProviderWithMockChannelFactory(SecurityTokenRequirement tokenRequirement) :
+        public MockWsTrustChannelSecurityTokenProvider(SecurityTokenRequirement tokenRequirement) :
             base(tokenRequirement)
         { }
 
         // Override channel factory creation with a mock channel factory so that it's possible to test WSTrustChannelSecurityTokenProvider
         // without actually making requests to an STS for tokens.
-        protected override ChannelFactory<IRequestChannel> CreateChannelFactory() => ChannelFactory;
+        internal override ChannelFactory<IRequestChannel> ChannelFactory => _mockRequestChannelFactory;
 
         protected override WsTrustRequest CreateWsTrustRequest()
         {
@@ -49,10 +45,7 @@ namespace System.ServiceModel.Federation.Tests.Mocks
 
         public void SetResponseSettings(MockResponseSettings responseSettings)
         {
-            var channelFactory = typeof(WSTrustChannelSecurityTokenProvider)
-                .GetField("_channelFactory", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(this) as MockRequestChannelFactory;
-
+            var channelFactory = ChannelFactory as MockRequestChannelFactory;
             channelFactory.ResponseSettings = responseSettings;
         }
     }

@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public string RequestType
         {
             get => _requestType;
-            set => _requestType = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(RequestType)) : value;
+            internal set => _requestType = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(RequestType)) : value;
         }
     }
 }

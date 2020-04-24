@@ -3,16 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IdentityModel.Selectors;
-using System.IdentityModel.Tokens;
 using System.Reflection;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Security;
-using System.ServiceModel.Security.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace System.ServiceModel.Federation.Tests
 {
-    static class WSTrustTestHelpers
+    static class WsTrustTestHelpers
     {
         const string TargetAddressUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/TargetAddress";
         const string IssuerBindingUri = "http://schemas.microsoft.com/ws/2006/05/servicemodel/securitytokenrequirement/IssuerBinding";
@@ -28,37 +25,25 @@ namespace System.ServiceModel.Federation.Tests
             .GetValue(null) as SecurityAlgorithmSuite;
 
         public static SecurityTokenRequirement CreateSecurityRequirement(
-            Binding issuerBinding,
-            string issuerAddress = "http://localhost",
-            string tokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
-            string targetAddress = "http://localhost",
-            SecurityKeyType keyType = SecurityKeyType.BearerKey,
+            WsTrustTokenParameters wsTrustTokenParameters,
             SecurityAlgorithmSuite securityAlgorithmSuite = null,
-            MessageSecurityVersion defauiltMessageSecurityVersion = null,
             SecurityBindingElement securityBindingElement = null)
         {
-            var requirements = new SecurityTokenRequirement
+            var securityTokenRequirement = new SecurityTokenRequirement
             {
-                TokenType = tokenType
+                TokenType = wsTrustTokenParameters.TokenType
             };
 
-            var issuedTokenParameters = new IssuedSecurityTokenParameters
-            {
-                IssuerAddress = new EndpointAddress(issuerAddress),
-                KeyType = keyType,
-                IssuerBinding = issuerBinding,
-                DefaultMessageSecurityVersion = defauiltMessageSecurityVersion
-            };
-            requirements.Properties.Add(IssuerBindingUri, issuerBinding);
-            requirements.Properties.Add(TargetAddressUri, new EndpointAddress(targetAddress));
-            requirements.Properties.Add(IssuedTokenParametersUri, issuedTokenParameters);
-            requirements.Properties.Add(SecurityAlgorithmSuiteUri, securityAlgorithmSuite ?? DefaultSecurityAlgorithmSuite);
+            securityTokenRequirement.Properties.Add(IssuerBindingUri, wsTrustTokenParameters.IssuerBinding);
+            securityTokenRequirement.Properties.Add(TargetAddressUri, wsTrustTokenParameters.IssuerAddress);
+            securityTokenRequirement.Properties.Add(IssuedTokenParametersUri, wsTrustTokenParameters);
+            securityTokenRequirement.Properties.Add(SecurityAlgorithmSuiteUri, securityAlgorithmSuite ?? DefaultSecurityAlgorithmSuite);
             if (securityBindingElement != null)
             {
-                requirements.Properties.Add(SecurityBindingElementUri, securityBindingElement);
+                securityTokenRequirement.Properties.Add(SecurityBindingElementUri, securityBindingElement);
             }
 
-            return requirements;
+            return securityTokenRequirement;
         }
     }
 }
