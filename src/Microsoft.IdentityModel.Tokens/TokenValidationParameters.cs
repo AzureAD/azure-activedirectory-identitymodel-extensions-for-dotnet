@@ -113,6 +113,15 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate IEnumerable<SecurityKey> TokenDecryptionKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for TypeValidator.
+    /// </summary>
+    /// <param name="type">The token type to validate.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>The actual token type, that may be the same as 'type' or a different value if the token type was resolved from a different location.</returns>
+    public delegate string TypeValidator(string type, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
@@ -175,6 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
             ValidateIssuer = other.ValidateIssuer;
@@ -512,6 +522,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateTokenReplay"/> is false, this delegate will still be called.
         /// </remarks>
         public TokenReplayValidator TokenReplayValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the type of the token.
+        /// If the token type cannot be validated, an exception MUST be thrown by the delegate.
+        /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
+        /// Implementations that need to resolve it from a different location can use the 'token' parameter.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the 'type' of the token, instead of normal processing.
+        /// This means that no default 'type' validation will occur.
+        /// </remarks>
+        public TypeValidator TypeValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if an actor token is detected, whether it should be validated.
