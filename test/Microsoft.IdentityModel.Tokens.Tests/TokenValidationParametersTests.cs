@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 39)
+            if (properties.Length != 40)
                 Assert.True(false, "Number of properties has changed from 39 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
@@ -74,6 +74,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     { "CustomKey", "CustomValue" }
                 };
 
+            TypeValidator typeValidator = (typ, token, parameters) => "ActualType";
+
             var validTypes = new List<string> { "ValidType1", "ValidType2", "ValidType3" };
 
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
@@ -88,6 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
+                TypeValidator = typeValidator,
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidAudience = validAudience,
@@ -103,6 +106,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(validationParametersInline.SaveSigninToken);
             Assert.False(validationParametersInline.ValidateAudience);
             Assert.False(validationParametersInline.ValidateIssuer);
+            Assert.True(object.ReferenceEquals(validationParametersInline.TypeValidator, typeValidator));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidIssuer, validIssuer));
@@ -119,6 +123,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             validationParametersSets.SaveSigninToken = true;
+            validationParametersSets.TypeValidator = typeValidator;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
             validationParametersSets.ValidAudience = validAudience;
@@ -146,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 39)
+            if (properties.Length != 40)
                 Assert.True(false, "Number of public fields has changed from 39 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
@@ -183,6 +188,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Null(validationParameters.LifetimeValidator);
             Assert.Null(validationParameters.IssuerSigningKeyResolver);
             Assert.Null(validationParameters.IssuerValidator);
+            Assert.Null(validationParameters.TypeValidator);
             Assert.Null(validationParameters.ValidAudiences);
             Assert.Null(validationParameters.ValidIssuers);
             Assert.Null(validationParameters.SignatureValidator);

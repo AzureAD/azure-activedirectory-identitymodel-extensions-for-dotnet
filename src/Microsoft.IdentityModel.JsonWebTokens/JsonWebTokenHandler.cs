@@ -1179,7 +1179,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
            
-            JwtTokenUtilities.ValidateTokenType(jsonWebToken.Typ, validationParameters);
+            JwtTokenUtilities.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
 
             return new TokenValidationResult
             {

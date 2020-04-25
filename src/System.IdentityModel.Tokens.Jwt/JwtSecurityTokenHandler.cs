@@ -746,7 +746,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
             
-            JwtTokenUtilities.ValidateTokenType(jwtToken.Header.Typ, validationParameters);
+            JwtTokenUtilities.ValidateTokenType(jwtToken.Header.Typ, jwtToken, validationParameters);
 
             var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
