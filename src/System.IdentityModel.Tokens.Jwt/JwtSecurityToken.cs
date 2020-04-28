@@ -308,7 +308,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
-        /// Note that if this JWT is nested ( <see cref="JwtSecurityToken.InnerToken"/> != null, this property represnts the payload of the most inner token.
+        /// Note that if this JWT is nested ( <see cref="JwtSecurityToken.InnerToken"/> != null, this property represents the payload of the most inner token.
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
