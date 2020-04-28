@@ -286,8 +286,12 @@ namespace System.ServiceModel.Federation
             if (securityTokenReference == null)
                 return null;
 
-            // TODO - need to create an the WsSerializationContext of the 'target'.
-            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, _requestSerializationContext));
+            // this is tricky.
+            // the SecurityTokenReference must be in the wsse namespace of the security binding that will communicate with the relying party.
+            // the 'TokenType must be in wsse 1.1
+            // TODO - need to create to obtain the actual security version that will be used for the relying party.
+            // even though the MessageSecurityVersion is 1.1, the security header is written with 1.0
+            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, new WsSerializationContext(WsTrustFeb2005Version.TrustFeb2005)));
         }
 
         /// <summary>
@@ -475,6 +479,9 @@ namespace System.ServiceModel.Federation
         /// </summary>
         private void SetInboundSerializationContext()
         {
+            // WsTrustTokenParameters.MessageSecurityVersion can be checked directly instead of
+            // extracting MessageSecurityVersion from the issuer binding, because the WsFederationHttpBinding
+            // creates its security binding element using the MessageSecurityVersion from its WsTrustTokenParameters.
             MessageSecurityVersion messageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion;
             if (messageSecurityVersion == null)
                 messageSecurityVersion = WsTrustTokenParameters.DefaultMessageSecurityVersion;

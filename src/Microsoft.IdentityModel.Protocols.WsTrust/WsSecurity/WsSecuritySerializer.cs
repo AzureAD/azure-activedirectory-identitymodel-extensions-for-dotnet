@@ -176,8 +176,10 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
             writer.WriteStartElement(serializationContext.SecurityConstants.Prefix, WsSecurityElements.SecurityTokenReference, serializationContext.SecurityConstants.Namespace);
 
+            // the SecurityTokenReference must be in the wsse namespace of the security binding that will communicate with the relying party.
+            // For Saml2 tokens, the 'TokenType must be in wsse 1.1 namespace
             if (!string.IsNullOrEmpty(securityTokenReference.TokenType))
-                writer.WriteAttributeString(WsSecurityAttributes.TokenType, serializationContext.SecurityConstants.Namespace, securityTokenReference.TokenType);
+                writer.WriteAttributeString(WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace, securityTokenReference.TokenType);
 
             if (!string.IsNullOrEmpty(securityTokenReference.Id))
                 writer.WriteAttributeString(WsUtilityAttributes.Id, securityTokenReference.Id);

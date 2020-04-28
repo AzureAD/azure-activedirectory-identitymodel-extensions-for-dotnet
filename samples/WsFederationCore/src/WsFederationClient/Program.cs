@@ -32,6 +32,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Description;
 using System.ServiceModel.Federation;
 using System.ServiceModel.Security;
 using WcfUtilities;
@@ -46,8 +47,6 @@ namespace WsFederationClient
 
         static void Main(string[] args)
         {
-            ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
-
             IssuerBaseAddress = @"Put base addreess to ADFS here";
             ServiceAddress = "https://127.0.0.1:443/IssuedTokenUsingTls";
             ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindBySubjectName, "RelyingParty");
@@ -75,8 +74,7 @@ namespace WsFederationClient
                      SecurityMode.TransportWithMessageCredential);
 
             var channelFactory = new ChannelFactory<IRequestReply>(serviceBinding, new EndpointAddress(ServiceAddress));
-
-            // TODO find out why this needs to be set to none.
+            // this allows to use an untrused certificate for the STS
             channelFactory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
             {
                 CertificateValidationMode = X509CertificateValidationMode.None
@@ -91,6 +89,16 @@ namespace WsFederationClient
             {
                 channelFactory.Credentials.Windows.ClientCredential = new NetworkCredential();
             }
+
+            WsTrustChannelClientCredentials wsTrustChannelClientCredentials = new WsTrustChannelClientCredentials(channelFactory.Credentials);
+            // this allows to use an untrused certificate for the relying party.
+            wsTrustChannelClientCredentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
+            {
+                CertificateValidationMode = X509CertificateValidationMode.None
+            };
+
+            channelFactory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
+            channelFactory.Endpoint.EndpointBehaviors.Add(wsTrustChannelClientCredentials);
 
             Console.WriteLine($"=========================================");
             Console.WriteLine($"WsFederationClient *** CORE ***.");
@@ -180,11 +188,6 @@ namespace WsFederationClient
                         Mode = SecurityMode.Transport
                     },
                 });
-        }
-
-        public static bool ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            return true;
         }
     }
 
