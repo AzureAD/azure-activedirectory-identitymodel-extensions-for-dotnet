@@ -479,6 +479,9 @@ namespace System.ServiceModel.Federation
         /// </summary>
         private void SetInboundSerializationContext()
         {
+            // WsTrustTokenParameters.MessageSecurityVersion can be checked directly instead of
+            // extracting MessageSecurityVersion from the issuer binding, because the WsFederationHttpBinding
+            // creates its security binding element using the MessageSecurityVersion from its WsTrustTokenParameters.
             MessageSecurityVersion messageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion;
             if (messageSecurityVersion == null)
                 messageSecurityVersion = WsTrustTokenParameters.DefaultMessageSecurityVersion;
