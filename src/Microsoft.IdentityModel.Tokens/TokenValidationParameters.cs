@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="type">The token type to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    /// <returns>The actual token type, that may be the same as 'type' or a different value if the token type was resolved from a different location.</returns>
+    /// <returns>The actual token type, that may be the same as <paramref name="type"/> or a different value if the token type was resolved from a different location.</returns>
     public delegate string TypeValidator(string type, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
