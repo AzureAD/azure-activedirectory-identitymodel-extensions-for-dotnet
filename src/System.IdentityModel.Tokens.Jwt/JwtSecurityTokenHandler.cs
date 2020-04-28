@@ -1262,6 +1262,10 @@ namespace System.IdentityModel.Tokens.Jwt
                         {
                             return signingKey;
                         }
+
+                        X509SecurityKey x509Key = signingKey as X509SecurityKey;
+                        if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
+                            return signingKey;
                     }
                 }
             }
