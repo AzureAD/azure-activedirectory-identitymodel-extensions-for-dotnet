@@ -39,6 +39,7 @@ namespace System.ServiceModel.Federation
         /// </summary>
         /// <param name="clientCredentials"></param>
         public WsTrustChannelClientCredentials(ClientCredentials clientCredentials)
+            : base(clientCredentials)
         {
             // TODO - throw on null
             ClientCredentials = clientCredentials;
