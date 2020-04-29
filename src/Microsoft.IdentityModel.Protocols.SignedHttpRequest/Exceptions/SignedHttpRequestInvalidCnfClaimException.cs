@@ -26,12 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
     /// This exception is thrown when a SignedHttpRequest handler encounters an error during 'cnf' claim resolution.   
     /// </summary>
+    [Serializable]
     public class SignedHttpRequestInvalidCnfClaimException : SignedHttpRequestValidationException
     {
         /// <summary>
@@ -57,6 +59,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
         public SignedHttpRequestInvalidCnfClaimException(string message, Exception innerException)
             : base(message, innerException)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SignedHttpRequestInvalidCnfClaimException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected SignedHttpRequestInvalidCnfClaimException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }
