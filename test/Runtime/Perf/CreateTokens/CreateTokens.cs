@@ -59,7 +59,7 @@ namespace RuntimeTests
                 NumIterations = testConfig.NumIterations,
                 SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                 Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
-                SecurityTokenDescriptor = TestData.RsaSecurityTokenDescriptor
+                SecurityTokenDescriptor = TestData.SecurityTokenDescriptor(TestData.RsaSigningCredentials_2048Sha256)
             };
 
             // run each test to set any static data

@@ -1,18 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <Import Project="build.props" />
-  <PropertyGroup>
-    <AssemblyVersion>$(Version)</AssemblyVersion>
-  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1F3EDF4D-F972-4E7B-875A-30B5A30BBC4E}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>RuntimeTests</RootNamespace>
-    <AssemblyName>ValidateTokens.$(Version)</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>ValidateTokens</RootNamespace>
+    <AssemblyName>ValidateTokens</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -37,7 +33,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>$(RootFolder)\Artifacts\debug\$(Version)\</OutputPath>
+    <OutputPath>bin\debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,21 +42,30 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>$(RootFolder)\Artifacts\release\($Version)\</OutputPath>
+    <OutputPath>bin\release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="$(Version)" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(Version)" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="$(Version)" />
+    <PackageReference Include="BenchmarkDotNet">
+      <Version>0.12.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.5.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="6.5.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt">
+      <Version>6.5.1</Version>
+    </PackageReference>
   </ItemGroup>
-  <Import Project="$(RootFolder)\Common\RuntimeCommon.items" />
   <ItemGroup>
+    <Compile Include="..\..\Common\TestData.cs">
+      <Link>TestData.cs</Link>
+    </Compile>
+    <Compile Include="CreateJwtTokensAlgorithms.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ValidateTokens.cs" />
+    <Compile Include="MeasureDifferentAlgorithms.cs" />
+    <Compile Include="MeasureTokenHandlers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

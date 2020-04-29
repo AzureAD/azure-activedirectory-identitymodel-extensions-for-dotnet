@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using ValidateTokensCommon;
-
-namespace ValidateToken
+namespace ValidateTokens
 {
     class Program
     {

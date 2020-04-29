@@ -25,13 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using BenchmarkDotNet.Running;
+
 namespace RuntimeTests
 {
     class Program
     {
         static void Main(string[] args)
         {
-            ValidateTokens.Run(args);
+            BenchmarkRunner.Run<MeasureDifferentAlgorithms>();
         }
     }
 }

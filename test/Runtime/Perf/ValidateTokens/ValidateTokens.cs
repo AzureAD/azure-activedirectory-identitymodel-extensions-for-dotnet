@@ -58,7 +58,7 @@ namespace RuntimeTests
                 Claims = TestData.ClaimsDictionary,
                 Issuer = TestData.Issuer,
                 Subject = TestData.Subject,
-                SigningCredentials = TestData.RsaSigningCredentials_2048
+                SigningCredentials = TestData.RsaSigningCredentials_2048Sha256
             };
 
             var jwtTokenHandler = new JwtSecurityTokenHandler();

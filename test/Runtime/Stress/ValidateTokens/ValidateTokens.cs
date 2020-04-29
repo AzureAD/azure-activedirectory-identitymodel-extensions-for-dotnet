@@ -25,19 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Tokens.Saml2;
+using RuntimeCommon;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using RuntimeTestCommon;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml;
-using Microsoft.IdentityModel.Tokens.Saml2;
 
-namespace ValidateTokensCommon
+namespace ValidateTokens
 {
     public class ValidateTokens
     {
@@ -57,9 +55,8 @@ namespace ValidateTokensCommon
                     TokenTestExecutors.SamlSecurityTokenHandler_CreateToken_InParallel,
                 });
 
-            var securityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(Default.SamlClaims);
-            securityTokenDescriptor.Claims = Default.PayloadDictionary;
-            var tokenValidationParameters = Default.AsymmetricSignTokenValidationParameters;
+            var securityTokenDescriptor = TestData.SecurityTokenDescriptor(TestData.RsaSigningCredentials_2048Sha256);
+            var tokenValidationParameters = TestData.TokenValidationParameters(securityTokenDescriptor.SigningCredentials.Key);
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var jwt = jwtTokenHandler.CreateEncodedJwt(securityTokenDescriptor);
             var samlTokenHandler = new SamlSecurityTokenHandler();
@@ -70,7 +67,7 @@ namespace ValidateTokensCommon
             var saml2 = saml2TokenHandler.WriteToken(saml2Token);
 
             var testConfig = TestConfig.ParseArgs(args);
-            var tokenTestData = new TokenTestData
+            var tokenTestData = new TokenTestRunData
             {
                 JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
                 JsonWebTokenHandler = new JsonWebTokenHandler(),

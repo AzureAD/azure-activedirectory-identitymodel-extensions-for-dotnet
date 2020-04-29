@@ -1,6 +1,0 @@
-﻿<Project>
-  <PropertyGroup>
-    <Version>x.y.z</Version>
-	<RootFolder>root.folder</RootFolder>
-  </PropertyGroup>
-</Project>
