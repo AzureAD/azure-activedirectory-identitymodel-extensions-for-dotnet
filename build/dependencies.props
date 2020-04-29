@@ -17,6 +17,6 @@
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
-    <WCFVersion>5.0.0-ci.20223.1</WCFVersion>
+    <WCFVersion>5.0.0-ci.20229.1</WCFVersion>
   </PropertyGroup>
 </Project>

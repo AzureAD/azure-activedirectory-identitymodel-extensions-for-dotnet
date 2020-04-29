@@ -50,10 +50,10 @@ namespace RelyingParty
             // bypasses certificate validation
             ServicePointManager.ServerCertificateValidationCallback = ValidateServerCertificate;
 
-            IssuerBaseAddress = @"put ADFS base address here";
+            IssuerBaseAddress = "Put base address to ADFS here";
             ServiceAddress = "https://127.0.0.1:443/IssuedTokenUsingTls";
-            ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindBySubjectName, "RelyingParty");
-            UpnIdentity = "put upn here";
+            ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindByThumbprint, "826068f64be4baad2b2bf49795fe6ac8b0020a8d");
+            UpnIdentity = "Put UpnIdentity here";
             UsernameMixed = "trust/13/usernamemixed";
             WindowsTransport = "trust/13/windowsTransport";
 
@@ -63,7 +63,7 @@ namespace RelyingParty
             // service host
             var serviceHost = new ServiceHost(typeof(RequestReply), new Uri(ServiceAddress));
             serviceHost.AddServiceEndpoint(typeof(IRequestReply), serviceBinding, ServiceAddress);
-            serviceHost.Credentials.ServiceCertificate.Certificate = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindBySubjectName, "RelyingParty");
+            serviceHost.Credentials.ServiceCertificate.Certificate = ServiceCert;
 
             // setting UseIdentityConfiguration = true is what allows Saml2 tokens, but default only SAML1 tokens are allowed.
             // bypass all checks of inbound token
