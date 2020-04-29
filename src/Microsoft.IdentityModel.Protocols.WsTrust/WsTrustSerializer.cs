@@ -679,7 +679,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             }
         }
 
-        private static XmlElement ReadXmlElement(XmlReader reader)
+        internal static XmlElement CreateXmlElement(XmlReader reader)
         {
             string elementName = reader.LocalName;
             string elementNs = reader.NamespaceURI;
@@ -727,7 +727,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 reader.ReadStartElement();
                 reader.MoveToContent();
-                XmlElement xmlElement = ReadXmlElement(reader);
+                XmlElement xmlElement = CreateXmlElement(reader);
                 RequestedSecurityToken requestedSecurityToken = new RequestedSecurityToken(xmlElement);
                 reader.ReadEndElement();
                 return requestedSecurityToken;
@@ -1438,6 +1438,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestedSecurityToken"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
+        /// <remarks>The order of writing the <see cref="RequestedSecurityToken"/>is: <see cref="RequestedSecurityToken.TokenElement"/>, <see cref="RequestedSecurityToken.SecurityToken"/>.
+        /// For <see cref="RequestedSecurityToken.SecurityToken"/> to be written there must be a <see cref="SecurityTokenHandler"/> found in <see cref="WsTrustSerializer.SecurityTokenHandlers"/> that can write the <see cref="SecurityToken"/>.
+        /// By default: <see cref="Saml2SecurityToken"/> and <see cref="SamlSecurityToken"/> are supported.</remarks>
         public void WriteRequestedSecurityToken(XmlDictionaryWriter writer, WsSerializationContext serializationContext, RequestedSecurityToken requestedSecurityToken)
         {
             //  <t:RequestedSecurityToken>
@@ -1450,14 +1453,22 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             try
             {
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedSecurityToken, serializationContext.TrustConstants.Namespace);
-                foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
-                {
-                    if (tokenHandler.CanWriteSecurityToken(requestedSecurityToken.SecurityToken))
-                    {
-                        if (!tokenHandler.TryWriteSourceData(writer, requestedSecurityToken.SecurityToken))
-                            tokenHandler.WriteToken(writer, requestedSecurityToken.SecurityToken);
 
-                        break;
+                if (requestedSecurityToken.TokenElement != null)
+                {
+                    requestedSecurityToken.TokenElement.WriteTo(writer);
+                }
+                else if (requestedSecurityToken.SecurityToken != null)
+                {
+                    foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
+                    {
+                        if (tokenHandler.CanWriteSecurityToken(requestedSecurityToken.SecurityToken))
+                        {
+                            if (!tokenHandler.TryWriteSourceData(writer, requestedSecurityToken.SecurityToken))
+                                tokenHandler.WriteToken(writer, requestedSecurityToken.SecurityToken);
+
+                            break;
+                        }
                     }
                 }
 

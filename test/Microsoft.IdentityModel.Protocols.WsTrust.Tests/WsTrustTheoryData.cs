@@ -30,6 +30,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsSecurity;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -91,6 +92,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         public SecurityTokenReference RequestedUnattachedReference { get; set; }
 
         public RequestSecurityTokenResponse RequestSecurityTokenResponse { get; set; }
+
+        public SecurityTokenHandler SecurityTokenHandler { get; set; }
+
+        public TokenValidationParameters TokenValidationParameters { get; set; }
 
         public UseKey UseKey { get; set; }
 

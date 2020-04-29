@@ -36,13 +36,13 @@ using Microsoft.IdentityModel.Tokens.Saml2;
 
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+// Arrays as attribute arguments are not CLS-compliant
+#pragma warning disable CS3016
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class RequestSecurityTokenResponseTests
     {
-
         [Theory, MemberData(nameof(ReadAndWriteResponseTheoryData))]
         public void ReadAndWriteResponse(WsTrustTheoryData theoryData)
         {
@@ -50,27 +50,45 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var memeoryStream = new MemoryStream();
-                var writer = XmlDictionaryWriter.CreateTextWriter(memeoryStream, Encoding.UTF8);
-                var serializer = new WsTrustSerializer();
-                serializer.WriteResponse(writer, theoryData.WsTrustVersion, theoryData.WsTrustResponse);
-                writer.Flush();
-                var bytes = memeoryStream.ToArray();
-                var xml = Encoding.UTF8.GetString(bytes);
-                var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
-                var response = serializer.ReadResponse(reader);
-                IdentityComparer.AreEqual(response, theoryData.WsTrustResponse, context);
-                var validationParameters = new TokenValidationParameters
+                WsTrustResponse wsTrustResponse = null;
+                using (var memoryStream = new MemoryStream())
                 {
-                    IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
-                    ValidateAudience = false,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false
-                };
+                    var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+                    var serializer = new WsTrustSerializer();
+                    serializer.WriteResponse(writer, theoryData.WsTrustVersion, theoryData.WsTrustResponse);
+                    writer.Flush();
 
-                var tokenHandler = new Saml2SecurityTokenHandler();
-                var token = response.RequestSecurityTokenResponseCollection[0].RequestedSecurityToken.SecurityToken as Saml2SecurityToken;
-                var cp = tokenHandler.ValidateToken(token.Assertion.CanonicalString, validationParameters, out SecurityToken securityToken);
+                    // sometimes it is helpful to see the xml that was generated.
+                    // the next two lines are for this purpose.
+                    var bytes = memoryStream.ToArray();
+                    var xml = Encoding.UTF8.GetString(bytes);
+
+                    var reader = XmlDictionaryReader.CreateTextReader(bytes, XmlDictionaryReaderQuotas.Max);
+                    wsTrustResponse = serializer.ReadResponse(reader);
+                    IdentityComparer.AreEqual(wsTrustResponse, theoryData.WsTrustResponse, context);
+                }
+
+                // indicates we want to validate the token
+                if (theoryData.SecurityTokenHandler != null)
+                {
+                    var requestedSecurityToken = wsTrustResponse.RequestSecurityTokenResponseCollection[0].RequestedSecurityToken;
+                    if (requestedSecurityToken.SecurityToken != null)
+                    {
+                        theoryData.SecurityTokenHandler.ValidateToken(theoryData.SecurityTokenHandler.WriteToken(requestedSecurityToken.SecurityToken), theoryData.TokenValidationParameters, out SecurityToken securityToken);
+                    }
+                    else if (requestedSecurityToken.TokenElement != null)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false);
+                            requestedSecurityToken.TokenElement.WriteTo(writer);
+                            writer.Flush();
+                            var tokenXml = Encoding.UTF8.GetString(memoryStream.ToArray());
+                            theoryData.SecurityTokenHandler.ValidateToken(tokenXml, theoryData.TokenValidationParameters, out _);
+                        }
+                    }
+                }
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -87,14 +105,22 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             {
                 var tokenHandler = new Saml2SecurityTokenHandler();
                 var tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
-                var samlToken = tokenHandler.CreateToken(tokenDescriptor);
-                var signedToken = tokenHandler.WriteToken(samlToken);
-                var signedSamlToken = tokenHandler.ReadToken(signedToken);
+                XmlElement xmlElement = CreateXmlElement(tokenHandler, tokenDescriptor);
+
                 return new TheoryData<WsTrustTheoryData>
                 {
                     new WsTrustTheoryData
                     {
                         First = true,
+                        SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        TestId = "WsTrustResponseWithSaml2SecurityToken",
+                        TokenValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = Default.AsymmetricSigningCredentials.Key,
+                            ValidateAudience = false,
+                            ValidateIssuer = false,
+                            ValidateLifetime = false
+                        },
                         WsTrustResponse = new WsTrustResponse(new RequestSecurityTokenResponse
                         {
                             AppliesTo = WsDefaults.AppliesTo,
@@ -103,14 +129,29 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                             Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
                             KeyType = WsDefaults.KeyType,
                             RequestedProofToken = new RequestedProofToken(new BinarySecret(Guid.NewGuid().ToByteArray())),
-                            RequestedSecurityToken = new RequestedSecurityToken(signedSamlToken),
+                            RequestedSecurityToken = new RequestedSecurityToken(xmlElement),
                             TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
                             UnattachedReference = WsDefaults.SecurityTokenReference
                         }),
-                        TestId = "WsTrustResponseWithSaml2SecurityToken",
                         WsTrustVersion = WsTrustVersion.Trust13
                     }
                 };
+            }
+        }
+
+        private static XmlElement CreateXmlElement(SecurityTokenHandler tokenHandler, SecurityTokenDescriptor tokenDescriptor)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var xmlWriter = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
+                {
+                    tokenHandler.WriteToken(xmlWriter, tokenHandler.CreateToken(tokenDescriptor));
+                    xmlWriter.Flush();
+                }
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                using (var xmlReader = XmlDictionaryReader.CreateTextReader(memoryStream, XmlDictionaryReaderQuotas.Max))
+                    return WsTrustSerializer.CreateXmlElement(xmlReader);
             }
         }
 
