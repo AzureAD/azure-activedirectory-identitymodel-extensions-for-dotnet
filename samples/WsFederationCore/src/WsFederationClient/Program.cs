@@ -26,13 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.Net;
-using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
-using System.ServiceModel.Description;
 using System.ServiceModel.Federation;
 using System.ServiceModel.Security;
 using WcfUtilities;
@@ -47,10 +46,12 @@ namespace WsFederationClient
 
         static void Main(string[] args)
         {
-            IssuerBaseAddress = @"Put base addreess to ADFS here";
+            IssuerBaseAddress = @"Put base address to ADFS here";
+            Password = "Put Password here";
             ServiceAddress = "https://127.0.0.1:443/IssuedTokenUsingTls";
-            ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindBySubjectName, "RelyingParty");
-            UpnIdentity = "PutUpnIdentity here";
+            ServiceCert = CertificateUtilities.GetCertificate(StoreName.My, StoreLocation.LocalMachine, X509FindType.FindByThumbprint, "826068f64be4baad2b2bf49795fe6ac8b0020a8d");
+            UpnIdentity = "Put UpnIdentity here";
+            Username = "Put Username here";
             UsernameMixed = "trust/13/usernamemixed";
             WindowsTransport = "trust/13/windowstransport";
 
@@ -69,36 +70,34 @@ namespace WsFederationClient
                     false,
                     SecurityKeyType.SymmetricKey,
                     _saml20,
-                     new EndpointAddress(new Uri(IssuerBaseAddress + WindowsTransport), EndpointIdentity.CreateUpnIdentity(UpnIdentity), new AddressHeader[0]),
-                     IssuerBindingWindowsTransport(),
-                     SecurityMode.TransportWithMessageCredential);
+                    // currently we are unable to set the UPN or SPN this will only work with default identity
+                    // it hasn't been tested yet.
+                    new EndpointAddress(new Uri(IssuerBaseAddress + WindowsTransport)),
+                    IssuerBindingWindowsTransport(),
+                    SecurityMode.TransportWithMessageCredential);
 
             var channelFactory = new ChannelFactory<IRequestReply>(serviceBinding, new EndpointAddress(ServiceAddress));
-            // this allows to use an untrused certificate for the STS
+            // TODO - create RelyingParty certificate so this is custom certificate is not needed.
+
+            // this allows to use an untrused certificate for the STS and RelyingParty
+            // the validator will be used for the STS and RelyingParty
+            // if seperate validation is required, then a WsTrustClientCredentials could be created with its own CertificateValidator passing the outer
+            // ClientCredentials as a parameter.
             channelFactory.Credentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
             {
-                CertificateValidationMode = X509CertificateValidationMode.None
+                CertificateValidationMode = X509CertificateValidationMode.Custom,
+                CustomCertificateValidator = new CustomCertificateValidator()
             };
 
             if (username)
             {
-                channelFactory.Credentials.UserName.UserName = "Put username here";
-                channelFactory.Credentials.UserName.Password = "Put password here";
+                channelFactory.Credentials.UserName.Password = Password;
+                channelFactory.Credentials.UserName.UserName = Username;
             }
             else
             {
                 channelFactory.Credentials.Windows.ClientCredential = new NetworkCredential();
             }
-
-            WsTrustChannelClientCredentials wsTrustChannelClientCredentials = new WsTrustChannelClientCredentials(channelFactory.Credentials);
-            // this allows to use an untrused certificate for the relying party.
-            wsTrustChannelClientCredentials.ServiceCertificate.SslCertificateAuthentication = new X509ServiceCertificateAuthentication
-            {
-                CertificateValidationMode = X509CertificateValidationMode.None
-            };
-
-            channelFactory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
-            channelFactory.Endpoint.EndpointBehaviors.Add(wsTrustChannelClientCredentials);
 
             Console.WriteLine($"=========================================");
             Console.WriteLine($"WsFederationClient *** CORE ***.");
@@ -130,7 +129,7 @@ namespace WsFederationClient
 
         public static string IssuerBaseAddress { get; set; }
 
-        public static string UsernameMixed { get; set; }
+        public static string Password { get; set;  }
 
         public static X509Certificate2 ServiceCert { get; set; }
 
@@ -139,6 +138,11 @@ namespace WsFederationClient
         public static string WindowsTransport { get; set; }
 
         public static string UpnIdentity { get; set; }
+
+        public static string Username { get; set; }
+
+        public static string UsernameMixed { get; set; }
+
 
         public static Binding ServiceBinding(bool establishSecurityContext, SecurityKeyType issuedKeyType, string issuedTokenType, EndpointAddress issuerAddress, Binding issuerBinding, SecurityMode mode)
         {
@@ -188,6 +192,18 @@ namespace WsFederationClient
                         Mode = SecurityMode.Transport
                     },
                 });
+        }
+    }
+
+    /// <summary>
+    /// Provides the ability to customize validation X509Certificates.
+    /// </summary>
+    public class CustomCertificateValidator : X509CertificateValidator
+    {
+        public override void Validate(X509Certificate2 certificate)
+        {
+            // perform check here
+            return;
         }
     }
 

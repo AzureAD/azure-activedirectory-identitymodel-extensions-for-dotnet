@@ -85,6 +85,9 @@ namespace WcfUtilities
                     }
                 }
 
+                if (certificate == null)
+                    throw new InvalidProgramException($"Cert not found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+
                 Console.WriteLine($"Cert found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
                 return certificate;
             }

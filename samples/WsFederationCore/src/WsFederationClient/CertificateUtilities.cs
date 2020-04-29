@@ -35,18 +35,61 @@ namespace WcfUtilities
         public static X509Certificate2 GetCertificate(StoreName name, StoreLocation location, X509FindType findType, object value)
         {
             X509Store store = null;
+            X509Certificate2 certificate = null;
             try
             {
                 store = new X509Store(name, location);
                 store.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection collection = store.Certificates.Find(findType, value, false);
-                if (collection.Count == 1)
-                    return collection[0];
 
                 if (collection.Count == 0)
                     throw new InvalidProgramException($"Cert not found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
 
-                throw new InvalidProgramException($"Multiple certs found. Count: '{collection.Count}',   StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                // we need this loop as some X509FindType will match multiple certs, so need to check for exact match and single
+                foreach (var cert in collection)
+                {
+                    switch (findType)
+                    {
+                        case X509FindType.FindByThumbprint:
+                            if (cert.Thumbprint.Equals(value as string, StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (certificate == null)
+                                    certificate = cert;
+                                else
+                                    throw new InvalidOperationException($"Mulitple certs found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                            }
+                            break;
+
+                        case X509FindType.FindBySubjectName:
+                            if (cert.SubjectName.Equals(value))
+                            {
+                                if (certificate == null)
+                                    certificate = cert;
+                                else
+                                    throw new InvalidOperationException($"Mulitple certs found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                            }
+                            break;
+
+                        case X509FindType.FindBySubjectDistinguishedName:
+                            if (cert.SubjectName.Equals(value))
+                            {
+                                if (certificate == null)
+                                    certificate = cert;
+                                else
+                                    throw new InvalidOperationException($"Mulitple certs found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                            }
+                            break;
+
+                        default:
+                            throw new NotSupportedException($"X509FindType not supported: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                    }
+                }
+
+                if (certificate == null)
+                    throw new InvalidProgramException($"Cert not found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+
+                Console.WriteLine($"Cert found: StoreName: '{name}', StoreLocation: '{location}', X509FindType: '{findType}', findValue: '{value}'.");
+                return certificate;
             }
             finally
             {
