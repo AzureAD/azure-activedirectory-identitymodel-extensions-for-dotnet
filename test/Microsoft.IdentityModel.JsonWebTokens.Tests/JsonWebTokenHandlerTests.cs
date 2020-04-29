@@ -1820,6 +1820,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             else
                 theoryData.ExpectedException.ProcessNoException();
 
+            Assert.Equal(theoryData.TokenTypeHeader, tokenValidationResult.TokenType);
         }
 
         public static TheoryData<JwtTheoryData> ValidateTypeTheoryData = JwtSecurityTokenHandlerTests.ValidateTypeTheoryData;
