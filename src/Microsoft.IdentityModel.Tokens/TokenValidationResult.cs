@@ -67,6 +67,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the token type of the <see cref="SecurityToken"/> that was validated.
+        /// When a <see cref="TokenValidationParameters.TypeValidator"/> is registered,
+        /// the type returned by the delegate is used to populate this property.
+        /// Otherwise, the type is resolved from the token itself, if available
+        /// (e.g for a JSON Web Token, from the "typ" header). 
         /// </summary>
         public string TokenType { get; set; }
     }

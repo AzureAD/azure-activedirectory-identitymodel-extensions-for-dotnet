@@ -1146,7 +1146,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         SecurityToken = jwtToken,
                         ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
-                        IsValid = true
+                        IsValid = true,
+                        TokenType = innerTokenValidationResult.TokenType
                     };
                 }
                 else
@@ -1178,13 +1179,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
-            Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
+            var type = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
 
             return new TokenValidationResult
             {
                 SecurityToken = jsonWebToken,
                 ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters, issuer),
-                IsValid = true
+                IsValid = true,
+                TokenType = type
             };
         }
 

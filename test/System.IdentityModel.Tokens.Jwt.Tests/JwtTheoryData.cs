@@ -49,5 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public TokenType TokenType { get; set; }
 
         public TokenValidationParameters ValidationParameters { get; set; }
+
+        public string TokenTypeHeader { get; set; }
     }
 }
