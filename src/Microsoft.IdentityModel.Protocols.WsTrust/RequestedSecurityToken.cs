@@ -40,7 +40,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     public class RequestedSecurityToken
     {
         private SecurityToken _securityToken;
-        private string _token;
         private XmlElement _xmlElement;
 
         /// <summary>
@@ -49,16 +48,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         public RequestedSecurityToken()
         {
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="RequestedSecurityToken"/>.
-        /// </summary>
-        /// <param name="token">a security token</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception>
-        public RequestedSecurityToken(string token)
-        {
-            Token = token;
         }
 
         /// <summary>
@@ -78,16 +67,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public RequestedSecurityToken(SecurityToken securityToken)
         {
             SecurityToken = securityToken;
-        }
-
-        /// <summary>
-        /// Gets or sets the token.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">if Token is null or empty string.</exception>
-        public string Token
-        {
-            get => _token;
-            set => _token = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException(nameof(Token)) : value;
         }
 
         /// <summary>
