@@ -15,6 +15,7 @@ namespace System.ServiceModel.Federation
 {
     public class WsTrustTokenParameters : IssuedSecurityTokenParameters
     {
+        internal const bool DefaultEstablishSecurityContext = true;
         public static readonly bool DefaultCacheIssuedTokens = true;
         public static readonly int DefaultIssuedTokenRenewalThresholdPercentage = 60;
         public static readonly TimeSpan DefaultMaxIssuedTokenCachingTime = TimeSpan.MaxValue;
@@ -31,6 +32,7 @@ namespace System.ServiceModel.Federation
         public WsTrustTokenParameters()
         {
             KeyType = DefaultSecurityKeyType;
+            EstablishSecurityContext = DefaultEstablishSecurityContext;
             DefaultMessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10;
             MessageSecurityVersion = MessageSecurityVersion.WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10;
         }
@@ -50,6 +52,7 @@ namespace System.ServiceModel.Federation
             _messageSecurityVersion = other.MessageSecurityVersion;
             RequestContext = other.RequestContext;
             _target = other.Target;
+            EstablishSecurityContext = other.EstablishSecurityContext;
         }
 
         protected override SecurityTokenParameters CloneCore()
@@ -100,5 +103,7 @@ namespace System.ServiceModel.Federation
             get => _target;
             set => _target = !string.IsNullOrEmpty(value) ? value : throw new ArgumentNullException(nameof(value));
         }
+
+        public bool EstablishSecurityContext { get; set; }
     }
 }
