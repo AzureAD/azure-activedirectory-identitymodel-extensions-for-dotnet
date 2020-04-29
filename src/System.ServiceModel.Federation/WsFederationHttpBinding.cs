@@ -6,6 +6,7 @@
 
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Channels;
+using System.ServiceModel.Security.Tokens;
 
 namespace System.ServiceModel.Federation
 {
@@ -30,19 +31,37 @@ namespace System.ServiceModel.Federation
             var result = new TransportSecurityBindingElement
             {
                 IncludeTimestamp = true,
+                MessageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion
             };
 
             if (WsTrustTokenParameters.KeyType == SecurityKeyType.BearerKey)
             {
                 result.EndpointSupportingTokenParameters.Signed.Add(WsTrustTokenParameters);
-                result.MessageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion;
             }
             else
             {
                 result.EndpointSupportingTokenParameters.Endorsing.Add(WsTrustTokenParameters);
-                result.MessageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion;
             }
 
+            if (WsTrustTokenParameters.EstablishSecurityContext)
+            {
+                var securityContextWrappingElement = new TransportSecurityBindingElement
+                {
+                    IncludeTimestamp = true,
+                    MessageSecurityVersion = WsTrustTokenParameters.MessageSecurityVersion
+                };
+                securityContextWrappingElement.LocalClientSettings.DetectReplays = false;
+
+                var scParameters = new SecureConversationSecurityTokenParameters(result)
+                {
+                    RequireCancellation = true,
+                    RequireDerivedKeys = false
+                };
+                securityContextWrappingElement.EndpointSupportingTokenParameters.Endorsing.Add(scParameters);
+
+                result = securityContextWrappingElement;
+            }
+            
             SecurityBindingElement = result;
             return result;
         }
