@@ -19,7 +19,7 @@ namespace System.ServiceModel.Federation
         public static readonly bool DefaultCacheIssuedTokens = true;
         public static readonly int DefaultIssuedTokenRenewalThresholdPercentage = 60;
         public static readonly TimeSpan DefaultMaxIssuedTokenCachingTime = TimeSpan.MaxValue;
-        public static readonly SecurityKeyType DefaultSecurityKeyType = SecurityKeyType.BearerKey;
+        public static readonly SecurityKeyType DefaultSecurityKeyType = SecurityKeyType.SymmetricKey;
 
         private TimeSpan _maxIssuedTokenCachingTime = DefaultMaxIssuedTokenCachingTime;
         private MessageSecurityVersion _messageSecurityVersion;
