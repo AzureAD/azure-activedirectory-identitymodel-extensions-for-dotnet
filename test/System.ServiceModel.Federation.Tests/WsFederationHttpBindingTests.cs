@@ -5,7 +5,6 @@
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
 using System.ServiceModel.Channels;
-using System.ServiceModel.Description;
 using System.ServiceModel.Security.Tokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -29,7 +28,8 @@ namespace System.ServiceModel.Federation.Tests
                     KeyType = theoryData.KeyType,
                     RequestContext = theoryData.RequestContext,
                     Target = "https://localhost",
-                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
+                    TokenType = Saml2Constants.OasisWssSaml2TokenProfile11,
+                    EstablishSecurityContext = false
                 };
 
                 var binding = new WsFederationHttpBinding(wsTrustTokenParameters);
@@ -109,11 +109,6 @@ namespace System.ServiceModel.Federation.Tests
         public static SecurityTokenProvider GetProviderForBinding(Binding binding)
         {
             var factory = new ChannelFactory<IRequestChannel>(binding, new EndpointAddress(new Uri("https://localhost")));
-
-            // TODO: This substitution shouldn't be necessary in the future.
-            factory.Endpoint.EndpointBehaviors.Remove(typeof(ClientCredentials));
-            factory.Endpoint.EndpointBehaviors.Add(new WsTrustChannelClientCredentials());
-
             IRequestChannel channel = factory.CreateChannel();
             channel.Open();
 

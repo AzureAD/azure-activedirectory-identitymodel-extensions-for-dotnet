@@ -153,7 +153,7 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Simple negative case
-                wsTrustTokenParameters = new WsTrustTokenParameters
+                var wsTrustTokenParametersNegative = new WsTrustTokenParameters
                 {
                     CacheIssuedTokens = false,
                     IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
@@ -161,7 +161,7 @@ namespace System.ServiceModel.Federation.Tests
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
-                var provider2 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
+                var provider2 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParametersNegative));
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider2,
@@ -171,7 +171,7 @@ namespace System.ServiceModel.Federation.Tests
                 });
 
                 // Confirm that tokens are not cached longer than MaxIssuedTokenCachingTime
-                wsTrustTokenParameters = new WsTrustTokenParameters
+                var wsTrustTokenParametersShortMaxIssueCaching = new WsTrustTokenParameters
                 {
                     CacheIssuedTokens = true,
                     IssuerAddress = new EndpointAddress(new Uri("https://localhost")),
@@ -180,13 +180,13 @@ namespace System.ServiceModel.Federation.Tests
                     TokenType = Saml2Constants.OasisWssSaml2TokenProfile11
                 };
 
-                var provider6 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
+                var provider6 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParametersShortMaxIssueCaching));
                 data.Add(new ProviderCachingTheoryData
                 {
                     Provider1 = provider6,
                     Provider2 = provider6,
                     WaitBetweenGetTokenCallsMS = 500,
-                    ShouldShareToken = true,
+                    ShouldShareToken = false,
                     TestId = "Test4"
                 });
 
@@ -202,8 +202,8 @@ namespace System.ServiceModel.Federation.Tests
                 var provider7 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
-                    Provider1 = provider6,
-                    Provider2 = provider6,
+                    Provider1 = provider7,
+                    Provider2 = provider7,
                     WaitBetweenGetTokenCallsMS = 500,
                     ShouldShareToken = true,
                     TestId = "Test6",
@@ -228,8 +228,8 @@ namespace System.ServiceModel.Federation.Tests
                 var provider8 = new MockWsTrustChannelSecurityTokenProvider(WsTrustTestHelpers.CreateSecurityRequirement(wsTrustTokenParameters));
                 data.Add(new ProviderCachingTheoryData
                 {
-                    Provider1 = provider7,
-                    Provider2 = provider7,
+                    Provider1 = provider8,
+                    Provider2 = provider8,
                     WaitBetweenGetTokenCallsMS = 500,
                     ShouldShareToken = true,
                     TestId = "Test8",
