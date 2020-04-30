@@ -97,6 +97,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
         }
 
+        public static X509SigningCredentials X509AsymmetricSigningCredentials
+        {
+            get => new X509SigningCredentials(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature);
+        }
+
         public static SignatureProvider AsymmetricSignatureProvider
         {
             get => CryptoProviderFactory.Default.CreateForSigning(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaSha256);
@@ -713,9 +718,28 @@ namespace Microsoft.IdentityModel.TestUtils
             };
         }
 
+        public static SecurityTokenDescriptor X509SecurityTokenDescriptor(EncryptingCredentials encryptingCredentials, X509SigningCredentials signingCredentials, List<Claim> claims)
+        {
+            return new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                EncryptingCredentials = encryptingCredentials,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                Issuer = Issuer,
+                IssuedAt = DateTime.UtcNow,
+                NotBefore = DateTime.UtcNow,
+                SigningCredentials = signingCredentials,
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
+            };
+        }
+
         public static SecurityTokenDescriptor SecurityTokenDescriptor(SigningCredentials signingCredentials)
         {
             return SecurityTokenDescriptor(null, signingCredentials, null);
+        }
+        public static SecurityTokenDescriptor X509SecurityTokenDescriptor(X509SigningCredentials signingCredentials)
+        {
+            return X509SecurityTokenDescriptor(null, signingCredentials, null);
         }
 
         public static string Session
@@ -943,6 +967,11 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string SymmetricJws
         {
             get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2));
+        }
+
+        public static string AsymmetricJws
+        {
+            get => Jwt(X509SecurityTokenDescriptor(X509AsymmetricSigningCredentials));
         }
 #endif
 
