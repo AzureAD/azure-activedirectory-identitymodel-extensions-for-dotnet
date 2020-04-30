@@ -642,7 +642,7 @@ namespace System.ServiceModel.Federation.Tests
                 var expectedIssueAction = GetWsTrustIssueAction(theoryData.ExpectedMessageSecurityVersion);
                 if (!string.Equals(request.RequestType, expectedIssueAction, StringComparison.Ordinal))
                 {
-                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedIssueAction}; actual {request.RequestType}");
+                    context.AddDiff($"Unexpected RequestType. Expected {expectedIssueAction}; actual {request.RequestType}");
                 }
 
                 // Confirm that the correct security version action was used in the outgoing request's message header
@@ -650,21 +650,21 @@ namespace System.ServiceModel.Federation.Tests
                 var expectedIssueRequestAction = GetWsTrustIssueRequestAction(theoryData.ExpectedMessageSecurityVersion);
                 if (!string.Equals(actionUsed, expectedIssueRequestAction, StringComparison.Ordinal))
                 {
-                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedIssueRequestAction}; actual {actionUsed}");
+                    context.AddDiff($"Unexpected Action. Expected {expectedIssueRequestAction}; actual {actionUsed}");
                 }
 
                 // Confirm that the correct key type was used in the outgoing request
-                var expectedKeyType = GetWsTrustBearerKeyType(theoryData.ExpectedMessageSecurityVersion);
+                var expectedKeyType = GetWsTrustSymmetricKeyType(theoryData.ExpectedMessageSecurityVersion);
                 if (!string.Equals(request.KeyType, expectedKeyType, StringComparison.Ordinal))
                 {
-                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedKeyType}; actual {request.KeyType}");
+                    context.AddDiff($"Unexpected KeyType. Expected {expectedKeyType}; actual {request.KeyType}");
                 }
 
                 // Confirm that the correct WsTrust version was used in the outgoing request
                 var expectedTrustVersion = GetWsTrustVersion(theoryData.ExpectedMessageSecurityVersion);
                 if (request.WsTrustVersion != expectedTrustVersion)
                 {
-                    context.AddDiff($"Unexpected WsTrust action. Expected {expectedTrustVersion}; actual {request.WsTrustVersion}");
+                    context.AddDiff($"Unexpected Trust Version. Expected {expectedTrustVersion}; actual {request.WsTrustVersion}");
                 }
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -833,6 +833,26 @@ namespace System.ServiceModel.Federation.Tests
             if (trustVersion == TrustVersion.WSTrustFeb2005)
             {
                 return WsTrustKeyTypes.TrustFeb2005.Bearer;
+            }
+
+            throw new ArgumentException("Unsupported trust version");
+        }
+
+        private string GetWsTrustSymmetricKeyType(MessageSecurityVersion messageSecurityVersion)
+        {
+            var trustVersion = messageSecurityVersion?.TrustVersion;
+
+            if (trustVersion is null)
+            {
+                return null;
+            }
+            if (trustVersion == TrustVersion.WSTrust13)
+            {
+                return WsTrustKeyTypes.Trust13.Symmetric;
+            }
+            if (trustVersion == TrustVersion.WSTrustFeb2005)
+            {
+                return WsTrustKeyTypes.TrustFeb2005.Symmetric;
             }
 
             throw new ArgumentException("Unsupported trust version");
