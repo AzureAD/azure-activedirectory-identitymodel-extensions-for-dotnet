@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.TestUtils;
 using System;
 using System.IO;
 using System.Runtime.Serialization;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -53,6 +53,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 serializer.WriteObject(memoryStream, exception);
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 _ = serializer.ReadObject(memoryStream);
+
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
