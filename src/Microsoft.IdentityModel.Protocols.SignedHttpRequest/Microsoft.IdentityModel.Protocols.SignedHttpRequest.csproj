@@ -22,9 +22,10 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461' ">
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   
-   <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net45' And '$(TargetFramework)' != 'net461' ">
     <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
   </ItemGroup>
 
