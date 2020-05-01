@@ -73,6 +73,15 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenExpiredException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            Expires = (DateTime)info.GetValue(nameof(Expires), typeof(DateTime));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(Expires), Expires, typeof(DateTime));
         }
     }
 }

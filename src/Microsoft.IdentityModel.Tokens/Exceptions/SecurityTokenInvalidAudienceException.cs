@@ -76,6 +76,15 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidAudienceException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            InvalidAudience = info.GetString(nameof(InvalidAudience));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(InvalidAudience), InvalidAudience, typeof(string));
         }
     }
 }
