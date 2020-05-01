@@ -74,6 +74,15 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenNotYetValidException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            NotBefore = (DateTime)info.GetValue(nameof(NotBefore), typeof(DateTime));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(NotBefore), NotBefore, typeof(DateTime));
         }
     }
 }

@@ -81,6 +81,17 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidLifetimeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            NotBefore = (DateTime?)info.GetValue(nameof(NotBefore), typeof(DateTime?));
+            Expires = (DateTime?)info.GetValue(nameof(Expires), typeof(DateTime?));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(NotBefore), NotBefore, typeof(DateTime?));
+            info.AddValue(nameof(Expires), Expires, typeof(DateTime?));
         }
     }
 }

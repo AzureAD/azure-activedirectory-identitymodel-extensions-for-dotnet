@@ -76,6 +76,15 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidIssuerException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            InvalidIssuer = info.GetString(nameof(InvalidIssuer));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(InvalidIssuer), InvalidIssuer, typeof(string));
         }
     }
 }
