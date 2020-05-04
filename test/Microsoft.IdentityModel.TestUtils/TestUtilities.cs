@@ -32,6 +32,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Xunit;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -327,13 +328,16 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
         {
             ClaimsPrincipal retVal = null;
+            SecurityToken validatedToken = null;
             try
             {
-                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out SecurityToken validatedToken);
+                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
+                Assert.True(validatedToken != null);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
+                Assert.True(validatedToken == null);
                 expectedException.ProcessException(ex);
             }
 
