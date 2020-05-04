@@ -316,40 +316,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Validates the 'typ' claim of the JWT token header.
-        /// </summary>
-        /// <param name="type">The value of the 'typ' header claim."/></param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null or whitespace.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> is null or whitespace and <see cref="TokenValidationParameters.ValidTypes"/> is not null.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> failed to match <see cref="TokenValidationParameters.ValidTypes"/>.</exception>
-        /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="TokenValidationParameters.ValidTypes"/>.</remarks>
-        internal static void ValidateTokenType(string type, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (validationParameters.ValidTypes == null || validationParameters.ValidTypes.Count() == 0)
-            {
-                LogHelper.LogInformation(TokenLogMessages.IDX10255);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(type))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidTypeException(TokenLogMessages.IDX10256) { InvalidType = null });
-
-            if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
-            {
-                throw LogHelper.LogExceptionMessage(
-                                new SecurityTokenInvalidTypeException(LogHelper.FormatInvariant(TokenLogMessages.IDX10257, type, Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes)))
-                                { InvalidType = type }); ;
-            }
-
-            // if it reaches here, token type was succcessfully validated.
-            LogHelper.LogInformation(TokenLogMessages.IDX10258, type);
-        }
-
-        /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
         /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
