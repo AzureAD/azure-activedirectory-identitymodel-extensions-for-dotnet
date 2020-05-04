@@ -208,6 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
             RequireSignedTokens = true;
             RequireAudience = true;
             SaveSigninToken = false;
+            TryAllIssuerSigningKeys = true;
             ValidateActor = false;
             ValidateAudience = true;
             ValidateIssuer = true;

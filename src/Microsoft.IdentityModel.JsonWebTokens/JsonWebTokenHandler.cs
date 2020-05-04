@@ -1234,30 +1234,34 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
             }
 
-            foreach (var key in keys)
+            if(keys!=null)
             {
-                try
+                foreach (var key in keys)
                 {
-                    if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Alg, validationParameters))
+                    try
                     {
-                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
-                        jwtToken.SigningKey = key;
-                        return jwtToken;
-                    };
-                }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Alg, validationParameters))
+                        {
+                            LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+                            jwtToken.SigningKey = key;
+                            return jwtToken;
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionStrings.AppendLine(ex.ToString());
+                    }
+
+                    if (key != null)
+                    {
+                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        if (kidExists && !kidMatched && key.KeyId != null)
+                            kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+                    }
                 }
 
-                if (key != null)
-                {
-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (kidExists && !kidMatched && key.KeyId != null)
-                        kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-                }
             }
-
+            
             if (kidExists)
             {
                 if (kidMatched)
