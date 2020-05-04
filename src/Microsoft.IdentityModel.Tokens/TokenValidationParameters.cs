@@ -184,6 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
@@ -522,6 +523,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateTokenReplay"/> is false, this delegate will still be called.
         /// </remarks>
         public TokenReplayValidator TokenReplayValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token kid or if token kid is empty.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool TryAllIssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the type of the token.

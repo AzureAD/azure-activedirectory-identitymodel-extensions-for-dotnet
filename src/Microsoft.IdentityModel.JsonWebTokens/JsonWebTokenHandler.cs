@@ -1195,7 +1195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             var kidMatched = false;
-            IEnumerable<SecurityKey> keys = null;
+            IEnumerable<SecurityKey> keys = null;           
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
                 keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Kid, validationParameters);
@@ -1209,8 +1209,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     keys = new List<SecurityKey> { key };
                 }
             }
-
-            if (keys == null)
+           
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
