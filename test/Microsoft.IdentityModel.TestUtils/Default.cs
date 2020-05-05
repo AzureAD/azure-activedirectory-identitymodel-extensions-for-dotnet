@@ -1106,7 +1106,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuerSigningKey = signingKey,
                 ValidAudience = Audience,
                 ValidIssuer = Issuer,
-                TryAllIssuerSigningKeys=false
+                IssuerSigningKeys = new SecurityKey[] { signingKey }
             };
         }
 

@@ -1866,6 +1866,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateLifetime = false,
                         }
                     },
+                     new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJws) + "_" + "RequireSignedTokens",
+                        Token = Default.SymmetricJws,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = Default.AsymmetricSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TryAllIssuerSigningKeys = false,
+                        }
+                    },
                     new JwtTheoryData
                     {
                         TestId = nameof(Default.SymmetricJws) + "_" + "RequireSignedTokens",
