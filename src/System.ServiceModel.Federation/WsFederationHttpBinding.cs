@@ -16,6 +16,7 @@ namespace System.ServiceModel.Federation
         public WsFederationHttpBinding(WsTrustTokenParameters wsTrustTokenParameters) : base(SecurityMode.TransportWithMessageCredential)
         {
             WsTrustTokenParameters = wsTrustTokenParameters ?? throw new ArgumentNullException(nameof(wsTrustTokenParameters));
+            Security.Message.ClientCredentialType = MessageCredentialType.IssuedToken;
         }
 
         public WsTrustTokenParameters WsTrustTokenParameters
