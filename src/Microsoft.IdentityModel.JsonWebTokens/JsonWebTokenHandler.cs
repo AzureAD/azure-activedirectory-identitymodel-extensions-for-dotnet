@@ -1209,7 +1209,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     keys = new List<SecurityKey> { key };
                 }
             }
-           
+
             if (keys == null && validationParameters.TryAllIssuerSigningKeys)
             {
                 // control gets here if:
