@@ -44,6 +44,10 @@
     {
       "file": "JsonWebKeyTests.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "TestData.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
     }
   ]
 }
