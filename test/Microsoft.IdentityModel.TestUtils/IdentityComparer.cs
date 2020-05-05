@@ -151,6 +151,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(SecurityTokenExpiredException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidAudienceException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidIssuerException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidSigningKeyException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidLifetimeException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidTypeException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenNotYetValidException).ToString(), CompareAllPublicProperties},
