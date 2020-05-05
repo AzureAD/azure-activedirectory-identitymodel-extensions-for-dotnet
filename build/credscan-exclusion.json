@@ -58,8 +58,9 @@
       "_justification": "File contains tokens that are used only for testing purposes."
     },
     {
-      "file": "TestData.cs",
-      "_justification": "File contains tokens that are used only for testing purposes."
+        "file": "TestData.cs",
+        "_justification": "File contains tokens that are used only for testing purposes."
+    },
     {
       "file": "program.cs",
       "_justification": "File does not contain an actual password, just the word."
