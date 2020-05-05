@@ -36,6 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
     [Serializable]
     public class SecurityTokenExpiredException : SecurityTokenValidationException
     {
+        [NonSerialized]
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenExpiredException) + ".";
+
+        [NonSerialized]
+        const string _ExpiresKey = _Prefix + nameof(Expires);
+
         /// <summary>
         /// Gets or sets the Expires value that created the validation exception. This value is always in UTC.
         /// </summary>
@@ -73,7 +79,20 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenExpiredException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            Expires = (DateTime)info.GetValue(nameof(Expires), typeof(DateTime));
+            SerializationInfoEnumerator enumerator = info.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                switch (enumerator.Name)
+                {
+                    case _ExpiresKey:
+                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime));
+                        break;
+
+                    default:
+                        // Ignore other fields.
+                        break;
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -81,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             base.GetObjectData(info, context);
 
-            info.AddValue(nameof(Expires), Expires, typeof(DateTime));
+            info.AddValue(_ExpiresKey, Expires);
         }
     }
 }

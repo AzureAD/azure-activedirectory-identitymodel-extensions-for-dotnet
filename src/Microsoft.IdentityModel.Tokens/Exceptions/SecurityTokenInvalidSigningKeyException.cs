@@ -73,8 +73,6 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidSigningKeyException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            //TODO - investigate if SigningKey type should be serialized
-            //SigningKey = (SecurityKey)info.GetValue(nameof(SigningKey), SigningKey.GetType());
         }
     }
 }

@@ -36,6 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
     [Serializable]
     public class SecurityTokenInvalidTypeException : SecurityTokenValidationException
     {
+        [NonSerialized]
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidTypeException) +".";
+
+        [NonSerialized]
+        const string _InvalidTypeKey = _Prefix + nameof(InvalidType);
+
         /// <summary>
         /// Gets or sets the invalid type that created the validation exception.
         /// </summary>
@@ -76,7 +82,20 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidTypeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            InvalidType = info.GetString(nameof(InvalidType));
+            SerializationInfoEnumerator enumerator = info.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                switch (enumerator.Name)
+                {
+                    case _InvalidTypeKey:
+                        InvalidType = info.GetString(_InvalidTypeKey);
+                        break;
+
+                    default:
+                        // Ignore other fields.
+                        break;
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -84,7 +103,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             base.GetObjectData(info, context);
 
-            info.AddValue(nameof(InvalidType), InvalidType, typeof(string));
+            if (!string.IsNullOrEmpty(InvalidType))
+                info.AddValue(_InvalidTypeKey, InvalidType);
         }
     }
 }

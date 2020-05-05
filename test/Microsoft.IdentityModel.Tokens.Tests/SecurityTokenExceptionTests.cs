@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.IdentityModel.TestUtils;
@@ -178,26 +179,34 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = "SecurityTokenNotYetValidExceptionSerializesPropertiesDefaultValue",
                         ExceptionType = typeof(SecurityTokenNotYetValidException),
                     },
-                    //TODO - investigate if SigningKey type should be serialized
-                    //new SecurityTokenExceptionTheoryData
-                    //{
-                    //    TestId = "SecurityTokenInvalidSigningKeyExceptionSerializesProperties",
-                    //    ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
-                    //    ExceptionSetter = (ex) =>
-                    //    {
-                    //        if (!(ex is SecurityTokenInvalidSigningKeyException securityTokenInvalidSigningKeyException))
-                    //            throw new ArgumentException($"expected argument of type {nameof(SecurityTokenInvalidSigningKeyException)} recieved type {ex.GetType()}");
-                    //
-                    //        securityTokenInvalidSigningKeyException.SigningKey = new CustomSecurityKey();
-                    //    }
-                    //},
-                    //new SecurityTokenExceptionTheoryData
-                    //{
-                    //    TestId = "SecurityTokenInvalidSigningKeyExceptionSerializesPropertiesDefaultValue",
-                    //    ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
-                    //},
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenInvalidSigningKeyExceptionSerializesProperties",
+                        ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
+                        ExceptionSetter = (ex) =>
+                        {
+                            if (!(ex is SecurityTokenInvalidSigningKeyException securityTokenInvalidSigningKeyException))
+                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenInvalidSigningKeyException)} recieved type {ex.GetType()}");
+
+                            securityTokenInvalidSigningKeyException.SigningKey = new CustomSecurityKey();
+                        },
+                        PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                        {
+                            [typeof(SecurityTokenInvalidSigningKeyException)] = new List<string>{ "SigningKey" }
+                        }
+                    },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenInvalidSigningKeyExceptionSerializesPropertiesDefaultValue",
+                        ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
+                    },
                 };
             }
+        }
+
+        public class CustomSecurityKey : SecurityKey
+        {
+            public override int KeySize => 1;
         }
     }
 
