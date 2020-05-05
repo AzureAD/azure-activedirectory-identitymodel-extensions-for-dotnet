@@ -902,7 +902,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             bool kidMatched = false;
-            IEnumerable<SecurityKey> keys = null;          
+            IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
                 keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
