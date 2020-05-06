@@ -901,7 +901,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     return jwtToken;
             }
 
-            bool kidMatched = false;           
+            bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -917,7 +917,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
-            if (keys == null)
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
@@ -941,30 +941,34 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
             }
 
-            foreach (var key in keys)
+            if (keys != null)
             {
-                try
+                foreach (var key in keys)
                 {
-                    if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, validationParameters))
+                    try
                     {
-                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
-                        jwtToken.SigningKey = key;
-                        return jwtToken;
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Header.Alg, validationParameters))
+                        {
+                            LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+                            jwtToken.SigningKey = key;
+                            return jwtToken;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionStrings.AppendLine(ex.ToString());
+                    }
+
+                    if (key != null)
+                    {
+                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        if (kidExists && !kidMatched && key.KeyId != null)
+                            kidMatched = jwtToken.Header.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }
                 }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
-                }
 
-                if (key != null)
-                {
-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (kidExists && !kidMatched && key.KeyId != null)
-                        kidMatched = jwtToken.Header.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-                }
             }
-
+            
             if (kidExists)
             {
                 if (kidMatched) 

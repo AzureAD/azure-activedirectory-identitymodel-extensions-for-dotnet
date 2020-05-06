@@ -137,6 +137,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     }
                 );
 
+                // Actor validation is true
+                // Actor is signed with symmetric key
+                // TokenValidationParameters.ActorValidationParameters is null
+                // TokenValidationParameters will be used, but will not find signing key because an assymetric signing key is provided
+                // All Signing keys will not be tried to verify signature because validationParameters.TryAllIssuerSigningKeys is set to false
+                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
+                validationParameters = Default.AsymmetricSignTokenValidationParameters;
+                validationParameters.ValidateActor = true;
+                validationParameters.TryAllIssuerSigningKeys = false;
+                theoryData.Add(
+                    new JwtTheoryData
+                    {
+                        TestId = "ActorValidationUsingTVP - NotTryingAllIssuerSigningKeys - ExceptionExpected",
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
+                        TokenHandler = handler,
+                        ValidationParameters = validationParameters
+                    }
+                );
 
                 // Actor validation is false
                 // Actor is signed with symmetric key
