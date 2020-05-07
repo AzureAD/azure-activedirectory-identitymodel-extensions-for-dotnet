@@ -940,38 +940,50 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         [Theory, MemberData(nameof(ValidateSignedHttpRequestCallsTheoryData))]
         public async Task ValidateSignedHttpRequestCalls(ValidateSignedHttpRequestTheoryData theoryData)
         {
+            var containsClaim = new Func<SignedHttpRequestValidationParameters, string, bool>((validationParams, claim) =>
+            {
+                return validationParams.ValidatePresentClaims && validationParams.ClaimsToValidateWhenPresent.Contains(claim);
+            });
+
             var context = TestUtilities.WriteHeader($"{this}.ValidateSignedHttpRequestCalls", theoryData);
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             var handler = new SignedHttpRequestHandlerPublic();
-             var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadPublicAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+            var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadPublicAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.Ts))
                 context.AddDiff($"ValidationParameters.ValidateTs={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs}, ValidateTsClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateMClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.M))
                 context.AddDiff($"ValidationParameters.ValidateM={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM}, ValidateMClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateUClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.U))
                 context.AddDiff($"ValidationParameters.ValidateU={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU}, ValidateUClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidatePClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.P))
                 context.AddDiff($"ValidationParameters.ValidateP={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP}, ValidatePClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateQClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.Q))
                 context.AddDiff($"ValidationParameters.ValidateQ={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ}, ValidateQClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateHClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.H))
                 context.AddDiff($"ValidationParameters.ValidateH={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH}, ValidateHClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateBClaimCall"];
-            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB &&
+                methodCalledStatus != containsClaim(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters, SignedHttpRequestClaimTypes.B))
                 context.AddDiff($"ValidationParameters.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
@@ -1027,7 +1039,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        First = true,
                         SignedHttpRequestToken = signedHttpRequestToken,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
@@ -1058,7 +1069,216 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         TestId = "ValidNoCalls",
                     },
-
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestToken,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidatePresentClaims = true,
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidPresentDefaultClaimsCalls",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestToken,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidatePresentClaims = true,
+                            ClaimsToValidateWhenPresent = new List<string>
+                            {
+                                SignedHttpRequestClaimTypes.Ts,
+                                SignedHttpRequestClaimTypes.M,
+                                SignedHttpRequestClaimTypes.U,
+                                SignedHttpRequestClaimTypes.P,
+                                SignedHttpRequestClaimTypes.Q,
+                                SignedHttpRequestClaimTypes.H,
+                                SignedHttpRequestClaimTypes.B,
+                            },
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidPresentAllClaimsCalls",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestToken,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidatePresentClaims = true,
+                            ClaimsToValidateWhenPresent = null,
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidTokenNullClaimsValidateWhenPresentList",
+                    },
+                     new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestToken,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidatePresentClaims = true,
+                            ClaimsToValidateWhenPresent = new List<string> { "not a valid claim" },
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidTokenSpuriousClaimsInValidateWhenPresentList",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = new JsonWebToken(new JsonWebTokenHandler().CreateToken(
+                            new JObject().ToString(),
+                            SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                            new Dictionary<string, object>() { { System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType } })),
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidatePresentClaims = true,
+                            ClaimsToValidateWhenPresent = new List<string>
+                            {
+                                SignedHttpRequestClaimTypes.Ts,
+                                SignedHttpRequestClaimTypes.M,
+                                SignedHttpRequestClaimTypes.U,
+                                SignedHttpRequestClaimTypes.P,
+                                SignedHttpRequestClaimTypes.Q,
+                                SignedHttpRequestClaimTypes.H,
+                                SignedHttpRequestClaimTypes.B,
+                            },
+                            ValidateTs = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateU = false,
+                            ValidateH = false,
+                            ValidateB = false,
+                            ReplayValidatorAsync = async (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken) =>
+                            {
+                                signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"] = true;
+                                await Task.FromResult<object>(null);
+                            }
+                        },
+                        CallContext = new CallContext()
+                        {
+                            PropertyBag = new Dictionary<string, object>()
+                            {
+                                {"mockValidateSignedHttpRequestSignatureAsync", null },
+                                {"onlyTrack_ValidateTsClaimCall", false },
+                                {"onlyTrack_ValidateMClaimCall", false },
+                                {"onlyTrack_ValidateUClaimCall", false },
+                                {"onlyTrack_ValidatePClaimCall", false },
+                                {"onlyTrack_ValidateQClaimCall", false },
+                                {"onlyTrack_ValidateHClaimCall", false },
+                                {"onlyTrack_ValidateBClaimCall", false },
+                                {"onlyTrack_AdditionalClaimValidatorCall", false },
+                                {"onlyTrack_ReplayValidatorCall", false },
+                            }
+                        },
+                        TestId = "ValidNoClaimsPresent",
+                    },
                 };
             }
         }
