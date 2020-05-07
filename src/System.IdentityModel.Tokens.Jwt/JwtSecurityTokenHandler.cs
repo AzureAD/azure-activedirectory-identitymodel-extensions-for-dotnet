@@ -903,28 +903,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            if (validationParameters.IssuerSigningKeyResolver != null)
-            {
-                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
-            }
-            else
-            {
-                var key = ResolveIssuerSigningKey(token, jwtToken, validationParameters);
-                if (key != null)
-                {
-                    kidMatched = true;
-                    keys = new List<SecurityKey> { key };
-                }
-            }
-
-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
-            {
-                // control gets here if:
-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
-                // 2. ResolveIssuerSigningKey returned null
-                // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = GetAllSigningKeys(token, jwtToken, jwtToken.Header.Kid, validationParameters);
-            }
+            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters,out kidMatched);
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
@@ -985,17 +964,6 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private IEnumerable<SecurityKey> GetAllSigningKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-        
         private IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
         {
             if (validationParameters.TokenDecryptionKey != null)
@@ -1216,9 +1184,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
+        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -1226,7 +1195,15 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters);
+            string kid = null;
+            string x5t = null;
+            if (jwtToken.Header != null)
+            {
+                kid = jwtToken.Header.Kid;
+                x5t = jwtToken.Header.X5t;
+            }
+
+            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, kid, x5t, jwtToken, validationParameters, out kidMatched);
         }
 
         /// <summary>

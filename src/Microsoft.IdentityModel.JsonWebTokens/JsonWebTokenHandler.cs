@@ -909,17 +909,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private IEnumerable<SecurityKey> GetAllSigningKeys(string token, TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-
         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
@@ -960,11 +949,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
+        /// <param name="token"></param>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal virtual SecurityKey ResolveIssuerSigningKey(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        internal virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JsonWebToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -972,7 +963,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
+            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters, out kidMatched);
         }
 
         /// <summary>
@@ -1196,30 +1187,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return jwtToken;
             }
 
-            var kidMatched = false;
+            bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            if (validationParameters.IssuerSigningKeyResolver != null)
-            {
-                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Kid, validationParameters);
-            }
-            else
-            {
-                var key = ResolveIssuerSigningKey(jwtToken, validationParameters);
-                if (key != null)
-                {
-                    kidMatched = true;
-                    keys = new List<SecurityKey> { key };
-                }
-            }
-
-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
-            {
-                // control gets here if:
-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
-                // 2. ResolveIssuerSigningKey returned null
-                // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = GetAllSigningKeys(token, validationParameters);
-            }
+            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters, out kidMatched);
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
@@ -1236,7 +1206,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
             }
 
-            if (keys!=null)
+            if (keys != null)
             {
                 foreach (var key in keys)
                 {
@@ -1263,7 +1233,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
 
             }
-            
+
             if (kidExists)
             {
                 if (kidMatched)
