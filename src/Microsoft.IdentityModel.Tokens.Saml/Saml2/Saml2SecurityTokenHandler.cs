@@ -33,6 +33,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Saml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -384,51 +385,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            if (validationParameters.IssuerSigningKeyResolver != null)
-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
-            else
-            {
-                var key = ResolveIssuerSigningKey(token, samlToken, validationParameters);
-                if (key != null)
-                {
-                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
-                    keyMatched = true;
-                    keys = new List<SecurityKey> { key };
-                }
-            }
-
-            if (keys == null)
-            {
-                // control gets here if:
-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
-                // 2. ResolveIssuerSigningKey returned null
-                // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = GetAllSigningKeys(validationParameters);
-            }
+            keys = ResolveIssuerSigningKey(token, samlToken, validationParameters, out keyMatched);
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
-            foreach (var key in keys)
-            {
-                try
-                {
-                    samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
-                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
-                    samlToken.SigningKey = key;
-                    return samlToken;
-                }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
-                }
 
-                if (key != null)
+            if (keys != null)
+            {
+                foreach (var key in keys)
                 {
-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (canMatchKey && !keyMatched && key.KeyId != null)
-                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
+                    try
+                    {
+                        samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+                        samlToken.SigningKey = key;
+                        return samlToken;
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionStrings.AppendLine(ex.ToString());
+                    }
+
+                    if (key != null)
+                    {
+                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        if (canMatchKey && !keyMatched && key.KeyId != null)
+                            keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
+                    }
                 }
             }
 
@@ -442,29 +427,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
 
-        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
         /// </summary>
         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
         /// <param name="samlToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
+        /// <param name="keyMatched">A<see cref="bool"/>to represent if a issuer signing key matched token keyinfo</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/>.Assertion' is null.</exception>
         /// <remarks>If key fails to resolve, then null is returned.</remarks>
-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
+        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters, out bool keyMatched)
         {
             if (samlToken == null)
                 throw LogArgumentNullException(nameof(samlToken));
@@ -476,21 +451,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
             if (samlToken.Assertion?.Signature?.KeyInfo == null)
-                return null;
-
-            if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
-                return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
             {
-                foreach (var key in validationParameters.IssuerSigningKeys)
-                {
-                    if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(key))
-                        return key;
-                }
+                keyMatched = false;
+                return null;
             }
 
-            return null;
+            return SamlTokenUtilities.GetKeysForTokenSignatureValidation(token, samlToken, samlToken.Assertion.Signature.KeyInfo, validationParameters, out keyMatched);
         }
 
         /// <summary>

@@ -665,7 +665,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         }
                     },
                     new SamlTheoryData
-                    { 
+                    {
                         Audiences = new List<string>(),
                         Token = ReferenceTokens.SamlToken_NoAudienceRestrictions_NoSignature,
                         ExpectedException = new ExpectedException(typeof(SamlSecurityTokenException), "IDX11401:"),
@@ -740,7 +740,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             ValidateIssuer = false,
                             RequireSignedTokens = false
                         },
-                    }
+                    },
+                    new SamlTheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        Handler = new SamlSecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}NotTryAllIssuerSigningKeys",
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            TryAllIssuerSigningKeys = false
+                        }
+                    },
                 };
             }
         }

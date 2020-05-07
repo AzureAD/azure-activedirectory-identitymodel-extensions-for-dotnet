@@ -1005,7 +1005,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             ValidateIssuer = false,
                             RequireSignedTokens = false
                         },
-                    }
+                    },
+                    new Saml2TheoryData
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch)}NotTryAllIssuerSigningKeys",
+                        Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            TryAllIssuerSigningKeys = false
+                        }
+                    },
                 };
             }
         }
