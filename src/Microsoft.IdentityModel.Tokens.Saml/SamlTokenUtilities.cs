@@ -50,7 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         internal static SecurityKey ResolveTokenSigningKey(KeyInfo tokenKeyInfo, TokenValidationParameters validationParameters)
         {
-
             if (validationParameters.IssuerSigningKey != null && tokenKeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
                 return validationParameters.IssuerSigningKey;
 
@@ -75,14 +74,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="keyMatched">A <see cref="bool"/> to represent if a a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns all <see cref="SecurityKey"/> to use for signature validation.</returns>
-        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token,SecurityToken samlToken, KeyInfo tokenKeyInfo, TokenValidationParameters validationParameters, out bool keyMatched)
+        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token, SecurityToken samlToken, KeyInfo tokenKeyInfo, TokenValidationParameters validationParameters, out bool keyMatched)
         {
-            IEnumerable<SecurityKey> keys = null;
             keyMatched = false;
 
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, tokenKeyInfo?.Id, validationParameters);
+                return validationParameters.IssuerSigningKeyResolver(token, samlToken, tokenKeyInfo?.Id, validationParameters);
             }
             else
             {
@@ -91,34 +89,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (key != null)
                 {
                     keyMatched = true;
-                    keys = new List<SecurityKey> { key };
+                    return new List<SecurityKey> { key };
                 }
                 else
                 {
                     keyMatched = false;
                     if (validationParameters.TryAllIssuerSigningKeys)
                     {
-                        keys = GetAllSigningKeys(validationParameters);
+                        return TokenUtilities.GetAllSigningKeys(validationParameters);
                     }
                 }
             }
-            return keys;
-        }
-
-        /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
-        /// </summary>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in validationParameters.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
+            return null;
         }
     }
 }

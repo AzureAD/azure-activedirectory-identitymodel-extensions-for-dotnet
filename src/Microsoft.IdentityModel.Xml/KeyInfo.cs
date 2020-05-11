@@ -145,6 +145,9 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         internal bool MatchesKey(SecurityKey key)
         {
+            if (key == null)
+                return false;
+
             if (key is X509SecurityKey x509SecurityKey)
             {
                 return Matches(x509SecurityKey);
@@ -163,6 +166,9 @@ namespace Microsoft.IdentityModel.Xml
 
         private bool Matches(X509SecurityKey key)
         {
+            if (key == null)
+                return false;
+
             foreach (var data in X509Data)
             {
                 foreach (var certificate in data.Certificates)
@@ -178,6 +184,9 @@ namespace Microsoft.IdentityModel.Xml
 
         private bool Matches(RsaSecurityKey key)
         {
+            if (key == null)
+                return false;
+
             if (!key.Parameters.Equals(default(RSAParameters)))
             {
                 return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(key.Parameters.Exponent))
@@ -195,6 +204,9 @@ namespace Microsoft.IdentityModel.Xml
 
         private bool Matches(JsonWebKey key)
         {
+            if (key == null)
+                return false;
+
             if (RSAKeyValue != null)
             {
                 return (RSAKeyValue.Exponent.Equals(Convert.FromBase64String(key.E))

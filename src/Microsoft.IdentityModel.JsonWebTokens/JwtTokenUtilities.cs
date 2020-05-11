@@ -383,14 +383,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="kidMatched">A <see cref="bool"/> to represent if a a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns all <see cref="SecurityKey"/> to use for signature validation.</returns>
-        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token, string kid, string x5t, SecurityToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
+        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token, string kid, string x5t, SecurityToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
         {
-            IEnumerable<SecurityKey> keys = null;
             kidMatched = false;
 
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
-                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, kid, validationParameters);
+                return validationParameters.IssuerSigningKeyResolver(token, jwtToken, kid, validationParameters);
             }
             else
             {
@@ -399,35 +398,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (key != null)
                 {
                     kidMatched = true;
-                    keys = new List<SecurityKey> { key };
+                    return new List<SecurityKey> { key };
                 }
                 else
                 {
                     kidMatched = false;
                     if (validationParameters.TryAllIssuerSigningKeys)
                     {
-                        keys = GetAllSigningKeys(token, validationParameters);
+                        return TokenUtilities.GetAllSigningKeys(validationParameters);
                     }
                 }
             }
-            return keys;
-        }
-
-        /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
-        /// </summary>
-        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in validationParameters.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(string token, TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
+            return null;
         }
     }
 }

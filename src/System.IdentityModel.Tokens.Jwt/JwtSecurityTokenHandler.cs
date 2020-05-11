@@ -1187,7 +1187,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
+        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -1195,15 +1195,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            string kid = null;
-            string x5t = null;
-            if (jwtToken.Header != null)
-            {
-                kid = jwtToken.Header.Kid;
-                x5t = jwtToken.Header.X5t;
-            }
-
-            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, kid, x5t, jwtToken, validationParameters, out kidMatched);
+            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters, out kidMatched);
         }
 
         /// <summary>
