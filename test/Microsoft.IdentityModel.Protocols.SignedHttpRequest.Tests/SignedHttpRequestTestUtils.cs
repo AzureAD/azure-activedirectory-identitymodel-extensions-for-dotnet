@@ -175,9 +175,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             { SignedHttpRequestClaimTypes.M, "GET"},
             { SignedHttpRequestClaimTypes.U, "www.contoso.com"},
             { SignedHttpRequestClaimTypes.P, "/path1"},
-            { SignedHttpRequestClaimTypes.Q, JArray.Parse("[[\"b\", \"a\", \"c\"],\"u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY\"]") },
-            { SignedHttpRequestClaimTypes.H, JArray.Parse("[[\"content-type\",\"etag\"],\"P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs\"]") },
-            { SignedHttpRequestClaimTypes.B, "47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU" },
+            { SignedHttpRequestClaimTypes.Q, "[[\"b\",\"a\",\"c\"],\"u4LgkGUWhP9MsKrEjA4dizIllDXluDku6ZqCeyuR-JY\"]" },
+            { SignedHttpRequestClaimTypes.H, "[[\"content-type\",\"etag\"],\"P6z5XN4tTzHkfwe3XO1YvVUIurSuhvh_UG10N_j-aGs\"]" },
+            { SignedHttpRequestClaimTypes.B, "ZK-O2gzHjpsCGped6sUL2EM20Z9T-uF07LCGMA88UFw" },
             { SignedHttpRequestClaimTypes.Nonce, "81da490f46c3494eba8c6e25a45a4d0f" },
             { ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(JsonWebKeyConverter.ConvertFromRSASecurityKey(DefaultSigningCredentials.Key as RsaSecurityKey))) }
         };

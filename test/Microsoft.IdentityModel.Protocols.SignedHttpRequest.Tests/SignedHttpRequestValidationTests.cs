@@ -944,37 +944,34 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             var handler = new SignedHttpRequestHandlerPublic();
-            var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadPublicAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
-
-            if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                throw new TestException($"unable to cast to {nameof(JsonWebToken)}");
+             var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadPublicAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.Ts, out var claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
                 context.AddDiff($"ValidationParameters.ValidateTs={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs}, ValidateTsClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateMClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.M, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM)
                 context.AddDiff($"ValidationParameters.ValidateM={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM}, ValidateMClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateUClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.U, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU)
                 context.AddDiff($"ValidationParameters.ValidateU={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU}, ValidateUClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidatePClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.P, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP)
                 context.AddDiff($"ValidationParameters.ValidateP={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP}, ValidatePClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateQClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.Q, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ)
                 context.AddDiff($"ValidationParameters.ValidateQ={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ}, ValidateQClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateHClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.H, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH)
                 context.AddDiff($"ValidationParameters.ValidateH={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH}, ValidateHClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateBClaimCall"];
-            if (methodCalledStatus != (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB || jwtSignedHttpRequest.TryGetClaim(SignedHttpRequestClaimTypes.B, out claimValue) && claimValue != null))
+            if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
                 context.AddDiff($"ValidationParameters.ValidateB={signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB}, ValidateBClaim method call status: {methodCalledStatus}.");
 
             methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ReplayValidatorCall"];
@@ -1059,7 +1056,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                                 {"onlyTrack_ReplayValidatorCall", false },
                             }
                         },
-                        TestId = "ValidCallsWithExistingClaims",
+                        TestId = "ValidNoCalls",
                     },
 
                 };
@@ -1273,13 +1270,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateTs = false,
                             ValidateU = false,
                         },
-                        HttpRequestMethod = "GET",
-                        HttpRequestUri = new Uri("http://www.contoso.com/path1?b=bar&a=foo&c=duck", UriKind.Absolute),
-                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
-                        {
-                            ["content-type"] = new List<string>{ "application/json" },
-                            ["etag"] = new List<string> { "742-3u8f34-3r2nvv3" }
-                        },
                         ExpectedSignedHttpRequestValidationResult = new SignedHttpRequestValidationResult()
                         {
                             AccessTokenValidationResult = new TokenValidationResult()
@@ -1307,13 +1297,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidateQ = false,
                             ValidateTs = false,
                             ValidateU = false,
-                        },
-                        HttpRequestMethod = "GET",
-                        HttpRequestUri = new Uri("http://www.contoso.com/path1?b=bar&a=foo&c=duck", UriKind.Absolute),
-                        HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>
-                        {
-                            ["content-type"] = new List<string>{ "application/json" },
-                            ["etag"] = new List<string> { "742-3u8f34-3r2nvv3" }
                         },
                         ExpectedSignedHttpRequestValidationResult = new SignedHttpRequestValidationResult()
                         {
