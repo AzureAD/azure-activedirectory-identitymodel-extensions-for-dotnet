@@ -51,6 +51,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string IdTokenEncryptionAlgValuesSupported = "id_token_encryption_alg_values_supported";
         public const string IdTokenEncryptionEncValuesSupported = "id_token_encryption_enc_values_supported";
         public const string IdTokenSigningAlgValuesSupported = "id_token_signing_alg_values_supported";
+        public const string IntrospectionEndpoint = "introspection_endpoint";
+        public const string IntrospectionEndpointAuthMethodsSupported = "introspection_endpoint_auth_methods_supported";
+        public const string IntrospectionEndpointAuthSigningAlgValuesSupported = "introspection_endpoint_auth_signing_alg_values_supported";
         public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
         public const string LogoutSessionSupported = "logout_session_supported";

@@ -91,6 +91,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.IdTokenEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.IdTokenEncryptionEncValuesSupported);
             Assert.NotNull(configuration.IdTokenSigningAlgValuesSupported);
+            Assert.NotNull(configuration.IntrospectionEndpointAuthMethodsSupported);
+            Assert.NotNull(configuration.IntrospectionEndpointAuthSigningAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionEncValuesSupported);
             Assert.NotNull(configuration.RequestObjectSigningAlgValuesSupported);
@@ -131,8 +133,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 44)
-                Assert.True(false, "Number of properties has changed from 44 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 47)
+                Assert.True(false, "Number of properties has changed from 47 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -146,6 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{false, true, true}),
+                            new KeyValuePair<string, List<object>>("IntrospectionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
@@ -171,6 +174,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             string end_Session_Endpoint = Guid.NewGuid().ToString();
             string frontchannelLogoutSessionSupported = "true";
             string frontchannelLogoutSupported = "true";
+            string introspection_Endpoint = Guid.NewGuid().ToString();
             string issuer = Guid.NewGuid().ToString();
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
@@ -181,6 +185,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 EndSessionEndpoint = end_Session_Endpoint,
                 FrontchannelLogoutSessionSupported = frontchannelLogoutSessionSupported,
                 FrontchannelLogoutSupported = frontchannelLogoutSupported,
+                IntrospectionEndpoint = introspection_Endpoint,
                 Issuer = issuer,
                 JwksUri = jwks_Uri,
                 TokenEndpoint = token_Endpoint,
@@ -203,6 +208,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (!string.Equals(configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.FrontchannelLogoutSupported != efrontchannelLogoutSessionSupported. '{0}', '{1}'.", configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported));
+
+            if (!string.Equals(configuration.IntrospectionEndpoint, introspection_Endpoint))
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.IntrospectionEndpoint != introspection_Endpoint. '{0}', '{1}'.", configuration.IntrospectionEndpoint, introspection_Endpoint));
 
             if (!string.Equals(configuration.Issuer, issuer))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.Issuer != issuer. '{0}', '{1}'.", configuration.Issuer, issuer));
@@ -271,6 +279,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "id_token_encryption_alg_values_supported",
                 "id_token_encryption_enc_values_supported",
                 "id_token_signing_alg_values_supported",
+                "introspection_endpoint_auth_methods_supported",
+                "introspection_endpoint_auth_signing_alg_values_supported",
                 "request_object_encryption_alg_values_supported",
                 "request_object_encryption_enc_values_supported",
                 "request_object_signing_alg_values_supported",
