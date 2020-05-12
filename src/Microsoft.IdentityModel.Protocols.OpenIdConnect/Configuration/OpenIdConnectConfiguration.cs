@@ -203,6 +203,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public ICollection<string> IdTokenSigningAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
+        /// Gets or sets the 'introspection_endpoint'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpoint, Required = Required.Default)]
+        public string IntrospectionEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'introspection_endpoint_auth_methods_supported'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpointAuthMethodsSupported, Required = Required.Default)]
+        public ICollection<string> IntrospectionEndpointAuthMethodsSupported { get; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets the collection of 'introspection_endpoint_auth_signing_alg_values_supported'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpointAuthSigningAlgValuesSupported, Required = Required.Default)]
+        public ICollection<string> IntrospectionEndpointAuthSigningAlgValuesSupported { get; } = new Collection<string>();
+
+        /// <summary>
         /// Gets or sets the 'issuer'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.Issuer, Required = Required.Default)]
@@ -461,6 +479,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeIdTokenSigningAlgValuesSupported()
         {
             return IdTokenSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'introspection_endpoint_auth_methods_supported' (IntrospectionEndpointAuthMethodsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'introspection_endpoint_auth_methods_supported' (IntrospectionEndpointAuthMethodsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIntrospectionEndpointAuthMethodsSupported()
+        {
+            return IntrospectionEndpointAuthMethodsSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'introspection_endpoint_auth_signing_alg_values_supported' (IntrospectionEndpointAuthSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'introspection_endpoint_auth_signing_alg_values_supported' (IntrospectionEndpointAuthSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIntrospectionEndpointAuthSigningAlgValuesSupported()
+        {
+            return IntrospectionEndpointAuthSigningAlgValuesSupported.Count > 0;
         }
 
         /// <summary>

@@ -99,6 +99,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""id_token_encryption_alg_values_supported"" : [""RSA1_5"", ""A256KW""],
                                                 ""id_token_encryption_enc_values_supported"" : [""A128CBC-HS256"",""A256CBC-HS512""],
                                                 ""id_token_signing_alg_values_supported"" : [""RS256""],
+                                                ""introspection_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect"",
+                                                ""introspection_endpoint_auth_methods_supported"" : [""client_secret_post"",""private_key_jwt""],
+                                                ""introspection_endpoint_auth_signing_alg_values_supported"" : [""ES192"", ""ES256""],
                                                 ""issuer"" : ""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
                                                 ""jwks_uri"" : ""JsonWebKeySet.json"",
                                                 ""logout_session_supported"" : true,
@@ -230,6 +233,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.IdTokenEncryptionAlgValuesSupported, "RSA1_5", "A256KW");
             AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256", "A256CBC-HS512");
             AddToCollection(config.IdTokenSigningAlgValuesSupported, "RS256");
+            config.IntrospectionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect";
+            AddToCollection(config.IntrospectionEndpointAuthMethodsSupported, "client_secret_post", "private_key_jwt");
+            AddToCollection(config.IntrospectionEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
             config.Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/";
             config.JwksUri = "JsonWebKeySet.json";
             config.LogoutSessionSupported = true;
