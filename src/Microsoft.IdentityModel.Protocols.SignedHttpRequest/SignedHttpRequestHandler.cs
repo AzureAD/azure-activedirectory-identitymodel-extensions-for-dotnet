@@ -545,28 +545,61 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync != null)
                 await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs, SignedHttpRequestClaimTypes.Ts))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.Ts);
+
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs)
                 ValidateTsClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
+
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM, SignedHttpRequestClaimTypes.M))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.M);
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateM)
                 ValidateMClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
 
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU, SignedHttpRequestClaimTypes.U))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.U);
+
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateU)
                 ValidateUClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
+
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP, SignedHttpRequestClaimTypes.P))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.P);
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateP)
                 ValidatePClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
 
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ, SignedHttpRequestClaimTypes.Q))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.Q);
+
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateQ)
                 ValidateQClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
 
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH, SignedHttpRequestClaimTypes.H))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.H);
+
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateH)
                 ValidateHClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
+
+            if (ValidationSkippedForClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB, SignedHttpRequestClaimTypes.B))
+                LogHelper.LogWarning(LogMessages.IDX23036, SignedHttpRequestClaimTypes.B);
 
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateB)
                 ValidateBClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
 
             return jwtSignedHttpRequest;
+        }
+
+        /// <summary>
+        /// Determine if validation is being skipped for a present claim.
+        /// </summary>
+        /// <param name="jwtSignedHttpRequest">The request to check for skipped validation.</param>
+        /// <param name="validateClaim">If claim validation will happen.</param>
+        /// <param name="claimName">The name of the claim.</param>
+        /// <returns>Whether the given claim exists and is not being validated</returns>
+        internal virtual bool ValidationSkippedForClaim(JsonWebToken jwtSignedHttpRequest, bool validateClaim, string claimName)
+        {
+            return !validateClaim && (jwtSignedHttpRequest.TryGetClaim(claimName, out var claimValue) && claimValue != null);
         }
 
         /// <summary>
