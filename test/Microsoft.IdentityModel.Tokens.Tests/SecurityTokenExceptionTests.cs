@@ -200,6 +200,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = "SecurityTokenInvalidSigningKeyExceptionSerializesPropertiesDefaultValue",
                         ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
                     },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenInvalidAlgorithmSerializesProperties",
+                        ExceptionType = typeof(SecurityTokenInvalidAlgorithmException),
+                        ExceptionSetter = (ex) =>
+                        {
+                            if (!(ex is SecurityTokenInvalidAlgorithmException securityTokenInvalidAlgorithm))
+                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenInvalidAlgorithmException)} recieved type {ex.GetType()}");
+
+                            securityTokenInvalidAlgorithm.InvalidAlgorithm = Guid.NewGuid().ToString();
+                        },
+                    },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenInvalidAlgorithmSerializesPropertiesDefaultValue",
+                        ExceptionType = typeof(SecurityTokenInvalidAlgorithmException),
+                    },
                 };
             }
         }

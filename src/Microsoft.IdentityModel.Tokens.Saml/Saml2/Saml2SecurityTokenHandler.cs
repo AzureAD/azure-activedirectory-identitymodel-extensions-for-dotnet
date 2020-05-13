@@ -420,6 +420,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     try
                     {
+                        Validators.ValidateAlgorithm(samlToken.Assertion.Signature.SignedInfo.SignatureMethod, key, samlToken, validationParameters);
+
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
                         LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                         samlToken.SigningKey = key;

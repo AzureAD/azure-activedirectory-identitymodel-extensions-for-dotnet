@@ -42,8 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 41)
-                Assert.True(false, "Number of properties has changed from 41 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 43)
+                Assert.True(false, "Number of properties has changed from 43 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -76,10 +76,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             TypeValidator typeValidator = (typ, token, parameters) => "ActualType";
 
+            AlgorithmValidator algorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false);
+
             var validTypes = new List<string> { "ValidType1", "ValidType2", "ValidType3" };
+
+            var validAlgorithms = new List<string> { "RSA2048", "RSA1024" };
 
             TokenValidationParameters validationParametersInline = new TokenValidationParameters()
             {
+                AlgorithmValidator = algorithmValidator,
                 ActorValidationParameters = actorValidationParameters,
                 AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue,
                 IssuerSigningKey = issuerSigningKey,
@@ -91,6 +96,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
                 TypeValidator = typeValidator,
+                ValidAlgorithms = validAlgorithms,
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidAudience = validAudience,
@@ -106,6 +112,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(validationParametersInline.SaveSigninToken);
             Assert.False(validationParametersInline.ValidateAudience);
             Assert.False(validationParametersInline.ValidateIssuer);
+            Assert.True(object.ReferenceEquals(validationParametersInline.ValidAlgorithms, validAlgorithms));
+            Assert.True(object.ReferenceEquals(validationParametersInline.AlgorithmValidator, algorithmValidator));
             Assert.True(object.ReferenceEquals(validationParametersInline.TypeValidator, typeValidator));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudience, validAudience));
             Assert.True(object.ReferenceEquals(validationParametersInline.ValidAudiences, validAudiences));
@@ -113,6 +121,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(validationParametersInline.IgnoreTrailingSlashWhenValidatingAudience);
 
             TokenValidationParameters validationParametersSets = new TokenValidationParameters();
+            validationParametersSets.AlgorithmValidator = algorithmValidator;
             validationParametersSets.ActorValidationParameters = actorValidationParameters;
             validationParametersSets.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue;
             validationParametersSets.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -126,6 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.TypeValidator = typeValidator;
             validationParametersSets.ValidateAudience = false;
             validationParametersSets.ValidateIssuer = false;
+            validationParametersSets.ValidAlgorithms = validAlgorithms;
             validationParametersSets.ValidAudience = validAudience;
             validationParametersSets.ValidAudiences = validAudiences;
             validationParametersSets.ValidIssuer = validIssuer;
@@ -151,8 +161,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 41)
-                Assert.True(false, "Number of public fields has changed from 41 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 43)
+                Assert.True(false, "Number of public fields has changed from 43 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

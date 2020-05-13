@@ -39,6 +39,11 @@ namespace Microsoft.IdentityModel.TestUtils
     /// </summary>
     public static class ValidationDelegates
     {
+        public static AlgorithmValidator AlgorithmValidatorBuilder(bool result)
+        {
+            return (string algorithm, SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters) => result;
+        }
+
         public static bool AudienceValidatorReturnsFalse(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return false;
