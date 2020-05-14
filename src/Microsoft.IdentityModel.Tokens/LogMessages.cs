@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10102 = "IDX10102: NameClaimType cannot be null or whitespace.";
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
+        public const string IDX10105 = "IDX10105: ClaimValue that is a collection of collections is not supported. Such ClaimValue is found for ClaimType : '{0}'";
 
         // token validation
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
@@ -226,6 +227,7 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10811 = "IDX10811:"
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
         public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
+
 
 #pragma warning restore 1591
     }
