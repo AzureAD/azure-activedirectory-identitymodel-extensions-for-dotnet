@@ -26,10 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -54,6 +57,78 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeys != null)
                 foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
                     yield return key;
+        }
+
+        /// <summary>
+        /// Merges claims, If an item with same type exists in both the lists, the one in claims is picked.
+        /// </summary>
+        /// <param name="claims">Collection of claims.</param>
+        /// <param name="subjectClaims">Collection of claims.</param>
+        /// <param name="replace">Tells to either replace repeating items in subjectClaims or keep them.</param>
+        /// <returns></returns>
+        internal static IEnumerable<Claim> MergeClaims(IEnumerable<Claim> claims, IEnumerable<Claim> subjectClaims, bool replace)
+        {
+            if (claims == null)
+                return subjectClaims;
+
+            if (subjectClaims == null)
+                return claims;
+
+            List<Claim> result = claims.ToList();
+            if (replace)
+            {
+                foreach (Claim claim in subjectClaims)
+                {
+                    if (claims.Where(i => i.Type == claim.Type).FirstOrDefault() == null)
+                    {
+                        result.Add(claim);
+                    }
+                }
+                return result;
+            }
+            else
+                return result.Concat(subjectClaims);
+        }
+
+        /// <summary>
+        /// Gets ValueType of the claim from it's Value.
+        /// </summary>
+        /// <param name="value">Represents value of a claim.</param>
+        /// <returns>String representing claim's ValueType.</returns>
+        internal static string GetClaimValueTypeFromValue(object value)
+        {
+            if (value.GetType().Name == typeof(String).Name)
+            {
+                return ClaimValueTypes.String;
+            }
+            if (value.GetType().Name == typeof(Boolean).Name)
+            {
+                return ClaimValueTypes.Boolean;
+            }
+            if (value.GetType().Name == typeof(Int32).Name)
+            {
+                return ClaimValueTypes.Integer32;
+            }
+            if (value.GetType().Name == typeof(Int64).Name)
+            {
+                return ClaimValueTypes.Integer64;
+            }
+            if (value.GetType().Name == typeof(Double).Name)
+            {
+                return ClaimValueTypes.Double;
+            }
+            if (value.GetType().Name == typeof(DateTime).Name)
+            {
+                return ClaimValueTypes.DateTime;
+            }
+            if (value.GetType().Name == typeof(List<>).Name)
+            {
+                foreach (var item in (IList)value)
+                {
+                    return GetClaimValueTypeFromValue(item);
+                }
+            }
+            return null;
         }
     }
 }

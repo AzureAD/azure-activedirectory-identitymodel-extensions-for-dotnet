@@ -365,7 +365,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     Expires = Default.Expires,
                     Issuer = Default.Issuer,
                     SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = new ClaimsIdentity(Default.SamlClaims)
+                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Claims = Default.SamlClaimsDictionary
                 };
 
                 var validationParameters = new TokenValidationParameters
