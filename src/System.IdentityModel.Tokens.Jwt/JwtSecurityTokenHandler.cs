@@ -546,6 +546,8 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
+            IEnumerable<Claim> claims = JwtTokenUtilities.GetAllClaims(claimCollection, subject != null ? subject.Claims : null);
+
             LogHelper.LogVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials, OutboundAlgorithmMap);

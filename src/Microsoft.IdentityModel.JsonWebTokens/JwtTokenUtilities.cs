@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -281,6 +282,87 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return string.Empty;
 
             return claim.Value;
+        }
+
+        /// <summary>
+        /// Gets ValueType of the claim from it's Value.
+        /// </summary>
+        /// <param name="value">Represents value of a claim.</param>
+        /// <returns>String representing claim's ValueType.</returns>
+        internal static string GetClaimValueTypeFromValue(object value)
+        {
+            if (value.GetType().Name == typeof(String).Name && value.ToString() == string.Empty)
+                return JsonClaimValueTypes.JsonNull;
+
+            string claimValueType = TokenUtilities.GetClaimValueTypeFromValue(value);
+
+            if (!String.IsNullOrEmpty(claimValueType))
+                return claimValueType;
+
+            if (value.GetType().Name == typeof(JObject).Name)
+            {
+                return JsonClaimValueTypes.Json;
+            }
+            if (value.GetType().Name == typeof(JArray).Name)
+            {
+                return JsonClaimValueTypes.JsonArray;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Creats claims from dictionary.
+        /// </summary>
+        /// <param name="claimsCollection">Represents claims stored in dictionary.</param>
+        /// <returns>claims</returns>
+        internal static IEnumerable<Claim> CreateClaimsFromDictionary(IDictionary<string, object> claimsCollection)
+        {
+            List<Claim> claims = new List<Claim>();
+            object value;
+            foreach (string claimtype in claimsCollection.Keys)
+            {
+                claimsCollection.TryGetValue(claimtype, out value);
+                if (value != null)
+                {
+                    string valueType = GetClaimValueTypeFromValue(value);
+
+                    if (value.GetType().Name == typeof(List<>).Name)
+                    {
+                        foreach (var item in (IList)value)
+                        {
+                            claims.Add(new Claim(claimtype, item.ToString(), valueType));
+                        }
+                    }
+                    else
+                    {
+                        claims.Add(new Claim(claimtype, value.ToString(), valueType));
+                    }
+                }
+            }
+            return claims;
+        }
+
+        /// <summary>
+        /// Merges SecurityTokenDescriptor.Claims and SecurityTokenDescriptor.Subject.Claims
+        /// </summary>
+        /// <param name="claims">Represents SecurityTokenDescriptor.Claims.</param>
+        /// <param name="subjectClaims">SecurityTokenDescriptor.Subject.Claims.</param>
+        /// <returns>Merged list of claims </returns>
+        internal static IEnumerable<Claim> GetAllClaims(IDictionary<string , object> claims, IEnumerable<Claim> subjectClaims)
+        {
+            IEnumerable<Claim> allClaims = null;
+            if (claims != null)
+                allClaims = CreateClaimsFromDictionary(claims);
+
+            if (allClaims != null && allClaims.Any())
+            {
+                allClaims = TokenUtilities.MergeClaims(allClaims, subjectClaims, true);
+            }
+            else if (subjectClaims != null && subjectClaims.Any())
+                allClaims = subjectClaims;
+
+            return allClaims;
         }
 
         /// <summary>
