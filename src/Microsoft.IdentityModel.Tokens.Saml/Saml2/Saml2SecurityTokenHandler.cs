@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
@@ -681,20 +682,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(tokenDescriptor.Subject));
 
             var attributes = new List<Saml2Attribute>();
-            foreach (Claim claim in tokenDescriptor.Subject.Claims)
+
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
-                if (claim != null)
+                foreach (Claim claim in claims)
                 {
-                    switch (claim.Type)
+                    if (claim != null)
                     {
-                        // TODO - should these really be filtered?
-                        case ClaimTypes.AuthenticationInstant:
-                        case ClaimTypes.AuthenticationMethod:
-                        case ClaimTypes.NameIdentifier:
-                            break;
-                        default:
-                            attributes.Add(CreateAttribute(claim));
-                            break;
+                        switch (claim.Type)
+                        {
+                            // TODO - should these really be filtered?
+                            case ClaimTypes.AuthenticationInstant:
+                            case ClaimTypes.AuthenticationMethod:
+                            case ClaimTypes.NameIdentifier:
+                                break;
+                            default:
+                                attributes.Add(CreateAttribute(claim));
+                                break;
+                        }
                     }
                 }
             }
@@ -895,9 +902,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             string nameIdentifierSpProviderId = null;
             string nameIdentifierSpNameQualifier = null;
 
-            if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Claims != null)
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
-                foreach (var claim in tokenDescriptor.Subject.Claims)
+                foreach (var claim in claims)
                 {
                     if (claim.Type == ClaimTypes.NameIdentifier)
                     {

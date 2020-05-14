@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
@@ -83,7 +84,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
         /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' if present.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
-        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims'. The values will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
@@ -91,6 +92,45 @@ namespace System.IdentityModel.Tokens.Jwt
             if (claims != null)
                 AddClaims(claims);
 
+            AddFirstPriorityClaims(issuer, audience, notBefore, expires, issuedAt);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' and 'claimCollection' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' or 'claimCollection' if present.</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="claimsCollection">If both <paramref name="claims"/> and <paramref name="claimsCollection"/> are not null then the values in claims will be combined with the values in claimsCollection. The values found in claimCollection take precedence over those found in claims, so any duplicate
+        /// values will be overridden.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, IDictionary<string, object> claimsCollection, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+            : base(StringComparer.Ordinal)
+        {
+            if (claims != null)
+                AddClaims(claims);
+
+            if (claimsCollection != null && claimsCollection.Any())
+                AddDictionaryClaims(claimsCollection);
+
+            AddFirstPriorityClaims(issuer, audience, notBefore, expires, issuedAt);
+        }
+
+        /// <summary>
+        /// Adds Nbf, Exp, Iat, Iss and Aud claims to payload
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in <see cref="JwtPayload"/> instance.</param>
+        internal void AddFirstPriorityClaims(string issuer, string audience, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+        {
             if (expires.HasValue)
             {
                 if (notBefore.HasValue)
@@ -508,6 +548,20 @@ namespace System.IdentityModel.Tokens.Jwt
                     this[jsonClaimType] = jsonClaimValue;
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds claims from dictionary.
+        /// </summary>
+        /// <param name="claimsCollection"> A dictionary of claims.</param>
+        /// <remark> If a key is already present in target dictionary, its value is overridden by the value of the key in claimsCollection.</remark>
+        internal void AddDictionaryClaims(IDictionary<string, object> claimsCollection)
+        {
+            if (claimsCollection == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claimsCollection)));
+
+            foreach (string type in claimsCollection.Keys)
+                this[type] = claimsCollection[type];
         }
 
         internal static string GetClaimValueType(object obj)
