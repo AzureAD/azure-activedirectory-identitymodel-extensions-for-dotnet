@@ -1,5 +1,7 @@
 ﻿using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
+using System.Security.Claims;
+using System.Collections;
 //------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
@@ -101,6 +103,80 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Gets ValueType of the claim from it's Value.
+        /// </summary>
+        /// <param name="value">Represents value of a claim.</param>
+        /// <returns>String representing claim's ValueType.</returns>
+        internal static string GetClaimValueTypeFromValue(object value)
+        {
+            string claimValueType;
+            claimValueType = TokenUtilities.GetClaimValueTypeFromValue(value);
+
+            if (claimValueType != null)
+                return claimValueType;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Creats claims from dictionary.
+        /// </summary>
+        /// <param name="claimsCollection">Represents claims stored in dictionary.</param>
+        /// <returns>claims</returns>
+        internal static IEnumerable<Claim> CreateClaimsFromDictionary(IDictionary<string, object> claimsCollection)
+        {
+            List<Claim> claims = null;
+            object value;
+            if (claimsCollection == null)
+                return claims;
+
+            claims = new List<Claim>();
+            foreach (string claimtype in claimsCollection.Keys)
+            {
+                claimsCollection.TryGetValue(claimtype, out value);
+                if (value != null)
+                {
+                    string valueType = GetClaimValueTypeFromValue(value);
+
+                    if (value.GetType().Name == typeof(List<>).Name)
+                    {
+                        foreach (var item in (IList)value)
+                        {
+                            claims.Add(new Claim(claimtype, item.ToString(), valueType));
+                        }
+                    }
+                    else
+                    {
+                        claims.Add(new Claim(claimtype, value.ToString(), valueType));
+                    }
+                }
+            }
+            return claims;
+        }
+
+        /// <summary>
+        /// Merges SecurityTokenDescriptor.Claims and SecurityTokenDescriptor.Subject.Claims
+        /// </summary>
+        /// <param name="claims">Represents SecurityTokenDescriptor.Claims.</param>
+        /// <param name="subjectClaims">SecurityTokenDescriptor.Subject.Claims.</param>
+        /// <returns>Merged list of claims </returns>
+        internal static IEnumerable<Claim> GetAllClaims(IDictionary<string, object> claims, IEnumerable<Claim> subjectClaims)
+        {
+            IEnumerable<Claim> allClaims = null;
+            if (claims != null)
+                allClaims = CreateClaimsFromDictionary(claims);
+
+            if (allClaims != null && allClaims.Any())
+            {
+                allClaims = TokenUtilities.MergeClaims(allClaims, subjectClaims, true);
+            }
+            else if (subjectClaims != null && subjectClaims.Any())
+                allClaims = subjectClaims;
+
+            return allClaims;
         }
     }
 }

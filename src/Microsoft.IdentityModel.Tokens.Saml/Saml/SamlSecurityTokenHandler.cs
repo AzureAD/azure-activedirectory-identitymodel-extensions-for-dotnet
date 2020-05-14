@@ -270,10 +270,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
-            if (tokenDescriptor.Subject != null)
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
                 var attributes = new List<SamlAttribute>();
-                foreach (var claim in tokenDescriptor.Subject.Claims)
+                foreach (var claim in claims)
                 {
                     if (claim != null && claim.Type != ClaimTypes.NameIdentifier)
                     {
@@ -450,9 +452,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlSubject = new SamlSubject();
             Claim identityClaim = null;
-            if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Claims != null)
+
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
-                foreach (var claim in tokenDescriptor.Subject.Claims)
+                foreach (var claim in claims)
                 {
                     if (claim.Type == ClaimTypes.NameIdentifier)
                     {
