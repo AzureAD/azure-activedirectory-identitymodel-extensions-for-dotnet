@@ -372,45 +372,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return null;
         }
-
-        /// <summary>
-        /// Returns all <see cref="SecurityKey"/> to use when validating the signature of a token.
-        /// </summary>
-        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
-        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
-        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="jwtToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <param name="kidMatched">A <see cref="bool"/> to represent if a a issuer signing key matched with token kid or x5t</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> to use for signature validation.</returns>
-        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token, string kid, string x5t, SecurityToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
-        {
-            kidMatched = false;
-
-            if (validationParameters.IssuerSigningKeyResolver != null)
-            {
-                return validationParameters.IssuerSigningKeyResolver(token, jwtToken, kid, validationParameters);
-            }
-            else
-            {
-                SecurityKey key = ResolveTokenSigningKey(kid, x5t, jwtToken, validationParameters);
-
-                if (key != null)
-                {
-                    kidMatched = true;
-                    return new List<SecurityKey> { key };
-                }
-                else
-                {
-                    kidMatched = false;
-                    if (validationParameters.TryAllIssuerSigningKeys)
-                    {
-                        return TokenUtilities.GetAllSigningKeys(validationParameters);
-                    }
-                }
-            }
-            return null;
-        }
     }
 }
 

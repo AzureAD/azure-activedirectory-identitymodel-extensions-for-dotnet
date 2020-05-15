@@ -903,7 +903,28 @@ namespace System.IdentityModel.Tokens.Jwt
 
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters,out kidMatched);
+            if (validationParameters.IssuerSigningKeyResolver != null)
+            {
+                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
+            }
+            else
+            {
+                var key = ResolveIssuerSigningKey(token, jwtToken, validationParameters);
+                if (key != null)
+                {
+                    kidMatched = true;
+                    keys = new List<SecurityKey> { key };
+                }
+            }
+
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+            {
+                // control gets here if:
+                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+                // 2. ResolveIssuerSigningKey returned null
+                // Try all the keys. This is the degenerate case, not concerned about perf.
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
+            }
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
@@ -1184,10 +1205,9 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
+        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -1195,7 +1215,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters, out kidMatched);
+            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters);
         }
 
         /// <summary>

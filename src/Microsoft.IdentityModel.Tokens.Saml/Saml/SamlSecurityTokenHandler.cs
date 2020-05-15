@@ -777,32 +777,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
         /// </summary>
         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
-        /// <param name="samlToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
+        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
-        /// <param name="keyMatched">A<see cref="bool"/>to represent if a issuer signing key matched token keyinfo</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="ArgumentNullException">If <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, SamlSecurityToken samlToken, TokenValidationParameters validationParameters, out bool keyMatched)
+        protected virtual SecurityKey ResolveIssuerSigningKey(string token, SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (samlToken == null)
-                throw LogArgumentNullException(nameof(samlToken));
+            if (securityToken == null)
+                throw LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            if (samlToken.Assertion == null)
-                throw LogArgumentNullException(nameof(samlToken.Assertion));
+            if (securityToken.Assertion == null)
+                throw LogArgumentNullException(nameof(securityToken.Assertion));
 
-            if (samlToken.Assertion?.Signature?.KeyInfo == null)
-            {
-                keyMatched = false;
-                return null;
-            }
-
-            return SamlTokenUtilities.GetKeysForTokenSignatureValidation(token, samlToken, samlToken.Assertion.Signature.KeyInfo, validationParameters, out keyMatched);
+            return SamlTokenUtilities.ResolveTokenSigningKey(securityToken.Assertion.Signature.KeyInfo, validationParameters);
         }
 
         /// <summary>
@@ -1029,7 +1022,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            keys = ResolveIssuerSigningKey(token, samlToken, validationParameters, out keyMatched);
+            if (validationParameters.IssuerSigningKeyResolver != null)
+            {
+                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
+            }
+            else
+            {
+                var securityKey = ResolveIssuerSigningKey(token, samlToken, validationParameters);
+                if (securityKey != null)
+                {
+                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+                    keyMatched = true;
+                    keys = new List<SecurityKey> { securityKey };
+                }
+            }
+
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+            {
+                // control gets here if:
+                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+                // 2. ResolveIssuerSigningKey returned null
+                // Try all the keys. This is the degenerate case, not concerned about perf.
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
+            }
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();

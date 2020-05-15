@@ -947,26 +947,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
-        /// </summary>
-        /// <param name="token"></param>
-        /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JsonWebToken jwtToken, TokenValidationParameters validationParameters, out bool kidMatched)
-        {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
-
-            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters, out kidMatched);
-        }
-
-        /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when decrypting a JWE.
         /// </summary>
         /// <param name="token">The <see cref="string"/> the token that is being decrypted.</param>
@@ -1189,7 +1169,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters, out kidMatched);
+            if (validationParameters.IssuerSigningKeyResolver != null)
+            {
+                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Kid, validationParameters);
+            }
+            else
+            {
+                var key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
+                if (key != null)
+                {
+                    kidMatched = true;
+                    keys = new List<SecurityKey> { key };
+                }
+            }
+
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+            {
+                // control gets here if:
+                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+                // 2. ResolveIssuerSigningKey returned null
+                // Try all the keys. This is the degenerate case, not concerned about perf.
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
+            }
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
