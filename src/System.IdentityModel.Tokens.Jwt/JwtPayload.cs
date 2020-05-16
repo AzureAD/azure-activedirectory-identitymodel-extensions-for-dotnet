@@ -69,7 +69,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
         /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
-           : this(issuer, audience, claims, notBefore, expires, null)
+           : this(issuer, audience, claims, null, notBefore, expires, null)
         {
         }
 
@@ -79,17 +79,22 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
         /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
         /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
-        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
-        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
-        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' if present.</param>
+        /// <param name="claimsCollection">If both claims and claimsCollection are not null then the values in claims will be combined with the values in claimsCollection. The values found in claimCollection take precedence over those found in claims, so any duplicate
+        /// values will be overridden.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' and 'claimcollection' if present.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
-        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
-        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, IDictionary<string, object> claimsCollection, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
         {
             if (claims != null)
                 AddClaims(claims);
+
+            if (claimsCollection != null && claimsCollection.Count > 0)
+                MergeDictionaryClaims(claimsCollection);
 
             if (expires.HasValue)
             {
@@ -510,6 +515,20 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
+        /// <summary>
+        /// Adds claims from dictionary.
+        /// </summary>
+        /// <param name="claimsCollection"> A dictionary of claims.</param>
+        /// <remark> If a key is already present in target dictionary, its value is overridden by the value of the key in claimsCollection.</remark>
+        public void MergeDictionaryClaims(IDictionary<string, object> claimsCollection)
+        {
+            if (claimsCollection == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claimsCollection)));
+
+            foreach (string type in claimsCollection.Keys)
+                this[type] = claimsCollection[type];
+        }
+
         internal static string GetClaimValueType(object obj)
         {
             if (obj == null)
@@ -722,7 +741,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>This instance as JSON.</returns>
         /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
-        {
+                {
             return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
         }
 

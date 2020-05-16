@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     }
                 }
 
-                AddActorToAttributes(attributes, tokenDescriptor.Subject.Actor);
+                AddActorToAttributes(attributes, tokenDescriptor.Subject?.Actor);
 
                 var consolidatedAttributes = ConsolidateAttributes(attributes);
                 if (consolidatedAttributes.Count > 0)
