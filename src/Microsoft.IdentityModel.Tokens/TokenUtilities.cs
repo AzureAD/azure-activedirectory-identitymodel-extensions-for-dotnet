@@ -60,13 +60,12 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Merges claims, If an item with same type exists in both the lists, the one in claims is picked.
+        /// Merges claims. If a claim with same type exists in both the lists, the one in claims will be kept.
         /// </summary>
-        /// <param name="claims">Collection of claims.</param>
-        /// <param name="subjectClaims">Collection of claims.</param>
-        /// <param name="replace">Tells to either replace repeating items in subjectClaims or keep them.</param>
-        /// <returns></returns>
-        internal static IEnumerable<Claim> MergeClaims(IEnumerable<Claim> claims, IEnumerable<Claim> subjectClaims, bool replace)
+        /// <param name="claims"> Collection of claims.</param>
+        /// <param name="subjectClaims"> Collection of claims.</param>
+        /// <returns> A Merged list of claims.</returns>
+        internal static IEnumerable<Claim> MergeClaims(IEnumerable<Claim> claims, IEnumerable<Claim> subjectClaims)
         {
             if (claims == null)
                 return subjectClaims;
@@ -75,59 +74,53 @@ namespace Microsoft.IdentityModel.Tokens
                 return claims;
 
             List<Claim> result = claims.ToList();
-            if (replace)
+
+            foreach (Claim claim in subjectClaims)
             {
-                foreach (Claim claim in subjectClaims)
-                {
-                    if (claims.Where(i => i.Type == claim.Type).FirstOrDefault() == null)
-                    {
-                        result.Add(claim);
-                    }
-                }
-                return result;
+                if (claims.Where(i => i.Type == claim.Type).FirstOrDefault() == null)
+                    result.Add(claim);
             }
-            else
-                return result.Concat(subjectClaims);
+
+            return result;
         }
 
         /// <summary>
-        /// Gets ValueType of the claim from it's Value.
+        /// Gets the value type of the claim.
         /// </summary>
-        /// <param name="value">Represents value of a claim.</param>
-        /// <returns>String representing claim's ValueType.</returns>
+        /// <param name="value"> The claim value.</param>
+        /// <returns> The value type of the claim.</returns>
         internal static string GetClaimValueTypeFromValue(object value)
         {
-            if (value.GetType().Name == typeof(String).Name)
+            if (value != null)
             {
-                return ClaimValueTypes.String;
-            }
-            if (value.GetType().Name == typeof(Boolean).Name)
-            {
-                return ClaimValueTypes.Boolean;
-            }
-            if (value.GetType().Name == typeof(Int32).Name)
-            {
-                return ClaimValueTypes.Integer32;
-            }
-            if (value.GetType().Name == typeof(Int64).Name)
-            {
-                return ClaimValueTypes.Integer64;
-            }
-            if (value.GetType().Name == typeof(Double).Name)
-            {
-                return ClaimValueTypes.Double;
-            }
-            if (value.GetType().Name == typeof(DateTime).Name)
-            {
-                return ClaimValueTypes.DateTime;
-            }
-            if (value.GetType().Name == typeof(List<>).Name)
-            {
-                foreach (var item in (IList)value)
+                if (value.GetType().Name == typeof(String).Name)
+                    return ClaimValueTypes.String;
+
+                if (value.GetType().Name == typeof(Boolean).Name)
+                    return ClaimValueTypes.Boolean;
+
+                if (value.GetType().Name == typeof(Int32).Name)
+                    return ClaimValueTypes.Integer32;
+
+                if (value.GetType().Name == typeof(Int64).Name)
+                    return ClaimValueTypes.Integer64;
+
+                if (value.GetType().Name == typeof(Double).Name)
+                    return ClaimValueTypes.Double;
+
+                if (value.GetType().Name == typeof(DateTime).Name)
+                    return ClaimValueTypes.DateTime;
+
+                if (value.GetType().Name == typeof(List<>).Name)
                 {
-                    return GetClaimValueTypeFromValue(item);
+                    foreach (var item in (IList)value)
+                    {
+                        // What to do if the value type of objects in the list are different.
+                        return GetClaimValueTypeFromValue(item);
+                    }
                 }
             }
+
             return null;
         }
     }

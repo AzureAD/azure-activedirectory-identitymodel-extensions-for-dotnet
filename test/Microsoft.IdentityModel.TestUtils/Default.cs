@@ -425,6 +425,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray1", @"[1,2,3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray2", @"[1,""2"",3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
                         new Claim("ClaimValueTypes.JsonClaimValueTypes.Integer1", "1", ClaimValueTypes.Integer),
+                        new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer)
                     };
         }
 
@@ -444,8 +445,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 { "ClaimValueTypes.JsonClaimValueTypes.Json2", JObject.Parse(@"{""jsonProperty2"":""jsonvalue2""}") },
                 { "ClaimValueTypes.JsonClaimValueTypes.JsonNull", "" },
                 { "ClaimValueTypes.JsonClaimValueTypes.JsonArray1", JArray.Parse(@"[1,2,3]") },
-                {"ClaimValueTypes.JsonClaimValueTypes.JsonArray2", JArray.Parse(@"[1,""2"",3]") },
-                {"ClaimValueTypes.JsonClaimValueTypes.Integer1", 1 },
+                { "ClaimValueTypes.JsonClaimValueTypes.JsonArray2", JArray.Parse(@"[1,""2"",3]") },
+                { "ClaimValueTypes.JsonClaimValueTypes.Integer1", 1 },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
             };
         }
 
@@ -674,9 +676,14 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new Dictionary<string, object>()
             {
+                { ClaimTypes.Country, "USA"},
+                { ClaimTypes.NameIdentifier, "Bob" },
                 { ClaimTypes.Email, "Bob@contoso.com" },
                 { ClaimTypes.GivenName, "Bob" },
-                { ClaimTypes.Role, "HR" }
+                { ClaimTypes.HomePhone, "555.1212" },
+                { ClaimTypes.Role, new List<string>{"Developer", "Sales" } },
+                { ClaimTypes.StreetAddress, "123AnyWhereStreet\r\nSomeTown/r/nUSA" },
+                { ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien" }
             };
         }
 
