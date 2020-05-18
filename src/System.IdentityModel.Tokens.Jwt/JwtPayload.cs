@@ -69,7 +69,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
         /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
-           : this(issuer, audience, claims, null, notBefore, expires, null)
+           : this(issuer, audience, claims, notBefore, expires, null)
         {
         }
 
@@ -79,13 +79,57 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
         /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
         /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
-        /// <param name="claimsCollection">If both claims and claimsCollection are not null then the values in claims will be combined with the values in claimsCollection. The values found in claimCollection take precedence over those found in claims, so any duplicate
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+            : base(StringComparer.Ordinal)
+        {
+            if (claims != null)
+                AddClaims(claims);
+
+            if (expires.HasValue)
+            {
+                if (notBefore.HasValue)
+                {
+                    if (notBefore.Value >= expires.Value)
+                    {
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
+                    }
+
+                    this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
+                }
+
+                this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
+            }
+
+            if (issuedAt.HasValue)
+                this[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(issuedAt.Value.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(issuer))
+                this[JwtRegisteredClaimNames.Iss] = issuer;
+
+            // if could be the case that some of the claims above had an 'aud' claim;
+            if (!string.IsNullOrEmpty(audience))
+                AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="claimsCollection">If both <paramref name="claims"/> and <paramref name="claimsCollection"/> are not null then the values in claims will be combined with the values in claimsCollection. The values found in claimCollection take precedence over those found in claims, so any duplicate
         /// values will be overridden.</param>
         /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' and 'claimcollection' if present.</param>
         /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' and 'claimcollection' if present.</param>
         /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' and 'claimcollection' if present.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
-        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, IDictionary<string, object> claimsCollection, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
@@ -741,7 +785,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>This instance as JSON.</returns>
         /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
-                {
+        {
             return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
         }
 

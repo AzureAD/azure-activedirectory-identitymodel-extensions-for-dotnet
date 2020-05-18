@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, IEnumerable<Claim> claims, DateTime? nbf, DateTime? exp, DateTime? iat, SigningCredentials signingCredentials)
         {
-            JwtPayload payload = new JwtPayload(issuer, audience, claims, null, nbf, exp, iat);
+            JwtPayload payload = new JwtPayload(issuer, audience, claims, nbf, exp, iat);
             JwtHeader header = (signingCredentials != null) ? new JwtHeader(signingCredentials) : new JwtHeader();
             return new JwtSecurityToken(header, payload, header.Base64UrlEncode(), payload.Base64UrlEncode(), "" );
         }

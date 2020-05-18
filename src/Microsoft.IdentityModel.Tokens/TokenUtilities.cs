@@ -30,9 +30,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -60,11 +57,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Merges claims. If a claim with same type exists in both the lists, the one in claims will be kept.
+        /// Merges claims. If a claim with same type exists in both <paramref name="claims"/> and <paramref name="subjectClaims"/>, the one in claims will be kept.
         /// </summary>
-        /// <param name="claims"> Collection of claims.</param>
-        /// <param name="subjectClaims"> Collection of claims.</param>
-        /// <returns> A Merged list of claims.</returns>
+        /// <param name="claims"> Collection of <see cref="Claim"/>'s.</param>
+        /// <param name="subjectClaims"> Collection of <see cref="Claim"/>'s.</param>
+        /// <returns> A Merged list of <see cref="Claim"/>'s.</returns>
         internal static IEnumerable<Claim> MergeClaims(IEnumerable<Claim> claims, IEnumerable<Claim> subjectClaims)
         {
             if (claims == null)
@@ -77,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             foreach (Claim claim in subjectClaims)
             {
-                if (claims.Where(i => i.Type == claim.Type).FirstOrDefault() == null)
+                if (!claims.Where(i => i.Type == claim.Type).Any())
                     result.Add(claim);
             }
 
@@ -85,27 +82,27 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the value type of the claim.
+        /// Gets the value type of the <see cref="Claim"/> from its value <paramref name="value"/>
         /// </summary>
-        /// <param name="value"> The claim value.</param>
-        /// <returns> The value type of the claim.</returns>
+        /// <param name="value"> The <see cref="Claim"/> value.</param>
+        /// <returns> The value type of the <see cref="Claim"/>.</returns>
         internal static string GetClaimValueTypeFromValue(object value)
         {
             if (value != null)
             {
-                if (value.GetType().Name == typeof(String).Name)
+                if (value.GetType().Name == typeof(string).Name)
                     return ClaimValueTypes.String;
 
-                if (value.GetType().Name == typeof(Boolean).Name)
+                if (value.GetType().Name == typeof(bool).Name)
                     return ClaimValueTypes.Boolean;
 
-                if (value.GetType().Name == typeof(Int32).Name)
+                if (value.GetType().Name == typeof(int).Name)
                     return ClaimValueTypes.Integer32;
 
-                if (value.GetType().Name == typeof(Int64).Name)
+                if (value.GetType().Name == typeof(long).Name)
                     return ClaimValueTypes.Integer64;
 
-                if (value.GetType().Name == typeof(Double).Name)
+                if (value.GetType().Name == typeof(double).Name)
                     return ClaimValueTypes.Double;
 
                 if (value.GetType().Name == typeof(DateTime).Name)
