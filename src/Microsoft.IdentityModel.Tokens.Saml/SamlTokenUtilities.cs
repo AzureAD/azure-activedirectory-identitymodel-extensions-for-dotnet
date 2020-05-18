@@ -29,12 +29,8 @@ using System.Collections;
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens.Saml
 {
@@ -106,32 +102,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Creates claims from  a dictionary.
+        /// Creates <see cref="Claim"/>'s from <paramref name="claimsCollection"/>.
         /// </summary>
         /// <param name="claimsCollection"> A dictionary that represents a set of claims.</param>
-        /// <returns> A collection of Claim objects created from the dictionary.</returns>
+        /// <returns> A collection of <see cref="Claim"/>'s created from the <paramref name="claimsCollection"/>.</returns>
         internal static IEnumerable<Claim> CreateClaimsFromDictionary(IDictionary<string, object> claimsCollection)
         {
             List<Claim> claims = null;
-            object value;
             if (claimsCollection == null)
                 return claims;
 
             claims = new List<Claim>();
-            foreach (string claimtype in claimsCollection.Keys)
+            foreach (var claim in claimsCollection)
             {
-                if (claimsCollection.TryGetValue(claimtype, out value))
-                {
-                    string valueType = TokenUtilities.GetClaimValueTypeFromValue(value);
+                string claimType = claim.Key;
+                object claimValue = claim.Value;
 
-                    if (value.GetType().Name == typeof(List<>).Name)
+                if (claimValue != null)
+                {
+                    string valueType = TokenUtilities.GetClaimValueTypeFromValue(claimValue);
+
+                    if (claimValue.GetType().Name == typeof(List<>).Name)
                     {
-                        foreach (var item in (IList)value)
-                            claims.Add(new Claim(claimtype, item.ToString(), valueType));
+                        foreach (var item in (IList)claimValue)
+                            claims.Add(new Claim(claimType, item.ToString(), valueType));
                     }
                     else
                     {
-                        claims.Add(new Claim(claimtype, value.ToString(), valueType));
+                        claims.Add(new Claim(claimType, claimValue.ToString(), valueType));
                     }
                 }
             }
@@ -140,11 +138,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Merges IDictionary of claims and IEnumerable of claims.
+        /// Merges <paramref name="claims"/> and <paramref name="subjectClaims"/>
         /// </summary>
         /// <param name="claims"> A dictionary of claims.</param>
-        /// <param name="subjectClaims"> An IEnumerable of claims.</param>
-        /// <returns> A merged list of claims.</returns>
+        /// <param name="subjectClaims"> A collection of <see cref="Claim"/>'s</param>
+        /// <returns> A merged list of <see cref="Claim"/>'s.</returns>
         internal static IEnumerable<Claim> GetAllClaims(IDictionary<string, object> claims, IEnumerable<Claim> subjectClaims)
         {
             IEnumerable<Claim> allClaims = null;
