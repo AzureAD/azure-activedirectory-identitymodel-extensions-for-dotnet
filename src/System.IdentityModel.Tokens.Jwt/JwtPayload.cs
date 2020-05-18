@@ -69,7 +69,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
         /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
-           : this(issuer, audience, claims, null, notBefore, expires, null)
+           : this(issuer, audience, claims, notBefore, expires, null)
         {
         }
 
