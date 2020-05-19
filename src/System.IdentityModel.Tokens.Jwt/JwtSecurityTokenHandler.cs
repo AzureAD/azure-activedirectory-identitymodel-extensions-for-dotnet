@@ -387,30 +387,6 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Creates a JWT in 'Compact Serialization Format'.
-        /// </summary>
-        /// <param name="issuer">The issuer of the token.</param>
-        /// <param name="audience">The audience for this token.</param>
-        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">Translated into 'epoch time' and assigned to 'nbf'.</param>
-        /// <param name="expires">Translated into 'epoch time' and assigned to 'exp'.</param>
-        /// <param name="issuedAt">Translated into 'epoch time' and assigned to 'iat'.</param>
-        /// <param name="signingCredentials">Contains cryptographic material for signing.</param>
-        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting.</param>
-        /// <param name="claimCollection">A collection of (key,value) pairs representing <see cref="Claim"/>(s) for this token.</param>
-        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
-        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> in the <paramref name="subject"/> will map <see cref="Claim.Type"/> by applying <see cref="OutboundClaimTypeMap"/>. Modifying <see cref="OutboundClaimTypeMap"/> could change the outbound JWT.</para>
-        /// </remarks>
-        /// <returns>A Base64UrlEncoded string in 'Compact Serialization Format'.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
-        public virtual string CreateEncodedJwt(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, IDictionary<string, object> claimCollection)
-        {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials, claimCollection).RawData;
-        }
-
-        /// <summary>
         /// Creates a Json Web Token (JWT).
         /// </summary>
         /// <param name="tokenDescriptor"> A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
@@ -456,33 +432,6 @@ namespace System.IdentityModel.Tokens.Jwt
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials, null);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="JwtSecurityToken"/>
-        /// </summary>
-        /// <param name="issuer">The issuer of the token.</param>
-        /// <param name="audience">The audience for this token.</param>
-        /// <param name="subject">The source of the <see cref="Claim"/>(s) for this token.</param>
-        /// <param name="notBefore">The notbefore time for this token.</param>
-        /// <param name="expires">The expiration time for this token.</param>
-        /// <param name="issuedAt">The issue time for this token.</param>
-        /// <param name="signingCredentials">Contains cryptographic material for generating a signature.</param>
-        /// <param name="encryptingCredentials">Contains cryptographic material for encrypting the token.</param>
-        /// <param name="claimCollection">A collection of (key,value) pairs representing <see cref="Claim"/>(s) for this token.</param>
-        /// <remarks>If <see cref="ClaimsIdentity.Actor"/> is not null, then a claim { actort, 'value' } will be added to the payload. <see cref="CreateActorValue"/> for details on how the value is created.
-        /// <para>See <seealso cref="JwtHeader"/> for details on how the HeaderParameters are added to the header.</para>
-        /// <para>See <seealso cref="JwtPayload"/> for details on how the values are added to the payload.</para>
-        /// <para>Each <see cref="Claim"/> on the <paramref name="subject"/> added will have <see cref="Claim.Type"/> translated according to the mapping found in
-        /// <see cref="OutboundClaimTypeMap"/>. Adding and removing to <see cref="OutboundClaimTypeMap"/> will affect the name component of the Json claim.</para>
-        /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
-        /// <para><see cref="EncryptingCredentials.EncryptingCredentials(SecurityKey, string, string)"/> is used to encrypt <see cref="JwtSecurityToken.RawData"/> or <see cref="JwtSecurityToken.RawPayload"/> .</para>
-        /// </remarks>
-        /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
-        public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, IDictionary<string, object> claimCollection)
-        {
-            return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials, claimCollection);
         }
 
         /// <summary>
