@@ -1,0 +1,537 @@
+diff --git a/src/Microsoft.IdentityModel.JsonWebTokens/JsonWebTokenHandler.cs b/src/Microsoft.IdentityModel.JsonWebTokens/JsonWebTokenHandler.cs
+index b083dd18..5102af82 100644
+--- a/src/Microsoft.IdentityModel.JsonWebTokens/JsonWebTokenHandler.cs
++++ b/src/Microsoft.IdentityModel.JsonWebTokens/JsonWebTokenHandler.cs
+@@ -909,17 +909,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+             }
+         }
+ 
+-        private IEnumerable<SecurityKey> GetAllSigningKeys(string token, TokenValidationParameters validationParameters)
+-        {
+-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
+-            if (validationParameters.IssuerSigningKey != null)
+-                yield return validationParameters.IssuerSigningKey;
+-
+-            if (validationParameters.IssuerSigningKeys != null)
+-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+-                    yield return key;
+-        }
+-
+         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+         {
+             IEnumerable<SecurityKey> keys = null;
+@@ -960,11 +949,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+         /// <summary>
+         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
+         /// </summary>
++        /// <param name="token"></param>
+         /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being validated.</param>
+         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
++        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
+         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+         /// <remarks>If key fails to resolve, then null is returned</remarks>
+-        internal virtual SecurityKey ResolveIssuerSigningKey(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
++        internal virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JsonWebToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
+         {
+             if (validationParameters == null)
+                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+@@ -972,7 +963,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+             if (jwtToken == null)
+                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+ 
+-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
++            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters, out kidMatched);
+         }
+ 
+         /// <summary>
+@@ -1194,30 +1185,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+                     return jwtToken;
+             }
+ 
+-            var kidMatched = false;
++            bool kidMatched = false;
+             IEnumerable<SecurityKey> keys = null;
+-            if (validationParameters.IssuerSigningKeyResolver != null)
+-            {
+-                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Kid, validationParameters);
+-            }
+-            else
+-            {
+-                var key = ResolveIssuerSigningKey(jwtToken, validationParameters);
+-                if (key != null)
+-                {
+-                    kidMatched = true;
+-                    keys = new List<SecurityKey> { key };
+-                }
+-            }
+-
+-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+-            {
+-                // control gets here if:
+-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+-                // 2. ResolveIssuerSigningKey returned null
+-                // Try all the keys. This is the degenerate case, not concerned about perf.
+-                keys = GetAllSigningKeys(token, validationParameters);
+-            }
++            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters, out kidMatched);
+ 
+             // keep track of exceptions thrown, keys that were tried
+             var exceptionStrings = new StringBuilder();
+@@ -1234,7 +1204,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+                 throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
+             }
+ 
+-            if (keys!=null)
++            if (keys != null)
+             {
+                 foreach (var key in keys)
+                 {
+@@ -1261,7 +1231,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+                 }
+ 
+             }
+-            
++
+             if (kidExists)
+             {
+                 if (kidMatched)
+diff --git a/src/Microsoft.IdentityModel.JsonWebTokens/JwtTokenUtilities.cs b/src/Microsoft.IdentityModel.JsonWebTokens/JwtTokenUtilities.cs
+index 81f68dbb..a967d3e3 100644
+--- a/src/Microsoft.IdentityModel.JsonWebTokens/JwtTokenUtilities.cs
++++ b/src/Microsoft.IdentityModel.JsonWebTokens/JwtTokenUtilities.cs
+@@ -406,5 +406,63 @@ namespace Microsoft.IdentityModel.JsonWebTokens
+ 
+             return null;
+         }
++
++        /// <summary>
++        /// Returns all <see cref="SecurityKey"/> to use when validating the signature of a token.
++        /// </summary>
++        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
++        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
++        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
++        /// <param name="jwtToken">The <see cref="SecurityToken"/> that is being validated.</param>
++        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
++        /// <param name="kidMatched">A <see cref="bool"/> to represent if a a issuer signing key matched with token kid or x5t</param>
++        /// <returns>Returns all <see cref="SecurityKey"/> to use for signature validation.</returns>
++        internal static IEnumerable<SecurityKey> GetKeysForTokenSignatureValidation(string token, string kid, string x5t, SecurityToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
++        {
++            IEnumerable<SecurityKey> keys = null;
++            kidMatched = false;
++
++            if (validationParameters.IssuerSigningKeyResolver != null)
++            {
++                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, kid, validationParameters);
++            }
++            else
++            {
++                SecurityKey key = ResolveTokenSigningKey(kid, x5t, jwtToken, validationParameters);
++
++                if (key != null)
++                {
++                    kidMatched = true;
++                    keys = new List<SecurityKey> { key };
++                }
++                else
++                {
++                    kidMatched = false;
++                    if (validationParameters.TryAllIssuerSigningKeys)
++                    {
++                        keys = GetAllSigningKeys(token, validationParameters);
++                    }
++                }
++            }
++            return keys;
++        }
++
++        /// <summary>
++        /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
++        /// </summary>
++        /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
++        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
++        /// <returns>Returns all <see cref="SecurityKey"/> provided in validationParameters.</returns>
++        internal static IEnumerable<SecurityKey> GetAllSigningKeys(string token, TokenValidationParameters validationParameters)
++        {
++            LogHelper.LogInformation(TokenLogMessages.IDX10243);
++            if (validationParameters.IssuerSigningKey != null)
++                yield return validationParameters.IssuerSigningKey;
++
++            if (validationParameters.IssuerSigningKeys != null)
++                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
++                    yield return key;
++        }
+     }
+ }
++
+diff --git a/src/Microsoft.IdentityModel.Tokens.Saml/Saml/SamlSecurityTokenHandler.cs b/src/Microsoft.IdentityModel.Tokens.Saml/Saml/SamlSecurityTokenHandler.cs
+index 8acbb150..e21e4a51 100644
+--- a/src/Microsoft.IdentityModel.Tokens.Saml/Saml/SamlSecurityTokenHandler.cs
++++ b/src/Microsoft.IdentityModel.Tokens.Saml/Saml/SamlSecurityTokenHandler.cs
+@@ -547,17 +547,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
+             }
+         }
+ 
+-        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
+-        {
+-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
+-            if (validationParameters.IssuerSigningKey != null)
+-                yield return validationParameters.IssuerSigningKey;
+-
+-            if (validationParameters.IssuerSigningKeys != null)
+-                foreach (SecurityKey securityKey in validationParameters.IssuerSigningKeys)
+-                    yield return securityKey;
+-        }
+-
+         /// <summary>
+         /// Creates claims from a <see cref="SamlAttributeStatement"/>.
+         /// </summary>
+@@ -788,40 +777,32 @@ namespace Microsoft.IdentityModel.Tokens.Saml
+         /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
+         /// </summary>
+         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+-        /// <param name="securityToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
++        /// <param name="samlToken">The <see cref="SamlSecurityToken"/> that is being validated.</param>
+         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
++        /// <param name="keyMatched">A<see cref="bool"/>to represent if a issuer signing key matched token keyinfo</param>
+         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+-        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null.</exception>
++        /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/> is null.</exception>
+         /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
+         /// <exception cref="ArgumentNullException">If <see cref="SamlSecurityToken.Assertion"/> is null.</exception>
+         /// <remarks>If key fails to resolve, then null is returned</remarks>
+-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, SamlSecurityToken securityToken, TokenValidationParameters validationParameters)
++        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, SamlSecurityToken samlToken, TokenValidationParameters validationParameters, out bool keyMatched)
+         {
+-            if (securityToken == null)
+-                throw LogArgumentNullException(nameof(securityToken));
++            if (samlToken == null)
++                throw LogArgumentNullException(nameof(samlToken));
+ 
+             if (validationParameters == null)
+                 throw LogArgumentNullException(nameof(validationParameters));
+ 
+-            if (securityToken.Assertion == null)
+-                throw LogArgumentNullException(nameof(securityToken.Assertion));
+-
+-            if (securityToken.Assertion?.Signature?.KeyInfo == null)
+-                return null;
+-
+-            if (securityToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
+-                return validationParameters.IssuerSigningKey;
++            if (samlToken.Assertion == null)
++                throw LogArgumentNullException(nameof(samlToken.Assertion));
+ 
+-            if (validationParameters.IssuerSigningKeys != null)
++            if (samlToken.Assertion?.Signature?.KeyInfo == null)
+             {
+-                foreach (var key in validationParameters.IssuerSigningKeys)
+-                {
+-                    if (securityToken.Assertion.Signature.KeyInfo.MatchesKey(key))
+-                        return key;
+-                }
++                keyMatched = false;
++                return null;
+             }
+ 
+-            return null;
++            return SamlTokenUtilities.GetKeysForTokenSignatureValidation(token, samlToken, samlToken.Assertion.Signature.KeyInfo, validationParameters, out keyMatched);
+         }
+ 
+         /// <summary>
+@@ -1048,53 +1029,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml
+ 
+             bool keyMatched = false;
+             IEnumerable<SecurityKey> keys = null;
+-            if (validationParameters.IssuerSigningKeyResolver != null)
+-            {
+-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
+-            }
+-            else
+-            {
+-                var securityKey = ResolveIssuerSigningKey(token, samlToken, validationParameters);
+-                if (securityKey != null)
+-                {
+-                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+-                    keyMatched = true;
+-                    keys = new List<SecurityKey> { securityKey };
+-                }
+-            }
+-
+-            if (keys == null)
+-            {
+-                // control gets here if:
+-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+-                // 2. ResolveIssuerSigningKey returned null
+-                // Try all the keys. This is the degenerate case, not concerned about perf.
+-                keys = GetAllSigningKeys(validationParameters);
+-            }
++            keys = ResolveIssuerSigningKey(token, samlToken, validationParameters, out keyMatched);
+ 
+             // keep track of exceptions thrown, keys that were tried
+             var exceptionStrings = new StringBuilder();
+             var keysAttempted = new StringBuilder();
+             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
+-            foreach (var key in keys)
++            if (keys != null)
+             {
+-                try
+-                {
+-                    samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
+-                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+-                    samlToken.SigningKey = key;
+-                    return samlToken;
+-                }
+-                catch (Exception ex)
++                foreach (var key in keys)
+                 {
+-                    exceptionStrings.AppendLine(ex.ToString());
+-                }
++                    try
++                    {
++                        samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
++                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
++                        samlToken.SigningKey = key;
++                        return samlToken;
++                    }
++                    catch (Exception ex)
++                    {
++                        exceptionStrings.AppendLine(ex.ToString());
++                    }
+ 
+-                if (key != null)
+-                {
+-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+-                    if (canMatchKey && !keyMatched && key.KeyId != null)
+-                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
++                    if (key != null)
++                    {
++                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
++                        if (canMatchKey && !keyMatched && key.KeyId != null)
++                            keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
++                    }
+                 }
+             }
+ 
+diff --git a/src/Microsoft.IdentityModel.Tokens.Saml/Saml2/Saml2SecurityTokenHandler.cs b/src/Microsoft.IdentityModel.Tokens.Saml/Saml2/Saml2SecurityTokenHandler.cs
+index c1a78b5f..2befefc7 100644
+--- a/src/Microsoft.IdentityModel.Tokens.Saml/Saml2/Saml2SecurityTokenHandler.cs
++++ b/src/Microsoft.IdentityModel.Tokens.Saml/Saml2/Saml2SecurityTokenHandler.cs
+@@ -33,6 +33,7 @@ using System.Security.Claims;
+ using System.Text;
+ using System.Xml;
+ using Microsoft.IdentityModel.Logging;
++using Microsoft.IdentityModel.Tokens.Saml;
+ using static Microsoft.IdentityModel.Logging.LogHelper;
+ 
+ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+@@ -384,51 +385,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
+ 
+             bool keyMatched = false;
+             IEnumerable<SecurityKey> keys = null;
+-            if (validationParameters.IssuerSigningKeyResolver != null)
+-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
+-            else
+-            {
+-                var key = ResolveIssuerSigningKey(token, samlToken, validationParameters);
+-                if (key != null)
+-                {
+-                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+-                    keyMatched = true;
+-                    keys = new List<SecurityKey> { key };
+-                }
+-            }
+-
+-            if (keys == null)
+-            {
+-                // control gets here if:
+-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+-                // 2. ResolveIssuerSigningKey returned null
+-                // Try all the keys. This is the degenerate case, not concerned about perf.
+-                keys = GetAllSigningKeys(validationParameters);
+-            }
++            keys = ResolveIssuerSigningKey(token, samlToken, validationParameters, out keyMatched);
+ 
+             // keep track of exceptions thrown, keys that were tried
+             var exceptionStrings = new StringBuilder();
+             var keysAttempted = new StringBuilder();
+             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
+-            foreach (var key in keys)
++
++            if (keys != null)
+             {
+-                try
++                foreach (var key in keys)
+                 {
+-                    samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
+-                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+-                    samlToken.SigningKey = key;
+-                    return samlToken;
+-                }
+-                catch (Exception ex)
+-                {
+-                    exceptionStrings.AppendLine(ex.ToString());
+-                }
++                    try
++                    {
++                        samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
++                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
++                        samlToken.SigningKey = key;
++                        return samlToken;
++                    }
++                    catch (Exception ex)
++                    {
++                        exceptionStrings.AppendLine(ex.ToString());
++                    }
+ 
+-                if (key != null)
+-                {
+-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+-                    if (canMatchKey && !keyMatched && key.KeyId != null)
+-                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
++                    if (key != null)
++                    {
++                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
++                        if (canMatchKey && !keyMatched && key.KeyId != null)
++                            keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
++                    }
+                 }
+             }
+ 
+@@ -442,29 +427,19 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
+             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
+         }
+ 
+-        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
+-        {
+-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
+-            if (validationParameters.IssuerSigningKey != null)
+-                yield return validationParameters.IssuerSigningKey;
+-
+-            if (validationParameters.IssuerSigningKeys != null)
+-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+-                    yield return key;
+-        }
+-
+         /// <summary>
+         /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
+         /// </summary>
+         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+         /// <param name="samlToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
+         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that will be used during validation.</param>
++        /// <param name="keyMatched">A<see cref="bool"/>to represent if a issuer signing key matched token keyinfo</param>
+         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+         /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/> is null.</exception>
+         /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
+         /// <exception cref="ArgumentNullException">If <paramref name="samlToken"/>.Assertion' is null.</exception>
+         /// <remarks>If key fails to resolve, then null is returned.</remarks>
+-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters)
++        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, TokenValidationParameters validationParameters, out bool keyMatched)
+         {
+             if (samlToken == null)
+                 throw LogArgumentNullException(nameof(samlToken));
+@@ -476,21 +451,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
+                 throw LogArgumentNullException(nameof(samlToken.Assertion));
+ 
+             if (samlToken.Assertion?.Signature?.KeyInfo == null)
+-                return null;
+-
+-            if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
+-                return validationParameters.IssuerSigningKey;
+-
+-            if (validationParameters.IssuerSigningKeys != null)
+             {
+-                foreach (var key in validationParameters.IssuerSigningKeys)
+-                {
+-                    if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(key))
+-                        return key;
+-                }
++                keyMatched = false;
++                return null;
+             }
+ 
+-            return null;
++            return SamlTokenUtilities.GetKeysForTokenSignatureValidation(token, samlToken, samlToken.Assertion.Signature.KeyInfo, validationParameters, out keyMatched);
+         }
+ 
+         /// <summary>
+diff --git a/src/System.IdentityModel.Tokens.Jwt/JwtSecurityTokenHandler.cs b/src/System.IdentityModel.Tokens.Jwt/JwtSecurityTokenHandler.cs
+index 904c6a16..be79a36c 100644
+--- a/src/System.IdentityModel.Tokens.Jwt/JwtSecurityTokenHandler.cs
++++ b/src/System.IdentityModel.Tokens.Jwt/JwtSecurityTokenHandler.cs
+@@ -903,28 +903,7 @@ namespace System.IdentityModel.Tokens.Jwt
+ 
+             bool kidMatched = false;
+             IEnumerable<SecurityKey> keys = null;
+-            if (validationParameters.IssuerSigningKeyResolver != null)
+-            {
+-                keys = validationParameters.IssuerSigningKeyResolver(token, jwtToken, jwtToken.Header.Kid, validationParameters);
+-            }
+-            else
+-            {
+-                var key = ResolveIssuerSigningKey(token, jwtToken, validationParameters);
+-                if (key != null)
+-                {
+-                    kidMatched = true;
+-                    keys = new List<SecurityKey> { key };
+-                }
+-            }
+-
+-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+-            {
+-                // control gets here if:
+-                // 1. User specified delegate: IssuerSigningKeyResolver returned null
+-                // 2. ResolveIssuerSigningKey returned null
+-                // Try all the keys. This is the degenerate case, not concerned about perf.
+-                keys = GetAllSigningKeys(token, jwtToken, jwtToken.Header.Kid, validationParameters);
+-            }
++            keys = ResolveIssuerSigningKey(token, jwtToken, validationParameters,out kidMatched);
+ 
+             // keep track of exceptions thrown, keys that were tried
+             var exceptionStrings = new StringBuilder();
+@@ -985,17 +964,6 @@ namespace System.IdentityModel.Tokens.Jwt
+             }
+         }
+ 
+-        private IEnumerable<SecurityKey> GetAllSigningKeys(string token, JwtSecurityToken securityToken, string kid, TokenValidationParameters validationParameters)
+-        {
+-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
+-            if (validationParameters.IssuerSigningKey != null)
+-                yield return validationParameters.IssuerSigningKey;
+-
+-            if (validationParameters.IssuerSigningKeys != null)
+-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+-                    yield return key;
+-        }
+-        
+         private IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
+         {
+             if (validationParameters.TokenDecryptionKey != null)
+@@ -1216,9 +1184,10 @@ namespace System.IdentityModel.Tokens.Jwt
+         /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> that is being validated.</param>
+         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
++        /// <param name="kidMatched">A <see cref="bool"/> to represent if a issuer signing key matched with token kid or x5t</param>
+         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+         /// <remarks>If key fails to resolve, then null is returned</remarks>
+-        protected virtual SecurityKey ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
++        protected virtual IEnumerable<SecurityKey> ResolveIssuerSigningKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters,out bool kidMatched)
+         {
+             if (validationParameters == null)
+                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+@@ -1226,7 +1195,15 @@ namespace System.IdentityModel.Tokens.Jwt
+             if (jwtToken == null)
+                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+ 
+-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters);
++            string kid = null;
++            string x5t = null;
++            if (jwtToken.Header != null)
++            {
++                kid = jwtToken.Header.Kid;
++                x5t = jwtToken.Header.X5t;
++            }
++
++            return JwtTokenUtilities.GetKeysForTokenSignatureValidation(token, kid, x5t, jwtToken, validationParameters, out kidMatched);
+         }
+ 
+         /// <summary>
