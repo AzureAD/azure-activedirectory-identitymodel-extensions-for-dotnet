@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// A class which contains useful methods for processing tokens.
     /// </summary>
-    public class TokenUtilities
+    internal class TokenUtilities
     {
         /// <summary>
         /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (value != null)
             {
-                if (value.GetType().Name == typeof(string).Name)
+                if (value is string)
                     return ClaimValueTypes.String;
 
                 if (value.GetType().Name == typeof(bool).Name)
@@ -116,6 +116,8 @@ namespace Microsoft.IdentityModel.Tokens
                         return GetClaimValueTypeFromValue(item);
                     }
                 }
+
+                return value.GetType().ToString();
             }
 
             return null;

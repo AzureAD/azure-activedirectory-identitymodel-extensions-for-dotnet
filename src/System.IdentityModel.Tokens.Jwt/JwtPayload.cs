@@ -564,7 +564,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="claimsCollection"> A dictionary of claims.</param>
         /// <remark> If a key is already present in target dictionary, its value is overridden by the value of the key in claimsCollection.</remark>
-        public void MergeDictionaryClaims(IDictionary<string, object> claimsCollection)
+        internal void MergeDictionaryClaims(IDictionary<string, object> claimsCollection)
         {
             if (claimsCollection == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claimsCollection)));

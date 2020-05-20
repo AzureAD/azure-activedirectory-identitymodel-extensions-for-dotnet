@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// <summary>
     /// A class which contains useful methods for processing saml tokens.
     /// </summary>
-    public class SamlTokenUtilities
+    internal class SamlTokenUtilities
     {
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
