@@ -197,6 +197,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10694 = "IDX10694: JsonWebKeyConverter threw attempting to convert JsonWebKey: '{0}'. Exception: '{1}'.";
         public const string IDX10695 = "IDX10695: Unable to create a JsonWebKey from an ECDsa object. Required ECParameters structure is not supported by .NET Framework < 4.7.";
+        public const string IDX10696 = "IDX10696: The algorithm '{0}' is not in the user-defined accepted list of algorithms.";
+        public const string IDX10697 = "IDX10697: The user defined 'Delegate' AlgorithmValidator specified on TokenValidationParameters returned false when validating Algorithm: '{0}', SecurityKey: '{1}'.";
 
         // security keys
         public const string IDX10700 = "IDX10700: {0} is unable to use 'rsaParameters'. {1} is null.";
