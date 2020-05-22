@@ -1287,6 +1287,153 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha256 },
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidAtClaimException), "IDX23013", typeof(SecurityTokenDecryptionFailedException)),
+                        TestId = "ValidEncryptedAcccessToken_DecryptionAlgorithmNotListed",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string> { SecurityAlgorithms.Aes128CbcHmacSha256 },
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidAtClaimException), "IDX23013", typeof(SecurityTokenSignatureKeyNotFoundException)),
+                        TestId = "ValidEncryptedAcccessToken_IssuerAlgorithmNotListed",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false),
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidAtClaimException), "IDX23013", typeof(SecurityTokenDecryptionFailedException)),
+                        TestId = "ValidEncryptedAcccessToken_AcceptedAlgorithmValidatorFails",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string> { SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.RsaSha256 },
+                        },
+                        TestId = "ValidEncryptedAcccessToken_AcceptedAlgorithmListed",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string>(),
+                        },
+                        TestId = "ValidEncryptedAcccessToken_EmptyAcceptedAlgorithms",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                        },
+                        ValidationParameters =  new TokenValidationParameters()
+                        {
+                            IssuerSigningKey = KeyingMaterial.RsaSigningCreds_2048_Public.Key,
+                            ValidIssuer = Default.Issuer,
+                            ValidAudience = Default.Audience,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                            ValidateLifetime = false,
+                            AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true),
+                        },
+                        TestId = "ValidEncryptedAcccessToken_AcceptedAlgorithmValidatorValidates",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
                         SignedHttpRequestToken = signedHttpRequest,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
@@ -1312,6 +1459,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         TestId = "ValidTest",
                     }
+
                 };
             }
         }
@@ -1329,7 +1477,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 Headers = HttpRequestHeaders
             };
 
-            var tokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters;
+            var tokenValidationParameters = ValidationParameters ?? SignedHttpRequestTestUtils.DefaultTokenValidationParameters;
 
             // add testId for debugging purposes
             var callContext = CallContext;
@@ -1370,6 +1518,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         public SecurityKey ExpectedPopKey { get; set; }
 
         internal JsonWebToken SignedHttpRequestToken { get; set; }
+
+        public TokenValidationParameters ValidationParameters { get; set; }
     }
 }
 

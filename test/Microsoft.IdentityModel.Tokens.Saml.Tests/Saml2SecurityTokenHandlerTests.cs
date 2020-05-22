@@ -1008,6 +1008,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
+
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch)}NotTryAllIssuerSigningKeys",
@@ -1017,6 +1018,73 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
                             TryAllIssuerSigningKeys = false
                         }
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}_SpecifyAlgorithm_AlgorithnInList",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha256Signature }
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}_SpecifyAlgorithm_EmptyList",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string>()
+                        }
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}_SpecifyAlgorithm_AlgorithnNotList",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha512Signature }
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503")
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}_SpecifyAlgorithm_AlgorithmValidationFails",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503")
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}_SpecifyAlgorithm_AlgorithmValidationValidates",
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true)
+                        },
                     },
                 };
             }

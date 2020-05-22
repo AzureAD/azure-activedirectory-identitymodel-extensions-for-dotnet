@@ -149,6 +149,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenHandler).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenExpiredException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidAlgorithmException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidAudienceException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidIssuerException).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenInvalidSigningKeyException).ToString(), CompareAllPublicProperties},
