@@ -28,8 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -38,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// A class which contains useful methods for processing tokens.
     /// </summary>
-    public class TokenUtilities
+    internal class TokenUtilities
     {
         /// <summary>
         /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
@@ -54,6 +53,31 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeys != null)
                 foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
                     yield return key;
+        }
+
+        /// <summary>
+        /// Merges claims. If a claim with same type exists in both <paramref name="claims"/> and <paramref name="subjectClaims"/>, the one in claims will be kept.
+        /// </summary>
+        /// <param name="claims"> Collection of <see cref="Claim"/>'s.</param>
+        /// <param name="subjectClaims"> Collection of <see cref="Claim"/>'s.</param>
+        /// <returns> A Merged list of <see cref="Claim"/>'s.</returns>
+        internal static IEnumerable<Claim> MergeClaims(IEnumerable<Claim> claims, IEnumerable<Claim> subjectClaims)
+        {
+            if (claims == null)
+                return subjectClaims;
+
+            if (subjectClaims == null)
+                return claims;
+
+            List<Claim> result = claims.ToList();
+
+            foreach (Claim claim in subjectClaims)
+            {
+                if (!claims.Any(i => i.Type == claim.Type))
+                    result.Add(claim);
+            }
+
+            return result;
         }
     }
 }

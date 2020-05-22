@@ -108,15 +108,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (key.KeySize < 2048)
-                return false;
-
             return SupportedAlgorithms.IsSupportedKeyWrapAlgorithm(algorithm, key);
         }
 

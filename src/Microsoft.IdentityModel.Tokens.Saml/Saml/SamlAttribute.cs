@@ -91,16 +91,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 int indexOfHash = value.IndexOf('#');
                 if (indexOfHash == -1)
-                    throw LogExceptionMessage(new SecurityTokenInvalidAudienceException("value, SR.GetString(SR.ID4254)")); ;
+                    throw LogExceptionMessage(new SecurityTokenInvalidAudienceException(FormatInvariant(LogMessages.IDX11314, value)));
 
                 string prefix = value.Substring(0, indexOfHash);
                 if (prefix.Length == 0)
-                    throw LogExceptionMessage(new ArgumentException("value SR.GetString(SR.ID4254)"));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11314, value)));
 
                 string suffix = value.Substring(indexOfHash + 1);
                 if (suffix.Length == 0)
                 {
-                    throw LogExceptionMessage(new ArgumentException("value, SR.GetString(SR.ID4254)"));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11314, value)));
                 }
 
                 _attributeValueXsiType = value;

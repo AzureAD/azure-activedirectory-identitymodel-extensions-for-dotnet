@@ -25,9 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Logging;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -36,6 +38,76 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal static class SupportedAlgorithms
     {
+        internal static readonly ICollection<string> EcdsaSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.EcdsaSha256,
+            SecurityAlgorithms.EcdsaSha256Signature,
+            SecurityAlgorithms.EcdsaSha384,
+            SecurityAlgorithms.EcdsaSha384Signature,
+            SecurityAlgorithms.EcdsaSha512,
+            SecurityAlgorithms.EcdsaSha512Signature
+        };
+
+        internal static readonly ICollection<string> HashAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.Sha256,
+            SecurityAlgorithms.Sha256Digest,
+            SecurityAlgorithms.Sha384,
+            SecurityAlgorithms.Sha384Digest,
+            SecurityAlgorithms.Sha512,
+            SecurityAlgorithms.Sha512Digest
+        };
+
+        internal static readonly ICollection<string> RsaEncryptionAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.RsaOAEP,
+            SecurityAlgorithms.RsaPKCS1,
+            SecurityAlgorithms.RsaOaepKeyWrap
+        };
+
+        internal static readonly ICollection<string> RsaSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.RsaSha256,
+            SecurityAlgorithms.RsaSha384,
+            SecurityAlgorithms.RsaSha512,
+            SecurityAlgorithms.RsaSha256Signature,
+            SecurityAlgorithms.RsaSha384Signature,
+            SecurityAlgorithms.RsaSha512Signature
+        };
+
+        internal static readonly ICollection<string> RsaPssSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.RsaSsaPssSha256,
+            SecurityAlgorithms.RsaSsaPssSha384,
+            SecurityAlgorithms.RsaSsaPssSha512,
+            SecurityAlgorithms.RsaSsaPssSha256Signature,
+            SecurityAlgorithms.RsaSsaPssSha384Signature,
+            SecurityAlgorithms.RsaSsaPssSha512Signature
+        };
+
+        internal static readonly ICollection<string> SymmetricEncryptionAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.Aes128CbcHmacSha256,
+            SecurityAlgorithms.Aes192CbcHmacSha384,
+            SecurityAlgorithms.Aes256CbcHmacSha512
+        };
+
+        internal static readonly ICollection<string> SymmetricKeyWrapAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.Aes128KW,
+            SecurityAlgorithms.Aes256KW
+        };
+
+        internal static readonly ICollection<string> SymmetricSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.HmacSha256Signature,
+            SecurityAlgorithms.HmacSha384Signature,
+            SecurityAlgorithms.HmacSha512Signature,
+            SecurityAlgorithms.HmacSha256,
+            SecurityAlgorithms.HmacSha384,
+            SecurityAlgorithms.HmacSha512
+        };
+
         /// <summary>
         /// Checks if an 'algorithm, key' pair is supported.
         /// </summary>
@@ -101,35 +173,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool IsSupportedEcdsaAlgorithm(string algorithm)
         {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                    return true;
-            }
-
-            return false;
+            return EcdsaSigningAlgorithms.Contains(algorithm);
         }
 
         internal static bool IsSupportedHashAlgorithm(string algorithm)
         {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Sha256:
-                case SecurityAlgorithms.Sha256Digest:
-                case SecurityAlgorithms.Sha384:
-                case SecurityAlgorithms.Sha384Digest:
-                case SecurityAlgorithms.Sha512:
-                case SecurityAlgorithms.Sha512Digest:
-                    return true;
-
-                default:
-                    return false;
-            }
+            return HashAlgorithms.Contains(algorithm);
         }
 
         internal static bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
@@ -140,7 +189,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
+            if (key.KeySize < 2048)
+                return false;
+
+            if (   algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
                 || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
             {
@@ -159,28 +211,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool IsSupportedRsaAlgorithm(string algorithm, SecurityKey key)
         {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSha512Signature:
-                case SecurityAlgorithms.RsaOAEP:
-                case SecurityAlgorithms.RsaPKCS1:
-                case SecurityAlgorithms.RsaOaepKeyWrap:
-                    return true;
-                case SecurityAlgorithms.RsaSsaPssSha256:
-                case SecurityAlgorithms.RsaSsaPssSha384:
-                case SecurityAlgorithms.RsaSsaPssSha512:
-                case SecurityAlgorithms.RsaSsaPssSha256Signature:
-                case SecurityAlgorithms.RsaSsaPssSha384Signature:
-                case SecurityAlgorithms.RsaSsaPssSha512Signature:
-                    return IsSupportedRsaPss(key);
-            }
-
-            return false;
+            return RsaSigningAlgorithms.Contains(algorithm)
+                || RsaEncryptionAlgorithms.Contains(algorithm)
+                || (RsaPssSigningAlgorithms.Contains(algorithm) && IsSupportedRsaPss(key));
         }
 
         private static bool IsSupportedRsaPss(SecurityKey key)
@@ -212,23 +245,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool IsSupportedSymmetricAlgorithm(string algorithm)
         {
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.Aes128CbcHmacSha256:
-                case SecurityAlgorithms.Aes192CbcHmacSha384:
-                case SecurityAlgorithms.Aes256CbcHmacSha512:
-                case SecurityAlgorithms.Aes128KW:
-                case SecurityAlgorithms.Aes256KW:
-                case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
-                case SecurityAlgorithms.HmacSha256:
-                case SecurityAlgorithms.HmacSha384:
-                case SecurityAlgorithms.HmacSha512:
-                    return true;
-            }
-
-            return false;
+            return SymmetricEncryptionAlgorithms.Contains(algorithm)
+                || SymmetricKeyWrapAlgorithms.Contains(algorithm)
+                || SymmetricSigningAlgorithms.Contains(algorithm);
         }
     }
 }
