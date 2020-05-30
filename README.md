@@ -1,20 +1,19 @@
 Windows Azure Active Directory IdentityModel Extensions for .Net
 ===========
 
-IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity. 
+IdentityModel Extensions for .Net provide assemblies that are interesting for web developers that wish to use federated identity providers for establishing the callers identity.
 
 ## Versions
-Current version - 6.5.1 \
+Current version - 6.6.0 \
 Minimum recommended version - 5.5.0
 
 You can find the release notes for each version [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases). Older versions can be found [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes).
-## 6.5.1
-Simple servicing release with two small fixes.
-TokenValidationParameters.Clone missed one instance variable.
-JsonHeader was being cached in an unbounded cache. We just disabled it for now.
 
-## Note about 6.5.0
-If you noticed, we bumped the release from 5.5.0 to 6.5.0.\
+## 6.6.0
+See the release notes [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases/tag/6.6.0)
+
+## Note about 6.x
+If you noticed, we bumped the release from 5.x to 6.x\
 We were maintaining two releases from two different branches.\
 dev - 6.x\
 dev5x - 5.x
