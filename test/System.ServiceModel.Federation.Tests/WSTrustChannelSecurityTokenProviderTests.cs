@@ -424,7 +424,7 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256),
+                    ExpectedProofKey = Psha1KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy2, 256),
                     TestId = "ComputedKey_DefaultKeySize"
                 },
                 new ProofTokenGenerationTheoryData
@@ -438,7 +438,7 @@ namespace System.ServiceModel.Federation.Tests
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1),
                         KeySizeInBits = 256
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256),
+                    ExpectedProofKey = Psha1KeyGenerator.ComputeCombinedKey(TestEntropy4, TestEntropy3, 256),
                     TestId = "ComputedKey_KeySizeFromIssuer"
                 },
                 new ProofTokenGenerationTheoryData
@@ -451,7 +451,7 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy3)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024),
+                    ExpectedProofKey = Psha1KeyGenerator.ComputeCombinedKey(TestEntropy3, TestEntropy1, 1024),
                     TestId = "ComputedKey_KeySizeFromRequestor"
                 },
                 new ProofTokenGenerationTheoryData
@@ -465,7 +465,7 @@ namespace System.ServiceModel.Federation.Tests
                         Entropy = new Entropy(new BinarySecret(TestEntropy1)),
                         ProofToken = new RequestedProofToken(WsTrustKeyTypes.Trust13.PSHA1)
                     },
-                    ExpectedProofKey = KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192),
+                    ExpectedProofKey = Psha1KeyGenerator.ComputeCombinedKey(TestEntropy1, TestEntropy3, 192),
                     TestId = "ComputedKey_KeySizeFromNonDefaultSecurityAlgorithmSuite"
                 },
                 new ProofTokenGenerationTheoryData

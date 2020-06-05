@@ -31,9 +31,12 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal static class KeyGenerator
+    /// <summary>
+    /// Generates Combined and 
+    /// </summary>
+    public static class Psha1KeyGenerator
     {
-        static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
+        private static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
 
         //
         // 1/(2^32) keys will be weak.  20 random keys will never happen by chance without the RNG being messed up.
@@ -110,12 +113,9 @@ namespace Microsoft.IdentityModel.Tokens
             // Note that requestorEntrophy is considered the 'secret'.
             using (KeyedHashAlgorithm kha = new HMACSHA1(requestorEntropy))
             {
-                //kha.Key = requestorEntropy;
-
                 byte[] a = issuerEntropy; // A(0), the 'seed'.
                 byte[] b = new byte[kha.HashSize / 8 + a.Length]; // Buffer for A(i) + seed
                 byte[] result = null;
-
                 try
                 {
 
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens
             return key;
         }
 
-        private static int ValidateKeySizeInBytes(int keySizeInBits)
+        internal static int ValidateKeySizeInBytes(int keySizeInBits)
         {
             int keySizeInBytes = keySizeInBits / 8;
 
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="receiverEntropy">The issuer's entropy.</param>
         /// <returns>The computed symmetric key based on PSHA1 algorithm.</returns>
         /// <exception cref="ArgumentException">When keySizeInBits is not a whole number of bytes.</exception>
-        private static byte[] GenerateSymmetricKey(int keySizeInBits, byte[] senderEntropy, out byte[] receiverEntropy)
+        internal static byte[] GenerateSymmetricKey(int keySizeInBits, byte[] senderEntropy, out byte[] receiverEntropy)
         {
             if (senderEntropy == null)
                 throw LogHelper.LogArgumentNullException(nameof(senderEntropy));
@@ -197,7 +197,6 @@ namespace Microsoft.IdentityModel.Tokens
             return ComputeCombinedKey(senderEntropy, receiverEntropy, keySizeInBits);
         }
 
-
         /// <summary>
         /// Provides an integer-domain mathematical operation for 
         /// Ceiling( dividend / divisor ). 
@@ -205,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="dividend"></param>
         /// <param name="divisor"></param>
         /// <returns></returns>
-        public static int CeilingDivide(int dividend, int divisor)
+        internal static int CeilingDivide(int dividend, int divisor)
         {
             int remainder, quotient;
 
@@ -231,7 +230,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-
         internal static byte[] GenerateDerivedKey(string algorithm, byte[] masterKey, byte[] label, byte[] nonce, int derivedKeySizeInBits, int position)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -240,8 +238,15 @@ namespace Microsoft.IdentityModel.Tokens
             return (new PshaDerivedKeyGenerator(masterKey)).ComputeCombinedKey(algorithm, label, nonce, derivedKeySizeInBits, position);
         }
 
-        internal static void FillRandomBytes(byte[] buffer)
+        /// <summary>
+        /// Fills buffer with random bytes.
+        /// </summary>
+        /// <param name="buffer"></param>
+        public static void FillRandomBytes(byte[] buffer)
         {
+            if (buffer == null)
+                LogHelper.LogArgumentNullException(nameof(buffer));
+
             RandomNumberGenerator.GetBytes(buffer);
         }
 
@@ -250,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// side to generate the requestor's entropy.
         /// </summary>
         /// <param name="data">The array to fill with cryptographically strong random nonzero bytes.</param>
-        public static void GenerateRandomBytes(byte[] data)
+        internal static void GenerateRandomBytes(byte[] data)
         {
             RandomNumberGenerator.GetNonZeroBytes(data);
         }
@@ -260,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="sizeInBits"></param>
         /// <returns></returns>
-        public static byte[] GenerateRandomBytes(int sizeInBits)
+        internal static byte[] GenerateRandomBytes(int sizeInBits)
         {
             int sizeInBytes = sizeInBits / 8;
             if (sizeInBits <= 0)
@@ -275,4 +280,3 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
-           

@@ -39,9 +39,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Base class for support of serializing versions of WS-Security.
     /// </summary>
-    internal class WsSecuritySerializer
+    public class WsSecuritySerializer
     {
-        public WsSecuritySerializer()
+        internal WsSecuritySerializer()
         {
             //  if this clas becomes public, we will need to check parameters on public methods
         }
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             }
         }
 
-        public static XmlElement GetXmlElement (SecurityTokenReference securityTokenReference, WsTrustVersion wsTrustVersion)
+        internal static XmlElement GetXmlElement (SecurityTokenReference securityTokenReference, WsTrustVersion wsTrustVersion)
         {
             using (var stream = new MemoryStream())
             {
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             }
         }
 
-        public SecurityTokenReference ReadSecurityTokenReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        internal SecurityTokenReference ReadSecurityTokenReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <wsse:SecurityTokenReference wsu:Id="...",
             //                               wsse:TokenType="...",
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return securityTokenReference;
         }
 
-        public KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        internal KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return keyIdentifier;
         }
 
-        public void WriteKeyIdentifier(XmlDictionaryWriter writer, WsSerializationContext serializationContext, KeyIdentifier keyIdentifier)
+        internal void WriteKeyIdentifier(XmlDictionaryWriter writer, WsSerializationContext serializationContext, KeyIdentifier keyIdentifier)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             writer.WriteEndElement();
         }
 
-        public void WriteSecurityTokenReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
+        internal void WriteSecurityTokenReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             // <wsse:SecurityTokenReference>
             //      <wsse:KeyIdentifier wsu:Id="..."
