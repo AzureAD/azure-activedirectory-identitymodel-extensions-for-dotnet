@@ -107,6 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             GetAndCheckConfiguration("authorization_endpoint", "AuthorizationEndpoint", context);
             GetAndCheckConfiguration("check_session_iframe", "CheckSessionIframe", context);
             GetAndCheckConfiguration("end_session_endpoint", "EndSessionEndpoint", context);
+            GetAndCheckConfiguration("introspection_endpoint", "IntrospectionEndpoint", context);
             GetAndCheckConfiguration("jwks_uri", "JwksUri", context, OpenIdConfigData.AADCommonUrl);
             GetAndCheckConfiguration("token_endpoint", "TokenEndpoint", context);
             GetAndCheckConfiguration("userinfo_endpoint", "UserInfoEndpoint", context);

@@ -29,10 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Saml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -395,7 +397,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             bool keyMatched = false;
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
+            {
                 keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
+            }
             else
             {
                 var key = ResolveIssuerSigningKey(token, samlToken, validationParameters);
@@ -407,38 +411,44 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            if (keys == null)
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
                 // 2. ResolveIssuerSigningKey returned null
                 // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = GetAllSigningKeys(validationParameters);
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
             }
 
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
             bool canMatchKey = samlToken.Assertion.Signature.KeyInfo != null;
-            foreach (var key in keys)
-            {
-                try
-                {
-                    samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
-                    LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
-                    samlToken.SigningKey = key;
-                    return samlToken;
-                }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
-                }
 
-                if (key != null)
+            if (keys != null)
+            {
+                foreach (var key in keys)
                 {
-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (canMatchKey && !keyMatched && key.KeyId != null)
-                        keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
+                    try
+                    {
+                        Validators.ValidateAlgorithm(samlToken.Assertion.Signature.SignedInfo.SignatureMethod, key, samlToken, validationParameters);
+
+                        samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+                        samlToken.SigningKey = key;
+                        return samlToken;
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionStrings.AppendLine(ex.ToString());
+                    }
+
+                    if (key != null)
+                    {
+                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        if (canMatchKey && !keyMatched && key.KeyId != null)
+                            keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
+                    }
                 }
             }
 
@@ -450,17 +460,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
 
             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
-        }
-
-        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
         }
 
         /// <summary>
@@ -485,22 +484,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));
 
-            if (samlToken.Assertion?.Signature?.KeyInfo == null)
-                return null;
-
-            if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
-                return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-            {
-                foreach (var key in validationParameters.IssuerSigningKeys)
-                {
-                    if (samlToken.Assertion.Signature.KeyInfo.MatchesKey(key))
-                        return key;
-                }
-            }
-
-            return null;
+            return SamlTokenUtilities.ResolveTokenSigningKey(samlToken.Assertion.Signature.KeyInfo, validationParameters);
         }
 
         /// <summary>
@@ -708,20 +692,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(tokenDescriptor.Subject));
 
             var attributes = new List<Saml2Attribute>();
-            foreach (Claim claim in tokenDescriptor.Subject.Claims)
+
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
-                if (claim != null)
+                foreach (Claim claim in claims)
                 {
-                    switch (claim.Type)
+                    if (claim != null)
                     {
-                        // TODO - should these really be filtered?
-                        case ClaimTypes.AuthenticationInstant:
-                        case ClaimTypes.AuthenticationMethod:
-                        case ClaimTypes.NameIdentifier:
-                            break;
-                        default:
-                            attributes.Add(CreateAttribute(claim));
-                            break;
+                        switch (claim.Type)
+                        {
+                            // TODO - should these really be filtered?
+                            case ClaimTypes.AuthenticationInstant:
+                            case ClaimTypes.AuthenticationMethod:
+                            case ClaimTypes.NameIdentifier:
+                                break;
+                            default:
+                                attributes.Add(CreateAttribute(claim));
+                                break;
+                        }
                     }
                 }
             }
@@ -922,9 +912,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             string nameIdentifierSpProviderId = null;
             string nameIdentifierSpNameQualifier = null;
 
-            if (tokenDescriptor.Subject != null && tokenDescriptor.Subject.Claims != null)
+            IEnumerable<Claim> claims = SamlTokenUtilities.GetAllClaims(tokenDescriptor.Claims, tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Claims : null);
+
+            if (claims != null && claims.Any())
             {
-                foreach (var claim in tokenDescriptor.Subject.Claims)
+                foreach (var claim in claims)
                 {
                     if (claim.Type == ClaimTypes.NameIdentifier)
                     {

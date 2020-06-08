@@ -410,6 +410,91 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }
             };
         }
+
+        /// <summary>
+        /// This test ensures that if every algorithm in SupportedAlgorithms has a value in our maps that validate key sizes
+        /// </summary>
+        /// <param name="theoryData"></param>
+        [Theory, MemberData(nameof(VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests))]
+        public void VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize", theoryData);
+            if (!AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(theoryData.Algorithm))
+                context.AddDiff($"!AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap.ContainsKey(theoryData.Algorithm)) algorithm: '{theoryData.Algorithm}'.");
+
+            if (!AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(theoryData.Algorithm))
+                context.AddDiff($"!AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap.ContainsKey(theoryData.Algorithm)): algorithm: '{theoryData.Algorithm}'.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<AsymmetricSignatureProviderTheoryData> VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests
+        {
+            get
+            {
+                var theoryData = new TheoryData<AsymmetricSignatureProviderTheoryData>();
+
+                foreach (var algorithm in SupportedAlgorithms.EcdsaSigningAlgorithms)
+                    theoryData.Add(
+                        new AsymmetricSignatureProviderTheoryData
+                        {
+                            Algorithm = algorithm,
+                            SecurityKey = KeyingMaterial.RsaSecurityKey_4096,
+                            TestId = algorithm
+                        });
+
+                foreach (var algorithm in SupportedAlgorithms.RsaPssSigningAlgorithms)
+                    theoryData.Add(
+                        new AsymmetricSignatureProviderTheoryData
+                        {
+                            Algorithm = algorithm,
+                            SecurityKey = KeyingMaterial.RsaSecurityKey_4096,
+                            TestId = algorithm
+                        });
+
+
+                foreach (var algorithm in SupportedAlgorithms.RsaSigningAlgorithms)
+                    theoryData.Add(
+                        new AsymmetricSignatureProviderTheoryData
+                        {
+                            Algorithm = algorithm,
+                            SecurityKey = KeyingMaterial.RsaSecurityKey_4096,
+                            TestId = algorithm
+                        });
+
+                return theoryData;
+            }
+        }
+
+        /// <summary>
+        /// This test ensures that if new keys sizes are added to the dictionaries that check for default supported algorithms, we have those algorithms in SupportedAlgorithms
+        /// </summary>
+        [Fact]
+        public void VerifyDefaultMinimumAsymmetricKeySizeAreSupported()
+        {
+            var theoryData = new TheoryDataBase
+            {
+                TestId = "VerifyDefaultMinimumAsymmetricKeySizeAreSupported"
+            };
+
+            var context = TestUtilities.WriteHeader($"{this}.VerifyDefaultMinimumAsymmetricKeySizeAreSupported", theoryData);
+
+            foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap.Keys)
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                {
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForSigningMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms.");
+                    context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
+                }
+
+            foreach (var algorithm in AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap.Keys)
+                if (!(SupportedAlgorithms.EcdsaSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaPssSigningAlgorithms.Contains(algorithm) || SupportedAlgorithms.RsaSigningAlgorithms.Contains(algorithm)))
+                {
+                    context.AddDiff($"DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap, algorithm: '{algorithm}' not found in (SupportedAlgorithms.EcdsaSigningAlgorithms || SupportedAlgorithms.RsaPssSigningAlgorithms || SupportedAlgorithms.RsaSigningAlgorithms");
+                    context.AddDiff($"seems like algorithm was added somewhere: '{algorithm}'.");
+                }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
     }
 
     public class AsymmetricSignatureProviderTheoryData : TheoryDataBase

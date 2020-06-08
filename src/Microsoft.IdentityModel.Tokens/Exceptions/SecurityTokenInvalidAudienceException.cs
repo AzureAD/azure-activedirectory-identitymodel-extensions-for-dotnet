@@ -36,6 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
     [Serializable]
     public class SecurityTokenInvalidAudienceException : SecurityTokenValidationException
     {
+        [NonSerialized]
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidAudienceException) + ".";
+
+        [NonSerialized]
+        const string _InvalidAudienceKey = _Prefix + nameof(InvalidAudience);
+
         /// <summary>
         /// Gets or sets the InvalidAudience that created the validation exception.
         /// </summary>
@@ -76,6 +82,29 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidAudienceException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            SerializationInfoEnumerator enumerator = info.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                switch (enumerator.Name)
+                {
+                    case _InvalidAudienceKey:
+                        InvalidAudience = info.GetString(_InvalidAudienceKey);
+                        break;
+
+                    default:
+                        // Ignore other fields.
+                        break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            if (!string.IsNullOrEmpty(InvalidAudience))
+                info.AddValue(_InvalidAudienceKey, InvalidAudience);
         }
     }
 }

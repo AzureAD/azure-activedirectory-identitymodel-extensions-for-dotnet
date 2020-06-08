@@ -32,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -64,7 +65,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             JwtHeaderParameterNames.Zip
         };
 
-        internal static Dictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
+        /// <summary>
+        /// Creates a dictionary from a list of Claim's.
+        /// </summary>
+        /// <param name="claims"> A list of claims.</param>
+        /// <returns> A Dictionary representing claims.</returns>
+        internal static IDictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
         {
             var payload = new Dictionary<string, object>();
 
@@ -373,3 +379,4 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
     }
 }
+

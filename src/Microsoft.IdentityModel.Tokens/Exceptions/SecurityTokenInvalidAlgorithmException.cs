@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -31,55 +31,55 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when 'issuer' of a token was not valid.
+    /// This exception is thrown when a cryptographic algorithm is invalid.
     /// </summary>
     [Serializable]
-    public class SecurityTokenInvalidIssuerException : SecurityTokenValidationException
+    public class SecurityTokenInvalidAlgorithmException : SecurityTokenValidationException
     {
         [NonSerialized]
-        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidIssuerException) + ".";
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidAlgorithmException) + ".";
 
         [NonSerialized]
-        const string _InvalidIssuerKey = _Prefix + nameof(InvalidIssuer);
+        const string _InvalidAlgorithmKey = _Prefix + nameof(InvalidAlgorithm);
 
         /// <summary>
-        /// Gets or sets the InvalidIssuer that created the validation exception.
+        /// Gets or sets the invalid algorithm that created the validation exception.
         /// </summary>
-        public string InvalidIssuer { get; set; }
+        public string InvalidAlgorithm { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidIssuerException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidAlgorithmException"/> class.
         /// </summary>
-        public SecurityTokenInvalidIssuerException()
+        public SecurityTokenInvalidAlgorithmException()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidIssuerException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidAlgorithmException"/> class.
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenInvalidIssuerException(string message)
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
+        public SecurityTokenInvalidAlgorithmException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidIssuerException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidAlgorithmException"/> class.
         /// </summary>
-        /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
+        /// <param name="message">Additional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SecurityTokenInvalidIssuerException(string message, Exception innerException)
+        public SecurityTokenInvalidAlgorithmException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidIssuerException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidTypeException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenInvalidIssuerException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenInvalidAlgorithmException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             SerializationInfoEnumerator enumerator = info.GetEnumerator();
@@ -87,8 +87,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 switch (enumerator.Name)
                 {
-                    case _InvalidIssuerKey:
-                        InvalidIssuer = info.GetString(_InvalidIssuerKey);
+                    case _InvalidAlgorithmKey:
+                        InvalidAlgorithm = info.GetString(_InvalidAlgorithmKey);
                         break;
 
                     default:
@@ -103,8 +103,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             base.GetObjectData(info, context);
 
-            if (!string.IsNullOrEmpty(InvalidIssuer))
-                info.AddValue(_InvalidIssuerKey, InvalidIssuer);
+            if (!string.IsNullOrEmpty(InvalidAlgorithm))
+                info.AddValue(_InvalidAlgorithmKey, InvalidAlgorithm);
         }
     }
 }

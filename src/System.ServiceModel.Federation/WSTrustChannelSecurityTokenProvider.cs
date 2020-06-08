@@ -144,7 +144,7 @@ namespace System.ServiceModel.Federation
                 (KeyEntropyMode == SecurityKeyEntropyMode.ClientEntropy || KeyEntropyMode == SecurityKeyEntropyMode.CombinedEntropy))
             {
                 byte[] entropyBytes = new byte[keySize / 8];
-                KeyGenerator.FillRandomBytes(entropyBytes);
+                Psha1KeyGenerator.FillRandomBytes(entropyBytes);
                 entropy = new Entropy(new BinarySecret(entropyBytes));
             }
 
@@ -259,7 +259,7 @@ namespace System.ServiceModel.Federation
                     if (keySizeInBits == 0)
                         throw new InvalidOperationException("No key size provided.");
 
-                    return new BinarySecretSecurityToken(KeyGenerator.ComputeCombinedKey(issuerEntropy, requestorEntropy, keySizeInBits));
+                    return new BinarySecretSecurityToken(Psha1KeyGenerator.ComputeCombinedKey(issuerEntropy, requestorEntropy, keySizeInBits));
                 }
                 else
                 {
@@ -291,7 +291,7 @@ namespace System.ServiceModel.Federation
             // the 'TokenType must be in wsse 1.1
             // TODO - need to create to obtain the actual security version that will be used for the relying party.
             // even though the MessageSecurityVersion is 1.1, the security header is written with 1.0
-            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, new WsSerializationContext(WsTrustFeb2005Version.TrustFeb2005)));
+            return new GenericXmlSecurityKeyIdentifierClause(WsSecuritySerializer.GetXmlElement(securityTokenReference, new WsSerializationContext(WsTrustVersion.TrustFeb2005)));
         }
 
         /// <summary>

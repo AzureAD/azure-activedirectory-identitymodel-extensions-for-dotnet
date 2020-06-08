@@ -636,6 +636,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
+                    Validators.ValidateAlgorithm(jwtToken.Enc, key, jwtToken, validationParameters);
                     decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
                     decryptionSucceeded = true;
                     break;
@@ -909,17 +910,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private IEnumerable<SecurityKey> GetAllSigningKeys(string token, TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-
         private IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
@@ -955,24 +945,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return unwrappedKeys;
-        }
-
-        /// <summary>
-        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
-        /// </summary>
-        /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal virtual SecurityKey ResolveIssuerSigningKey(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
-
-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
         }
 
         /// <summary>
@@ -1102,7 +1074,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         SecurityToken = jwtToken,
                         ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
-                        IsValid = true
+                        IsValid = true,
+                        TokenType = innerTokenValidationResult.TokenType
                     };
                 }
                 else
@@ -1134,13 +1107,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
-            Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
+            var type = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
 
             return new TokenValidationResult
             {
                 SecurityToken = jsonWebToken,
                 ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters, issuer),
-                IsValid = true
+                IsValid = true,
+                TokenType = type
             };
         }
 
@@ -1194,7 +1168,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return jwtToken;
             }
 
-            var kidMatched = false;
+            bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
             if (validationParameters.IssuerSigningKeyResolver != null)
             {
@@ -1202,7 +1176,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
             {
-                var key = ResolveIssuerSigningKey(jwtToken, validationParameters);
+                var key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
                 if (key != null)
                 {
                     kidMatched = true;
@@ -1210,13 +1184,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (keys == null)
+            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
                 // 2. ResolveIssuerSigningKey returned null
                 // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = GetAllSigningKeys(token, validationParameters);
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
             }
 
             // keep track of exceptions thrown, keys that were tried
@@ -1234,28 +1208,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
             }
 
-            foreach (var key in keys)
+            if (keys != null)
             {
-                try
+                foreach (var key in keys)
                 {
-                    if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Alg, validationParameters))
+                    try
                     {
-                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
-                        jwtToken.SigningKey = key;
-                        return jwtToken;
-                    };
-                }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
+                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Alg, jwtToken, validationParameters))
+                        {
+                            LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+                            jwtToken.SigningKey = key;
+                            return jwtToken;
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        exceptionStrings.AppendLine(ex.ToString());
+                    }
+
+                    if (key != null)
+                    {
+                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        if (kidExists && !kidMatched && key.KeyId != null)
+                            kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+                    }
                 }
 
-                if (key != null)
-                {
-                    keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
-                    if (kidExists && !kidMatched && key.KeyId != null)
-                        kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-                }
             }
 
             if (kidExists)
@@ -1281,9 +1259,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="signature">Signature to compare against.</param>
         /// <param name="key"><See cref="SecurityKey"/> to use.</param>
         /// <param name="algorithm">Crypto algorithm to use.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
         /// <returns>'true' if signature is valid.</returns>
-        internal bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, TokenValidationParameters validationParameters)
+        internal bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
@@ -1291,6 +1270,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 LogHelper.LogInformation(LogMessages.IDX14000, algorithm, key);
                 return false;
             }
+
+            Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)

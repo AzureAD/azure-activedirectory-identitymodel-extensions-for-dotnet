@@ -37,6 +37,12 @@ namespace Microsoft.IdentityModel.Tokens
     [Serializable]
     public class SecurityTokenNotYetValidException : SecurityTokenValidationException
     {
+        [NonSerialized]
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenNotYetValidException) + ".";
+
+        [NonSerialized]
+        const string _NotBeforeKey = _Prefix + nameof(NotBefore);
+
         /// <summary>
         /// Gets or sets the NotBefore value that created the validation exception. This value is always in UTC.
         /// </summary>
@@ -74,6 +80,28 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenNotYetValidException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            SerializationInfoEnumerator enumerator = info.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                switch (enumerator.Name)
+                {
+                    case _NotBeforeKey:
+                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime));
+                        break;
+
+                    default:
+                        // Ignore other fields.
+                        break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(_NotBeforeKey, NotBefore);
         }
     }
 }

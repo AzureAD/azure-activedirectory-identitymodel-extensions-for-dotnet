@@ -36,6 +36,15 @@ namespace Microsoft.IdentityModel.Tokens
     [Serializable]
     public class SecurityTokenInvalidLifetimeException : SecurityTokenValidationException
     {
+        [NonSerialized]
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidLifetimeException) + ".";
+
+        [NonSerialized]
+        const string _NotBeforeKey = _Prefix + nameof(NotBefore);
+
+        [NonSerialized]
+        const string _ExpiresKey = _Prefix + nameof(Expires);
+
         /// <summary>
         /// Gets or sets the NotBefore value that created the validation exception. This value is always in UTC.
         /// </summary>
@@ -81,6 +90,36 @@ namespace Microsoft.IdentityModel.Tokens
         protected SecurityTokenInvalidLifetimeException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+            SerializationInfoEnumerator enumerator = info.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                switch (enumerator.Name)
+                {
+                    case _NotBeforeKey:
+                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime));
+                        break;
+
+                    case _ExpiresKey:
+                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime));
+                        break;
+
+                    default:
+                        // Ignore other fields.
+                        break;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            if (NotBefore.HasValue)
+                info.AddValue(_NotBeforeKey, NotBefore.Value);
+
+            if (Expires.HasValue)
+                info.AddValue(_ExpiresKey, Expires.Value);
         }
     }
 }

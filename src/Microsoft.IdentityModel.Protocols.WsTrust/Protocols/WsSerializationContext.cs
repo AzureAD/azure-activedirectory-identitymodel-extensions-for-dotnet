@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        internal WsSerializationContext(WsTrustVersion wsTrustVersion, WsAddressingVersion wsAddressingVersion, WsSecurityVersion wsSecurityVersion)
+        public WsSerializationContext(WsTrustVersion wsTrustVersion, WsAddressingVersion wsAddressingVersion, WsSecurityVersion wsSecurityVersion)
         {
             TrustVersion = wsTrustVersion;
 

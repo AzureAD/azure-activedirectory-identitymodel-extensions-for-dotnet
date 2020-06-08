@@ -123,6 +123,13 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
+        public void FormatInvariant()
+        {
+            Assert.Equal(string.Empty, LogHelper.FormatInvariant(null, null));
+            Assert.Equal("Formated string", LogHelper.FormatInvariant("Formated string", null));
+        }
+
+        [Fact]
         public void TextWriterEventListenerLogging()
         {
             var filename = Guid.NewGuid().ToString() + ".txt";

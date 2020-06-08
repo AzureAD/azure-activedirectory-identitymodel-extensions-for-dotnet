@@ -34,6 +34,16 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
+    /// Definition for AlgorithmValidator
+    /// </summary>
+    /// <param name="algorithm">The algorithm to validate.</param>
+    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns><c>true</c> if the algorithm is considered valid</returns>
+    public delegate bool AlgorithmValidator(string algorithm, SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for AudienceValidator.
     /// </summary>
     /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
@@ -156,6 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other)));
 
+            AlgorithmValidator = other.AlgorithmValidator;
             ActorValidationParameters = other.ActorValidationParameters?.Clone();
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
@@ -184,6 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateAudience = other.ValidateAudience;
@@ -191,6 +203,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
             ValidateLifetime = other.ValidateLifetime;
             ValidateTokenReplay = other.ValidateTokenReplay;
+            ValidAlgorithms = other.ValidAlgorithms;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences;
             ValidIssuer = other.ValidIssuer;
@@ -207,6 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             RequireSignedTokens = true;
             RequireAudience = true;
             SaveSigninToken = false;
+            TryAllIssuerSigningKeys = true;
             ValidateActor = false;
             ValidateAudience = true;
             ValidateIssuer = true;
@@ -219,6 +233,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets <see cref="TokenValidationParameters"/>.
         /// </summary>
         public TokenValidationParameters ActorValidationParameters { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate used to validate the cryptographic algorithm used.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will validate the cryptographic algorithm used and
+        /// the algorithm will not be checked against <see cref="ValidAlgorithms"/>.
+        /// </remarks>
+        public AlgorithmValidator AlgorithmValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
@@ -524,6 +547,12 @@ namespace Microsoft.IdentityModel.Tokens
         public TokenReplayValidator TokenReplayValidator { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token kid or if token kid is empty.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool TryAllIssuerSigningKeys { get; set; }
+
+        /// <summary>
         /// Gets or sets a delegate that will be used to validate the type of the token.
         /// If the token type cannot be validated, an exception MUST be thrown by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
@@ -596,6 +625,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         [DefaultValue(false)]
         public bool ValidateTokenReplay { get; set; }
+
+        /// <summary>
+        /// Gets or sets the valid algorithms for cryptographic operations.
+        /// </summary>
+        /// <remarks>
+        /// If set to a non-empty collection, only the algorithms listed will be considered valid.
+        /// </remarks>
+        public IEnumerable<string> ValidAlgorithms { get; set; }
 
         /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used to check against the token's audience.

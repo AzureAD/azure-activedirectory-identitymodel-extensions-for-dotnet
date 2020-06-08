@@ -48,5 +48,4 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
     /// Class for specifying WS-Addressing 200408.
     /// </summary>
     internal class WsAddressing200408Version : WsAddressingVersion { }
-
 }
