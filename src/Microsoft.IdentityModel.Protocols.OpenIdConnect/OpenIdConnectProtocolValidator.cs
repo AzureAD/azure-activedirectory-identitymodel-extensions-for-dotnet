@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("value", LogHelper.FormatInvariant(LogMessages.IDX21105, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX21105, value)));
                 }
 
                 _nonceLifetime = value;
@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
-        private void CheckHash(HashAlgorithm hashAlgorithm, string expectedValue, string hashItem, string algorithm)
+        private static void CheckHash(HashAlgorithm hashAlgorithm, string expectedValue, string hashItem, string algorithm)
         {
             var hashBytes = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(hashItem));
             var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);

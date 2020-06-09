@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the 'jwks_uri'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.JwksUri, Required = Required.Default)]
-        public string JwksUri{ get; set; }
+        public string JwksUri { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JsonWebKeySet"/>
