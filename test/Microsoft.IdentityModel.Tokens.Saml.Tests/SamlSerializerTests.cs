@@ -191,7 +191,49 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
             try
             {
+                var reader = XmlUtilities.CreateXmlReader(theoryData.AssertionTestSet.Xml);
+                var assertion = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                context.PropertiesToIgnoreWhenComparing.Add(typeof(SamlAssertion), new List<string> { "CanonicalString" });
+                IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingDictionaryReader(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingDictionaryReader", theoryData);
+            try
+            {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.AssertionTestSet.Xml);
+                var assertion = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                context.PropertiesToIgnoreWhenComparing.Add(typeof(SamlAssertion), new List<string> { "CanonicalString" });
+                IdentityComparer.AreEqual(assertion, theoryData.AssertionTestSet.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingXDocumentReader(SamlTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingXDocumentReader", theoryData);
+            try
+            {
+                var reader = XmlUtilities.CreateXDocumentReader(theoryData.AssertionTestSet.Xml);
                 var assertion = (theoryData.SamlSerializer as SamlSerializerPublic).ReadAssertionPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -1090,7 +1132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 return base.ReadAdvice(reader);
             }
 
-            public SamlAssertion ReadAssertionPublic(XmlDictionaryReader reader)
+            public SamlAssertion ReadAssertionPublic(XmlReader reader)
             {
                 return base.ReadAssertion(reader);
             }
