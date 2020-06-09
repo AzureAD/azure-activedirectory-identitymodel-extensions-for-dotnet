@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             IssueFinal = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal";
             Renew = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Renew";
             RenewRequest = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Renew";
-            RenewResponse = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Renew";
+            RenewResponse = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/Renew";
             RenewFinal = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/RenewFinal";
             Status = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/Status";
             Validate = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Validate";
@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             IssueFinal = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal";
             Renew = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Renew";
             RenewRequest = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Renew";
-            RenewResponse = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Renew";
+            RenewResponse = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/Renew";
             RenewFinal = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/RenewFinal";
             Status = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTR/Status";
             Validate = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Validate";
