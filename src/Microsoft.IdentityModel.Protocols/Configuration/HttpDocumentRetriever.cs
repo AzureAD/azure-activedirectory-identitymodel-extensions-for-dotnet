@@ -87,7 +87,8 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
-                var response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
+                var uri = new Uri(address, UriKind.RelativeOrAbsolute);
+                var response = await httpClient.GetAsync(uri, cancel).ConfigureAwait(false);
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 if (response.IsSuccessStatusCode)
