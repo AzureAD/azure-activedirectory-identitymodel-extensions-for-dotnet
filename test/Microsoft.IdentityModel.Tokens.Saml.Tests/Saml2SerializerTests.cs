@@ -127,7 +127,47 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
             try
             {
+                var reader = XmlUtilities.CreateXmlReader(theoryData.Xml);
+                var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                IdentityComparer.AreEqual(assertion, theoryData.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingDictionaryReader(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingDictionaryReader", theoryData);
+            try
+            {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.Xml);
+                var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                IdentityComparer.AreEqual(assertion, theoryData.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingXDocumentReader(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingXDocumentReader", theoryData);
+            try
+            {
+                var reader = XmlUtilities.CreateXDocumentReader(theoryData.Xml);
                 var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -514,7 +554,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 return base.ReadAdvice(reader);
             }
 
-            public Saml2Assertion ReadAssertionPublic(XmlDictionaryReader reader)
+            public Saml2Assertion ReadAssertionPublic(XmlReader reader)
             {
                 return base.ReadAssertion(reader);
             }

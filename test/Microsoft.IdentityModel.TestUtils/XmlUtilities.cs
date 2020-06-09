@@ -30,6 +30,7 @@ using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -60,6 +61,14 @@ namespace Microsoft.IdentityModel.TestUtils
                 return null;
 
             return XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(xml), XmlDictionaryReaderQuotas.Max);
+        }
+
+        public static XmlReader CreateXDocumentReader(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
+            return XDocument.Parse(xml).CreateReader();
         }
 
         public static EnvelopedSignatureReader CreateEnvelopedSignatureReader(string xml)
