@@ -355,7 +355,7 @@ namespace Microsoft.IdentityModel.Logging
             get; set;
         }
         
-        private string PrepareMessage(EventLevel level, string message, params object[] args)
+        private static string PrepareMessage(EventLevel level, string message, params object[] args)
         {
             if (message == null)
                 return string.Empty;

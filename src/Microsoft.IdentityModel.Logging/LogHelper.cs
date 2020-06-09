@@ -248,6 +248,9 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="exception">The exception to log.</param>
         public static Exception LogExceptionMessage(EventLevel eventLevel, Exception exception)
         {
+            if (exception == null)
+                return null;
+
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
