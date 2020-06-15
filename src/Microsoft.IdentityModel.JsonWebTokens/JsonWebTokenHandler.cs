@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get { return true; }
         }
 
-        private JObject CreateDefaultJWEHeader(EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
+        private static JObject CreateDefaultJWEHeader(EncryptingCredentials encryptingCredentials, string compressionAlgorithm)
         {
             var header = new JObject();
             header.Add(JwtHeaderParameterNames.Alg, encryptingCredentials.Alg);
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return header;
         }
 
-        private JObject CreateDefaultJWSHeader(SigningCredentials signingCredentials)
+        private static JObject CreateDefaultJWSHeader(SigningCredentials signingCredentials)
         {
             var header = new JObject()
             {
@@ -512,7 +512,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">if <paramref name="compressionAlgorithm"/> is null.</exception>
         /// <exception cref="NotSupportedException">if the compression algorithm is not supported.</exception>
         /// <returns>Compressed JWT token bytes.</returns>
-        private byte[] CompressToken(string token, string compressionAlgorithm)
+        private static byte[] CompressToken(string token, string compressionAlgorithm)
         {
             if (token == null)
                 throw LogHelper.LogArgumentNullException(nameof(token));
@@ -669,7 +669,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private byte[] DecryptToken(JsonWebToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
+        private static byte[] DecryptToken(JsonWebToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
             using (var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Enc))
             {
@@ -798,7 +798,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return EncryptTokenPrivate(innerJwt, encryptingCredentials, algorithm, additionalHeaderClaims);
         }
 
-        private string EncryptTokenPrivate(string innerJwt, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims)
+        private static string EncryptTokenPrivate(string innerJwt, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims)
         {
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
@@ -1121,7 +1121,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Validates the JWT signature.
         /// </summary>
-        private JsonWebToken ValidateSignature(string token, TokenValidationParameters validationParameters)
+        private static JsonWebToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw LogHelper.LogArgumentNullException(nameof(token));
@@ -1176,7 +1176,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
             {
-                var key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, jwtToken, validationParameters);
+                var key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, validationParameters);
                 if (key != null)
                 {
                     kidMatched = true;
@@ -1262,7 +1262,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
         /// <returns>'true' if signature is valid.</returns>
-        internal bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        internal static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
