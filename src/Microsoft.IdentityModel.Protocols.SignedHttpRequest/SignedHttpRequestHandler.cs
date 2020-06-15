@@ -115,6 +115,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
+            if (signedHttpRequestDescriptor == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
+
             Dictionary<string, object> payload = new Dictionary<string, object>();
 
             AddAtClaim(payload, signedHttpRequestDescriptor);
@@ -206,7 +209,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(httpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Method));
 
-            if (!httpMethod.ToUpper().Equals(httpMethod, StringComparison.Ordinal))
+            if (!httpMethod.ToUpperInvariant().Equals(httpMethod, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
 
             payload.Add(SignedHttpRequestClaimTypes.M, httpMethod);
@@ -333,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var firstHeader = true;
                 foreach (var header in sanitizedHeaders)
                 {
-                    var headerName = header.Key.ToLower();
+                    var headerName = header.Key.ToLowerInvariant();
                     headerNameList.Add(headerName);
 
                     if (!firstHeader)
@@ -539,6 +542,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         protected virtual async Task<SecurityToken> ValidateSignedHttpRequestPayloadAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
+            if (signedHttpRequest == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
+
+            if (signedHttpRequestValidationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
+
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23030, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
 
@@ -1063,7 +1072,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             try
             {
                 var httpClient = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.HttpClientProvider?.Invoke() ?? _defaultHttpClient;
-                var response = await httpClient.GetAsync(jkuSetUrl, cancellationToken).ConfigureAwait(false);
+                var uri = new Uri(jkuSetUrl, UriKind.RelativeOrAbsolute);
+                var response = await httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
                 var jsonWebKey = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var jsonWebKeySet = new JsonWebKeySet(jsonWebKey);
                 return jsonWebKeySet.Keys.Cast<SecurityKey>().ToList();
@@ -1127,12 +1137,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         #endregion
 
         #region Private utility methods
-        private string CalculateBase64UrlEncodedHash(string data)
+        private static string CalculateBase64UrlEncodedHash(string data)
         {
             return CalculateBase64UrlEncodedHash(Encoding.UTF8.GetBytes(data));
         }
 
-        private string CalculateBase64UrlEncodedHash(byte[] bytes)
+        private static string CalculateBase64UrlEncodedHash(byte[] bytes)
         {
             using (var hash = SHA256.Create())
             {
@@ -1166,7 +1176,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Sanitizes the query params to comply with the specification.
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
-        private Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
+        private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
         {
             // Remove repeated query params according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
@@ -1182,7 +1192,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             foreach (var queryParamValuePair in queryParamKeyValuePairs)
             {
                 var queryParamKeyValuePairArray = queryParamValuePair.Split('=');
-                if (queryParamKeyValuePairArray.Count() == 2)
+                if (queryParamKeyValuePairArray.Length == 2)
                 {
                     var queryParamName = queryParamKeyValuePairArray[0];
                     var queryParamValue = queryParamKeyValuePairArray[1];
@@ -1219,7 +1229,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
         /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5
         /// </remarks>
-        private Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
+        private static Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
             // Remove repeated headers according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
@@ -1241,12 +1251,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 // in that case headerName should not be added, and the existing entry in sanitizedHeaders should be removed.
                 if (sanitizedHeaders.ContainsKey(headerName))
                 {
-                    repeatedHeaders.Add(headerName.ToLower());
+                    repeatedHeaders.Add(headerName.ToLowerInvariant());
                 }
                 // if header has more than one value don't add it to the sanitizedHeaders as it's repeated.
                 else if (header.Value.Count() > 1)
                 {
-                    repeatedHeaders.Add(headerName.ToLower());
+                    repeatedHeaders.Add(headerName.ToLowerInvariant());
                 }
                 else if (header.Value.Count() == 1 && !string.IsNullOrEmpty(header.Value.First()))
                     sanitizedHeaders.Add(headerName, header.Value.First());
