@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Globalization;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -138,9 +139,9 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                     else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience)
                     {
-                        var length = (validAudience.Length == tokenAudience.Length + 1 && validAudience.EndsWith("/"))
+                        var length = (validAudience.Length == tokenAudience.Length + 1 && validAudience.EndsWith("/", StringComparison.InvariantCulture))
                                         ? validAudience.Length - 1
-                                        : (tokenAudience.Length == validAudience.Length + 1 && tokenAudience.EndsWith("/"))
+                                        : (tokenAudience.Length == validAudience.Length + 1 && tokenAudience.EndsWith("/", StringComparison.InvariantCulture))
                                             ? tokenAudience.Length - 1
                                             : -1;
 

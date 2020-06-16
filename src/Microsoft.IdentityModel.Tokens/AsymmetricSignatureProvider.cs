@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens
             get => _minimumAsymmetricKeySizeInBitsForVerifyingMap;
         }
 
-        private PrivateKeyStatus FoundPrivateKey(SecurityKey key)
+        private static PrivateKeyStatus FoundPrivateKey(SecurityKey key)
         {
             if (key is AsymmetricSecurityKey asymmetricSecurityKey)
                 return asymmetricSecurityKey.PrivateKeyStatus;

@@ -37,8 +37,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class SymmetricKeyWrapProvider : KeyWrapProvider
     {
         private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
-        private static readonly int _blockSizeInBits = 64;
-        private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
+        private const int _blockSizeInBits = 64;
+        private const int _blockSizeInBytes = _blockSizeInBits >> 3;
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
@@ -109,6 +109,18 @@ namespace Microsoft.IdentityModel.Tokens
                         _symmetricAlgorithm = null;
                     }
 
+                    if (_symmetricAlgorithmEncryptor != null)
+                    {
+                        _symmetricAlgorithmEncryptor.Dispose();
+                        _symmetricAlgorithmEncryptor = null;
+                    }
+
+                    if (_symmetricAlgorithmDecryptor != null)
+                    {
+                        _symmetricAlgorithmDecryptor.Dispose();
+                        _symmetricAlgorithmDecryptor = null;
+                    }
+
                     _disposed = true;
                 }
             }
@@ -135,6 +147,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             byte[] keyBytes = null;
 
             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;

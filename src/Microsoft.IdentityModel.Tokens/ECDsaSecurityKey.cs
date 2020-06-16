@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool CanComputeJwkThumbprint()
         {
 #if NETSTANDARD2_0
-            if (ECDsaAdapter.Instance.SupportsECParameters())
+            if (ECDsaAdapter.SupportsECParameters())
                 return true;
 #endif
             return false;
@@ -131,10 +131,10 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] ComputeJwkThumbprint()
         {
 #if NETSTANDARD2_0
-            if (ECDsaAdapter.Instance.SupportsECParameters())
+            if (ECDsaAdapter.SupportsECParameters())
             {
                 ECParameters parameters = ECDsa.ExportParameters(false);
-                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.Instance.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
+                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
                 return Utility.GenerateSha256Hash(canonicalJwk);
             }
 #endif

@@ -27,10 +27,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -56,7 +57,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A copy of the byte array.</returns>
         public static byte[] CloneByteArray(this byte[] src)
         {
-            return (byte[])(src.Clone());
+            if (src == null)
+                throw LogHelper.LogArgumentNullException(nameof(src));
+
+            return (byte[])src.Clone();
         }
 
         /// <summary>
@@ -82,12 +86,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (first)
                 {
-                    sb.AppendFormat("{0}", str ?? Utility.Null);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "{0}", str ?? Utility.Null);
                     first = false;
                 }
                 else
                 {
-                    sb.AppendFormat(", {0}", str ?? Utility.Null);
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ", {0}", str ?? Utility.Null);
                 }
             }
 
