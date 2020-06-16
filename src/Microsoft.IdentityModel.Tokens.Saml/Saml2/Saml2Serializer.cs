@@ -1026,7 +1026,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
-        internal Saml2NameIdentifier ReadNameIdType(XmlDictionaryReader reader)
+        internal static Saml2NameIdentifier ReadNameIdType(XmlDictionaryReader reader)
         {
             // check that reader is on correct element is made by caller
             try

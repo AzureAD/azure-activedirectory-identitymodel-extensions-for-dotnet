@@ -102,6 +102,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns></returns>
         public bool Equals(AttributeKey x, AttributeKey y)
         {
+            if (x == null && y == null)
+                return true;
+            else if (x == null || y == null)
+                return false;
+
             return x.Name.Equals(y.Name, StringComparison.Ordinal)
                 && x.FriendlyName.Equals(y.FriendlyName, StringComparison.Ordinal)
                 && x.ValueType.Equals(y.ValueType, StringComparison.Ordinal)
@@ -117,6 +122,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns></returns>
         public int GetHashCode(AttributeKey obj)
         {
+            if (obj == null)
+                throw LogArgumentNullException(nameof(obj));
+
             return obj.GetHashCode();
         }
 

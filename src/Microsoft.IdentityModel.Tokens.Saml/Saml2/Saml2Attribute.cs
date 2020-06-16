@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get => _nameFormat;
             set => _nameFormat = (value != null && !value.IsAbsoluteUri)
-                ? throw LogExceptionMessage(new ArgumentException(nameof(value), FormatInvariant(LogMessages.IDX13300, value)))
+                ? throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, value), nameof(value)))
                 : value;
         }
 
