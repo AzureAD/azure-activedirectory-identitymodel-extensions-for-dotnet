@@ -593,7 +593,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return validateClaim || (validateIfPresent && jwtSignedHttpRequest.TryGetClaim(claimName, out var claimValue) && claimValue != null);
         }
 
-        private bool ValidateIfPresent(SignedHttpRequestValidationParameters validationParameters, string claim)
+        private static bool ValidateIfPresent(SignedHttpRequestValidationParameters validationParameters, string claim)
         {
             return validationParameters.ValidatePresentClaims &&
                 validationParameters.ClaimsToValidateWhenPresent != null &&
