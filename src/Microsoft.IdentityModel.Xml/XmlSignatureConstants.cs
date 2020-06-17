@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Xml
         public const string XmlNamespaceNamespace = "http://www.w3.org/2000/xmlns/";
         public const string XmlNamepspacePrefix = "xmlns";
         public const string XmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema-instance";
+        public const string Base64Encoding = Namespace + "base64";
 
         public static class Attributes
         {

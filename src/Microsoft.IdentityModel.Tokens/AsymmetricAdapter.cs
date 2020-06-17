@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Logging;
 using System.Reflection;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
 using System.Security.Cryptography.X509Certificates;
 #endif
 
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _useRSAOeapPadding = false;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
         private RSAEncryptionPadding _rsaEncryptionPadding;
 #endif
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
         private object _verifyRsaLock = new object();
         private object _verifyEcdsaLock = new object();
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
             : this(key, algorithm, hashAlgorithm, requirePrivateKey)
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
 
             // NETSTANDARD2_0 doesn't use RSACryptoServiceProviderProxy
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             return RSA.Decrypt(data, _rsaEncryptionPadding);
 #endif
         }
@@ -241,14 +241,14 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
 
             // NETSTANDARD2_0 doesn't use RSACryptoServiceProviderProxy
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NETSTANDARD2_1
             return RSA.Encrypt(data, _rsaEncryptionPadding);
 #endif
         }
 
         private HashAlgorithm HashAlgorithm { get; set; }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
         private HashAlgorithmName HashAlgorithmName { get; set; }
 
         private RSASignaturePadding RSASignaturePadding { get; set; }
@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingRsa(RSA rsa, string algorithm)
         {
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
             if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256, StringComparison.Ordinal) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature, StringComparison.Ordinal) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384, StringComparison.Ordinal) ||
@@ -281,7 +281,8 @@ namespace Microsoft.IdentityModel.Tokens
             // RSACryptoServiceProviderProxy is only supported on Windows platform
 #if DESKTOP
             _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                              || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
+                              || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal)
+                              || algorithm.Equals(SecurityAlgorithms.RsaOaepMgf1pKeyWrap, StringComparison.Ordinal);
 
             if (rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
             {
@@ -315,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
             // Here we can use RSA straight up.
             _rsaEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
@@ -349,7 +350,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
         private byte[] SignWithRsa(byte[] bytes)
         {
             lock (_signRsaLock)
@@ -383,7 +384,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NETSTANDARD2_0 || NETSTANDARD2_1
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
             lock (_verifyRsaLock)

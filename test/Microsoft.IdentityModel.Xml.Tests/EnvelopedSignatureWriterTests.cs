@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 
             try
             {
-                var serializer = new Saml2Serializer();
+                var serializer = new Saml2Serializer(new EncryptedAssertionHandler());
                 var samlAssertion = serializer.ReadAssertion(XmlUtilities.CreateDictionaryReader(theoryData.Xml));
                 var stream = new MemoryStream();
                 var writer = XmlDictionaryWriter.CreateTextWriter(stream);

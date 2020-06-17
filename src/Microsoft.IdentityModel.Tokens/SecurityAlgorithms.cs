@@ -39,6 +39,20 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes256Encryption = "http://www.w3.org/2001/04/xmlenc#aes256-cbc";
         public const string DesEncryption = "http://www.w3.org/2001/04/xmlenc#des-cbc";
 
+        // See: https://www.w3.org/TR/xmlenc-core1/#sec-AES-GCM
+        /// <summary>
+        /// Currently not supported. It's possible to provide your own implementation of the algorithm by overriding CryptoProviderFactory and AuthenticatedEncryptionProvider.
+        /// </summary>
+        public const string Aes128Gcm = "http://www.w3.org/2009/xmlenc11#aes128-gcm";
+        /// <summary>
+        /// Currently not supported. It's possible to provide your own implementation of the algorithm by overriding CryptoProviderFactory and AuthenticatedEncryptionProvider.
+        /// </summary>
+        public const string Aes192Gcm = "http://www.w3.org/2009/xmlenc11#aes192-gcm";
+        /// <summary>
+        /// Currently not supported. It's possible to provide your own implementation of the algorithm by overriding CryptoProviderFactory and AuthenticatedEncryptionProvider.
+        /// </summary>
+        public const string Aes256Gcm = "http://www.w3.org/2009/xmlenc11#aes256-gcm";
+
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-kw-aes
         public const string Aes128KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes128";
         public const string Aes192KeyWrap = "http://www.w3.org/2001/04/xmlenc#kw-aes192";
@@ -47,7 +61,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Ripemd160Digest = "http://www.w3.org/2001/04/xmlenc#ripemd160";
 
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP
-        public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+        public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep"; // treat as http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p. RsaOaepKeyWrap identifier doesn't exist, but we released, so don't break now.
+        public const string RsaOaepMgf1pKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p";
 
         // See: https://tools.ietf.org/html/rfc7518#section-4.1
         public const string Aes128KW = "A128KW";
@@ -61,6 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // See: https://www.w3.org/TR/xmldsig-core1/#sec-EnvelopedSignature
         public const string EnvelopedSignature = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
+        public const string Sha1Digest = "http://www.w3.org/2000/09/xmldsig#sha1";
 
         // See http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/#sec-SHA256
         // and https://tools.ietf.org/html/rfc6931#section-2.1.3
@@ -113,8 +129,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";
         public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
 
-        internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepKeyWrap;
-        internal const string DefaultSymmetricEncryptionAlgorithm = Aes128CbcHmacSha256;
+        internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepMgf1pKeyWrap;
+        internal const string DefaultSymmetricEncryptionAlgorithm = Aes128Gcm;
 
 #pragma warning restore 1591
     }

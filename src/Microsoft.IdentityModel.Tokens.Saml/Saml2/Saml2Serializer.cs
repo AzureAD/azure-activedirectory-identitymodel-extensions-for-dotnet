@@ -27,7 +27,9 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Security.Claims;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -41,12 +43,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     {
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
         private string _prefix = Saml2Constants.Prefix;
+        private readonly IEncryptedAssertionHandler _encryptedAssertionHandler;
 
         /// <summary>
         /// Instantiates a new instance of <see cref="Saml2Serializer"/>.
         /// </summary>
-        public Saml2Serializer() { }
+        public Saml2Serializer()
+        {
+            _encryptedAssertionHandler = null;
+        }
 
+        /// <summary>
+        /// Instantiates a new instance of <see cref="Saml2Serializer"/>.
+        /// </summary>
+        /// <param name="encryptedAssertionHandler"></param>
+        public Saml2Serializer(IEncryptedAssertionHandler encryptedAssertionHandler)
+        {
+            _encryptedAssertionHandler = encryptedAssertionHandler;
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="DSigSerializer"/> to use for reading / writing the <see cref="Xml.Signature"/>
@@ -186,29 +200,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Reads a &lt;saml:Assertion> element.
+        /// Reads a &lt;saml:Assertion> or &lt;saml:EncryptedAssertion> element.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a 'saml2:assertion' element.</param>
         /// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null.</exception>
-        /// <exception cref="NotSupportedException">If assertion is encrypted.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If <paramref name="reader"/> is not positioned at a Saml2Assertion.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If Version is not '2.0'.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If 'Id' is missing.</exception>>
         /// <exception cref="Saml2SecurityTokenReadException">If 'IssueInstant' is missing.</exception>>
         /// <exception cref="Saml2SecurityTokenReadException">If no statements are found.</exception>>
+        /// <exception cref="Saml2SecurityTokenEncryptedAssertionDecryptionException">if assertion is an EncryptedAssertion and decrypt operation failed.</exception>
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
+        /// <remarks>
+        /// If Assertion element is an EncryptedAssertion, Encrypted property of resulting Saml2Assertion object will be set to True
+        /// and EncryptedAssertion property will be set to raw assertion data string
+        /// </remarks>
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
             if (reader == null)
                 throw LogArgumentNullException(nameof(reader));
 
-            if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
-                throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13141));
+            XmlDictionaryReader plaintextReader = XmlDictionaryReader.CreateDictionaryReader(reader);
+            Saml2Assertion assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
 
-            XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+            // if assertion is encrypted then flag it as encrypted, attach original assertion string, and return
+            if (plaintextReader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
+            {
+                assertion.Encrypted = true;
+                assertion.EncryptedAssertion = reader.ReadOuterXml();
+                return assertion;
+            }
 
-            var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
-            var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
+            XmlUtil.CheckReaderOnEntry(plaintextReader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+            var envelopeReader = new EnvelopedSignatureReader(plaintextReader) { Serializer = DSigSerializer };
+
             try
             {
                 // @xsi:type
@@ -239,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // will move to next element
                 // <ds:Signature> 0-1 read by EnvelopedSignatureReader
                 envelopeReader.Read();
-               
+
                 // <Issuer> 1
                 assertion.Issuer = ReadIssuer(envelopeReader);
 
@@ -306,7 +331,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Assertion, ex);
             }
-        }
+        }   
+
+
 
         /// <summary>
         /// Reads a <see cref="Saml2Attribute"/>.
@@ -1402,7 +1429,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
                 if (declaredType == null
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
+                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
 
                 // If it's NameID we can handle it
                 if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace))
@@ -1520,7 +1547,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Writes the &lt;Assertion> element.
+        /// Writes the &lt;Assertion> or &lt;EncryptedAssertion> element.
         /// </summary>
         /// <param name="writer">A <see cref="XmlWriter"/> to serialize the <see cref="Saml2Assertion"/>.</param>
         /// <param name="assertion">The <see cref="Saml2Assertion"/> to serialize.</param>
@@ -1529,6 +1556,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="NotSupportedException">if <paramref name="assertion"/>.EncryptingCredentials != null.</exception>
         /// <exception cref="InvalidOperationException">The <paramref name="assertion"/> must have a <see cref="Saml2Subject"/> if no <see cref="Saml2Statement"/> are present.</exception>
         /// <exception cref="InvalidOperationException">The SAML2 authentication, attribute, and authorization decision <see cref="Saml2Statement"/> require a <see cref="Saml2Subject"/>.</exception>
+        /// <exception cref="Saml2SecurityTokenEncryptedAssertionEncryptionException">if assertion is an EncryptedAssertion and encrypt operation failed.</exception>
         public virtual void WriteAssertion(XmlWriter writer, Saml2Assertion assertion)
         {
             if (writer == null)
@@ -1537,6 +1565,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (assertion == null)
                 throw LogArgumentNullException(nameof(assertion));
 
+            // When EncryptingCredentials is not null - Assertion will be encrypted
+            if (assertion.EncryptingCredentials != null)
+            { 
+                EncryptAndWriteAssertion(writer, assertion);
+            }
+            else 
+                WritePlaintextAssertion(writer, assertion);
+        }
+
+        private void WritePlaintextAssertion(XmlWriter writer, Saml2Assertion assertion)
+        {
             // Wrap the writer if necessary for a signature
             // We do not dispose this writer, since as a delegating writer it would
             // dispose the inner writer, which we don't properly own.
@@ -1563,7 +1602,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            // <Assertion>
             writer.WriteStartElement(Prefix, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
             // @ID - required
@@ -1631,7 +1669,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 writer.WriteAttributeString(Saml2Constants.Attributes.FriendlyName, attribute.FriendlyName);
 
             // @OriginalIssuer - optional
-            if (attribute.OriginalIssuer != null )
+            if (attribute.OriginalIssuer != null)
                 writer.WriteAttributeString(Saml2Constants.Attributes.OriginalIssuer, Saml2Constants.ClaimType2009Namespace, attribute.OriginalIssuer);
 
             string xsiTypePrefix = null;
@@ -1830,7 +1868,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(statement));
 
             if (statement.Actions.Count == 0)
-                throw LogWriteException(LogMessages.IDX13901, statement.GetType(), "Actions" );
+                throw LogWriteException(LogMessages.IDX13901, statement.GetType(), "Actions");
 
             if (string.IsNullOrEmpty(statement.Decision))
                 throw LogWriteException(LogMessages.IDX13900, Saml2Constants.Attributes.Decision, nameof(statement.Decision));
@@ -1921,8 +1959,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(evidence));
 
             if (evidence.AssertionIdReferences.Count == 0
-            &&  evidence.Assertions.Count == 0
-            &&  evidence.AssertionUriReferences.Count == 0 )
+            && evidence.Assertions.Count == 0
+            && evidence.AssertionUriReferences.Count == 0)
                 throw LogWriteException(LogMessages.IDX13902);
 
             // <Evidence>
@@ -2109,7 +2147,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(subject));
 
             // If there's no ID, there has to be a SubjectConfirmation
-            if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
+            if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13305, subject)));
 
             // <Subject>
@@ -2349,5 +2387,42 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             return LogExceptionMessage(new Saml2SecurityTokenWriteException(FormatInvariant(format, args), inner));
         }
+
+        #region EncryptedAssertion
+        internal Saml2EncryptedAssertion EncryptAssertion(byte[] assertion, EncryptingCredentials encryptingCredentials)
+        {
+            return _encryptedAssertionHandler.EncryptAssertion(assertion, encryptingCredentials);
+        }
+
+        internal string DecryptAssertion(Saml2EncryptedAssertion encryptedAssertion, TokenValidationParameters validationParameters, string assertionString)
+        {
+            return _encryptedAssertionHandler.DecryptAssertion(encryptedAssertion, validationParameters, assertionString);
+        }
+
+        internal Saml2EncryptedAssertion ReadEncryptedAssertion(string assertion)
+        {
+            return _encryptedAssertionHandler.ReadEncryptedAssertion(assertion);
+        }
+
+        internal void EncryptAndWriteAssertion(XmlWriter writer, Saml2Assertion assertion)
+        {
+            XmlWriter originalWriter = writer;
+            MemoryStream plaintextStream = new MemoryStream();
+            XmlDictionaryWriter plaintextWriter = XmlDictionaryWriter.CreateTextWriter(plaintextStream, Encoding.UTF8, false);
+            writer = plaintextWriter;
+
+            // reuse this method in order to get bytes of plaintext written assertion
+            WritePlaintextAssertion(writer, assertion);
+
+            ((IDisposable)plaintextWriter).Dispose();
+            plaintextWriter = null;
+
+            var plaintextAssertionBytes = plaintextStream.ToArray();
+            ((IDisposable)plaintextStream).Dispose();
+
+            var encryptedAssertion = EncryptAssertion(plaintextAssertionBytes, assertion.EncryptingCredentials);
+            _encryptedAssertionHandler.WriteAssertionToXml(originalWriter, encryptedAssertion, Prefix);
+        }
+        #endregion
     }
 }

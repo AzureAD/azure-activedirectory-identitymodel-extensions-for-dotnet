@@ -37,6 +37,10 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class AuthenticatedEncryptionProvider : IDisposable
     {
+#if NETSTANDARD2_1
+        private const int AES_GCM_IV_SIZE = 12;
+        private const int AES_GCM_TAG_SIZE = 16;
+#endif
         private struct AuthenticatedKeys
         {
             public SymmetricSecurityKey AesKey;
@@ -67,22 +71,30 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
+            // Allow constructing AuthenticatedEncryptionProvider in case when AesGcm algorithm is passed to enable tests
+            if (!IsAesGcmAlgorithm(algorithm))
+            {
+                if (!IsSupportedAlgorithm(key, algorithm))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
 
-            ValidateKeySize(key, algorithm);
-            _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
-            _hmacAlgorithm = GetHmacAlgorithm(algorithm);
+                ValidateKeySize(key, algorithm);
+
+                _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
+                _hmacAlgorithm = GetHmacAlgorithm(algorithm);
+                Key = key;
+                Algorithm = algorithm;
+                _cryptoProviderFactory = key.CryptoProviderFactory;
+                if (key.CryptoProviderFactory.GetType() == typeof(CryptoProviderFactory))
+                    _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm, false) as SymmetricSignatureProvider;
+                else
+                    _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
+
+                if (_symmetricSignatureProvider == null)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
+            }
+
             Key = key;
             Algorithm = algorithm;
-            _cryptoProviderFactory = key.CryptoProviderFactory;
-            if (key.CryptoProviderFactory.GetType() == typeof(CryptoProviderFactory))
-                _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm, false) as SymmetricSignatureProvider;
-            else
-                _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
-
-            if (_symmetricSignatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
         }
 
         /// <summary>
@@ -99,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
-        public SecurityKey Key { get; }
+        public SecurityKey Key { get; private set; }
 
         /// <summary>
         /// Encrypts the 'plaintext'
@@ -137,35 +149,66 @@ namespace Microsoft.IdentityModel.Tokens
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            Aes aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-            aes.Key = _authenticatedkeys.AesKey.Key;
-            if (iv != null)
-                aes.IV = iv;
-
             byte[] ciphertext;
-            try
-            {
-                ciphertext = Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
-            }
-            catch(Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
-            }
 
-            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
-            Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
-            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + aes.IV.Length, ciphertext.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + aes.IV.Length + ciphertext.Length, al.Length);
-            byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
-            var authenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
-            Array.Copy(macHash, authenticationTag, authenticationTag.Length);
+#if NETSTANDARD2_1
+            if (IsAesGcmAlgorithm(Algorithm))
+            {
+                ciphertext = new byte[plaintext.Length];
+                byte[] nonce = new byte[AES_GCM_IV_SIZE];
+                byte[] tag = new byte[AES_GCM_TAG_SIZE];
+                using (var aesGcm = new AesGcm(GetKeyBytes(Key)))
+                {
+                    //random nonce
+                    RandomNumberGenerator rng = RandomNumberGenerator.Create();
+                    rng.GetBytes(nonce);
 
-            return new AuthenticatedEncryptionResult(Key, ciphertext, aes.IV, authenticationTag);
-        }
+                    try
+                    {
+                        aesGcm.Encrypt(nonce, plaintext, ciphertext, tag);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10618, Algorithm), ex));
+                    }
+                }
+                
+                return new AuthenticatedEncryptionResult(Key, ciphertext, nonce, tag);
+            }
+            else
+            {
+#endif
+                Aes aes = Aes.Create();
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+                aes.Key = _authenticatedkeys.AesKey.Key;
+                if (iv != null)
+                    aes.IV = iv;
+
+                try
+                {
+                    ciphertext = Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
+                }
+
+                byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
+                byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
+                Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
+                Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
+                Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + aes.IV.Length, ciphertext.Length);
+                Array.Copy(al, 0, macBytes, authenticatedData.Length + aes.IV.Length + ciphertext.Length, al.Length);
+                byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
+                var authenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
+                Array.Copy(macHash, authenticationTag, authenticationTag.Length);
+
+                return new AuthenticatedEncryptionResult(Key, ciphertext, aes.IV, authenticationTag);
+#if NETSTANDARD2_1
+                }
+#endif
+            }
 
         /// <summary>
         /// Decrypts ciphertext into plaintext
@@ -186,6 +229,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (ciphertext == null || ciphertext.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(ciphertext));
+
+            if (IsAesGcmAlgorithm(Algorithm))
+            {
+                // Until there is no AES-GCM support, Encrypt and Decrypt operations will throw an exception
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10692, Algorithm)));
+            }
 
             if (authenticatedData == null || authenticatedData.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
@@ -258,6 +307,16 @@ namespace Microsoft.IdentityModel.Tokens
             return SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key);
         }
 
+        private bool IsAesGcmAlgorithm(string algorithm)
+        {
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
+              || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
+              || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal)))
+                return false;
+
+            return true;
+        }
+
         private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)
         {
             int keyLength = -1;
@@ -291,13 +350,13 @@ namespace Microsoft.IdentityModel.Tokens
         private static string GetHmacAlgorithm(string algorithm)
         {
             if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
-                    return SecurityAlgorithms.HmacSha256;
+                return SecurityAlgorithms.HmacSha256;
 
             if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm, StringComparison.Ordinal))
                 return SecurityAlgorithms.HmacSha384;
 
             if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
-                    return SecurityAlgorithms.HmacSha512;
+                return SecurityAlgorithms.HmacSha512;
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
         }

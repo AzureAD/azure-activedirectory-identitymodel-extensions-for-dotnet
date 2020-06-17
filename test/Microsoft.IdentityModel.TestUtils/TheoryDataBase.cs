@@ -53,5 +53,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return $"{TestId}, {ExpectedException}";
         }
+
+        /// <summary>
+        /// Structure which holds custom/ad-hoc values.
+        /// </summary>
+        /// <remarks>
+        /// Replacement of existing, 'first-class', properties of classes derived from TheoryDataBase is NOT the intention of this container.
+        /// </remarks>
+        public Dictionary<string, object> PropertyBag { get; set; } = new Dictionary<string, object>();
     }
 }

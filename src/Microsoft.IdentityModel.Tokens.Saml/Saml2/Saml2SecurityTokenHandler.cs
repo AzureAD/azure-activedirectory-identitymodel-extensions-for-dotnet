@@ -35,6 +35,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Saml;
+using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -47,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     public class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         private const string _actor = "Actor";
-        private Saml2Serializer _serializer = new Saml2Serializer();
+        private Saml2Serializer _serializer = new Saml2Serializer(new EncryptedAssertionHandler());
 
         /// <summary>
         /// Gets or set the <see cref="Saml2Serializer"/> that will be used to read and write a <see cref="Saml2SecurityToken"/>.
@@ -100,19 +101,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             try
             {
-                using (var sr = new StringReader(token))
+                using (var reader = XmlUtil.CreateDefaultXmlDictionaryReader(token))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
 #if NET45
                     settings.XmlResolver = null;
 #endif                 
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings)))
-                    {
-                        return CanReadToken(reader);
-                    }
+                    return CanReadToken(reader);
                 }
             }
-            catch(Exception)
+            catch(Exception )
             {
                 return false;
             }
@@ -128,7 +126,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (reader == null)
                 return false;
 
-            return reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+            return (reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace)
+                   || reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace));
         }
 
         /// <summary>
@@ -158,6 +157,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             var assertion = new Saml2Assertion(CreateIssuerNameIdentifier(tokenDescriptor))
             {
                 Subject = CreateSubject(tokenDescriptor),
+                EncryptingCredentials = tokenDescriptor.EncryptingCredentials,
                 SigningCredentials = tokenDescriptor.SigningCredentials,
                 Conditions = CreateConditions(tokenDescriptor),
                 Advice = CreateAdvice(tokenDescriptor)
@@ -229,6 +229,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+
+            // if an assertion is encrypted - decrypt it first
+            if (IsSaml2EncryptedAssertion(token))
+            {
+                var encryptedAssertion = Serializer.ReadEncryptedAssertion(token);
+                token = Serializer.DecryptAssertion(encryptedAssertion, validationParameters, token);
+            }
 
             var samlToken = ValidateSignature(token, validationParameters);
             if (samlToken == null)
@@ -452,6 +459,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
 
+        private IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
+        {
+            LogHelper.LogInformation(TokenLogMessages.IDX10243);
+            if (validationParameters.IssuerSigningKey != null)
+                yield return validationParameters.IssuerSigningKey;
+
+            if (validationParameters.IssuerSigningKeys != null)
+                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+                    yield return key;
+        }
+
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use for validating the signature of a token.
         /// </summary>
@@ -496,6 +514,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">If <paramref name="token"/>.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/></returns>
+        /// <remarks>
+        /// In case when token represents an EncryptedAssertion, Encrypted property of <see cref="Saml2Assertion"/> will be set to True
+        /// and <paramref name="token"/> will be used to set EncryptedAssertion property.
+        /// </remarks>
         public virtual Saml2SecurityToken ReadSaml2Token(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -557,6 +579,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal static bool IsSaml2Assertion(XmlReader reader)
         {
             return reader.IsStartElement(Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
+        }
+
+        /// <summary>
+        /// Indicates if the assertion string represents an EncryptedAssertion.
+        /// </summary>
+        /// <param name="assertion">String representation of an assertion.</param>
+        /// <returns>'true' if assertion is encrypted, 'false' otherwise.</returns>
+        private bool IsSaml2EncryptedAssertion(string assertion)
+        {
+            using (var reader = XmlUtil.CreateDefaultXmlReader(assertion))
+            {
+                try
+                {
+                    reader.MoveToContent();
+                    return reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace);
+                }
+                catch (Exception ex)
+                {
+                    LogInformation(LogMessages.IDX13609, assertion, ex);
+                    return false;
+                }
+            }
         }
 
         /// <summary>

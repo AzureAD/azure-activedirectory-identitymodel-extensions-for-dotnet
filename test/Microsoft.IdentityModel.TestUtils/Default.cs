@@ -776,7 +776,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
+#pragma warning disable 0618
                 Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
+#pragma warning restore 0618
             };
         }
 

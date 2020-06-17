@@ -224,6 +224,10 @@ namespace Microsoft.IdentityModel.TestUtils
         public static byte[] DefaultSymmetricKeyBytes_128 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_128);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_128 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_128) { KeyId = "DefaultSymmetricSecurityKey_128" };
 
+        public static string DefaultSymmetricKeyEncoded_192 = "hf+ctyfSxzcVMn5B5D+u4It4/HHjnh/E";
+        public static byte[] DefaultSymmetricKeyBytes_192 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_192);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_192 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_192) { KeyId = "DefaultSymmetricSecurityKey_192" };
+
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256) { KeyId = "DefaultSymmetricSecurityKey_256" };
