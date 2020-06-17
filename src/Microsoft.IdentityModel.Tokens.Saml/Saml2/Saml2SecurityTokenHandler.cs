@@ -657,7 +657,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (claim.Properties.TryGetValue(ClaimProperties.SamlAttributeNameFormat, out string nameFormat))
             {
                 if (!Saml2Serializer.CanCreateValidUri(nameFormat, UriKind.Absolute))
-                    throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13300, ClaimProperties.SamlAttributeNameFormat)));
+                    throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13300, ClaimProperties.SamlAttributeNameFormat, nameFormat)));
 
                 attribute.NameFormat = new Uri(nameFormat);
             }

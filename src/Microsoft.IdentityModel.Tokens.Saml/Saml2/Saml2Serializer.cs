@@ -2300,7 +2300,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX13136, element);
 
                 if (requireUri && !CanCreateValidUri(value, kind))
-                    throw LogReadException(LogMessages.IDX13107, element, value);
+                    throw LogReadException(LogMessages.IDX13107, element, element, value);
 
                 return new Uri(value, kind);
             }
