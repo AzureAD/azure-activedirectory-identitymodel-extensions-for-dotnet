@@ -50,14 +50,8 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public static class JsonExtensions
     {
-        private static Serializer _serializer;
-        private static Deserializer _deserializer;
-
-        static JsonExtensions()
-        {
-           _serializer = JsonConvert.SerializeObject;
-           _deserializer = JsonConvert.DeserializeObject;
-        }
+        private static Serializer _serializer = JsonConvert.SerializeObject;
+        private static Deserializer _deserializer = JsonConvert.DeserializeObject;
 
         /// <summary>
         /// Gets or sets a <see cref="Serializer"/> to use when serializing objects to JSON.
@@ -71,10 +65,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
-
-                _serializer = value;
+                _serializer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
             }
         }
 
@@ -90,10 +81,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
-
-                _deserializer = value;
+                _deserializer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
             }
         }
 
