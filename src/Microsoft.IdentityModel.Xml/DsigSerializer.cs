@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Xml
         /// Reads the "X509DataElement" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509Data"/> element.</param>
-        private X509Data ReadX509Data(XmlReader reader)
+        private static X509Data ReadX509Data(XmlReader reader)
         {
             var data = new X509Data();
 
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Xml
         /// Reads the "X509IssuerSerial" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-X509Data.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.X509IssuerSerial"/> element.</param>
-        private IssuerSerial ReadIssuerSerial(XmlReader reader)
+        private static IssuerSerial ReadIssuerSerial(XmlReader reader)
         {
             reader.ReadStartElement(XmlSignatureConstants.Elements.X509IssuerSerial, XmlSignatureConstants.Namespace);
 
@@ -256,7 +256,7 @@ namespace Microsoft.IdentityModel.Xml
         /// Reads the "RSAKeyValue" element conforming to https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-RSAKeyValue.
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned on a <see cref="XmlSignatureConstants.Elements.RSAKeyValue"/> element.</param>
-        private RSAKeyValue ReadRSAKeyValue(XmlReader reader)
+        private static RSAKeyValue ReadRSAKeyValue(XmlReader reader)
         {
             reader.ReadStartElement(XmlSignatureConstants.Elements.RSAKeyValue, XmlSignatureConstants.Namespace);
 
