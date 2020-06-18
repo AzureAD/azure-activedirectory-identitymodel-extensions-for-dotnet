@@ -116,11 +116,11 @@ namespace Microsoft.IdentityModel.Tokens
 
                 byte[] x = Base64UrlEncoder.DecodeBytes(jsonWebKey.X);
                 if (x.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("x.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(x), cbKey, x.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.X), cbKey, x.Length)));
 
                 byte[] y = Base64UrlEncoder.DecodeBytes(jsonWebKey.Y);
                 if (y.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("y.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(y), cbKey, y.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.Y), cbKey, y.Length)));
 
                 Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
                 Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(jsonWebKey.D);
                     if (d.Length > cbKey)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("d.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(d), cbKey, d.Length)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.D), cbKey, d.Length)));
 
                     foreach (byte b in d)
                         Marshal.WriteByte(keyBlobPtr, index++, b);
