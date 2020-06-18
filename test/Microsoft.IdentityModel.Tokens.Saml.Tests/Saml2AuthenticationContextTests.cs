@@ -34,49 +34,59 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
     public class Saml2AuthenticationContextTests
     {
         [Fact]
+        public void Saml2AuthenticationContext_Ctor_NoException()
+        {
+            new Saml2AuthenticationContext();
+        }
+
+        [Fact]
         public void Saml2AuthenticationContext_RelativeClassReference_ArgumentException()
         {
             var classRef = new Uri("resource", UriKind.Relative);
+            var authContext = new Saml2AuthenticationContext();
             Assert.Throws<ArgumentException>(() => new Saml2AuthenticationContext(classRef));
         }
 
         [Fact]
-        public void Saml2AuthenticationContext_NullClassReference_ArgumentException()
+        public void Saml2AuthenticationContext_NullClassReference_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>(() => new Saml2AuthenticationContext(null));
+            var authContext = new Saml2AuthenticationContext();
+            Assert.Throws<ArgumentNullException>(() => authContext.ClassReference = null);
         }
 
         [Fact]
         public void Saml2AuthenticationContext_AbsoluteClassReference_NoException()
         {
             var classRef = new Uri("http://resource", UriKind.Absolute);
-            new Saml2AuthenticationContext(classRef);
+            new Saml2AuthenticationContext
+            {
+                ClassReference = classRef
+            };
         }
 
         [Fact]
         public void Saml2AuthenticationContext_RelativeDeclarationReference_ArgumentException()
         {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                var classRef = new Uri("http://resource", UriKind.Absolute);
-                var declarationReference = new Uri("resource", UriKind.Relative);
-                new Saml2AuthenticationContext(classRef, declarationReference);
-            });
+            var authContext = new Saml2AuthenticationContext();
+            var declarationReference = new Uri("resource", UriKind.Relative);
+            Assert.Throws<ArgumentException>(() => authContext.DeclarationReference = declarationReference);
         }
 
         [Fact]
         public void Saml2AuthenticationContext_AbsoluteDeclarationReference_NoException()
         {
-            var classRef = new Uri("http://resource", UriKind.Absolute);
             var declarationReference = new Uri("http://resource", UriKind.Absolute);
-            new Saml2AuthenticationContext(classRef, declarationReference);
+            new Saml2AuthenticationContext
+            {
+                DeclarationReference = declarationReference
+            };
         }
 
         [Fact]
-        public void Saml2AuthenticationContext_NullDeclarationReference_NoException()
+        public void Saml2AuthenticationContext_NullDeclarationReference_ArgumentNullException()
         {
-            var classRef = new Uri("http://resource", UriKind.Absolute);
-            new Saml2AuthenticationContext(classRef, null);
+            var authContext = new Saml2AuthenticationContext();
+            Assert.Throws<ArgumentNullException>(() => authContext.DeclarationReference = null);
         }
     }
 }

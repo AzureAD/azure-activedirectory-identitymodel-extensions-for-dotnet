@@ -73,8 +73,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="declarationReference">The declaration reference of the authentication context.</param>
         public Saml2AuthenticationContext(Uri classReference, Uri declarationReference)
         {
-            ClassReference = classReference;
-            DeclarationReference = declarationReference;
+            // Class and declaration reference are optional, so don't try and set the respective properties if
+            // the parameters are null.
+            if (classReference != null)
+                ClassReference = classReference;
+
+            if (declarationReference != null)
+                DeclarationReference = declarationReference;
+
             AuthenticatingAuthorities = new List<Uri>();
         }
 
@@ -121,7 +127,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _declarationReference; }
             set
             {
-                if (value != null && !value.IsAbsoluteUri)
+                if (value == null)
+                    throw LogArgumentNullException(nameof(value));
+
+                if (!value.IsAbsoluteUri)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(DeclarationReference), value)));
 
                 _declarationReference = value;
