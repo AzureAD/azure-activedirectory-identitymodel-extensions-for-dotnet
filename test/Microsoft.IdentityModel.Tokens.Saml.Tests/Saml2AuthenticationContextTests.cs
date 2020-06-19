@@ -40,6 +40,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
 
         [Fact]
+        public void Saml2AuthenticationContext_CtorNullClassRef_ArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new Saml2AuthenticationContext(null));
+        }
+
+        [Fact]
+        public void Saml2AuthenticationContext_CtorClassRef_NoException()
+        {
+            var classRef = new Uri("http://resource", UriKind.Absolute);
+            new Saml2AuthenticationContext(classRef);
+        }
+
+        [Fact]
+        public void Saml2AuthenticationContext_CtorNullClassAndDeclaration_ArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new Saml2AuthenticationContext(null, null));
+        }
+
+        [Fact]
+        public void Saml2AuthenticationContext_CtorNullDeclaration_ArgumentNullException()
+        {
+            var classRef = new Uri("http://resource", UriKind.Absolute);
+            Assert.Throws<ArgumentNullException>(() => new Saml2AuthenticationContext(classRef, null));
+        }
+
+        [Fact]
+        public void Saml2AuthenticationContext_CtorClassAndDeclarationRef_NoException()
+        {
+            var classRef = new Uri("http://resource", UriKind.Absolute);
+            var declarationReference = new Uri("http://resource", UriKind.Absolute);
+            new Saml2AuthenticationContext(classRef, declarationReference);
+        }
+
+        [Fact]
         public void Saml2AuthenticationContext_RelativeClassReference_ArgumentException()
         {
             var classRef = new Uri("resource", UriKind.Relative);

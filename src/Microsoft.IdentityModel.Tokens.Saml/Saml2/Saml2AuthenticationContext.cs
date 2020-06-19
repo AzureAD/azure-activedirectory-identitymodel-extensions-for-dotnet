@@ -53,7 +53,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of Saml2AuthenticationContext.
         /// </summary>
         public Saml2AuthenticationContext()
-            : this(null, null)
         {
         }
 
@@ -62,8 +61,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="classReference">The class reference of the authentication context.</param>
         public Saml2AuthenticationContext(Uri classReference)
-            : this(classReference, null)
         {
+            ClassReference = classReference;
         }
 
         /// <summary>
@@ -73,15 +72,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="declarationReference">The declaration reference of the authentication context.</param>
         public Saml2AuthenticationContext(Uri classReference, Uri declarationReference)
         {
-            // Class and declaration reference are optional, so don't try and set the respective properties if
-            // the parameters are null.
-            if (classReference != null)
-                ClassReference = classReference;
-
-            if (declarationReference != null)
-                DeclarationReference = declarationReference;
-
-            AuthenticatingAuthorities = new List<Uri>();
+            ClassReference = classReference;
+            DeclarationReference = declarationReference;
         }
 
         /// <summary>
@@ -93,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public ICollection<Uri> AuthenticatingAuthorities
         {
             get;
-        }
+        } = new List<Uri>();
 
         /// <summary>
         /// Gets or sets a URI reference identifying an authentication context class that 
