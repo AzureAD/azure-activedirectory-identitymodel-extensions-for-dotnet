@@ -659,7 +659,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
 
                 // Now we have enough data to create the object
-                var authnContext = new Saml2AuthenticationContext(classRef, declRef);
+                var authnContext = new Saml2AuthenticationContext(classRef);
+
+                if (declRef != null)
+                    authnContext.DeclarationReference = declRef;
 
                 // <AuthenticatingAuthority> - 0-OO
                 while (reader.IsStartElement(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace))
