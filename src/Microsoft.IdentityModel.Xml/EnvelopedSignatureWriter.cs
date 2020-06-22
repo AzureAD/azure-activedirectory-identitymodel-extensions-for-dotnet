@@ -205,8 +205,8 @@ namespace Microsoft.IdentityModel.Xml
             };
 
             using (var canonicalSignedInfoStream = new MemoryStream())
+            using (var signedInfoWriter = CreateTextWriter(Stream.Null))
             {
-                var signedInfoWriter = CreateTextWriter(Stream.Null);
                 signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
                 DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
                 signedInfoWriter.EndCanonicalization();

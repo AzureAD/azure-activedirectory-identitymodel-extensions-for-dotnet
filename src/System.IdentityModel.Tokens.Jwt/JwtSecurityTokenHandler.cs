@@ -77,7 +77,18 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Default JwtHeader algorithm mapping
         /// </summary>
-        public static IDictionary<string, string> DefaultOutboundAlgorithmMap;
+        public static IDictionary<string, string> DefaultOutboundAlgorithmMap = new Dictionary<string, string>
+        {
+            { SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256 },
+            { SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384 },
+            { SecurityAlgorithms.EcdsaSha512Signature, SecurityAlgorithms.EcdsaSha512 },
+            { SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.HmacSha256 },
+            { SecurityAlgorithms.HmacSha384Signature, SecurityAlgorithms.HmacSha384 },
+            { SecurityAlgorithms.HmacSha512Signature, SecurityAlgorithms.HmacSha512 },
+            { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
+            { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
+            { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
+        };
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
@@ -85,18 +96,6 @@ namespace System.IdentityModel.Tokens.Jwt
         static JwtSecurityTokenHandler()
         {
             LogHelper.LogVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
-            DefaultOutboundAlgorithmMap = new Dictionary<string, string>
-            {
-                 { SecurityAlgorithms.EcdsaSha256Signature, SecurityAlgorithms.EcdsaSha256 },
-                 { SecurityAlgorithms.EcdsaSha384Signature, SecurityAlgorithms.EcdsaSha384 },
-                 { SecurityAlgorithms.EcdsaSha512Signature, SecurityAlgorithms.EcdsaSha512 },
-                 { SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.HmacSha256 },
-                 { SecurityAlgorithms.HmacSha384Signature, SecurityAlgorithms.HmacSha384 },
-                 { SecurityAlgorithms.HmacSha512Signature, SecurityAlgorithms.HmacSha512 },
-                 { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
-                 { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
-                 { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
-            };
         }
 
         /// <summary>
@@ -808,6 +807,12 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
         protected ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
+            if (jwtToken is null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (validationParameters is null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
             DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
             DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
 
@@ -899,7 +904,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
         /// <returns>'true' if signature is valid.</returns>
-        private bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        private static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
 
@@ -1063,7 +1068,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
+        private static IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
         {
             if (validationParameters.TokenDecryptionKey != null)
                 yield return validationParameters.TokenDecryptionKey;
@@ -1293,7 +1298,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, jwtToken, validationParameters);
+            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters);
         }
 
         /// <summary>
@@ -1357,7 +1362,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private byte[] DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
+        private static byte[] DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
         {
             using (var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc))
             {
@@ -1489,7 +1494,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return unwrappedKeys;
         }
 
-        private byte[] GetSymmetricSecurityKey(SecurityKey key)
+        private static byte[] GetSymmetricSecurityKey(SecurityKey key)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
@@ -173,9 +174,18 @@ namespace Microsoft.IdentityModel.Xml
             {
                 foreach (var certificate in data.Certificates)
                 {
+                    // depending on the target, X509Certificate2 may be disposable
                     var cert = new X509Certificate2(Convert.FromBase64String(certificate));
-                    if (cert.Equals(key.Certificate))
-                        return true;
+                    try
+                    {
+                        if (cert.Equals(key.Certificate))
+                            return true;
+                    }
+                    finally
+                    {
+                        if (cert is IDisposable disposable)
+                            disposable?.Dispose();
+                    }
                 }
             }
 
@@ -189,14 +199,14 @@ namespace Microsoft.IdentityModel.Xml
 
             if (!key.Parameters.Equals(default(RSAParameters)))
             {
-                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(key.Parameters.Exponent))
-                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(key.Parameters.Modulus)));
+                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(key.Parameters.Exponent), StringComparison.InvariantCulture)
+                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(key.Parameters.Modulus), StringComparison.InvariantCulture));
             }
             else if (key.Rsa != null)
             {
                 var parameters = key.Rsa.ExportParameters(false);
-                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(parameters.Exponent))
-                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(parameters.Modulus)));
+                return (RSAKeyValue.Exponent.Equals(Convert.ToBase64String(parameters.Exponent), StringComparison.InvariantCulture)
+                     && RSAKeyValue.Modulus.Equals(Convert.ToBase64String(parameters.Modulus), StringComparison.InvariantCulture));
             }
 
             return false;
@@ -209,21 +219,38 @@ namespace Microsoft.IdentityModel.Xml
 
             if (RSAKeyValue != null)
             {
-                return (RSAKeyValue.Exponent.Equals(Convert.FromBase64String(key.E))
-                        && RSAKeyValue.Modulus.Equals(Convert.FromBase64String(key.N)));
+                return RSAKeyValue.Exponent.Equals(Convert.FromBase64String(key.E))
+                        && RSAKeyValue.Modulus.Equals(Convert.FromBase64String(key.N));
             }
 
             foreach (var x5c in key.X5c)
             {
+                // depending on the target, X509Certificate2 may be disposable
                 var certToMatch = new X509Certificate2(Convert.FromBase64String(x5c));
-                foreach (var data in X509Data)
+                try
                 {
-                    foreach (var certificate in data.Certificates)
+                    foreach (var data in X509Data)
                     {
-                        var cert = new X509Certificate2(Convert.FromBase64String(certificate));
-                        if (cert.Equals(certToMatch))
-                            return true;
+                        foreach (var certificate in data.Certificates)
+                        {
+                            var cert = new X509Certificate2(Convert.FromBase64String(certificate));
+                            try
+                            {
+                                if (cert.Equals(certToMatch))
+                                    return true;
+                            }
+                            finally
+                            {
+                                if (cert is IDisposable disposable)
+                                    disposable?.Dispose();
+                            }
+                        }
                     }
+                }
+                finally
+                {
+                    if (certToMatch is IDisposable disposable)
+                        disposable?.Dispose();
                 }
             }
 

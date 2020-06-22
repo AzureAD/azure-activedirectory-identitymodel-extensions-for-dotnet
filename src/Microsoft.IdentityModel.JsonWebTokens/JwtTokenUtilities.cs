@@ -209,15 +209,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (sizeInBits != 256 && sizeInBits != 384 && sizeInBits != 512)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10401, nameof(sizeInBits)));
 
-            var aes = Aes.Create();
-            int halfSizeInBytes = sizeInBits >> 4;
-            key = new byte[halfSizeInBytes << 1];
-            aes.KeySize = sizeInBits >> 1;
-            // The design of AuthenticatedEncryption needs two keys of the same size - generate them, each half size of what's required
-            aes.GenerateKey();
-            Array.Copy(aes.Key, key, halfSizeInBytes);
-            aes.GenerateKey();
-            Array.Copy(aes.Key, 0, key, halfSizeInBytes, halfSizeInBytes);
+            using (var aes = Aes.Create())
+            {
+                int halfSizeInBytes = sizeInBits >> 4;
+                key = new byte[halfSizeInBytes << 1];
+                aes.KeySize = sizeInBits >> 1;
+                // The design of AuthenticatedEncryption needs two keys of the same size - generate them, each half size of what's required
+                aes.GenerateKey();
+                Array.Copy(aes.Key, key, halfSizeInBytes);
+                aes.GenerateKey();
+                Array.Copy(aes.Key, 0, key, halfSizeInBytes, halfSizeInBytes);
+            }
 
             return key;
         }
@@ -227,6 +229,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public static IEnumerable<SecurityKey> GetAllDecryptionKeys(TokenValidationParameters validationParameters)
         {
+            if (validationParameters == null)
+                throw new ArgumentNullException(nameof(validationParameters));
+
             var decryptionKeys = new Collection<SecurityKey>();
             if (validationParameters.TokenDecryptionKey != null)
                 decryptionKeys.Add(validationParameters.TokenDecryptionKey);
@@ -326,11 +331,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
         /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="jwtToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, SecurityToken jwtToken,TokenValidationParameters validationParameters)
+        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters)
         {
 
             if (!string.IsNullOrEmpty(kid))

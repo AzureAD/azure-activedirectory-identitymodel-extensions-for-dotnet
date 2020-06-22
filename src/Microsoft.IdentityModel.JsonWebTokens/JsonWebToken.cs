@@ -349,7 +349,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = rawData;
         }
 
-        private void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             if (jtoken.Type is JTokenType.Object)
             {
@@ -383,7 +383,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             if (jtoken is JValue jvalue)
             {
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private void DecodeJws(string[] tokenParts)
         {
             // Log if CTY is set, assume compact JWS
-            if (Cty != string.Empty)
+            if (!string.IsNullOrEmpty(Cty))
                 LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14105, Payload.Value<string>(JwtHeaderParameterNames.Cty)));
 
             try

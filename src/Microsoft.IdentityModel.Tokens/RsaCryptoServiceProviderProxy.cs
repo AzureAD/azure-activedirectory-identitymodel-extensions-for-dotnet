@@ -264,6 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                 }
             }
+            base.Dispose(disposing);
         }
     }
 }

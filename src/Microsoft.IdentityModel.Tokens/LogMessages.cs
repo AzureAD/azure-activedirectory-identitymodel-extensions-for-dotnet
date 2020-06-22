@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens
         // public const string IDX10672 = "IDX10672:";
         // public const string IDX10673 = "IDX10673:";
         public const string IDX10674 = "IDX10674: JsonWebKeyConverter does not support SecurityKey of type: {0}";
-        public const string IDX10675 = "IDX10675: The byte count of '{0}' must be less than or equal to '{1}', but was {2}.";
+        public const string IDX10675 = "IDX10675: Cannot create a ECDsa object from the '{0}', the bytes from the decoded value of '{1}' must be less than the size associated with the curve: '{2}'. Size was: '{3}'.";
         // public const string IDX10676 = "IDX10676:";
         public const string IDX10677 = "IDX10677: GetKeyedHashAlgorithm threw, key: {0}, algorithm {1}.";
         // public const string IDX10678 = "IDX10678:";

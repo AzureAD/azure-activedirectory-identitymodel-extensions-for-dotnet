@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromECDsaSecurityKey(ECDsaSecurityKey key)
         {
-            if (!ECDsaAdapter.Instance.SupportsECParameters())
+            if (!ECDsaAdapter.SupportsECParameters())
                 throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
 
             if (key == null)
@@ -210,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             return new JsonWebKey
             {
-                Crv = ECDsaAdapter.Instance.GetCrvParameterValue(parameters.Curve),
+                Crv = ECDsaAdapter.GetCrvParameterValue(parameters.Curve),
                 X = parameters.Q.X != null ? Base64UrlEncoder.Encode(parameters.Q.X) : null,
                 Y = parameters.Q.Y != null ? Base64UrlEncoder.Encode(parameters.Q.Y) : null,
                 D = parameters.D != null ? Base64UrlEncoder.Encode(parameters.D) : null,

@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
 
 #if NET461 || NETSTANDARD2_0
         private RSAEncryptionPadding _rsaEncryptionPadding;
+        private object _signRsaLock = new object();
 #endif
 
         private bool _disposeCryptoOperators = false;
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SignDelegate SignatureFunction;
         private VerifyDelegate VerifyFunction;
 
-        private object _signRsaLock = new object();
+
         private object _signEcdsaLock = new object();
         private object _verifyRsaLock = new object();
         private object _verifyEcdsaLock = new object();

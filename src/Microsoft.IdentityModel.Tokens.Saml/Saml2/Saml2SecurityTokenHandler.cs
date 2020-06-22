@@ -504,7 +504,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            return ReadSaml2Token(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max));
+            using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
+            {
+                return ReadSaml2Token(reader);
+            }
         }
 
         /// <summary>
@@ -1088,6 +1091,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="issuer">The issuer.</param>
         protected virtual void ProcessStatements(ICollection<Saml2Statement> statements, ClaimsIdentity identity, string issuer)
         {
+            if (statements == null)
+                throw LogArgumentNullException(nameof(statements));
+
             foreach (var statement in statements)
             {
                 if (statement is Saml2AttributeStatement attrStatement)
@@ -1200,6 +1206,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (identity == null)
                 throw LogArgumentNullException(nameof(identity));
 
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
             if (statement.AuthenticationContext.DeclarationReference != null)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13001));
 
@@ -1242,6 +1251,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(LogMessages.IDX13110);
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
 
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))

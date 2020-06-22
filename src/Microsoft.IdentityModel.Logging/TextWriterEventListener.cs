@@ -129,6 +129,7 @@ namespace Microsoft.IdentityModel.Logging
                 _streamWriter.Dispose();
             }
 
+            GC.SuppressFinalize(this);
             base.Dispose();
         }
     }
