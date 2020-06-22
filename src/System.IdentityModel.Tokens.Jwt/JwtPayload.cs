@@ -437,7 +437,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             if (jtoken.Type == JTokenType.Object)
             {
@@ -471,7 +471,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             JValue jvalue = jtoken as JValue;
             if (jvalue != null)
@@ -499,11 +499,9 @@ namespace System.IdentityModel.Tokens.Jwt
         public void AddClaim(Claim claim)
         {
             if (claim == null)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claim"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claim)));
 
-            this.AddClaims(new Claim[] { claim });
+            AddClaims(new Claim[] { claim });
         }
 
         /// <summary>
