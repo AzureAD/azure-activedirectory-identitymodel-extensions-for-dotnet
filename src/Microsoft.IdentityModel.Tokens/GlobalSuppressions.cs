@@ -21,7 +21,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1820:Test for empty strings using string length", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Globalization is not used")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.AdditionalHeaderClaims")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.Claims")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.JsonWebKey.Oth")]

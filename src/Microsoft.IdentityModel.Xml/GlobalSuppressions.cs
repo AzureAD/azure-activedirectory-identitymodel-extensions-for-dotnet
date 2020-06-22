@@ -5,7 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Globalization is not used")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Doesn't own object", Scope = "member", Target = "~M:Microsoft.IdentityModel.Xml.EnvelopedSignatureWriter.OnEndRootElement")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Ownership is shared between multiple objects and stream is only in memory", Scope = "member", Target = "~M:Microsoft.IdentityModel.Xml.DSigSerializer.ReadSignedInfo(System.Xml.XmlReader)~Microsoft.IdentityModel.Xml.SignedInfo")]
 [assembly: SuppressMessage("Design", "CA1056:Uri properties should not be strings", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Xml.KeyInfo.RetrievalMethodUri")]
