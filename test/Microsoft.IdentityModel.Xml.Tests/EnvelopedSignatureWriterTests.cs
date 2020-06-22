@@ -467,7 +467,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             saml2Conditions.NotOnOrAfter = DateTime.Parse("2019-04-08T10:45:49Z");
             assertion.Conditions = saml2Conditions;
 
-            var saml2AuthenticationContext = new Saml2AuthenticationContext(new Uri("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"), null);
+            var saml2AuthenticationContext = new Saml2AuthenticationContext(new Uri("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"));
             var saml2Statement = new Saml2AuthenticationStatement(saml2AuthenticationContext)
             {
                 AuthenticationInstant = DateTime.Parse("2019-04-08T10:30:49Z"),
