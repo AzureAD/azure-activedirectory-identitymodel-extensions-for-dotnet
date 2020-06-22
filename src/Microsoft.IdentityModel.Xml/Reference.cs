@@ -46,7 +46,6 @@ namespace Microsoft.IdentityModel.Xml
         private string _digestMethod;
         private string _digestValue;
         private XmlTokenStream _tokenStream;
-        private TransformFactory _transformFactory = TransformFactory.Default;
 
         /// <summary>
         /// Initializes an instance of <see cref="Reference"/>
@@ -158,7 +157,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <param name="tokenStream">the set of XML nodes to read.</param>
         /// <param name="hash">the hash algorithm to apply.</param>
         /// <returns>hash of the octets.</returns>
-        private byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hash)
+        private static byte[] ProcessAndDigest(XmlTokenStream tokenStream, HashAlgorithm hash)
         {
             using (var stream = new MemoryStream())
             {

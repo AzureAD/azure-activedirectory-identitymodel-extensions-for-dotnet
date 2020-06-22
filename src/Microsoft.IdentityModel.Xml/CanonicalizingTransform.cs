@@ -80,8 +80,8 @@ namespace Microsoft.IdentityModel.Xml
         {
             var streamWriter = new XmlTokenStreamWriter(tokenStream);
             using (var stream = new MemoryStream())
+            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
             {
-                var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
                 writer.StartCanonicalization(stream, includeComments, inclusiveNamespacesPrefixList);
                 streamWriter.WriteTo(writer);
                 writer.EndCanonicalization();

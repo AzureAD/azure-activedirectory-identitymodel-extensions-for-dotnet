@@ -77,8 +77,8 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(hash));
 
             using (var stream = new MemoryStream())
+            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
             {
-                var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
                 writer.StartCanonicalization(stream, IncludeComments, XmlUtil.TokenizeInclusiveNamespacesPrefixList(InclusiveNamespacesPrefixList));
                 tokenStream.WriteTo(writer);
                 writer.EndCanonicalization();
