@@ -48,6 +48,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+
+                CryptoProviderFactory.Default.ReleaseKeyWrapProvider(keyWrapProvider);
             }
             else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
@@ -57,6 +59,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var unwrappedKey = keyWrapProvider.UnwrapKey(wrappedKey);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+
+                CryptoProviderFactory.Default.ReleaseKeyWrapProvider(keyWrapProvider);
             }
         }
 
@@ -71,6 +75,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(wrappedKey, 0, wrappedKey.Length);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+
+                CryptoProviderFactory.Default.ReleaseKeyWrapProvider(keyWrapProvider);
             }
             else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase))
@@ -80,6 +86,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 byte[] unwrappedKey = testParams.KeyVaultDecryptor.TransformFinalBlock(wrappedKey, 0, wrappedKey.Length);
 
                 Assert.True(Utility.AreEqual(unwrappedKey, testParams.KeyToWrap), "Utility.AreEqual(unwrappedKey, testParams.KeyToWrap)");
+
+                CryptoProviderFactory.Default.ReleaseKeyWrapProvider(keyWrapProvider);
             }
         }
 

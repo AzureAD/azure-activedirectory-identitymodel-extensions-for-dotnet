@@ -41,12 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
     internal class ECDsaAdapter
     {
         internal readonly CreateECDsaDelegate CreateECDsaFunction = null;
-        internal static ECDsaAdapter Instance;
-
-        static ECDsaAdapter()
-        {
-            Instance = new ECDsaAdapter();
-        }
+        internal static ECDsaAdapter Instance = new ECDsaAdapter();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ECDsaAdapter"/> class.
@@ -121,11 +116,11 @@ namespace Microsoft.IdentityModel.Tokens
 
                 byte[] x = Base64UrlEncoder.DecodeBytes(jsonWebKey.X);
                 if (x.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("x.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(x), cbKey, x.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.X), cbKey, x.Length)));
 
                 byte[] y = Base64UrlEncoder.DecodeBytes(jsonWebKey.Y);
                 if (y.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("y.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(y), cbKey, y.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.Y), cbKey, y.Length)));
 
                 Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
                 Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
@@ -144,7 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(jsonWebKey.D);
                     if (d.Length > cbKey)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("d.Length", LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(d), cbKey, d.Length)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.D), cbKey, d.Length)));
 
                     foreach (byte b in d)
                         Marshal.WriteByte(keyBlobPtr, index++, b);
@@ -180,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="curveId">Represents ecdsa curve -P256, P384, P521</param>
         /// <returns>Size of the key in bytes</returns>
-        private uint GetKeyByteCount(string curveId)
+        private static uint GetKeyByteCount(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
                 throw LogHelper.LogArgumentNullException(nameof(curveId));
@@ -223,7 +218,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
         /// <param name="willCreateSignatures">Whether the provider will create signatures or not</param>
         /// <returns>Uint representing the magic number</returns>
-        private uint GetMagicValue(string curveId, bool willCreateSignatures)
+        private static uint GetMagicValue(string curveId, bool willCreateSignatures)
         {
             if (string.IsNullOrEmpty(curveId))
                 throw LogHelper.LogArgumentNullException(nameof(curveId));
@@ -261,7 +256,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <returns>True if operations using <see cref="CngKey"/> are supported on user's runtime platform, false otherwise.</returns>
         [MethodImpl(MethodImplOptions.NoOptimization)]
-        private bool SupportsCNGKey()
+        private static bool SupportsCNGKey()
         {
             try
             {
@@ -321,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Returns the elliptic curve corresponding to the curve id.
         /// </summary>
         /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
-        private ECCurve GetNamedECCurve(string curveId)
+        private static ECCurve GetNamedECCurve(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
                 throw LogHelper.LogArgumentNullException(nameof(curveId));
@@ -340,7 +335,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        internal string GetCrvParameterValue(ECCurve curve)
+        internal static string GetCrvParameterValue(ECCurve curve)
         {
             if (curve.Oid == null)
                 throw LogHelper.LogArgumentNullException(nameof(curve.Oid));
@@ -360,7 +355,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Tests if user application's runtime supports <see cref="ECParameters"/> structure.
         /// </summary>
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
-        internal bool SupportsECParameters()
+        internal static bool SupportsECParameters()
         {
             try
             {
@@ -378,7 +373,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
 #pragma warning disable CS0168 //the variable is declared but never used
         [MethodImpl(MethodImplOptions.NoOptimization)]
-        private void LoadECParametersType()
+        private static void LoadECParametersType()
         {
             ECParameters _;
         }

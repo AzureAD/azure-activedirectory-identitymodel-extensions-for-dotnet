@@ -135,13 +135,13 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string GetNextId()
         {
-            RandomNumberGenerator rng = RandomNumberGenerator.Create();
+            using RandomNumberGenerator rng = RandomNumberGenerator.Create();
             byte[] id = new byte[RandomSaltSize];
             rng.GetBytes(id);
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < id.Length; i++)
             {
-                builder.AppendFormat("{0:X2}", id[i]);
+                builder.AppendFormat(CultureInfo.InvariantCulture, "{0:X2}", id[i]);
             }
 
             return builder.ToString();

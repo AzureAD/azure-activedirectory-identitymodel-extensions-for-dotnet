@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
             return GetCacheKeyPrivate(securityKey, algorithm, typeofProvider);
         }
 
-        private string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
+        private static string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
             return string.Format(CultureInfo.InvariantCulture,
                                  "{0}-{1}-{2}-{3}",
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
         /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
-        private bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
+        private static bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
         {
             return signatureProvider.Key.InternalId.Length != 0;
         }

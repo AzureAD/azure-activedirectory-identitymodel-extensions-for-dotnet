@@ -37,8 +37,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class SymmetricKeyWrapProvider : KeyWrapProvider
     {
         private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
-        private static readonly int _blockSizeInBits = 64;
-        private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
+        private const int _blockSizeInBits = 64;
+        private const int _blockSizeInBytes = _blockSizeInBits >> 3;
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
@@ -109,6 +109,18 @@ namespace Microsoft.IdentityModel.Tokens
                         _symmetricAlgorithm = null;
                     }
 
+                    if (_symmetricAlgorithmEncryptor != null)
+                    {
+                        _symmetricAlgorithmEncryptor.Dispose();
+                        _symmetricAlgorithmEncryptor = null;
+                    }
+
+                    if (_symmetricAlgorithmDecryptor != null)
+                    {
+                        _symmetricAlgorithmDecryptor.Dispose();
+                        _symmetricAlgorithmDecryptor = null;
+                    }
+
                     _disposed = true;
                 }
             }
@@ -135,6 +147,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
             byte[] keyBytes = null;
 
             SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
@@ -331,7 +346,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes128KW.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.Length != 16)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
 
                 return;
             }
@@ -339,7 +354,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes256KW.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.Length != 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
 
                 return;
             }

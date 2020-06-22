@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
             return IsSupportedCompressionAlgorithm(algorithm);
         }
 
-        private bool IsSupportedCompressionAlgorithm(string algorithm)
+        private static bool IsSupportedCompressionAlgorithm(string algorithm)
         {
             return CompressionAlgorithms.Deflate.Equals(algorithm, StringComparison.Ordinal);
         }
