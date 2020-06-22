@@ -50,7 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
-        private static string[] _tokenTypeIdentifiers = new string[] { SamlConstants.Namespace, SamlConstants.OasisWssSamlTokenProfile11 };
 
 #region fields
         /// <summary>
@@ -188,6 +187,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <returns><see cref="ICollection{SamlAttribute}"/>common attributes collected into value lists.</returns>
         protected virtual ICollection<SamlAttribute> ConsolidateAttributes(ICollection<SamlAttribute> attributes)
         {
+            if (attributes == null)
+                throw LogArgumentNullException(nameof(attributes));
+
             var distinctAttributes = new Dictionary<SamlAttributeKeyComparer.AttributeKey, SamlAttribute>(attributes.Count, new SamlAttributeKeyComparer());
             foreach (var attribute in attributes)
             {
@@ -523,6 +525,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
         protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
         {
+            if (attributes == null)
+                throw LogArgumentNullException(nameof(attributes));
+
             bool actorElementWritten = false;
 
             using (var ms = new MemoryStream())
@@ -633,6 +638,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="issuer">The issuer.</param>
         protected virtual void ProcessCustomSubjectStatement(SamlStatement statement, ClaimsIdentity identity, string issuer)
         {
+            if (statement == null)
+                throw LogArgumentNullException(nameof(statement));
+
             LogHelper.LogWarning(LogMessages.IDX11516, statement.GetType());
         }
 
@@ -646,6 +654,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="SamlSecurityTokenException">if the statement is not a <see cref="SamlSubjectStatement"/>.</exception>
         protected virtual IEnumerable<ClaimsIdentity> ProcessStatements(SamlSecurityToken samlToken, string issuer, TokenValidationParameters validationParameters)
         {
+            if (samlToken == null)
+                throw LogArgumentNullException(nameof(samlToken));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
             var identityDict = new Dictionary<SamlSubject, ClaimsIdentity>(SamlSubjectEqualityComparer);
             foreach (var item in samlToken.Assertion.Statements)
             {
@@ -733,7 +747,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
 
-            return ReadSamlToken(XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max));
+            using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
+            {
+                return ReadSamlToken(reader);
+            }
         }
 
         /// <summary>

@@ -36,7 +36,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public class SamlAuthenticationStatement : SamlSubjectStatement
     {
-        private DateTime _authenticationInstant = DateTime.UtcNow.ToUniversalTime();
         private string _authenticationMethod = SamlConstants.UnspecifiedAuthenticationMethod;
 
         internal SamlAuthenticationStatement()

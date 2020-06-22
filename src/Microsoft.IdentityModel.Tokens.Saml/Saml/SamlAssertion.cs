@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         try
                         {
                             var serializer = new SamlSerializer();
-                            var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null);
+                            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
                             using (var c14nStream = new MemoryStream())
                             {
                                 writer.StartCanonicalization(c14nStream, false, null);
