@@ -117,9 +117,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         public IEnumerable<string> ClaimsToValidateWhenPresent { get; set; } = new List<string>
         {
-            SignedHttpRequestClaimTypes.Ts,
             SignedHttpRequestClaimTypes.M,
-            SignedHttpRequestClaimTypes.U,
             SignedHttpRequestClaimTypes.P
         };
 

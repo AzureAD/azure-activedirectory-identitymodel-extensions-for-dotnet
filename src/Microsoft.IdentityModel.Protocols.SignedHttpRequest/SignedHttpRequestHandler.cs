@@ -556,7 +556,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (validationParameters.ReplayValidatorAsync != null)
                 await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ReplayValidatorAsync(jwtSignedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
-            if (ShouldValidate(jwtSignedHttpRequest,validationParameters.ValidateTs, ValidateIfPresent(validationParameters, SignedHttpRequestClaimTypes.Ts), SignedHttpRequestClaimTypes.Ts))
+            if (ShouldValidate(jwtSignedHttpRequest, validationParameters.ValidateTs, ValidateIfPresent(validationParameters, SignedHttpRequestClaimTypes.Ts), SignedHttpRequestClaimTypes.Ts))
                 ValidateTsClaim(jwtSignedHttpRequest, signedHttpRequestValidationContext);
 
             if (ShouldValidate(jwtSignedHttpRequest, validationParameters.ValidateM, ValidateIfPresent(validationParameters, SignedHttpRequestClaimTypes.M), SignedHttpRequestClaimTypes.M))
