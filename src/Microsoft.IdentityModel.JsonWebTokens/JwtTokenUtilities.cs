@@ -254,13 +254,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (claim.ValueType == ClaimValueTypes.Double)
             {
-                if (double.TryParse(claim.Value, out double doubleValue))
+                if (double.TryParse(claim.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double doubleValue))
                     return doubleValue;
             }
 
             if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
             {
-                if (int.TryParse(claim.Value, out int intValue))
+                if (int.TryParse(claim.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out int intValue))
                     return intValue;
             }
 

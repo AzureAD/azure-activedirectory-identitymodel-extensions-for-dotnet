@@ -352,16 +352,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         break;
 
                     case ClaimValueTypes.Double:
-                        jsonValue = double.Parse(claim.Value);
+                        jsonValue = double.Parse(claim.Value, CultureInfo.InvariantCulture);
                         break;
 
                     case ClaimValueTypes.Integer:
                     case ClaimValueTypes.Integer32:
-                        jsonValue = int.Parse(claim.Value);
+                        jsonValue = int.Parse(claim.Value, CultureInfo.InvariantCulture);
                         break;
 
                     case ClaimValueTypes.Integer64:
-                        jsonValue = long.Parse(claim.Value);
+                        jsonValue = long.Parse(claim.Value, CultureInfo.InvariantCulture);
                         break;
 
                     case ClaimValueTypes.DateTime:
