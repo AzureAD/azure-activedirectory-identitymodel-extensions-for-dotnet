@@ -27,6 +27,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -74,5 +75,22 @@ namespace Microsoft.IdentityModel.Tokens
             : base(info, context)
         {
         }
+
+#if NETSTANDARD2_0
+        /// <summary>
+        /// When overridden in a derived class, sets the System.Runtime.Serialization.SerializationInfo
+        /// with information about the exception.
+        /// </summary>
+        /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+        /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="info"/> is null.</exception>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null)
+                throw LogHelper.LogArgumentNullException(nameof(info));
+
+            base.GetObjectData(info, context);
+        }
+#endif
     }
 }
