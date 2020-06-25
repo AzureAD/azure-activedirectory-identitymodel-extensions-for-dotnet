@@ -110,6 +110,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public bool AcceptUnsignedHeaders { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the claims to validate if present.
+        /// </summary>
+        /// <remarks>
+        /// Validation will only occur if <see cref="ValidatePresentClaims"/> is set to <c>true</c>.
+        /// </remarks>
+        public IEnumerable<string> ClaimsToValidateWhenPresent { get; set; } = new List<string>
+        {
+            SignedHttpRequestClaimTypes.M,
+            SignedHttpRequestClaimTypes.P
+        };
+
+        /// <summary>
         /// Gets or sets a collection of <see cref="SecurityKey"/> used for the 'cnf' claim decryption.
         /// </summary>
         public IEnumerable<SecurityKey> CnfDecryptionKeys { get; set; }
@@ -216,5 +228,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateB { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether claims in <see cref="ClaimsToValidateWhenPresent"/> should be validated if present.
+        /// </summary>
+        /// <remarks>
+        /// Allows for validation of a claim if present, even if the validation option for the claim is set to <c>false</c>.
+        /// </remarks>
+        public bool ValidatePresentClaims { get; set; } = false;
     }
 }
