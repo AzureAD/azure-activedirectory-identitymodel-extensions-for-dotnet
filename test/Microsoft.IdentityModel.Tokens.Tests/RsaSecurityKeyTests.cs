@@ -165,31 +165,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(RsaSecurityKey key, string alg, bool expectedResult)
-        {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
-       }
-
-        public static TheoryData<RsaSecurityKey, string, bool> IsSupportedAlgDataSet
-        {
-            get
-            {
-                var dataset = new TheoryData<RsaSecurityKey, string, bool>();
-#if NET452
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.RsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048, SecurityAlgorithms.EcdsaSha256, false);
-#endif
-                dataset.Add(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, true);
-                RsaSecurityKey testKey = new RsaSecurityKey(KeyingMaterial.RsaParameters1);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.EcdsaSha256 });
-                dataset.Add(testKey, SecurityAlgorithms.EcdsaSha256, true);
-                return dataset;
-            }
-        }
-
         [Fact]
         public void CanComputeJwkThumbprint()
         {

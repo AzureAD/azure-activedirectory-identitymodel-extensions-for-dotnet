@@ -35,7 +35,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class SecurityKeyTests
     {
-
         [Fact]
         public void ComputeJwkThumbprint()
         {
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         }
 
-        [Theory, MemberData(nameof(ConversionKeyTheoryData))]
+        [Theory, MemberData(nameof(CompareJwkThumbprintsTestCases))]
         public void CompareJwkThumbprints(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompareJwkThumbprints", theoryData);
@@ -74,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JsonWebKeyConverterTheoryData> ConversionKeyTheoryData
+        public static TheoryData<JsonWebKeyConverterTheoryData> CompareJwkThumbprintsTestCases
         {
             get
             {
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateInternalIdsTheoryData))]
+        [Theory, MemberData(nameof(CreateInternalIdsTestCases))]
         public void CreateInternalIds(SecurityKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateInternalIds", theoryData);
@@ -154,14 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
-        public void CanComputeJwkThumbprint()
-        {
-            Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
-        }
-
-
-        public static TheoryData<SecurityKeyTheoryData> CreateInternalIdsTheoryData
+        public static TheoryData<SecurityKeyTheoryData> CreateInternalIdsTestCases
         {
             get
             {
@@ -237,6 +229,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
                 };
             }
+        }
+
+        [Fact]
+        public void CanComputeJwkThumbprint()
+        {
+            Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
         }
 
         public class SecurityKeyTheoryData : TheoryDataBase

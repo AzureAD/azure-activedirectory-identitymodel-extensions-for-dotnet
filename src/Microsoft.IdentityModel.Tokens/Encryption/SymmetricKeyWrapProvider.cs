@@ -152,14 +152,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             byte[] keyBytes = null;
 
-            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
+            if (key is SymmetricSecurityKey symmetricSecurityKey)
                 keyBytes = symmetricSecurityKey.Key;
-            else
+            else if (key is JsonWebKey jsonWebKey)
             {
-                JsonWebKey jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+                if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
+                    keyBytes = (securityKey as SymmetricSecurityKey).Key;
             }
 
             if (keyBytes == null)
@@ -197,22 +195,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal))
-            {
-                if (key is SymmetricSecurityKey)
-                    return true;
-
-                if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return true;
-            }
-
-            return false;
+            return SupportedAlgorithms.IsSupportedSymmetricKeyWrap(algorithm, key);
         }
 
         /// <summary>
@@ -343,18 +326,18 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ValidateKeySize(byte[] key, string algorithm)
         {
-            if (SecurityAlgorithms.Aes128KW.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes128KW.Equals(algorithm, StringComparison.Ordinal) || SecurityAlgorithms.Aes128KeyWrap.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.Length != 16)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, algorithm, 128, Key.KeyId, key.Length << 3)));
 
                 return;
             }
 
-            if (SecurityAlgorithms.Aes256KW.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes256KW.Equals(algorithm, StringComparison.Ordinal) || (SecurityAlgorithms.Aes256KeyWrap.Equals(algorithm, StringComparison.Ordinal)))
             {
                 if (key.Length != 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, algorithm, 256, Key.KeyId, key.Length << 3)));
 
                 return;
             }

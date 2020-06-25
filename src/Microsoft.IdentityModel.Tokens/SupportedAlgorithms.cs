@@ -58,6 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.Sha512Digest
         };
 
+        // doubles as RsaKeyWrapAlgorithms
         internal static readonly ICollection<string> RsaEncryptionAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.RsaOAEP,
@@ -95,7 +96,9 @@ namespace Microsoft.IdentityModel.Tokens
         internal static readonly ICollection<string> SymmetricKeyWrapAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.Aes128KW,
-            SecurityAlgorithms.Aes256KW
+            SecurityAlgorithms.Aes256KW,
+            SecurityAlgorithms.Aes128KeyWrap,
+            SecurityAlgorithms.Aes256KeyWrap,
         };
 
         internal static readonly ICollection<string> SymmetricSigningAlgorithms = new Collection<string>
@@ -181,7 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             return HashAlgorithms.Contains(algorithm);
         }
 
-        internal static bool IsSupportedKeyWrapAlgorithm(string algorithm, SecurityKey key)
+        internal static bool IsSupportedRsaKeyWrap(string algorithm, SecurityKey key)
         {
             if (key == null)
                 return false;
@@ -189,24 +192,27 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (key.KeySize < 2048)
+            if (!RsaEncryptionAlgorithms.Contains(algorithm))
                 return false;
 
-            if (   algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
-            {
-                if (key is RsaSecurityKey)
-                    return true;
-
-                if (key is X509SecurityKey)
-                    return true;
-
-                if (key is JsonWebKey jsonWebKey && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA)
-                    return true;
-            }
+            if (key is RsaSecurityKey || key is X509SecurityKey || (key is JsonWebKey rsaJsonWebKey && rsaJsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA))
+                return key.KeySize >= 2048;
 
             return false;
+        }
+
+        internal static bool IsSupportedSymmetricKeyWrap(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (!SymmetricKeyWrapAlgorithms.Contains(algorithm))
+                return false;
+
+            return (key is SymmetricSecurityKey || (key is JsonWebKey jsonWebKey && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet));
         }
 
         internal static bool IsSupportedRsaAlgorithm(string algorithm, SecurityKey key)

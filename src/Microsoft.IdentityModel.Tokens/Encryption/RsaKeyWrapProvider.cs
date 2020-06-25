@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            return SupportedAlgorithms.IsSupportedKeyWrapAlgorithm(algorithm, key);
+            return SupportedAlgorithms.IsSupportedRsaKeyWrap(algorithm, key);
         }
 
         /// <summary>
