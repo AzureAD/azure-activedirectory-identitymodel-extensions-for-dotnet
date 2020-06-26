@@ -50,6 +50,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var jwt = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
                 var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out SecurityToken _);
                 var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters);
+
+                if (tokenValidationResult.Exception != null && tokenValidationResult.IsValid)
+                        context.Diffs.Add("tokenValidationResult.IsValid, tokenValidationResult.Exception != null");
+
                 if (!tokenValidationResult.IsValid)
                 {
                     numberOfErrors++;
