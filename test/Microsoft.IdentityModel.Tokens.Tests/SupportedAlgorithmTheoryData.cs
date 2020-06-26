@@ -48,7 +48,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static void AddTestCase(string algorithm, SecurityKey securityKey, bool isSupportedAlgorithm, string testId, TheoryData<SupportedAlgorithmTheoryData> theoryData, ExpectedException expectedException = null)
         {
-
             theoryData.Add(new SupportedAlgorithmTheoryData
             {
                 Algorithm = algorithm,
