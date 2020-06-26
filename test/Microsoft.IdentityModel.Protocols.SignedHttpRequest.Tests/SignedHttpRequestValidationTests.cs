@@ -1390,7 +1390,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (result.Exception != null)
+                {
+                    if (result.IsValid)
+                        context.AddDiff("result.IsValid, result.Exception != null");
+
                     throw result.Exception;
+                }
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }

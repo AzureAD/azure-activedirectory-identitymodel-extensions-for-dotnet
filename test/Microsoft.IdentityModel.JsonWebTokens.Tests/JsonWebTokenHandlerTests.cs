@@ -1844,7 +1844,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handler = new JsonWebTokenHandler();
                 var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
                 if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
                     throw validationResult.Exception;
+                }
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -2356,7 +2361,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var validationResult = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters);
                 var validatedToken = validationResult.SecurityToken as JsonWebToken;
                 if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
                     throw validationResult.Exception;
+                }
 
                 if (validationResult.IsValid)
                 {
