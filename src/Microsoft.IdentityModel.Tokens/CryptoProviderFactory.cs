@@ -113,8 +113,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="algorithm">the algorithm to use.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">thrown if If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assingable from <see cref="KeyWrapProvider"/>.</exception>
+        /// <exception cref="ArgumentException">thrown if <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="KeyWrapProvider"/>.</exception>
         /// <remarks>
         /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
         /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="AuthenticatedEncryptionProvider"/>.
@@ -152,8 +152,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="algorithm">the algorithm to use.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="NotSupportedException">thrown if If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type not assingable from <see cref="KeyWrapProvider"/>.</exception>
+        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type not assignable from <see cref="KeyWrapProvider"/>.</exception>
         /// <remarks>
         /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
         /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="KeyWrapProvider"/>.
@@ -207,9 +207,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException">thrown if <see cref="SecurityKey.KeySize"/> is too small.</exception>
-        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assingable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assignable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
         /// <exception cref="NotSupportedException">thrown if the key / algorithm is not supported.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assingable from <see cref="SignatureProvider"/>.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="SignatureProvider"/>.</exception>
         /// <remarks>
         /// <para>AsymmetricSignatureProviders require access to a PrivateKey for Signing.</para>
         /// <para>When finished with the <see cref="SignatureProvider"/> call <see cref="ReleaseSignatureProvider(SignatureProvider)"/>.</para>
@@ -240,9 +240,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException">thrown if <see cref="SecurityKey.KeySize"/> is too small.</exception>
-        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assingable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assignable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
         /// <exception cref="NotSupportedException">thrown if the key / algorithm is not supported.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assingable from <see cref="SignatureProvider"/>.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="SignatureProvider"/>.</exception>
         /// <remarks>When finished with the <see cref="SignatureProvider"/> call <see cref="ReleaseSignatureProvider(SignatureProvider)"/>.
         /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
         /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="SignatureProvider"/>.
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="algorithm">the name of the hash algorithm to create.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assingable from <see cref="HashAlgorithm"/>.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="HashAlgorithm"/>.</exception>
         /// <exception cref="NotSupportedException">thrown if <paramref name="algorithm"/> is not supported.</exception>
         /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.
         /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="algorithm">the name of the hash algorithm to create.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assingable from <see cref="HashAlgorithm"/>.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="HashAlgorithm"/>.</exception>
         /// <exception cref="NotSupportedException">thrown if <paramref name="algorithm"/> is not supported.</exception>
         /// <remarks>When finished with the <see cref="HashAlgorithm"/> call <see cref="ReleaseHashAlgorithm(HashAlgorithm)"/>.
         /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
