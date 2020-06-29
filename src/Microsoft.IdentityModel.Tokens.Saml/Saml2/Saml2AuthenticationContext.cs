@@ -119,10 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             get { return _declarationReference; }
             set
             {
-                if (value == null)
-                    throw LogArgumentNullException(nameof(value));
-
-                if (!value.IsAbsoluteUri)
+                if (value != null && !value.IsAbsoluteUri)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(DeclarationReference), value)));
 
                 _declarationReference = value;

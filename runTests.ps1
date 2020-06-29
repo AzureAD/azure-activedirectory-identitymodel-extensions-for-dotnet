@@ -52,8 +52,8 @@ foreach ($testProject in $testProjects)
         Write-Host ">>> Set-Location $root\test\$name"
         pushd
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -wait -passthru -NoNewWindow $dotnetexe 'test $name.csproj'--no-build --no-restore -nodereuse:false -v d -c $buildType"
-        $p = Start-Process -wait -passthru -NoNewWindow $dotnetexe "test $name.csproj --no-build --no-restore -nodereuse:false -v d -c $buildType"
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
+        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
 
         if($p.ExitCode -ne 0)
         {
