@@ -61,8 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         [Fact]
         public void Saml2AuthenticationContext_CtorNullDeclaration_ArgumentNullException()
         {
-            var classRef = new Uri("http://resource", UriKind.Absolute);
-            Assert.Throws<ArgumentNullException>(() => new Saml2AuthenticationContext(classRef, null));
+            new Saml2AuthenticationContext(new Uri("http://resource", UriKind.Absolute), null);
         }
 
         [Fact]
@@ -117,10 +116,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
 
         [Fact]
-        public void Saml2AuthenticationContext_NullDeclarationReference_ArgumentNullException()
+        public void Saml2AuthenticationContext_NullDeclarationReference()
         {
-            var authContext = new Saml2AuthenticationContext();
-            Assert.Throws<ArgumentNullException>(() => authContext.DeclarationReference = null);
+            new Saml2AuthenticationContext
+            {
+                DeclarationReference = null
+            };
         }
     }
 }
