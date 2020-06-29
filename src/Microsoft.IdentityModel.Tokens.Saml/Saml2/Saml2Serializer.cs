@@ -1584,6 +1584,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             // <Signature> 0-1
             if (null != signatureWriter)
                 signatureWriter.WriteSignature();
+            else if(null != assertion.Signature)
+                DSigSerializer.WriteSignature(writer, assertion.Signature);
 
             // <Subject> 0-1
             if (null != assertion.Subject)
