@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets the canonicalized (ExclusiveC14n) representation without comments.
         /// </summary>
-        internal string CanonicalString
+        public string CanonicalString
         {
             get
             {
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 return _canonicalString;
             }
-            set
+            internal set
             {
                 _canonicalString = string.IsNullOrEmpty(value) ? throw LogArgumentNullException(nameof(value)) : value;
             }
