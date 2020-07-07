@@ -5,7 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Globalization is not used")]
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Breaking change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Tokens.Saml2.Saml2Constants.AcceptedDateTimeFormats")]
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Breaking change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Tokens.Saml.SamlConstants.AcceptedDateTimeFormats")]
 [assembly: SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "Breaking change", Scope = "type", Target = "~T:Microsoft.IdentityModel.Tokens.Saml2.Saml2Constants")]

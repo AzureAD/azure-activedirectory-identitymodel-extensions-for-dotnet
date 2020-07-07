@@ -5,7 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Globalization is not used in this project")]
 [assembly: SuppressMessage("Design", "CA1055:Uri return values should not be strings", Justification = "Previously released as returning a string", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.BuildRedirectUrl~System.String")]
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Previously released as returning an array", Scope = "member", Target = "~P:Microsoft.IdentityModel.Protocols.HttpRequestData.Body")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Previously released read/write", Scope = "member", Target = "~P:Microsoft.IdentityModel.Protocols.HttpRequestData.Headers")]
