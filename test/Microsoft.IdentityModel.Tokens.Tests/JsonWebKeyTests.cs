@@ -145,35 +145,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)
-        {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
-        }
-
-        public static TheoryData<JsonWebKey, string, bool> IsSupportedAlgDataSet
-        {
-            get
-            {
-                var dataset = new TheoryData<JsonWebKey, string, bool>();
-                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.RsaSha256Signature, false);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa_2048, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa_2048, SecurityAlgorithms.EcdsaSha256, false);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
-                JsonWebKey testKey = new JsonWebKey
-                {
-                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
-                    K = KeyingMaterial.DefaultSymmetricKeyEncoded_256
-                };
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, true);
-                return dataset;
-            }
-        }
-
         // Tests to make sure conditional property serialization for JsonWebKeys is working properly.
         [Fact]
         public void ConditionalPropertySerialization()

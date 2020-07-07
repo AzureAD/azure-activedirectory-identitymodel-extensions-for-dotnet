@@ -38,14 +38,22 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     public class GetSetContext
     {
-        private List<string> _errors = new List<string>();
-
         private List<KeyValuePair<string, List<object>>> _propertyNamesAndSetGetValues;
 
-        public List<string> Errors { get { return _errors; } }
+        /// <summary>
+        /// Any errors will be put here.
+        /// </summary>
+        public List<string> Errors { get; } = new List<string>();
 
+        /// <summary>
+        /// The 'TKey' in <see cref="KeyValuePair{TKey, TValue}"/> is the name of the Method to call.
+        /// The first 'TValue' is the default value, the others will be used to perform a 'set / get' and then check values are equal. This catches the error where an assignment is made to the wrong private variable.
+        /// </summary>
         public List<KeyValuePair<string, List<object>>> PropertyNamesAndSetGetValue { get { return _propertyNamesAndSetGetValues; } set { _propertyNamesAndSetGetValues = value; } }
 
+        /// <summary>
+        /// This is an instance of the object that is to be tested.
+        /// </summary>
         public object Object { get; set; }
     }
 

@@ -71,30 +71,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // there are no defaults.
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(ECDsaSecurityKey key, string alg, bool expectedResult)
-        {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
-        }
-
-        public static TheoryData<ECDsaSecurityKey, string, bool> IsSupportedAlgDataSet
-        {
-            get
-            {
-                var dataset = new TheoryData<ECDsaSecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, true);
-                dataset.Add(KeyingMaterial.Ecdsa256Key_Public, SecurityAlgorithms.EcdsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.Ecdsa384Key, SecurityAlgorithms.Aes128Encryption, false);
-                dataset.Add(KeyingMaterial.Ecdsa521Key, SecurityAlgorithms.EcdsaSha384, true);
-                ECDsaSecurityKey testKey = new ECDsaSecurityKey(KeyingMaterial.Ecdsa256Key.ECDsa);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSsaPssSha256Signature, true);
-                return dataset;
-
-            }
-        }
-
         [Fact]
         public void CanComputeJwkThumbprint()
         {

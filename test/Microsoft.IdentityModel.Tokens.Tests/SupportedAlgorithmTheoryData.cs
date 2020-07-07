@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -29,49 +29,33 @@ using System;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
-using EE = Microsoft.IdentityModel.TestUtils.ExpectedException;
-using KEY = Microsoft.IdentityModel.TestUtils.KeyingMaterial;
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class SymmetricSecurityKeyTests
+    public class SupportedAlgorithmTheoryData : TheoryDataBase
     {
+        public string Algorithm { get; set; }
 
-        [Theory, MemberData(nameof(ConstructorDataSet))]
-        public void Constructor(byte[] key, EE ee)
+        public bool IsSupportedAlgorithm { get; set; } = true;
+
+        public SecurityKey SecurityKey { get; set; }
+
+        public static void AddTestCase(string algorithm, SecurityKey securityKey, string testId, TheoryData<SupportedAlgorithmTheoryData> theoryData, ExpectedException expectedException = null)
         {
-            try
-            {
-                var symmetricSecurityKey = new SymmetricSecurityKey(key);
-                ee.ProcessNoException();
-            }
-            catch (Exception exception)
-            {
-                ee.ProcessException(exception);
-            }
+            AddTestCase(algorithm, securityKey, true, testId, theoryData, expectedException);
         }
 
-        public static TheoryData<byte[], EE> ConstructorDataSet
+        public static void AddTestCase(string algorithm, SecurityKey securityKey, bool isSupportedAlgorithm, string testId, TheoryData<SupportedAlgorithmTheoryData> theoryData, ExpectedException expectedException = null)
         {
-            get
+            theoryData.Add(new SupportedAlgorithmTheoryData
             {
-                var dataset = new TheoryData<byte[], EE>();
-                dataset.Add(KEY.DefaultSymmetricKeyBytes_256, EE.NoExceptionExpected);
-                dataset.Add(null, EE.ArgumentNullException());
-                dataset.Add(new byte[0], EE.ArgumentException());
-                return dataset;
-            }
-        }
-
-        [Fact]
-        public void CanComputeJwkThumbprint()
-        {
-            Assert.True(KEY.DefaultSymmetricSecurityKey_256.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on a SymmetricSecurityKey.");
+                Algorithm = algorithm,
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+                IsSupportedAlgorithm = isSupportedAlgorithm,
+                SecurityKey = securityKey,
+                TestId = testId
+            });
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

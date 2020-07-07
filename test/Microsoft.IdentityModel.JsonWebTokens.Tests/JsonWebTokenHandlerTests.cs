@@ -246,7 +246,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-
         public static TheoryData<CreateTokenTheoryData> CreateJWETheoryData
         {
             get
@@ -1462,10 +1461,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEDirectEncryptionTheoryData))]
-        public void RoundTripEncryptExistingJWSUsingDirectEncryption(CreateTokenTheoryData theoryData)
+        [Theory, MemberData(nameof(RoundTripJWEDirectTestCases))]
+        public void RoundTripJWEInnerJWSDirect(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripEncryptExistingJWSUsingDirectEncryption", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEInnerJWSDirect", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var innerJwt = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
             var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJwt, theoryData.EncryptingCredentials);
@@ -1494,10 +1493,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEDirectEncryptionTheoryData))]
-        public void RoundTripJWEDirectEncryption(CreateTokenTheoryData theoryData)
+        [Theory, MemberData(nameof(RoundTripJWEDirectTestCases))]
+        public void RoundTripJWEDirect(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEDirectEncryption", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEDirect", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
@@ -1531,7 +1530,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<CreateTokenTheoryData> RoundTripJWEDirectEncryptionTheoryData
+        public static TheoryData<CreateTokenTheoryData> RoundTripJWEDirectTestCases
         {
             get
             {
@@ -1578,15 +1577,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEKeyWrappingTheoryData))]
-        public void RoundTripEncryptExistingJWSUsingKeyWrapping(CreateTokenTheoryData theoryData)
+        [Theory, MemberData(nameof(RoundTripJWEKeyWrapTestCases))]
+        public void RoundTripJWEInnerJWSKeyWrap(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripEncryptExistingJWSUsingKeyWrapping", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEInnerJWSKeyWrap", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var innerJws = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
-            var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJws, theoryData.EncryptingCredentials);
             try
             {
+                var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJws, theoryData.EncryptingCredentials);
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
                 if (tokenValidationResult.Exception != null)
@@ -1610,16 +1609,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEKeyWrappingTheoryData))]
-        public void RoundTripJWEKeyWrapping(CreateTokenTheoryData theoryData)
+        [Theory, MemberData(nameof(RoundTripJWEKeyWrapTestCases))]
+        public void RoundTripJWEKeyWrap(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEKeyWrapping", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEKeyWrap", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
-            var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
             try
             {
+                var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
                 IdentityComparer.AreEqual(tokenValidationResult.IsValid, theoryData.IsValid, context);
                 if (tokenValidationResult.Exception != null)
@@ -1647,109 +1646,119 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<CreateTokenTheoryData> RoundTripJWEKeyWrappingTheoryData
+        public static TheoryData<CreateTokenTheoryData> RoundTripJWEKeyWrapTestCases
         {
             get
             {
                 return new TheoryData<CreateTokenTheoryData>
                 {
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
                         First = true,
-                        TestId = "RsaPKCS1-Aes128CbcHmacSha256",
+                        TestId = "RsaPKCS1_Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaPKCS1-Aes192CbcHmacSha384",
+                        TestId = "RsaPKCS1_Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaPKCS1-Aes256CbcHmacSha512",
+                        TestId = "RsaPKCS1_Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOAEP-Aes128CbcHmacSha256",
+                        TestId = "RsaOAEP_Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOAEP-Aes192CbcHmacSha384",
+                        TestId = "RsaOAEP_Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOAEP-Aes256CbcHmacSha512",
+                        TestId = "RsaOAEP_Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOaepKeyWrap-Aes128CbcHmacSha256",
+                        TestId = "RsaOaepKeyWrap_Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
+                        TestId = "RsaOaepKeyWrap_Aes192CbcHmacSha384",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "RsaOaepKeyWrap-Aes256CbcHmacSha512",
+                        TestId = "RsaOaepKeyWrap_Aes256CbcHmacSha512",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "SymmetricSecurityKey2_128-Aes128KW-Aes128CbcHmacSha256",
+                        TestId = "Aes128KeyWrap_Aes128CbcHmacSha256",
                         ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
-                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256)
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes128KeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-                    new CreateTokenTheoryData()
+                    new CreateTokenTheoryData
                     {
-                        TestId = "SymmetricEncryptionKey256-Aes256KW-Aes128CbcHmacSha256",
+                        TestId = "Aes256KeyWrap_Aes128CbcHmacSha256",
+                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.SymmetricSecurityKey2_128, Default.SymmetricSigningKey256),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes256KeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256),
+                        ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10662:")
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "Aes128KW_Aes128CbcHmacSha256",
+                        ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256),
+                        ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10662:")
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "Aes256KW_Aes128CbcHmacSha256",
                         ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters,
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-                    new CreateTokenTheoryData()
-                    {
-                        TestId = "RsaOaepKeyWrap-Aes192CbcHmacSha384",
-                        ValidationParameters = Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
-                        Payload = Default.PayloadString,
-                        SigningCredentials = Default.SymmetricSigningCredentials,
-                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes192CbcHmacSha384)
-                    }
                 };
             }
         }
@@ -1835,7 +1844,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handler = new JsonWebTokenHandler();
                 var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
                 if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
                     throw validationResult.Exception;
+                }
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -2347,7 +2361,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var validationResult = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters);
                 var validatedToken = validationResult.SecurityToken as JsonWebToken;
                 if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
                     throw validationResult.Exception;
+                }
 
                 if (validationResult.IsValid)
                 {

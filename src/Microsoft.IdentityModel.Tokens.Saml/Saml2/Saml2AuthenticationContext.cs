@@ -53,7 +53,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of Saml2AuthenticationContext.
         /// </summary>
         public Saml2AuthenticationContext()
-            : this(null, null)
         {
         }
 
@@ -62,8 +61,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="classReference">The class reference of the authentication context.</param>
         public Saml2AuthenticationContext(Uri classReference)
-            : this(classReference, null)
         {
+            ClassReference = classReference;
         }
 
         /// <summary>
@@ -75,7 +74,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             ClassReference = classReference;
             DeclarationReference = declarationReference;
-            AuthenticatingAuthorities = new List<Uri>();
         }
 
         /// <summary>
@@ -87,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         public ICollection<Uri> AuthenticatingAuthorities
         {
             get;
-        }
+        } = new List<Uri>();
 
         /// <summary>
         /// Gets or sets a URI reference identifying an authentication context class that 
@@ -105,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(value), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(ClassReference), value)));
 
                 _classReference = value;
             }
@@ -122,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             set
             {
                 if (value != null && !value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(value), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(DeclarationReference), value)));
 
                 _declarationReference = value;
             }
