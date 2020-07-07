@@ -42,6 +42,11 @@ namespace Microsoft.IdentityModel.Tokens
         public string Audience { get; set; }
 
         /// <summary>
+        /// Gets or sets the value of the 'audience' claim.
+        /// </summary>
+        public string[] Audiences { get; set; }
+
+        /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.
         /// </summary>
         public string CompressionAlgorithm { get; set; }

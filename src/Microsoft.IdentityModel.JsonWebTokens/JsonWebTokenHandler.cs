@@ -256,6 +256,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
             }
 
+            if (tokenDescriptor.Audience != null)
+            {
+                if (tokenDescriptor.Audiences != null)
+                {
+                    payload[JwtRegisteredClaimNames.Aud] = new JArray(tokenDescriptor.Audience, tokenDescriptor.Audiences);
+                }
+            }
+
             if (tokenDescriptor.Expires.HasValue)
             {
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Exp))
