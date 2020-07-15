@@ -347,7 +347,7 @@ namespace Microsoft.IdentityModel.Logging
             if (arg == null)
                 return string.Empty;
 
-            if (arg is Exception ex && ex.GetType().FullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal))
+            if (arg is Exception ex && IsCustomException(ex))
                 return ex.ToString();
 
             return arg.GetType().ToString();
