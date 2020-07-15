@@ -88,6 +88,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     new AudienceValidationTheoryData
                     {
+                        Audiences = new List<string>{ },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
+                        TestId = "AudiencesEmptyList",
+                        TokenValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"}
+                    },
+                    new AudienceValidationTheoryData
+                    {
+                        Audiences = new List<string>{ },
+                        TestId = "ValidateAudienceFalseAudiencesEmptyList",
+                        TokenValidationParameters = new TokenValidationParameters{ ValidateAudience = false }
+                    },
+                    new AudienceValidationTheoryData
+                    {
                         Audiences = null,
                         TestId = "ValidateAudienceFalseAudiencesNull",
                         TokenValidationParameters = new TokenValidationParameters{ ValidateAudience = false }
