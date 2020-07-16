@@ -162,28 +162,22 @@ namespace Microsoft.IdentityModel.Tokens
             if (validAudience.Length == tokenAudience.Length)
             {
                 if (string.Equals(validAudience, tokenAudience, StringComparison.Ordinal))
-                {
                     return true;
-                }
             }
             else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
-            {
                 return true;
-            }
 
             return false;
         }
 
         private static bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)
         {
-            int length;
+            int length = -1;
 
             if (validAudience.Length == tokenAudience.Length + 1 && validAudience.EndsWith("/", StringComparison.InvariantCulture))
                 length = validAudience.Length - 1;
             else if (tokenAudience.Length == validAudience.Length + 1 && tokenAudience.EndsWith("/", StringComparison.InvariantCulture))
                 length = tokenAudience.Length - 1;
-            else
-                length = -1;
 
             // the length of the audiences is different by more than 1 and neither ends in a "/"
             if (length == -1)
