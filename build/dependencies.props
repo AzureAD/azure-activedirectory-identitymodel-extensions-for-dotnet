@@ -3,6 +3,7 @@
     <MicrosoftAzureKeyVaultVersion>3.0.5</MicrosoftAzureKeyVaultVersion>
     <MicrosoftAzureServicesAppAuthenticationVersion>1.0.3</MicrosoftAzureServicesAppAuthenticationVersion>
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
+    <MicrosoftExtensionsVersion>3.1.2</MicrosoftExtensionsVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <SystemCollectionsSpecializedVersion>4.3.0</SystemCollectionsSpecializedVersion>
@@ -16,5 +17,6 @@
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
+    <WCFVersion>4.8.0-preview.20255.4</WCFVersion>
   </PropertyGroup>
 </Project>

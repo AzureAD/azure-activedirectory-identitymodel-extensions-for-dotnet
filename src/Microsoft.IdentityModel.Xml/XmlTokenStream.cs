@@ -39,8 +39,8 @@ namespace Microsoft.IdentityModel.Xml
     public class XmlTokenStream
     {
         private List<XmlToken> _xmlTokens = new List<XmlToken>();
-        private string _excludedElement;
-        private string _excludedElementNamespace;
+        private string _excludeElement;
+        private string _excludeNamespace;
 
         /// <summary>
         /// Initializes a <see cref="XmlTokenStream"/>
@@ -105,8 +105,8 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(element))
                 throw LogArgumentNullException(nameof(element));
 
-            _excludedElement = element;
-            _excludedElementNamespace = @namespace;
+            _excludeElement = element;
+            _excludeNamespace = @namespace;
         }
 
         /// <summary>
@@ -116,11 +116,23 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
         public void WriteTo(XmlWriter writer)
         {
+            WriteTo(writer, _excludeElement, _excludeNamespace);
+        }
+
+        /// <summary>
+        /// Writes the XML nodes into the <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">the <see cref="XmlWriter"/> to use.</param>
+        /// <param name="excludeElement">element to exclude.</param>
+        /// <param name="excludeNamespace">namespace of element to exclude.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        internal void WriteTo(XmlWriter writer, string excludeElement, string excludeNamespace)
+        {
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
             var streamWriter = new XmlTokenStreamWriter(this);
-            streamWriter.WriteTo(writer, _excludedElement, _excludedElementNamespace);
+            streamWriter.WriteTo(writer, excludeElement, excludeNamespace);
         }
 
         internal ReadOnlyCollection<XmlToken> XmlTokens => _xmlTokens.AsReadOnly();
