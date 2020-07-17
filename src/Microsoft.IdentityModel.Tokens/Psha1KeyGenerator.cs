@@ -38,10 +38,6 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
 
-        //
-        // 1/(2^32) keys will be weak.  20 random keys will never happen by chance without the RNG being messed up.
-        //
-        const int _maxKeyIterations = 20;
         static int s_minKeySizeInBits = 16 * 8; // 16 Bytes - 128 bits.
         static int s_maxKeySizeInBits = (16 * 1024) * 8; // 16 K
 
@@ -63,13 +59,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Do a sanity check here. We don't want to allow invalid keys or keys that are too large.
             if ((keySizeInBits < s_minKeySizeInBits) || (keySizeInBits > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant("Invalid key size. Key size requested: '{0}', must be larger than '{1}' and smaller than '{2}'.", keySizeInBits, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(keySizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10852, keySizeInBits, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(keySizeInBits)));
 
             if ((issuerEntropy.Length * 8 < s_minKeySizeInBits) || (issuerEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant("Invalid issuerEntropy size. issuerEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.", issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX10853, issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy))));
 
             if ((requestorEntropy.Length * 8 < s_minKeySizeInBits) || (requestorEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant("Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.", requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX10854, requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy))));
 
             int keySizeInBytes = ValidateKeySizeInBytes(keySizeInBits);
 
@@ -170,10 +166,10 @@ namespace Microsoft.IdentityModel.Tokens
             int keySizeInBytes = keySizeInBits / 8;
 
             if (keySizeInBits <= 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("keySizeInBits is less than 0"));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(keySizeInBits), LogHelper.FormatInvariant(LogMessages.IDX10850, nameof(keySizeInBits), keySizeInBits)));
 
             if (keySizeInBytes * 8 != keySizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentException("keySizeInBits must be a multiple of 8"));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10851, nameof(keySizeInBits), keySizeInBits), nameof(keySizeInBits)));
 
             return keySizeInBytes;
         }
@@ -269,10 +265,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             int sizeInBytes = sizeInBits / 8;
             if (sizeInBits <= 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits), nameof(sizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits), LogHelper.FormatInvariant(LogMessages.IDX10850, nameof(sizeInBits), sizeInBits)));
 
             if (sizeInBytes * 8 != sizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentException("sizeInBits must be multiple of 8", nameof(sizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10851, nameof(sizeInBits), sizeInBits), nameof(sizeInBits)));
 
             byte[] data = new byte[sizeInBytes];
             GenerateRandomBytes(data);

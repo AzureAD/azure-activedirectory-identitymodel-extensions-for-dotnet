@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class WsTrustSerializer
     {
-        private readonly WsSecuritySerializer _wsSecuritySerializer = new WsSecuritySerializer();
+        //private readonly WsSecuritySerializer _wsSecuritySerializer = new WsSecuritySerializer();
         private readonly WsFedSerializer _wsFedSerializer = new WsFedSerializer();
         private readonly WsPolicySerializer _wsPolicySerializer = new WsPolicySerializer();
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;BinarySecret&gt;.</exception>
-        public BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static BinarySecret ReadBinarySecrect(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:BinarySecret Type="...">
             //      ...
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;Entropy&gt;.</exception>
-        public Entropy ReadEntropy(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static Entropy ReadEntropy(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:Entropy>
             //      <t:BinarySecret>
@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">Thrown if <paramref name="reader"/> is not positioned at &lt;Lifetime&gt;.</exception>
-        public Lifetime ReadLifetime(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static Lifetime ReadLifetime(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:Lifetime>
             //      <wsu:Created xmlns:wsu="...">2017-04-23T16:11:17.348Z</wsu:Created>
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             throw XmlUtil.LogReadException(LogMessages.IDX15101, reader.ReadOuterXml());
         }
 
-        private SecurityTokenReference ReadReference(XmlDictionaryReader reader, WsSerializationContext serializationContext, string elementName)
+        private static SecurityTokenReference ReadReference(XmlDictionaryReader reader, WsSerializationContext serializationContext, string elementName)
         {
             //  <wsse:SecurityTokenReference ...>
             //      ...
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             {
                 bool isEmptyElement = reader.IsEmptyElement;
                 reader.ReadStartElement();
-                SecurityTokenReference tokenReference = _wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext);
+                SecurityTokenReference tokenReference = WsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext);
 
                 if (!isEmptyElement)
                     reader.ReadEndElement();
@@ -601,7 +601,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedAttachedReference&gt;.</exception>
-        public SecurityTokenReference ReadRequestedAttachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static SecurityTokenReference ReadRequestedAttachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedAttachedReference>
             //      <wsse:SecurityTokenReference ...>
@@ -634,7 +634,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedProofToken&gt;.</exception>
-        public RequestedProofToken ReadRequestedProofToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static RequestedProofToken ReadRequestedProofToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedProofToken>
             //      <t:BinarySecret>
@@ -693,11 +693,16 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
 
                 ms.Seek(0, SeekOrigin.Begin);
-                XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
-                XmlDocument dom = new XmlDocument();
-                dom.PreserveWhitespace = true;
-                dom.Load(memoryReader);
-                return  dom.DocumentElement;
+                using (XmlDictionaryReader memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null))
+                {
+                    XmlDocument dom = new XmlDocument
+                    {
+                        PreserveWhitespace = true
+                    };
+
+                    dom.Load(memoryReader);
+                    return dom.DocumentElement;
+                }
             }
         }
 
@@ -711,7 +716,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedSecurityToken&gt;.</exception>
-        public RequestedSecurityToken ReadRequestedSecurityToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static RequestedSecurityToken ReadRequestedSecurityToken(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedSecurityToken>
             //      <SecurityToken>
@@ -751,7 +756,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestedUnattachedReference&gt;.</exception>
-        public SecurityTokenReference ReadRequestedUnattachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static SecurityTokenReference ReadRequestedUnattachedReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:RequestedUnattachedReference>
             //      <wsse:SecurityTokenReference ...>
@@ -852,7 +857,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="trustRequest"></param>
-        private void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
+        private static void ReadUnknownElement(XmlDictionaryReader reader, WsTrustRequest trustRequest)
         {
             bool isEmptyElement = reader.IsEmptyElement;
             var doc = new XmlDocument();
@@ -877,7 +882,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;UseKey&gt;.</exception>
-        public UseKey ReadUseKey(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public static UseKey ReadUseKey(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <t:UseKey Sig="...">
             //      SecurityTokenReference / SecurityToken
@@ -895,7 +900,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 UseKey useKey = null;
 
                 if (reader.IsStartElement() && reader.IsLocalName(WsSecurityElements.SecurityTokenReference))
-                    useKey = new UseKey(new SecurityTokenElement(_wsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext)));
+                    useKey = new UseKey(new SecurityTokenElement(WsSecuritySerializer.ReadSecurityTokenReference(reader, serializationContext)));
 
                 if (!string.IsNullOrEmpty(signatureId))
                     useKey.SignatureId = signatureId;
@@ -932,7 +937,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="binarySecret"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteBinarySecret(XmlDictionaryWriter writer, WsSerializationContext serializationContext, BinarySecret binarySecret)
+        public static void WriteBinarySecret(XmlDictionaryWriter writer, WsSerializationContext serializationContext, BinarySecret binarySecret)
         {
             //  <t:BinarySecret Type="...">
             //      ...
@@ -969,7 +974,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="claims"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteClaims(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Claims claims)
+        public static void WriteClaims(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Claims claims)
         {
             //  <t:Claims Dialect="...">
             //    ...
@@ -984,7 +989,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     writer.WriteAttributeString(WsTrustAttributes.Dialect, claims.Dialect);
 
                 foreach (ClaimType claimType in claims.ClaimTypes)
-                    _wsFedSerializer.WriteClaimType(writer, serializationContext, claimType);
+                    WsFedSerializer.WriteClaimType(writer, serializationContext, claimType);
 
                 writer.WriteEndElement();
             }
@@ -1008,7 +1013,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="entropy"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteEntropy(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Entropy entropy)
+        public static void WriteEntropy(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Entropy entropy)
         {
             //  <t:Entropy>
             //      <t:BinarySecret>
@@ -1046,7 +1051,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="lifetime"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteLifetime(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Lifetime lifetime)
+        public static void WriteLifetime(XmlDictionaryWriter writer, WsSerializationContext serializationContext, Lifetime lifetime)
         {
             //  <t:Lifetime>
             //      <wsu:Created xmlns:wsu="...">2017-04-23T16:11:17.348Z</wsu:Created>
@@ -1143,7 +1148,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="proofEncryption"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteProofEncryption(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement proofEncryption)
+        public static void WriteProofEncryption(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenElement proofEncryption)
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, proofEncryption, nameof(proofEncryption));
 
@@ -1225,19 +1230,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     writer.WriteElementString(serializationContext.TrustConstants.Prefix, WsTrustElements.ComputedKeyAlgorithm, serializationContext.TrustConstants.Namespace, trustRequest.ComputedKeyAlgorithm);
 
                 if (trustRequest.AppliesTo != null)
-                    _wsPolicySerializer.WriteAppliesTo(writer, serializationContext, trustRequest.AppliesTo);
+                    WsPolicySerializer.WriteAppliesTo(writer, serializationContext, trustRequest.AppliesTo);
 
                 if (trustRequest.OnBehalfOf != null)
                     WriteOnBehalfOf(writer, serializationContext, trustRequest.OnBehalfOf);
 
                 if (trustRequest.AdditionalContext != null)
-                    _wsFedSerializer.WriteAdditionalContext(writer, serializationContext, trustRequest.AdditionalContext);
+                    WsFedSerializer.WriteAdditionalContext(writer, serializationContext, trustRequest.AdditionalContext);
 
                 if (trustRequest.Claims != null)
                     WriteClaims(writer, serializationContext, trustRequest.Claims);
 
                 if (trustRequest.PolicyReference != null)
-                    _wsPolicySerializer.WritePolicyReference(writer, serializationContext, trustRequest.PolicyReference);
+                    WsPolicySerializer.WritePolicyReference(writer, serializationContext, trustRequest.PolicyReference);
 
                 if (trustRequest.ProofEncryption != null)
                     WriteProofEncryption(writer, serializationContext, trustRequest.ProofEncryption);
@@ -1318,7 +1323,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                 // <AppliesTo>
                 if (requestSecurityTokenResponse.AppliesTo != null)
-                    _wsPolicySerializer.WriteAppliesTo(writer, serializationContext, requestSecurityTokenResponse.AppliesTo);
+                    WsPolicySerializer.WriteAppliesTo(writer, serializationContext, requestSecurityTokenResponse.AppliesTo);
 
                 // <Entropy>
                 if (requestSecurityTokenResponse.Entropy != null)
@@ -1359,7 +1364,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityTokenReference"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteRequestedAttachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
+        public static void WriteRequestedAttachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             //  <t:RequestedAttachedReference>
             //      <SecurityTokenReference d3p1:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0" xmlns:d3p1=""http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd"" xmlns=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"">
@@ -1371,7 +1376,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             try
             {
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedAttachedReference, serializationContext.TrustConstants.Namespace);
-                _wsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, securityTokenReference);
+                WsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, securityTokenReference);
                 writer.WriteEndElement();
             }
             catch (Exception ex)
@@ -1394,7 +1399,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="requestedProofToken"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteRequestedProofToken(XmlDictionaryWriter writer, WsSerializationContext serializationContext, RequestedProofToken requestedProofToken)
+        public static void WriteRequestedProofToken(XmlDictionaryWriter writer, WsSerializationContext serializationContext, RequestedProofToken requestedProofToken)
         {
             //  <t:RequestedProofToken>
             //      <t:BinarySecret>
@@ -1494,7 +1499,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="securityTokenReference"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteRequestedUnattachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
+        public static void WriteRequestedUnattachedReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             //  <t:RequestedUnattachedReference>
             //    <SecurityTokenReference d3p1:TokenType=""http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0"" xmlns:d3p1=""http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd"" xmlns=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"">
@@ -1507,7 +1512,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             try
             {
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestedUnattachedReference, serializationContext.TrustConstants.Namespace);
-                _wsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, securityTokenReference);
+                WsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, securityTokenReference);
                 writer.WriteEndElement();
             }
             catch (Exception ex)
@@ -1576,7 +1581,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="useKey"/> is null.</exception>
         /// <exception cref="XmlWriteException">If an error occurs when writing the element.</exception>
-        public void WriteUseKey(XmlDictionaryWriter writer, WsSerializationContext serializationContext, UseKey useKey)
+        public static void WriteUseKey(XmlDictionaryWriter writer, WsSerializationContext serializationContext, UseKey useKey)
         {
             //  <t:UseKey Sig="...">
             //    SecurityToken OR SecurityTokenReference
@@ -1591,7 +1596,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     writer.WriteAttributeString(WsTrustAttributes.Sig, useKey.SignatureId);
 
                 if (useKey.SecurityTokenElement.SecurityTokenReference != null)
-                    _wsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, useKey.SecurityTokenElement.SecurityTokenReference);
+                    WsSecuritySerializer.WriteSecurityTokenReference(writer, serializationContext, useKey.SecurityTokenElement.SecurityTokenReference);
 
                 writer.WriteEndElement();
             }

@@ -32,21 +32,21 @@ using Microsoft.IdentityModel.Protocols;
 
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
-    public abstract class WsSecurityConstants<T> : WsSecurityConstants where T : new()
-    {
-        private static T _instance;
+    //public abstract class WsSecurityConstants<T> : WsSecurityConstants where T : new()
+    //{
+    //    private static T _instance;
 
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
+    //    public static T Instance
+    //    {
+    //        get
+    //        {
+    //            if (_instance == null)
+    //                _instance = new T();
 
-                return _instance;
-            }
-        }
-    }
+    //            return _instance;
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// Provides constants for WS-Security 1.0 and 1.1.
@@ -66,9 +66,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             }
         }
 
-        public static WsSecurity10Constants WsSecurity10 => WsSecurity10Constants.Instance;
+        public static WsSecurity10Constants WsSecurity10 => new WsSecurity10Constants();
 
-        public static WsSecurity11Constants WsSecurity11 => WsSecurity11Constants.Instance;
+        public static WsSecurity11Constants WsSecurity11 => new WsSecurity11Constants();
 
         public string FragmentBaseAddress { get; protected set; }
 
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Provides constants for WS-Security 1.0.
     /// </summary>
-    public class WsSecurity10Constants : WsSecurityConstants<WsSecurity10Constants>
+    public class WsSecurity10Constants : WsSecurityConstants
     {
         public WsSecurity10Constants()
         {
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Provides constants for WS-Security 1.1.
     /// </summary>
-    public class WsSecurity11Constants : WsSecurityConstants<WsSecurity11Constants>
+    public class WsSecurity11Constants : WsSecurityConstants
     {
         public WsSecurity11Constants()
         {

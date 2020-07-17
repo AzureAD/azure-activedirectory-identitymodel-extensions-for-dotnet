@@ -95,14 +95,14 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
             return new PolicyReference(uri, digest, digestAlgorithm);
         }
 
-        public void WriteAppliesTo(XmlDictionaryWriter writer, WsSerializationContext serializationContext, AppliesTo appliesTo)
+        public static void WriteAppliesTo(XmlDictionaryWriter writer, WsSerializationContext serializationContext, AppliesTo appliesTo)
         {
             //  if this clas becomes public, we will need to check parameters
             //  WsUtils.ValidateParamsForWritting(writer, serializationContext, appliesTo, nameof(appliesTo));
 
             writer.WriteStartElement(serializationContext.PolicyConstants.Prefix, WsPolicyElements.AppliesTo, serializationContext.PolicyConstants.Namespace);
             if (appliesTo.EndpointReference != null)
-                _wsAddressingSerializer.WriteEndpointReference(writer, serializationContext, appliesTo.EndpointReference);
+                WsAddressingSerializer.WriteEndpointReference(writer, serializationContext, appliesTo.EndpointReference);
 
             writer.WriteEndElement();
         }
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
         /// <param name="writer"></param>
         /// <param name="serializationContext"></param>
         /// <param name="policyReference"></param>
-        public void WritePolicyReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, PolicyReference policyReference)
+        public static void WritePolicyReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, PolicyReference policyReference)
         {
             //  if this clas becomes public, we will need to check parameters
             //  WsUtils.ValidateParamsForWritting(writer, serializationContext, policyReference, nameof(policyReference));

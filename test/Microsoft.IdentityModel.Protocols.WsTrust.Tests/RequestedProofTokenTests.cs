@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var requestedProofToken = theoryData.WsTrustSerializer.ReadRequestedProofToken(theoryData.Reader, theoryData.WsSerializationContext);
+                var requestedProofToken = WsTrustSerializer.ReadRequestedProofToken(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(requestedProofToken, theoryData.RequestedProofToken, context);
             }
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedProofToken", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteRequestedProofToken(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedProofToken);
+                WsTrustSerializer.WriteRequestedProofToken(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedProofToken);
             }
             catch (Exception ex)
             {

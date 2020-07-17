@@ -79,8 +79,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">if Data is null.</exception>
         public byte[] Data
         {
-            get => _data;
-            set => _data = value ?? throw LogHelper.LogArgumentNullException(nameof(Data));
+            get
+            {
+                byte[] binaryCopy = new byte[_data.Length];
+                Array.Copy(_data, binaryCopy, _data.Length);
+                return binaryCopy;
+            }
+
+            internal set
+            {
+                _data = value ?? throw LogHelper.LogArgumentNullException(nameof(Data));
+            }
         }
 
         /// <summary>

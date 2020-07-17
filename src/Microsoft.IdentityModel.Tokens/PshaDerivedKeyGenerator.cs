@@ -29,7 +29,6 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
-// TODO - performance
 namespace Microsoft.IdentityModel.Tokens
 {
     internal class PshaDerivedKeyGenerator
@@ -97,7 +96,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 _aValue = _seed;
-                _chunk = new byte[0];
+                _chunk = Array.Empty<byte>();
                 _index = 0;
                 _position = 0;
                 _masterKey = masterKey;

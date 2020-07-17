@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     {
         private static T _instance;
 
-        public static T Instance
+        internal static T Instance
         {
             get
             {

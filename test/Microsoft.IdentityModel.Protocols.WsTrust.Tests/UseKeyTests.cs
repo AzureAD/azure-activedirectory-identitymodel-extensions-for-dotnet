@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var useKey = theoryData.WsTrustSerializer.ReadUseKey(theoryData.Reader, theoryData.WsSerializationContext);
+                var useKey = WsTrustSerializer.ReadUseKey(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(useKey, theoryData.UseKey, context);
             }
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteUseKey", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteUseKey(theoryData.Writer, theoryData.WsSerializationContext, theoryData.UseKey);
+                WsTrustSerializer.WriteUseKey(theoryData.Writer, theoryData.WsSerializationContext, theoryData.UseKey);
             }
             catch (Exception ex)
             {

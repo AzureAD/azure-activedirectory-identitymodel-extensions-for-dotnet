@@ -46,15 +46,15 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
             if (uri == null)
                 throw LogHelper.LogArgumentNullException(nameof(uri));
 
-            if (!Uri.IsWellFormedUriString(uri, UriKind.Absolute))
+            if (!System.Uri.IsWellFormedUriString(uri, UriKind.Absolute))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant($"uri is not absolute: {uri}")));
-                
-            Uri = new Uri(uri);
+
+            Uri = uri;
             AdditionalXmlElements = new Collection<XmlElement>();
         }
 
-        public readonly ICollection<XmlElement> AdditionalXmlElements;
+        public ICollection<XmlElement> AdditionalXmlElements { get; }
 
-        public readonly Uri Uri;
+        public string Uri {get;}
     }
 }

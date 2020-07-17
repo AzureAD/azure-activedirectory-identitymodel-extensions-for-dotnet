@@ -83,12 +83,12 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
             throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15001, WsAddressingElements.EndpointReference, WsAddressingConstants.Addressing200408.Namespace, WsAddressingConstants.Addressing10.Namespace, reader.NamespaceURI)));
         }
 
-        public void WriteEndpointReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, EndpointReference endpointReference)
+        public static void WriteEndpointReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, EndpointReference endpointReference)
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, endpointReference, nameof(endpointReference));
             writer.WriteStartElement(serializationContext.AddressingConstants.Prefix, WsAddressingElements.EndpointReference, serializationContext.AddressingConstants.Namespace);
             writer.WriteStartElement(serializationContext.AddressingConstants.Prefix, WsAddressingElements.Address, serializationContext.AddressingConstants.Namespace);
-            writer.WriteString(endpointReference.Uri.AbsoluteUri);
+            writer.WriteString(endpointReference.Uri);
             writer.WriteEndElement();
             foreach (XmlElement element in endpointReference.AdditionalXmlElements)
                 element.WriteTo(writer);

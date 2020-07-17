@@ -27,28 +27,28 @@
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
-    /// <summary>
-    /// Abstract class for singleton pattern for multipule WsTrust versions for Actions.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class WsTrustActions<T> : WsTrustActions where T : new()
-    {
-        private static T _instance;
+    ///// <summary>
+    ///// Abstract class for singleton pattern for multipule WsTrust versions for Actions.
+    ///// </summary>
+    ///// <typeparam name="T"></typeparam>
+    //public abstract class WsTrustActions<T> : WsTrustActions where T : new()
+    //{
+    //    private T _instance;
 
-        /// <summary>
-        /// Implements singleton pattern.
-        /// </summary>
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
+    //    /// <summary>
+    //    /// Implements singleton pattern.
+    //    /// </summary>
+    //    public T Instance
+    //    {
+    //        get
+    //        {
+    //            if (_instance == null)
+    //                _instance = new T();
 
-                return _instance;
-            }
-        }
-    }
+    //            return _instance;
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// Values for Actions for WsTrust Feb2005, 1.3 and 1.4.
@@ -59,19 +59,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets the an instance of WsTrust Feb2005 Actions.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrustFeb2005Actions TrustFeb2005 => WsTrustFeb2005Actions.Instance;
+        public static WsTrustFeb2005Actions TrustFeb2005 => new  WsTrustFeb2005Actions();
 
         /// <summary>
         /// Gets the an instance of WsTrust 1.3 Actions.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public static WsTrust13Actions Trust13 => WsTrust13Actions.Instance;
+        public static WsTrust13Actions Trust13 => new WsTrust13Actions();
 
         /// <summary>
         /// Gets the an instance of Trust 1.4 Actions.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust.html </para>
         /// </summary>
-        public static WsTrust14Actions Trust14 => WsTrust14Actions.Instance;
+        public static WsTrust14Actions Trust14 => new WsTrust14Actions();
 
         /// <summary>
         /// Gets the Cancel action.
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Provides string values for WsTrust Feb2005 Actions.
     /// </summary>
-    public class WsTrustFeb2005Actions : WsTrustActions<WsTrustFeb2005Actions>
+    public class WsTrustFeb2005Actions : WsTrustActions
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrustFeb2005Actions"/>.
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Provides string values for WsTrust 1.3 Actions.
     /// </summary>
-    public class WsTrust13Actions : WsTrustActions<WsTrust13Actions>
+    public class WsTrust13Actions : WsTrustActions
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust13Actions"/>.
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Provides string values for WsTrust 1.4 Actions.
     /// </summary>
-    public class WsTrust14Actions : WsTrustActions<WsTrust14Actions>
+    public class WsTrust14Actions : WsTrustActions
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust14Actions"/>.

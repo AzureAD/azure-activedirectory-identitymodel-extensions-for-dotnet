@@ -57,20 +57,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public BinarySecret BinarySecret { get; internal set; }
 
         /// <summary>
-        /// Constructor for sending entropy in encrypted key format.
-        /// </summary>
-        /// <param name="secret">The key material.</param>
-        /// <param name="wrappingCredentials">The encrypting credentials used to encrypt the key material.</param>
-        public Entropy( byte[] secret, EncryptingCredentials wrappingCredentials )
-        {
-        }
-
-        /// <summary>
         /// Constructs an entropy instance with the protected key.
         /// </summary>
         /// <param name="protectedKey">The protected key which can be either binary secret or encrypted key.</param>
         public Entropy( ProtectedKey protectedKey )
         {
+            ProtectedKey = protectedKey ?? throw LogHelper.LogArgumentNullException(nameof(protectedKey));
         }
 
         /// <summary>

@@ -28,6 +28,7 @@
 using System.IO;
 using System.Text;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Protocols.WsUtility;
 using Microsoft.IdentityModel.Xml;
@@ -39,29 +40,34 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Base class for support of serializing versions of WS-Security.
     /// </summary>
-    public class WsSecuritySerializer
+    public static class WsSecuritySerializer
     {
-        internal WsSecuritySerializer()
-        {
-            //  if this clas becomes public, we will need to check parameters on public methods
-        }
-
         public static XmlElement GetXmlElement(SecurityTokenReference securityTokenReference, WsSerializationContext wsSerializationContext)
         {
+            if (securityTokenReference == null)
+                throw LogHelper.LogArgumentNullException(nameof(securityTokenReference));
+
+            if (wsSerializationContext == null)
+                throw LogHelper.LogArgumentNullException(nameof(wsSerializationContext));
+
             using (var stream = new MemoryStream())
             {
-                var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
-                var serializer = new WsSecuritySerializer();
-                serializer.WriteSecurityTokenReference(writer, wsSerializationContext, securityTokenReference);
-                writer.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-                var dom = new XmlDocument
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false))
                 {
-                    PreserveWhitespace = true
-                };
-                dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
+                    WsSecuritySerializer.WriteSecurityTokenReference(writer, wsSerializationContext, securityTokenReference);
+                    writer.Flush();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var dom = new XmlDocument
+                    {
+                        PreserveWhitespace = true
+                    };
 
-                return dom.DocumentElement;
+                    using (var textReader = new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit })
+                    {
+                        dom.Load(textReader);
+                        return dom.DocumentElement;
+                    }
+                }
             }
         }
 
@@ -69,22 +75,26 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
         {
             using (var stream = new MemoryStream())
             {
-                var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false);
-                var serializer = new WsSecuritySerializer();
-                serializer.WriteSecurityTokenReference(writer, new WsSerializationContext(wsTrustVersion), securityTokenReference);
-                writer.Flush();
-                stream.Seek(0, SeekOrigin.Begin);
-                var dom = new XmlDocument
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(stream, Encoding.UTF8, false))
                 {
-                    PreserveWhitespace = true
-                };
-                dom.Load(new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit });
+                    WriteSecurityTokenReference(writer, new WsSerializationContext(wsTrustVersion), securityTokenReference);
+                    writer.Flush();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var dom = new XmlDocument
+                    {
+                        PreserveWhitespace = true
+                    };
 
-                return dom.DocumentElement;
+                    using (var textReader = new XmlTextReader(stream) { DtdProcessing = DtdProcessing.Prohibit })
+                    {
+                        dom.Load(textReader);
+                        return dom.DocumentElement;
+                    }
+                }
             }
         }
 
-        internal SecurityTokenReference ReadSecurityTokenReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        internal static SecurityTokenReference ReadSecurityTokenReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <wsse:SecurityTokenReference wsu:Id="...",
             //                               wsse:TokenType="...",
@@ -111,7 +121,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return securityTokenReference;
         }
 
-        internal KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        internal static KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -139,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return keyIdentifier;
         }
 
-        internal void WriteKeyIdentifier(XmlDictionaryWriter writer, WsSerializationContext serializationContext, KeyIdentifier keyIdentifier)
+        internal static void WriteKeyIdentifier(XmlDictionaryWriter writer, WsSerializationContext serializationContext, KeyIdentifier keyIdentifier)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -164,7 +174,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             writer.WriteEndElement();
         }
 
-        internal void WriteSecurityTokenReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
+        internal static void WriteSecurityTokenReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
             // <wsse:SecurityTokenReference>
             //      <wsse:KeyIdentifier wsu:Id="..."
