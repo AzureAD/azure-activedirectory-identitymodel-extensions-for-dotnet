@@ -380,6 +380,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             switch (algorithm)
             {
+                case SecurityAlgorithms.HmacSha1:
+                    return new HMACSHA1(keyBytes);
+
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha256:
                     return new HMACSHA256(keyBytes);

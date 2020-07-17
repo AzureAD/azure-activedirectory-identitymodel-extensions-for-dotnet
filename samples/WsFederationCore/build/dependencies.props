@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+    <IdentityModelVersion>0.0.1-preview</IdentityModelVersion>
+    <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>
+    <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
+    <WCFVersion>5.0.0-ci.20220.1</WCFVersion>
+  </PropertyGroup>
+</Project>
