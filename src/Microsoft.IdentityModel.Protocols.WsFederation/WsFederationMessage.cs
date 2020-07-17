@@ -536,8 +536,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm, value); }
         }
 
-        private static List<string> WsTrustNamespaceList = new List<string>() { WsTrustConstants.Namespaces.WsTrust2005, WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
+        internal static List<string> WsTrustNamespaceList = new List<string>() { WsTrustConstants.Namespaces.WsTrust2005, WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
 
-        private static List<string> WsTrustNamespaceNon2005List = new List<string>() { WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
+        internal static List<string> WsTrustNamespaceNon2005List = new List<string>() { WsTrustConstants.Namespaces.WsTrust1_3, WsTrustConstants.Namespaces.WsTrust1_4 };
     }
 }

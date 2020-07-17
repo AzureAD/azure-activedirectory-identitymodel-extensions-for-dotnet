@@ -2,8 +2,12 @@
   "tool": "Credential Scanner",
   "suppressions": [
     {
-      "file": "SelfSigned1024_SHA1.pfx",
-      "_justification": "Self-signed certificate used by unit tests"
+        "file": "SelfSigned1024_SHA1.pfx",
+        "_justification": "Self-signed certificate used by unit tests"
+    },
+    {
+      "file": "RelyingParty.pfx",
+        "_justification": "Self-signed certificate used by unit tests"
     },
     {
       "file": "SelfSigned1024_SHA256.pfx",
@@ -42,20 +46,28 @@
       "_justification": "File contains tokens that are used only for testing purposes."
     },
     {
-      "file": "JsonWebKeyTests.cs",
-      "_justification": "File contains tokens that are used only for testing purposes."
-    },
-    {
-      "file": "TestData.cs",
-      "_justification": "File contains tokens that are used only for testing purposes."
-    },
-    {
       "file": "JwtSecurityTokenHandlerTests.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
     },
     {
       "file": "References.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "JsonWebKeyTests.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+        "file": "TestData.cs",
+        "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "program.cs",
+      "_justification": "File does not contain an actual password, just the word."
+    },
+    {
+      "file": "ClientCredentialsWrappingTests.cs",
+      "_justification": "File does not have actual password just a stub."
     }
   ]
 }

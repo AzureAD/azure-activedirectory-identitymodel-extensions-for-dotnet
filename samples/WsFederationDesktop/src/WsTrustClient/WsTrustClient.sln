@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WsTrustClient", "WsTrustClient.csproj", "{2BDA255E-E880-4AA8-BC24-AEBE3C051951}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WCFSecurityUtilities", "..\WCFSecurityUtilities\WCFSecurityUtilities.csproj", "{D580B35D-F6D1-4306-90BA-E075BB47628F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BDA255E-E880-4AA8-BC24-AEBE3C051951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BDA255E-E880-4AA8-BC24-AEBE3C051951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BDA255E-E880-4AA8-BC24-AEBE3C051951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BDA255E-E880-4AA8-BC24-AEBE3C051951}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D580B35D-F6D1-4306-90BA-E075BB47628F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D580B35D-F6D1-4306-90BA-E075BB47628F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D580B35D-F6D1-4306-90BA-E075BB47628F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D580B35D-F6D1-4306-90BA-E075BB47628F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B67BC29F-5044-40BD-ACC1-EE7E57F6494F}
+	EndGlobalSection
+EndGlobal

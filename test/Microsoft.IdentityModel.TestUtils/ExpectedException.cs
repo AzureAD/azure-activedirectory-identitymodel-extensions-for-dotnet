@@ -31,6 +31,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Xml;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -296,6 +297,11 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ExpectedException KeyWrapException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenKeyWrapException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException XmlReadException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(XmlReadException), substringExpected, innerTypeExpected);
         }
 
         public bool IgnoreExceptionType { get; set; } = false;

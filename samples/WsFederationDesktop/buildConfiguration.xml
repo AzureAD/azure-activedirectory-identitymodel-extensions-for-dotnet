@@ -1,0 +1,15 @@
+<root>
+  <dotnetArchitecture>x64</dotnetArchitecture>
+  <nugetVersion>3.5.0-rc-1285</nugetVersion>
+  <runtimes>netstandard2.0</runtimes>
+  <assemblyVersion>6.5.1</assemblyVersion>
+  <nugetSuffix>preview</nugetSuffix>
+  <projects>
+    <src>
+      <project name="WsFederationClient" />
+      <project name="WsTrustClient" />
+    </src>
+    <test>
+    </test>
+  </projects>
+</root>
