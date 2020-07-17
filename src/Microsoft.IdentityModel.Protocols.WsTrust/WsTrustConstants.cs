@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Implements singleton pattern.
         /// </summary>
-        public static T Instance
+        internal static T Instance
         {
             get
             {

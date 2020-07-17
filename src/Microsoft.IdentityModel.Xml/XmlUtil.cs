@@ -262,14 +262,16 @@ namespace Microsoft.IdentityModel.Xml
                 if (ms.Length == 0)
                     return null;
 
-                var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null);
-                XmlDocument dom = new XmlDocument
+                using (var memoryReader = XmlDictionaryReader.CreateTextReader(ms, Encoding.UTF8, XmlDictionaryReaderQuotas.Max, null))
                 {
-                    PreserveWhitespace = true
-                };
+                    XmlDocument dom = new XmlDocument
+                    {
+                        PreserveWhitespace = true
+                    };
 
-                dom.Load(memoryReader);
-                xmlElement = dom.DocumentElement;
+                    dom.Load(memoryReader);
+                    xmlElement = dom.DocumentElement;
+                }
             }
 
             return xmlElement;
@@ -311,6 +313,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <returns></returns>
         public static string ReadStringElement(XmlDictionaryReader reader)
         {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
             if (reader.IsEmptyElement)
             {
                 reader.ReadStartElement();
@@ -332,6 +337,9 @@ namespace Microsoft.IdentityModel.Xml
         /// <returns></returns>
         public static int? ReadIntElement(XmlDictionaryReader reader)
         {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
             if (reader.IsEmptyElement)
             {
                 reader.ReadStartElement();

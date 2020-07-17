@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class BinaryExchange
     {
+        private byte[] _binaryData;
+
         /// <summary>
         /// Creates an instance of <see cref="BinaryExchange"/>
         /// </summary>
@@ -60,14 +62,27 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public BinaryExchange( byte[] binaryData, Uri valueType, Uri encodingType )
         {
             BinaryData = binaryData ?? throw LogHelper.LogArgumentNullException(nameof(binaryData));
-            ValueType = valueType ?? throw LogHelper.LogArgumentNullException(nameof(ValueType)); ;
-            EncodingType = encodingType ?? throw LogHelper.LogArgumentNullException(nameof(EncodingType)); ;
+            ValueType = valueType ?? throw LogHelper.LogArgumentNullException(nameof(valueType)); ;
+            EncodingType = encodingType ?? throw LogHelper.LogArgumentNullException(nameof(encodingType)); ;
         }
 
         /// <summary>
         /// Gets the Binary Data.
         /// </summary>
-        public byte[] BinaryData { get; }
+        public byte[] BinaryData
+        {
+            get
+            {
+                byte[] binaryCopy = new byte[_binaryData.Length];
+                Array.Copy(_binaryData, binaryCopy, _binaryData.Length);
+                return binaryCopy;
+            }
+
+            private set
+            {
+                _binaryData = value;
+            }
+        }
 
         /// <summary>
         /// Gets the ValueType Uri.

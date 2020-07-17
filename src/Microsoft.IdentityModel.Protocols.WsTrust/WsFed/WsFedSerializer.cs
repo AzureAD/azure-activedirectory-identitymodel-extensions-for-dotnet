@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             return new ClaimType { Uri = uri };
         }
 
-        public void WriteClaimType(XmlDictionaryWriter writer, WsSerializationContext serializationContext, ClaimType claimType)
+        public static void WriteClaimType(XmlDictionaryWriter writer, WsSerializationContext serializationContext, ClaimType claimType)
         {
             writer.WriteStartElement(serializationContext.FedConstants.AuthPrefix, WsFedElements.ClaimType, serializationContext.FedConstants.AuthNamespace);
             writer.WriteAttributeString(WsFedAttributes.Uri, claimType.Uri);
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// <param name="writer"></param>
         /// <param name="serializationContext"></param>
         /// <param name="additionalContext"></param>
-        public void WriteAdditionalContext(XmlDictionaryWriter writer, WsSerializationContext serializationContext, AdditionalContext additionalContext)
+        public static void WriteAdditionalContext(XmlDictionaryWriter writer, WsSerializationContext serializationContext, AdditionalContext additionalContext)
         {
             //  <auth:AdditionalContext>
             //    <auth:ContextItem Name="xs:anyURI" Scope="xs:anyURI" ? ...>

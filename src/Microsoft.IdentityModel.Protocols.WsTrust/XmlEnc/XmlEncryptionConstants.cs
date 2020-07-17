@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Protocols
     {
         private static T _instance;
 
-        public static T Instance
+        internal static T Instance
         {
             get
             {

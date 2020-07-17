@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
     {
         private static T _instance;
 
-        public static T Instance
+        internal static T Instance
         {
             get
             {

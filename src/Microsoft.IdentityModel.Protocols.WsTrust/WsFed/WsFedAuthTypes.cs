@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
     {
         private static T _instance;
 
-        public static T Instance
+        internal static T Instance
         {
             get
             {
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
 
     public class WsFedAuthTypes
     {
-        public static WsFed12AuthTypes Fed12 => WsFed12AuthTypes.Instance;
+        public static WsFed12AuthTypes Fed12 => new WsFed12AuthTypes();
 
         public WsFedAuthTypes() {}
 
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         public string Unknown { get; protected set; }
     }
 
-    public class WsFed12AuthTypes : WsFedAuthTypes<WsFed12AuthTypes>
+    public class WsFed12AuthTypes : WsFedAuthTypes
     {
         public WsFed12AuthTypes()
         {

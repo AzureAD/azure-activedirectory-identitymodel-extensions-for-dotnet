@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     {
         private static T _instance;
 
-        public static T Instance
+        internal static T Instance
         {
             get
             {
@@ -50,9 +50,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// </summary>
     public abstract class WsSecurityKeyTypes
     {
-        public WsSecurity10KeyTypes WsSecurity10 => WsSecurity10KeyTypes.Instance;
+        public static WsSecurity10KeyTypes WsSecurity10 => WsSecurity10KeyTypes.Instance;
 
-        public WsSecurity11KeyTypes WsSecurity11 => WsSecurity11KeyTypes.Instance;
+        public static WsSecurity11KeyTypes WsSecurity11 => WsSecurity11KeyTypes.Instance;
 
         public string Sha1Thumbprint { get; protected set; }
     }
