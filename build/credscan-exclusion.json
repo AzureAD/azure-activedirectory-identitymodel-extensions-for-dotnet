@@ -48,6 +48,14 @@
     {
       "file": "TestData.cs",
       "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "JwtSecurityTokenHandlerTests.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
+    },
+    {
+      "file": "References.cs",
+      "_justification": "File contains tokens that are used only for testing purposes."
     }
   ]
 }
