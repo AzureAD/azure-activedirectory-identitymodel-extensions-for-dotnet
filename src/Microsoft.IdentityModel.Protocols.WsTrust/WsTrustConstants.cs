@@ -30,34 +30,14 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Abstract class for for singleton pattern for multipule WsTrust  Actions, KeyTypes, Namesapces, Prefered Prefix.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class WsTrustConstants<T> : WsTrustConstants where T : new()
-    {
-        private static T _instance;
-
-        /// <summary>
-        /// Implements singleton pattern.
-        /// </summary>
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
-    /// <summary>
     /// Values for constants for WsTrust Feb2005, 1.3 and 1.4.
     /// </summary>
     public abstract class WsTrustConstants : WsConstantsBase
     {
-        private static IList<string> _knownNamespaces = null;
+        /// <summary>
+        /// Gets a list of all known namespaces
+        /// </summary>
+        public static IList<string> KnownNamespaces { get; } = new List<string> { "http://schemas.xmlsoap.org/ws/2005/02/trust", "http://docs.oasis-open.org/ws-sx/ws-trust/200512", "http://docs.oasis-open.org/ws-sx/ws-trust/200802" };
 
         /// <summary>
         /// Gets version specific WsTrust Actions.
@@ -75,42 +55,28 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public WsTrustBinarySecretTypes WsTrustBinarySecretTypes { get; protected set; }
 
         /// <summary>
-        /// Gets a list of all supported namespaces
-        /// </summary>
-        public static IList<string> KnownNamespaces
-        {
-            get
-            {
-                if (_knownNamespaces == null)
-                    _knownNamespaces = new List<string> { "http://schemas.xmlsoap.org/ws/2005/02/trust", "http://docs.oasis-open.org/ws-sx/ws-trust/200512", "http://docs.oasis-open.org/ws-sx/ws-trust/200802" };
-
-                return _knownNamespaces;
-            }
-        }
-
-        /// <summary>
         /// Gets the an instance of WsTrust Feb2005 Constants.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrustFeb2005Constants TrustFeb2005 => WsTrustFeb2005Constants.Instance;
+        public static WsTrustFeb2005Constants TrustFeb2005 { get; } = new WsTrustFeb2005Constants();
 
         /// <summary>
         /// Gets the an instance of WsTrust 1.3 Constants.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrust13Constants Trust13 => WsTrust13Constants.Instance;
+        public static WsTrust13Constants Trust13 { get; } = new WsTrust13Constants();
 
         /// <summary>
         /// Gets the an instance of WsTrust 1.4 Constants.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrust14Constants Trust14 => WsTrust14Constants.Instance;
+        public static WsTrust14Constants Trust14 { get; } = new WsTrust14Constants();
     }
 
     /// <summary>
     /// Provides constants for WsTrust Feb2005.
     /// </summary>
-    public class WsTrustFeb2005Constants : WsTrustConstants<WsTrustFeb2005Constants>
+    public class WsTrustFeb2005Constants : WsTrustConstants
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrustFeb2005Constants"/>.
@@ -129,7 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Provides constants for WsTrust 1.3.
     /// </summary>
-    public class WsTrust13Constants : WsTrustConstants<WsTrust13Constants>
+    public class WsTrust13Constants : WsTrustConstants
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust13Constants"/>.
@@ -148,7 +114,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Provides constants for WsTrust 1.3.
     /// </summary>
-    public class WsTrust14Constants : WsTrustConstants<WsTrust14Constants>
+    public class WsTrust14Constants : WsTrustConstants
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust14Constants"/>.
@@ -164,4 +130,3 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
     }
 }
-

@@ -35,10 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public static class WsDefaults
     {
-        public static AppliesTo AppliesTo => new AppliesTo 
-        { 
-            EndpointReference = new EndpointReference("https://www.identitymodel.com") 
-        };
+        public static AppliesTo AppliesTo => new AppliesTo(new EndpointReference("https://www.identitymodel.com"));
 
         public static KeyIdentifier KeyIdentifier => new KeyIdentifier {
             EncodingType = WsSecurityEncodingTypes.WsSecurity11.Base64,

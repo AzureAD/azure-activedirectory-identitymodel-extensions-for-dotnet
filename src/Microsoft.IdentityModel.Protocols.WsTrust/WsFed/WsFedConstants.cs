@@ -31,49 +31,13 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
-    public abstract class WsFedConstants<T> : WsFedConstants where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     public abstract class WsFedConstants : WsConstantsBase
     {
-        private static IList<string> _knownAuthNamespaces = null;
-        private static IList<string> _knownNamespaces = null;
+        public static IList<string> KnownNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wsfed/federation/200706" };
 
-        public static IList<string> KnownNamespaces
-        {
-            get
-            {
-                if (_knownNamespaces == null)
-                    _knownNamespaces = new List<string> { "http://docs.oasis-open.org/wsfed/federation/200706" };
+        public static IList<string> KnownAuthNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wsfed/authorization/200706" };
 
-                return _knownNamespaces;
-            }
-        }
-        public static IList<string> KnownAuthNamespaces
-        {
-            get
-            {
-                if (_knownAuthNamespaces == null)
-                    _knownAuthNamespaces = new List<string> { "http://docs.oasis-open.org/wsfed/authorization/200706" };
-
-                return _knownAuthNamespaces;
-            }
-        }
-
-        public static WsFed12Constants Fed12 => WsFed12Constants.Instance;
+        public static WsFed12Constants Fed12 { get; } = new WsFed12Constants();
 
         public WsFedConstants() {}
 
@@ -88,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         public string SchemaLocation { get; protected set; }
     }
 
-    public class WsFed12Constants : WsFedConstants<WsFed12Constants>
+    public class WsFed12Constants : WsFedConstants
     {
         public WsFed12Constants() 
         {

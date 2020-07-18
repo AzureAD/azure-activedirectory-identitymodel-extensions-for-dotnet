@@ -29,25 +29,9 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public abstract class XmlEncryptionDataTypes<T> : XmlEncryptionDataTypes where T : new()
+    internal abstract class XmlEncryptionDataTypes
     {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
-    public abstract class XmlEncryptionDataTypes
-    {
-        public static XmlEncryption11DataTypes XmlEnc11 => XmlEncryption11DataTypes.Instance;
+        public static XmlEncryption11DataTypes XmlEnc11 { get; } = new XmlEncryption11DataTypes();
 
         public XmlEncryptionDataTypes() {}
 
@@ -56,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
         public string Element { get; protected set; }
     }
 
-    public class XmlEncryption11DataTypes : XmlEncryptionDataTypes<XmlEncryption11DataTypes>
+    internal class XmlEncryption11DataTypes : XmlEncryptionDataTypes
     {
 
         public XmlEncryption11DataTypes()

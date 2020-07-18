@@ -156,12 +156,14 @@ if ($generateContractAssemblies.IsPresent)
 	WriteSectionFooter("End Generating Contract Assemblies");
 }
 
-foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
-{
-	$name = $project.name;
-	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-}
+Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack -c $buildType -o $artifactsRoot -v m -s wilson.sln"
+
+#foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
+#{
+#	$name = $project.name;
+#	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+#	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s wilson.sln"
+#}
 
 WriteSectionFooter("End Build");
 

@@ -31,43 +31,16 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
-    public abstract class WsPolicyConstants<T> : WsPolicyConstants where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     public abstract class WsPolicyConstants : WsConstantsBase
     {
-        private static IList<string> _knownNamespaces = null;
+        public static IList<string> KnownNamespaces { get; } = new List<string> { "http://schemas.xmlsoap.org/ws/2004/09/policy", "http://www.w3.org/ns/ws-policy" };
 
-        public static IList<string> KnownNamespaces
-        {
-            get
-            {
-                if (_knownNamespaces == null)
-                    _knownNamespaces = new List<string> { "http://schemas.xmlsoap.org/ws/2004/09/policy", "http://www.w3.org/ns/ws-policy" };
+        public static WsPolicy12Constants Policy12 { get; } = new WsPolicy12Constants();
 
-                return _knownNamespaces;
-            }
-        }
-
-        public static WsPolicy12Constants Policy12 => WsPolicy12Constants.Instance;
-
-        public static WsPolicy15Constants Policy15 => WsPolicy15Constants.Instance;
+        public static WsPolicy15Constants Policy15 { get; } = new WsPolicy15Constants();
     }
 
-    public class WsPolicy12Constants : WsPolicyConstants<WsPolicy12Constants>
+    public class WsPolicy12Constants : WsPolicyConstants
     {
         public WsPolicy12Constants()
         {
@@ -76,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
         }
     }
 
-    public class WsPolicy15Constants : WsPolicyConstants<WsPolicy15Constants>
+    public class WsPolicy15Constants : WsPolicyConstants
     {
         public WsPolicy15Constants()
         {

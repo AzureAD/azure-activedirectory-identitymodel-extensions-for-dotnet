@@ -29,7 +29,7 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public static class XmlEncryptionElements
+    internal static class XmlEncryptionElements
     {
         public const string CarriedKeyName = "CarriedKeyName";
 

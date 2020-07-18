@@ -42,11 +42,10 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
     /// <summary>
     /// Class for specifying WS-Addressing 10.
     /// </summary>
-    internal class WsAddressing10Version : WsAddressingVersion { }
+    public class WsAddressing10Version : WsAddressingVersion { }
 
     /// <summary>
     /// Class for specifying WS-Addressing 200408.
     /// </summary>
-    internal class WsAddressing200408Version : WsAddressingVersion { }
-
+    public class WsAddressing200408Version : WsAddressingVersion { }
 }

@@ -29,30 +29,14 @@
 
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
-    public abstract class WsSecurityEncodingTypes<T> : WsSecurityEncodingTypes where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     /// <summary>
     /// Provides encodingtypes for WS-Security 1.0 and 1.1.
     /// </summary>
-    public abstract class WsSecurityEncodingTypes
+    public abstract class WsSecurityEncodingTypes : WsConstantsBase
     {
-        public static WsSecurity10EncodingTypes WsSecurity10 => WsSecurity10EncodingTypes.Instance;
+        public static WsSecurity10EncodingTypes WsSecurity10 { get; } = new WsSecurity10EncodingTypes();
 
-        public static WsSecurity11EncodingTypes WsSecurity11 => WsSecurity11EncodingTypes.Instance;
+        public static WsSecurity11EncodingTypes WsSecurity11 { get; } = new WsSecurity11EncodingTypes();
 
         public WsSecurityEncodingTypes() {}
 
@@ -64,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// Provides encodingtypes for WS-Security 1.0.
-    public class WsSecurity10EncodingTypes : WsSecurityEncodingTypes<WsSecurity10EncodingTypes>
+    public class WsSecurity10EncodingTypes : WsSecurityEncodingTypes
     {
         public WsSecurity10EncodingTypes()
         {
@@ -75,7 +59,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// Provides encodingtypes for WS-Security 1.1.
-    public class WsSecurity11EncodingTypes : WsSecurityEncodingTypes<WsSecurity11EncodingTypes>
+    public class WsSecurity11EncodingTypes : WsSecurityEncodingTypes
     {
         public WsSecurity11EncodingTypes()
         {

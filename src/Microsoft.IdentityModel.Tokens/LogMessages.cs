@@ -236,7 +236,12 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
         public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
 
-
+        // KeyGeneration errors
+        public const string IDX10850 = "IDX10850: '{0}' cannot be less than zero. Was: '{1}'.";
+        public const string IDX10851 = "IDX10851: '{0}' must be a multiple of 8. Was: '{1}'.";
+        public const string IDX10852 = "IDX10852: Key size requested: '{0}', must be larger than '{1}' and smaller than '{2}'.";
+        public const string IDX10853 = "IDX10853: Invalid issuerEntropy size. issuerEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.";
+        public const string IDX10854 = "IDX10854: Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.";
 #pragma warning restore 1591
     }
 }

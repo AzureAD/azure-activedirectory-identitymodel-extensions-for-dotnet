@@ -41,9 +41,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         private string _scope;
         private string _value;
 
-        public ContextItem() { }
+        internal ContextItem() { }
 
-        // brentsch - TODO, it is contradictory to have setters that take null, but throw in constructors.
         public ContextItem(string name)
         {
             Name = name;
@@ -51,14 +50,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
 
         public ContextItem(string name, string value)
         {
-            // [brentsch] - TODO check for absolute URI
             Name = name;
             Value = value;
         }
 
         public ContextItem(string name, string value, string scope)
         {
-            // [brentsch] - TODO check for absolute URI
             Name = name;
             Value = value;
             Scope = scope;

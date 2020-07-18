@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="message">message for exception.</param>
         /// <remarks>EventLevel is set to Error.</remarks>
-        public static Exception LogWsTrustReadException(string message)
+        internal static Exception LogWsTrustReadException(string message)
         {
             return LogHelper.LogExceptionMessage(new WsTrustReadException(message));
         }
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="message">message for exception.</param>
         /// <param name="innerException">inner exceptioin.</param>
         /// <remarks>EventLevel is set to Error.</remarks>
-        public static Exception LogWsTrustReadException(string message, Exception innerException)
+        internal static Exception LogWsTrustReadException(string message, Exception innerException)
         {
             return LogHelper.LogExceptionMessage(new WsTrustReadException(message, innerException));
         }
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="format">argument that is null or empty.</param>
         /// <param name="args">arguments for formatting</param>
         /// <remarks>EventLevel is set to Error.</remarks>
-        public static Exception LogWsTrustReadException(string format, params object[] args)
+        internal static Exception LogWsTrustReadException(string format, params object[] args)
         {
             return LogHelper.LogExceptionMessage(new WsTrustReadException(LogHelper.FormatInvariant(format, args)));
         }
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static Exception LogWsTrustReadException(Exception innerException, string format, params object[] args)
+        internal static Exception LogWsTrustReadException(Exception innerException, string format, params object[] args)
         {
             return LogHelper.LogExceptionMessage(new WsTrustReadException(LogHelper.FormatInvariant(format, args), innerException));
         }

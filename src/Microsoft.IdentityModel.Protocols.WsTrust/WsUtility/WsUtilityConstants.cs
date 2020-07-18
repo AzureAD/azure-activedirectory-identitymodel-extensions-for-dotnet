@@ -31,45 +31,17 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsUtility
 {
-    public abstract class WsUtilityConstants<T> : WsUtilityConstants where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     public abstract class WsUtilityConstants : WsConstantsBase
     {
-        private static IList<string> _knownNamespaces = null;
+        public static IList<string> KnownNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" };
 
-        public static IList<string> KnownNamespaces
-        {
-            get
-            {
-                if (_knownNamespaces == null)
-                    _knownNamespaces = new List<string> { "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" };
-
-                return _knownNamespaces;
-            }
-        }
-
-        public static WsUtility10Constants WsUtility10 => WsUtility10Constants.Instance;
+        public static WsUtility10Constants WsUtility10 { get; } = new  WsUtility10Constants();
 
         public WsUtilityConstants() { }
     }
 
-    public class WsUtility10Constants : WsUtilityConstants<WsUtility10Constants>
+    public class WsUtility10Constants : WsUtilityConstants
     {
-
         public WsUtility10Constants()
         {
             Namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";

@@ -25,9 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Logging;
-
 #pragma warning disable 1591
 
 namespace Microsoft.IdentityModel.XmlEnc
@@ -36,7 +33,6 @@ namespace Microsoft.IdentityModel.XmlEnc
     {
         public EncryptedKey()
         {
-
         }
     }
 }

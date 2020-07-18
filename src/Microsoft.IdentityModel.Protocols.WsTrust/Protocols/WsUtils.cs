@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Checks standard items on a write call.
         /// </summary>
-        public static void ValidateParamsForWritting(XmlWriter writer, WsSerializationContext serializationContext, object obj, string objName)
+        internal static void ValidateParamsForWritting(XmlWriter writer, WsSerializationContext serializationContext, object obj, string objName)
         {
             if (writer == null)
                 throw LogHelper.LogArgumentNullException(nameof(writer));
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="element"/> is null or empty.</exception>
         /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
         /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at expected element.</exception>
-        public static void CheckReaderOnEntry(XmlReader reader, string element, WsSerializationContext serializationContext)
+        internal static void CheckReaderOnEntry(XmlReader reader, string element, WsSerializationContext serializationContext)
         {
             if (serializationContext == null)
                 throw LogHelper.LogArgumentNullException(nameof(serializationContext));

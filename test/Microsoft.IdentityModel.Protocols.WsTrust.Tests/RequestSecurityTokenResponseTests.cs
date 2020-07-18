@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                         {
                             AppliesTo = WsDefaults.AppliesTo,
                             AttachedReference = WsDefaults.SecurityTokenReference,
-                            Entropy = new Entropy(new BinarySecret(Guid.NewGuid().ToByteArray(), WsSecurity11EncodingTypes.Instance.Base64)),
+                            Entropy = new Entropy(new BinarySecret(Guid.NewGuid().ToByteArray(), WsSecurityEncodingTypes.WsSecurity11.Base64)),
                             Lifetime = new Lifetime(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromDays(1)),
                             KeyType = WsDefaults.KeyType,
                             RequestedProofToken = new RequestedProofToken(new BinarySecret(Guid.NewGuid().ToByteArray())),
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var requestSecurityTokenResponse = theoryData.WsTrustSerializer.ReadRequestedSecurityToken(theoryData.Reader, theoryData.WsSerializationContext);
+                var requestSecurityTokenResponse = WsTrustSerializer.ReadRequestedSecurityToken(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(requestSecurityTokenResponse, theoryData.RequestedSecurityToken, context);
             }

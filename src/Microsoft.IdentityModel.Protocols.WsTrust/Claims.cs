@@ -59,6 +59,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets the dialect of these claims.
         /// </summary>
-        public string Dialect { get; set;  }
+        public string Dialect { get; }
     }
 }

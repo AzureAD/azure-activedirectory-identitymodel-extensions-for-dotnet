@@ -76,43 +76,6 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        internal WsSerializationContext(WsTrustVersion wsTrustVersion, WsAddressingVersion wsAddressingVersion, WsSecurityVersion wsSecurityVersion)
-        {
-            TrustVersion = wsTrustVersion;
-
-            FedConstants = WsFedConstants.Fed12;
-            PolicyConstants = WsPolicyConstants.Policy12;
-
-            if (wsAddressingVersion is WsAddressing10Version)
-                AddressingConstants = WsAddressingConstants.Addressing10;
-            else
-                AddressingConstants = WsAddressingConstants.Addressing200408;
-
-            if (wsSecurityVersion is WsSecurity10Version)
-                SecurityConstants = WsSecurityConstants.WsSecurity10;
-            else
-                SecurityConstants = WsSecurityConstants.WsSecurity11;
-
-            if (wsTrustVersion is WsTrustFeb2005Version)
-            {
-                TrustActions = WsTrustActions.TrustFeb2005;
-                TrustConstants = WsTrustConstants.TrustFeb2005;
-                TrustKeyTypes = WsTrustKeyTypes.TrustFeb2005;
-            }
-            else if (wsTrustVersion is WsTrust13Version)
-            {
-                TrustActions = WsTrustActions.Trust13;
-                TrustConstants = WsTrustConstants.Trust13;
-                TrustKeyTypes = WsTrustKeyTypes.Trust13;
-            }
-            else if (wsTrustVersion is WsTrust14Version)
-            {
-                TrustActions = WsTrustActions.Trust14;
-                TrustConstants = WsTrustConstants.Trust14;
-                TrustKeyTypes = WsTrustKeyTypes.Trust14;
-            }
-        }
-
         public WsAddressingConstants AddressingConstants { get; }
 
         public WsFedConstants FedConstants { get; }

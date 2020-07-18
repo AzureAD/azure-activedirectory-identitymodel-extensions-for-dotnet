@@ -28,29 +28,6 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Abstract class for singleton pattern for multipule WsTrust versions for BinarySecretTypes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class WsTrustBinarySecretTypes<T> : WsTrustBinarySecretTypes where T : new()
-    {
-        private static T _instance;
-
-        /// <summary>
-        /// Implements singleton pattern.
-        /// </summary>
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
-    /// <summary>
     /// Values for BinarySecrectTypes for WsTrust Feb2005, 1.3 and 1.4.
     /// </summary>
     public abstract class WsTrustBinarySecretTypes
@@ -59,19 +36,19 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets the an instance of WsTrust Feb2005 BinarySecretTypes.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrustFeb2005BinarySecretTypes TrustFeb2005 => WsTrustFeb2005BinarySecretTypes.Instance;
+        public static WsTrustFeb2005BinarySecretTypes TrustFeb2005 { get; } = new WsTrustFeb2005BinarySecretTypes();
 
         /// <summary>
         /// Gets the an instance of WsTrust 1.3 BinarySecretTypes.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrust13BinarySecretTypes Trust13 => WsTrust13BinarySecretTypes.Instance;
+        public static WsTrust13BinarySecretTypes Trust13 { get; } = new WsTrust13BinarySecretTypes();
 
         /// <summary>
         /// Gets the an instance of WsTrust 1.4 BinarySecretTypes.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrust14BinarySecretTypes Trust14 => WsTrust14BinarySecretTypes.Instance;
+        public static WsTrust14BinarySecretTypes Trust14 { get; } = new WsTrust14BinarySecretTypes();
 
         /// <summary>
         /// Gets the AsymmetricKey value.
@@ -92,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Values for BinarySecretTypes for WsTrust Feb2005.
     /// </summary>
-    public class WsTrustFeb2005BinarySecretTypes : WsTrustBinarySecretTypes<WsTrustFeb2005BinarySecretTypes>
+    public class WsTrustFeb2005BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrustFeb2005BinarySecretTypes"/>.
@@ -109,7 +86,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Values for BinarySecretTypes for WsTrust 1.3.
     /// </summary>
-    public class WsTrust13BinarySecretTypes : WsTrustBinarySecretTypes<WsTrust13BinarySecretTypes>
+    public class WsTrust13BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust13BinarySecretTypes"/>.
@@ -126,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Values for BinarySecretTypes for WsTrust 1.4.
     /// </summary>
-    public class WsTrust14BinarySecretTypes : WsTrustBinarySecretTypes<WsTrust14BinarySecretTypes>
+    public class WsTrust14BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
         /// Creates an instance of <see cref="WsTrust14BinarySecretTypes"/>.

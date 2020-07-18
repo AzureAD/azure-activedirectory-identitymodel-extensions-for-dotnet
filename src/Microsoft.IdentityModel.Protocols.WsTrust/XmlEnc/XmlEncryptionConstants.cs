@@ -29,30 +29,14 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public abstract class XmlEncryptionConstants<T> : XmlEncryptionConstants where T : new()
+    internal abstract class XmlEncryptionConstants : WsConstantsBase
     {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
-    public abstract class XmlEncryptionConstants : WsConstantsBase
-    {
-        public static XmlEncryption11Constants XmlEnc11 => XmlEncryption11Constants.Instance;
+        public static XmlEncryption11Constants XmlEnc11 { get; } = new XmlEncryption11Constants();
 
         public XmlEncryptionConstants() {}
     }
 
-    public class XmlEncryption11Constants : XmlEncryptionConstants<XmlEncryption11Constants>
+    internal class XmlEncryption11Constants : XmlEncryptionConstants
     {
         public XmlEncryption11Constants()
         {

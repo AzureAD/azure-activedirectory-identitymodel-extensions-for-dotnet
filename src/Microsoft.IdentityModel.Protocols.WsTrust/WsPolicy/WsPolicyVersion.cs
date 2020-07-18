@@ -32,11 +32,11 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
     /// <summary>
     /// Classes for specifying WS-Policy, 1.2 and 1.5.
     /// </summary>
-    public abstract class WsPolicyVersion
+    internal abstract class WsPolicyVersion
     {
-        public static WsPolicyVersion Policy12 = new WsPolicy12Version();
+        public static WsPolicyVersion Policy12 { get; } = new WsPolicy12Version();
 
-        public static WsPolicyVersion Policy15 = new WsPolicy15Version();
+        public static WsPolicyVersion Policy15 { get; } = new WsPolicy15Version();
     }
 
     /// <summary>

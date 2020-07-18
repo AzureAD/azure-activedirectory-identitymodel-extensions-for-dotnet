@@ -31,40 +31,13 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsAddressing
 {
-    public abstract class WsAddressingConstants<T> : WsAddressingConstants where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     public abstract class WsAddressingConstants : WsConstantsBase
     {
-        private static IList<string> _knownNamespaces = null;
+        public static IList<string> KnownNamespaces { get; } = new List<string> { "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing" };
 
-        public static IList<string> KnownNamespaces
-        {
-            get
-            {
-                if (_knownNamespaces == null)
-                    _knownNamespaces = new List<string> { "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing" };
+        public static WsAddressing10Constants Addressing10 { get; } = new WsAddressing10Constants();
 
-                return _knownNamespaces;
-            }
-        }
-
-        public static WsAddressing10Constants Addressing10 => WsAddressing10Constants.Instance;
-
-        public static WsAddressing200408Constants Addressing200408 => WsAddressing200408Constants.Instance;
+        public static WsAddressing200408Constants Addressing200408 { get; } = new WsAddressing200408Constants();
 
         public WsAddressingConstants() {}
 
@@ -73,8 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         public string ValueType { get; protected set; }
     }
 
-
-    public class WsAddressing10Constants : WsAddressingConstants<WsAddressing10Constants>
+    public class WsAddressing10Constants : WsAddressingConstants
     {
         public WsAddressing10Constants()
         {
@@ -83,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         }
     }
 
-    public class WsAddressing200408Constants : WsAddressingConstants<WsAddressing200408Constants>
+    public class WsAddressing200408Constants : WsAddressingConstants
     {
         public WsAddressing200408Constants()
         {

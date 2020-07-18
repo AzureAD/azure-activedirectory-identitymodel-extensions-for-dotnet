@@ -29,7 +29,7 @@
 
 namespace Microsoft.IdentityModel.Protocols
 {
-    public static class XmlEncryptionAttributes
+    internal static class XmlEncryptionAttributes
     {
         public const string Algorithm = "Algorithm";
 

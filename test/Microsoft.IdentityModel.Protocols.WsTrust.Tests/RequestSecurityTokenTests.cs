@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     },
                     out SecurityToken saml2SecurityToken);
 
-                var trustConstants = WsTrust13Constants.Instance;
+                var trustConstants = WsTrustConstants.Trust13;
                 var propertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>> { { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } } };
 
                 var doc = new XmlDocument();

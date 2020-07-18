@@ -4,7 +4,6 @@
 // a specific target and scoped to a namespace, type, member, etc.
 
 using System.Diagnostics.CodeAnalysis;
-
 [assembly: SuppressMessage("Documentation", "CA1200:Avoid using cref tags with a prefix", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Usage", "CA2213:Disposable fields should be disposed", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
@@ -62,3 +61,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used as platform test", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.RsaSecurityKey.PrivateKeyStatus")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used as platform test", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromECDsaSecurityKey(Microsoft.IdentityModel.Tokens.ECDsaSecurityKey)~Microsoft.IdentityModel.Tokens.JsonWebKey")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used as platform test", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.ECDsaAdapter.SupportsECParameters~System.Boolean")]
+[assembly: SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.Psha1KeyGenerator.ComputeCombinedKey(System.Byte[],System.Byte[],System.Int32)~System.Byte[]")]
+[assembly: SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateKeyedHashAlgorithm(System.Byte[],System.String)~System.Security.Cryptography.KeyedHashAlgorithm")]

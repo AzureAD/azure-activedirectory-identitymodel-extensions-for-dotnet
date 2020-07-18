@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
         public const string Id = "Id";
 
-        // WsSecurity 1.1 {2012}
+        // WsSecurity 1.1 {2004}
         public const string TokenType = "TokenType";
 
         public const string Type = "Type";

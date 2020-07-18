@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadBinarySecrect", theoryData);
             try
             {
-                var binarySecret = theoryData.WsTrustSerializer.ReadBinarySecrect(theoryData.Reader, theoryData.WsSerializationContext);
+                var binarySecret = WsTrustSerializer.ReadBinarySecrect(theoryData.Reader, theoryData.WsSerializationContext);
                 IdentityComparer.AreEqual(binarySecret, theoryData.BinarySecret, context);
             }
             catch (Exception ex)
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadLifetime", theoryData);
             try
             {
-                var lifetime = theoryData.WsTrustSerializer.ReadLifetime(theoryData.Reader, theoryData.WsSerializationContext);
+                var lifetime = WsTrustSerializer.ReadLifetime(theoryData.Reader, theoryData.WsSerializationContext);
                 IdentityComparer.AreEqual(lifetime, theoryData.Lifetime, context);
             }
             catch (Exception ex)
@@ -328,7 +328,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var attachedReference = theoryData.WsTrustSerializer.ReadRequestedAttachedReference(theoryData.Reader, theoryData.WsSerializationContext);
+                var attachedReference = WsTrustSerializer.ReadRequestedAttachedReference(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(attachedReference, theoryData.Reference, context);
             }
@@ -379,7 +379,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var requestedSecurityToken = theoryData.WsTrustSerializer.ReadRequestedSecurityToken(theoryData.Reader, theoryData.WsSerializationContext);
+                var requestedSecurityToken = WsTrustSerializer.ReadRequestedSecurityToken(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(requestedSecurityToken, theoryData.RequestedSecurityToken, context);
             }
@@ -429,7 +429,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var unattachedReference = theoryData.WsTrustSerializer.ReadRequestedUnattachedReference(theoryData.Reader, theoryData.WsSerializationContext);
+                var unattachedReference = WsTrustSerializer.ReadRequestedUnattachedReference(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(unattachedReference, theoryData.Reference, context);
             }
@@ -478,7 +478,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteBinarySecrect", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteBinarySecret(theoryData.Writer, theoryData.WsSerializationContext, theoryData.BinarySecret);
+                WsTrustSerializer.WriteBinarySecret(theoryData.Writer, theoryData.WsSerializationContext, theoryData.BinarySecret);
                 //IdentityComparer.AreEqual(binarySecret, theoryData.BinarySecret, context);
             }
             catch (Exception ex)
@@ -555,7 +555,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteClaims", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteClaims(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Claims);
+                WsTrustSerializer.WriteClaims(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Claims);
                 //IdentityComparer.AreEqual(claims, theoryData.Claims, context);
             }
             catch (Exception ex)
@@ -600,7 +600,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteLifetime", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteLifetime(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Lifetime);
+                WsTrustSerializer.WriteLifetime(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Lifetime);
                 //IdentityComparer.AreEqual(lifetime, theoryData.Lifetime, context);
             }
             catch (Exception ex)
@@ -694,7 +694,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteProofEncryption", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteProofEncryption(theoryData.Writer, theoryData.WsSerializationContext, theoryData.ProofEncryption);
+                WsTrustSerializer.WriteProofEncryption(theoryData.Writer, theoryData.WsSerializationContext, theoryData.ProofEncryption);
                 //IdentityComparer.AreEqual(lifetime, theoryData.Lifetime, context);
             }
             catch (Exception ex)
@@ -739,7 +739,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedAttachedReference", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteRequestedAttachedReference(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedAttachedReference);
+                WsTrustSerializer.WriteRequestedAttachedReference(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedAttachedReference);
             }
             catch (Exception ex)
             {
@@ -827,7 +827,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedUnattachedReference", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteRequestedUnattachedReference(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedUnattachedReference);
+                WsTrustSerializer.WriteRequestedUnattachedReference(theoryData.Writer, theoryData.WsSerializationContext, theoryData.RequestedUnattachedReference);
             }
             catch (Exception ex)
             {
@@ -864,40 +864,5 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 };
             }
         }
-
-        [Fact]
-        public void StringIntern()
-        {
-            TestUtilities.WriteHeader($"{this}.StringIntern");
-            var context = new CompareContext("StringIntern");
-
-            // WsTrustActions
-            CheckRefs(context, "WsTrustFeb2005Actions.Cancel", (new WsTrustFeb2005Actions()).Cancel, WsTrustActions.TrustFeb2005.Cancel, WsTrustFeb2005Actions.Instance.Cancel);
-            CheckRefs(context, "WsTrust13Actions.Cancel", (new WsTrust13Actions()).Cancel, WsTrustActions.Trust13.Cancel, WsTrust13Actions.Instance.Cancel);
-            CheckRefs(context, "WsTrust14Actions.Cancel", (new WsTrust14Actions()).Cancel, WsTrustActions.Trust14.Cancel, WsTrust14Actions.Instance.Cancel);
-
-            CheckRefs(context, "WsTrustFeb2005Actions.Issue", (new WsTrustFeb2005Actions()).Issue, WsTrustActions.TrustFeb2005.Issue, WsTrustFeb2005Actions.Instance.Issue);
-            CheckRefs(context, "WsTrust13Actions.Issue", (new WsTrust13Actions()).Issue, WsTrustActions.Trust13.Issue, WsTrust13Actions.Instance.Issue);
-            CheckRefs(context, "WsTrust14Actions.Issue", (new WsTrust14Actions()).Issue, WsTrustActions.Trust14.Issue, WsTrust14Actions.Instance.Issue);
-
-            CheckRefs(context, "WsTrustFeb2005Actions.Validate", (new WsTrustFeb2005Actions()).Validate, WsTrustActions.TrustFeb2005.Validate, WsTrustFeb2005Actions.Instance.Validate);
-            CheckRefs(context, "WsTrust13Actions.Validate", (new WsTrust13Actions()).Validate, WsTrustActions.Trust13.Validate, WsTrust13Actions.Instance.Validate);
-            CheckRefs(context, "WsTrust14Actions.Validate", (new WsTrust14Actions()).Validate, WsTrustActions.Trust14.Validate, WsTrust14Actions.Instance.Validate);
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        private void CheckRefs(CompareContext context, string title, string string1, string string2, string string3)
-        {
-            if (!object.ReferenceEquals(string1, string2))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string1, string2)");
-
-            if (!object.ReferenceEquals(string1, string3))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string1, string3)");
-
-            if (!object.ReferenceEquals(string2, string3))
-                context.AddDiff($"{title} : !object.ReferenceEquals(string2, string3)");
-        }
-
     }
 }

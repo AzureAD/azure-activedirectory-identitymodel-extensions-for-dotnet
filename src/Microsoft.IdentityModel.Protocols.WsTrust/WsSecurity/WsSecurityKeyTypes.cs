@@ -29,30 +29,14 @@
 
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
-    public abstract class WsSecurityKeyTypes<T> : WsSecurityKeyTypes where T : new()
-    {
-        private static T _instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
     /// <summary>
     /// Provides keytypes for WS-Security 1.0 and 1.1.
     /// </summary>
     public abstract class WsSecurityKeyTypes
     {
-        public WsSecurity10KeyTypes WsSecurity10 => WsSecurity10KeyTypes.Instance;
+        public static WsSecurity10KeyTypes WsSecurity10 { get; } = new WsSecurity10KeyTypes();
 
-        public WsSecurity11KeyTypes WsSecurity11 => WsSecurity11KeyTypes.Instance;
+        public static WsSecurity11KeyTypes WsSecurity11 { get; } = new WsSecurity11KeyTypes();
 
         public string Sha1Thumbprint { get; protected set; }
     }
@@ -60,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Provides keytypes for WS-Security 1.0.
     /// </summary>
-    public class WsSecurity10KeyTypes : WsSecurityKeyTypes<WsSecurity10KeyTypes>
+    public class WsSecurity10KeyTypes : WsSecurityKeyTypes
     {
         public WsSecurity10KeyTypes()
         {
@@ -71,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     /// <summary>
     /// Provides keytypes for WS-Security 1.1.
     /// </summary>
-    public class WsSecurity11KeyTypes : WsSecurityKeyTypes<WsSecurity11KeyTypes>
+    public class WsSecurity11KeyTypes : WsSecurityKeyTypes
     {
         public WsSecurity11KeyTypes()
         {

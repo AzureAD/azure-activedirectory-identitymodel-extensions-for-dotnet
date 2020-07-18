@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsAddressing;
 
@@ -35,15 +34,15 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     public class AppliesTo
     {
-        public AppliesTo()
+        internal AppliesTo()
         {
         }
 
         public AppliesTo(EndpointReference endpointReference)
         {
-            EndpointReference = endpointReference;
+            EndpointReference = endpointReference ?? throw LogHelper.LogArgumentNullException(nameof(endpointReference));
         }
 
-        public EndpointReference EndpointReference { get; set; }
+        public EndpointReference EndpointReference { get; }
     }
 }

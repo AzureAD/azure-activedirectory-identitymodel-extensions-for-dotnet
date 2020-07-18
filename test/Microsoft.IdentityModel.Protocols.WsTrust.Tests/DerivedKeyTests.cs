@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                byte[] computedKey = KeyGenerator.ComputeCombinedKey(theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.RequestorEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits);
+                byte[] computedKey = Psha1KeyGenerator.ComputeCombinedKey(theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.RequestorEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits);
                 // derived key with label == null, position == 0, nonce == IssuerEntropy should equal computed key.
                 byte[] derivedKey = (new PshaDerivedKeyGenerator(theoryData.ComputedKeyMaterial.RequestorEntropyBytes).ComputeCombinedKey(SecurityAlgorithms.HmacSha1, new byte[] { }, theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits, 0));
                 theoryData.ExpectedException.ProcessNoException(context);

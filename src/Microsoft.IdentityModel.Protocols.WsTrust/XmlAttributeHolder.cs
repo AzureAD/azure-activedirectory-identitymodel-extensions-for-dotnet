@@ -25,13 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Xml;
 
 namespace Microsoft.IdentityModel.Xml
 {
     internal struct XmlAttributeHolder
     {
-        public static XmlAttributeHolder[] EmptyArray = new XmlAttributeHolder[0];
+        public static XmlAttributeHolder[] EmptyArray = Array.Empty<XmlAttributeHolder>();
 
         public XmlAttributeHolder(string prefix, string localName, string ns, string value)
         {

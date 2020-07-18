@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             try
             {
-                var entropy = theoryData.WsTrustSerializer.ReadEntropy(theoryData.Reader, theoryData.WsSerializationContext);
+                var entropy = WsTrustSerializer.ReadEntropy(theoryData.Reader, theoryData.WsSerializationContext);
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(entropy, theoryData.Entropy, context);
             }
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             var context = TestUtilities.WriteHeader($"{this}.WriteEntropy", theoryData);
             try
             {
-                theoryData.WsTrustSerializer.WriteEntropy(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Entropy);
+                WsTrustSerializer.WriteEntropy(theoryData.Writer, theoryData.WsSerializationContext, theoryData.Entropy);
                 //IdentityComparer.AreEqual(entropy, theoryData.Entropy, context);
             }
             catch (Exception ex)

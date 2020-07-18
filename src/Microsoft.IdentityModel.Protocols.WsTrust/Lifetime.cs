@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
@@ -39,14 +40,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     {
         private DateTime? _created;
         private DateTime? _expires;
-
-        /// <summary>
-        /// Creates an instance of <see cref="Lifetime"/>.
-        /// <para>>A Lifetime can be used to represent the creation and expiration times of a security token.</para>
-        /// </summary>
-        public Lifetime()
-        {
-        }
 
         /// <summary>
         /// Creates an instance of a <see cref="Lifetime"/>.

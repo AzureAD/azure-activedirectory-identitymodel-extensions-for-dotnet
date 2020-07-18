@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
     /// <summary>
     /// Classes for specifying WS-Fed 1.2.
     /// </summary>
-    public abstract class WsFedVersion
+    internal abstract class WsFedVersion
     {
         public static WsFedVersion Fed12 = new WsFed12Version();
     }

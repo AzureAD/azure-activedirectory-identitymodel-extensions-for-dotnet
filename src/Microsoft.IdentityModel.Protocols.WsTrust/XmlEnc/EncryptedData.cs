@@ -25,18 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Logging;
-
 #pragma warning disable 1591
 
 namespace Microsoft.IdentityModel.XmlEnc
 {
-    public class EncryptedData
+    internal class EncryptedData
     {
         public EncryptedData()
         {
-
         }
     }
 }
