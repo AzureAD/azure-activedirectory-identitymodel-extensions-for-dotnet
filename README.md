@@ -63,7 +63,7 @@ We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on 
 
 ## Security Reporting
 
-See [Security.md](./Security.md)
+See [SECURITY.md](./SECURITY.md)
 
 ## Security Vulnerability in Microsoft.IdentityModel.Tokens 5.1.0
 
