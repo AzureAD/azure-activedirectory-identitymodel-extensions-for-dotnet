@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
+            if (!SupportedAlgorithms.IsSupportedRsaKeyWrap(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
 
             Algorithm = algorithm;

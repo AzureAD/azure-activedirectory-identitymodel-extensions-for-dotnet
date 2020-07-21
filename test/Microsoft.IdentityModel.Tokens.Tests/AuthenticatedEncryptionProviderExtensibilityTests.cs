@@ -43,8 +43,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
             Assert.True(provider.GetKeyBytesCalled);
-            Assert.True(provider.IsSupportedAlgorithmCalled);
-            Assert.True(provider.ValidateKeySizeCalled);
         }
 
         [Fact]

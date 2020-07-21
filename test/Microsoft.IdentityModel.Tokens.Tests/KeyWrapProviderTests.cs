@@ -126,8 +126,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             provider.UnwrapKey(wrappedKey);
             Assert.True(provider.UnwrapKeyCalled);
             Assert.True(provider.WrapKeyCalled);
-            Assert.True(provider.IsSupportedAlgorithmCalled);
-            Assert.True(provider.GetSymmetricAlgorithmCalled);
         }
 
         [Theory, MemberData(nameof(WrapUnwrapTheoryData))]

@@ -67,10 +67,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
+            if (!SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
 
-            ValidateKeySize(key, algorithm);
+            ValidateKeySizeInternal(key, algorithm);
             _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
             _hmacAlgorithm = GetHmacAlgorithm(algorithm);
             Key = key;
@@ -352,6 +352,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">if <paramref name="algorithm"/> is not a supported algorithm.</exception>
         protected virtual void ValidateKeySize(SecurityKey key, string algorithm)
+        {
+            ValidateKeySizeInternal(key, algorithm);
+        }
+
+        private static void ValidateKeySizeInternal(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));

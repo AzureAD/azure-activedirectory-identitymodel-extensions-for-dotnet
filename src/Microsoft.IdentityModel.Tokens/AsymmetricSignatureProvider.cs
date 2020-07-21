@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
-            ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+            ValidateAsymetricSecurityKeySizeInternal(key, algorithm, willCreateSignatures);
             _asymmetricAdapter = ResolveAsymmetricAdapter(jsonWebKey?.ConvertedSecurityKey ?? key, algorithm, willCreateSignatures);
             WillCreateSignatures = willCreateSignatures;
         }
@@ -334,6 +334,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
         /// </remarks>
         public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
+        {
+            ValidateAsymetricSecurityKeySizeInternal(key, algorithm, willCreateSignatures);
+        }
+
+        private void ValidateAsymetricSecurityKeySizeInternal(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));

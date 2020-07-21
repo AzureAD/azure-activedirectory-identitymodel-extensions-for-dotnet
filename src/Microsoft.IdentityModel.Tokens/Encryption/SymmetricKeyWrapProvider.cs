@@ -66,13 +66,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
+            if (!SupportedAlgorithms.IsSupportedSymmetricKeyWrap(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
 
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
+            _symmetricAlgorithm = GetSymetricAlgorithmInternal(key, algorithm);
             if (_symmetricAlgorithm == null)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
         }
@@ -146,6 +146,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
+        {
+            return GetSymetricAlgorithmInternal(key, algorithm);
+        }
+
+        private SymmetricAlgorithm GetSymetricAlgorithmInternal(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
