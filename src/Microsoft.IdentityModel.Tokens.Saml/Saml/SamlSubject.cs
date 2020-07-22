@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (subject1 == null && subject2 == null)
                 return true;
 
-            if (subject1 == null | subject2 == null)
+            if (subject1 == null || subject2 == null)
                 return false;
 
             if (ReferenceEquals(subject1, subject2))
@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (subject1.KeyInfo != null && subject2.KeyInfo != null)
                 if (!subject1.KeyInfo.Equals(subject2.KeyInfo))
                     return false;
-                else if (subject1.KeyInfo == null | subject2.KeyInfo == null)
+                else if (subject1.KeyInfo == null || subject2.KeyInfo == null)
                     return false;
 
             if (subject1.ConfirmationMethods.Count != subject2.ConfirmationMethods.Count)
