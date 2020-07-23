@@ -127,20 +127,17 @@ namespace Microsoft.IdentityModel.Xml
                 EqualityComparer<IssuerSerial>.Default.Equals(IssuerSerial, data.IssuerSerial) &&
                 string.Equals(SKI, data.SKI, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(SubjectName, data.SubjectName, StringComparison.OrdinalIgnoreCase) &&
-                EqualityComparer<ICollection<string>>.Default.Equals(Certificates, data.Certificates) &&
+                Enumerable.SequenceEqual(Certificates.OrderBy(t => t), data.Certificates.OrderBy(t => t)) &&
                 string.Equals(CRL, data.CRL, StringComparison.OrdinalIgnoreCase);
         }
-
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            int hashCode = 1279802945;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IssuerSerial>.Default.GetHashCode(IssuerSerial);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SKI);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SubjectName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<string>>.Default.GetHashCode(Certificates);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CRL);
-            return hashCode;
+            unchecked
+            {
+                // Certificates is the only immutable property
+                return 794516417 + EqualityComparer<ICollection<string>>.Default.GetHashCode(Certificates);
+            }
         }
     }
 }

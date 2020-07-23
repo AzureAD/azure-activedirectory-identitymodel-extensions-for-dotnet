@@ -65,10 +65,13 @@ namespace Microsoft.IdentityModel.Xml
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            int hashCode = -1073543679;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IssuerName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SerialNumber);
-            return hashCode;
+            unchecked
+            {
+                int hashCode = -1073543679;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IssuerName);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SerialNumber);
+                return hashCode;
+            }
         }
     }
 }

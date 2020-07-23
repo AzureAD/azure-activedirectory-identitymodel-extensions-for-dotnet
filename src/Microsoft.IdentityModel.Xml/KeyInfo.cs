@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
@@ -122,20 +123,17 @@ namespace Microsoft.IdentityModel.Xml
                 string.Equals(KeyName, info.KeyName, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(RetrievalMethodUri, info.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) &&
                 EqualityComparer<RSAKeyValue>.Default.Equals(RSAKeyValue, info.RSAKeyValue) &&
-                EqualityComparer<ICollection<X509Data>>.Default.Equals(X509Data, info.X509Data);
+                Enumerable.SequenceEqual(X509Data, info.X509Data);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            int hashCode = 1840145486;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Id);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Prefix);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KeyName);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RetrievalMethodUri);
-            hashCode = hashCode * -1521134295 + EqualityComparer<RSAKeyValue>.Default.GetHashCode(RSAKeyValue);
-            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<X509Data>>.Default.GetHashCode(X509Data);
-            return hashCode;
+            unchecked
+            {
+                // X509Data reference is the only immutable property
+                return -811635255 + EqualityComparer<ICollection<X509Data>>.Default.GetHashCode(X509Data);
+            }
         }
 
         /// <summary>

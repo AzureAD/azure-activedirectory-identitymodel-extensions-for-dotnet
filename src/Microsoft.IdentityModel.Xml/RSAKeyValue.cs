@@ -65,10 +65,13 @@ namespace Microsoft.IdentityModel.Xml
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            int hashCode = 936145456;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Modulus);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Exponent);
-            return hashCode;
+            unchecked
+            {
+                int hashCode = 936145456;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Modulus);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Exponent);
+                return hashCode;
+            }
         }
     }
 }
