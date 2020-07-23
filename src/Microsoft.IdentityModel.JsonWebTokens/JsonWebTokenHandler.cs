@@ -1096,8 +1096,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private TokenValidationResult ValidateTokenPayload(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
         {
-            var expires = (jsonWebToken.ValidTo == null) ? null : new DateTime?(jsonWebToken.ValidTo);
-            var notBefore = (jsonWebToken.ValidFrom == null) ? null : new DateTime?(jsonWebToken.ValidFrom);
+            var expires = jsonWebToken.ValidTo;
+            var notBefore = jsonWebToken.ValidFrom;
 
             Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
             Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
@@ -1138,7 +1138,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 var validatedJsonWebToken = validatedToken as JsonWebToken;
                 if (validatedJsonWebToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(JsonWebToken), validatedJsonWebToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(JsonWebToken), validatedToken.GetType(), token)));
 
                 return validatedJsonWebToken;
             }
@@ -1220,7 +1220,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                             jwtToken.SigningKey = key;
                             return jwtToken;
-                        };
+                        }
                     }
                     catch (Exception ex)
                     {

@@ -28,7 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
@@ -116,29 +115,27 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public ICollection<X509Data> X509Data { get; } = new Collection<X509Data>();
 
-        /// <summary>
-        /// Compares two KeyInfo objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
-        {   
-            KeyInfo other = obj as KeyInfo;
-            if (other == null)
-                return false;
-            else if (string.Compare(KeyName, other.KeyName, StringComparison.OrdinalIgnoreCase) != 0
-                ||string.Compare(RetrievalMethodUri, other.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) != 0
-                || (RSAKeyValue != null && !RSAKeyValue.Equals(other.RSAKeyValue)
-                || !new HashSet<X509Data>(X509Data).SetEquals(other.X509Data)))
-                return false;
-
-            return true;
+        {
+            return obj is KeyInfo info &&
+                string.Equals(KeyName, info.KeyName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(RetrievalMethodUri, info.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) &&
+                EqualityComparer<RSAKeyValue>.Default.Equals(RSAKeyValue, info.RSAKeyValue) &&
+                EqualityComparer<ICollection<X509Data>>.Default.Equals(X509Data, info.X509Data);
         }
 
-        /// <summary>
-        /// Serves as a hash function for KeyInfo.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            int hashCode = 1840145486;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Id);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Prefix);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KeyName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RetrievalMethodUri);
+            hashCode = hashCode * -1521134295 + EqualityComparer<RSAKeyValue>.Default.GetHashCode(RSAKeyValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<X509Data>>.Default.GetHashCode(X509Data);
+            return hashCode;
         }
 
         /// <summary>

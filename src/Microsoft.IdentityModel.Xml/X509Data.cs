@@ -120,31 +120,27 @@ namespace Microsoft.IdentityModel.Xml
             set;
         }
 
-        /// <summary>
-        /// Compares two X509Data objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            var other = obj as X509Data;
-            if (other == null)
-                return false;
-            else if (!IssuerSerial.Equals(other.IssuerSerial) ||
-                string.Compare(SKI, other.SKI, StringComparison.OrdinalIgnoreCase) != 0 || 
-                string.Compare(SubjectName, other.SubjectName, StringComparison.OrdinalIgnoreCase) != 0 ||
-                // certificates may need to be compared in a special way instead of generic string comparison?
-                !Enumerable.SequenceEqual(Certificates.OrderBy(t => t), other.Certificates.OrderBy(t => t)) ||
-                string.Compare(CRL, other.CRL, StringComparison.OrdinalIgnoreCase) != 0)
-                    return false;
-            return true;
+            return obj is X509Data data &&
+                EqualityComparer<IssuerSerial>.Default.Equals(IssuerSerial, data.IssuerSerial) &&
+                string.Equals(SKI, data.SKI, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(SubjectName, data.SubjectName, StringComparison.OrdinalIgnoreCase) &&
+                EqualityComparer<ICollection<string>>.Default.Equals(Certificates, data.Certificates) &&
+                string.Equals(CRL, data.CRL, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Serves as a hash function for X509Data.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            int hashCode = 1279802945;
+            hashCode = hashCode * -1521134295 + EqualityComparer<IssuerSerial>.Default.GetHashCode(IssuerSerial);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SKI);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SubjectName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ICollection<string>>.Default.GetHashCode(Certificates);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CRL);
+            return hashCode;
         }
-
     }
 }
