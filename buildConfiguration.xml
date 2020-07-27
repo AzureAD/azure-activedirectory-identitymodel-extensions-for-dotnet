@@ -17,11 +17,9 @@
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
       <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
       <project name="Microsoft.IdentityModel.Protocols.WsTrust" />
-      <project name="System.ServiceModel.Federation" />
     </src>
     <test>
       <project name="Microsoft.IdentityModel.Protocols.WsTrust.Tests" test="yes" />
-      <project name="System.ServiceModel.Federation.Tests" test="yes" />
     </test>
   </projects>
 </root>
