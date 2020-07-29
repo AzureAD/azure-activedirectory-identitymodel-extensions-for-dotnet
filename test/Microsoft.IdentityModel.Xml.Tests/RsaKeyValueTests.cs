@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -34,6 +36,36 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class RsaKeyValueTests
     {
+        [Fact]
+        public void RsaKeyValue_ListCollectionTests()
+        {
+            var rsaKeyValue = new RSAKeyValue(string.Empty, string.Empty);
+            var secondrsaKeyValue = new RSAKeyValue("modulus", "exponent");
+
+            var list = new List<RSAKeyValue> { rsaKeyValue, secondrsaKeyValue };
+            var secondList = new List<RSAKeyValue> { rsaKeyValue, secondrsaKeyValue };
+
+            Assert.True(Enumerable.SequenceEqual(list, secondList));
+        }
+
+        [Fact]
+        public void RsaKeyValue_HashSetCollectionTests()
+        {
+            var set = new HashSet<RSAKeyValue>();
+            var rsaKeyValue = new RSAKeyValue(string.Empty, string.Empty);
+
+            set.Add(rsaKeyValue);
+
+            bool inCollection = set.Contains(rsaKeyValue);
+            Assert.True(inCollection);
+
+            var secondRSAKeyValue = new RSAKeyValue(string.Empty, string.Empty);
+
+            // hashcode is determined by immutable property values, not reference
+            inCollection = set.Contains(secondRSAKeyValue);
+            Assert.True(inCollection);
+        }
+
         [Theory, MemberData(nameof(IssuerSerialComparisonData))]
         public void RsaKeyValue_HashCodeTests(RsaKeyValueComparisonTheoryData theoryData)
         {

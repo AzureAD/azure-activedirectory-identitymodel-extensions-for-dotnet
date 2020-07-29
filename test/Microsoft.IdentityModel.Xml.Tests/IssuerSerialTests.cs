@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -34,6 +36,37 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class IssuerSerialTests
     {
+        [Fact]
+        public void IssuerSerial_HashSetCollectionTests()
+        {
+            var set = new HashSet<IssuerSerial>();
+
+            var issuerSerial = new IssuerSerial(string.Empty, string.Empty);
+
+            set.Add(issuerSerial);
+
+            bool inCollection = set.Contains(issuerSerial);
+            Assert.True(inCollection);
+
+            var secondIssuerSerial = new IssuerSerial(string.Empty, string.Empty);
+
+            // hashcode is determined by immutable values, not reference
+            inCollection = set.Contains(secondIssuerSerial);
+            Assert.True(inCollection);
+        }
+
+        [Fact]
+        public void IssuerSerial_ListCollectionTests()
+        {
+            var issuerSerial = new IssuerSerial(string.Empty, string.Empty);
+            var secondIssuerSerial = new IssuerSerial("issuerName", "serialNumber");
+
+            var list = new List<IssuerSerial> { issuerSerial, secondIssuerSerial };
+            var secondList = new List<IssuerSerial> { issuerSerial, secondIssuerSerial };
+
+            Assert.True(Enumerable.SequenceEqual(list, secondList));
+        }
+
         [Theory, MemberData(nameof(IssuerSerialComparisonData))]
         public void IssuerSerial_HashCodeTests(IssuerSerialComparisonTheoryData theoryData)
         {

@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -34,6 +36,46 @@ namespace Microsoft.IdentityModel.Xml.Tests
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
     public class X509DataTests
     {
+        [Fact]
+        public void X509Data_ListCollectionTests()
+        {
+            var x509Data = new X509Data()
+            {
+                SKI = "anotherSKI",
+                SubjectName = "anotherSubjectName",
+                CRL = "anotherCRL",
+                IssuerSerial = new IssuerSerial(string.Empty, string.Empty),
+            };
+            x509Data.Certificates.Add(ReferenceMetadata.X509CertificateData1);
+
+            var secondx509Data = new X509Data();
+
+            var list = new List<X509Data> { x509Data, secondx509Data };
+            var secondList = new List<X509Data> { x509Data, secondx509Data };
+
+            Assert.True(Enumerable.SequenceEqual(list, secondList));
+        }
+
+        [Fact]
+        public void X509Data_HashSetCollectionTests()
+        {
+            var set = new HashSet<X509Data>();
+
+            var x509Data = new X509Data();
+
+            set.Add(x509Data);
+
+            // modify each property to check that hashcode is stable
+            x509Data.SKI = "anotherSKI";
+            x509Data.SubjectName = "anotherSubjectName";
+            x509Data.CRL = "anotherCRL";
+            x509Data.IssuerSerial = new IssuerSerial(string.Empty, string.Empty);
+            x509Data.Certificates.Add(ReferenceMetadata.X509CertificateData1);
+
+            bool inCollection = set.Contains(x509Data);
+            Assert.True(inCollection);
+        }
+
         [Theory, MemberData(nameof(X509DataComparisonData))]
         public void X509Data_HashCodeTests(X509DataComparisonTheoryData theoryData)
         {

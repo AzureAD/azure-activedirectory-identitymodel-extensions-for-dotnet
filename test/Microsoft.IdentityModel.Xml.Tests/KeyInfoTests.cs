@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -60,26 +61,43 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.GetSet(context);
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
-    }
 
-    public class KeyInfoTheoryData : TheoryDataBase
-    {
-        public DSigSerializer Serializer
+        [Fact]
+        public void KeyInfo_ListCollectionTests()
         {
-            get;
-            set;
-        } = new DSigSerializer();
+            var keyInfo = new KeyInfo();
+            var secondKeyInfo = new KeyInfo()
+            {
+                KeyName = "anotherKeyName",
+                RetrievalMethodUri = "anotherRetrievalMethodUri",
+                RSAKeyValue = new RSAKeyValue(string.Empty, string.Empty),
+            };
 
-        public KeyInfo KeyInfo
-        {
-            get;
-            set;
+            secondKeyInfo.X509Data.Add(new X509Data(ReferenceMetadata.X509Certificate1));
+
+            var list = new List<KeyInfo> { keyInfo, secondKeyInfo };
+            var secondList = new List<KeyInfo> { keyInfo, secondKeyInfo };
+
+            Assert.True(Enumerable.SequenceEqual(list, secondList));
         }
 
-        public string Xml
+        [Fact]
+        public void KeyInfo_HashCodeCollectionTests()
         {
-            get;
-            set;
+            var set = new HashSet<KeyInfo>();
+
+            var keyInfo = new KeyInfo();
+
+            set.Add(keyInfo);
+
+            // modify each property to check that hashcode is stable
+            keyInfo.KeyName = "anotherKeyName";
+            keyInfo.RetrievalMethodUri = "anotherRetrievalMethodUri";
+            keyInfo.RSAKeyValue = new RSAKeyValue(string.Empty, string.Empty);
+            keyInfo.X509Data.Add(new X509Data(ReferenceMetadata.X509Certificate1));
+
+            bool inCollection = set.Contains(keyInfo);
+            Assert.True(inCollection);
         }
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -235,16 +253,39 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        public class KeyInfoComparisonTheoryData : TheoryDataBase
-        {
-            public KeyInfo FirstKeyInfo { get; set; }
 
-            public KeyInfo SecondKeyInfo { get; set; }
-
-            public bool HashShouldMatch { get; set; }
-
-            public bool ShouldBeConsideredEqual { get; set; }
-        }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
+    }
+
+    public class KeyInfoComparisonTheoryData : TheoryDataBase
+    {
+        public KeyInfo FirstKeyInfo { get; set; }
+
+        public KeyInfo SecondKeyInfo { get; set; }
+
+        public bool HashShouldMatch { get; set; }
+
+        public bool ShouldBeConsideredEqual { get; set; }
+    }
+
+    public class KeyInfoTheoryData : TheoryDataBase
+    {
+        public DSigSerializer Serializer
+        {
+            get;
+            set;
+        } = new DSigSerializer();
+
+        public KeyInfo KeyInfo
+        {
+            get;
+            set;
+        }
+
+        public string Xml
+        {
+            get;
+            set;
+        }
     }
 }
