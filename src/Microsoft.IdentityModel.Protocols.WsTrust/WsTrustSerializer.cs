@@ -1250,6 +1250,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (trustRequest.UseKey != null)
                     WriteUseKey(writer, serializationContext, trustRequest.UseKey);
 
+                if (trustRequest.Entropy != null)
+                    WriteEntropy(writer, serializationContext, trustRequest.Entropy);
+
                 foreach (XmlElement xmlElement in trustRequest.AdditionalXmlElements)
                     xmlElement.WriteTo(writer);
 
