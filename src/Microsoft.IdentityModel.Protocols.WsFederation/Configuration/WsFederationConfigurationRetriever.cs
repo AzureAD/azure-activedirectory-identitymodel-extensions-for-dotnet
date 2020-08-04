@@ -77,7 +77,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
 
-        Task<WsFederationConfiguration> IConfigurationRetriever<WsFederationConfiguration>.GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
+        /// <inheritdoc/>
+        public Task<WsFederationConfiguration> GetConfigurationAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             return GetAsync(address, retriever, cancel);
         }
