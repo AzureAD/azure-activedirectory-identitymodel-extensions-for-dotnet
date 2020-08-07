@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
@@ -63,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 
         public override string ToString()
         {
-            return TestId + ", ExpectSignature: " + ExpectSignature;
+            return $"{TestId}, ExpectedException: {ExpectedException}.";
         }
     }
 }

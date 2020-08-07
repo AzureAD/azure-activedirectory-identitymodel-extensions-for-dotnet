@@ -97,6 +97,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Digest);
         }
 
+        public static SigningCredentials AsymmetricSigningCredentialsWithoutSpecifyingDigest
+        {
+            get => new SigningCredentials(KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key, KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Algorithm);
+        }
+
         public static X509SigningCredentials X509AsymmetricSigningCredentials
         {
             get => new X509SigningCredentials(KeyingMaterial.DefaultCert_2048, SecurityAlgorithms.RsaSha256Signature);

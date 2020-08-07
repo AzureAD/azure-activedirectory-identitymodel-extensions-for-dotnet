@@ -200,34 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha256Signature:
-                case SecurityAlgorithms.RsaSsaPssSha256:
-                case SecurityAlgorithms.RsaSsaPssSha256Signature:
-                    return HashAlgorithmName.SHA256;
-
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha384Signature:
-                case SecurityAlgorithms.RsaSsaPssSha384:
-                case SecurityAlgorithms.RsaSsaPssSha384Signature:
-                    return HashAlgorithmName.SHA384;
-
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha512Signature:
-                case SecurityAlgorithms.RsaSsaPssSha512:
-                case SecurityAlgorithms.RsaSsaPssSha512Signature:
-                    return HashAlgorithmName.SHA512;
-            }
-
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            return SupportedAlgorithms.GetHashAlgorithmName(algorithm);
         }
 
         private AsymmetricAdapter ResolveAsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
@@ -251,28 +224,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            switch (algorithm)
-            {
-                case SecurityAlgorithms.EcdsaSha256:
-                case SecurityAlgorithms.EcdsaSha256Signature:
-                case SecurityAlgorithms.RsaSha256:
-                case SecurityAlgorithms.RsaSha256Signature:
-                    return SecurityAlgorithms.Sha256;
-
-                case SecurityAlgorithms.EcdsaSha384:
-                case SecurityAlgorithms.EcdsaSha384Signature:
-                case SecurityAlgorithms.RsaSha384:
-                case SecurityAlgorithms.RsaSha384Signature:
-                    return SecurityAlgorithms.Sha384;
-
-                case SecurityAlgorithms.EcdsaSha512:
-                case SecurityAlgorithms.EcdsaSha512Signature:
-                case SecurityAlgorithms.RsaSha512:
-                case SecurityAlgorithms.RsaSha512Signature:
-                    return SecurityAlgorithms.Sha512;
-            }
-
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+            return SupportedAlgorithms.GetDigestFromSignatureAlgorithm(algorithm);
         }
 
         /// <summary>

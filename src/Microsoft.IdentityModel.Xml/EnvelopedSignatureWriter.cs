@@ -175,7 +175,9 @@ namespace Microsoft.IdentityModel.Xml
         private Signature CreateSignature()
         {
             CryptoProviderFactory cryptoProviderFactory = _signingCredentials.CryptoProviderFactory ?? _signingCredentials.Key.CryptoProviderFactory;
-            var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
+            string digestAlgorithm = !string.IsNullOrEmpty(_signingCredentials.Digest) ? _signingCredentials.Digest : SupportedAlgorithms.GetDigestFromSignatureAlgorithm(_signingCredentials.Algorithm);
+            var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(digestAlgorithm);
+
             if (hashAlgorithm == null)
                 throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Digest)));
 
@@ -188,7 +190,7 @@ namespace Microsoft.IdentityModel.Xml
                     {
                         Uri = _referenceUri,
                         DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
-                        DigestMethod = _signingCredentials.Digest
+                        DigestMethod = digestAlgorithm
                     };
                 }
             }
@@ -205,30 +207,32 @@ namespace Microsoft.IdentityModel.Xml
             };
 
             using (var canonicalSignedInfoStream = new MemoryStream())
-            using (var signedInfoWriter = CreateTextWriter(Stream.Null))
             {
-                signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
-                DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
-                signedInfoWriter.EndCanonicalization();
-                signedInfoWriter.Flush();
-
-                var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
-                if (provider == null)
-                    throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
-
-                try
+                using (var signedInfoWriter = CreateTextWriter(Stream.Null))
                 {
-                    return new Signature
+                    signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
+                    DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
+                    signedInfoWriter.EndCanonicalization();
+                    signedInfoWriter.Flush();
+
+                    var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
+                    if (provider == null)
+                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
+
+                    try
                     {
-                        KeyInfo = new KeyInfo(_signingCredentials.Key),
-                        SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
-                        SignedInfo = signedInfo,
-                    };
-                }
-                finally
-                {
-                    if (provider != null)
-                        cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                        return new Signature
+                        {
+                            KeyInfo = new KeyInfo(_signingCredentials.Key),
+                            SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
+                            SignedInfo = signedInfo,
+                        };
+                    }
+                    finally
+                    {
+                        if (provider != null)
+                            cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                    }
                 }
             }
         }
