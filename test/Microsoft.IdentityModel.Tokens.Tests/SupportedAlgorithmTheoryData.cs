@@ -37,6 +37,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public string Algorithm { get; set; }
 
+        public string Digest { get; set; }
+
         public bool IsSupportedAlgorithm { get; set; } = true;
 
         public SecurityKey SecurityKey { get; set; }

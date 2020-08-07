@@ -28,12 +28,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
@@ -44,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class EnvelopedSignatureWriterTests
     {
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
+        [Theory, MemberData(nameof(ConstructorTestCases))]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -59,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> ConstructorTheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> ConstructorTestCases
         {
             get
             {
@@ -86,7 +84,96 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripSaml2TheoryData))]
+        [Theory, MemberData(nameof(CreateSignatureWithoutSpecifyingDigestTestCases))]
+        public void CreateSignatureWithoutSpecifyingDigest(EnvelopedSignatureTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateSignatureWithoutSpecifyingDigest", theoryData);
+
+            try
+            {
+                using (var buffer = new MemoryStream())
+                {
+                    var writer = new EnvelopedSignatureWriter(XmlWriter.Create(buffer), theoryData.SigningCredentials, theoryData.ReferenceId);
+                    writer.WriteStartElement("EntityDescriptor", "urn:oasis:names:tc:SAML:2.0:metadata");
+                    writer.WriteAttributeString("entityID", "issuer");
+                    writer.WriteEndElement();
+
+                    // read and verify signatures
+                    EnvelopedSignatureReader envelopedReader = new EnvelopedSignatureReader(XmlUtilities.CreateDictionaryReader(Encoding.UTF8.GetString(buffer.ToArray())));
+                    while (envelopedReader.Read());
+
+                    envelopedReader.Signature.Verify(theoryData.SigningCredentials.Key, theoryData.SigningCredentials.Key.CryptoProviderFactory);
+                    theoryData.ExpectedException.ProcessNoException(context);
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<EnvelopedSignatureTheoryData> CreateSignatureWithoutSpecifyingDigestTestCases
+        {
+            get
+            {
+                var theoryData = new TheoryData<EnvelopedSignatureTheoryData>();
+
+                // ECD
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, null, SecurityAlgorithms.EcdsaSha256 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256Signature, null, SecurityAlgorithms.EcdsaSha256Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha384, null, SecurityAlgorithms.EcdsaSha384 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha384Signature, null, SecurityAlgorithms.EcdsaSha384Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha512, null, SecurityAlgorithms.EcdsaSha512 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha512Signature, null, SecurityAlgorithms.EcdsaSha512Signature + "_DigestNULL"));
+
+                // RSA
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, null, SecurityAlgorithms.RsaSha256 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256Signature, null, SecurityAlgorithms.RsaSha256Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha384, null, SecurityAlgorithms.RsaSha384 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha384Signature, null, SecurityAlgorithms.RsaSha384Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512, null, SecurityAlgorithms.RsaSha512 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, null, SecurityAlgorithms.RsaSha512Signature + "_DigestNULL"));
+
+#if NET_CORE
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256, null, SecurityAlgorithms.RsaSsaPssSha256 + "_DigestNULL"));
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256Signature, null, SecurityAlgorithms.RsaSsaPssSha256Signature + "_DigestNULL"));
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384, null, SecurityAlgorithms.RsaSsaPssSha384 + "_DigestNULL"));
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384Signature, null, SecurityAlgorithms.RsaSsaPssSha384Signature + "_DigestNULL"));
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512, null, SecurityAlgorithms.RsaSsaPssSha512 + "_DigestNULL"));
+               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512Signature, null, SecurityAlgorithms.RsaSsaPssSha512Signature + "_DigestNULL"));
+#endif
+
+                // Symmetric
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256, null, SecurityAlgorithms.HmacSha256 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256Signature, null, SecurityAlgorithms.HmacSha256Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha384, null, SecurityAlgorithms.HmacSha384 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha384Signature, null, SecurityAlgorithms.HmacSha384Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512, null, SecurityAlgorithms.HmacSha512 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512Signature, null, SecurityAlgorithms.HmacSha512Signature + "_DigestNULL"));
+
+                // couple of failure cases
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.EcdsaSha256, null, "RSASecurityKey_EcdsaSha256", ExpectedException.NotSupportedException()));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.RsaSha256, null, "Ecdsa256SecurityKey_RsaSha256", ExpectedException.NotSupportedException()));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.RsaSha256, null, "SymmetricSecurityKey256_RsaSha256", ExpectedException.NotSupportedException()));
+
+                return theoryData;
+            }
+        }
+
+        private static EnvelopedSignatureTheoryData CreateSignatureTestCase(SecurityKey securityKey, string algorithm, string digest, string testId, ExpectedException expectedException = null)
+        {
+            return new EnvelopedSignatureTheoryData
+            {
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
+                ReferenceId = Default.ReferenceUriWithOutPrefix,
+                SigningCredentials = string.IsNullOrEmpty(digest) ? new SigningCredentials(securityKey, algorithm) : new SigningCredentials(securityKey, algorithm, digest),
+                TestId = testId
+            };
+        }
+
+        [Theory, MemberData(nameof(RoundTripSaml2TestCases))]
         public void RoundTripSaml2(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripSaml2", theoryData);
@@ -115,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> RoundTripSaml2TheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> RoundTripSaml2TestCases
         {
             get
             {
@@ -139,7 +226,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripWsMetadataTheoryData))]
+        [Theory, MemberData(nameof(RoundTripWsMetadataTestCases))]
         public void RoundTripWsMetadata(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripWsMetadata", theoryData);
@@ -150,13 +237,11 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 {
                     Encoding = new UTF8Encoding(false)
                 };
+
                 var buffer = new MemoryStream();
                 var esw = new EnvelopedSignatureWriter(XmlWriter.Create(buffer, settings), theoryData.SigningCredentials, theoryData.ReferenceId);
 
-                foreach (var action in theoryData.Action.GetInvocationList())
-                {
-                    action.DynamicInvoke(esw);
-                }
+                theoryData.Action.DynamicInvoke(esw);
 
                 var metadata = Encoding.UTF8.GetString(buffer.ToArray());
                 var configuration = new WsFederationConfiguration();
@@ -173,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnvelopedSignatureTheoryData> RoundTripWsMetadataTheoryData
+        public static TheoryData<EnvelopedSignatureTheoryData> RoundTripWsMetadataTestCases
         {
             get
             {

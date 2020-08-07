@@ -256,5 +256,59 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
+
+        [Theory, MemberData(nameof(GetDigestFromSignatureAlgorithmTests))]
+        public void GetDigestFromSignatureAlgorithm(SupportedAlgorithmTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.GetDigestFromSignatureAlgorithm", theoryData);
+
+            try
+            {
+                if (!theoryData.Digest.Equals(SupportedAlgorithms.GetDigestFromSignatureAlgorithm(theoryData.Algorithm)))
+                    context.AddDiff($"(!theoryData.Digest.Equals(SupportedAlgorithms.GetDigestFromSignatureAlgorithm(theoryData.Algorithm)). '{theoryData.Digest}' != Expected result from: '{theoryData.Algorithm}'.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SupportedAlgorithmTheoryData> GetDigestFromSignatureAlgorithmTests
+        {
+            get
+            {
+                return new TheoryData<SupportedAlgorithmTheoryData>
+                {
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha256, Algorithm = SecurityAlgorithms.EcdsaSha256, Digest = SecurityAlgorithms.Sha256 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha256Signature, Algorithm = SecurityAlgorithms.EcdsaSha256Signature, Digest = SecurityAlgorithms.Sha256Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha384, Algorithm = SecurityAlgorithms.EcdsaSha384, Digest = SecurityAlgorithms.Sha384 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha384Signature, Algorithm = SecurityAlgorithms.EcdsaSha384Signature , Digest = SecurityAlgorithms.Sha384Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha512, Algorithm = SecurityAlgorithms.EcdsaSha512, Digest = SecurityAlgorithms.Sha512 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.EcdsaSha512Signature, Algorithm = SecurityAlgorithms.EcdsaSha512Signature, Digest = SecurityAlgorithms.Sha512Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha256, Algorithm = SecurityAlgorithms.HmacSha256, Digest = SecurityAlgorithms.Sha256 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha256Signature, Algorithm = SecurityAlgorithms.HmacSha256Signature, Digest = SecurityAlgorithms.Sha256Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha384, Algorithm = SecurityAlgorithms.HmacSha384, Digest = SecurityAlgorithms.Sha384 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha384Signature, Algorithm = SecurityAlgorithms.HmacSha384Signature, Digest = SecurityAlgorithms.Sha384Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha512, Algorithm = SecurityAlgorithms.HmacSha512, Digest = SecurityAlgorithms.Sha512 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.HmacSha512Signature, Algorithm = SecurityAlgorithms.HmacSha512Signature, Digest = SecurityAlgorithms.Sha512Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha256, Algorithm = SecurityAlgorithms.RsaSha256, Digest = SecurityAlgorithms.Sha256 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha256Signature, Algorithm = SecurityAlgorithms.RsaSha256Signature, Digest = SecurityAlgorithms.Sha256Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha384, Algorithm = SecurityAlgorithms.RsaSha384, Digest = SecurityAlgorithms.Sha384 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha384Signature, Algorithm = SecurityAlgorithms.RsaSha384Signature, Digest = SecurityAlgorithms.Sha384Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha512, Algorithm = SecurityAlgorithms.RsaSha512, Digest = SecurityAlgorithms.Sha512 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSha512Signature, Algorithm = SecurityAlgorithms.RsaSha512Signature, Digest = SecurityAlgorithms.Sha512Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha256, Algorithm = SecurityAlgorithms.RsaSha256, Digest = SecurityAlgorithms.Sha256 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha256Signature, Algorithm = SecurityAlgorithms.RsaSsaPssSha256Signature, Digest = SecurityAlgorithms.Sha256Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha384, Algorithm = SecurityAlgorithms.RsaSha384, Digest = SecurityAlgorithms.Sha384 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha384Signature, Algorithm = SecurityAlgorithms.RsaSsaPssSha384Signature, Digest = SecurityAlgorithms.Sha384Digest },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha512, Algorithm = SecurityAlgorithms.RsaSha512, Digest = SecurityAlgorithms.Sha512 },
+                    new SupportedAlgorithmTheoryData{ TestId = SecurityAlgorithms.RsaSsaPssSha512Signature, Algorithm = SecurityAlgorithms.RsaSsaPssSha512Signature, Digest = SecurityAlgorithms.Sha512Digest }
+                };
+            }
+        }
     }
 }

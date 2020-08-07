@@ -69,20 +69,20 @@ namespace Microsoft.IdentityModel.Tokens
         internal static readonly ICollection<string> RsaSigningAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.RsaSha256,
-            SecurityAlgorithms.RsaSha384,
-            SecurityAlgorithms.RsaSha512,
             SecurityAlgorithms.RsaSha256Signature,
+            SecurityAlgorithms.RsaSha384,
             SecurityAlgorithms.RsaSha384Signature,
+            SecurityAlgorithms.RsaSha512,
             SecurityAlgorithms.RsaSha512Signature
         };
 
         internal static readonly ICollection<string> RsaPssSigningAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.RsaSsaPssSha256,
-            SecurityAlgorithms.RsaSsaPssSha384,
-            SecurityAlgorithms.RsaSsaPssSha512,
             SecurityAlgorithms.RsaSsaPssSha256Signature,
+            SecurityAlgorithms.RsaSsaPssSha384,
             SecurityAlgorithms.RsaSsaPssSha384Signature,
+            SecurityAlgorithms.RsaSsaPssSha512,
             SecurityAlgorithms.RsaSsaPssSha512Signature
         };
 
@@ -96,20 +96,120 @@ namespace Microsoft.IdentityModel.Tokens
         internal static readonly ICollection<string> SymmetricKeyWrapAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.Aes128KW,
-            SecurityAlgorithms.Aes256KW,
             SecurityAlgorithms.Aes128KeyWrap,
-            SecurityAlgorithms.Aes256KeyWrap,
+            SecurityAlgorithms.Aes256KW,
+            SecurityAlgorithms.Aes256KeyWrap
         };
 
         internal static readonly ICollection<string> SymmetricSigningAlgorithms = new Collection<string>
         {
-            SecurityAlgorithms.HmacSha256Signature,
-            SecurityAlgorithms.HmacSha384Signature,
-            SecurityAlgorithms.HmacSha512Signature,
             SecurityAlgorithms.HmacSha256,
+            SecurityAlgorithms.HmacSha256Signature,
             SecurityAlgorithms.HmacSha384,
-            SecurityAlgorithms.HmacSha512
+            SecurityAlgorithms.HmacSha384Signature,
+            SecurityAlgorithms.HmacSha512,
+            SecurityAlgorithms.HmacSha512Signature
         };
+
+#if NET461 || NETSTANDARD2_0
+        /// <summary>
+        /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
+        /// This method returns the <see cref="HashAlgorithmName"/>
+        /// that describes the <see cref="HashAlgorithm"/>to use when generating a Signature.
+        /// </summary>
+        /// <param name="algorithm">The SignatureAlgorithm in use.</param>
+        /// <returns>The <see cref="HashAlgorithmName"/> to use.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="algorithm"/> is not supported.</exception>
+        internal static HashAlgorithmName GetHashAlgorithmName(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSsaPssSha256:
+                case SecurityAlgorithms.RsaSsaPssSha256Signature:
+                    return HashAlgorithmName.SHA256;
+
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSsaPssSha384:
+                case SecurityAlgorithms.RsaSsaPssSha384Signature:
+                    return HashAlgorithmName.SHA384;
+
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RsaSsaPssSha512:
+                case SecurityAlgorithms.RsaSsaPssSha512Signature:
+                    return HashAlgorithmName.SHA512;
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+        }
+#endif
+
+        /// <summary>
+        /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
+        /// This method returns the HashAlgorithm string that is associated with a SignatureAlgorithm.
+        /// </summary>
+        /// <param name="algorithm">The SignatureAlgorithm of interest.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/>is null or whitespace.</exception>
+        /// <exception cref="ArgumentException">if <paramref name="algorithm"/> is not supported.</exception>
+        internal static string GetDigestFromSignatureAlgorithm(string algorithm)
+        {
+            if (string.IsNullOrWhiteSpace(algorithm))
+                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.EcdsaSha256:
+                case SecurityAlgorithms.HmacSha256:
+                case SecurityAlgorithms.RsaSha256:
+                case SecurityAlgorithms.RsaSsaPssSha256:
+                    return SecurityAlgorithms.Sha256;
+
+                case SecurityAlgorithms.EcdsaSha256Signature:
+                case SecurityAlgorithms.HmacSha256Signature:
+                case SecurityAlgorithms.RsaSha256Signature:
+                case SecurityAlgorithms.RsaSsaPssSha256Signature:
+                    return SecurityAlgorithms.Sha256Digest;
+
+                case SecurityAlgorithms.EcdsaSha384:
+                case SecurityAlgorithms.HmacSha384:
+                case SecurityAlgorithms.RsaSha384:
+                case SecurityAlgorithms.RsaSsaPssSha384:
+                    return SecurityAlgorithms.Sha384;
+
+                case SecurityAlgorithms.EcdsaSha384Signature:
+                case SecurityAlgorithms.HmacSha384Signature:
+                case SecurityAlgorithms.RsaSha384Signature:
+                case SecurityAlgorithms.RsaSsaPssSha384Signature:
+                    return SecurityAlgorithms.Sha384Digest;
+
+                case SecurityAlgorithms.EcdsaSha512:
+                case SecurityAlgorithms.HmacSha512:
+                case SecurityAlgorithms.RsaSha512:
+                case SecurityAlgorithms.RsaSsaPssSha512:
+                    return SecurityAlgorithms.Sha512;
+
+                case SecurityAlgorithms.EcdsaSha512Signature:
+                case SecurityAlgorithms.HmacSha512Signature:
+                case SecurityAlgorithms.RsaSha512Signature:
+                case SecurityAlgorithms.RsaSsaPssSha512Signature:
+                    return SecurityAlgorithms.Sha512Digest;
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+        }
 
         /// <summary>
         /// Checks if an 'algorithm, key' pair is supported.
