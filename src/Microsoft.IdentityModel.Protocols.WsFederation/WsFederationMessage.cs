@@ -83,10 +83,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
-
             if (uri != null && uri.Query.Length > 1)
+            {
+                LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
                 return FromQueryString(uri.Query.Substring(1));
+            }
 
             return new WsFederationMessage();
         }
@@ -208,7 +209,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // find matching </RequestedSecurityToken>
-            var tokenEndIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, tokenStartIndex);
+            var tokenEndIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, tokenStartIndex, StringComparison.InvariantCulture);
             if (tokenEndIndex == -1)
             {
                 LogHelper.LogWarning(LogMessages.IDX22904);
@@ -250,8 +251,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             string token = null;
             using (var sr = new StringReader(Wresult))
+            using (var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit })
             {
-                var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit };
                 if (xmlReader.Settings != null)
                     xmlReader.Settings.DtdProcessing = DtdProcessing.Prohibit;
 

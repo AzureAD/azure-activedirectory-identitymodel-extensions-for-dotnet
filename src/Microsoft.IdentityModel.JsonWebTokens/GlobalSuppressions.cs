@@ -5,7 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Globablization is not used in this project")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Previously released as non-static", Scope = "member", Target = "~P:Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.TokenType")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Previously released as non-static", Scope = "member", Target = "~M:Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(System.String,Microsoft.IdentityModel.Tokens.EncryptingCredentials)~System.String")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Previously released as non-static", Scope = "member", Target = "~M:Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(System.String,Microsoft.IdentityModel.Tokens.EncryptingCredentials,System.String)~System.String")]

@@ -272,7 +272,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             return tokenEndpoint;
         }
 
-        private bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
+        private static bool IsSecurityTokenServiceTypeRoleDescriptor(XmlReader reader)
         {
             if (reader == null || !reader.IsStartElement(Elements.RoleDescriptor, MetadataNamespace))
                 return false;
