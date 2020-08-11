@@ -1638,7 +1638,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureValidationFailedException(substringExpected: "IDX10503:"),
                         TestId = "Security Key Identifier not found",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Asymmetric_2048, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.X509SecurityKey_LocalSts, null)
@@ -1759,7 +1759,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(substringExpected: "IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureValidationFailedException(substringExpected: "IDX10503:"),
                         TestId = "BinaryKey 56Bits",
                         Token = JwtTestUtilities.GetJwtParts(EncodedJwts.Symmetric_256, "ALLParts"),
                         ValidationParameters = ValidateSignatureValidationParameters(KeyingMaterial.DefaultSymmetricSecurityKey_56, null),

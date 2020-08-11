@@ -977,30 +977,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             return key;
                     }
                 }
+            }
 
-                if (!string.IsNullOrEmpty(jwtToken.X5t))
+            if (!string.IsNullOrEmpty(jwtToken.X5t))
+            {
+                if (validationParameters.TokenDecryptionKey != null)
                 {
-                    if (validationParameters.TokenDecryptionKey != null)
-                    {
-                        if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return validationParameters.TokenDecryptionKey;
+                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        return validationParameters.TokenDecryptionKey;
 
-                        var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
+                    var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
+                        return validationParameters.TokenDecryptionKey;
+                }
+
+                if (validationParameters.TokenDecryptionKeys != null)
+                {
+                    foreach (var key in validationParameters.TokenDecryptionKeys)
+                    {
+                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                            return key;
+
+                        var x509Key = key as X509SecurityKey;
                         if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
-                            return validationParameters.TokenDecryptionKey;
-                    }
-
-                    if (validationParameters.TokenDecryptionKeys != null)
-                    {
-                        foreach (var key in validationParameters.TokenDecryptionKeys)
-                        {
-                            if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                                return key;
-
-                            var x509Key = key as X509SecurityKey;
-                            if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
-                                return key;
-                        }
+                            return key;
                     }
                 }
             }
@@ -1247,7 +1247,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
             {
                 if (keysAttempted.Length > 0)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureValidationFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
                 else
                     throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
             }

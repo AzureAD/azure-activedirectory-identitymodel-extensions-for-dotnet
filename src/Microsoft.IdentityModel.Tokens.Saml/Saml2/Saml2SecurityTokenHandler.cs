@@ -447,7 +447,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
 
             if (keysAttempted.Length > 0)
-                throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
+                throw LogExceptionMessage(new SecurityTokenSignatureValidationFailedException(FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, samlToken)));
 
             throw LogExceptionMessage(new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10500));
         }
