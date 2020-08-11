@@ -1070,13 +1070,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     var innerToken = ValidateSignature(decryptedJwt, validationParameters);
                     jwtToken.InnerToken = innerToken;
                     var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParameters);
-                    return new TokenValidationResult
+                    var tokenValidationResult = new TokenValidationResult
                     {
                         SecurityToken = jwtToken,
                         ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
                         IsValid = true,
                         TokenType = innerTokenValidationResult.TokenType
                     };
+
+                    var claims = JwtTokenUtilities.CreateDictionaryFromClaims(innerTokenValidationResult.ClaimsIdentity.Claims);
+                    foreach (var claim in claims)
+                        tokenValidationResult.Claims.Add(claim.Key, claim.Value);
+
+                    return tokenValidationResult;
                 }
                 else
                 {
@@ -1109,14 +1115,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters);
             var type = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-
-            return new TokenValidationResult
+            var claimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters, issuer);
+            var tokenValidationResult = new TokenValidationResult
             {
                 SecurityToken = jsonWebToken,
-                ClaimsIdentity = CreateClaimsIdentity(jsonWebToken, validationParameters, issuer),
+                ClaimsIdentity = claimsIdentity,
                 IsValid = true,
                 TokenType = type
             };
+
+            var claims = JwtTokenUtilities.CreateDictionaryFromClaims(claimsIdentity.Claims);
+            foreach (var claim in claims)
+                tokenValidationResult.Claims.Add(claim.Key, claim.Value);
+
+            return tokenValidationResult;
         }
 
         /// <summary>

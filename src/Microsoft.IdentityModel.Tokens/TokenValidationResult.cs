@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -35,6 +36,11 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class TokenValidationResult
     {
+        /// <summary>
+        /// The <see cref="Dictionary{TKey, TValue}"/> created from the validated security token.
+        /// </summary>
+        public IDictionary<string, object> Claims { get; } = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
