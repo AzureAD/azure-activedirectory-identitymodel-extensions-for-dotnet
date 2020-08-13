@@ -251,11 +251,8 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             string token = null;
             using (var sr = new StringReader(Wresult))
-            using (var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit })
+            using (var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null })
             {
-                if (xmlReader.Settings != null)
-                    xmlReader.Settings.DtdProcessing = DtdProcessing.Prohibit;
-
                 // Read StartElement <RequestSecurityTokenResponseCollection> this is possible for wstrust 1.3 and 1.4
                 if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))
                     xmlReader.ReadStartElement();

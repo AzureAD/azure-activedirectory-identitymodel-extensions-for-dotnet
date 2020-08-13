@@ -31,4 +31,3 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Doesn't own object", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.ReadEntityDescriptor(System.Xml.XmlReader)~Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConfiguration")]
 
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Protocols.WsFederation.SecurityTokenServiceTypeRoleDescriptor.KeyInfos")]
-[assembly: SuppressMessage("Security", "CA3075:Insecure DTD processing in XML", Justification = "Not created from factory, dtd is still prohibited", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.GetTokenUsingXmlReader~System.String")]
