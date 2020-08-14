@@ -42,7 +42,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void Constructor()
         {
             var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
-            Assert.True(provider.GetKeyBytesCalled);
         }
 
         [Fact]
@@ -53,6 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var results = provider.Encrypt(Guid.NewGuid().ToByteArray(), authenticatedData);
             var derivedProvider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
             derivedProvider.Decrypt(results.Ciphertext, authenticatedData, results.IV, results.AuthenticationTag);
+            Assert.True(derivedProvider.GetKeyBytesCalled);
             Assert.True(derivedProvider.DecryptCalled);
         }
 
@@ -61,6 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
             provider.Encrypt(Guid.NewGuid().ToByteArray(), Guid.NewGuid().ToByteArray());
+            Assert.True(provider.GetKeyBytesCalled);
             Assert.True(provider.EncryptCalled);
         }
 

@@ -141,7 +141,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
                     SigningKey = KeyingMaterial.RsaSecurityKey_1024,
+                    VerifyKey = KeyingMaterial.RsaSecurityKey_1024,
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException(),
+                    VerifyAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
                     TestId = "KeySizeSmallerThanRequiredSize"
                 });
 

@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
-        private AsymmetricAdapter _asymmetricAdapter;
+        private Lazy<AsymmetricAdapter> _asymmetricAdapter;
         private bool _disposed = false;
 
         /// <summary>
@@ -59,13 +59,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!SupportedAlgorithms.IsSupportedRsaKeyWrap(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
-
             Algorithm = algorithm;
             Key = key;
 
-            _asymmetricAdapter = new AsymmetricAdapter(key, algorithm, willUnwrap);
+            _asymmetricAdapter = new Lazy<AsymmetricAdapter>(() =>
+            {
+                if (!IsSupportedAlgorithm(Key, Algorithm))
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
+                return new AsymmetricAdapter(key, algorithm, willUnwrap);
+            });
         }
 
         /// <summary>
@@ -95,7 +97,8 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     _disposed = true;
-                    _asymmetricAdapter.Dispose();
+                    if (_asymmetricAdapter.IsValueCreated)
+                        _asymmetricAdapter.Value.Dispose();
                 }
             }
         }
@@ -130,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Decrypt(keyBytes);
+                return _asymmetricAdapter.Value.Decrypt(keyBytes);
             }
             catch (Exception ex)
             {
@@ -157,11 +160,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Encrypt(keyBytes);
+                return _asymmetricAdapter.Value.Encrypt(keyBytes);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex), ex));
             }
         }
     }

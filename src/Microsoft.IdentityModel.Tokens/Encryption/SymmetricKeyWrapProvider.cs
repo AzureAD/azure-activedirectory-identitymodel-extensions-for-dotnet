@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
-        private SymmetricAlgorithm _symmetricAlgorithm;
+        private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
         private bool _disposed;
@@ -72,9 +72,13 @@ namespace Microsoft.IdentityModel.Tokens
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymetricAlgorithmInternal(key, algorithm);
-            if (_symmetricAlgorithm == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+            _symmetricAlgorithm = new Lazy<SymmetricAlgorithm>(() =>
+            {
+                SymmetricAlgorithm symetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
+                if (symetricAlgorithm == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+                return symetricAlgorithm;
+            });
         }
 
         /// <summary>
@@ -103,9 +107,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (disposing)
                 {
-                    if (_symmetricAlgorithm != null)
+                    if (_symmetricAlgorithm != null && _symmetricAlgorithm.IsValueCreated)
                     {
-                        _symmetricAlgorithm.Dispose();
+                        _symmetricAlgorithm.Value.Dispose();
                         _symmetricAlgorithm = null;
                     }
 
@@ -146,11 +150,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">The keysize doesn't match the algorithm.</exception>
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
-        {
-            return GetSymetricAlgorithmInternal(key, algorithm);
-        }
-
-        private SymmetricAlgorithm GetSymetricAlgorithmInternal(SecurityKey key, string algorithm)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -278,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
-                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.CreateDecryptor();
+                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
                 }
             }
 
@@ -376,7 +375,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(LogMessages.IDX10658, ex), ex));
             }
         }
 
@@ -420,7 +419,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
-                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.CreateEncryptor();
+                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();
                 }
             }
 

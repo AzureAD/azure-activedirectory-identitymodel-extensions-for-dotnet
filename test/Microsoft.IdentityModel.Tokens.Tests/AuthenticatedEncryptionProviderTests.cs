@@ -119,8 +119,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test4", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10668:"));
-            theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
-            theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
+            theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
+            theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.NoExceptionExpected);
 
             // set key.CryptoProviderFactory to return null when creating SignatureProvider
             var key = Default.SymmetricEncryptionKey256;
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SymmetricSignatureProviderForSigning = null
             };
-            theoryData.Add("Test9", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentException("IDX10649:"));
+            theoryData.Add("Test9", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
 
             key = Default.SymmetricEncryptionKey256;
             key.CryptoProviderFactory = new AuthenticatedEncryptionCryptoProviderFactory
@@ -420,7 +420,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
 
             ExpectedException expectedException = ExpectedException.ObjectDisposedException;
-            expectedException.SubstringExpected = decryptSignatureProviderDisposed.GetType().ToString();
+            expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
             theoryData.Add(new AuthenticatedEncryptionTheoryData
             {
                 AuthenticatedData = Guid.NewGuid().ToByteArray(),
@@ -552,8 +552,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             decryptionProvider.Dispose();
             decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
             encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
-            expectedException = ExpectedException.ObjectDisposedException;
-            expectedException.SubstringExpected = decryptSignatureProvider.GetType().ToString();
 
             theoryData.Add(new AuthenticatedEncryptionTheoryData
             {
@@ -562,7 +560,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DecryptionProvider = decryptionProvider,
                 EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
                 EncryptionProvider = encryptionProvider,
-                ExpectedException = expectedException,
                 Plaintext = Guid.NewGuid().ToByteArray(),
                 TestId = "DecryptExtensibilityCache"
             });
@@ -589,8 +586,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
             encryptionProvider.Dispose();
             encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
-            expectedException = ExpectedException.ObjectDisposedException;
-            expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
 
             theoryData.Add(new AuthenticatedEncryptionTheoryData
             {
@@ -599,7 +594,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DecryptionProvider = decryptionProvider,
                 EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
                 EncryptionProvider = encryptionProvider,
-                ExpectedException = expectedException,
                 Plaintext = Guid.NewGuid().ToByteArray(),
                 TestId = "EcryptExtensibilityCache"
             });

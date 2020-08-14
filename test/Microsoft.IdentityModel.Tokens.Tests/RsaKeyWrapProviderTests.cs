@@ -115,7 +115,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
                     TestId = "KeyTooSmall1024",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
@@ -123,7 +122,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
                     TestId = "KeyDoesNotMatchAlgorithm",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.Aes128KW,
@@ -157,6 +155,67 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WillUnwrap = true
                 }
+            };
+        }
+
+        [Theory, MemberData(nameof(RsaKeyWrapValidationOnAccessTestCases))]
+        public void RsaKeyWrap_KeyAndAlgorithmValidationOnAccess(KeyWrapTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.RsaKeyWrap_KeyAndAlgorithmValidationOnAccess", theoryData);
+            var provider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, theoryData.WillUnwrap);
+
+            try
+            {
+                // access a lazy initialized resource
+                provider.WrapKey(Guid.NewGuid().ToByteArray());
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        public static TheoryData<KeyWrapTheoryData> RsaKeyWrapValidationOnAccessTestCases()
+        {
+            return new TheoryData<KeyWrapTheoryData>
+            {
+                new KeyWrapTheoryData
+                {
+                    TestId = "KeyTooSmall1024",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_1024,
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10658:", typeof(NotSupportedException))
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "KeyDoesNotMatchAlgorithm",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.Aes128KW,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10658", typeof(NotSupportedException))
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "RsaAlgorithmMatch",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "X509AlgorithmMatch",
+                    WillUnwrap = false,
+                    WrapKey = KeyingMaterial.X509SecurityKey2,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1
+                },
+                new KeyWrapTheoryData
+                {
+                    TestId = "JwkRSA",
+                    WillUnwrap = false,
+                    WrapKey = KeyingMaterial.JsonWebKeyRsa_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                },
             };
         }
 

@@ -38,10 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
     public class AsymmetricSignatureProvider : SignatureProvider
     {
         private bool _disposed;
-        private AsymmetricAdapter _asymmetricAdapter;
+        private Lazy<AsymmetricAdapter> _asymmetricAdapter;
         private CryptoProviderFactory _cryptoProviderFactory;
-        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
-        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
+        private readonly IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
+        private readonly IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
         /// <summary>
         /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
@@ -153,9 +153,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
-            ValidateAsymetricSecurityKeySizeInternal(key, algorithm, willCreateSignatures);
-            _asymmetricAdapter = ResolveAsymmetricAdapter(jsonWebKey?.ConvertedSecurityKey ?? key, algorithm, willCreateSignatures);
             WillCreateSignatures = willCreateSignatures;
+
+            _asymmetricAdapter = new Lazy<AsymmetricAdapter>(() =>
+            {
+                ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
+                AsymmetricAdapter asymmetricAdapter = ResolveAsymmetricAdapter(jsonWebKey?.ConvertedSecurityKey ?? key, algorithm, willCreateSignatures);
+                return asymmetricAdapter;
+            });
         }
 
         /// <summary>
@@ -310,7 +315,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Sign(input);
+                return _asymmetricAdapter.Value.Sign(input);
             }
             catch
             {
@@ -334,11 +339,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
         /// </remarks>
         public virtual void ValidateAsymmetricSecurityKeySize(SecurityKey key, string algorithm, bool willCreateSignatures)
-        {
-            ValidateAsymetricSecurityKeySizeInternal(key, algorithm, willCreateSignatures);
-        }
-
-        private void ValidateAsymetricSecurityKeySizeInternal(SecurityKey key, string algorithm, bool willCreateSignatures)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -405,7 +405,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Verify(input, signature);
+                return _asymmetricAdapter.Value.Verify(input, signature);
             }
             catch
             {
@@ -427,7 +427,8 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     CryptoProviderCache?.TryRemove(this);
-                    _asymmetricAdapter.Dispose();
+                    if (_asymmetricAdapter.IsValueCreated)
+                        _asymmetricAdapter.Value.Dispose();
                 }
             }
         }
