@@ -34,6 +34,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Json.Linq;
 using Xunit;
+using System.Reflection;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -2360,6 +2361,99 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 }
             };
         }
+
+        [Theory, MemberData(nameof(SecurityTokenDecryptionTheoryData))]
+        public void GetEncryptionKeys(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.EncryptionKeysCheck", theoryData);
+            try
+            {
+                TestUtilities.AssertFailIfErrors(context);
+                string jweFromJwtHandlerWithKid = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                var jwtTokenFromJwtHandlerWithKid = theoryData.JwtSecurityTokenHandler.ReadJwtToken(jweFromJwtHandlerWithKid);
+                var getContentEncryptionKeysMethod = theoryData.JwtSecurityTokenHandler.GetType().GetMethod("GetContentEncryptionKeys", BindingFlags.Instance | BindingFlags.NonPublic);
+                var encryptionKeysFromJwtHandlerWithKid = getContentEncryptionKeysMethod.Invoke(theoryData.JwtSecurityTokenHandler, new object[2] { jwtTokenFromJwtHandlerWithKid, theoryData.ValidationParameters });
+
+                var encryptingCredentials = theoryData.TokenDescriptor.EncryptingCredentials;
+                var keyId = encryptingCredentials.Key.KeyId;
+                encryptingCredentials.Key.KeyId = "";
+
+                string jweFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                var jwtTokenFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.ReadJwtToken(jweFromJwtHandlerWithNoKid);
+                jwtTokenFromJwtHandlerWithNoKid.Header.Add("x5t", keyId);
+                jwtTokenFromJwtHandlerWithNoKid.Header.Remove("alg");
+                jwtTokenFromJwtHandlerWithNoKid.Header.Add("alg", theoryData.Algorithm);
+
+                theoryData.ValidationParameters.TokenDecryptionKey.KeyId = keyId;
+                var encryptionKeysFromJwtHandlerWithNoKid = getContentEncryptionKeysMethod.Invoke(theoryData.JwtSecurityTokenHandler, new object[2] { jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters });
+
+                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex.InnerException, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+        public static TheoryData<CreateTokenTheoryData> SecurityTokenDecryptionTheoryData
+        {
+            get
+            {
+                var tokenHandler = new JwtSecurityTokenHandler
+                {
+                    SetDefaultTimesOnTokenCreation = false
+                };
+
+                tokenHandler.InboundClaimTypeMap.Clear();
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                   new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "Valid",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Algorithm = JwtConstants.DirectKeyUseAlg
+                    },
+                   new CreateTokenTheoryData
+                    {
+                        TestId = "AlgorithmMisMatch",
+                        Payload = Default.PayloadString,
+                        ExpectedException = ExpectedException.KeyWrapException("IDX10613:"),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512
+                    }
+                };
+            }
+        }
     }
 
     public class KeyWrapTokenTheoryData : TheoryDataBase
@@ -2413,6 +2507,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public string JwtToken { get; set; }
 
         public TokenValidationParameters ValidationParameters { get; set; }
+
+        public string Algorithm { get; set; }
     }
 }
 

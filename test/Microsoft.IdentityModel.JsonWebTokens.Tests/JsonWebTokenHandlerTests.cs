@@ -31,6 +31,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Json;
@@ -256,7 +257,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
 
                 tokenHandler.InboundClaimTypeMap.Clear();
-
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
@@ -298,6 +298,98 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
                         }
+                    }
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(SecurityTokenDecryptionTheoryData))]
+        public void GetEncryptionKeys(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.EncryptionKeysCheck", theoryData);
+            try
+            {
+                string jweFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials);
+                var jwtTokenFromJsonHandlerWithKid = new JsonWebToken(jweFromJsonHandlerWithKid);
+                var getContentEncryptionKeysMethod = theoryData.JsonWebTokenHandler.GetType().GetMethod("GetContentEncryptionKeys", BindingFlags.Instance | BindingFlags.NonPublic);
+                var encryptionKeysFromJsonHandlerWithKid = getContentEncryptionKeysMethod.Invoke(theoryData.JsonWebTokenHandler, new object[2] { jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters });
+
+                var encryptingCredentials = theoryData.TokenDescriptor.EncryptingCredentials;
+                var keyId = encryptingCredentials.Key.KeyId;
+                encryptingCredentials.Key.KeyId = "";
+
+                string jweFromJsonHandlerWithNoKid = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials);
+                var jwtTokenFromJsonHandlerWithNoKid = new JsonWebToken(jweFromJsonHandlerWithNoKid);
+                jwtTokenFromJsonHandlerWithNoKid.Header.Add("x5t", keyId);
+                jwtTokenFromJsonHandlerWithNoKid.Header.Remove("alg");
+                jwtTokenFromJsonHandlerWithNoKid.Header.Add("alg", theoryData.Algorithm);
+
+                theoryData.ValidationParameters.TokenDecryptionKey.KeyId = keyId;
+                var encryptionKeysFromJsonHandlerWithNoKid = getContentEncryptionKeysMethod.Invoke(theoryData.JsonWebTokenHandler, new object[2] { jwtTokenFromJsonHandlerWithNoKid, theoryData.ValidationParameters });
+
+                IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, encryptionKeysFromJsonHandlerWithNoKid, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex.InnerException, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+        public static TheoryData<CreateTokenTheoryData> SecurityTokenDecryptionTheoryData
+        {
+            get
+            {
+                var tokenHandler = new JwtSecurityTokenHandler
+                {
+                    SetDefaultTimesOnTokenCreation = false
+                };
+
+                tokenHandler.InboundClaimTypeMap.Clear();
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                   new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "Valid",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Algorithm = JwtConstants.DirectKeyUseAlg
+                    },
+                   new CreateTokenTheoryData
+                    {
+                        TestId = "AlgorithmMisMatch",
+                        Payload = Default.PayloadString,
+                        ExpectedException = ExpectedException.KeyWrapException("IDX10613:"),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512
                     }
                 };
             }
@@ -688,7 +780,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         First = true,
                         TestId = "Valid",
                         Payload = Default.PayloadString,
-                        TokenDescriptor =  new SecurityTokenDescriptor
+                        TokenDescriptor = new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             Subject = new ClaimsIdentity(Default.PayloadClaims)
@@ -2494,6 +2586,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string JwtToken { get; set; }
 
         public TokenValidationParameters ValidationParameters { get; set; }
+
+        public string Algorithm { get; set; }
     }
 }
 

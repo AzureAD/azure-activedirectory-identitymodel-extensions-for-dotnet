@@ -934,17 +934,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
+            // keep track of exceptions thrown, keys that were tried
+            var exceptionStrings = new StringBuilder();
+            var keysAttempted = new StringBuilder();
             foreach (var key in keys)
             {
-                if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
+                try
                 {
-                    var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
-                    var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                    unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                    if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
+                    {
+                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
+                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                    }
                 }
+                catch (Exception ex)
+                {
+                    exceptionStrings.AppendLine(ex.ToString());
+                }
+                keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
             }
 
-            return unwrappedKeys;
+            if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
+                return unwrappedKeys;
+            else
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10613, keysAttempted, exceptionStrings, jwtToken)));
         }
 
         /// <summary>
@@ -977,34 +991,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             return key;
                     }
                 }
+            }
 
-                if (!string.IsNullOrEmpty(jwtToken.X5t))
+            if (!string.IsNullOrEmpty(jwtToken.X5t))
+            {
+                if (validationParameters.TokenDecryptionKey != null)
                 {
-                    if (validationParameters.TokenDecryptionKey != null)
-                    {
-                        if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return validationParameters.TokenDecryptionKey;
+                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        return validationParameters.TokenDecryptionKey;
 
-                        var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
+                    var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
+                        return validationParameters.TokenDecryptionKey;
+                }
+
+                if (validationParameters.TokenDecryptionKeys != null)
+                {
+                    foreach (var key in validationParameters.TokenDecryptionKeys)
+                    {
+                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                            return key;
+
+                        var x509Key = key as X509SecurityKey;
                         if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
-                            return validationParameters.TokenDecryptionKey;
-                    }
-
-                    if (validationParameters.TokenDecryptionKeys != null)
-                    {
-                        foreach (var key in validationParameters.TokenDecryptionKeys)
-                        {
-                            if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                                return key;
-
-                            var x509Key = key as X509SecurityKey;
-                            if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
-                                return key;
-                        }
+                            return key;
                     }
                 }
             }
-
             return null;
         }
 
