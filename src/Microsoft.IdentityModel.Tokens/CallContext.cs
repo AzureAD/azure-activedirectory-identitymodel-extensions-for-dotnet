@@ -48,9 +48,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CallContext(Guid activityId)
         {
-            if (activityId == null)
-                throw new ArgumentNullException(nameof(activityId));
-
             ActivityId = activityId;
         }
 

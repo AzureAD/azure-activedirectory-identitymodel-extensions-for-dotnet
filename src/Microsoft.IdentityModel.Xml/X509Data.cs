@@ -120,31 +120,24 @@ namespace Microsoft.IdentityModel.Xml
             set;
         }
 
-        /// <summary>
-        /// Compares two X509Data objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            var other = obj as X509Data;
-            if (other == null)
-                return false;
-            else if (!IssuerSerial.Equals(other.IssuerSerial) ||
-                string.Compare(SKI, other.SKI, StringComparison.OrdinalIgnoreCase) != 0 || 
-                string.Compare(SubjectName, other.SubjectName, StringComparison.OrdinalIgnoreCase) != 0 ||
-                // certificates may need to be compared in a special way instead of generic string comparison?
-                !Enumerable.SequenceEqual(Certificates.OrderBy(t => t), other.Certificates.OrderBy(t => t)) ||
-                string.Compare(CRL, other.CRL, StringComparison.OrdinalIgnoreCase) != 0)
-                    return false;
-            return true;
+            return obj is X509Data data &&
+                EqualityComparer<IssuerSerial>.Default.Equals(IssuerSerial, data.IssuerSerial) &&
+                string.Equals(SKI, data.SKI, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(SubjectName, data.SubjectName, StringComparison.OrdinalIgnoreCase) &&
+                Enumerable.SequenceEqual(Certificates.OrderBy(t => t), data.Certificates.OrderBy(t => t)) &&
+                string.Equals(CRL, data.CRL, StringComparison.OrdinalIgnoreCase);
         }
-
-        /// <summary>
-        /// Serves as a hash function for X509Data.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            unchecked
+            {
+                // Certificates is the only immutable property
+                return 794516417 + EqualityComparer<ICollection<string>>.Default.GetHashCode(Certificates);
+            }
         }
-
     }
 }

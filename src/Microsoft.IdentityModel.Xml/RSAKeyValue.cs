@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -53,27 +54,24 @@ namespace Microsoft.IdentityModel.Xml
             Exponent = exponent;
         }
 
-        /// <summary>
-        /// Compares two RSAKeyValue objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            var other = obj as RSAKeyValue;
-            if (other == null)
-                return false;
-            else if (string.Compare(Modulus, other.Modulus, StringComparison.OrdinalIgnoreCase) != 0
-                || string.Compare(Exponent, other.Exponent, StringComparison.OrdinalIgnoreCase) != 0)
-                    return false;
-            return true;
+            return obj is RSAKeyValue value &&
+                string.Equals(Modulus, value.Modulus, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Exponent, value.Exponent, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Serves as a hash function for RSAKeyValue.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            unchecked
+            {
+                int hashCode = 936145456;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Modulus);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Exponent);
+                return hashCode;
+            }
         }
-
     }
 }

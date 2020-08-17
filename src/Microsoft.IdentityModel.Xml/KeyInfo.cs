@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
@@ -116,29 +116,24 @@ namespace Microsoft.IdentityModel.Xml
         /// </summary>
         public ICollection<X509Data> X509Data { get; } = new Collection<X509Data>();
 
-        /// <summary>
-        /// Compares two KeyInfo objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
-        {   
-            KeyInfo other = obj as KeyInfo;
-            if (other == null)
-                return false;
-            else if (string.Compare(KeyName, other.KeyName, StringComparison.OrdinalIgnoreCase) != 0
-                ||string.Compare(RetrievalMethodUri, other.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) != 0
-                || (RSAKeyValue != null && !RSAKeyValue.Equals(other.RSAKeyValue)
-                || !new HashSet<X509Data>(X509Data).SetEquals(other.X509Data)))
-                return false;
-
-            return true;
+        {
+            return obj is KeyInfo info &&
+                string.Equals(KeyName, info.KeyName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(RetrievalMethodUri, info.RetrievalMethodUri, StringComparison.OrdinalIgnoreCase) &&
+                EqualityComparer<RSAKeyValue>.Default.Equals(RSAKeyValue, info.RSAKeyValue) &&
+                Enumerable.SequenceEqual(X509Data, info.X509Data);
         }
 
-        /// <summary>
-        /// Serves as a hash function for KeyInfo.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            unchecked
+            {
+                // X509Data reference is the only immutable property
+                return -811635255 + EqualityComparer<ICollection<X509Data>>.Default.GetHashCode(X509Data);
+            }
         }
 
         /// <summary>

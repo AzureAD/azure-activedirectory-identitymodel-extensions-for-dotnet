@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -53,27 +54,24 @@ namespace Microsoft.IdentityModel.Xml
             SerialNumber = serialNumber;
         }
 
-        /// <summary>
-        /// Compares two IssuerSerial objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            var other = obj as IssuerSerial;
-            if (other == null)
-                return false;
-            else if (string.Compare(IssuerName, other.IssuerName, StringComparison.OrdinalIgnoreCase) != 0
-                || string.Compare(SerialNumber, other.SerialNumber, StringComparison.OrdinalIgnoreCase) != 0)
-                return false;
-            return true;
+            return obj is IssuerSerial serial &&
+                string.Equals(IssuerName, serial.IssuerName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(SerialNumber, serial.SerialNumber, StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary>
-        /// Serves as a hash function for IssuerSerial.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            unchecked
+            {
+                int hashCode = -1073543679;
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IssuerName);
+                hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SerialNumber);
+                return hashCode;
+            }
         }
-
     }
 }
