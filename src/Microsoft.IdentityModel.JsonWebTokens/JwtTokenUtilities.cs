@@ -155,6 +155,105 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Decrypts a Json Web Token.
+        /// </summary>
+        /// <param name="jwtToken">The Json Web Token</param>
+        /// <param name="validationParameters">The validation parameters containing cryptographic material.</param>
+        /// <param name="decryptionParameters">The decryption parameters container.</param>
+        /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
+        internal static string DecryptJwtToken(
+            SecurityToken jwtToken,
+            TokenValidationParameters validationParameters,
+            JwtTokenDecryptionParameters decryptionParameters)
+        {
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            if (decryptionParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(decryptionParameters));
+
+            bool decryptionSucceeded = false;
+            bool algorithmNotSupportedByCryptoProvider = false;
+            byte[] decryptedTokenBytes = null;
+
+            // keep track of exceptions thrown, keys that were tried
+            var exceptionStrings = new StringBuilder();
+            var keysAttempted = new StringBuilder();
+            foreach (SecurityKey key in decryptionParameters.Keys)
+            {
+                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                if (cryptoProviderFactory == null)
+                {
+                    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
+                    continue;
+                }
+
+                if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
+                {
+                    algorithmNotSupportedByCryptoProvider = true;
+                    LogHelper.LogWarning(TokenLogMessages.IDX10611, decryptionParameters.Enc, key);
+                    continue;
+                }
+
+                try
+                {
+                    Validators.ValidateAlgorithm(decryptionParameters.Enc, key, jwtToken, validationParameters);
+                    decryptedTokenBytes = DecryptToken(cryptoProviderFactory, key, decryptionParameters);
+                    decryptionSucceeded = true;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    exceptionStrings.AppendLine(ex.ToString());
+                }
+
+                if (key != null)
+                    keysAttempted.AppendLine(key.ToString());
+            }
+
+            ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
+
+            if (string.IsNullOrEmpty(decryptionParameters.Zip))
+                return Encoding.UTF8.GetString(decryptedTokenBytes);
+
+            try
+            {
+                return decryptionParameters.DecompressionFunction(decryptedTokenBytes, decryptionParameters.Zip);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, decryptionParameters.Zip), ex));
+            }
+        }
+
+        private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
+        {
+            if (!decryptionSucceeded && keysAttempted.Length > 0)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, decryptionParameters.EncodedToken)));
+
+            if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10619, decryptionParameters.Alg, decryptionParameters.Enc)));
+
+            if (!decryptionSucceeded)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, decryptionParameters.EncodedToken)));
+        }
+
+        private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, JwtTokenDecryptionParameters decryptionParameters)
+        {
+            using (AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, decryptionParameters.Enc))
+            {
+                if (decryptionProvider == null)
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, decryptionParameters.Enc)));
+
+                return decryptionProvider.Decrypt(
+                    Base64UrlEncoder.DecodeBytes(decryptionParameters.Ciphertext),
+                    Encoding.ASCII.GetBytes(decryptionParameters.EncodedHeader),
+                    Base64UrlEncoder.DecodeBytes(decryptionParameters.InitializationVector),
+                    Base64UrlEncoder.DecodeBytes(decryptionParameters.AuthenticationTag));
+            }
+        }
+
+        /// <summary>
         /// Generates key bytes.
         /// </summary>
         public static byte[] GenerateKeyBytes(int sizeInBits)

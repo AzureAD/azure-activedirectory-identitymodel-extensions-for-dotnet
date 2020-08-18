@@ -2319,7 +2319,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                 DecryptingCredentials = rsaPKCS1EncryptingCredential,
-                ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
+                ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10619:"),
                 TestId = "Key wrap token test using symmetric key to wrap but RSA to unwrap"
             });
 

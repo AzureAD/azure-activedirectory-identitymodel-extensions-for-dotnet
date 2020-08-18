@@ -1681,6 +1681,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
+                    new CreateTokenTheoryData()
+                    {
+                        TestId = "EncryptionAlgorithmNotSupported",
+                        IsValid = false,
+                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                        CompressionProviderFactory = new CompressionProviderFactory(),
+                        ValidationParameters = Default.TokenValidationParameters(new EncryptingCredentials(
+                            KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512).Key,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
+                        Payload = Default.PayloadString,
+                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                        EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10619:")
+                    },
                 };
             }
         }
