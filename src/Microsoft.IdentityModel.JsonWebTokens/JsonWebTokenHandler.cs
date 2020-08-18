@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             JObject payload;
             if (tokenDescriptor.Subject != null)
-                payload = JObject.FromObject(JwtTokenUtilities.CreateDictionaryFromClaims(tokenDescriptor.Subject.Claims));
+                payload = JObject.FromObject(TokenUtilities.CreateDictionaryFromClaims(tokenDescriptor.Subject.Claims));
             else
                 payload = new JObject();
 

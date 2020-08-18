@@ -418,7 +418,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static List<Claim> EntityAsJsonClaim( string issuer, string orginalIssuer )
         {
-            return new List<Claim> { new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, issuer ?? Default.Issuer, orginalIssuer) };
+            return new List<Claim> { new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), Tokens.JsonClaimValueTypes.Json, issuer ?? Default.Issuer, orginalIssuer) };
         }
 #endif
     }

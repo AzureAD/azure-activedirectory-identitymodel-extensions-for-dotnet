@@ -27,8 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -39,6 +41,82 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class TokenUtilities
     {
+        /// <summary>
+        /// Creates a dictionary from a list of Claim's.
+        /// </summary>
+        /// <param name="claims"> A list of claims.</param>
+        /// <returns> A Dictionary representing claims.</returns>
+        internal static IDictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
+        {
+            var payload = new Dictionary<string, object>();
+
+            if (claims == null)
+                return payload;
+
+            foreach (Claim claim in claims)
+            {
+                if (claim == null)
+                    continue;
+
+                string jsonClaimType = claim.Type;
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object existingValue;
+
+                // If there is an existing value, append to it.
+                // What to do if the 'ClaimValueType' is not the same.
+                if (payload.TryGetValue(jsonClaimType, out existingValue))
+                {
+                    IList<object> claimValues = existingValue as IList<object>;
+                    if (claimValues == null)
+                    {
+                        claimValues = new List<object>();
+                        claimValues.Add(existingValue);
+                        payload[jsonClaimType] = claimValues;
+                    }
+
+                    claimValues.Add(jsonClaimValue);
+                }
+                else
+                {
+                    payload[jsonClaimType] = jsonClaimValue;
+                }
+            }
+
+            return payload;
+        }
+
+        internal static object GetClaimValueUsingValueType(Claim claim)
+        {
+            if (claim.ValueType == ClaimValueTypes.String)
+                return claim.Value;
+
+            if (claim.ValueType == ClaimValueTypes.Boolean && bool.TryParse(claim.Value, out bool boolValue))
+                return boolValue;
+
+            if (claim.ValueType == ClaimValueTypes.Double && double.TryParse(claim.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double doubleValue))
+                return doubleValue;
+
+            if ((claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32) && int.TryParse(claim.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out int intValue))
+                return intValue;
+
+            if (claim.ValueType == ClaimValueTypes.Integer64 && long.TryParse(claim.Value, out long longValue))
+                return longValue;
+
+            if (claim.ValueType == ClaimValueTypes.DateTime && DateTime.TryParse(claim.Value, out DateTime dateTimeValue))
+                return dateTimeValue;
+
+            if (claim.ValueType == JsonClaimValueTypes.Json)
+                return JObject.Parse(claim.Value);
+
+            if (claim.ValueType == JsonClaimValueTypes.JsonArray)
+                return JArray.Parse(claim.Value);
+
+            if (claim.ValueType == JsonClaimValueTypes.JsonNull)
+                return string.Empty;
+
+            return claim.Value;
+        }
+
         /// <summary>
         /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
         /// </summary>

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -35,6 +36,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class TokenValidationResult
     {
+        private Lazy<IDictionary<string, object>> _claims => new Lazy<IDictionary<string, object>>(() => TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity?.Claims));
+
+        /// <summary>
+        /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
+        /// </summary>
+        public IDictionary<string, object> Claims
+        {
+            get
+            {
+                return _claims.Value;
+            }
+        }
+
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
@@ -54,6 +68,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// True if the token was successfully validated, false otherwise.
         /// </summary>
         public bool IsValid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of data that could be used in custom scenarios. This uses <see cref="StringComparer.Ordinal"/> for case-sensitive comparison of keys.
+        /// </summary>
+        public IDictionary<string, object> PropertyBag { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityToken"/> that was validated.

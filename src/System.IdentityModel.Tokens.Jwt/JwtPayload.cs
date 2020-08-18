@@ -31,7 +31,6 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -524,7 +523,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : JwtTokenUtilities.GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
