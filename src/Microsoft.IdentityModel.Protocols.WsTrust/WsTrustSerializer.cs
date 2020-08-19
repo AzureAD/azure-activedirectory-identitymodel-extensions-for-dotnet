@@ -508,7 +508,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="reader"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="serializationContext"/> is null.</exception>
         /// <exception cref="XmlReadException">If <paramref name="reader"/> is not positioned at &lt;RequestSecurityTokenResponse&gt;.</exception>
-        public RequestSecurityTokenResponse ReadRequestSeurityTokenResponse(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        public RequestSecurityTokenResponse ReadRequestSecurityTokenResponse(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             WsUtils.CheckReaderOnEntry(reader, WsTrustElements.RequestSecurityTokenResponse, serializationContext);
 
@@ -840,7 +840,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
             while (reader.IsStartElement())
             {
                 if (reader.IsStartElement(WsTrustElements.RequestSecurityTokenResponse, serializationContext.TrustConstants.Namespace))
-                    response.RequestSecurityTokenResponseCollection.Add(ReadRequestSeurityTokenResponse(reader, serializationContext));
+                    response.RequestSecurityTokenResponseCollection.Add(ReadRequestSecurityTokenResponse(reader, serializationContext));
                 else
                     // brentsch - need to put these elements in array
                     reader.Skip();
