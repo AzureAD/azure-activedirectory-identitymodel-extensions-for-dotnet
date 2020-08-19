@@ -822,7 +822,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     // Removed until we have a way of matching a SecurityKey with a KeyInfo.
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch),
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,

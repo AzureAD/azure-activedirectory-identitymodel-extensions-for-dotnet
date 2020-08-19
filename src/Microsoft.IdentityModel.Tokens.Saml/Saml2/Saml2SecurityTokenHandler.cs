@@ -444,7 +444,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             //if there was a key match with what was found in tokenValidationParameters most likely metadata is stale. throw SecurityTokenSignatureKeyNotFoundException
             if (!keyMatched && canMatchKey && keysAttempted.Length > 0)
-                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10501, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
+                throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10513, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
 
             if (keysAttempted.Length > 0)
                 throw LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(FormatInvariant(TokenLogMessages.IDX10512, keysAttempted, exceptionStrings, samlToken)));

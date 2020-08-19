@@ -570,7 +570,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     // Removed until we have a way of matching a KeyInfo with a SecurityKey.
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_Valid),
                         Token = ReferenceTokens.SamlToken_Valid,
@@ -793,7 +793,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             ValidateLifetime = false,
                             ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha512Signature }
                         },
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501")
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513")
                     },
                     new SamlTheoryData
                     {
@@ -808,7 +808,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             ValidateLifetime = false,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501")
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513")
                     },
                     new SamlTheoryData
                     {
