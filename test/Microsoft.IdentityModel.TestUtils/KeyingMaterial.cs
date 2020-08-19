@@ -230,6 +230,10 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256);
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
 
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256_NoKeyId = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256);
+        public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2_NoKeyId = new SigningCredentials(DefaultSymmetricSecurityKey_256_NoKeyId, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId = new EncryptingCredentials(DefaultSymmetricSecurityKey_256_NoKeyId, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
+
         public static string DefaultSymmetricKeyEncoded_384 = "Q6o4CQLPygAD+Dj6psJNJjCadf1+ZA6ggW2OzqAJ1Kq9orrXZmXUi8mMrYI4T3u8";
         public static byte[] DefaultSymmetricKeyBytes_384 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_384);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_384 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_384) { KeyId = "DefaultSymmetricSecurityKey_384" };

@@ -34,7 +34,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Json.Linq;
 using Xunit;
-using System.Reflection;
+using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -1856,7 +1856,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         TestId = "NullToken_PayloadValidationFailure",
-                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(LogMessages.IDX10211),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(TokenLogMessages.IDX10211),
                         Token = handler.CreateEncodedJwt("", Default.Audience, new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity), null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -2368,15 +2368,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var context = TestUtilities.WriteHeader($"{this}.EncryptionKeysCheck", theoryData);
             try
             {
-                TestUtilities.AssertFailIfErrors(context);
                 string jweFromJwtHandlerWithKid = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
                 var jwtTokenFromJwtHandlerWithKid = theoryData.JwtSecurityTokenHandler.ReadJwtToken(jweFromJwtHandlerWithKid);
-                var getContentEncryptionKeysMethod = theoryData.JwtSecurityTokenHandler.GetType().GetMethod("GetContentEncryptionKeys", BindingFlags.Instance | BindingFlags.NonPublic);
-                var encryptionKeysFromJwtHandlerWithKid = getContentEncryptionKeysMethod.Invoke(theoryData.JwtSecurityTokenHandler, new object[2] { jwtTokenFromJwtHandlerWithKid, theoryData.ValidationParameters });
+                var encryptionKeysFromJwtHandlerWithKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithKid, theoryData.ValidationParameters);
 
-                var encryptingCredentials = theoryData.TokenDescriptor.EncryptingCredentials;
-                var keyId = encryptingCredentials.Key.KeyId;
-                encryptingCredentials.Key.KeyId = "";
+                var keyId = theoryData.TokenDescriptor.EncryptingCredentials.Key.KeyId;
+                theoryData.TokenDescriptor.EncryptingCredentials = theoryData.EncryptingCredentials;
 
                 string jweFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
                 var jwtTokenFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.ReadJwtToken(jweFromJwtHandlerWithNoKid);
@@ -2384,15 +2381,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 jwtTokenFromJwtHandlerWithNoKid.Header.Remove("alg");
                 jwtTokenFromJwtHandlerWithNoKid.Header.Add("alg", theoryData.Algorithm);
 
-                theoryData.ValidationParameters.TokenDecryptionKey.KeyId = keyId;
-                var encryptionKeysFromJwtHandlerWithNoKid = getContentEncryptionKeysMethod.Invoke(theoryData.JwtSecurityTokenHandler, new object[2] { jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters });
+                var encryptionKeysFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters);
 
+                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
+                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
                 IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex.InnerException, context);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -2417,39 +2415,42 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                             Claims = Default.PayloadDictionary
                         },
                         JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            TokenDecryptionKeys = new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256, KeyingMaterial.DefaultSymmetricSecurityKey_512 },
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
                         },
-                        Algorithm = JwtConstants.DirectKeyUseAlg
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
+                        Algorithm = JwtConstants.DirectKeyUseAlg,
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
                     },
                    new CreateTokenTheoryData
                     {
                         TestId = "AlgorithmMisMatch",
                         Payload = Default.PayloadString,
-                        ExpectedException = ExpectedException.KeyWrapException("IDX10613:"),
+                        ExpectedException = ExpectedException.KeyWrapException("IDX10618:"),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            EncryptingCredentials =  KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                             Claims = Default.PayloadDictionary
                         },
                         JwtSecurityTokenHandler = new JwtSecurityTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            TokenDecryptionKeys = new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
                         },
-                        Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512
+                        Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
                     }
                 };
             }
@@ -2509,6 +2510,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public TokenValidationParameters ValidationParameters { get; set; }
 
         public string Algorithm { get; set; }
+
+        public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
     }
 }
 

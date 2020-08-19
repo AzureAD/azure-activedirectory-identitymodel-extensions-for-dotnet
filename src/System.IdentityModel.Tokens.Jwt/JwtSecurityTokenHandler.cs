@@ -1457,7 +1457,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
+        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             IEnumerable<SecurityKey> keys = null;
 
@@ -1499,13 +1499,13 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     exceptionStrings.AppendLine(ex.ToString());
                 }
-                keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                keysAttempted.AppendLine(key.ToString());
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
                 return unwrappedKeys;
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10613, keysAttempted, exceptionStrings, jwtToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, keysAttempted, exceptionStrings, jwtToken)));
         }
 
         private static byte[] GetSymmetricSecurityKey(SecurityKey key)
