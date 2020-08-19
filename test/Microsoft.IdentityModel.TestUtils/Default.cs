@@ -1036,6 +1036,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2));
         }
 
+        public static string SymmetricJwsWithNoKid
+        {
+            get => Jwt(SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId));
+        }
+
         public static string AsymmetricJws
         {
             get => Jwt(X509SecurityTokenDescriptor(X509AsymmetricSigningCredentials));

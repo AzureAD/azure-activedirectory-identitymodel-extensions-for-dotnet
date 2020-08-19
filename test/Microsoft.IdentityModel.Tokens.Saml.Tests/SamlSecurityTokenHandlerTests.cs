@@ -547,7 +547,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_AttributeTampered),
                         Token = ReferenceTokens.SamlToken_AttributeTampered,
@@ -558,7 +558,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_DigestTampered),
                         Token = ReferenceTokens.SamlToken_DigestTampered,
@@ -581,7 +581,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_SignatureTampered),
                         Token = ReferenceTokens.SamlToken_SignatureTampered,
