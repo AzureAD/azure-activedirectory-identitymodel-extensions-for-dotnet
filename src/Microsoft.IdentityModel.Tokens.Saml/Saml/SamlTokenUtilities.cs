@@ -50,6 +50,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         internal static SecurityKey ResolveTokenSigningKey(KeyInfo tokenKeyInfo, TokenValidationParameters validationParameters)
         {
+            if (tokenKeyInfo == null)
+                return null;
+
             if (validationParameters.IssuerSigningKey != null && tokenKeyInfo.MatchesKey(validationParameters.IssuerSigningKey))
                 return validationParameters.IssuerSigningKey;
 
