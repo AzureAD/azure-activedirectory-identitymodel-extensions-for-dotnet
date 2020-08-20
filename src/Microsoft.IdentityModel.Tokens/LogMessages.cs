@@ -124,6 +124,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10615 = "IDX10615: Encryption failed. No support for: Algorithm: '{0}', SecurityKey: '{1}'.";
         public const string IDX10616 = "IDX10616: Encryption failed. EncryptionProvider failed for: Algorithm: '{0}', SecurityKey: '{1}'. See inner exception.";
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
+        public const string IDX10618 = "IDX10618: Key unwrap failed using decryption Keys: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
 
         // Formating
         public const string IDX10400 = "IDX10400: Unable to decode: '{0}' as Base64url encoded string.";
