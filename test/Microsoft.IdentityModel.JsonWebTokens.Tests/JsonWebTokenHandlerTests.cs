@@ -1957,6 +1957,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 return new TheoryData<JwtTheoryData>
                 {
+                     new JwtTheoryData
+                    {
+                        TestId = nameof(Default.SymmetricJwsWithNoKid) + "_" + "RequireSignedTokens_NoKid_WrongSigningKey",
+                        Token = Default.SymmetricJwsWithNoKid,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503"),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = Default.SymmetricSigningKey1024,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
                     new JwtTheoryData
                     {
                         TestId = nameof(Default.AsymmetricJws) + "_" + "RequireSignedTokens",

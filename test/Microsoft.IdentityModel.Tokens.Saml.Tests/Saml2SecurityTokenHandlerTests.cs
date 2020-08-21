@@ -749,7 +749,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_Formated),
                         Token = ReferenceTokens.Saml2Token_Formated,
@@ -799,7 +799,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_AttributeTampered),
                         Token = ReferenceTokens.Saml2Token_AttributeTampered,
@@ -810,7 +810,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_DigestTampered),
                         Token = ReferenceTokens.Saml2Token_DigestTampered,
@@ -822,7 +822,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     // Removed until we have a way of matching a SecurityKey with a KeyInfo.
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch),
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -833,7 +833,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_SignatureTampered),
                         Token = ReferenceTokens.Saml2Token_SignatureTampered,
@@ -886,7 +886,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid)}RequireSignedTokensNullSigningKey",
                         Token = ReferenceTokens.Saml2Token_Valid,
@@ -1009,7 +1009,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     new Saml2TheoryData
                     {
 
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch)}NotTryAllIssuerSigningKeys",
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -1057,7 +1057,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             ValidateLifetime = false,
                             ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha512Signature }
                         },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503")
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514")
                     },
                     new Saml2TheoryData
                     {
@@ -1071,7 +1071,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             ValidateLifetime = false,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503")
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10514")
                     },
                     new Saml2TheoryData
                     {
@@ -1085,6 +1085,36 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             ValidateLifetime = false,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true)
                         },
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid_WithNoKeyInfo)}NullSigningKey",
+                        Token = ReferenceTokens.Saml2Token_Valid_WithNoKeyInfo,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = null,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:")
+                    },
+                    new Saml2TheoryData
+                    {
+                        TestId = $"{nameof(ReferenceTokens.Saml2Token_Valid_WithNoKeyInfo)}NotNullSigningKey",
+                        Token = ReferenceTokens.Saml2Token_Valid_WithNoKeyInfo,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultSymmetricSecurityKey_1024,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10512:")
                     },
                 };
             }
