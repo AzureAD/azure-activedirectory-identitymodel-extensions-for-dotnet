@@ -43,6 +43,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12700 = "IDX12700: Error found while parsing date time. The '{0}' claim has value '{1}' which is could not be parsed to an integer.";
         internal const string IDX12701 = "IDX12701: Error found while parsing date time. The '{0}' claim has value '{1}' does not lie in the valid range.";
         internal const string IDX12706 = "IDX12706: '{0}' can only write SecurityTokens of type: '{1}', 'token' type is: '{2}'.";
+        internal const string IDX12707 = "IDX12707: '{0}' cannot read this xml: '{1}'. The reader needs to be positioned at an element: '{2}', within the namespace: '{3}', with an EncodingType attribute equal to: {4}, and with a ValueType attribute equal to one of the following: '{5}', '{6}'.";
         internal const string IDX12709 = "IDX12709: CanReadToken() returned false. JWT is not well formed: '{0}'.\nThe token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.";
         internal const string IDX12710 = "IDX12710: Only a single 'Actor' is supported. Found second claim of type: '{0}', value: '{1}'";
         internal const string IDX12711 = "IDX12711: actor.BootstrapContext is not a string AND actor.BootstrapContext is not a JWT";

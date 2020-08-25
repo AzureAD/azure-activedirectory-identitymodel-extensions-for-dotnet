@@ -35,6 +35,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using System.Linq;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -720,17 +721,21 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             return ReadJwtToken(token);
         }
-        
+
         /// <summary>
-        /// Deserializes token with the provided <see cref="TokenValidationParameters"/>.
+        /// Reads a string from <paramref name="reader"/> into an instance of <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <param name="reader"><see cref="XmlReader"/>.</param>
-        /// <param name="validationParameters">The current <see cref="TokenValidationParameters"/>.</param>
-        /// <returns>The <see cref="SecurityToken"/></returns>
-        /// <remarks>This method is not current supported.</remarks>
+        /// <param name="reader">A <see cref="XmlReader"/> instance positioned at a &lt;BinarySecurityToken> element.</param>
+        /// <param name="validationParameters">Not used.</param>
+        /// <returns>A <see cref="JwtSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public override SecurityToken ReadToken(XmlReader reader, TokenValidationParameters validationParameters)
         {
-            throw new NotImplementedException();
+            return ReadToken(reader);
         }
 
         /// <summary>
@@ -1536,15 +1541,219 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             Validators.ValidateIssuerSecurityKey(key, securityToken, validationParameters);
         }
-
+               
         /// <summary>
-        /// Serializes to XML a token of the type handled by this instance.
+        /// Serializes a <see cref="JwtSecurityToken"/> into a JWT in Compact Serialization Format.
         /// </summary>
-        /// <param name="writer">The XML writer.</param>
-        /// <param name="token">A token of type <see cref="TokenType"/>.</param>
+        /// <param name="writer">The <see cref="XmlWriter"/> to write the <paramref name="token"/> to.</param>
+        /// <param name="token"><see cref="JwtSecurityToken"/> to serialize.</param>
+        /// <remarks>
+        /// <para>The JWT will be serialized as a JWE or JWS.</para>
+        /// <para><see cref="JwtSecurityToken.Payload"/> will be used to create the JWT. If there is an inner token, the inner token's payload will be used.</para>
+        /// <para>If either <see cref="JwtSecurityToken.SigningCredentials"/> or <see cref="JwtSecurityToken.InnerToken"/>.SigningCredentials are set, the JWT will be signed.</para>
+        /// <para>If <see cref="JwtSecurityToken.EncryptingCredentials"/> is set, a JWE will be created using the JWT above as the plaintext.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">'token' is null.</exception>
+        /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.SigningCredentials"/> and <see cref="JwtSecurityToken.InnerToken"/> are set.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.InnerToken"/> and <see cref="JwtSecurityToken.InnerToken"/>.EncryptingCredentials are set.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">if <see cref="JwtSecurityToken.InnerToken"/> is set and <see cref="JwtSecurityToken.EncryptingCredentials"/> is not set.</exception>        
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
-            throw new NotImplementedException();
+            if (writer == null)
+                throw LogHelper.LogArgumentNullException(nameof(writer));
+
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+            
+            var jwt = WriteToken(token);
+            var bytes = Encoding.UTF8.GetBytes(jwt);
+            var base64 = Convert.ToBase64String(bytes);
+
+            // <BinarySecurityToken>
+            writer.WriteStartElement(JwtConstants.BinarySecurityTokenElement, JwtConstants.WsSecurityNamespace);
+
+            if (!string.IsNullOrEmpty(token.Id))
+                writer.WriteAttributeString(JwtConstants.IdAttribute, JwtConstants.WsUtilityNamespace, $"_{token.Id}");
+
+            writer.WriteAttributeString(JwtConstants.ValueTypeAttribute, JwtConstants.TokenType);
+            writer.WriteAttributeString(JwtConstants.EncodingTypeAttribute, JwtConstants.Base64Binary);
+            writer.WriteValue(base64);
+
+            // </BinarySecurityToken>
+            writer.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Determines whether the <paramref name="reader"/> is positioned at a &lt;BinarySecurityToken> element
+        /// and has the correct ValueType attribute.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> instance.</param>
+        /// <returns>
+        /// <para>'true' if the <paramref name="reader"/> is positioned at a &lt;BinarySecurityToken> element and has the correct ValueType attribute. .</para>
+        /// <para>Otherwise 'false'.</para>
+        /// </returns>
+        public override bool CanReadToken(XmlReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            return
+                reader.IsStartElement(JwtConstants.BinarySecurityTokenElement, JwtConstants.WsSecurityNamespace) &&
+                reader.GetAttribute(JwtConstants.EncodingTypeAttribute) == JwtConstants.Base64Binary &&
+                (reader.GetAttribute(JwtConstants.ValueTypeAttribute) == JwtConstants.TokenType || reader.GetAttribute(JwtConstants.ValueTypeAttribute) == JwtConstants.TokenTypeAlt);
+        }
+
+        /// <summary>
+        /// Reads a string read from <paramref name="reader"/> into an instance of <see cref="JwtSecurityToken"/>.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> instance positioned at a &lt;BinarySecurityToken> element.</param>
+        /// <returns>A <see cref="JwtSecurityToken"/></returns>
+        /// <exception cref="ArgumentNullException">The token from <paramref name="reader"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">The token from <paramref name="reader"/> is incorrectly formatted.</exception>
+        /// <exception cref="ArgumentException">The token from <paramref name="reader"/> has a length greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
+        public override SecurityToken ReadToken(XmlReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            CheckReaderOnEntry(reader, JwtConstants.BinarySecurityTokenElement, JwtConstants.WsSecurityNamespace);
+
+            var token = ReadJwtTokenFromXml(reader);
+            return ReadJwtToken(token);
+        }
+
+        /// <summary>
+        /// Reads and validates a string read from <paramref name="reader"/>.
+        /// </summary>
+        /// <param name="reader">A <see cref="XmlReader"/> instance positioned at a &lt;BinarySecurityToken> element.</param>
+        /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
+        /// <param name="validatedToken">The <see cref="JwtSecurityToken"/> that was validated.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="reader"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="ArgumentException">The token from <paramref name="reader"/> is longer than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">The token from <paramref name="reader"/> does not have 3 or 5 parts.</exception>
+        /// <exception cref="ArgumentException">The token from <paramref name="reader"/> is null.</exception>
+        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/> returns false.</exception>
+        /// <exception cref="FormatException">The token from <paramref name="reader"/> is not a correctly formatted base64 string.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">The token from <paramref name="reader"/> was a JWE was not able to be decrypted.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">The 'kid' header claim is not null AND decryption fails.</exception>
+        /// <exception cref="SecurityTokenException">The 'enc' header claim is null or empty.</exception>
+        /// <exception cref="SecurityTokenExpiredException">The 'exp' claim is &lt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException"><see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null. Audience is not validated if <see cref="TokenValidationParameters.ValidateAudience"/> is set to false.</exception>
+        /// <exception cref="SecurityTokenInvalidAudienceException">The 'aud' claim did not match either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
+        /// <exception cref="SecurityTokenInvalidLifetimeException">The 'nbf' claim is &gt; 'exp' claim.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException">The signature of the token from <paramref name="reader"/> is not properly formatted.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException">The 'exp' claim is missing and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
+        /// <exception cref="SecurityTokenNoExpirationException"><see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
+        /// <exception cref="SecurityTokenNotYetValidException">The 'nbf' claim is &gt; DateTime.UtcNow.</exception>
+        /// <exception cref="SecurityTokenReplayAddFailedException">The token from <paramref name="reader"/> could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
+        /// <exception cref="SecurityTokenReplayDetectedException">The token from <paramref name="reader"/> is found in the cache.</exception>
+        /// <returns> A <see cref="ClaimsPrincipal"/> from the JWT. Does not include claims found in the JWT header.</returns>
+        /// <remarks> 
+        /// Many of the exceptions listed above are not thrown directly from this method. See <see cref="Validators"/> to examin the call graph.
+        /// </remarks>
+        public override ClaimsPrincipal ValidateToken(XmlReader reader, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            CheckReaderOnEntry(reader, JwtConstants.BinarySecurityTokenElement, JwtConstants.WsSecurityNamespace);
+
+            var token = ReadJwtTokenFromXml(reader);
+            return ValidateToken(token, validationParameters, out validatedToken);
+        }
+
+        private string ReadJwtTokenFromXml(XmlReader reader)
+        {
+            if (!CanReadToken(reader))
+                throw LogHelper.LogArgumentException<ArgumentException>(
+                    nameof(reader),
+                    LogMessages.IDX12707,
+
+                    nameof(JwtSecurityTokenHandler), //0
+                    reader.ReadOuterXml(), //1
+                    JwtConstants.BinarySecurityTokenElement, //2
+                    JwtConstants.WsSecurityNamespace, //3
+                    JwtConstants.Base64Binary, //4
+                    JwtConstants.TokenTypeAlt, //5
+                    JwtConstants.TokenType); //6
+
+            var token = reader.ReadElementContentAsString();
+
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                // TODO: The old code just allowed the FormatException to be thrown directly. Should an IDX error code be created for incorrectly formatted base64 encoded JWT?
+                var bytes = Convert.FromBase64String(token);
+                token = Encoding.UTF8.GetString(bytes);
+            }
+            return token;
+        }
+
+        /*
+         * ------------------
+         * Everything beyond this comment is copied (and maybe altered) from XmlUtil so that we don't need to add a reference.
+         * ------------------
+         */
+
+        const string IDX30011 = "IDX30011: Unable to read XML. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
+        const string IDX30022 = "IDX30022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
+        const string IDX30024 = "IDX30024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
+        static void CheckReaderOnEntry(XmlReader reader, string element, string @namespace)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            // IsStartElement calls reader.MoveToContent().
+            if (!reader.IsStartElement())
+                throw LogReadException(IDX30022, reader.NodeType);
+
+            if (string.IsNullOrEmpty(@namespace))
+            {
+                if (!reader.IsStartElement(element))
+                    throw LogReadException(IDX30024, element, reader.LocalName);
+            }
+            else
+            {
+                if (!reader.IsStartElement(element, @namespace))
+                    throw LogReadException(IDX30011, @namespace, element, reader.NamespaceURI, reader.LocalName);
+            }
+        }
+
+        static Exception LogReadException(string format, params object[] args)
+        {
+            return LogHelper.LogExceptionMessage(new XmlException(FormatInvariant(format, args)));
+        }
+
+        static string FormatInvariant(string format, params object[] args)
+        {
+            if (format == null)
+                return string.Empty;
+
+            if (args == null)
+                return format;
+
+            if (!IdentityModelEventSource.ShowPII)
+                return string.Format(Globalization.CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray());
+
+            return string.Format(Globalization.CultureInfo.InvariantCulture, format, args);
+        }
+
+        static string RemovePII(object arg)
+        {
+            if (arg == null)
+                return string.Empty;
+
+            if (arg is Exception ex)
+                return ex.ToString();
+
+            return arg.GetType().ToString();
         }
     }
 }

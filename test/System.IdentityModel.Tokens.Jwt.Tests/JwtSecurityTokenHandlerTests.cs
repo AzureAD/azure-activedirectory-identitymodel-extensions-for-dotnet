@@ -35,6 +35,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Json.Linq;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using System.Xml;
+using System.Text;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -1845,6 +1847,45 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
         }
 
+        [Theory, MemberData(nameof(ValidateTokenTheoryData))]
+        public void ValidateEnvelopedToken(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateEnvelopedToken", theoryData);
+
+            using(var stream = new MemoryStream())
+            {
+                using (var writer = XmlWriter.Create(stream, new XmlWriterSettings { CloseOutput = false }))
+                {
+                    writer.WriteStartElement(JwtConstants.BinarySecurityTokenElement, JwtConstants.WsSecurityNamespace);
+                    writer.WriteAttributeString(JwtConstants.ValueTypeAttribute, JwtConstants.TokenType);
+                    writer.WriteAttributeString(JwtConstants.EncodingTypeAttribute, JwtConstants.Base64Binary);
+                    if(theoryData.Token != null)
+                        writer.WriteValue(Convert.ToBase64String(Encoding.UTF8.GetBytes(theoryData.Token)));
+                    writer.WriteEndElement();
+                }
+
+                stream.Position = 0;
+
+                using (var reader = XmlReader.Create(stream))
+                {
+                    var validatedToken = null as SecurityToken;
+                    try
+                    {
+                        _ = theoryData.TokenHandler.ValidateToken(reader, theoryData.ValidationParameters, out validatedToken);
+                        Assert.True(validatedToken != null);
+                        theoryData.ExpectedException.ProcessNoException();
+                    }
+                    catch (Exception ex)
+                    {
+                        Assert.True(validatedToken == null);
+                        theoryData.ExpectedException.ProcessException(ex);
+                    }
+                }
+            }
+
+            TestUtilities.ValidateToken(theoryData.Token, theoryData.ValidationParameters, theoryData.TokenHandler, theoryData.ExpectedException);
+        }
+
         public static TheoryData<JwtTheoryData> ValidateTokenTheoryData
         {
             get
@@ -2138,6 +2179,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Theory, MemberData(nameof(WriteTokenTheoryData))]
         public void WriteToken(JwtTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
             try
             {
                 var token = theoryData.TokenHandler.WriteToken(theoryData.SecurityToken);
@@ -2145,6 +2187,46 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Assert.True(token.Split('.').Length == 5);
                 else
                     Assert.True(token.Split('.').Length == 3);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+        }
+
+        [Theory, MemberData(nameof(WriteTokenTheoryData))]
+        public void WriteEnvelopedToken(JwtTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteEnvelopedToken", theoryData);
+            try
+            {
+                using(var stream = new MemoryStream())
+                {
+                    using (var writer = XmlWriter.Create(stream, new XmlWriterSettings { CloseOutput = false }))
+                        theoryData.TokenHandler.WriteToken(writer, theoryData.SecurityToken);
+                    stream.Position = 0;
+                    using(var reader = XmlReader.Create(stream))
+                    {
+                        reader.MoveToContent();
+                        Assert.Equal(JwtConstants.BinarySecurityTokenElement, reader.LocalName);
+                        Assert.Equal(JwtConstants.WsSecurityNamespace, reader.NamespaceURI);
+
+                        var encodingType = reader.GetAttribute(JwtConstants.EncodingTypeAttribute);
+                        Assert.Equal(JwtConstants.Base64Binary, encodingType);
+
+                        var valueType = reader.GetAttribute(JwtConstants.ValueTypeAttribute);
+                        Assert.Equal(JwtConstants.TokenType, valueType);
+
+                        var base64 = reader.ReadElementContentAsString();
+                        var token = Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+                        if (theoryData.TokenType == TokenType.JWE)
+                            Assert.True(token.Split('.').Length == 5);
+                        else
+                            Assert.True(token.Split('.').Length == 3);
+                    }
+                }
 
                 theoryData.ExpectedException.ProcessNoException();
             }

@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
@@ -81,5 +83,15 @@ namespace System.IdentityModel.Tokens.Jwt
         /// JWE header alg indicating a shared symmetric key is directly used as CEK.
         /// </summary>
         public const string DirectKeyUseAlg = Microsoft.IdentityModel.JsonWebTokens.JwtConstants.DirectKeyUseAlg;
+
+        // These following constants were added here because otherwise we would need to add a dependency to Microsoft.IdentityModel.Protocols.WsFederation
+        internal const string BinarySecurityTokenElement = "BinarySecurityToken";
+        internal const string WsSecurityNamespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd";
+        internal const string WsUtilityNamespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
+        internal const string ValueTypeAttribute = "ValueType";
+        internal const string IdAttribute = "Id";
+
+        internal const string EncodingTypeAttribute = "EncodingType";
+        internal const string Base64Binary = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary";
     }
 }
