@@ -28,6 +28,7 @@
 using System;
 using System.Security.Claims;
 using System.Xml;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -70,7 +71,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the WriteToken method can serialize this token.</returns>
         public virtual bool CanWriteSecurityToken(SecurityToken securityToken)
         {
-            return false;
+            if (securityToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+
+            return CanWriteToken && TokenType.IsAssignableFrom(securityToken.GetType());
         }
 
         /// <summary>
