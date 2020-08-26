@@ -78,12 +78,24 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
+            : this(signingCredentials, outboundAlgorithmMap, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> provides the token type</param>
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
             : base(StringComparer.Ordinal)
         {
             if (signingCredentials == null)
-            {
                 this[JwtHeaderParameterNames.Alg] = SecurityAlgorithms.None;
-            }
+
             else
             {
                 if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(signingCredentials.Algorithm, out string outboundAlg))
@@ -98,7 +110,11 @@ namespace System.IdentityModel.Tokens.Jwt
                     this[JwtHeaderParameterNames.X5t] = Base64UrlEncoder.Encode(x509SigningCredentials.Certificate.GetCertHash());
             }
 
-            Typ = JwtConstants.HeaderType;
+            if (string.IsNullOrEmpty(tokenType))
+                Typ = JwtConstants.HeaderType;
+            else
+                Typ = tokenType;
+
             SigningCredentials = signingCredentials;
         }
 
@@ -109,8 +125,22 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        /// <exception cref="ArgumentNullException">If 'signingCredentials' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap)
+            : this(encryptingCredentials, outboundAlgorithmMap, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> provides the token type</param>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
             : base(StringComparer.Ordinal)
         {
             if (encryptingCredentials == null)
@@ -130,7 +160,10 @@ namespace System.IdentityModel.Tokens.Jwt
             if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
                 Kid = encryptingCredentials.Key.KeyId;
 
-            Typ = JwtConstants.HeaderType;
+            if (string.IsNullOrEmpty(tokenType))
+                Typ = JwtConstants.HeaderType;
+            else
+                Typ = tokenType;
 
             EncryptingCredentials = encryptingCredentials;
         }

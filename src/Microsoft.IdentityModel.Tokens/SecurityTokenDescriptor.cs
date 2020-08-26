@@ -72,6 +72,14 @@ namespace Microsoft.IdentityModel.Tokens
         public DateTime? NotBefore { get; set; }
 
         /// <summary>
+        /// Gets or sets the token type.
+        /// <remarks> If provided, this will be added as the value for the 'typ' header parameter. In the case of a JWE, this will be added to both the inner (JWS) and the outer token (JWE) header. By default, the value used is 'JWT'.
+        /// If <see cref="AdditionalHeaderClaims"/> also contains 'typ' header claim value, it will override the TokenType provided here.
+        /// This value is used only for JWT tokens and not for SAML/SAML2 tokens</remarks>
+        /// </summary>
+        public string TokenType { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which represents the claims that will be used when creating a security token.
         /// If both <cref see="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
