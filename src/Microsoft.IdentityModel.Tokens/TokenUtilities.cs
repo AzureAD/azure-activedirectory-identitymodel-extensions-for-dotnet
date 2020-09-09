@@ -41,6 +41,25 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class TokenUtilities
     {
+
+        /// <summary>
+        /// A URI that represents the JSON XML data type.
+        /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
+        internal const string Json = "JSON";
+
+        /// <summary>
+        /// A URI that represents the JSON array XML data type.
+        /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
+        internal const string JsonArray = "JSON_ARRAY";
+
+        /// <summary>
+        /// A URI that represents the JSON null data type
+        /// </summary>
+        /// <remarks>When mapping json to .Net Claim(s), we use empty string to represent the claim value and set the ClaimValueType to JsonNull</remarks>
+        internal const string JsonNull = "JSON_NULL";
+
         /// <summary>
         /// Creates a dictionary from a list of Claim's.
         /// </summary>
@@ -105,13 +124,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (claim.ValueType == ClaimValueTypes.DateTime && DateTime.TryParse(claim.Value, out DateTime dateTimeValue))
                 return dateTimeValue;
 
-            if (claim.ValueType == JsonClaimValueTypes.Json)
+            if (claim.ValueType == Json)
                 return JObject.Parse(claim.Value);
 
-            if (claim.ValueType == JsonClaimValueTypes.JsonArray)
+            if (claim.ValueType == JsonArray)
                 return JArray.Parse(claim.Value);
 
-            if (claim.ValueType == JsonClaimValueTypes.JsonNull)
+            if (claim.ValueType == JsonNull)
                 return string.Empty;
 
             return claim.Value;
