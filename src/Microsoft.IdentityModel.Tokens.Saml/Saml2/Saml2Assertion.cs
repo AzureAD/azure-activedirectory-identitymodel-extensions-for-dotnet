@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Gets the canonicalized (ExclusiveC14n) representation without comments.
         /// </summary>
-        internal string CanonicalString
+        public string CanonicalString
         {
             get
             {
