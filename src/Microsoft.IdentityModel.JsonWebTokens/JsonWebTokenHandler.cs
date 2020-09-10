@@ -778,7 +778,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
 
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                wrappedKey = kwProvider.WrapKey((securityKey as SymmetricSecurityKey).Key);
+                wrappedKey = kwProvider.WrapKey(((SymmetricSecurityKey) securityKey).Key);
             }
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
