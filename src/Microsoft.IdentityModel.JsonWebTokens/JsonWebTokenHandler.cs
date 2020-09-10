@@ -131,21 +131,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private static JObject CreateDefaultJWSHeader(SigningCredentials signingCredentials, string tokenType)
         {
-            var header = new JObject()
-            {
-                { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm }
-            };
+            JObject header = null;
 
-            if (signingCredentials.Key.KeyId != null)
-                header.Add(JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId);
+            if (signingCredentials == null)
+            {
+                header = new JObject()
+                {
+                    {JwtHeaderParameterNames.Alg, SecurityAlgorithms.None }
+                };
+            }
+            else
+            {
+                header = new JObject()
+                {
+                    { JwtHeaderParameterNames.Alg, signingCredentials.Algorithm }
+                };
+
+                if (signingCredentials.Key.KeyId != null)
+                    header.Add(JwtHeaderParameterNames.Kid, signingCredentials.Key.KeyId);
+
+                if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
+                    header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
+            }
 
             if (string.IsNullOrEmpty(tokenType))
                 header.Add(JwtHeaderParameterNames.Typ, JwtConstants.HeaderType);
             else
                 header.Add(JwtHeaderParameterNames.Typ, tokenType);
-
-            if (signingCredentials.Key is X509SecurityKey x509SecurityKey)
-                header[JwtHeaderParameterNames.X5t] = x509SecurityKey.X5t;
 
             return header;
         }
@@ -462,14 +474,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, nameof(additionalHeaderClaims), string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters))));
 
-            JObject header = null;
-            if (signingCredentials != null)
-                header = CreateDefaultJWSHeader(signingCredentials, tokenType);
-            else
-                header = new JObject
-                    {
-                        { JwtHeaderParameterNames.Alg, SecurityAlgorithms.None},
-                    };
+            var header = CreateDefaultJWSHeader(signingCredentials, tokenType);
 
             if (encryptingCredentials == null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
                 header.Merge(JObject.FromObject(additionalHeaderClaims));
@@ -773,8 +778,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
 
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                var symmetricKey = securityKey as SymmetricSecurityKey;
-                wrappedKey = kwProvider.WrapKey(symmetricKey.Key);
+                wrappedKey = kwProvider.WrapKey((securityKey as SymmetricSecurityKey).Key);
             }
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
@@ -807,7 +811,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                     var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
-                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal)? string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)) :
+                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal) ?
+                        string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)):
                         string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
                 }
                 catch (Exception ex)

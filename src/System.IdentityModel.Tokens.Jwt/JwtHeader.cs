@@ -89,7 +89,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        /// <param name="tokenType"> provides the token type</param>
+        /// <param name="tokenType"> will be added as the value for the 'typ' claim in the header. If it is null or empty <see cref="JwtConstants.HeaderType"/> will be used as token type</param>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
             : base(StringComparer.Ordinal)
         {

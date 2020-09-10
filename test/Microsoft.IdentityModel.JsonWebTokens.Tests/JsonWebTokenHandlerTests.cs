@@ -288,7 +288,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                         First = true,
-                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -831,7 +830,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         First = true,
                         TestId = "ValidUsingTokenType",
-                        Payload = Default.PayloadString,
                         TokenDescriptor = new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,

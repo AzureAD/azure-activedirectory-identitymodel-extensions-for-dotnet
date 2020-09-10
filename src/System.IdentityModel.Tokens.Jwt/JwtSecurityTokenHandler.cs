@@ -548,7 +548,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             LogHelper.LogVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
-            JwtHeader header = signingCredentials == null ? new JwtHeader() : new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType);
+            JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType);
 
             if (subject?.Actor != null)
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, CreateActorValue(subject.Actor)));
@@ -603,8 +603,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.Aes192CbcHmacSha384, SecurityAlgorithms.Aes256CbcHmacSha512, encryptingCredentials.Enc)));
 
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
-                var symmetricKey = securityKey as SymmetricSecurityKey;
-                wrappedKey = kwProvider.WrapKey(symmetricKey.Key);
+                wrappedKey = kwProvider.WrapKey((securityKey as SymmetricSecurityKey).Key);
             }
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
@@ -616,7 +615,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, tokenType);
                     var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
-                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal)? new JwtSecurityToken(
+                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal) ? new JwtSecurityToken(
                                     header,
                                     innerJwt,
                                     header.Base64UrlEncode(),
