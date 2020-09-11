@@ -45,8 +45,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationResult tokenValidationResult = new TokenValidationResult();
             Type type = typeof(TokenValidationResult);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 7)
-                Assert.True(false, "Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 9)
+                Assert.True(false, "Number of public fields has changed from 9 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -60,6 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("SecurityToken", new List<object>{(SecurityToken)null, new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor())), new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()))}),
                         new KeyValuePair<string, List<object>>("TokenContext", new List<object>{(CallContext)null, new CallContext(), new CallContext()}),
                         new KeyValuePair<string, List<object>>("TokenType", new List<object>{(string)null, "JWTToken", "JwtToken2"}),
+                        new KeyValuePair<string, List<object>>("PropertyBag", new List<object>{ tokenValidationResult.PropertyBag })
                     },
                     Object = tokenValidationResult,
                 };
