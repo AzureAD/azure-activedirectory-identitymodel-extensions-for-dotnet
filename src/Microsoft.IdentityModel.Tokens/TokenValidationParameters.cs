@@ -587,7 +587,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Validation of the issuer mitigates forwarding attacks that can occur when an
         /// IdentityProvider represents multiple tenants and signs tokens with the same keys.
         /// It is possible that a token issued for the same audience could be from a different tenant. For example an application could accept users from
-        /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. A application that accepts tokens from fabrikam could forward them
+        /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. An application that accepts tokens from fabrikam could forward them
         /// to the application that accepts tokens for contoso.
         /// This boolean only applies to default issuer validation. If <see cref= "IssuerValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
