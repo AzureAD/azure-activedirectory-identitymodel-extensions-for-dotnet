@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
                 FedConstants = WsFedConstants.Fed12;
                 PolicyConstants = WsPolicyConstants.Policy12;
                 SecurityConstants = WsSecurityConstants.WsSecurity10;
+                SecurityVersion = WsSecurityVersion.Security10;
                 TrustActions = WsTrustActions.TrustFeb2005;
                 TrustConstants = WsTrustConstants.TrustFeb2005;
                 TrustKeyTypes = WsTrustKeyTypes.TrustFeb2005;
@@ -60,6 +61,7 @@ namespace Microsoft.IdentityModel.Protocols
                 FedConstants = WsFedConstants.Fed12;
                 PolicyConstants = WsPolicyConstants.Policy12;
                 SecurityConstants = WsSecurityConstants.WsSecurity11;
+                SecurityVersion = WsSecurityVersion.Security11;
                 TrustActions = WsTrustActions.Trust13;
                 TrustConstants = WsTrustConstants.Trust13;
                 TrustKeyTypes = WsTrustKeyTypes.Trust13;
@@ -70,6 +72,7 @@ namespace Microsoft.IdentityModel.Protocols
                 FedConstants = WsFedConstants.Fed12;
                 PolicyConstants = WsPolicyConstants.Policy12;
                 SecurityConstants = WsSecurityConstants.WsSecurity11;
+                SecurityVersion = WsSecurityVersion.Security11;
                 TrustActions = WsTrustActions.Trust14;
                 TrustConstants = WsTrustConstants.Trust14;
                 TrustKeyTypes = WsTrustKeyTypes.Trust14;
@@ -79,6 +82,7 @@ namespace Microsoft.IdentityModel.Protocols
         public WsSerializationContext(WsTrustVersion wsTrustVersion, WsAddressingVersion wsAddressingVersion, WsSecurityVersion wsSecurityVersion)
         {
             TrustVersion = wsTrustVersion;
+            SecurityVersion = wsSecurityVersion;
 
             FedConstants = WsFedConstants.Fed12;
             PolicyConstants = WsPolicyConstants.Policy12;
@@ -128,5 +132,7 @@ namespace Microsoft.IdentityModel.Protocols
         public WsTrustKeyTypes TrustKeyTypes { get; }
 
         public WsTrustVersion TrustVersion { get; }
+
+        public WsSecurityVersion SecurityVersion { get; }
     }
 }

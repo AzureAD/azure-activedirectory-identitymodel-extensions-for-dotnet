@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
         internal static SecurityTokenReference ReadSecurityTokenReference(XmlDictionaryReader reader, WsSerializationContext serializationContext)
         {
             //  <wsse:SecurityTokenReference wsu:Id="...",
-            //                               wsse:TokenType="...",
+            //                               wsse11:TokenType="...",
             //                               wsse:Usage="...">
             //      ...
             //  </wsse:SecurityTokenReference>
@@ -105,15 +105,18 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
             var securityTokenReference = new SecurityTokenReference
             {
-                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, serializationContext.SecurityConstants.Namespace),
-                TokenType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.TokenType, serializationContext.SecurityConstants.Namespace),
-                Usage = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.Usage, serializationContext.SecurityConstants.Namespace)
+                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace),
+                Usage = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace)
             };
+            
+            // The TokenType attribute is part of the Ws-Security 1.1 spec.
+            if (serializationContext.SecurityVersion == WsSecurityVersion.Security11)
+                securityTokenReference.TokenType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace);
 
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
             if (reader.IsStartElement() && reader.IsLocalName(WsSecurityElements.KeyIdentifier))
-                securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader, serializationContext);
+                securityTokenReference.KeyIdentifier = ReadKeyIdentifier(reader);
 
             if (!isEmptyElement)
                 reader.ReadEndElement();
@@ -121,7 +124,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return securityTokenReference;
         }
 
-        internal static KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader, WsSerializationContext serializationContext)
+        internal static KeyIdentifier ReadKeyIdentifier(XmlDictionaryReader reader)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -134,9 +137,9 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
             var keyIdentifier = new KeyIdentifier
             {
-                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, serializationContext.AddressingConstants.Namespace),
-                EncodingType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.EncodingType, serializationContext.SecurityConstants.Namespace),
-                ValueType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.ValueType, serializationContext.SecurityConstants.Namespace)
+                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace),
+                EncodingType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.EncodingType, WsSecurityConstants.WsSecurity10.Namespace),
+                ValueType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.ValueType, WsSecurityConstants.WsSecurity10.Namespace)
             };
 
             reader.ReadStartElement();
@@ -149,7 +152,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             return keyIdentifier;
         }
 
-        internal static void WriteKeyIdentifier(XmlDictionaryWriter writer, WsSerializationContext serializationContext, KeyIdentifier keyIdentifier)
+        internal static void WriteKeyIdentifier(XmlDictionaryWriter writer, KeyIdentifier keyIdentifier)
         {
             //  <wsse:KeyIdentifier wsu:Id="..."
             //                      ValueType="..."
@@ -157,10 +160,13 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             //      ...
             //  </wsse:KeyIdentifier>
 
-            writer.WriteStartElement(serializationContext.SecurityConstants.Prefix, WsSecurityElements.KeyIdentifier, serializationContext.SecurityConstants.Namespace);
+            var wsse = writer.LookupPrefix(WsSecurityConstants.WsSecurity10.Namespace) ?? WsSecurityConstants.WsSecurity10.Prefix;
+            var wsu = writer.LookupPrefix(WsUtilityConstants.WsUtility10.Namespace) ?? WsUtilityConstants.WsUtility10.Prefix;
+
+            writer.WriteStartElement(wsse, WsSecurityElements.KeyIdentifier, WsSecurityConstants.WsSecurity10.Namespace);
 
             if (!string.IsNullOrEmpty(keyIdentifier.Id))
-                writer.WriteAttributeString(WsUtilityAttributes.Id, keyIdentifier.Id);
+                writer.WriteAttributeString(wsu, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace, keyIdentifier.Id);
 
             if (!string.IsNullOrEmpty(keyIdentifier.ValueType))
                 writer.WriteAttributeString(WsSecurityAttributes.ValueType, keyIdentifier.ValueType);
@@ -176,26 +182,30 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
 
         internal static void WriteSecurityTokenReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, SecurityTokenReference securityTokenReference)
         {
-            // <wsse:SecurityTokenReference>
-            //      <wsse:KeyIdentifier wsu:Id="..."
-            //                          ValueType="..."
-            //                          EncodingType="...">
-            //          ...
-            //      </wsse:KeyIdentifier>
-            //  </wsse:SecurityTokenReference>
+            // <wsse:SecurityTokenReference wsu:Id="..."
+            //                              wsse11:TokenType="..."
+            //                              wsse:Usage="...">
+            //     ...
+            // </wsse:SecurityTokenReference>
 
-            writer.WriteStartElement(serializationContext.SecurityConstants.Prefix, WsSecurityElements.SecurityTokenReference, serializationContext.SecurityConstants.Namespace);
+            var wsse = writer.LookupPrefix(WsSecurityConstants.WsSecurity10.Namespace) ?? WsSecurityConstants.WsSecurity10.Prefix;
+            var wsse11 = writer.LookupPrefix(WsSecurityConstants.WsSecurity11.Namespace) ?? WsSecurityConstants.WsSecurity11.Prefix;
+            var wsu = writer.LookupPrefix(WsUtilityConstants.WsUtility10.Namespace) ?? WsUtilityConstants.WsUtility10.Prefix;
 
-            // the SecurityTokenReference must be in the wsse namespace of the security binding that will communicate with the relying party.
-            // For Saml2 tokens, the 'TokenType must be in wsse 1.1 namespace
-            if (!string.IsNullOrEmpty(securityTokenReference.TokenType))
-                writer.WriteAttributeString(WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace, securityTokenReference.TokenType);
+            writer.WriteStartElement(wsse, WsSecurityElements.SecurityTokenReference, serializationContext.SecurityConstants.Namespace);
+
+            // The TokenType attribute is described in the Ws-Security 1.1 specification.
+            if (serializationContext.SecurityVersion == WsSecurityVersion.Security11)
+                writer.WriteAttributeString(wsse11, WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace, securityTokenReference.TokenType);
 
             if (!string.IsNullOrEmpty(securityTokenReference.Id))
-                writer.WriteAttributeString(WsUtilityAttributes.Id, securityTokenReference.Id);
+                writer.WriteAttributeString(wsu, WsUtilityAttributes.Id, WsUtilityConstants.WsUtility10.Namespace, securityTokenReference.Id);
+
+            if (!string.IsNullOrEmpty(securityTokenReference.Usage))
+                writer.WriteAttributeString(wsse, WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace, securityTokenReference.Usage);
 
             if (securityTokenReference.KeyIdentifier != null)
-                WriteKeyIdentifier(writer, serializationContext, securityTokenReference.KeyIdentifier);
+                WriteKeyIdentifier(writer, securityTokenReference.KeyIdentifier);
 
             writer.WriteEndElement();
         }
