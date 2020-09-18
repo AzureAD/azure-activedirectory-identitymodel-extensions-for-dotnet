@@ -45,7 +45,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14101 = "IDX14101: Unable to decode the payload '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX14102 = "IDX14102: Unable to decode the header '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX14103 = "IDX14103: Failed to create the token encryption provider.";
-        internal const string IDX14104 = "IDX14104: Unable to obtain a CryptoProviderFactory, EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are both null.";
         internal const string IDX14105 = "IDX14105: Header.Cty != null, assuming JWS. Cty: '{0}'.";
         internal const string IDX14106 = "IDX14106: Decoding token: '{0}' into header, payload and signature.";
         internal const string IDX14107 = "IDX14107: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
