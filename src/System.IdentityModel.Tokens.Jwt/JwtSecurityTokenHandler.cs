@@ -1360,22 +1360,6 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        private static byte[] DecryptToken(JwtSecurityToken jwtToken, CryptoProviderFactory cryptoProviderFactory, SecurityKey key)
-        {
-            using (var decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, jwtToken.Header.Enc))
-            {
-                if (decryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, jwtToken.Header.Enc)));
-
-                return decryptionProvider.Decrypt(
-                        Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
-                        Encoding.ASCII.GetBytes(jwtToken.RawHeader),
-                        Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
-                        Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag)
-                    );
-            }
-        }
-
         /// <summary>
         /// Decrypts a JWE and returns the clear text 
         /// </summary>
@@ -1399,60 +1383,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
-            var decryptionSucceeded = false;
-            byte[] decryptedTokenBytes = null;
 
-            // keep track of exceptions thrown, keys that were tried
-            var exceptionStrings = new StringBuilder();
-            var keysAttempted = new StringBuilder();
-            foreach (SecurityKey key in keys)
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, new JwtTokenDecryptionParameters
             {
-                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-                if (cryptoProviderFactory == null)
-                {
-                    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
-                    continue;
-                }
-
-                if (!cryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Enc, key))
-                {
-                    LogHelper.LogWarning(TokenLogMessages.IDX10611, jwtToken.Header.Enc, key);
-                    continue;
-                }
-
-                try
-                {
-                    Validators.ValidateAlgorithm(jwtToken.Header.Enc, key, jwtToken, validationParameters);
-                    decryptedTokenBytes = DecryptToken(jwtToken, cryptoProviderFactory, key);
-                    decryptionSucceeded = true;
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    exceptionStrings.AppendLine(ex.ToString());
-                }
-
-                if (key != null)
-                    keysAttempted.AppendLine(key.ToString());
-            }
-
-            if (!decryptionSucceeded && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, jwtToken.RawData)));
-
-            if (!decryptionSucceeded)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, jwtToken.RawData)));
-
-            if (string.IsNullOrEmpty(jwtToken.Header.Zip))
-                return Encoding.UTF8.GetString(decryptedTokenBytes);
-
-            try
-            {
-                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Header.Zip);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, jwtToken.Header.Zip), ex));
-            }
+                Alg = jwtToken.Header.Alg,
+                AuthenticationTag = jwtToken.RawAuthenticationTag,
+                Ciphertext = jwtToken.RawCiphertext,
+                DecompressionFunction = JwtTokenUtilities.DecompressToken,
+                Enc = jwtToken.Header.Enc,
+                EncodedHeader = jwtToken.EncodedHeader,
+                EncodedToken = jwtToken.RawData,
+                InitializationVector= jwtToken.RawInitializationVector,
+                Keys = keys,
+                Zip = jwtToken.Header.Zip,
+            });
         }
 
         internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
