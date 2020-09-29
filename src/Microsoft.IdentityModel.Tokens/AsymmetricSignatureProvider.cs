@@ -37,9 +37,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class AsymmetricSignatureProvider : SignatureProvider
     {
-        private bool _disposed;
-        private AsymmetricAdapter _asymmetricAdapter;
+        private DisposableObjectPool<AsymmetricAdapter> _asymmetricAdapterObjectPool;
         private CryptoProviderFactory _cryptoProviderFactory;
+        private bool _disposed;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
@@ -153,10 +153,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
-            ValidateAsymmetricSecurityKeySize(key, algorithm, willCreateSignatures);
-            _asymmetricAdapter = ResolveAsymmetricAdapter(jsonWebKey?.ConvertedSecurityKey ?? key, algorithm, willCreateSignatures);
             WillCreateSignatures = willCreateSignatures;
-        }
+            ValidateAsymmetricSecurityKeySize(key, algorithm, WillCreateSignatures);
+            _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(CreateAsymmetricAdapter);
+    }
 
         /// <summary>
         /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for creating signatures.
@@ -203,10 +203,10 @@ namespace Microsoft.IdentityModel.Tokens
             return SupportedAlgorithms.GetHashAlgorithmName(algorithm);
         }
 
-        private AsymmetricAdapter ResolveAsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
+        private AsymmetricAdapter CreateAsymmetricAdapter()
         {
-            var hashAlgoritmName = GetHashAlgorithmName(algorithm);
-            return new AsymmetricAdapter(key, algorithm, _cryptoProviderFactory.CreateHashAlgorithm(hashAlgoritmName), hashAlgoritmName, requirePrivateKey);
+            var hashAlgoritmName = GetHashAlgorithmName(Algorithm);
+            return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(hashAlgoritmName), hashAlgoritmName, WillCreateSignatures);
         }
 #endif
 
@@ -227,16 +227,9 @@ namespace Microsoft.IdentityModel.Tokens
             return SupportedAlgorithms.GetDigestFromSignatureAlgorithm(algorithm);
         }
 
-        /// <summary>
-        /// This method is here, just to keep the #if out of the constructor.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="algorithm"></param>
-        /// <param name="requirePrivateKey"></param>
-        /// <returns></returns>
-        private AsymmetricAdapter ResolveAsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
+        private AsymmetricAdapter CreateAsymmetricAdapter()
         {
-            return new AsymmetricAdapter(key, algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(algorithm)), requirePrivateKey);
+            return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(Algorithm)), WillCreateSignatures);
         }
 #endif
 
@@ -260,14 +253,22 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
+            AsymmetricAdapter asym = null;
             try
             {
-                return _asymmetricAdapter.Sign(input);
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.Sign(input);
             }
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
+                Dispose(true);
                 throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _asymmetricAdapterObjectPool.Free(asym);
             }
         }
 
@@ -350,14 +351,22 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
+            AsymmetricAdapter asym = null;
             try
             {
-                return _asymmetricAdapter.Verify(input, signature);
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.Verify(input, signature);
             }
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
+                Dispose(true);
                 throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _asymmetricAdapterObjectPool.Free(asym);
             }
         }
 
@@ -370,11 +379,12 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 _disposed = true;
-
                 if (disposing)
                 {
+                    foreach (var item in _asymmetricAdapterObjectPool.Items)
+                        item.Value?.Dispose();
+
                     CryptoProviderCache?.TryRemove(this);
-                    _asymmetricAdapter.Dispose();
                 }
             }
         }

@@ -51,10 +51,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NET461 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
 #endif
-
             try
             {
-                new AsymmetricSignatureProvider(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
+                new AsymmetricAdapter(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
                 expectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -64,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
 #if NET452
             // RSA-PSS is not available on .NET 4.5.2
-            expectedException = ExpectedException.NotSupportedException("IDX10634:");
+            expectedException = ExpectedException.NotSupportedException("IDX10687:");
 #endif
 
 #if NET461 || NET_CORE
@@ -73,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-                new AsymmetricSignatureProvider(KeyingMaterial.DefaultRsaSecurityKey1, SecurityAlgorithms.RsaSsaPssSha256, false);
+                new AsymmetricAdapter(new RsaSecurityKey(new DerivedRsa(2048)), SecurityAlgorithms.RsaSha256, false);
                 expectedException.ProcessNoException(context);
             }
             catch (Exception ex)
