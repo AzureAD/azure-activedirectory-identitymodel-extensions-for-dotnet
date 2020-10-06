@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class ECDsaAdapter
     {
-        internal readonly CreateECDsaDelegate CreateECDsaFunction = null;
+        internal readonly CreateECDsaDelegate CreateECDsaFunction = ECDsaNotSupported;
         internal static ECDsaAdapter Instance = new ECDsaAdapter();
 
         /// <summary>
@@ -67,11 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal ECDsa CreateECDsa(JsonWebKey jsonWebKey, bool usePrivateKey)
         {
-            if (CreateECDsaFunction != null)
-                return CreateECDsaFunction(jsonWebKey, usePrivateKey);
-
-            // we will get here on platforms that are not supported.
-            throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10690));
+            return CreateECDsaFunction(jsonWebKey, usePrivateKey);
         }
 
         /// <summary>
@@ -168,6 +164,12 @@ namespace Microsoft.IdentityModel.Tokens
                 if (keyBlobHandle != null && keyBlobHandle.IsAllocated)
                     keyBlobHandle.Free();
             }
+        }
+
+        internal static ECDsa ECDsaNotSupported(JsonWebKey jsonWebKey, bool usePrivateKey)
+        {
+            // we will get here on platforms that are not supported.
+            throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10690));
         }
 
         /// <summary>
