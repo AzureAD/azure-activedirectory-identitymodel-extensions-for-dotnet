@@ -52,9 +52,6 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _disposed = false;
         private bool _disposeRsa = false;
 
-        private object _signLock = new object();
-        private object _verifyLock = new object();
-
         // Only dispose of the RsaCryptoServiceProvider object if we created a new instance that supports SHA-256,
         // otherwise do not disposed of the referenced RsaCryptoServiceProvider
         //private bool _disposeRsa;
@@ -195,10 +192,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (hash == null)
                 throw LogHelper.LogArgumentNullException(nameof(hash));
 
-            lock (_signLock)
-            {
-                return _rsa.SignData(input, hash);
-            }
+            return _rsa.SignData(input, hash);
         }
 
         /// <summary>
@@ -222,10 +216,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
-            lock (_verifyLock)
-            {
-                return _rsa.VerifyData(input, hash, signature);
-            }
+            return _rsa.VerifyData(input, hash, signature);
         }
 
         /// <summary>

@@ -71,8 +71,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool _disposeCryptoOperators = false;
         private bool _disposed = false;
-        private SignDelegate SignatureFunction;
-        private VerifyDelegate VerifyFunction;
+        private SignDelegate SignatureFunction = SignatureFunctionNotFound;
+        private VerifyDelegate VerifyFunction = VerifyFunctionNotFound;
 
 #if NET461 || NETSTANDARD2_0
         // HasAlgorithmName was introduced into Net46
@@ -329,11 +329,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal byte[] Sign(byte[] bytes)
         {
-            if (SignatureFunction != null)
-                return SignatureFunction(bytes);
-
-            // we should never get here, its a bug if we do.
-            throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX10685));
+            return SignatureFunction(bytes);
         }
 
         private byte[] SignWithECDsa(byte[] bytes)
@@ -355,13 +351,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
+        internal static byte[] SignatureFunctionNotFound(byte[] bytes)
+        {
+            // we should never get here, its a bug if we do.
+            throw LogHelper.LogExceptionMessage(new CryptographicException(LogMessages.IDX10685));
+        }
+
         internal bool Verify(byte[] bytes, byte[] signature)
         {
-            if (VerifyFunction != null)
-                return VerifyFunction(bytes, signature);
-
-            // we should never get here, its a bug if we do.
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10686));
+            return VerifyFunction(bytes, signature);
         }
 
         private bool VerifyWithECDsa(byte[] bytes, byte[] signature)
@@ -382,6 +380,12 @@ namespace Microsoft.IdentityModel.Tokens
             return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);
         }
 #endif
+
+        internal static bool VerifyFunctionNotFound(byte[] bytes, byte[] signature)
+        {
+            // we should never get here, its a bug if we do.
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10686));
+        }
 
         // Put all the 'lightup' code here.
 #if NET45
