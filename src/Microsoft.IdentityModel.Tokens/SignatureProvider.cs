@@ -85,6 +85,11 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityKey Key { get; private set; }
 
         /// <summary>
+        /// For testing purposes
+        /// </summary>
+        internal virtual int ObjectPoolSize => 0;
+
+        /// <summary>
         /// This must be overridden to produce a signature over the 'input'.
         /// </summary>
         /// <param name="input">bytes to sign.</param>
