@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
@@ -132,6 +133,64 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             if (typeof(InMemoryCryptoProviderCache) != cryptoFactory1.CryptoProviderCache.GetType())
                 context.Diffs.Add("typeof(InMemoryCryptoProviderCache) != cryptoFactory1.CryptoProviderCache.GetType()");
 
+            if (cryptoFactory1.SignatureProviderObjectPoolCacheSize != CryptoProviderFactory.DefaultSignatureProviderObjectPoolCacheSize)
+                context.Diffs.Add("cryptoFactory1.SignatureProviderObjectPoolCacheSize != CryptoProviderFactory.DefaultSignatureProviderObjectPoolCacheSize");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void GetSets()
+        {
+            TestUtilities.WriteHeader($"{this}.GetSets");
+            var context = new CompareContext($"{this}.GetSets");
+
+            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory();
+            Type type = typeof(CryptoProviderFactory);
+            PropertyInfo[] properties = type.GetProperties();
+            if (properties.Length != 7)
+                Assert.True(false, "Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+
+            CustomCryptoProvider customCryptoProvider = new CustomCryptoProvider();
+            GetSetContext getSetContext =
+                new GetSetContext
+                {
+                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                    {
+                        new KeyValuePair<string, List<object>>("SignatureProviderObjectPoolCacheSize", new List<object>{CryptoProviderFactory.DefaultSignatureProviderObjectPoolCacheSize, 20, 10}),
+                        new KeyValuePair<string, List<object>>("CacheSignatureProviders", new List<object>{CryptoProviderFactory.DefaultCacheSignatureProviders, false, true}),
+                        new KeyValuePair<string, List<object>>("CustomCryptoProvider", new List<object>{(ICryptoProvider)null, customCryptoProvider, null}),
+                    },
+                    Object = cryptoProviderFactory,
+                };
+
+            TestUtilities.GetSet(getSetContext);
+
+            cryptoProviderFactory.SignatureProviderObjectPoolCacheSize = 42;
+            cryptoProviderFactory.CacheSignatureProviders = false;
+            cryptoProviderFactory.CustomCryptoProvider = customCryptoProvider;
+            CryptoProviderFactory clone = new CryptoProviderFactory(cryptoProviderFactory);
+            IdentityComparer.CompareAllPublicProperties(clone, cryptoProviderFactory, context);
+
+            try
+            {
+                cryptoProviderFactory.SignatureProviderObjectPoolCacheSize = 0;
+                context.AddDiff("cryptoProviderFactory.SignatureProviderObjectPoolCacheSize = 0; - Succeeded");
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                cryptoProviderFactory.SignatureProviderObjectPoolCacheSize = -1;
+                context.AddDiff("cryptoProviderFactory.SignatureProviderObjectPoolCacheSize = -1; - Succeeded");
+            }
+            catch
+            {
+            }
+
+            context.Diffs.AddRange(getSetContext.Errors);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -504,7 +563,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
-
 
         [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData))]
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)

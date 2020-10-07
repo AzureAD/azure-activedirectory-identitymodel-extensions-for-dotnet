@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, (algorithm ?? "null"), MinimumSymmetricKeySizeInBits, key, key.KeySize)));
 
             WillCreateSignatures = willCreateSignatures;
-            _keyedHashObjectPool = new DisposableObjectPool<KeyedHashAlgorithm>(CreateKeyedHashAlgorithm);
+            _keyedHashObjectPool = new DisposableObjectPool<KeyedHashAlgorithm>(CreateKeyedHashAlgorithm, key.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
         }
 
         /// <summary>
@@ -142,6 +142,16 @@ namespace Microsoft.IdentityModel.Tokens
             return _keyedHashObjectPool.Allocate();
         }
 
+        private KeyedHashAlgorithm CreateKeyedHashAlgorithm()
+        {
+            return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
+        }
+
+        /// <summary>
+        /// For testing purposes
+        /// </summary>
+        internal override int ObjectPoolSize => _keyedHashObjectPool.Size;
+
         /// <summary>
         /// This method is called just after the cryptographic operation.
         /// If <see cref="GetKeyedHashAlgorithm(byte[], string)"/> was overridden this method can be overridden for
@@ -151,11 +161,6 @@ namespace Microsoft.IdentityModel.Tokens
         protected virtual void ReleaseKeyedHashAlgorithm(KeyedHashAlgorithm keyedHashAlgorithm)
         {
             _keyedHashObjectPool.Free(keyedHashAlgorithm);
-        }
-
-        private KeyedHashAlgorithm CreateKeyedHashAlgorithm()
-        {
-            return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
         }
 
         /// <summary>

@@ -41,6 +41,8 @@ namespace Microsoft.IdentityModel.Tokens
         private static CryptoProviderFactory _default;
         private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
         private static object _cacheLock = new object();
+        private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
+        private int _signatureProviderObjectPoolCacheSize = _defaultSignatureProviderObjectPoolCacheSize;
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
@@ -59,6 +61,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public static bool DefaultCacheSignatureProviders { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the maximum size of the object pool used by the SignatureProvider that are used for crypto objects.
+        /// </summary>
+        public static int DefaultSignatureProviderObjectPoolCacheSize
+        {
+            get => _defaultSignatureProviderObjectPoolCacheSize;
+            set => _defaultSignatureProviderObjectPoolCacheSize = value > 0 ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10698, value)));
+        }
 
         /// <summary>
         /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
@@ -85,6 +96,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
             CustomCryptoProvider = other.CustomCryptoProvider;
+            CacheSignatureProviders = other.CacheSignatureProviders;
+            SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
         }
 
         /// <summary>
@@ -105,6 +118,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool CacheSignatureProviders { get; set; } = DefaultCacheSignatureProviders;
+
+        /// <summary>
+        /// Gets or sets the maximum size of the object pool used by the SignatureProvider that are used for crypto objects.
+        /// </summary>
+        public int SignatureProviderObjectPoolCacheSize
+        {
+            get => _signatureProviderObjectPoolCacheSize;
+
+            set => _signatureProviderObjectPoolCacheSize = value > 0 ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10698, value)));
+        }
 
         /// <summary>
         /// Creates an instance of <see cref="AuthenticatedEncryptionProvider"/> for a specific &lt;SecurityKey, Algorithm>.

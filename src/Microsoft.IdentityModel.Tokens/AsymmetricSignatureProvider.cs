@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             WillCreateSignatures = willCreateSignatures;
             ValidateAsymmetricSecurityKeySize(key, algorithm, WillCreateSignatures);
-            _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(CreateAsymmetricAdapter);
+            _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(CreateAsymmetricAdapter, _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
     }
 
         /// <summary>
@@ -232,6 +232,11 @@ namespace Microsoft.IdentityModel.Tokens
             return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(Algorithm)), WillCreateSignatures);
         }
 #endif
+
+        /// <summary>
+        /// For testing purposes
+        /// </summary>
+        internal override int ObjectPoolSize => _asymmetricAdapterObjectPool.Size;
 
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.

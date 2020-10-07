@@ -67,10 +67,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _factory = factory;
             Items = new Element[size];
+            Size = size;
         }
 
         // storage for the pool objects.
         internal Element[] Items { get; }
+
+        internal int Size { get; }
 
         private T CreateInstance()
         {
