@@ -349,7 +349,7 @@ namespace Microsoft.IdentityModel.TestUtils
         // This token was signed with Default.SymmetricSigningCredentials and encryted with Default.SymmetricEncryptingCredentials.
         // The inner JWT is unsigned and this token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ..jg3MBOc_adRzDLeLh34H1w.h6QUuTgVQuXJV1GbyvYf4rpzrm66LKKaapbMAXDuve825rUEC0SxPWk5Dg3rq-T7KckKKUAlTNjYIY6sw2gpAdB7Lt_zVYYo8_BKY5jPsnrD9649DxPfXnJWSR-uAuhYqx7ts9cFg-XHCeTN9X442Ay8W0kTJMpwV2QqE-b57aVSJ6QDH60COktf8uCTJQZfViJXG4BicIsqVqlDLBZIs_FZsDTWSZXzUrsOSSVoW7cpntvYTH4FqbtqcKsBEtmTXp88AW7jdkCRD8jjU9MUnQTKO43Eqw9Z3PF_3894ZpTfhjU_Jo7BZCyeBu7MPjFtGwU2aaOaFDLjehesRc2QBQ.nbNlF0P-6TGzFEYK93Xleg";
+        public static string JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ..cp1UnYaox-HQC0rSa_eFYQ.qrvErDcl9FyujJSgYFqkWvPwLSmeaBqXMpeIaSkh4-OMib_FA3fN3ENyGpRKWYtq60SDxwFTyOMK9XB2fbY8ieenErJSW3yhyOnVt0ENWUCTCG7CUqe0VylIQ7l_ZVbf7ec4yxe-30Ariy87-Ru1KtATYNiuyPQ_KaBajDYQ8Qi3HpnKqe0l7MYHVvhmny2Ib659-uV-vihV5An1KG8OjsL9mUiVsP417OVU5fI9jqYw9S58ghoEsr53tbfPl8zMwHalbMKid5HOVrnGzGOhswdiin2oc5vjGewGoQwEZYtNVKrS0CPOD8GtOzlZ0-EgFOYVbJ_I3O6Xml8nG0g6Gpo0An3Tyuhqpuq9XNuqsUc.OZ6v3Nbhh_vzs1AcwbAdPA";
 
         // This token was signed with Default.SymmetricSigningCredentials and encrypted with EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256).
         // This token includes two additional header claims:
@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.TestUtils
         // This token was signed with Default.SymmetricSigningCredentials and encrypted with EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256).
         // The inner JWT is unsigned and yhis token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ.HUOPbYVuehgfU4K2x3FL4mypDFU6jA7NePhjeArFAE9ZduQmGCR7Ei8A56XbDE2WwMT3VsM59cV7_C-ozZ16182H-mBX9PuLYUuwFneGbCFlx7sR_CjPlZKEIWi_AfxJ85HAIk--y-1BXJMx0VhZoo1uSignK339tupAP33JCOhzcHIavlqRNiRQqPiKP2wJTc6xk91RlLKonxHNPvYdo-zxX4VocMmS5qJgqz0o4EI7FezSp4OMzzoV52L7OlsEUvIAit5vYHhl5eSVy_7g1sDGMz3KmNHDZ6SQCuDF2iDcTp5mu6jVKNzwe5b0EpUKsH-HhWN_RMnAgmqNQQNzcg.xLG4YRE3hoOfK6Bb6kpN2g.jUK7qzXnRIn2xV-wwFt_T3siYfMIvXJYvxkf8fWq52nWBboWsv5t-zpkjdBAVyymjhLToD9j5G-VXV6PQOIm17zVOgWVHPBIefSdDkWFAf0ibNaOftWNuzDMDU2w2MFicrbFCQtTpY17YZ4tIIhrpXk1QjDWgIdXfYdKY9fKZJK5Le3Pa4v4rjNbfXf6Fet2hg2XkoxMGDE6chLbgI_ETzkq62ues4QNct3Ae1hBCowvaE4qSLLEhH35j6gptRkuJviQYZ0yICd6iVBt3hLmQWiAjH7uiHGpB_TQ-3AsSJZ-SEq1zvsXFUXI2RVp7p22tOoaQxCb56UrNy28LDKmZw.K7OFzWkFqA4cE9BaXm_gHw";
+        public static string JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ.IEDqNukS628dHdpDd21zDNh2y3fpwLhnBt51y0CkD--d0w729weXA6y2RwkYv5ugyzgxwzNmTfpWB7vumtHO7HGAcSFtvd9KvmR2xDhpiI1fnY0qqF21AxZpf74ch_jymcju1vptyW_E7dOHgwKwMXySH0gKfp128qbiK2KS36g6PMhfQvb99gCvRehsRo7c1zE_xa2ytPAtcXBaputHv0Du5ib-7ucRyc8RnFxxPsPed-trO6Xt6Ipxe6eu0zMxnYfs9WBeHb9a7zqiZ80bwf1Ks_GQFJ2IO_tGjB3nC9bZotKQpEntvyM3MiAsB1Y7vLjhcpjjOG1UIMVnpiUEQg.M34LLgzt6cETwngngzHTFA.OnHCX1FE_4uwSaE8-Wy4azdMSCIoHtb7-RL9ZPOCqW70iOIMJFr6VXtLkpf4QXwduFlyTbT3rM_8fB5Gnkxa8artnJ3VQ4bA2M_DeMKYgXQHsq1uSVOusXA9jq6fn99aHS9C05-rCaFca6MUl1m_-QfJieXFjgc0tXzyn3c_kM0dItqSRszFgl1daZZp9f00ZbyRZEn4idaS3nwGzwF8net_i-52UaYwf38gWVdgikFfS-g2ySjDoLW7FV1TkSOuHy-27GCWsIENbddWgCB86gUL896oBkBPJlpu3bqp_mn5wi1FyV9QKHiq7FEknqlYIHHEwye0EuEOLzMxYwsz8zAQLE0ljpLRbEk0NAHppPc.KcymSs9UWcfCNn8zERf8Pg";
 
         #endregion
 
@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         // This token is unsigned and includes one additional header claim:
         // { "int", 123 }.
-        public static string UnsignedJWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJub25lIiwiaW50IjoxMjN9.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3In0.";
+        public static string UnsignedJWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIiwiaW50IjoxMjN9.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIxNjE2MDA2MDE3In0.";
         #endregion
     }
 }
