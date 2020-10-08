@@ -129,6 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10617 = "IDX10617: Encryption failed. Keywrap is only supported for: '{0}', '{1}' and '{2}'. The content encryption specified is: '{3}'.";
         public const string IDX10618 = "IDX10618: Key unwrap failed using decryption Keys: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10619 = "IDX10619: Decryption failed. Algorithm: '{0}'. Either the Encryption Algorithm: '{1}' or none of the Security Keys are supported by the CryptoProviderFactory.";
+        public const string IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are null.";
 
         // Formating
         public const string IDX10400 = "IDX10400: Unable to decode: '{0}' as Base64url encoded string.";

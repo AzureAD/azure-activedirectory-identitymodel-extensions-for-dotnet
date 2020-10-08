@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
             if (cryptoProviderFactory == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10619));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
             byte[] wrappedKey = null;
             SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials,cryptoProviderFactory, out wrappedKey);
