@@ -38,61 +38,81 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     {
         public class AttributeKey
         {
-            string _friendlyName;
-            int _hashCode;
-            string _name;
-            string _nameFormat;
-            string _valueType;
-            string _originalIssuer;
+            readonly int _hashCode;
 
-            internal string FriendlyName { get { return _friendlyName; } }
-            internal string Name { get { return _name; } }
-            internal string NameFormat { get { return _nameFormat; } }
-            internal string ValueType { get { return _valueType; } }
-            internal string OriginalIssuer { get { return _originalIssuer; } }
+            internal string FriendlyName { get; }
+            internal string Name { get; }
+            internal string NameFormat { get; }
+            internal string ValueType { get; }
+            internal string OriginalIssuer { get; }
 
             public AttributeKey(Saml2Attribute attribute)
             {
                 if (attribute == null)
                     throw LogArgumentNullException(nameof(attribute));
 
-                _friendlyName = attribute.FriendlyName ?? String.Empty;
-                _name = attribute.Name;
-                _nameFormat = attribute.NameFormat == null ? String.Empty : attribute.NameFormat.OriginalString;
-                _valueType = attribute.AttributeValueXsiType ?? String.Empty;
-                _originalIssuer = attribute.OriginalIssuer ?? String.Empty;
+                FriendlyName = attribute.FriendlyName ?? string.Empty;
+                Name = attribute.Name;
+                NameFormat = attribute.NameFormat == null ? string.Empty : attribute.NameFormat.OriginalString;
+                ValueType = attribute.AttributeValueXsiType ?? string.Empty;
+                OriginalIssuer = attribute.OriginalIssuer ?? string.Empty;
 
-                ComputeHashCode();
+                _hashCode = ComputeHashCode();
             }
 
-            public override int GetHashCode()
+            /// <inheritdoc/>
+            public override int GetHashCode() => _hashCode;
+
+            int ComputeHashCode()
             {
-                return _hashCode;
+                int hashCode = Name.GetHashCode();
+                hashCode ^= FriendlyName.GetHashCode();
+                hashCode ^= NameFormat.GetHashCode();
+                hashCode ^= ValueType.GetHashCode();
+                hashCode ^= OriginalIssuer.GetHashCode();
+                return hashCode;
             }
 
-            void ComputeHashCode()
+            /// <inheritdoc/>
+            public override bool Equals(object obj) => Equals(obj as AttributeKey);
+
+            /// <summary>
+            /// Indicates whether the current object is equal to another object of the same type.
+            /// </summary>
+            /// <param name="other">An object to compare with this object.</param>
+            /// <returns>
+            /// <c>true</c> if the current object is equal to the other parameter; otherwise, <c>false</c>.
+            /// </returns>
+            public bool Equals(AttributeKey other)
             {
-                _hashCode = _name.GetHashCode();
-                _hashCode ^= _friendlyName.GetHashCode();
-                _hashCode ^= _nameFormat.GetHashCode();
-                _hashCode ^= _valueType.GetHashCode();
-                _hashCode ^= _originalIssuer.GetHashCode();
+                return other != null &&
+                    FriendlyName.Equals(other.FriendlyName, StringComparison.Ordinal) &&
+                    Name.Equals(other.Name, StringComparison.Ordinal) &&
+                    NameFormat.Equals(other.NameFormat, StringComparison.Ordinal) &&
+                    ValueType.Equals(other.ValueType, StringComparison.Ordinal) &&
+                    OriginalIssuer.Equals(other.OriginalIssuer, StringComparison.Ordinal);
             }
         }
 
         #region IEqualityComparer<AttributeKey> Members
 
+        /// <inheritdoc/>
         public bool Equals(AttributeKey x, AttributeKey y)
         {
-            return x.Name.Equals(y.Name, StringComparison.Ordinal)
-                && x.FriendlyName.Equals(y.FriendlyName, StringComparison.Ordinal)
-                && x.ValueType.Equals(y.ValueType, StringComparison.Ordinal)
-                && x.OriginalIssuer.Equals(y.OriginalIssuer, StringComparison.Ordinal)
-                && x.NameFormat.Equals(y.NameFormat, StringComparison.Ordinal);
+            if (x == null && y == null)
+                return true;
+            else if (x == null || y == null)
+                return false;
+
+            return x.Equals(y);
         }
 
+        /// <inheritdoc/>
         public int GetHashCode(AttributeKey obj)
         {
+            if (obj == null)
+                throw LogArgumentNullException(nameof(obj));
+
             return obj.GetHashCode();
         }
 
