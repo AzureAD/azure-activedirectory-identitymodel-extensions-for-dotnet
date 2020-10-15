@@ -63,13 +63,12 @@ Write-Host "releaseVersion: " $releaseVersion;
 Write-Host "nugetPreview:   " $nugetPreview;
 
 CreateArtifactsFolder($artifactsRoot);
-Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack -c $buildType -o $artifactsRoot -v m -s wilson.sln"
-#foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
-#{
-#	$name = $project.name;
-# Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
-#	Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
-#}
+foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
+{
+	$name = $project.name;
+ Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+	Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+}
 
 Write-Host "============================"
 Write-Host ""
