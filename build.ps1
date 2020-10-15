@@ -108,12 +108,12 @@ $ErrorActionPreference = "Stop"
 WriteSectionHeader("VerifyResourceUsage.pl");
 
 Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl"
-# $verifyResourceUsageResult = Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl
+$verifyResourceUsageResult = Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl
 
-#if($verifyResourceUsageResult.ExitCode -ne 0)
-#{
-#	throw "VerifyResourceUsage.pl failed."
-#}
+if($verifyResourceUsageResult.ExitCode -ne 0)
+{
+	throw "VerifyResourceUsage.pl failed."
+}
 
 WriteSectionFooter("End VerifyResourceUsage.pl");
 
@@ -156,14 +156,12 @@ if ($generateContractAssemblies.IsPresent)
 	WriteSectionFooter("End Generating Contract Assemblies");
 }
 
-Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack -c $buildType -o $artifactsRoot -v m -s wilson.sln"
-
-#foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
-#{
-#	$name = $project.name;
-#	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-#	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s wilson.sln"
-#}
+foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
+{
+	$name = $project.name;
+	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+}
 
 WriteSectionFooter("End Build");
 
