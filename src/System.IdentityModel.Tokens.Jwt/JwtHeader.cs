@@ -288,6 +288,12 @@ namespace System.IdentityModel.Tokens.Jwt
                 return GetStandardClaim(JwtHeaderParameterNames.X5t);
             }
         }
+        
+        /// <summary>
+        /// Gets the certificate used to sign the token
+        /// </summary>
+        /// <remarks>If the 'x5c' claim is not found, null is returned.</remarks>   
+        public string X5c => GetStandardClaim(JwtHeaderParameterNames.X5c);
 
         /// <summary>
         /// Gets the 'value' of the 'zip' claim { zip, 'value' }.
