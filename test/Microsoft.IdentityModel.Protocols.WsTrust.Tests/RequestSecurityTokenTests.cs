@@ -26,6 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+
+
+
+
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -44,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class RequestSecurityTokenTests
     {
-        [Theory, MemberData(nameof(ReadAndWriteRequestTheoryData))]
+        [Theory, MemberData(nameof(ReadAndWriteRequestTestCases))]
         public void ReadAndWriteRequest(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadAndWriteRequest", theoryData);
@@ -70,7 +74,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadAndWriteRequestTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadAndWriteRequestTestCases
         {
             get
             {
@@ -190,7 +194,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadRequestTheoryData))]
+        [Theory, MemberData(nameof(ReadRequestTestCases))]
         public void ReadRequest(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadRequest", theoryData);
@@ -209,7 +213,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadRequestTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestTestCases
         {
             get
             {
@@ -244,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestTestCases))]
         public void WriteRequest(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequest", theoryData);
@@ -261,7 +265,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestTestCases
         {
             get
             {

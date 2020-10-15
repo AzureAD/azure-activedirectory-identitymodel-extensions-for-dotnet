@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class UseKeyTests
     {
-        [Theory, MemberData(nameof(ReadUseKeyTheoryData))]
+        [Theory, MemberData(nameof(ReadUseKeyTestCases))]
         public void ReadUseKey(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadUseKey", theoryData);
@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadUseKeyTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadUseKeyTestCases
         {
             get
             {
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteUseKeyTheoryData))]
+        [Theory, MemberData(nameof(WriteUseKeyTestCases))]
         public void WriteUseKey(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteUseKey", theoryData);
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteUseKeyTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteUseKeyTestCases
         {
             get
             {

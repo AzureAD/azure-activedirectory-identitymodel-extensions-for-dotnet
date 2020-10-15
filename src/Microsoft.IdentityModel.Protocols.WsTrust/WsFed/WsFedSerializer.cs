@@ -28,6 +28,7 @@
 using System;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Xml;
 
 #pragma warning disable 1591
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(Xml.LogMessages.IDX30016, WsFedElements.ContextItem), ex));
+                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15016, WsFedElements.ContextItem), ex));
             }
 
             // </AdditionalContext>
@@ -102,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
             string name = XmlAttributeHolder.GetAttribute(attributes, WsFedAttributes.Name, @namespace);
             if (string.IsNullOrEmpty(name))
-                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(Xml.LogMessages.IDX30013, WsFedElements.ContextItem, WsFedAttributes.Name)));
+                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15013, WsFedElements.ContextItem, WsFedAttributes.Name)));
 
             var contextItem = new ContextItem(name)
             {
@@ -112,7 +113,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             reader.ReadStartElement();
             if (reader.IsStartElement(WsFedElements.Value, @namespace))
             {
-                string value = XmlUtil.ReadStringElement(reader);
+                string value = WsUtils.ReadStringElement(reader);
                 if (!string.IsNullOrEmpty(value))
                     contextItem.Value = value;
             }
@@ -152,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
             XmlAttributeHolder[] attributes = XmlAttributeHolder.ReadAttributes(reader);
             string uri = XmlAttributeHolder.GetAttribute(attributes, WsFedAttributes.Uri, @namespace);
             if (string.IsNullOrEmpty(uri))
-                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(Xml.LogMessages.IDX30013, WsFedElements.ContextItem, WsFedAttributes.Name)));
+                throw LogHelper.LogExceptionMessage(new XmlReadException(LogHelper.FormatInvariant(WsTrust.LogMessages.IDX15013, WsFedElements.ContextItem, WsFedAttributes.Name)));
 
             string optionalAttribute = XmlAttributeHolder.GetAttribute(attributes, WsFedAttributes.Optional, @namespace);
             bool? optional = null;
@@ -166,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
 
             // brentsch - TODO, need loop for multiple elements
             if (reader.IsStartElement(WsFedElements.Value, @namespace))
-                value = XmlUtil.ReadStringElement(reader);
+                value = WsUtils.ReadStringElement(reader);
 
             if (!isEmptyElement)
                 reader.ReadEndElement();

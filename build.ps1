@@ -5,7 +5,7 @@ param(
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
-    [string]$slnFile="wilson.sln",
+    [string]$slnFile="wstrust.sln",
     [switch]$runApiCompat,
     [switch]$generateContractAssemblies)
 

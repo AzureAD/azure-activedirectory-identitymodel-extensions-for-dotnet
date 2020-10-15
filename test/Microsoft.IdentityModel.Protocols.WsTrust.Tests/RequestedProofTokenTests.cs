@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class RequestedProofTokenTests
     {
-        [Theory, MemberData(nameof(ReadRequestedProofTokenTheoryData))]
+        [Theory, MemberData(nameof(ReadRequestedProofTokenTestCases))]
         public void ReadRequestedProofToken(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadRequestedProofToken", theoryData);
@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadRequestedProofTokenTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestedProofTokenTestCases
         {
             get
             {
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestedProofTokenTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestedProofTokenTestCases))]
         public void WriteRequestedProofToken(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedProofToken", theoryData);
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestedProofTokenTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestedProofTokenTestCases
         {
             get
             {

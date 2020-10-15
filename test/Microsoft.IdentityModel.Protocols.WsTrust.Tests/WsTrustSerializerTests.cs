@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(ReadBinarySecrectTheoryData))]
+        [Theory, MemberData(nameof(ReadBinarySecrectTestCases))]
         public void ReadBinarySecrect(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadBinarySecrect", theoryData);
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadBinarySecrectTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadBinarySecrectTestCases
         {
             get
             {
@@ -110,21 +110,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(System.Xml.XmlException)),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX15017:", typeof(System.Xml.XmlException)),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, "xxx"),
                         TestId = "EncodingError"
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust14)
                     {
-                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX30011:"),
+                        ExpectedException = new ExpectedException(typeof(XmlReadException), "IDX15011:"),
                         BinarySecret = new BinarySecret(Convert.FromBase64String(KeyingMaterial.SelfSigned2048_SHA256), WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey),
                         Reader = ReferenceXml.GetBinarySecretReader(WsTrustConstants.Trust13, WsTrustConstants.Trust13.WsTrustBinarySecretTypes.AsymmetricKey, KeyingMaterial.SelfSigned2048_SHA256),
                         TestId = "Trust13_14"
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
+                        ExpectedException = ExpectedException.XmlReadException("IDX15011:"),
                         Reader = ReferenceXml.RandomElementReader,
                         TestId = "ReaderNotOnCorrectElement"
                     }
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadClaimsTheoryData))]
+        [Theory, MemberData(nameof(ReadClaimsTestCases))]
         public void ReadClaims(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadClaims", theoryData);
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadClaimsTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadClaimsTestCases
         {
             get
             {
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadLifetimeTheoryData))]
+        [Theory, MemberData(nameof(ReadLifetimeTestCases))]
         public void ReadLifetime(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadLifetime", theoryData);
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadLifetimeTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadLifetimeTestCases
         {
             get
             {
@@ -240,28 +240,28 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
+                        ExpectedException = ExpectedException.XmlReadException("IDX15011:"),
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust14, created, expires),
                         TestId = "Trust14_13"
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = ExpectedException.XmlReadException("IDX30017:", typeof(FormatException)),
+                        ExpectedException = ExpectedException.XmlReadException("IDX15017:", typeof(FormatException)),
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, XmlConvert.ToString(created, XmlDateTimeSerializationMode.Utc), "xxx"),
                         TestId = "CreateParseError"
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = ExpectedException.XmlReadException("IDX30017:", typeof(FormatException)),
+                        ExpectedException = ExpectedException.XmlReadException("IDX15017:", typeof(FormatException)),
                         Lifetime = lifetime,
                         Reader = ReferenceXml.GetLifeTimeReader(WsTrustConstants.Trust13, "xxx", XmlConvert.ToString(expires, XmlDateTimeSerializationMode.Utc)),
                         TestId = "ExpireParseError"
                     },
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
                     {
-                        ExpectedException = ExpectedException.XmlReadException("IDX30011:"),
+                        ExpectedException = ExpectedException.XmlReadException("IDX15011:"),
                         Lifetime = lifetime,
                         Reader = ReferenceXml.RandomElementReader,
                         TestId = "ReaderNotOnCorrectElement"
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadOnBehalfOfTheoryData))]
+        [Theory, MemberData(nameof(ReadOnBehalfOfTestCases))]
         public void ReadOnBehalfOf(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadOnBehalfOf", theoryData);
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadOnBehalfOfTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadOnBehalfOfTestCases
         {
             get
             {
@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadRequestedAttachedReferenceTheoryData))]
+        [Theory, MemberData(nameof(ReadRequestedAttachedReferenceTestCases))]
         public void ReadRequestedAttachedReference(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadRequestedAttachedReference", theoryData);
@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadRequestedAttachedReferenceTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestedAttachedReferenceTestCases
         {
             get
             {
@@ -372,7 +372,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadRequestedSecurityTokenTheoryData))]
+        [Theory, MemberData(nameof(ReadRequestedSecurityTokenTestCases))]
         public void ReadRequestedSecurityToken(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadRequestedSecurityToken", theoryData);
@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadRequestedSecurityTokenTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestedSecurityTokenTestCases
         {
             get
             {
@@ -422,7 +422,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadUnattachedReferenceTheoryData))]
+        [Theory, MemberData(nameof(ReadUnattachedReferenceTestCases))]
         public void ReadUnattachedReference(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadUnattachedReference", theoryData);
@@ -441,7 +441,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadUnattachedReferenceTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadUnattachedReferenceTestCases
         {
             get
             {
@@ -472,7 +472,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteBinarySecrectTheoryData))]
+        [Theory, MemberData(nameof(WriteBinarySecrectTestCases))]
         public void WriteBinarySecrect(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteBinarySecrect", theoryData);
@@ -489,7 +489,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteBinarySecrectTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteBinarySecrectTestCases
         {
             get
             {
@@ -549,7 +549,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteClaimsTheoryData))]
+        [Theory, MemberData(nameof(WriteClaimsTestCases))]
         public void WriteClaims(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteClaims", theoryData);
@@ -566,7 +566,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteClaimsTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteClaimsTestCases
         {
             get
             {
@@ -594,7 +594,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteLifetimeTheoryData))]
+        [Theory, MemberData(nameof(WriteLifetimeTestCases))]
         public void WriteLifetime(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteLifetime", theoryData);
@@ -611,7 +611,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteLifetimeTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteLifetimeTestCases
         {
             get
             {
@@ -643,7 +643,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteOnBehalfOfTheoryData))]
+        [Theory, MemberData(nameof(WriteOnBehalfOfTestCases))]
         public void WriteOnBehalfOf(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteOnBehalfOf", theoryData);
@@ -660,7 +660,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteOnBehalfOfTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteOnBehalfOfTestCases
         {
             get
             {
@@ -688,7 +688,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteProofEncryptionTheoryData))]
+        [Theory, MemberData(nameof(WriteProofEncryptionTestCases))]
         public void WriteProofEncryption(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteProofEncryption", theoryData);
@@ -705,7 +705,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteProofEncryptionTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteProofEncryptionTestCases
         {
             get
             {
@@ -733,7 +733,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestedAttachedReferenceTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestedAttachedReferenceTestCases))]
         public void WriteRequestedAttachedReference(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedAttachedReference", theoryData);
@@ -749,7 +749,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestedAttachedReferenceTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestedAttachedReferenceTestCases
         {
             get
             {
@@ -777,7 +777,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestedSecurityTokenTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestedSecurityTokenTestCases))]
         public void WriteRequestedSecurityToken(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedSecurityToken", theoryData);
@@ -793,7 +793,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestedSecurityTokenTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestedSecurityTokenTestCases
         {
             get
             {
@@ -821,7 +821,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestedUnattachedReferenceTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestedUnattachedReferenceTestCases))]
         public void WriteRequestedUnattachedReference(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestedUnattachedReference", theoryData);
@@ -837,7 +837,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestedUnattachedReferenceTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestedUnattachedReferenceTestCases
         {
             get
             {

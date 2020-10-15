@@ -29,7 +29,7 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
     /// Generates Combined and 
@@ -59,13 +59,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Do a sanity check here. We don't want to allow invalid keys or keys that are too large.
             if ((keySizeInBits < s_minKeySizeInBits) || (keySizeInBits > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10852, keySizeInBits, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(keySizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15852, keySizeInBits, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(keySizeInBits)));
 
             if ((issuerEntropy.Length * 8 < s_minKeySizeInBits) || (issuerEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX10853, issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX15853, issuerEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(issuerEntropy))));
 
             if ((requestorEntropy.Length * 8 < s_minKeySizeInBits) || (requestorEntropy.Length * 8 > s_maxKeySizeInBits))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX10854, requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogHelper.FormatInvariant(LogMessages.IDX15854, requestorEntropy.Length * 8, s_minKeySizeInBits, s_maxKeySizeInBits), nameof(requestorEntropy))));
 
             int keySizeInBytes = ValidateKeySizeInBytes(keySizeInBits);
 
@@ -166,10 +166,10 @@ namespace Microsoft.IdentityModel.Tokens
             int keySizeInBytes = keySizeInBits / 8;
 
             if (keySizeInBits <= 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(keySizeInBits), LogHelper.FormatInvariant(LogMessages.IDX10850, nameof(keySizeInBits), keySizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(keySizeInBits), LogHelper.FormatInvariant(LogMessages.IDX15850, nameof(keySizeInBits), keySizeInBits)));
 
             if (keySizeInBytes * 8 != keySizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10851, nameof(keySizeInBits), keySizeInBits), nameof(keySizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15851, nameof(keySizeInBits), keySizeInBits), nameof(keySizeInBits)));
 
             return keySizeInBytes;
         }
@@ -265,10 +265,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             int sizeInBytes = sizeInBits / 8;
             if (sizeInBits <= 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits), LogHelper.FormatInvariant(LogMessages.IDX10850, nameof(sizeInBits), sizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(sizeInBits), LogHelper.FormatInvariant(LogMessages.IDX15850, nameof(sizeInBits), sizeInBits)));
 
             if (sizeInBytes * 8 != sizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10851, nameof(sizeInBits), sizeInBits), nameof(sizeInBits)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX15851, nameof(sizeInBits), sizeInBits), nameof(sizeInBits)));
 
             byte[] data = new byte[sizeInBytes];
             GenerateRandomBytes(data);

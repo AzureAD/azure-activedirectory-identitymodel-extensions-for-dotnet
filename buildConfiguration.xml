@@ -1,21 +1,11 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
-  <runtimes>net45,net461,netstandard2.0</runtimes>
-  <assemblyVersion>6.8.1</assemblyVersion>
+  <runtimes>netstandard2.0</runtimes>
+  <assemblyVersion>6.8.0</assemblyVersion>
   <nugetSuffix>preview</nugetSuffix>
   <projects>
     <src>
-      <project name="Microsoft.IdentityModel.Logging" />
-      <project name="Microsoft.IdentityModel.Tokens" />
-      <project name="Microsoft.IdentityModel.Xml" />
-      <project name="Microsoft.IdentityModel.JsonWebTokens" />
-      <project name="System.IdentityModel.Tokens.Jwt" />
-      <project name="Microsoft.IdentityModel.Tokens.Saml" />
-      <project name="Microsoft.IdentityModel.Protocols" />
-      <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
-      <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
-      <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
       <project name="Microsoft.IdentityModel.Protocols.WsTrust" />
     </src>
     <test>

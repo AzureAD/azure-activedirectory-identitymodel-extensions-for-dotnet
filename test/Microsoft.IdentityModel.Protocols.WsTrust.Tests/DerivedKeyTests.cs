@@ -9,7 +9,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class DerivedKeyTests
     {
-        [Theory, MemberData(nameof(ComputedKeyTheoryData))]
+        public const string HmacSha1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
+
+        [Theory, MemberData(nameof(ComputedKeyTestCases))]
         public void ComputedKey(DerivedKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ComputedKey", theoryData);
@@ -18,7 +20,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             {
                 byte[] computedKey = Psha1KeyGenerator.ComputeCombinedKey(theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.RequestorEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits);
                 // derived key with label == null, position == 0, nonce == IssuerEntropy should equal computed key.
-                byte[] derivedKey = (new PshaDerivedKeyGenerator(theoryData.ComputedKeyMaterial.RequestorEntropyBytes).ComputeCombinedKey(SecurityAlgorithms.HmacSha1, new byte[] { }, theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits, 0));
+                byte[] derivedKey = (new PshaDerivedKeyGenerator(theoryData.ComputedKeyMaterial.RequestorEntropyBytes).ComputeCombinedKey(HmacSha1, new byte[] { }, theoryData.ComputedKeyMaterial.IssuerEntropyBytes, theoryData.ComputedKeyMaterial.KeySizeInBits, 0));
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(computedKey, theoryData.ComputedKeyMaterial.DerivedKeyBytes, context);
                 if (!IdentityComparer.AreEqual(computedKey, derivedKey))
@@ -35,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<DerivedKeyTheoryData> ComputedKeyTheoryData
+        public static TheoryData<DerivedKeyTheoryData> ComputedKeyTestCases
         {
             get
             {

@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class RequestSecurityTokenResponseTests
     {
-        [Theory, MemberData(nameof(ReadAndWriteResponseTheoryData))]
+        [Theory, MemberData(nameof(ReadAndWriteResponseTestCases))]
         public void ReadAndWriteResponse(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadAndWriteResponse", theoryData);
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadAndWriteResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadAndWriteResponseTestCases
         {
             get
             {
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadRequestSeurityTokenResponseTheoryData))]
+        [Theory, MemberData(nameof(ReadRequestSeurityTokenResponseTestCases))]
         public void ReadRequestSeurityTokenResponse(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadRequestSeurityTokenResponse", theoryData);
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadRequestSeurityTokenResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadRequestSeurityTokenResponseTestCases
         {
             get
             {
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadResponseTheoryData))]
+        [Theory, MemberData(nameof(ReadResponseTestCases))]
         public void ReadResponse(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadResponse", theoryData);
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadResponseTestCases
         {
             get
             {
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteResponseTheoryData))]
+        [Theory, MemberData(nameof(WriteResponseTestCases))]
         public void WriteResponse(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteResponse", theoryData);
@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteResponseTestCases
         {
             get
             {
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteRequestSecurityTokenResponseTheoryData))]
+        [Theory, MemberData(nameof(WriteRequestSecurityTokenResponseTestCases))]
         public void WriteRequestSecurityTokenResponse(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteRequestSecurityTokenResponse", theoryData);
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteRequestSecurityTokenResponseTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteRequestSecurityTokenResponseTestCases
         {
             get
             {

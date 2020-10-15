@@ -28,7 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
@@ -49,7 +51,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// </summary>
     public class WsTrustSerializer
     {
-        //private readonly WsSecuritySerializer _wsSecuritySerializer = new WsSecuritySerializer();
+        private const BindingFlags getPropertyFlags = BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        private const BindingFlags invokeMethodFlags = BindingFlags.Instance | BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.NonPublic;
+
+        private static Type _saml2AssertionType = typeof(Saml2Assertion);
+        private static Type _samlAssertionType = typeof(SamlAssertion);
+        private static Type _xmlTokenStreamType;
+
         private readonly WsFedSerializer _wsFedSerializer = new WsFedSerializer();
         private readonly WsPolicySerializer _wsPolicySerializer = new WsPolicySerializer();
 
@@ -111,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.BinarySecret, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.BinarySecret, ex);
             }
         }
 
@@ -169,7 +177,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.Claims, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.Claims, ex);
             }
         }
 
@@ -212,7 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.Entropy, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.Entropy, ex);
             }
         }
 
@@ -242,10 +250,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 var lifetime = new Lifetime(null, null);
 
                 if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Created))
-                    lifetime.Created = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                    lifetime.Created = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
 
                 if (reader.IsStartElement() && reader.IsLocalName(WsUtilityElements.Expires))
-                    lifetime.Expires = XmlConvert.ToDateTime(XmlUtil.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
+                    lifetime.Expires = XmlConvert.ToDateTime(WsUtils.ReadStringElement(reader), XmlDateTimeSerializationMode.Utc);
 
                 if (!isEmptyElement)
                     reader.ReadEndElement();
@@ -257,7 +265,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.Lifetime, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.Lifetime, ex);
             }
         }
 
@@ -304,7 +312,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.OnBehalfOf, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.OnBehalfOf, ex);
             }
 
             throw XmlUtil.LogReadException(LogMessages.IDX15101, reader.ReadOuterXml());
@@ -332,7 +340,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, elementName, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, elementName, ex);
             }
         }
 
@@ -390,7 +398,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw LogHelper.LogExceptionMessage(ex);
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestSecurityToken, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestSecurityToken, ex);
             }
         }
 
@@ -402,7 +410,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 bool processed = false;
                 if (reader.IsStartElement(WsTrustElements.RequestType, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.RequestType = XmlUtil.ReadStringElement(reader);
+                    trustRequest.RequestType = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.OnBehalfOf, serializationContext.TrustConstants.Namespace))
                 {
@@ -410,35 +418,35 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 }
                 else if (reader.IsStartElement(WsTrustElements.TokenType, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.TokenType = XmlUtil.ReadStringElement(reader);
+                    trustRequest.TokenType = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.KeyType, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.KeyType = XmlUtil.ReadStringElement(reader);
+                    trustRequest.KeyType = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.KeySize, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.KeySizeInBits = XmlUtil.ReadIntElement(reader);
+                    trustRequest.KeySizeInBits = WsUtils.ReadIntElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.CanonicalizationAlgorithm, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.CanonicalizationAlgorithm = XmlUtil.ReadStringElement(reader);
+                    trustRequest.CanonicalizationAlgorithm = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.EncryptionAlgorithm, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.EncryptionAlgorithm = XmlUtil.ReadStringElement(reader);
+                    trustRequest.EncryptionAlgorithm = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.EncryptWith, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.EncryptWith = XmlUtil.ReadStringElement(reader);
+                    trustRequest.EncryptWith = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.SignWith, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.SignWith = XmlUtil.ReadStringElement(reader);
+                    trustRequest.SignWith = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.ComputedKeyAlgorithm, serializationContext.TrustConstants.Namespace))
                 {
-                    trustRequest.ComputedKeyAlgorithm = XmlUtil.ReadStringElement(reader);
+                    trustRequest.ComputedKeyAlgorithm = WsUtils.ReadStringElement(reader);
                 }
                 else if (reader.IsStartElement(WsTrustElements.UseKey, serializationContext.TrustConstants.Namespace))
                 {
@@ -522,7 +530,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 {
                     if (reader.IsStartElement(WsTrustElements.TokenType, serializationContext.TrustConstants.Namespace))
                     {
-                        tokenResponse.TokenType = XmlUtil.ReadStringElement(reader);
+                        tokenResponse.TokenType = WsUtils.ReadStringElement(reader);
                     }
                     else if (reader.IsStartElement(WsTrustElements.Lifetime, serializationContext.TrustConstants.Namespace))
                     {
@@ -530,11 +538,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                     }
                     else if (reader.IsStartElement(WsTrustElements.KeySize, serializationContext.TrustConstants.Namespace))
                     {
-                        tokenResponse.KeySizeInBits = XmlUtil.ReadIntElement(reader);
+                        tokenResponse.KeySizeInBits = WsUtils.ReadIntElement(reader);
                     }
                     else if (reader.IsStartElement(WsTrustElements.KeyType, serializationContext.TrustConstants.Namespace))
                     {
-                        tokenResponse.KeyType = XmlUtil.ReadStringElement(reader);
+                        tokenResponse.KeyType = WsUtils.ReadStringElement(reader);
                     }
                     else if (reader.IsStartElement(WsTrustElements.RequestedSecurityToken, serializationContext.TrustConstants.Namespace))
                     {
@@ -587,7 +595,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw LogHelper.LogExceptionMessage(ex);
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
             }
         }
 
@@ -620,7 +628,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestedAttachedReference, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestedAttachedReference, ex);
             }
         }
 
@@ -661,7 +669,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
 
                     if (reader.IsStartElement(WsTrustElements.ComputedKey, serializationContext.TrustConstants.Namespace))
                     {
-                        proofToken.ComputedKeyAlgorithm = XmlUtil.ReadStringElement(reader);
+                        proofToken.ComputedKeyAlgorithm = WsUtils.ReadStringElement(reader);
                     }
                 }
 
@@ -675,7 +683,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw LogHelper.LogExceptionMessage(ex);
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestedProofToken, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestedProofToken, ex);
             }
         }
 
@@ -742,7 +750,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestedSecurityToken, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestedSecurityToken, ex);
             }
         }
 
@@ -775,7 +783,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw;
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestedUnattachedReference, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestedUnattachedReference, ex);
             }
         }
 
@@ -816,7 +824,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw LogHelper.LogExceptionMessage(ex);
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
             }
         }
 
@@ -915,7 +923,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlReadException)
                     throw LogHelper.LogExceptionMessage(ex);
 
-                throw XmlUtil.LogReadException(Xml.LogMessages.IDX30017, ex, WsTrustElements.UseKey, ex);
+                throw XmlUtil.LogReadException(LogMessages.IDX15017, ex, WsTrustElements.UseKey, ex);
             }
         }
 
@@ -959,7 +967,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.BinarySecret, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.BinarySecret, ex);
             }
         }
 
@@ -998,7 +1006,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.Claims, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.Claims, ex);
             }
         }
 
@@ -1036,7 +1044,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.Entropy, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.Entropy, ex);
             }
         }
 
@@ -1084,7 +1092,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.Lifetime, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.Lifetime, ex);
             }
         }
 
@@ -1116,14 +1124,21 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.OnBehalfOf, serializationContext.TrustConstants.Namespace);
                 if (onBehalfOf.SecurityToken != null)
                 {
-                    foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
-                    {
-                        if (tokenHandler.CanWriteSecurityToken(onBehalfOf.SecurityToken))
+                    bool tryWriteSucceeded = false;
+                    if (onBehalfOf.SecurityToken is Saml2SecurityToken saml2SecurityToken)
+                        tryWriteSucceeded = TryWriteSourceData(writer, saml2SecurityToken.Assertion, _saml2AssertionType);
+                    else if (onBehalfOf.SecurityToken is SamlSecurityToken samlSecurityToken)
+                        tryWriteSucceeded = TryWriteSourceData(writer, samlSecurityToken.Assertion, _samlAssertionType);
+
+                    if (!tryWriteSucceeded)
+                        foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
                         {
-                            if (!tokenHandler.TryWriteSourceData(writer, onBehalfOf.SecurityToken))
+                            if (tokenHandler.TokenType == onBehalfOf.SecurityToken.GetType())
+                            {
                                 tokenHandler.WriteToken(writer, onBehalfOf.SecurityToken);
+                                break;
+                            }
                         }
-                    }
                 }
 
                 writer.WriteEndElement();
@@ -1133,8 +1148,36 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.OnBehalfOf, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.OnBehalfOf, ex);
             }
+        }
+
+        /// <summary>
+        /// A method like this should be added to the tokenhandlers, when the original data is needed.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="assertion"></param>
+        /// <param name="assertionType"></param>
+        /// <returns></returns>
+        private static bool TryWriteSourceData(XmlDictionaryWriter writer, object assertion, Type assertionType)
+        {
+            try
+            {
+                object xmlTokenStream = assertionType.InvokeMember("XmlTokenStream", getPropertyFlags, null, assertion, null, CultureInfo.InvariantCulture);
+                if (xmlTokenStream == null)
+                    return false;
+
+                if (_xmlTokenStreamType == null)
+                    _xmlTokenStreamType = xmlTokenStream.GetType();
+
+                _xmlTokenStreamType.InvokeMember("WriteTo", invokeMethodFlags, null, xmlTokenStream, new object[] { writer }, CultureInfo.InvariantCulture);
+                return true;
+            }
+            catch(Exception)
+            {
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1165,7 +1208,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.ProofEncryption, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.ProofEncryption, ex);
             }
         }
 
@@ -1263,7 +1306,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestSecurityToken, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestSecurityToken, ex);
             }
         }
 
@@ -1352,7 +1395,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
             }
         }
 
@@ -1387,7 +1430,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestedAttachedReference, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestedAttachedReference, ex);
             }
         }
 
@@ -1431,7 +1474,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestedProofToken, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestedProofToken, ex);
             }
         }
 
@@ -1470,13 +1513,13 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 {
                     foreach (SecurityTokenHandler tokenHandler in SecurityTokenHandlers)
                     {
-                        if (tokenHandler.CanWriteSecurityToken(requestedSecurityToken.SecurityToken))
-                        {
-                            if (!tokenHandler.TryWriteSourceData(writer, requestedSecurityToken.SecurityToken))
-                                tokenHandler.WriteToken(writer, requestedSecurityToken.SecurityToken);
+                        //if (tokenHandler.CreateSecurityTokenReference(.CanWriteSecurityToken(requestedSecurityToken.SecurityToken))
+                        //{
+                        //    if (!tokenHandler.TryWriteSourceData(writer, requestedSecurityToken.SecurityToken))
+                        //        tokenHandler.WriteToken(writer, requestedSecurityToken.SecurityToken);
 
-                            break;
-                        }
+                        //    break;
+                        //}
                     }
                 }
 
@@ -1487,7 +1530,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestedSecurityToken, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestedSecurityToken, ex);
             }
         }
 
@@ -1523,7 +1566,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestedUnattachedReference, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestedUnattachedReference, ex);
             }
         }
 
@@ -1569,7 +1612,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.RequestSecurityTokenResponse, ex);
             }
         }
 
@@ -1608,7 +1651,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (ex is XmlWriteException)
                     throw;
 
-                throw XmlUtil.LogWriteException(Xml.LogMessages.IDX30407, ex, WsTrustElements.UseKey, ex);
+                throw XmlUtil.LogWriteException(LogMessages.IDX15407, ex, WsTrustElements.UseKey, ex);
             }
         }
     }

@@ -28,8 +28,9 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     internal class PshaDerivedKeyGenerator
     {
@@ -37,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
         static int s_maxKeySizeInBits = (16 * 1024) * 8; // 16 K
 
         private byte[] _masterKey;
+
+        private const string HmacSha1 = "http://www.w3.org/2000/09/xmldsig#hmac-sha1";
 
         public PshaDerivedKeyGenerator(byte[] masterKey)
         {
@@ -104,7 +107,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             internal byte[] GetDerivedKey(string algorithm, int derivedKeySize, int position)
             {
-                using (KeyedHashAlgorithm hmac = CryptoProviderFactory.Default.CreateKeyedHashAlgorithm(_masterKey, algorithm))
+                KeyedHashAlgorithm hmac;
+                if (algorithm == HmacSha1)
+                    hmac = new HMACSHA1(_masterKey);
+                else
+                    hmac = CryptoProviderFactory.Default.CreateKeyedHashAlgorithm(_masterKey, algorithm);
+                try
                 {
                     _buffer = new byte[hmac.HashSize / 8 + _seed.Length];
 
@@ -120,6 +128,11 @@ namespace Microsoft.IdentityModel.Tokens
                         derivedKey[i] = GetByte(hmac);
 
                     return derivedKey;
+                }
+                finally
+                {
+                    if (hmac != null)
+                        hmac.Dispose();
                 }
             }
 

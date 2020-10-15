@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 {
     public class EntropyTests
     {
-        [Theory, MemberData(nameof(ReadEntropyTheoryData))]
+        [Theory, MemberData(nameof(ReadEntropyTestCases))]
         public void ReadEntropy(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadEntropy", theoryData);
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> ReadEntropyTheoryData
+        public static TheoryData<WsTrustTheoryData> ReadEntropyTestCases
         {
             get
             {
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteEntropyTheoryData))]
+        [Theory, MemberData(nameof(WriteEntropyTestCases))]
         public void WriteEntropy(WsTrustTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteEntropy", theoryData);
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<WsTrustTheoryData> WriteEntropyTheoryData
+        public static TheoryData<WsTrustTheoryData> WriteEntropyTestCases
         {
             get
             {
