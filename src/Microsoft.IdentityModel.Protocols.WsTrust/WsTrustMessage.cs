@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets an value that represents the Participants element used to specify the parcipants sharing the security token.
+        /// Gets or sets a value that represents the Participants element used to specify the participants sharing the security token.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown if Participants is null.</exception>
@@ -324,11 +324,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets or sets an value that represents the PolicyReference element used to specify the parcipants sharing the security token.
+        /// Gets or sets a value that represents the PolicyReference element used to specify the participants sharing the security token.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown if PolicyReference is null.</exception>
-        public PolicyReference PolicyReference
+        internal PolicyReference PolicyReference
         {
             get => _policyReference;
             set => _policyReference = value ?? throw LogHelper.LogArgumentNullException(nameof(PolicyReference));

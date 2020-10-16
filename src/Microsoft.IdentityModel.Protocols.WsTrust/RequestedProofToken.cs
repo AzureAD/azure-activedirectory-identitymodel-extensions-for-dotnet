@@ -28,7 +28,7 @@
 using System;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.XmlEnc;
+using Microsoft.IdentityModel.Protocols.XmlEnc;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <param name="computedKeyAlgorithm">the algorithm to apply when creating the security key.
         /// a typical value is: http://docs.oasis-open.org/ws-sx/ws-trust/200512/CK/PSHA1 </param>
         /// <exception cref="ArgumentNullException">if <paramref name="computedKeyAlgorithm"/> is null or empty string.</exception>
-        public RequestedProofToken(string computedKeyAlgorithm)
+        internal RequestedProofToken(string computedKeyAlgorithm)
         {
             ComputedKeyAlgorithm = computedKeyAlgorithm;
         }
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         ///<param name="encryptedKey"> an <see cref="EncryptedKey"/> that can be used when creating a <see cref= "SecurityKey" /> for cryptographic operations.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="encryptedKey"/> is null.</exception>
-        public RequestedProofToken(EncryptedKey encryptedKey)
+        internal  RequestedProofToken(EncryptedKey encryptedKey)
         {
             EncryptedKey = encryptedKey ?? throw LogHelper.LogArgumentNullException(nameof(encryptedKey));
         }
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets or sets the <see cref="EncryptedKey"/> to use when creating a <see cref="SecurityKey"/> for cryptographic operations.
         /// </summary>
         /// <exception cref="ArgumentNullException">if EncryptedKey is null.(</exception>
-        public EncryptedKey EncryptedKey
+        internal EncryptedKey EncryptedKey
         {
             get => _encryptedKey;
             set => _encryptedKey = value ?? throw LogHelper.LogArgumentNullException(nameof(EncryptedKey));

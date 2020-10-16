@@ -25,31 +25,48 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Provides encodingtypes for WS-Security 1.0 and 1.1.
+    /// Constants for encoding types for WS-Security 1.0 and 1.1.
+    /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public abstract class WsSecurityEncodingTypes : WsConstantsBase
     {
+        /// <summary>
+        /// Gets encoding type constants for WS-Security 1.0
+        /// </summary>
         public static WsSecurity10EncodingTypes WsSecurity10 { get; } = new WsSecurity10EncodingTypes();
 
+        /// <summary>
+        /// Gets encoding type constants for WS-Security 1.1
+        /// </summary>
         public static WsSecurity11EncodingTypes WsSecurity11 { get; } = new WsSecurity11EncodingTypes();
 
-        public WsSecurityEncodingTypes() {}
-
+        /// <summary>
+        /// Gets Base64 encoding type for WS-Security
+        /// </summary>
         public string Base64 { get; protected set; }
 
+        /// <summary>
+        /// Gets HexBinary encoding type for WS-Security
+        /// </summary>
         public string HexBinary { get; protected set; }
 
+        /// <summary>
+        /// Gets Text encoding type for WS-Security
+        /// </summary>
         public string Text { get; protected set; }
     }
 
-    /// Provides encodingtypes for WS-Security 1.0.
+    /// <summary>
+    /// Provides encoding type constants for WS-Security 1.0.
+    /// </summary>
     public class WsSecurity10EncodingTypes : WsSecurityEncodingTypes
     {
+        /// <summary>
+        /// Instantiates encoding types for WS-Security 1.0
+        /// </summary>
         public WsSecurity10EncodingTypes()
         {
             Base64 = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0/#Base64Binary";
@@ -58,9 +75,14 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
         }
     }
 
-    /// Provides encodingtypes for WS-Security 1.1.
+    /// <summary>
+    /// Provides encoding type constants for WS-Security 1.1.
+    /// </summary>
     public class WsSecurity11EncodingTypes : WsSecurityEncodingTypes
     {
+        /// <summary>
+        /// Instantiates encoding types for  WS-Security 1.1
+        /// </summary>
         public WsSecurity11EncodingTypes()
         {
             Base64 = "http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1/#Base64Binary";

@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(JwtPayload).ToString(), CompareAllPublicProperties },
                 { typeof(JwtSecurityToken).ToString(), CompareAllPublicProperties },
                 { typeof(JwtSecurityTokenHandler).ToString(), CompareAllPublicProperties },
-                { typeof(PolicyReference).ToString(), CompareAllPublicProperties },
+                //{ typeof(PolicyReference).ToString(), CompareAllPublicProperties },
                 { typeof(RequestedSecurityToken).ToString(), CompareAllPublicProperties },
                 { typeof(RequestedProofToken).ToString(), CompareAllPublicProperties },
                 { typeof(RequestSecurityTokenResponse).ToString(), CompareAllPublicProperties },

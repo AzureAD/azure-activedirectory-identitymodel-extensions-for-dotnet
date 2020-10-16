@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System;
 using Microsoft.IdentityModel.Logging;
 
@@ -41,19 +39,43 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         private string _scope;
         private string _value;
 
-        internal ContextItem() { }
+        /// <summary>
+        /// Instantiates a empty <see cref="ContextItem"/>.
+        /// </summary>
+        public ContextItem() { }
 
+        /// <summary>
+        /// Instantiates a <see cref="ContextItem"/> with a name.
+        /// </summary>
+        /// <param name="name">the name of this <see cref="ContextItem"/>.</param>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="name"/> is null or empty.</exception>
         public ContextItem(string name)
         {
             Name = name;
         }
 
+        /// <summary>
+        /// Instantiates a <see cref="ContextItem"/> with a name and value.
+        /// </summary>
+        /// <param name="name">the name of this <see cref="ContextItem"/>.</param>
+        /// <param name="value">the value of this <see cref="ContextItem"/>.</param>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="name"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="value"/> is null or empty.</exception>
         public ContextItem(string name, string value)
         {
             Name = name;
             Value = value;
         }
 
+        /// <summary>
+        /// Instantiates a <see cref="ContextItem"/> with a name, value and scope.
+        /// </summary>
+        /// <param name="name">the name of this <see cref="ContextItem"/>.</param>
+        /// <param name="value">the value of this <see cref="ContextItem"/>.</param>
+        /// <param name="scope">the value of this <see cref="ContextItem"/>.</param>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="name"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="value"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"> thrown if <paramref name="scope"/> is null or empty.</exception>
         public ContextItem(string name, string value, string scope)
         {
             Name = name;
@@ -62,8 +84,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         }
 
         /// <summary>
-        /// Gets the name of the item.
+        /// Gets or sets the Name of this <see cref="ContextItem"/>.
         /// </summary>
+        /// <exception cref="ArgumentNullException"> thrown if value is null or empty.</exception>
         public string Name 
         {
             get => _name;
@@ -71,8 +94,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         }
 
         /// <summary>
-        /// Gets the Scope of the scope.
+        /// Gets or sets the Scope of this <see cref="ContextItem"/>.
         /// </summary>
+        /// <exception cref="ArgumentNullException"> thrown if value is null or empty.</exception>
         public string Scope
         {
             get => _scope;
@@ -80,8 +104,9 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         }
 
         /// <summary>
-        /// Gets the value of the value.
+        /// Gets or sets the value of this <see cref="ContextItem"/>.
         /// </summary>
+        /// <exception cref="ArgumentNullException"> thrown if value is null or empty.</exception>
         public string Value
         {
             get => _value;

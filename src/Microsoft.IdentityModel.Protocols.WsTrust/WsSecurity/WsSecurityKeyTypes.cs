@@ -25,27 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Provides keytypes for WS-Security 1.0 and 1.1.
+    /// Constants for key types for WS-Security 1.0 and 1.1.
+    /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public abstract class WsSecurityKeyTypes
     {
+        /// <summary>
+        /// Gets key type constants for WS-Security 1.0
+        /// </summary>
         public static WsSecurity10KeyTypes WsSecurity10 { get; } = new WsSecurity10KeyTypes();
 
+        /// <summary>
+        /// Gets key type constants for WS-Security 1.1
+        /// </summary>
         public static WsSecurity11KeyTypes WsSecurity11 { get; } = new WsSecurity11KeyTypes();
 
+        /// <summary>
+        /// Gets Sha1Thumbprint constant type for WS-Security
+        /// </summary>
         public string Sha1Thumbprint { get; protected set; }
     }
 
     /// <summary>
-    /// Provides keytypes for WS-Security 1.0.
+    /// Provides key type constants for WS-Security 1.0.
     /// </summary>
     public class WsSecurity10KeyTypes : WsSecurityKeyTypes
     {
+        /// <summary>
+        /// Instantiates key types for WS-Security 1.0
+        /// </summary>
         public WsSecurity10KeyTypes()
         {
             Sha1Thumbprint = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0/#ThumbprintSHA1";
@@ -53,10 +64,13 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// <summary>
-    /// Provides keytypes for WS-Security 1.1.
+    /// Provides key type constants for WS-Security 1.1.
     /// </summary>
     public class WsSecurity11KeyTypes : WsSecurityKeyTypes
     {
+        /// <summary>
+        /// Instantiates key types for WS-Security 1.1
+        /// </summary>
         public WsSecurity11KeyTypes()
         {
             Sha1Thumbprint = "http://docs.oasis-open.org/wss/oasis-wss-soap-message-security-1.1/#ThumbprintSHA1";

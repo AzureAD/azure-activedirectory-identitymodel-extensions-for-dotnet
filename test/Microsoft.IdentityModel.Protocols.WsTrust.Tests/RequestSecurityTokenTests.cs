@@ -118,6 +118,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 var doc = new XmlDocument();
                 doc.LoadXml("<UnknownElement attribute1=\"1\">this is an unknownElement</UnknownElement>");
                 var xmlElement = doc.DocumentElement;
+                var xmlAttribute = doc.CreateAttribute("attributePrefix", "attributeLocalName", "attributeNamespace");
                 var wsTrustRequest = new WsTrustRequest(trustConstants.WsTrustActions.Issue)
                 {
                     AdditionalContext = additionalContext,
@@ -146,6 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 };
 
                 wsTrustRequest.AdditionalXmlElements.Add(xmlElement);
+                wsTrustRequest.AdditionalXmlAttributes.Add(xmlAttribute);
 
                 return new TheoryData<WsTrustTheoryData>
                 {

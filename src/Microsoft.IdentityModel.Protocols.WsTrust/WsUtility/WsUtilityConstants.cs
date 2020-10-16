@@ -25,23 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsUtility
 {
+    /// <summary>
+    /// Constants for WS-Utility.
+    /// <para>see: http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd </para>
+    /// </summary>
     public abstract class WsUtilityConstants : WsConstantsBase
     {
+        /// <summary>
+        /// Gets the list of namespaces that are recognized by this runtime.
+        /// </summary>
         public static IList<string> KnownNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" };
 
+        /// <summary>
+        /// Gets constants for WS-Utility 1.0
+        /// </summary>
         public static WsUtility10Constants WsUtility10 { get; } = new  WsUtility10Constants();
-
-        public WsUtilityConstants() { }
     }
 
+    /// <summary>
+    /// Provides constants for WS-Utility 1.0.
+    /// </summary>
     public class WsUtility10Constants : WsUtilityConstants
     {
+        /// <summary>
+        /// Instantiates WS-Utility 1.0
+        /// </summary>
         public WsUtility10Constants()
         {
             Namespace = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd";
@@ -49,4 +61,3 @@ namespace Microsoft.IdentityModel.Protocols.WsUtility
         }
     }
 }
- 

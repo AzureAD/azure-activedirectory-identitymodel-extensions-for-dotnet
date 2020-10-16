@@ -25,9 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.IdentityModel.Logging;
-
-#pragma warning disable 1591
 
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
@@ -55,6 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// Gets ClaimType value element.
         /// </summary>
         /// <remarks>this is an optional value.</remarks>
+        /// <exception cref="ArgumentNullException"> thrown if value is null.or empty.</exception>
         public string Value
         {
             get => _value;
@@ -65,6 +65,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
         /// Gets ClaimType uri attribute.
         /// </summary>
         /// <remarks>this is a required value.</remarks>
+        /// <exception cref="ArgumentNullException"> thrown if value is null.or empty.</exception>
         public string Uri
         {
             get => _uri;

@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using Microsoft.IdentityModel.Protocols.WsAddressing;
 using Microsoft.IdentityModel.Protocols.WsFed;
 using Microsoft.IdentityModel.Protocols.WsPolicy;
@@ -36,10 +34,15 @@ using Microsoft.IdentityModel.Protocols.WsTrust;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Used to remember the prefix, namespace to use / expect when reading and writing WsTrust Requests and Responses.
+    /// Associates the usual protocol versions for a specific version of WsTrust.
+    /// This is helpful when reading and writing WsTrust Requests and Responses.
     /// </summary>
     public class WsSerializationContext
     {
+        /// <summary>
+        /// Instantiates a <see cref="WsSerializationContext"/> that sets the expected versions of additional Ws* versions.
+        /// </summary>
+        /// <param name="wsTrustVersion">the <see cref="WsTrustVersion"/> to set the additional Ws* versions.</param>
         public WsSerializationContext(WsTrustVersion wsTrustVersion)
         {
             TrustVersion = wsTrustVersion;
@@ -76,20 +79,44 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="WsAddressingConstants"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsAddressingConstants AddressingConstants { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsFedConstants"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsFedConstants FedConstants { get; }
        
+        /// <summary>
+        /// Gets the <see cref="WsPolicyConstants"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsPolicyConstants PolicyConstants { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsSecurityConstants"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsSecurityConstants SecurityConstants { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsTrustActions"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsTrustActions TrustActions { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsTrustConstants"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsTrustConstants TrustConstants { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsTrustKeyTypes"/> associated with the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsTrustKeyTypes TrustKeyTypes { get; }
 
+        /// <summary>
+        /// Gets the <see cref="WsTrustVersion"/> passed to constructor.
+        /// </summary>
         public WsTrustVersion TrustVersion { get; }
     }
 }

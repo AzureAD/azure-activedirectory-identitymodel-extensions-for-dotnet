@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     internal static class WsUtils
     {
         /// <summary>
-        /// Assumes the xmlreader is positioned on a startelement.
+        /// Assumes the xmlreader is positioned on a start element.
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>

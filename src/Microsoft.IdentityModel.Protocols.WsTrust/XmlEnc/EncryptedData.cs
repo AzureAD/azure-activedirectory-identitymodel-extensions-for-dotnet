@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
-namespace Microsoft.IdentityModel.XmlEnc
+namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
     internal class EncryptedData
     {

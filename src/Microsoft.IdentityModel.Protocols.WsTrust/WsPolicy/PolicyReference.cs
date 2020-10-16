@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
     /// <summary>
     /// Defines the wsp:PolicyReference element.
     /// </summary>
-    public class PolicyReference
+    internal class PolicyReference
     {
         public PolicyReference()
         {

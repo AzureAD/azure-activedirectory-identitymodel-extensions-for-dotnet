@@ -31,8 +31,6 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsTrust;
 using Microsoft.IdentityModel.Xml;
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
     /// <summary>
@@ -42,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFed
     {
         public WsFedSerializer()
         {
-            //  if this clas becomes public, we will need to check parameters on public methods
+            //  if this class becomes public, we will need to check parameters on public methods
         }
 
         /// <summary>

@@ -25,19 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
+using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
+    /// <summary>
+    /// Constants for XML Encryption.
+    /// <para>see: https://www.w3.org/TR/xmlenc-core1/ </para>
+    /// </summary>
     internal abstract class XmlEncryptionConstants : WsConstantsBase
     {
-        public static XmlEncryption11Constants XmlEnc11 { get; } = new XmlEncryption11Constants();
+        /// <summary>
+        /// Gets the list of namespaces that are recognized by this runtime.
+        /// </summary>
+        public static readonly IList<string> KnownNamespaces = new List<string> { "http://www.w3.org/2001/04/xmlenc#" };
 
-        public XmlEncryptionConstants() {}
+        /// <summary>
+        /// Gets constants for XML Encryption 1.1
+        /// </summary>
+        public static XmlEncryption11Constants XmlEnc11 { get; } = new XmlEncryption11Constants();
     }
 
+    /// <summary>
+    /// Provides constants for XML Encryption 1.1.
+    /// </summary>
     internal class XmlEncryption11Constants : XmlEncryptionConstants
     {
+        /// <summary>
+        /// Instantiates XML Encryption 1.1
+        /// </summary>
         public XmlEncryption11Constants()
         {
             Namespace = "http://www.w3.org/2001/04/xmlenc#";

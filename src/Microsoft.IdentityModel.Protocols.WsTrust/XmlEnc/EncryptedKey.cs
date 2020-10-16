@@ -25,11 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
-namespace Microsoft.IdentityModel.XmlEnc
+namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
-    public class EncryptedKey
+    internal  class EncryptedKey
     {
         public EncryptedKey()
         {

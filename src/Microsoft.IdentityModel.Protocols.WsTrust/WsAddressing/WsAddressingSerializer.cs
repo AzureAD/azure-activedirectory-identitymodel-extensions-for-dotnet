@@ -51,6 +51,15 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         /// <returns>An <see cref="EndpointReference"/> instance.</returns>
         public virtual EndpointReference ReadEndpointReference(XmlDictionaryReader reader)
         {
+            //  <wsa:EndpointReference>
+            //    <wsa:Address>xs:anyURI</wsa:Address>
+            //    <wsa:ReferenceProperties>... </wsa:ReferenceProperties> ?
+            //    <wsa:ReferenceParameters>... </wsa:ReferenceParameters> ?
+            //    <wsa:PortType>xs:QName</wsa:PortType> ?
+            //    <wsa:ServiceName PortName="xs:NCName"?>xs:QName</wsa:ServiceName> ?
+            //    <wsp:Policy> ... </wsp:Policy>*
+            //  </wsa:EndpointReference>
+
             XmlUtil.CheckReaderOnEntry(reader, WsAddressingElements.EndpointReference);
             foreach (string @namespace in WsAddressingConstants.KnownNamespaces)
             {
@@ -87,10 +96,12 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         public static void WriteEndpointReference(XmlDictionaryWriter writer, WsSerializationContext serializationContext, EndpointReference endpointReference)
         {
             WsUtils.ValidateParamsForWritting(writer, serializationContext, endpointReference, nameof(endpointReference));
+
             writer.WriteStartElement(serializationContext.AddressingConstants.Prefix, WsAddressingElements.EndpointReference, serializationContext.AddressingConstants.Namespace);
             writer.WriteStartElement(serializationContext.AddressingConstants.Prefix, WsAddressingElements.Address, serializationContext.AddressingConstants.Namespace);
             writer.WriteString(endpointReference.Uri);
             writer.WriteEndElement();
+
             foreach (XmlElement element in endpointReference.AdditionalXmlElements)
                 element.WriteTo(writer);
 

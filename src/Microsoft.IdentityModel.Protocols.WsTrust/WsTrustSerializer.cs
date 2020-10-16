@@ -385,6 +385,11 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 if (!string.IsNullOrEmpty(context))
                     trustRequest.Context = context;
 
+                // remember all attributes
+                var doc = new XmlDocument();
+                foreach (XmlAttributeHolder attribute in xmlAttributes)
+                        trustRequest.AdditionalXmlAttributes.Add(doc.CreateAttribute(attribute.Prefix, attribute.LocalName, attribute.NamespaceUri));
+
                 reader.MoveToContent();
                 reader.ReadStartElement();
                 ReadRequest(reader, trustRequest, serializationContext);
@@ -1241,6 +1246,9 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
                 writer.WriteStartElement(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestSecurityToken, serializationContext.TrustConstants.Namespace);
                 if (!string.IsNullOrEmpty(trustRequest.Context))
                     writer.WriteAttributeString(WsTrustAttributes.Context, trustRequest.Context);
+
+                foreach (var attribute in trustRequest.AdditionalXmlAttributes)
+                    attribute.WriteTo(writer);
 
                 writer.WriteElementString(serializationContext.TrustConstants.Prefix, WsTrustElements.RequestType, serializationContext.TrustConstants.Namespace, trustRequest.RequestType);
 

@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets the colllection of additional Participants.
+        /// Gets the collection of additional Participants.
         /// </summary>
         public ICollection<SecurityTokenElement> AdditionalParticipants { get; } = new Collection<SecurityTokenElement>();
     }

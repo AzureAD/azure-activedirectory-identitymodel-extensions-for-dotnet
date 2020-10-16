@@ -32,8 +32,6 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.WsUtility;
 using Microsoft.IdentityModel.Xml;
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
@@ -83,12 +81,20 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             //  </wsse:SecurityTokenReference>
 
             XmlAttributeHolder[] xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
-            var securityTokenReference = new SecurityTokenReference
-            {
-                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace),
-                TokenType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace),
-                Usage = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace)
-            };
+            var securityTokenReference = new SecurityTokenReference();
+
+            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace);
+            string tokenType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.TokenType, WsSecurityConstants.WsSecurity11.Namespace);
+            string usage = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.Usage, WsSecurityConstants.WsSecurity10.Namespace);
+
+            if (!string.IsNullOrEmpty(id))
+                securityTokenReference.Id = id;
+
+            if (!string.IsNullOrEmpty(tokenType))
+                securityTokenReference.TokenType = tokenType;
+
+            if (!string.IsNullOrEmpty(usage))
+                securityTokenReference.Usage = usage;
 
             bool isEmptyElement = reader.IsEmptyElement;
             reader.ReadStartElement();
@@ -112,12 +118,19 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
             bool isEmptyElement = reader.IsEmptyElement;
             var xmlAttributes = XmlAttributeHolder.ReadAttributes(reader);
 
-            var keyIdentifier = new KeyIdentifier
-            {
-                Id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace),
-                EncodingType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.EncodingType, WsSecurityConstants.WsSecurity10.Namespace),
-                ValueType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.ValueType, WsSecurityConstants.WsSecurity10.Namespace)
-            };
+            var keyIdentifier = new KeyIdentifier();
+            string id = XmlAttributeHolder.GetAttribute(xmlAttributes, WsUtilityAttributes.Id, WsSecurityConstants.WsSecurity10.Namespace);
+            string encodingType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.EncodingType, WsSecurityConstants.WsSecurity10.Namespace);
+            string valueType = XmlAttributeHolder.GetAttribute(xmlAttributes, WsSecurityAttributes.ValueType, WsSecurityConstants.WsSecurity10.Namespace);
+
+            if (!string.IsNullOrEmpty(id))
+                keyIdentifier.Id = id;
+
+            if (!string.IsNullOrEmpty(encodingType))
+                keyIdentifier.EncodingType = encodingType;
+
+            if (!string.IsNullOrEmpty(valueType))
+                keyIdentifier.ValueType = valueType;
 
             reader.ReadStartElement();
             if (!isEmptyElement)

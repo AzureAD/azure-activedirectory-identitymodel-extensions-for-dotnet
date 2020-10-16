@@ -25,24 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
+    /// <summary>
+    /// Constants for XML Encryption DataTypes.
+    /// <para>see: https://www.w3.org/TR/xmlenc-core1/ </para>
+    /// </summary>
     internal abstract class XmlEncryptionDataTypes
     {
+        /// <summary>
+        /// Gets DataTypes for XML Encryption 1.1.
+        /// </summary>
         public static XmlEncryption11DataTypes XmlEnc11 { get; } = new XmlEncryption11DataTypes();
 
-        public XmlEncryptionDataTypes() {}
-
+        /// <summary>
+        /// Gets Content DataType type for XML Encryption
+        /// </summary>
         public string Content { get; protected set; }
-        
+
+        /// <summary>
+        /// Gets Content DataType type for XML Encryption
+        /// </summary>
         public string Element { get; protected set; }
     }
 
+    /// <summary>
+    /// Provides DataTypes for XML Encryption 1.1.
+    /// </summary>
     internal class XmlEncryption11DataTypes : XmlEncryptionDataTypes
     {
-
+        /// <summary>
+        /// Instantiates DataTypes for XML Encryption 1.1.
+        /// </summary>
         public XmlEncryption11DataTypes()
         {
             Content = "http://www.w3.org/2001/04/xmlenc#Content";

@@ -25,29 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsAddressing
 {
+    /// <summary>
+    /// Constants for WS-Addressing namespace and prefix.
+    /// see: https://www.w3.org/Submission/ws-addressing/
+    /// </summary>
     public abstract class WsAddressingConstants : WsConstantsBase
     {
+        /// <summary>
+        /// Gets the list of namespaces that are recognized by this runtime.
+        /// </summary>
         public static IList<string> KnownNamespaces { get; } = new List<string> { "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing" };
 
+        /// <summary>
+        /// Gets constants for WS-Addressing 1.0
+        /// </summary>
         public static WsAddressing10Constants Addressing10 { get; } = new WsAddressing10Constants();
 
+        /// <summary>
+        /// Gets constants for WS-Addressing 200408
+        /// </summary>
         public static WsAddressing200408Constants Addressing200408 { get; } = new WsAddressing200408Constants();
-
-        public WsAddressingConstants() {}
-
-        public string Type { get; protected set; }
-
-        public string ValueType { get; protected set; }
     }
 
+    /// <summary>
+    /// Provides constants for WS-Addressing 1.0
+    /// </summary>
     public class WsAddressing10Constants : WsAddressingConstants
     {
+        /// <summary>
+        /// Instantiates WS-Addressing 1.0
+        /// </summary>
         public WsAddressing10Constants()
         {
             Namespace = "http://www.w3.org/2005/08/addressing";
@@ -55,12 +66,18 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         }
     }
 
+    /// <summary>
+    /// Provides constants for WS-Addressing 200408
+    /// </summary>
     public class WsAddressing200408Constants : WsAddressingConstants
     {
+        /// <summary>
+        /// Instantiates WS-Addressing 200408
+        /// </summary>
         public WsAddressing200408Constants()
         {
-            Prefix = "wsa";
             Namespace = "http://schemas.xmlsoap.org/ws/2004/08/addressing";
+            Prefix = "wsa";
         }
     }
 }

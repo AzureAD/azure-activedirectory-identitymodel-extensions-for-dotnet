@@ -25,35 +25,65 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
+    /// <summary>
+    /// Constants for WS-Federation
+    /// see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html
+    /// </summary>
     public abstract class WsFedConstants : WsConstantsBase
     {
+        /// <summary>
+        /// Gets the list of namespaces that are recognized by this runtime.
+        /// </summary>
         public static IList<string> KnownNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wsfed/federation/200706" };
 
+        /// <summary>
+        /// Gets the list of auth namespaces that are recognized by this runtime.
+        /// </summary>
         public static IList<string> KnownAuthNamespaces { get; } = new List<string> { "http://docs.oasis-open.org/wsfed/authorization/200706" };
 
+        /// <summary>
+        /// Gets constants for WS-Federation 1.2
+        /// </summary>
         public static WsFed12Constants Fed12 { get; } = new WsFed12Constants();
 
-        public WsFedConstants() {}
-
+        /// <summary>
+        /// Gets the auth namespace for a WS-Federation.
+        /// </summary>
         public string AuthNamespace { get; protected set; }
 
+        /// <summary>
+        /// Gets the auth prefix for WS-Federation.
+        /// </summary>
         public string AuthPrefix { get; protected set; }
 
+        /// <summary>
+        /// Gets the privacy namespace for WS-Federation.
+        /// </summary>
         public string PrivacyNamespace { get; protected set; }
 
+        /// <summary>
+        /// Gets the privacy prefix for a WS-Federation.
+        /// </summary>
         public string PrivacyPrefix { get; protected set; }
 
+        /// <summary>
+        /// Gets the schema location for a WS-Federation.
+        /// </summary>
         public string SchemaLocation { get; protected set; }
     }
 
+    /// <summary>
+    /// Constants for WS-Federation 1.2
+    /// </summary>
     public class WsFed12Constants : WsFedConstants
     {
+        /// <summary>
+        /// Instantiates WS-Federation 1.2
+        /// </summary>
         public WsFed12Constants() 
         {
             AuthNamespace = "http://docs.oasis-open.org/wsfed/authorization/200706";

@@ -25,14 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsAddressing
 {
+    /// <summary>
+    /// Constants for WS-Addressing attributes.
+    /// <para>see: https://www.w3.org/Submission/ws-addressing/ </para>
+    /// </summary>
     public static class WsAddressingAttributes
     {
+        /// <summary>
+        /// Gets the value for "PortName"
+        /// </summary>
         public const string PortName = "PortName";
 
+        /// <summary>
+        /// Gets the value for "RelationshipType"
+        /// </summary>
         public const string RelationshipType = "RelationshipType";
     }
 }

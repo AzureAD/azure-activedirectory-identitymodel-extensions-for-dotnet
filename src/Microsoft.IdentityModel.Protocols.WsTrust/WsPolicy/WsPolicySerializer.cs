@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
         /// <param name="namespace"></param>
         public virtual PolicyReference ReadPolicyReference(XmlDictionaryReader reader, string @namespace)
         {
-            //  if this clas becomes public, we will need to check parameters
+            //  if this class becomes public, we will need to check parameters
             //  XmlUtil.CheckReaderOnEntry(reader, WsPolicyElements.PolicyReference, @namespace);
 
             bool isEmptyElement = reader.IsEmptyElement;
