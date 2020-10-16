@@ -5,7 +5,7 @@ param(
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
-    [string]$slnFile="wilson.sln",
+    [string]$slnFile="wstrust.sln",
     [switch]$runApiCompat,
     [switch]$generateContractAssemblies)
 
@@ -158,9 +158,9 @@ if ($generateContractAssemblies.IsPresent)
 
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
-	$name = $project.name;
-	Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
-	Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+    $name = $project.name;
+    Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
+    Start-Process -wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v m -s $root\src\$name\$name.csproj"
 }
 
 WriteSectionFooter("End Build");

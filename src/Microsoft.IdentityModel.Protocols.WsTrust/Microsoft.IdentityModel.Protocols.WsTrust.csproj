@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <AssemblyName>Microsoft.IdentityModel.Protocols.WsTrust</AssemblyName>
+    <Description>Includes types that provide support for creating, serializing and validating WsTrust Messages.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Microsoft.IdentityModel.Protocols.WsTrust</PackageId>
+    <PackageTags>.NET;Windows;Authentication;Identity;WsTrust</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="$(IdentityModelVersion)" />
+    <PackageReference Include="Microsoft.IdentityModel.Xml" Version="$(IdentityModelVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Xml.XmlDocument" Version="$(SystemXmlXmlDocumentVersion)" />
+  </ItemGroup>
+
+</Project>

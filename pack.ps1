@@ -66,8 +66,8 @@ CreateArtifactsFolder($artifactsRoot);
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
 	$name = $project.name;
-	Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
-	Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+    Write-Host ">>> Start-Process -wait -NoNewWindow $dotnetexe 'pack' --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
+    Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $root\src\$name\$name.csproj"
 }
 
 Write-Host "============================"

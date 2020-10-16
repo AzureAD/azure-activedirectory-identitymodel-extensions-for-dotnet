@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <SrcTargets>netstandard2.0</SrcTargets>
+    <SrcStandardTargets>netstandard2.0</SrcStandardTargets>
+  </PropertyGroup>
+</Project>
