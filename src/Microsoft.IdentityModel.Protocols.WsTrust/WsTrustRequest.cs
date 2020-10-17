@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 using System;
 using Microsoft.IdentityModel.Logging;
 

@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Generates Combined and 
     /// </summary>
-    public static class Psha1KeyGenerator
+    internal static class Psha1KeyGenerator
     {
         private static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
 

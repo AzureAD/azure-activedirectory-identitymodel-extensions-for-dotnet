@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// The Renewing element is used to indicate a preference if token can be renewed
     /// or renewed after expiration.
     /// </remarks>
-    public class Renewing
+    internal class Renewing
     {
         /// <summary>
         /// Constructs default <see cref="Renewing"/> element.

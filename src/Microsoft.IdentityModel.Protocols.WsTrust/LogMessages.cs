@@ -63,7 +63,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public const string IDX15851 = "IDX15851: '{0}' must be a multiple of 8. Was: '{1}'.";
         public const string IDX15852 = "IDX15852: Key size requested: '{0}', must be larger than '{1}' and smaller than '{2}'.";
         public const string IDX15853 = "IDX15853: Invalid issuerEntropy size. issuerEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.";
-        public const string IDX15854 = "IDX15854" +
-            ": Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.";
+        public const string IDX15854 = "IDX15854: Invalid requestorEntropy size. requestorEntropy.Length: '{0}', must be larger than '{1}' and smaller than '{2}'.";
     }
 }

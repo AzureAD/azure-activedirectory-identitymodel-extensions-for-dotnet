@@ -28,80 +28,54 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Abstract class for singleton pattern for multipule WsTrust versions for KeyTypes.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class WsTrustKeyTypes<T> : WsTrustKeyTypes where T : new()
-    {
-        private static T _instance;
-
-        /// <summary>
-        /// Implements singleton pattern.
-        /// </summary>
-        internal static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-
-                return _instance;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Values for KeyTypes for WsTrust Feb2005, 1.3 and 1.4.
+    /// Constants KeyTypes for WsTrust Feb2005, 1.3 and 1.4.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public abstract class WsTrustKeyTypes
     {
         /// <summary>
-        /// Gets the an instance of WsTrust Feb2005 KeyTypes.
-        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// Gets KeyTypes constants for WSTrust Feb2005
         /// </summary>
-        public static WsTrustFeb2005KeyTypes TrustFeb2005 => WsTrustFeb2005KeyTypes.Instance;
+        public static WsTrustFeb2005KeyTypes TrustFeb2005 { get; } = new WsTrustFeb2005KeyTypes();
 
         /// <summary>
-        /// Gets the an instance of WsTrust 1.3 KeyTypes.
-        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// Gets KeyTypes constants for WSTrust 1.3
         /// </summary>
-        public static WsTrust13KeyTypes Trust13 => WsTrust13KeyTypes.Instance;
+        public static WsTrust13KeyTypes Trust13 { get; } = new WsTrust13KeyTypes();
 
         /// <summary>
-        /// Gets the an instance of WsTrust 1.4 KeyTypes.
-        /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
+        /// Gets KeyTypes constants for WSTrust 1.4
         /// </summary>
-        public static WsTrust14KeyTypes Trust14 => WsTrust14KeyTypes.Instance;
+        public static WsTrust14KeyTypes Trust14 { get; } = new WsTrust14KeyTypes();
 
         /// <summary>
-        /// Gets the Bearer KeyType.
+        /// Gets Bearer constant type for WSTrust.
         /// </summary>
         public string Bearer { get; protected set; }
 
         /// <summary>
-        /// Gets the PublicKey KeyType.
+        /// Gets PublicKey constant type for WSTrust.
         /// </summary>
         public string PublicKey { get; protected set; }
 
         /// <summary>
-        /// Gets the PSHA1 KeyType.
+        /// Gets PSHA1 constant type for WSTrust.
         /// </summary>
         public string PSHA1 { get; protected set; }
 
         /// <summary>
-        /// Gets the Symmetric KeyType.
+        /// Gets Symmetric constant type for WSTrust.
         /// </summary>
         public string Symmetric { get; protected set; }
     }
 
     /// <summary>
-    /// Values for KeyTypes for WsTrust Feb2005.
+    /// Provides KeyTypes constants for WSTrust Feb2005
     /// </summary>
-    public class WsTrustFeb2005KeyTypes : WsTrustKeyTypes<WsTrustFeb2005KeyTypes>
+    public class WsTrustFeb2005KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Creates an instance of <see cref="WsTrustFeb2005KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of KeyTypes for WsTrust Feb2005.</para>
+        /// Instantiates KeyTypes for WSTrust Feb2005
         /// </summary>
         public WsTrustFeb2005KeyTypes()
         {
@@ -113,13 +87,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Values for KeyTypes for WsTrust 1.3.
+    /// Provides KeyTypes constants for WSTrust 1.3
     /// </summary>
-    public class WsTrust13KeyTypes : WsTrustKeyTypes<WsTrust13KeyTypes>
+    public class WsTrust13KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Creates an instance of <see cref="WsTrustFeb2005KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.TrustFeb2005"/>  maintains a singleton instance of KeyTypes for WsTrust 1.3.</para>
+        /// Instantiates KeyTypes for WSTrust 1.3
         /// </summary>
         public WsTrust13KeyTypes()
         {
@@ -131,13 +104,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Values for KeyTypes for WsTrust 1.4.
+    /// Provides KeyTypes constants for WSTrust 1.44
     /// </summary>
-    public class WsTrust14KeyTypes : WsTrustKeyTypes<WsTrust14KeyTypes>
+    public class WsTrust14KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Creates an instance of <see cref="WsTrust14KeyTypes"/>.
-        /// <para>The property <see cref="WsTrustKeyTypes.Trust14"/>  maintains a singleton instance of KeyTypes for WsTrust 1.4.</para>
+        /// Instantiates KeyTypes for WSTrust 1.4
         /// </summary>
         public WsTrust14KeyTypes()
         {

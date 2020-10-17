@@ -46,27 +46,28 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Creates an instance of <see cref="RequestedSecurityToken"/>.
         /// This constructor is useful when deserializing from a stream such as xml.
         /// </summary>
-        public RequestedSecurityToken()
+        internal RequestedSecurityToken()
         {
         }
 
         /// <summary>
-        ///
+        /// Instantiates an instance of <see cref="RequestedSecurityToken"/> with a specific <see cref="XmlElement"/>.
         /// </summary>
-        /// <param name="xmlElement"></param>
+        /// <param name="xmlElement">an <see cref="XmlElement"/> of the callers choice.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="xmlElement"/> is null.</exception>
         public RequestedSecurityToken(XmlElement xmlElement)
         {
-            _xmlElement = xmlElement;
+            _xmlElement = xmlElement ?? throw LogHelper.LogArgumentNullException(nameof(xmlElement));
         }
 
         /// <summary>
         /// Creates an instance of <see cref="RequestedSecurityToken"/>.
         /// </summary>
         /// <param name="securityToken">a <see cref="SecurityToken"/>.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="securityToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="securityToken"/> is null.</exception>
         public RequestedSecurityToken(SecurityToken securityToken)
         {
-            SecurityToken = securityToken;
+            SecurityToken = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
         }
 
         /// <summary>

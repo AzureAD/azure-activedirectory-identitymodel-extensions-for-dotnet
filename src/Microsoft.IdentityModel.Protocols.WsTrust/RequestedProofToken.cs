@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// This constructor is useful when deserializing from a stream such as xml.
         /// <see cref="RequestedProofToken"/> is to represent the proof-of-possession artifact associated with a security token.
         /// </summary>
-        public RequestedProofToken()
+        internal RequestedProofToken()
         {
         }
 
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <see cref="RequestedProofToken"/> is to represent the proof-of-possession artifact associated with a security token.
         /// </summary>
         ///<param name="binarySecret"> a <see cref="BinarySecret"/> that can be used when creating a <see cref= "SecurityKey" /> for cryptographic operations.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="binarySecret"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="binarySecret"/> is null.</exception>
         public RequestedProofToken(BinarySecret binarySecret)
         {
             BinarySecret = binarySecret;
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="computedKeyAlgorithm">the algorithm to apply when creating the security key.
         /// a typical value is: http://docs.oasis-open.org/ws-sx/ws-trust/200512/CK/PSHA1 </param>
-        /// <exception cref="ArgumentNullException">if <paramref name="computedKeyAlgorithm"/> is null or empty string.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="computedKeyAlgorithm"/> is null or empty string.</exception>
         internal RequestedProofToken(string computedKeyAlgorithm)
         {
             ComputedKeyAlgorithm = computedKeyAlgorithm;
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <see cref="RequestedProofToken"/> is to represent the proof-of-possession artifact associated with a security token.
         /// </summary>
         ///<param name="encryptedKey"> an <see cref="EncryptedKey"/> that can be used when creating a <see cref= "SecurityKey" /> for cryptographic operations.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptedKey"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="encryptedKey"/> is null.</exception>
         internal  RequestedProofToken(EncryptedKey encryptedKey)
         {
             EncryptedKey = encryptedKey ?? throw LogHelper.LogArgumentNullException(nameof(encryptedKey));
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets or sets the <see cref="BinarySecret"/> to use when creating a <see cref="SecurityKey"/> for cryptographic operations.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if BinarySecret is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if BinarySecret is null.</exception>
         public BinarySecret BinarySecret
         {
             get => _binarySecret;
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets or set the computed key algorithm to use when creating a <see cref="SecurityKey"/> for cryptographic operations.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if ComputedKeyAlgorithm is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">thrown if ComputedKeyAlgorithm is null or empty.</exception>
         public string ComputedKeyAlgorithm
         {
             get => _computedKeyAlgorithm;
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets or sets the <see cref="EncryptedKey"/> to use when creating a <see cref="SecurityKey"/> for cryptographic operations.
         /// </summary>
-        /// <exception cref="ArgumentNullException">if EncryptedKey is null.(</exception>
+        /// <exception cref="ArgumentNullException">thrown if EncryptedKey is null.(</exception>
         internal EncryptedKey EncryptedKey
         {
             get => _encryptedKey;

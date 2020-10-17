@@ -46,7 +46,7 @@ using Microsoft.IdentityModel.Xml;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Reads and writes WS-Trust requests and responses.
+    /// Reads and writes WS-Trust requests and responses to and from XML.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public class WsTrustSerializer

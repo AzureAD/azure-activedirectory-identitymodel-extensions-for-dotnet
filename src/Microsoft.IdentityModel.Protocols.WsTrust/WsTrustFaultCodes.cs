@@ -30,48 +30,48 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Provides string values for WsTrust fault codes.
-    /// <para>Fault codes values for WsTrust Feb2005, 1.3 and 1.4 are the same.</para>
+    /// Constants Fault codes for WsTrust Feb2005, 1.3 and 1.4.
+    /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public static class WsTrustFaultCodes
     {
         /// <summary>
-        /// Gets the 'FailedAuthentication' fault code.
+        /// Gets the value for "FailedAuthentication"
         /// </summary>
         public const string FailedAuthentication = "FailedAuthentication";
 
         /// <summary>
-        /// Gets the 'FailedCheck' fault code.
+        /// Gets the value for "FailedCheck"
         /// </summary>
         public const string FailedCheck = "FailedCheck";
 
         /// <summary>
-        /// Gets the 'InvalidSecurity' fault code.
+        /// Gets the value for "InvalidSecurity"
         /// </summary>
         public const string InvalidSecurity = "InvalidSecurity";
 
         /// <summary>
-        /// Gets the 'InvalidSecurityToken' fault code.
+        /// Gets the value for "InvalidSecurityToken"
         /// </summary>
         public const string InvalidSecurityToken = "InvalidSecurityToken";
 
         /// <summary>
-        /// Gets the 'MessageExpired' fault code.
+        /// Gets the value for "MessageExpired"
         /// </summary>
         public const string MessageExpired = "MessageExpired";
 
         /// <summary>
-        /// Gets the 'SecurityTokenUnavailable' fault code.
+        /// Gets the value for "SecurityTokenUnavailable"
         /// </summary>
         public const string SecurityTokenUnavailable = "SecurityTokenUnavailable";
 
         /// <summary>
-        /// Gets the 'UnsupportedAlgorithm' fault code.
+        /// Gets the value for "UnsupportedAlgorithm"
         /// </summary>
         public const string UnsupportedAlgorithm = "UnsupportedAlgorithm";
 
         /// <summary>
-        /// Gets the 'UnsupportedSecurityToken' fault code.
+        /// Gets the value for "UnsupportedSecurityToken"
         /// </summary>
         public const string UnsupportedSecurityToken = "UnsupportedSecurityToken";
     }

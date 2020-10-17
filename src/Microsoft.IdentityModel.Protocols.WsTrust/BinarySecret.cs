@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Creates an instance of <see cref="BinarySecret"/>.
         /// This constructor is useful when deserializing from xml.
         /// </summary>
-        public BinarySecret()
+        internal BinarySecret()
         {
         }
 
@@ -95,6 +95,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// <summary>
         /// Gets or sets the encoding type.
         /// </summary>
+        /// <exception cref="ArgumentNullException">thrown if value is null or empty.</exception>
         public string EncodingType
         {
             get => _encodingType;

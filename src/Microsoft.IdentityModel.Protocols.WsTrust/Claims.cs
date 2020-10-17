@@ -44,7 +44,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="dialect">a uri that defines the dialect of the claims.</param>
         /// <param name="claimTypes">a list of <see cref="ClaimType"/>.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="dialect"/> is null or empty, <paramref name="claimTypes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="dialect"/> is null or empty</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="claimTypes"/> is null.</exception>
         public Claims(string dialect, IList<ClaimType> claimTypes)
         {
             Dialect = string.IsNullOrEmpty(dialect) ? throw LogHelper.LogArgumentNullException(nameof(dialect)) : dialect;

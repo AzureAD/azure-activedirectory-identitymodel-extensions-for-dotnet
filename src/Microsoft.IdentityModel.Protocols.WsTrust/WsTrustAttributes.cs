@@ -28,58 +28,58 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Provides string values for WsTrust attributes.
-    /// <para>Attribute values for WsTrust Feb2005, 1.3 and 1.4 are the same.</para>
+    /// Constants for WS-Trust attributes.
+    /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public static class WsTrustAttributes
     {
         /// <summary>
-        /// Gets the 'Allow' attribute.
+        /// Gets the value for "Allow"
         /// </summary>
         public const string Allow = "Allow";
 
         /// <summary>
-        /// Gets the 'Context' attribute.
+        /// Gets the value for "Context"
         /// </summary>
         public const string Context = "Context";
 
         /// <summary>
-        /// Gets the 'Dialect' attribute.
+        /// Gets the value for "Dialect"
         /// </summary>
         public const string Dialect = "Dialect";
 
         /// <summary>
-        /// Gets the 'EncodingType' attribute.
+        /// Gets the value for "EncodingType"
         /// </summary>
         public const string EncodingType = "EncodingType";
 
         /// <summary>
-        /// Gets the 'KeyExchangeToken' attribute.
+        /// Gets the value for "KeyExchangeToken"
         /// </summary>
         public const string KeyExchangeToken = "KeyExchangeToken";
 
         /// <summary>
-        /// Gets the 'OK' attribute.
+        /// Gets the value for "OK"
         /// </summary>
         public const string OK = "OK";
 
         /// <summary>
-        /// Gets the 'RequestKET' attribute.
+        /// Gets the value for "RequestKET"
         /// </summary>
         public const string RequestKET = "RequestKET";
 
         /// <summary>
-        /// Gets the 'Sig' attribute.
+        /// Gets the value for "Sig"
         /// </summary>
         public const string Sig = "Sig";
 
         /// <summary>
-        /// Gets the 'Type' attribute.
+        /// Gets the value for "Type"
         /// </summary>
         public const string Type = "Type";
 
         /// <summary>
-        /// Gets the 'ValueType' attribute.
+        /// Gets the value for "ValueType"
         /// </summary>
         public const string ValueType = "ValueType";
     }

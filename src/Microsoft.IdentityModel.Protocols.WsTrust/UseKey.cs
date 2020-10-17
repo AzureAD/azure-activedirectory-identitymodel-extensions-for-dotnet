@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     /// <summary>
     /// Represents the contents of a UseKey element.
     /// <para>
-    /// <see cref="UseKey"/> can be used to specify an existing key to use with a wstrust request.
+    /// <see cref="UseKey"/> can be used to specify an existing key to use with a WStrust request.
     /// </para>
     /// see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html
     /// </summary>
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         }
 
         /// <summary>
-        /// Gets the <see cref="SecurityTokenElement"/>.
+        /// Gets the <see cref="SecurityTokenElement"/> passed to the constructor.
         /// </summary>
         public SecurityTokenElement SecurityTokenElement
         {

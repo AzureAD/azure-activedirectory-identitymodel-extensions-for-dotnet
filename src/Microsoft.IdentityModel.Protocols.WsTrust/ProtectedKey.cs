@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust
@@ -40,21 +42,22 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         /// <param name="secret">The key material that needs to be protected.</param>
         /// <param name="wrappingCredentials">The encrypting credentials used to encrypt the key material.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="secret"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="wrappingCredentials"/> is null.</exception>
         public ProtectedKey(byte[] secret, EncryptingCredentials wrappingCredentials)
         {
-            Secret = secret;
-            WrappingCredentials = wrappingCredentials;
+            Secret = secret ?? throw LogHelper.LogArgumentNullException(nameof(secret));
+            WrappingCredentials = wrappingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(wrappingCredentials));
         }
 
         /// <summary>
-        /// Gets the key material.
+        /// Gets the secret passed to the constructor.
         /// </summary>
         public byte[] Secret { get; }
 
         /// <summary>
-        /// Gets the encrypting credentials. Null means that the keys are not encrypted.
+        /// Gets the encrypting credentials passed to the constructor.
         /// </summary>
         public EncryptingCredentials WrappingCredentials { get; }
     }
 }
-
