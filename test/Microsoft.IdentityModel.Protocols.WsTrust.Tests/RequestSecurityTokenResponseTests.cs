@@ -214,7 +214,6 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
             {
                 var response = theoryData.WsTrustSerializer.ReadResponse(theoryData.Reader);
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(response, theoryData.WsTrustRequest, context);
             }
             catch (Exception ex)
             {
@@ -228,6 +227,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             get
             {
+                var tokenHandler = new Saml2SecurityTokenHandler();
+                var tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
+                var saml2Token = tokenHandler.CreateToken(tokenDescriptor);
+
                 var theoryData = new TheoryData<WsTrustTheoryData>
                 {
                     new WsTrustTheoryData(WsTrustVersion.Trust13)
@@ -243,21 +246,61 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
                 reader.ReadStartElement();
                 theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
                 {
-                    ExpectedException = ExpectedException.XmlReadException("IDX30022:"),
+                    ExpectedException = ExpectedException.XmlReadException("IDX15022:"),
                     Reader = reader,
                     TestId = "ReaderNotOnStartElement"
                 });
 
                 theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
                 {
-                    ExpectedException = ExpectedException.XmlReadException("IDX30024:"),
+                    ExpectedException = ExpectedException.XmlReadException("IDX15024:"),
                     Reader = WsTrustReferenceXml.RandomElementReader,
                     TestId = "ReaderNotOnCorrectElement"
+                });
+
+                string saml2 = tokenHandler.WriteToken(saml2Token);
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseReader(WsTrustConstants.Trust13, saml2),
+                    TestId = "TokenResponseSaml2Trust13"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX15017:", typeof(System.Xml.XmlException)),
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseReader(WsTrustConstants.Trust13, saml2, false),
+                    TestId = "TokenResponseSaml2Trust13_WithOutNamespace"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseCollectionReader(WsTrustConstants.Trust13, saml2),
+                    TestId = "TokenResponseCollectionSaml2Trust13"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    ExpectedException = ExpectedException.XmlReadException("IDX15017:", typeof(System.Xml.XmlException)),
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseCollectionReader(WsTrustConstants.Trust13, saml2, false),
+                    TestId = "TokenResponseCollectionSaml2Trust13_WithoutNamespace"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.TrustFeb2005)
+                {
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseReader(WsTrustConstants.TrustFeb2005, saml2),
+                    TestId = "TokenResponseSaml2TrustFeb2005"
+                });
+
+                theoryData.Add(new WsTrustTheoryData(WsTrustVersion.Trust13)
+                {
+                    Reader = WsTrustReferenceXml.GetRequestSecurityTokenResponseCollectionReader(WsTrustConstants.Trust13, saml2),
+                    TestId = "TokenResponseCollectionSaml2TrustFeb2005"
                 });
 
                 return theoryData;
             }
         }
+
 
         [Theory, MemberData(nameof(WriteResponseTestCases))]
         public void WriteResponse(WsTrustTheoryData theoryData)
@@ -279,6 +322,10 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             get
             {
+                var tokenHandler = new Saml2SecurityTokenHandler();
+                var tokenDescriptor = Default.SecurityTokenDescriptor(Default.AsymmetricSigningCredentials);
+                XmlElement xmlElement = CreateXmlElement(tokenHandler, tokenDescriptor);
+
                 return new TheoryData<WsTrustTheoryData>
                 {
                     new WsTrustTheoryData(new MemoryStream())

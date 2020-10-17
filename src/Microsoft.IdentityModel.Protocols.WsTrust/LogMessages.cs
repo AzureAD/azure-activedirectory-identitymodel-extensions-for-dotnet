@@ -38,8 +38,8 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         // ========================================================================================================================
         // copied from M.IM.XML
 
-        internal const string IDX15000 = "IDX15000: Unknown Ws-Trust namespace. Expecting Element: '{0}' to be in one of three namespaces: '{1}', '{2}', '{3}'. Found namespace '{4}'.";
-        internal const string IDX15001 = "IDX15001: Unknown Ws-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'.";
+        internal const string IDX15000 = "IDX15000: Unknown WS-Trust namespace. Expecting Element: '{0}' to be in one of three namespaces: '{1}', '{2}', '{3}'. Found namespace '{4}'.";
+        internal const string IDX15001 = "IDX15001: Unknown WS-Addressing namespace. Expecting Element: '{0}' to be in one of two namespaces: '{1}', '{2}'. Found namespace '{3}'.";
 
         // XML reading
         internal const string IDX15011 = "IDX15011: Unable to read XML. Expecting XmlReader to be at ns.element: '{0}.{1}', found: '{2}.{3}'.";
@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         internal const string IDX15016 = "IDX15016: Exception thrown while reading '{0}'. See inner exception for more details.";
         internal const string IDX15017 = "IDX15017: Exception thrown while reading '{0}'. Caught exception: '{1}'.";
         internal const string IDX15022 = "IDX15022: Unable to read XML. Expecting XmlReader to be at a StartElement, NodeType is: '{0}'.";
+        internal const string IDX15024 = "IDX15024: Unable to read XML. Expecting XmlReader to be at element: '{0}', found: '{1}'.";
         internal const string IDX15407 = "IDX15407: Exception caught while writing: '{0}'. Caught exception: '{1}'.";
 
         // copied from M.IM.XML

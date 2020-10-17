@@ -30,6 +30,7 @@
 using System;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.WsUtility;
 using Microsoft.IdentityModel.TestUtils;
 
 namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
@@ -40,22 +41,24 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         public static string GetBinarySecret(string prefix, string ns, string type, string value)
         {
             return LogHelper.FormatInvariant(
-                @"<{0}:BinarySecret Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:BinarySecret>",
+                @"<{0}:{4} Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:{4}>",
                 prefix,
                 ns,
                 type,
-                value);
+                value,
+                WsTrustElements.BinarySecret);
         }
 
         public static XmlDictionaryReader GetBinarySecretReader(WsTrustConstants trustConstants, string type, string value)
         {
             return XmlUtilities.CreateDictionaryReader(
                 LogHelper.FormatInvariant(
-                    @"<{0}:BinarySecret Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:BinarySecret>",
+                    @"<{0}:{4} Type=""{2}"" xmlns:{0}=""{1}"">{3}</{0}:{4}>",
                     trustConstants.Prefix,
                     trustConstants.Namespace,
                     type,
-                    value));
+                    value,
+                    WsTrustElements.BinarySecret));
         }
 
         #endregion
@@ -64,11 +67,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         public static string GetLifeTime(WsTrustConstants trustConstants, string created, string expires)
         {
             return LogHelper.FormatInvariant(
-                @"<{0}:Lifetime xmlns:{0}=""{1}""><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
+                @"<{0}:{5} xmlns:{0}=""{1}""><wsu:{5} xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:{5}><wsu:{6} xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:{6}></{0}:{5}>",
                 trustConstants.Prefix,
                 trustConstants.Namespace,
                 created,
-                expires);
+                expires,
+                WsTrustElements.Lifetime,
+                WsUtilityElements.Created,
+                WsTrustElements.Expires);
         }
 
         public static XmlDictionaryReader GetLifeTimeReader(WsTrustConstants trustConstants, DateTime created, DateTime expires)
@@ -80,11 +86,14 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             return XmlUtilities.CreateDictionaryReader(
                 LogHelper.FormatInvariant(
-                @"<{0}:Lifetime xmlns:{0}=""{1}""><wsu:Created xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:Created><wsu:Expires xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:Expires></{0}:Lifetime>",
+                @"<{0}:{4} xmlns:{0}=""{1}""><wsu:{5} xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{2}</wsu:{5}><wsu:{6} xmlns:wsu=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"">{3}</wsu:{6}></{0}:{4}>",
                 trustConstants.Prefix,
                 trustConstants.Namespace,
                 created,
-                expires));
+                expires,
+                WsTrustElements.Lifetime,
+                WsUtilityElements.Created,
+                WsTrustElements.Expires));
         }
 
         #endregion
@@ -96,15 +105,17 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
 
             if (includeNamespace)
                 return LogHelper.FormatInvariant(
-                     @"<{0}:RequestedSecurityToken xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityToken>",
+                     @"<{0}:{3} xmlns:{0}=""{1}"">{2}</{0}:{3}>",
                         trustConstants.Prefix,
                         trustConstants.Namespace,
-                        token);
+                        token,
+                        WsTrustElements.RequestedSecurityToken);
             else
                 return LogHelper.FormatInvariant(
-                     @"<{0}:RequestedSecurityToken >{1}</{0}:RequestedSecurityToken>",
+                     @"<{0}:{2} >{1}</{0}:{2}>",
                      trustConstants.Prefix,
-                     token);
+                     token,
+                     WsTrustElements.RequestedSecurityToken);
 
         }
 
@@ -120,20 +131,50 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust.Tests
         {
             if (includeNamespace)
                 return LogHelper.FormatInvariant(
-                    @"<{0}:RequestedSecurityTokenResponse xmlns:{0}=""{1}"">{2}</{0}:RequestedSecurityTokenResponse>",
+                    @"<{0}:{3} xmlns:{0}=""{1}"">{2}</{0}:{3}>",
                     trustConstants.Prefix,
                     trustConstants.Namespace,
-                    GetRequestSecurityToken(trustConstants, token, false));
+                    GetRequestSecurityToken(trustConstants, token, false),
+                    WsTrustElements.RequestSecurityTokenResponse);
             else
                 return LogHelper.FormatInvariant(
-                    @"<{0}:RequestedSecurityTokenResponse >{1}</{0}:RequestedSecurityTokenResponse>",
+                    @"<{0}:{2}>{1}</{0}:{2}>",
                     trustConstants.Prefix,
-                    GetRequestSecurityToken(trustConstants, token, false));
+                    GetRequestSecurityToken(trustConstants, token, false),
+                    WsTrustElements.RequestSecurityTokenResponse);
         }
-
         public static XmlDictionaryReader GetRequestSecurityTokenResponseReader(WsTrustConstants trustConstants, string token, bool includeNamespace = true)
         {
             return XmlUtilities.CreateDictionaryReader(GetRequestSecurityTokenResponse(trustConstants, token, includeNamespace));
+        }
+
+        #endregion
+
+
+        #region RequestSecurityTokenResponseCollection
+        public static string GetRequestSecurityTokenResponseCollection(WsTrustConstants trustConstants, string token, bool includeNamespace = true)
+        {
+            if (includeNamespace)
+                return LogHelper.FormatInvariant(
+                    @"<{0}:{3} xmlns:{0}=""{1}""><{0}:{4} xmlns:{0}=""{1}"">{2}</{0}:{4}></{0}:{3}>",
+                    trustConstants.Prefix,
+                    trustConstants.Namespace,
+                    GetRequestSecurityToken(trustConstants, token, false),
+                    WsTrustElements.RequestSecurityTokenResponseCollection,
+                    WsTrustElements.RequestSecurityTokenResponse);
+
+            else
+                return LogHelper.FormatInvariant(
+                    @"<{0}:{2}><{0}:{3}>{1}</{0}:{3}></{0}:{2}>",
+                    trustConstants.Prefix,
+                    GetRequestSecurityToken(trustConstants, token, false),
+                    WsTrustElements.RequestSecurityTokenResponseCollection,
+                    WsTrustElements.RequestSecurityTokenResponse);
+        }
+
+        public static XmlDictionaryReader GetRequestSecurityTokenResponseCollectionReader(WsTrustConstants trustConstants, string token, bool includeNamespace = true)
+        {
+            return XmlUtilities.CreateDictionaryReader(GetRequestSecurityTokenResponseCollection(trustConstants, token, includeNamespace));
         }
 
         #endregion

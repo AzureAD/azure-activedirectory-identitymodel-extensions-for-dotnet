@@ -141,6 +141,22 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
         /// </summary>
         /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
+        /// <exception cref="XmlReadException">if <paramref name="reader"/> if not at a StartElement.</exception>
+        internal static void CheckReaderOnEntry(XmlReader reader)
+        {
+            if (reader == null)
+                throw LogHelper.LogArgumentNullException(nameof(reader));
+
+            // IsStartElement calls reader.MoveToContent().
+            if (!reader.IsStartElement())
+                throw XmlUtil.LogReadException(LogMessages.IDX15022, reader.NodeType);
+        }
+
+        /// <summary>
+        /// Checks if the <see cref="XmlReader"/> is pointing to an expected element.
+        /// </summary>
+        /// <param name="reader">the <see cref="XmlReader"/>to check.</param>
         /// <param name="element">the expected element.</param>
         /// <param name="serializationContext">the expected namespace.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
