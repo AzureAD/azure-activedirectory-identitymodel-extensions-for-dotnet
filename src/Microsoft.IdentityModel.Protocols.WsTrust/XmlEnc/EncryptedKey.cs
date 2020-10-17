@@ -27,8 +27,14 @@
 
 namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
-    internal  class EncryptedKey
+    /// <summary>
+    /// Represents Xml Encryption EncryptedKey
+    /// </summary>
+    public  class EncryptedKey
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public EncryptedKey()
         {
         }

@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// </summary>
         ///<param name="encryptedKey"> an <see cref="EncryptedKey"/> that can be used when creating a <see cref= "SecurityKey" /> for cryptographic operations.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="encryptedKey"/> is null.</exception>
-        internal  RequestedProofToken(EncryptedKey encryptedKey)
+        public  RequestedProofToken(EncryptedKey encryptedKey)
         {
             EncryptedKey = encryptedKey ?? throw LogHelper.LogArgumentNullException(nameof(encryptedKey));
         }
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         /// Gets or sets the <see cref="EncryptedKey"/> to use when creating a <see cref="SecurityKey"/> for cryptographic operations.
         /// </summary>
         /// <exception cref="ArgumentNullException">thrown if EncryptedKey is null.(</exception>
-        internal EncryptedKey EncryptedKey
+        public EncryptedKey EncryptedKey
         {
             get => _encryptedKey;
             set => _encryptedKey = value ?? throw LogHelper.LogArgumentNullException(nameof(EncryptedKey));

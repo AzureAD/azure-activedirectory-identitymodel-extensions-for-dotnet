@@ -32,9 +32,9 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Generates Combined and 
+    /// Generates Combined and Computed keys for SHA1
     /// </summary>
-    internal static class Psha1KeyGenerator
+    public static class Psha1KeyGenerator
     {
         private static RandomNumberGenerator _random = new RNGCryptoServiceProvider();
 
