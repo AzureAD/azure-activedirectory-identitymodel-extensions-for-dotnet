@@ -28,54 +28,54 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants KeyTypes for WsTrust Feb2005, 1.3 and 1.4.
+    /// Constants: WS-Trust KeyTypes.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public abstract class WsTrustKeyTypes
     {
         /// <summary>
-        /// Gets KeyTypes constants for WSTrust Feb2005
+        /// Gets WS-Trust Feb2005 KeyTypes.
         /// </summary>
         public static WsTrustFeb2005KeyTypes TrustFeb2005 { get; } = new WsTrustFeb2005KeyTypes();
 
         /// <summary>
-        /// Gets KeyTypes constants for WSTrust 1.3
+        /// Gets WS-Trust 1.3 KeyTypes.
         /// </summary>
         public static WsTrust13KeyTypes Trust13 { get; } = new WsTrust13KeyTypes();
 
         /// <summary>
-        /// Gets KeyTypes constants for WSTrust 1.4
+        /// Gets WS-Trust 1.4 KeyTypes.
         /// </summary>
         public static WsTrust14KeyTypes Trust14 { get; } = new WsTrust14KeyTypes();
 
         /// <summary>
-        /// Gets Bearer constant type for WSTrust.
+        /// Gets Bearer KeyType.
         /// </summary>
         public string Bearer { get; protected set; }
 
         /// <summary>
-        /// Gets PublicKey constant type for WSTrust.
+        /// Gets PublicKey KeyType.
         /// </summary>
         public string PublicKey { get; protected set; }
 
         /// <summary>
-        /// Gets PSHA1 constant type for WSTrust.
+        /// Gets PSHA1 KeyType.
         /// </summary>
         public string PSHA1 { get; protected set; }
 
         /// <summary>
-        /// Gets Symmetric constant type for WSTrust.
+        /// Gets Symmetric KeyType.
         /// </summary>
         public string Symmetric { get; protected set; }
     }
 
     /// <summary>
-    /// Provides KeyTypes constants for WSTrust Feb2005
+    /// Constants: WS-Trust Feb2005 KeyTypes.
     /// </summary>
     public class WsTrustFeb2005KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Instantiates KeyTypes for WSTrust Feb2005
+        /// Instantiates WS-Trust Feb2005 KeyTypes.
         /// </summary>
         public WsTrustFeb2005KeyTypes()
         {
@@ -87,12 +87,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides KeyTypes constants for WSTrust 1.3
+    /// Constants: WS-Trust 1.3 KeyTypes.
     /// </summary>
     public class WsTrust13KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Instantiates KeyTypes for WSTrust 1.3
+        /// Instantiates WS-Trust 1.3 KeyTypes.
         /// </summary>
         public WsTrust13KeyTypes()
         {
@@ -104,12 +104,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides KeyTypes constants for WSTrust 1.44
+    /// Constants: WS-Trust 1.4 KeyTypes.
     /// </summary>
     public class WsTrust14KeyTypes : WsTrustKeyTypes
     {
         /// <summary>
-        /// Instantiates KeyTypes for WSTrust 1.4
+        /// Instantiates WS-Trust 1.4 KeyTypes.
         /// </summary>
         public WsTrust14KeyTypes()
         {

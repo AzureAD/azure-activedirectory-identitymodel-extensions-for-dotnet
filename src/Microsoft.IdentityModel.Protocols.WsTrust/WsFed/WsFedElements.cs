@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
     /// <summary>
-    /// Constants for WS-Federation element names.
+    /// Constants: WS-Federation element names.
     /// <para>see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html </para>
     /// </summary>
     public static class WsFedElements

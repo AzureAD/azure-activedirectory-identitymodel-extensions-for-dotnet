@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Constants for WS-Security attributes.
+    /// Constants: WS-Security attribute names.
     /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public static class WsSecurityAttributes

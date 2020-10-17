@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     /// <summary>
-    /// Constants for WS-Policy elements.
+    /// Constants: WS-Policy elements names.
     /// <para>see: http://specs.xmlsoap.org/ws/2004/09/policy/ws-policy.pdf </para>
     /// </summary>
     public static class WsPolicyElements

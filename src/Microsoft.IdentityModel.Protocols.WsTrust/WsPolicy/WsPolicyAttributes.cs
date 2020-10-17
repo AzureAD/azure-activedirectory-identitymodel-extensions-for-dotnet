@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     /// <summary>
-    /// Constants for WS-Policy attributes.
+    /// Constants: WS-Policy attribute names.
     /// <para>see: http://specs.xmlsoap.org/ws/2004/09/policy/ws-policy.pdf </para>
     /// </summary>
     public static class WsPolicyAttributes

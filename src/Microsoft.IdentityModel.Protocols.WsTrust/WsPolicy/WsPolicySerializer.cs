@@ -29,8 +29,6 @@ using System.Xml;
 using Microsoft.IdentityModel.Protocols.WsAddressing;
 using Microsoft.IdentityModel.Xml;
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     /// <summary>

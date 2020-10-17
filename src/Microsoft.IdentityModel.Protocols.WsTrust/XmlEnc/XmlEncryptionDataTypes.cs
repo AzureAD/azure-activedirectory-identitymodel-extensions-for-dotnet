@@ -28,29 +28,29 @@
 namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
     /// <summary>
-    /// Constants for XML Encryption DataTypes.
+    /// Constants: XML Encryption DataTypes.
     /// <para>see: https://www.w3.org/TR/xmlenc-core1/ </para>
     /// </summary>
     internal abstract class XmlEncryptionDataTypes
     {
         /// <summary>
-        /// Gets DataTypes for XML Encryption 1.1.
+        /// Gets XML Encryption 1.1 DataTypes.
         /// </summary>
         public static XmlEncryption11DataTypes XmlEnc11 { get; } = new XmlEncryption11DataTypes();
 
         /// <summary>
-        /// Gets Content DataType type for XML Encryption
+        /// Gets Content DataType.
         /// </summary>
         public string Content { get; protected set; }
 
         /// <summary>
-        /// Gets Content DataType type for XML Encryption
+        /// Gets Element DataType.
         /// </summary>
         public string Element { get; protected set; }
     }
 
     /// <summary>
-    /// Provides DataTypes for XML Encryption 1.1.
+    /// Constants: XML Encryption 1.1 DataTypes.
     /// </summary>
     internal class XmlEncryption11DataTypes : XmlEncryptionDataTypes
     {

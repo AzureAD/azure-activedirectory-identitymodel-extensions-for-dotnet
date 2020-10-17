@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
     /// <summary>
-    /// Constants for XML Encryption.
+    /// Constants: XML Encryption namespace and prefix.
     /// <para>see: https://www.w3.org/TR/xmlenc-core1/ </para>
     /// </summary>
     internal abstract class XmlEncryptionConstants : WsConstantsBase
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.XmlEnc
     }
 
     /// <summary>
-    /// Provides constants for XML Encryption 1.1.
+    /// Constants: XML Encryption 1.1 namespace and prefix.
     /// </summary>
     internal class XmlEncryption11Constants : XmlEncryptionConstants
     {

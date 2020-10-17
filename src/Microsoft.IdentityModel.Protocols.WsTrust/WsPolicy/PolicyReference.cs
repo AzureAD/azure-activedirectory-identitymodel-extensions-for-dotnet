@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     /// <summary>

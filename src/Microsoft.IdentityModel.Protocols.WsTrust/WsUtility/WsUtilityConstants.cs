@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsUtility
 {
     /// <summary>
-    /// Constants for WS-Utility.
+    /// Constants: WS-Utility namespace and prefix.
     /// <para>see: http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd </para>
     /// </summary>
     public abstract class WsUtilityConstants : WsConstantsBase
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.WsUtility
     }
 
     /// <summary>
-    /// Provides constants for WS-Utility 1.0.
+    /// Constants: WS-Utility 1.0 namespace and prefix.
     /// </summary>
     public class WsUtility10Constants : WsUtilityConstants
     {

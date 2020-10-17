@@ -28,44 +28,44 @@
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Constants for encoding types for WS-Security 1.0 and 1.1.
+    /// Constants: WS-Security EncodingTypes.
     /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public abstract class WsSecurityEncodingTypes : WsConstantsBase
     {
         /// <summary>
-        /// Gets encoding type constants for WS-Security 1.0
+        /// Gets WS-Security 1.0 EncodingTypes.
         /// </summary>
         public static WsSecurity10EncodingTypes WsSecurity10 { get; } = new WsSecurity10EncodingTypes();
 
         /// <summary>
-        /// Gets encoding type constants for WS-Security 1.1
+        /// Gets WS-Security 1.1 EncodingTypes.
         /// </summary>
         public static WsSecurity11EncodingTypes WsSecurity11 { get; } = new WsSecurity11EncodingTypes();
 
         /// <summary>
-        /// Gets Base64 encoding type for WS-Security
+        /// Gets Base64 EncodingType.
         /// </summary>
         public string Base64 { get; protected set; }
 
         /// <summary>
-        /// Gets HexBinary encoding type for WS-Security
+        /// Gets HexBinary EncodingType.
         /// </summary>
         public string HexBinary { get; protected set; }
 
         /// <summary>
-        /// Gets Text encoding type for WS-Security
+        /// Gets Text EncodingType.
         /// </summary>
         public string Text { get; protected set; }
     }
 
     /// <summary>
-    /// Provides encoding type constants for WS-Security 1.0.
+    /// Constants: WS-Security 1.0 EncodingTypes.
     /// </summary>
     public class WsSecurity10EncodingTypes : WsSecurityEncodingTypes
     {
         /// <summary>
-        /// Instantiates encoding types for WS-Security 1.0
+        /// Instantiates WS-Security 1.0 EncodingTypes.
         /// </summary>
         public WsSecurity10EncodingTypes()
         {
@@ -76,12 +76,12 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// <summary>
-    /// Provides encoding type constants for WS-Security 1.1.
+    /// Constants: WS-Security 1.1 EncodingTypes.
     /// </summary>
     public class WsSecurity11EncodingTypes : WsSecurityEncodingTypes
     {
         /// <summary>
-        /// Instantiates encoding types for  WS-Security 1.1
+        /// Instantiates WS-Security 1.1 EncodingTypes.
         /// </summary>
         public WsSecurity11EncodingTypes()
         {

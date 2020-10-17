@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Constants for key types for WS-Security 1.0 and 1.1.
+    /// Constants: WS-Security KeyTypes.
     /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public abstract class WsSecurityKeyTypes
@@ -50,12 +50,12 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// <summary>
-    /// Provides key type constants for WS-Security 1.0.
+    /// Constants: WS-Security 1.0 KeyTypes.
     /// </summary>
     public class WsSecurity10KeyTypes : WsSecurityKeyTypes
     {
         /// <summary>
-        /// Instantiates key types for WS-Security 1.0
+        /// Instantiates WS-Security 1.0 KeyTypes.
         /// </summary>
         public WsSecurity10KeyTypes()
         {
@@ -64,12 +64,12 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// <summary>
-    /// Provides key type constants for WS-Security 1.1.
+    /// Constants: WS-Security 1.1 KeyTypes.
     /// </summary>
     public class WsSecurity11KeyTypes : WsSecurityKeyTypes
     {
         /// <summary>
-        /// Instantiates key types for WS-Security 1.1
+        /// Instantiates WS-Security 1.1 KeyTypes.
         /// </summary>
         public WsSecurity11KeyTypes()
         {

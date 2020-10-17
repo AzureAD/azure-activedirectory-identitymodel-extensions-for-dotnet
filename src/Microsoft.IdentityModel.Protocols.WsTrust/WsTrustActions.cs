@@ -28,122 +28,122 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants for WSTrust Actions Feb2005, 1.3 and 1.4.
+    /// Constants: WS-Trust Actions.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public abstract class WsTrustActions
     {
         /// <summary>
-        /// Gets Action constants for WS-Trust Feb2005.
+        /// Gets WS-Trust Feb2005 Actions.
         /// <para>see: http://specs.xmlsoap.org/ws/2005/02/trust/WS-Trust.pdf </para>
         /// </summary>
-        public static WsTrustFeb2005Actions TrustFeb2005 => new  WsTrustFeb2005Actions();
+        public static WsTrustFeb2005Actions TrustFeb2005 { get; } = new WsTrustFeb2005Actions();
 
         /// <summary>
-        /// Gets Action constants for WSTrust 1.3.
+        /// Gets WS-Trust 1.3 Actions.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
         /// </summary>
-        public static WsTrust13Actions Trust13 => new WsTrust13Actions();
+        public static WsTrust13Actions Trust13 { get; } = new WsTrust13Actions();
 
         /// <summary>
-        /// Gets Action constants for WSTrust 1.4.
+        /// Gets WS-Trust 1.4 Actions.
         /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/ws-trust.html </para>
         /// </summary>
-        public static WsTrust14Actions Trust14 => new WsTrust14Actions();
+        public static WsTrust14Actions Trust14 { get; } = new WsTrust14Actions();
 
         /// <summary>
-        /// Gets the Cancel action for WSTrust.
+        /// Gets Cancel Action.
         /// </summary>
         public string Cancel { get; protected set; }
 
         /// <summary>
-        /// Gets the CancelFinal action for WSTrust.
+        /// Gets CancelFinal Action.
         /// </summary>
         public string CancelFinal { get; protected set; }
 
         /// <summary>
-        /// Gets the CancelRequest action for WSTrust.
+        /// Gets CancelRequest Action.
         /// </summary>
         public string CancelRequest { get; protected set; }
 
         /// <summary>
-        /// Gets the CancelResponse action for WSTrust.
+        /// Gets CancelResponse Action.
         /// </summary>
         public string CancelResponse { get; protected set; }
 
         /// <summary>
-        /// Gets the Issue action for WSTrust.
+        /// Gets Issue Action.
         /// </summary>
         public string Issue { get; protected set; }
 
         /// <summary>
-        /// Gets the IssueFinal action for WSTrust.
+        /// Gets IssueFinal Action.
         /// </summary>
         public string IssueFinal { get; protected set; }
 
         /// <summary>
-        /// Gets the IssueRequest action for WSTrust.
+        /// Gets IssueRequest Action.
         /// </summary>
         public string IssueRequest { get; protected set; }
 
         /// <summary>
-        /// Gets the IssueResponse action for WSTrust.
+        /// Gets IssueResponse Action.
         /// </summary>
         public string IssueResponse { get; protected set; }
 
         /// <summary>
-        /// Gets the Renew action for WSTrust.
+        /// Gets Renew Action.
         /// </summary>
         public string Renew { get; protected set; }
 
         /// <summary>
-        /// Gets the RenewFinal action for WSTrust.
+        /// Gets RenewFinal Action.
         /// </summary>
         public string RenewFinal { get; protected set; }
 
         /// <summary>
-        /// Gets the RenewRequest action for WSTrust.
+        /// Gets RenewRequest Action.
         /// </summary>
         public string RenewRequest { get; protected set; }
 
         /// <summary>
-        /// Gets the RenewResponse action for WSTrust.
+        /// Gets RenewResponse Action.
         /// </summary>
         public string RenewResponse { get; protected set; }
 
         /// <summary>
-        /// Gets the Status action for WSTrust.
+        /// Gets Status Action.
         /// </summary>
         public string Status { get; protected set; }
 
         /// <summary>
-        /// Gets the Validate action for WSTrust.
+        /// Gets Validate Action.
         /// </summary>
         public string Validate { get; protected set; }
 
         /// <summary>
-        /// Gets the ValidateFinal action for WSTrust.
+        /// Gets ValidateFinal Action.
         /// </summary>
         public string ValidateFinal { get; protected set; }
 
         /// <summary>
-        /// Gets the ValidateRequest action for WSTrust.
+        /// Gets ValidateRequest Action.
         /// </summary>
         public string ValidateRequest { get; protected set; }
 
         /// <summary>
-        /// Gets the ValidateResponse action for WSTrust.
+        /// Gets ValidateResponse Action.
         /// </summary>
         public string ValidateResponse { get; protected set; }
     }
 
     /// <summary>
-    /// Provides action constants for WsTrust Feb2005.
+    /// Constants: WS-Trust Feb2005 Actions.
     /// </summary>
     public class WsTrustFeb2005Actions : WsTrustActions
     {
         /// <summary>
-        /// Instantiates actions types for WsTrust Feb2005.
+        /// Instantiates WS-Trust Feb2005 Actions.
         /// </summary>
         public WsTrustFeb2005Actions()
         {
@@ -163,12 +163,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides action constants for WsTrust 1.3.
+    /// Constants: WS-Trust 1.3 Actions.
     /// </summary>
     public class WsTrust13Actions : WsTrustActions
     {
         /// <summary>
-        /// Instantiates actions types for WsTrust 1.3.
+        /// Instantiates WS-Trust 1.3 Actions.
         /// </summary>
         public WsTrust13Actions()
         {
@@ -193,12 +193,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides action constants for WsTrust 1.4.
+    /// Constants: WS-Trust 1.4 Actions.
     /// </summary>
     public class WsTrust14Actions : WsTrustActions
     {
         /// <summary>
-        /// Instantiates actions types for WsTrust 1.4.
+        /// Instantiates WS-Trust 1.4 Actions.
         /// </summary>
         public WsTrust14Actions()
         {

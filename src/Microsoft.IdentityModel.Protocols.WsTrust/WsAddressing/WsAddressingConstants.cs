@@ -30,8 +30,8 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsAddressing
 {
     /// <summary>
-    /// Constants for WS-Addressing namespace and prefix.
-    /// see: https://www.w3.org/Submission/ws-addressing/
+    /// Constants: WS-Addressing namespace and prefix.
+    /// <para>see: https://www.w3.org/Submission/ws-addressing/ </para>
     /// </summary>
     public abstract class WsAddressingConstants : WsConstantsBase
     {
@@ -41,18 +41,18 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
         public static IList<string> KnownNamespaces { get; } = new List<string> { "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing" };
 
         /// <summary>
-        /// Gets constants for WS-Addressing 1.0
+        /// Gets constants for WS-Addressing 1.0.
         /// </summary>
         public static WsAddressing10Constants Addressing10 { get; } = new WsAddressing10Constants();
 
         /// <summary>
-        /// Gets constants for WS-Addressing 200408
+        /// Gets constants for WS-Addressing 200408.
         /// </summary>
         public static WsAddressing200408Constants Addressing200408 { get; } = new WsAddressing200408Constants();
     }
 
     /// <summary>
-    /// Provides constants for WS-Addressing 1.0
+    /// Constants: WS-Addressing 1.0 namespace and prefix.
     /// </summary>
     public class WsAddressing10Constants : WsAddressingConstants
     {
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.WsAddressing
     }
 
     /// <summary>
-    /// Provides constants for WS-Addressing 200408
+    /// Constants: WS-Addressing 200408 namespace and prefix.
     /// </summary>
     public class WsAddressing200408Constants : WsAddressingConstants
     {

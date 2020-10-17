@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsPolicy
 {
     /// <summary>
-    /// Constants for WS-Policy constants for WS-Policy 1.2 and 1.5.
+    /// Constants: WS-Policy constants namespace and prefix.
     /// <para>see: http://specs.xmlsoap.org/ws/2004/09/policy/ws-policy.pdf </para>
     /// </summary>
     public abstract class WsPolicyConstants : WsConstantsBase
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
     }
 
     /// <summary>
-    /// Provides constants for WS-Policy 1.2
+    /// Constants: WS-Policy 1.2 namespace and prefix.
     /// </summary>
     public class WsPolicy12Constants : WsPolicyConstants
     {
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.WsPolicy
     }
 
     /// <summary>
-    /// Provides constants for WS-Policy 1.5
+    /// Constants: WS-Policy 1.5 namespace and prefix.
     /// </summary>
     public class WsPolicy15Constants : WsPolicyConstants
     {

@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsSecurity
 {
     /// <summary>
-    /// Constants for WS-Security 1.0 and 1.1.
+    /// Constants: WS-Security namespace and prefix.
     /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public abstract class WsSecurityConstants : WsConstantsBase
@@ -41,28 +41,28 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
         public static readonly IList<string> KnownNamespaces = new List<string> { "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" };
 
         /// <summary>
-        /// Gets constants for WS-Security 1.0
+        /// Gets constants for WS-Security 1.0.
         /// </summary>
         public static WsSecurity10Constants WsSecurity10 => new WsSecurity10Constants();
 
         /// <summary>
-        /// Gets constants for WS-Security 1.1
+        /// Gets constants for WS-Security 1.1.
         /// </summary>
         public static WsSecurity11Constants WsSecurity11 => new WsSecurity11Constants();
 
         /// <summary>
-        /// Gets FragmentBaseAddress for WS-Security
+        /// Gets FragmentBaseAddress for WS-Security.
         /// </summary>
         public string FragmentBaseAddress { get; protected set; }
 
         /// <summary>
-        /// Gets EncodingTypes for WS-Security
+        /// Gets EncodingTypes for WS-Security.
         /// </summary>
         public WsSecurityEncodingTypes EncodingTypes { get; protected set; }
     }
 
     /// <summary>
-    /// Provides constants for WS-Security 1.0.
+    /// Constants: WS-Security 1.0 namespace and prefix.
     /// </summary>
     public class WsSecurity10Constants : WsSecurityConstants
     {
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.WsSecurity
     }
 
     /// <summary>
-    /// Provides constants for WS-Security 1.1.
+    /// Constants: WS-Security 1.1 namespace and prefix.
     /// </summary>
     public class WsSecurity11Constants : WsSecurityConstants
     {

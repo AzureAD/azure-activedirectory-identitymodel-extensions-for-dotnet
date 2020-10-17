@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants for WsTrust Feb2005, 1.3 and 1.4.
+    /// Constants: WS-Trust namespace and prefix.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public abstract class WsTrustConstants : WsConstantsBase
@@ -41,43 +41,43 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
         public static IList<string> KnownNamespaces { get; } = new List<string> { "http://schemas.xmlsoap.org/ws/2005/02/trust", "http://docs.oasis-open.org/ws-sx/ws-trust/200512", "http://docs.oasis-open.org/ws-sx/ws-trust/200802" };
 
         /// <summary>
-        /// Gets version specific WsTrust Actions.
+        /// Gets Actions for WS-Trust.
         /// </summary>
         public WsTrustActions WsTrustActions { get; protected set; }
 
         /// <summary>
-        /// Gets version specific WsTrust KeyTypes.
+        /// Gets KeyTypes for WS-Trust.
         /// </summary>
         public WsTrustKeyTypes WsTrustKeyTypes { get; protected set; }
 
         /// <summary>
-        /// Gets version specific WsTrust BinarySecretTypes.
+        /// Gets BinarySecretTypes for WS-Trust.
         /// </summary>
         public WsTrustBinarySecretTypes WsTrustBinarySecretTypes { get; protected set; }
 
         /// <summary>
-        /// Gets constants for WSTrust Feb2005.
+        /// Gets constants for WS-Trust Feb2005.
         /// </summary>
         public static WsTrustFeb2005Constants TrustFeb2005 { get; } = new WsTrustFeb2005Constants();
 
         /// <summary>
-        /// Gets constants for WSTrust 1.3.
+        /// Gets constants for WS-Trust 1.3.
         /// </summary>
         public static WsTrust13Constants Trust13 { get; } = new WsTrust13Constants();
 
         /// <summary>
-        /// Gets constants for WSTrust 1.4.
+        /// Gets constants for WS-Trust 1.4.
         /// </summary>
         public static WsTrust14Constants Trust14 { get; } = new WsTrust14Constants();
     }
 
     /// <summary>
-    /// Provides constants for WSTrust Feb2005
+    /// Constants: WS-Trust Feb2005 namespace and prefix.
     /// </summary>
     public class WsTrustFeb2005Constants : WsTrustConstants
     {
         /// <summary>
-        /// Instantiates WSTrust Feb2005.
+        /// Instantiates WS-Trust Feb2005.
         /// </summary>
         public WsTrustFeb2005Constants()
         {
@@ -90,12 +90,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides constants for WsTrust 1.3.
+    /// Constants: WS-Trust 1.3 namespace and prefix.
     /// </summary>
     public class WsTrust13Constants : WsTrustConstants
     {
         /// <summary>
-        /// Instantiates WSTrust 1.3.
+        /// Instantiates WS-Trust 1.3.
         /// </summary>
         public WsTrust13Constants()
         {
@@ -108,12 +108,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides constants for WsTrust 1.4.
+    /// Constants: WS-Trust 1.4 namespace and prefix.
     /// </summary>
     public class WsTrust14Constants : WsTrustConstants
     {
         /// <summary>
-        /// Instantiates WSTrust 1.4.
+        /// Instantiates WS-Trust 1.4.
         /// </summary>
         public WsTrust14Constants()
         {

@@ -25,13 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsFed
 {
     /// <summary>
-    /// Constants for WS-Federation attributes.
-    /// see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html
+    /// Constants: WS-Federation attribute names.
+    /// <para>see: http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html </para>
     /// </summary>
     public static class WsFedAttributes
     {

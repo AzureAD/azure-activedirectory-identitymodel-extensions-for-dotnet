@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsAddressing
 {
     /// <summary>
-    /// Constants for WS-Addressing attributes.
+    /// Constants: WS-Addressing attribute names.
     /// <para>see: https://www.w3.org/Submission/ws-addressing/ </para>
     /// </summary>
     public static class WsAddressingAttributes

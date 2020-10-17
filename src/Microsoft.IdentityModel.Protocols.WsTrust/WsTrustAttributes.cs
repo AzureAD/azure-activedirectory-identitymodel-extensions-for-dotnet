@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants for WS-Trust attributes.
+    /// Constants: WS-Trust attribute names.
     /// <para>see: https://www.oasis-open.org/committees/download.php/16790/wss-v1.1-spec-os-SOAPMessageSecurity.pdf </para>
     /// </summary>
     public static class WsTrustAttributes

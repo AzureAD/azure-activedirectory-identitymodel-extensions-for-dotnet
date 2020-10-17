@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.XmlEnc
 {
     /// <summary>
-    /// Constants for XML Encryption element names.
+    /// Constants: XML Encryption element names.
     /// <para>see: https://www.w3.org/TR/xmlenc-core1/ </para>
     /// </summary>
     internal static class XmlEncryptionElements

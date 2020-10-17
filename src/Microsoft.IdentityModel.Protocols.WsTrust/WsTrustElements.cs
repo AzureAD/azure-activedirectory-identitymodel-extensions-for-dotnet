@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants for WSTrust element names.
+    /// Constants: WS-Trust element names.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public static class WsTrustElements

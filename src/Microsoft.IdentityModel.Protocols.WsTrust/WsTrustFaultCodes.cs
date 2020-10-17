@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#pragma warning disable 1591
-
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants Fault codes for WsTrust Feb2005, 1.3 and 1.4.
+    /// Constants: WS-Trust FaultCodes.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public static class WsTrustFaultCodes

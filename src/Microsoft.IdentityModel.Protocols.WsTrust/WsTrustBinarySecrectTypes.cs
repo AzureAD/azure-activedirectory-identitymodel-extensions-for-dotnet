@@ -28,49 +28,49 @@
 namespace Microsoft.IdentityModel.Protocols.WsTrust
 {
     /// <summary>
-    /// Constants for BinarySecrectTypes for WsTrust Feb2005, 1.3 and 1.4.
+    /// Constants: WS-Trust BinarySecrectTypes.
     /// <para>see: http://docs.oasis-open.org/ws-sx/ws-trust/200512/ws-trust-1.3-os.html </para>
     /// </summary>
     public abstract class WsTrustBinarySecretTypes
     {
         /// <summary>
-        /// Gets BinarySecretTypes constants for WsTrust Feb2005.
+        /// Gets WS-Trust Feb2005 BinarySecrectTypes.
         /// </summary>
         public static WsTrustFeb2005BinarySecretTypes TrustFeb2005 { get; } = new WsTrustFeb2005BinarySecretTypes();
 
         /// <summary>
-        /// Gets BinarySecretTypes constants for WsTrust 1.3.
+        /// Gets WS-Trust 1.3 BinarySecrectTypes.
         /// </summary>
         public static WsTrust13BinarySecretTypes Trust13 { get; } = new WsTrust13BinarySecretTypes();
 
         /// <summary>
-        /// Gets BinarySecretTypes constants for WsTrust 1.4.
+        /// Gets WS-Trust 1.4 BinarySecrectTypes.
         /// </summary>
         public static WsTrust14BinarySecretTypes Trust14 { get; } = new WsTrust14BinarySecretTypes();
 
         /// <summary>
-        /// Gets AsymmetricKey constant type for WSTrust
+        /// Gets AsymmetricKey BinarySecrectType.
         /// </summary>
         public string AsymmetricKey { get; protected set; }
 
         /// <summary>
-        /// Gets Nonce constant type for WSTrust
+        /// Gets Nonce BinarySecrectType.
         /// </summary>
         public string Nonce { get; protected set; }
 
         /// <summary>
-        /// Gets SymmetricKey constant type for WSTrust
+        /// Gets SymmetricKey BinarySecrectType.
         /// </summary>
         public string SymmetricKey { get; protected set; }
     }
 
     /// <summary>
-    /// Provides BinarySecretTypes constants for WsTrust Feb2005.
+    /// Constants: WS-Trust Feb2005 BinarySecretTypes.
     /// </summary>
     public class WsTrustFeb2005BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
-        /// Instantiates BinarySecretTypes for WsTrust Feb2005.
+        /// Instantiates WS-Trust Feb2005 BinarySecretTypes.
         /// </summary>
         public WsTrustFeb2005BinarySecretTypes()
         {
@@ -81,12 +81,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides BinarySecretTypes constants for WsTrust 1.3.
+    /// Constants: WS-Trust 1.3 BinarySecretTypes.
     /// </summary>
     public class WsTrust13BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
-        /// Instantiates BinarySecretTypes for WsTrust 1.3.
+        /// Instantiates WS-Trust 1.3 BinarySecretTypes.
         /// </summary>
         public WsTrust13BinarySecretTypes()
         {
@@ -97,12 +97,12 @@ namespace Microsoft.IdentityModel.Protocols.WsTrust
     }
 
     /// <summary>
-    /// Provides BinarySecretTypes constants for WsTrust 1.4.
+    /// Constants: WS-Trust 1.4 BinarySecretTypes.
     /// </summary>
     public class WsTrust14BinarySecretTypes : WsTrustBinarySecretTypes
     {
         /// <summary>
-        /// Instantiates BinarySecretTypes for WsTrust 1.4.
+        /// Instantiates WS-Trust 1.4 BinarySecretTypes.
         /// </summary>
         public WsTrust14BinarySecretTypes()
         {
