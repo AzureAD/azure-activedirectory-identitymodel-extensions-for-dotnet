@@ -2,7 +2,7 @@ param(
     [string]$buildType="Debug",
     [string]$dotnetDir="c:\Program Files\dotnet",
     [string]$root=$PSScriptRoot,
-    [string]$slnFile="wilson.sln")
+    [string]$slnFile="wstrust.sln")
 
 ################################################# Functions ############################################################
 

@@ -1,5 +1,4 @@
-param([string]$root=$PSScriptRoot,
-      [string]$packageType="preview")
+param([string]$root=$PSScriptRoot)
 
 ################################################# Functions ############################################################
 
@@ -36,11 +35,12 @@ $dateTimeStamp = ($date.ToString("yy")-19).ToString() + $date.ToString("MMddHHmm
 $assemblyVersion = [string]$buildConfiguration.SelectSingleNode("root/assemblyVersion").InnerText
 $assemblyFileVersion = $assemblyVersion + "." + ($date.ToString("yy")-19).ToString() + $date.ToString("MMdd")
 $assemblyInformationalVersion = $assemblyVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD)
+$packageType = [string]$buildConfiguration.SelectSingleNode("root/packageType").InnerText
+$nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
+
 Write-Host "assemblyVersion: "  $assemblyVersion
 Write-Host "assemblyFileVersion: " $assemblyFileVersion
 Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
-
-$nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 if ( $packageType -eq "release")
 {
     $versionSuffix = ""
@@ -50,7 +50,8 @@ else
     $versionSuffix = $nugetSuffix + "-" + $dateTimeStamp
 }
 
-Write-Host "nugetSuffix: " $nugetSuffix
+Write-Host "nugetSuffix:   " $nugetSuffix
+Write-Host "packageType:   " $packageType
 Write-Host "versionSuffix: " $versionSuffix
 
 $versionPath = $PSScriptRoot + "/build/version.props"

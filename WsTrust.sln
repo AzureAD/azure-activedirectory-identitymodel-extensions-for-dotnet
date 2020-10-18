@@ -38,6 +38,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		pack.ps1 = pack.ps1
 		build\targets.props = build\targets.props
 		build\targetsTest.props = build\targetsTest.props
+		updateAssemblyInfo.ps1 = updateAssemblyInfo.ps1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.TestUtils", "test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj", "{5538B8EE-C8EE-4291-96A5-C7DA65778EA5}"
