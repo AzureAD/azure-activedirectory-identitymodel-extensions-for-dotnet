@@ -50,17 +50,17 @@ Write-Host "slnFile:         " $slnFile;
 $artifactsRoot = "$root\artifacts";
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $nugetVersion = $buildConfiguration.SelectSingleNode("root/nugetVersion").InnerText;
-$releaseVersion = [string]$buildConfiguration.SelectSingleNode("root/release").InnerText;
+$assemblyVersion = [string]$buildConfiguration.SelectSingleNode("root/assemblyVersion").InnerText;
 $nugetPreview = $buildConfiguration.SelectSingleNode("root/nugetPreview").InnerText;
 
 $startTime = Get-Date
-Write-Host "Start Time:     " $startTime
-Write-Host "PSScriptRoot:   " $PSScriptRoot;
-Write-Host "artifactsRoot:  " $artifactsRoot;
-Write-Host "dotnetexe:      " $dotnetexe;
-Write-Host "nugetVersion:   " $nugetVersion;
-Write-Host "releaseVersion: " $releaseVersion;
-Write-Host "nugetPreview:   " $nugetPreview;
+Write-Host "Start Time:      " $startTime
+Write-Host "PSScriptRoot:    " $PSScriptRoot;
+Write-Host "artifactsRoot:   " $artifactsRoot;
+Write-Host "dotnetexe:       " $dotnetexe;
+Write-Host "nugetVersion:    " $nugetVersion;
+Write-Host "$ssemblyVersion: " $assemblyVersion;
+Write-Host "nugetPreview:    " $nugetPreview;
 
 CreateArtifactsFolder($artifactsRoot);
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))

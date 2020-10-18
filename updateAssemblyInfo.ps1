@@ -60,7 +60,6 @@ $version = $version -replace "<VersionPrefix>(.*)</VersionPrefix>", "<VersionPre
 $version = $version -replace "<VersionSuffix>(.*)</VersionSuffix>", "<VersionSuffix>$versionSuffix</VersionSuffix>"
 
 Write-Host "versionPath: " $versionPath
-Write-Host "version:    " $version
 Set-Content $versionPath $version
 
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
