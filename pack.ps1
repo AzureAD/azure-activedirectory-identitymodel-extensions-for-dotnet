@@ -59,7 +59,7 @@ Write-Host "PSScriptRoot:    " $PSScriptRoot;
 Write-Host "artifactsRoot:   " $artifactsRoot;
 Write-Host "dotnetexe:       " $dotnetexe;
 Write-Host "nugetVersion:    " $nugetVersion;
-Write-Host "$ssemblyVersion: " $assemblyVersion;
+Write-Host "assemblyVersion: " $assemblyVersion;
 Write-Host "nugetPreview:    " $nugetPreview;
 
 CreateArtifactsFolder($artifactsRoot);
