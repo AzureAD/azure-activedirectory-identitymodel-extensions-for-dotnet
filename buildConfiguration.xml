@@ -4,7 +4,6 @@
   <runtimes>netstandard2.0</runtimes>
   <assemblyVersion>6.8.0</assemblyVersion>
   <nugetSuffix>preview</nugetSuffix>
-  <packageType>release</packageType>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Protocols.WsTrust" />

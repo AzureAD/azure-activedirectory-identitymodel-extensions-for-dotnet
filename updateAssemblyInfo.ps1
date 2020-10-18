@@ -1,4 +1,5 @@
-param([string]$root=$PSScriptRoot)
+param([string]$root=$PSScriptRoot,
+      [string]$packageType="preview")
 
 ################################################# Functions ############################################################
 
@@ -35,7 +36,6 @@ $dateTimeStamp = ($date.ToString("yy")-19).ToString() + $date.ToString("MMddHHmm
 $assemblyVersion = [string]$buildConfiguration.SelectSingleNode("root/assemblyVersion").InnerText
 $assemblyFileVersion = $assemblyVersion + "." + ($date.ToString("yy")-19).ToString() + $date.ToString("MMdd")
 $assemblyInformationalVersion = $assemblyVersion + "." + $dateTimeStamp + "." + (git rev-parse HEAD)
-$packageType = [string]$buildConfiguration.SelectSingleNode("root/packageType").InnerText
 $nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 
 Write-Host "assemblyVersion: "  $assemblyVersion
