@@ -119,6 +119,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Jti = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti;
 
         /// <summary>
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+        /// </summary>
+        public const string Name = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Name;
+
+        /// <summary>
         /// </summary>
         public const string NameId = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.NameId;
 
