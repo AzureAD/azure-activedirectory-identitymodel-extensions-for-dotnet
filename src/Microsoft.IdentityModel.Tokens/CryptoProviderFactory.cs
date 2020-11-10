@@ -286,7 +286,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #pragma warning restore 1573
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         /// <summary>
         /// Creates a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>

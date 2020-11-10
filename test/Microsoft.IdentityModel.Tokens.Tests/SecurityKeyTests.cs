@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var exception = Assert.Throws<NotSupportedException>(() => new ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey("keyid").ComputeJwkThumbprint());
             Assert.Contains("IDX10710", exception.Message);
 
-#if !NET_CORE
+#if NET452 || NET461
             exception = Assert.Throws<PlatformNotSupportedException>(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
             Assert.Contains("IDX10695", exception.Message);
 #else
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SecurityKey = KeyingMaterial.DefaultX509Key_2048_Public,
                     TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
                 });
-#if NET_CORE
+#if NET472 || NET_CORE
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
@@ -198,8 +198,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedInternalId = Base64UrlEncoder.Encode(KeyingMaterial.JsonWebKeyRsa_2048_Public.ComputeJwkThumbprint()),
                         TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public)
                     },
-#if NET_CORE
-                    // EcdsaSecurityKey should have InternalId set to its jwk thumbprint on core.
+#if NET472 || NET_CORE
+                    // EcdsaSecurityKey should have InternalId set to its jwk thumbprint on NET472 and NET_CORE.
                     new SecurityKeyTheoryData
                     {
                         SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = nameof(KeyingMaterial.Ecdsa256Key)
                     },
 #else
-                    // EcdsaSecurityKey should have InternalId set to an empty string on desktop.
+                    // EcdsaSecurityKey should have InternalId set to an empty string on NET452 and NET461.
                     new SecurityKeyTheoryData
                     {
                         SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
