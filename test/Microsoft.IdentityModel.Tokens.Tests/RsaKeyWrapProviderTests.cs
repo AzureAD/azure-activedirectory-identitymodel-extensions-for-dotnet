@@ -64,6 +64,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (theoryData.WillUnwrap)
                 {
                     provider = new RsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+                    provider.CreateAsymmetricAdapter();
+
                     if (!provider.Algorithm.Equals(theoryData.UnwrapAlgorithm))
                         context.AddDiff($"provider.Algorithm != theoryData.UnwrapAlgorithm: {provider.Algorithm} : {theoryData.UnwrapAlgorithm}.");
 
@@ -73,6 +75,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 else
                 {
                     provider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+
+                    provider.WrapKey(Guid.NewGuid().ToByteArray());
+
                     if (!provider.Algorithm.Equals(theoryData.WrapAlgorithm))
                         context.AddDiff($"provider.Algorithm != theoryData.WrapAlgorithm: {provider.Algorithm} : {theoryData.WrapAlgorithm}.");
 
@@ -115,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    ExpectedException =  ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
                     TestId = "KeyTooSmall1024",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
@@ -123,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
                     TestId = "KeyDoesNotMatchAlgorithm",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.Aes128KW,

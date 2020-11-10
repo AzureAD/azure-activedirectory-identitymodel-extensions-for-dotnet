@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         private DisposableObjectPool<AsymmetricAdapter> _asymmetricAdapterObjectPool;
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
+        private Lazy<bool> _keySizeIsValid;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
         private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
@@ -154,9 +155,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, (algorithm ?? "null"), key)));
 
             WillCreateSignatures = willCreateSignatures;
-            ValidateAsymmetricSecurityKeySize(key, algorithm, WillCreateSignatures);
+            _keySizeIsValid = new Lazy<bool>(ValidKeySize);
             _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(CreateAsymmetricAdapter, _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
-    }
+        }
 
         /// <summary>
         /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for creating signatures.
@@ -229,9 +230,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AsymmetricAdapter CreateAsymmetricAdapter()
         {
+            // Lazy object to ensure that validation is only called once.
+            _ = _keySizeIsValid.Value;
             return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(Algorithm)), WillCreateSignatures);
         }
 #endif
+
+        internal bool ValidKeySize()
+        {
+            ValidateAsymmetricSecurityKeySize(Key, Algorithm, WillCreateSignatures);
+            return true;
+        }
 
         /// <summary>
         /// For testing purposes

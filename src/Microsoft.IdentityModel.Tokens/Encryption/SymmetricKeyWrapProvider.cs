@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
-        private SymmetricAlgorithm _symmetricAlgorithm;
+        private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
         private bool _disposed;
@@ -66,15 +66,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
-
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
-            if (_symmetricAlgorithm == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+            _symmetricAlgorithm = new Lazy<SymmetricAlgorithm>(CreateSymmetricAlgorithm);
         }
 
         /// <summary>
@@ -93,6 +88,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override SecurityKey Key { get; }
 
+        private SymmetricAlgorithm CreateSymmetricAlgorithm()
+        {
+            if (!IsSupportedAlgorithm(Key, Algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, Algorithm, Key)));
+
+            SymmetricAlgorithm symmetricAlgorithm = GetSymmetricAlgorithm(Key, Algorithm);
+
+            if (symmetricAlgorithm == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+
+            return symmetricAlgorithm;
+        }
+
         /// <summary>
         /// Disposes of internal components.
         /// </summary>
@@ -105,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (_symmetricAlgorithm != null)
                     {
-                        _symmetricAlgorithm.Dispose();
+                        _symmetricAlgorithm.Value.Dispose();
                         _symmetricAlgorithm = null;
                     }
 
@@ -149,6 +157,9 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!IsSupportedAlgorithm(key, algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
 
             byte[] keyBytes = null;
 
@@ -273,7 +284,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
-                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.CreateDecryptor();
+                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
                 }
             }
 
@@ -415,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
-                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.CreateEncryptor();
+                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();
                 }
             }
 

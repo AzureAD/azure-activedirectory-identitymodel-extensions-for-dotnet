@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -36,8 +35,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
-        private AsymmetricAdapter _asymmetricAdapter;
+        private Lazy<AsymmetricAdapter> _asymmetricAdapter;
         private bool _disposed = false;
+        private bool _willUnwrap;
 
         /// <summary>
         /// Initializes a new instance of <see cref="RsaKeyWrapProvider"/> used for wrapping and un-wrappping keys.
@@ -59,13 +59,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
-
             Algorithm = algorithm;
             Key = key;
+            _willUnwrap = willUnwrap;
+            _asymmetricAdapter = new Lazy<AsymmetricAdapter>(CreateAsymmetricAdapter);
+        }
 
-            _asymmetricAdapter = new AsymmetricAdapter(key, algorithm, willUnwrap);
+        internal AsymmetricAdapter CreateAsymmetricAdapter()
+        {
+            if (!IsSupportedAlgorithm(Key, Algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, Algorithm, Key)));
+
+            return new AsymmetricAdapter(Key, Algorithm, _willUnwrap);
         }
 
         /// <summary>
@@ -95,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     _disposed = true;
-                    _asymmetricAdapter.Dispose();
+                    _asymmetricAdapter.Value.Dispose();
                 }
             }
         }
@@ -130,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Decrypt(keyBytes);
+                return _asymmetricAdapter.Value.Decrypt(keyBytes);
             }
             catch (Exception ex)
             {
@@ -157,7 +162,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Encrypt(keyBytes);
+                return _asymmetricAdapter.Value.Encrypt(keyBytes);
             }
             catch (Exception ex)
             {
