@@ -29,6 +29,7 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -84,6 +85,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CryptoProviderFactory()
         {
+            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
+        }
+
+        /// <summary>
+        /// Initializes an instance of a <see cref="CryptoProviderFactory"/>.
+        /// </summary>
+        /// <param name="cache">
+        /// The cache to use for caching CryptoProviders
+        /// </param>
+        public CryptoProviderFactory(CryptoProviderCache cache)
+        {
+            CryptoProviderCache = cache ?? throw LogHelper.LogArgumentNullException(nameof(cache));
         }
 
         /// <summary>
@@ -95,6 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
+            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
@@ -103,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get; } = new InMemoryCryptoProviderCache();
+        public CryptoProviderCache CryptoProviderCache { get; internal set; }
 
         /// <summary>
         /// Extensibility point for creating custom cryptographic operators.
@@ -536,19 +550,26 @@ namespace Microsoft.IdentityModel.Tokens
             if (CacheSignatureProviders && cacheProvider)
             {
                 if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                {
+                    signatureProvider.AddRef();
                     return signatureProvider;
+                }
 
                 lock (_cacheLock)
                 {
                     if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                    {
+                        signatureProvider.AddRef();
                         return signatureProvider;
+                    }
 
                     if (createAsymmetric)
                         signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
                     else
                         signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
-                    CryptoProviderCache.TryAdd(signatureProvider);
+                    if (ShouldCacheSignatureProvider(signatureProvider))
+                        CryptoProviderCache.TryAdd(signatureProvider);
                 }
             }
             else if (createAsymmetric)
@@ -561,6 +582,18 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return signatureProvider;
+        }
+
+        /// <summary>
+        /// For some security key types, in some runtimes, it's not possible to extract public key material and create an <see cref="SecurityKey.InternalId"/>.
+        /// In these cases, <see cref="SecurityKey.InternalId"/> will be an empty string, and these keys should not be cached.
+        /// </summary>
+        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
+        /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
+        internal static bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
+        {
+            _ = signatureProvider ?? throw new ArgumentNullException(nameof(signatureProvider));
+            return signatureProvider.Key.InternalId.Length != 0;
         }
 
         /// <summary>
@@ -666,9 +699,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
-            else if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
+
+            signatureProvider.Release();
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
                 CustomCryptoProvider.Release(signatureProvider);
-            else if (signatureProvider.CryptoProviderCache == null)
+            else if (signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0)
                 signatureProvider.Dispose();
         }
     }

@@ -26,9 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Concurrent;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+#if NETSTANDARD2_0 
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -36,10 +40,84 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines a cache for crypto providers.
     /// Current support is limited to <see cref="SignatureProvider"/> only.
     /// </summary>
-    public class InMemoryCryptoProviderCache : CryptoProviderCache
+    public class InMemoryCryptoProviderCache: CryptoProviderCache, IDisposable
+
     {
-        private ConcurrentDictionary<string, SignatureProvider> _signingSignatureProviders = new ConcurrentDictionary<string, SignatureProvider>();
-        private ConcurrentDictionary<string, SignatureProvider> _verifyingSignatureProviders = new ConcurrentDictionary<string, SignatureProvider>();
+        internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
+        private bool _disposed = false;
+#if NETSTANDARD2_0 
+        private readonly MemoryCache _signingSignatureProviders;
+        private readonly MemoryCache _verifyingSignatureProviders;
+#elif NET45 || NET461 || NET472
+        private readonly EventBasedLRUCache<string, SignatureProvider> _signingSignatureProviders;
+        private readonly EventBasedLRUCache<string, SignatureProvider> _verifyingSignatureProviders;
+#endif
+
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the default <see cref="CryptoProviderCacheOptions"/>.
+        /// </summary>
+        public InMemoryCryptoProviderCache() : this(new CryptoProviderCacheOptions())
+        {
+        }
+
+        internal CryptoProviderFactory CryptoProviderFactory { get; set; }
+
+#if NETSTANDARD2_0
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
+            _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
+            _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
+        }
+
+#elif NET45 || NET461 || NET472
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+        }
+
+        private void OnSignatureProviderRemovedFromCache(SignatureProvider signatureProvider)
+        {
+            signatureProvider.CryptoProviderCache = null;
+            if (signatureProvider.RefCount == 0)
+                signatureProvider.Dispose();
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
+        /// <param name="options">Options used to create the event queue thread.</param>
+        /// <param name="tryTakeTimeout">The time used in ms for the timeout interval of the event queue. Defaults to 500 ms.</param>
+        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, TaskCreationOptions options, int tryTakeTimeout = 500)
+        {
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+
+            if (tryTakeTimeout <= 0)
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
+
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+        }
+#endif
 
         /// <summary>
         /// Returns the cache key to use when looking up an entry into the cache for a <see cref="SignatureProvider" />
@@ -90,17 +168,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// For some security key types, in some runtimes, it's not possible to extract public key material and create an <see cref="SecurityKey.InternalId"/>.
-        /// In these cases, <see cref="SecurityKey.InternalId"/> will be an empty string, and these keys should not be cached.
-        /// </summary>
-        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
-        /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
-        private static bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
-        {
-            return signatureProvider.Key.InternalId.Length != 0;
-        }
-
-        /// <summary>
         /// Trys to adds a <see cref="SignatureProvider"/> to this cache.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to cache.</param>
@@ -114,26 +181,39 @@ namespace Microsoft.IdentityModel.Tokens
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
 
-            if (!ShouldCacheSignatureProvider(signatureProvider))
-                return false;
-
             var cacheKey = GetCacheKey(signatureProvider);
+#if NETSTANDARD2_0
+            MemoryCache signatureProviderCache;
+#elif NET45 || NET461 || NET472
+            EventBasedLRUCache<string, SignatureProvider> signatureProviderCache;
+#endif
+            // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)
-            {
-                if (_signingSignatureProviders.TryAdd(cacheKey, signatureProvider))
-                {
-                    signatureProvider.CryptoProviderCache = this;
-                    return true;
-                }
-            }
+                signatureProviderCache = _signingSignatureProviders;
             else
+                signatureProviderCache = _verifyingSignatureProviders;
+
+#if NETSTANDARD2_0
+            // The cache does NOT already have a crypto provider associated with this key.
+            if (!signatureProviderCache.TryGetValue(cacheKey, out _))
             {
-                if (_verifyingSignatureProviders.TryAdd(cacheKey, signatureProvider))
+                signatureProviderCache.Set(cacheKey, signatureProvider, new MemoryCacheEntryOptions
                 {
-                    signatureProvider.CryptoProviderCache = this;
-                    return true;
-                }
+                    SlidingExpiration = TimeSpan.FromDays(1),
+                    Size = 1,
+                });
+                signatureProvider.CryptoProviderCache = this;
+                return true;
             }
+#elif NET45 || NET461 || NET472
+            // The cache does NOT already have a crypto provider associated with this key.
+            if (!signatureProviderCache.Contains(cacheKey))
+            {
+                signatureProviderCache.SetValue(cacheKey, signatureProvider);
+                signatureProvider.CryptoProviderCache = this;
+                return true;
+            }
+#endif
 
             return false;
         }
@@ -163,9 +243,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             var cacheKey = GetCacheKeyPrivate(securityKey, algorithm, typeofProvider);
             if (willCreateSignatures)
+#if NETSTANDARD2_0
                 return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
+#elif NET45 || NET461 || NET472
+                return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
+#endif
             else
+#if NETSTANDARD2_0
                 return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
+#elif NET45 || NET461 || NET472
+                return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
+#endif
         }
 
         /// <summary>
@@ -184,24 +272,149 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             var cacheKey = GetCacheKey(signatureProvider);
+#if NETSTANDARD2_0
+            MemoryCache signatureProviderCache;
+#elif NET45 || NET461 || NET472
+            EventBasedLRUCache<string, SignatureProvider> signatureProviderCache;
+#endif
+            // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)
-            {
-                if (_signingSignatureProviders.TryRemove(cacheKey, out SignatureProvider provider))
-                {
-                    provider.CryptoProviderCache = null;
-                    return true;
-                }
-            }
+                signatureProviderCache = _signingSignatureProviders;
             else
+                signatureProviderCache = _verifyingSignatureProviders;
+
+            try
             {
-                if (_verifyingSignatureProviders.TryRemove(cacheKey, out SignatureProvider provider))
+#if NET45 || NET461 || NET472
+                return signatureProviderCache.TryRemove(cacheKey, out SignatureProvider provider);
+#elif NETSTANDARD2_0
+                if (signatureProviderCache.TryGetValue(cacheKey, out SignatureProvider provider))
                 {
+                    signatureProviderCache.Remove(cacheKey);
                     provider.CryptoProviderCache = null;
                     return true;
                 }
+                else
+                {
+                    return false;
+                }
+#endif
             }
-
-            return false;
+            catch (Exception ex)
+            {
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10699, cacheKey, ex));
+                return false;
+            }
         }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_signingSignatureProviders"/> and <see cref="_verifyingSignatureProviders"/>.
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                if (disposing)
+                {
+                    _signingSignatureProviders.Dispose();
+                    _verifyingSignatureProviders.Dispose();
+                }
+            }
+        }
+
+#region FOR TESTING (INTERNAL ONLY)
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        internal static long LinkedListCountSigning()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        internal long LinkedListCountSigning()
+        {
+            return _signingSignatureProviders.LinkedListCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        internal static long LinkedListCountVerifying()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        internal long LinkedListCountVerifying()
+        {
+            return _verifyingSignatureProviders.LinkedListCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        internal long MapCountSigning()
+        {
+#if NETSTANDARD2_0
+            return _signingSignatureProviders.Count;
+#elif NET45 || NET461 || NET472
+            return _signingSignatureProviders.MapCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        internal long MapCountVerifying()
+        {
+#if NETSTANDARD2_0
+            return _signingSignatureProviders.Count;
+#elif NET45 || NET461 || NET472
+            return _verifyingSignatureProviders.MapCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        internal static long EventQueueCountSigning()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        internal long EventQueueCountSigning()
+        {
+            return _signingSignatureProviders.EventQueueCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        internal static long EventQueueCountVerifying()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        internal long EventQueueCountVerifying()
+        {
+            return _verifyingSignatureProviders.EventQueueCount;
+#endif
+        }
+#endregion
     }
 }

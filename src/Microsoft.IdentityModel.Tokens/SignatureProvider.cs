@@ -27,6 +27,7 @@
 
 using Microsoft.IdentityModel.Logging;
 using System;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -35,6 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SignatureProvider : IDisposable
     {
+        /// <summary>
+        /// Maintains the number of external references
+        /// see: <see cref="AddRef"/>, <see cref="RefCount"/>, <see cref="Release"/>
+        /// </summary>
+        private int _referenceCount;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
         /// </summary>
@@ -46,6 +53,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Algorithm = (string.IsNullOrEmpty(algorithm)) ? throw LogHelper.LogArgumentNullException(nameof(algorithm)) : algorithm;
+            _referenceCount = 1;
+        }
+
+        internal int AddRef()
+        {
+            return Interlocked.Increment(ref _referenceCount);
         }
 
         /// <summary>
@@ -88,6 +101,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// For testing purposes
         /// </summary>
         internal virtual int ObjectPoolSize => 0;
+
+        internal int RefCount => _referenceCount;
+
+        internal int Release()
+        {
+            if (_referenceCount > 0)
+                Interlocked.Decrement(ref _referenceCount);
+
+            return _referenceCount;
+        }
 
         /// <summary>
         /// This must be overridden to produce a signature over the 'input'.

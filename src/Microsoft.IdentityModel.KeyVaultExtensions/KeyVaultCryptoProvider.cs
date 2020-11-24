@@ -49,6 +49,11 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         }
 
         /// <summary>
+        /// Gets the <see cref="CryptoProviderCache"/>
+        /// </summary>
+        internal CryptoProviderCache CryptoProviderCache => _cache;
+
+        /// <summary>
         /// Returns a cryptographic operator that supports the algorithm.
         /// </summary>
         /// <param name="algorithm">the algorithm that defines the cryptographic operator.</param>
@@ -77,7 +82,9 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                         return cachedProvider;
 
                     var signatureProvider = new KeyVaultSignatureProvider(key, algorithm, willCreateSignatures);
-                    _cache.TryAdd(signatureProvider);
+                    if (CryptoProviderFactory.ShouldCacheSignatureProvider(signatureProvider))
+                        _cache.TryAdd(signatureProvider);
+
                     return signatureProvider;
                 }
             }

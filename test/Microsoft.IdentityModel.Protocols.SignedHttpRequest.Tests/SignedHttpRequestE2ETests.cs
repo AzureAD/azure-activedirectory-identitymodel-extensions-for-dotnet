@@ -45,6 +45,16 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 {
     public class SignedHttpRequestE2ETests
     {
+        public static Func<CryptoProviderFactory> CreateCryptoProviderFactory = new Func<CryptoProviderFactory>(() =>
+        {
+#if NETCOREAPP
+            return new CryptoProviderFactory();
+#else
+            return new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50));
+#endif
+        });
+
+
         [Theory, MemberData(nameof(RoundtripTheoryData))]
         public async Task Roundtrips(RoundtripSignedHttpRequestTheoryData theoryData)
         {
@@ -242,7 +252,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.CreateAt(ecKeyCnfKeyId, false),
-                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256){CryptoProviderFactory = new CryptoProviderFactory()},
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256){CryptoProviderFactory = CreateCryptoProviderFactory()},
                         TestId = "ValidJwkECThumbprint",
                     },
                     new RoundtripSignedHttpRequestTheoryData
@@ -252,7 +262,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.CreateAt(x509KeyCnfKeyId, false),
-                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256){CryptoProviderFactory = new CryptoProviderFactory()},
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256){CryptoProviderFactory = CreateCryptoProviderFactory()},
                         TestId = "ValidJwkX509Thumbprint",
                     },
                     new RoundtripSignedHttpRequestTheoryData
@@ -326,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         {
                             { ConfirmationClaimTypes.Jwk, $@"{{""{JsonWebKeyParameterNames.Kid}"":""{KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.KeyId}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.X5c}"":[""{Convert.ToBase64String(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.Certificate.RawData)}""]}}" },
                         }.ToString(Formatting.None),
-                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256){CryptoProviderFactory = new CryptoProviderFactory() },
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256){CryptoProviderFactory = CreateCryptoProviderFactory() },
                         TestId = "ValidX5cThumbprint",
                     },
                     new RoundtripSignedHttpRequestTheoryData
@@ -389,7 +399,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.EncryptToken(SignedHttpRequestTestUtils.DefaultEncodedAccessToken),
-                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.RsaSha512){CryptoProviderFactory = new CryptoProviderFactory() },
+                        SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.RsaSha512){CryptoProviderFactory = CreateCryptoProviderFactory() },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23034"),
                         IsValid = false,
                         TestId = "InvalidBadPopSigningKey",
