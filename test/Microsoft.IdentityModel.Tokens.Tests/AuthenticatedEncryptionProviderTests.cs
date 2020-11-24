@@ -414,11 +414,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SymmetricSignatureProviderForSigning = decryptSignatureProviderDisposed,
             };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
             {
                 SymmetricSignatureProviderForSigning = encryptSignatureProvider,
             };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             ExpectedException expectedException = ExpectedException.ObjectDisposedException;
             expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
@@ -438,11 +440,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SymmetricSignatureProviderForSigning = decryptSignatureProvider
             };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
             {
                 SymmetricSignatureProviderForSigning = encryptSignatureProviderDisposed
             };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             expectedException = ExpectedException.ObjectDisposedException;
             expectedException.SubstringExpected = encryptSignatureProviderDisposed.GetType().ToString();
@@ -502,6 +506,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DisposeSignatureProvider = false,
                 SymmetricSignatureProviderForSigning = decryptSignatureProvider
             };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             encryptionKey = Default.SymmetricEncryptionKey256;
             encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
@@ -509,6 +514,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DisposeSignatureProvider = false,
                 SymmetricSignatureProviderForSigning = encryptSignatureProvider
             };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             // dispose, the crypto provider from the key will not dispose SignatureProvider so it can be reused
             // CryptoProvider.ReleaseSignatureProvider is overloaded.
@@ -540,6 +546,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DisposeSignatureProvider = true,
                 SymmetricSignatureProviderForSigning = decryptSignatureProvider
             };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             encryptionKey = Default.SymmetricEncryptionKey256;
             encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
@@ -547,6 +554,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DisposeSignatureProvider = true,
                 SymmetricSignatureProviderForSigning = encryptSignatureProvider
             };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             // dispose the DecryptionProvider
             decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
@@ -578,12 +586,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DisposeSignatureProvider = true,
                 SymmetricSignatureProviderForSigning = decryptSignatureProvider
             };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
             {
                 DisposeSignatureProvider = true,
                 SymmetricSignatureProviderForSigning = encryptSignatureProvider
             };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
 
             // dispose the EncryptionProvider
             decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);

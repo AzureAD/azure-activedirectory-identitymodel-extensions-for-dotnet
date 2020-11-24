@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -346,7 +347,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var theoryData = new TheoryData<JwtTheoryData>();
             var handler = new JwtSecurityTokenHandler();
             var asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null);
-            var cryptorProviderFactory = new CryptoProviderFactory();
+
+#if NETCOREAPP
+            var cache = new InMemoryCryptoProviderCache();
+#else
+            var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
+#endif
+
+            var cryptorProviderFactory = new CryptoProviderFactory(cache);
             asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
             var asymmetricTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters;
             asymmetricTokenValidationParameters.CryptoProviderFactory = cryptorProviderFactory;

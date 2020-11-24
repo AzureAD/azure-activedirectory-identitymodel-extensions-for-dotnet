@@ -29,6 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -53,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CreateAndReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAndReleaseSignatureProvidersTheoryData", theoryData);
-            var cryptoProviderFactory = new CryptoProviderFactory() { CacheSignatureProviders = false };
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()) { CacheSignatureProviders = false };
             try
             {
                 var signatureProvider = cryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
@@ -65,13 +67,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // If the signatureProvider is cached Dispose() will not be called on it.
                 if (signatureProvider.GetType().Equals(typeof(AsymmetricSignatureProvider)))
                 {
-                    var disposeCalled = (bool)typeof(AsymmetricSignatureProvider).GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue((AsymmetricSignatureProvider)signatureProvider);
+                    var disposeCalled = GetSignatureProviderIsDisposedByReflect(signatureProvider);
                     if (!disposeCalled)
                         context.Diffs.Add("Dispose wasn't called on the AsymmetricSignatureProvider.");
                 }
                 else // signatureProvider.GetType().Equals(typeof(SymmetricSignatureProvider))
                 {
-                    var disposeCalled = (bool)typeof(SymmetricSignatureProvider).GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue((SymmetricSignatureProvider)signatureProvider);
+                    var disposeCalled = GetSignatureProviderIsDisposedByReflect(signatureProvider);
                     if (!disposeCalled)
                         context.Diffs.Add("Dispose wasn't called on the SymmetricSignatureProvider.");
                 }
@@ -145,7 +147,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.WriteHeader($"{this}.GetSets");
             var context = new CompareContext($"{this}.GetSets");
 
-            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory();
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 7)
@@ -189,6 +192,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             catch
             {
             }
+
+            if (cryptoProviderFactory.CryptoProviderCache is IDisposable disposable)
+                disposable?.Dispose();
+
+            if (clone.CryptoProviderCache is IDisposable disposableClone)
+                disposableClone?.Dispose();
 
             context.Diffs.AddRange(getSetContext.Errors);
             TestUtilities.AssertFailIfErrors(context);
@@ -568,7 +577,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
-            var cryptoProviderFactory = new CryptoProviderFactory();
+
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+            // turning off caching also turns off ref counting considerations in the dipose algorithm.
+            cryptoProviderFactory.CacheSignatureProviders = false;
+
             try
             {
                 if (theoryData.CustomCryptoProvider != null)
@@ -590,7 +603,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                var cache = new InMemoryCryptoProviderCache();
+                var cache = CryptoProviderCacheTests.CreateCacheForTesting();
                 var asymmetricSignatureProvider = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
                 var asymmetricSignatureProviderToRelease = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true);
                 var symmetricSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true) { ThrowOnDispose = new InvalidOperationException() };
@@ -817,6 +830,202 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
+
+        [Fact]
+        public void ShouldCacheSignatureProvider()
+        {
+            TestUtilities.WriteHeader($"{this}.ShouldCacheSignatureProvider");
+            var context = new CompareContext($"{this}.ShouldCacheSignatureProvider");
+            var signingKeyWithEmptyKid = new CustomRsaSecurityKey(1024, PrivateKeyStatus.Exists, KM.RsaParameters_1024);
+            var signatureProvider = CryptoProviderFactory.Default.CreateForSigning(signingKeyWithEmptyKid, ALG.RsaSha256Signature);
+            if (CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(signingKeyWithEmptyKid, ALG.RsaSha256Signature, typeof(AsymmetricSignatureProvider).ToString(), true, out var _))
+                context.Diffs.Add("A SignatureProvider was added to CryptoProviderFactory.CryptoProviderCache, but ShouldCacheSignatureProvider() should return false as the key has an empty key id.");
+
+            CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            if (signing.RefCount != 1)
+                context.AddDiff($"{nameof(signing)} reference count should have been 1");
+
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            if (signing.RefCount != 2)
+                context.AddDiff($"{nameof(signing)} reference count should have been 2");
+
+            if (signing2.RefCount != 2)
+                context.AddDiff($"{nameof(signing2)} reference count should have been 2");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+
+            if (signing2.RefCount != 1)
+                context.AddDiff($"{nameof(signing2)} reference count should have been 1");
+
+            if (GetSignatureProviderIsDisposedByReflect(signing2))
+                context.AddDiff($"{nameof(signing2)} should NOT have been disposed");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+
+            if (signing.RefCount != 0)
+                context.AddDiff($"{nameof(signing)} reference count should have been 0");
+
+            if (GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing)} should NOT have been disposed");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_NoCaching()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest_NoCaching");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+            cryptoProviderFactory.CacheSignatureProviders = false;
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            if (signing.RefCount != 1)
+                context.AddDiff($"{nameof(signing)} reference count should have been 1");
+
+            if (signing2.RefCount != 1)
+                context.AddDiff($"{nameof(signing2)} reference count should have been 1");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+
+            if (signing2.RefCount != 0)
+                context.AddDiff($"{nameof(signing2)} reference count should have been 0");
+
+            if (!GetSignatureProviderIsDisposedByReflect(signing2))
+                context.AddDiff($"{nameof(signing2)} should not have been disposed");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+
+            if (!GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing)} should have been disposed");
+
+            if (signing.RefCount != 0)
+                context.AddDiff($"{nameof(signing)} reference count should have been 0");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_Caching()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            cryptoProviderFactory.CryptoProviderCache.TryRemove(signing2);
+
+            if (signing.CryptoProviderCache != null)
+                context.AddDiff($"{nameof(signing)} cache should be null");
+
+            if (signing2.CryptoProviderCache != null)
+                context.AddDiff($"{nameof(signing2)} cache should be null");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+
+            if (GetSignatureProviderIsDisposedByReflect(signing2))
+                context.AddDiff($"{nameof(signing2)} should not have been disposed");
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+
+            if (!GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing2)} should have been disposed");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_MultiThreaded()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            Task[] tasks = new Task[100];
+
+            for (int i = 0; i < 100; i++)
+            {
+                tasks[i] = Task.Run(() =>
+                {
+                    var rsaSha256 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+                    var hmacSha256 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+                    var hmacSha512 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey512, ALG.HmacSha512);
+                    var hmacSha384 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+                    var rsaSha256Verifying = cryptoProviderFactory.CreateForVerifying(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+                    var hmacSha256Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+                    var hmacSha512Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512);
+                    var hmacSha384Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+                    cryptoProviderFactory.ReleaseSignatureProvider(rsaSha256);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha256);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha512);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha384);
+
+                    cryptoProviderFactory.ReleaseSignatureProvider(rsaSha256Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha256Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha512Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha384Verifying);
+                });
+            }
+
+            Task.WaitAll(tasks);
+
+            cryptoProviderFactory.CacheSignatureProviders = false;
+
+            var rsaSha256Final = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var hmacSha256Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+            var hmacSha512Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey512, ALG.HmacSha512);
+            var hmacSha384Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+            var rsaSha256VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var hmacSha256VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+            var hmacSha512VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512);
+            var hmacSha384VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+            if (rsaSha256Final.RefCount != 1)
+                context.AddDiff($"{nameof(rsaSha256Final)} reference count should have been 1");
+
+            if (hmacSha256Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha256Final)} reference count should have been 1");
+
+            if (hmacSha512Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha512Final)} reference count should have been 1");
+
+            if (hmacSha384Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha384Final)} reference count should have been 1");
+
+            if (rsaSha256VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(rsaSha256VerifyingFinal)} reference count should have been 1");
+
+            if (hmacSha256VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha256VerifyingFinal)} reference count should have been 1");
+
+            if (hmacSha512VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha512VerifyingFinal)} reference count should have been 1");
+
+            if (hmacSha384VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha384VerifyingFinal)} reference count should have been 1");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static bool GetSignatureProviderIsDisposedByReflect(SignatureProvider signatureProvider) =>
+            (bool)signatureProvider.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signatureProvider);
     }
 }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

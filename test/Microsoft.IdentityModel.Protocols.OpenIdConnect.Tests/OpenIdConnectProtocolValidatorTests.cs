@@ -33,6 +33,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -1494,10 +1495,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), ExpectedException.NoExceptionExpected);
 
+#if NETCOREAPP
+                var cryptoProviderFactory = new CryptoProviderFactory();
+#else
+                var cryptoProviderFactory = new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50));
+#endif
+
                 // Default CryptoProviderFactory faults on this 'hash' algorithm
                 validator = new OpenIdConnectProtocolValidator()
                 {
-                    CryptoProviderFactory = new CryptoProviderFactory()
+                    CryptoProviderFactory = cryptoProviderFactory
                 };
 
                 theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21301:", typeof(NotSupportedException)));
