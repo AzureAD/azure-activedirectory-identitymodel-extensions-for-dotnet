@@ -817,6 +817,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 return theoryData;
             }
         }
+
+        [Fact]
+        public void ShouldCacheSignatureProvider()
+        {
+            TestUtilities.WriteHeader($"{this}.ShouldCacheSignatureProvider");
+            var context = new CompareContext($"{this}.ShouldCacheSignatureProvider");
+            var signingKeyWithEmptyKid = new CustomRsaSecurityKey(1024, PrivateKeyStatus.Exists, KM.RsaParameters_1024);
+            var signatureProvider = CryptoProviderFactory.Default.CreateForSigning(signingKeyWithEmptyKid, ALG.RsaSha256Signature);
+            if (CryptoProviderFactory.Default.CryptoProviderCache.TryGetSignatureProvider(signingKeyWithEmptyKid, ALG.RsaSha256Signature, typeof(AsymmetricSignatureProvider).ToString(), true, out var _))
+                context.Diffs.Add("A SignatureProvider was added to CryptoProviderFactory.CryptoProviderCache, but ShouldCacheSignatureProvider() should return false as the key has an empty key id.");
+
+            CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
     }
 }
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

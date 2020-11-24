@@ -103,7 +103,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get; } = new InMemoryCryptoProviderCache();
+        /// Set was added for simplifying stress and perf tests.
+        /// We may want to remove it.
+        public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache();
 
         /// <summary>
         /// Extensibility point for creating custom cryptographic operators.
@@ -505,7 +507,8 @@ namespace Microsoft.IdentityModel.Tokens
                     else
                         signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
-                    CryptoProviderCache.TryAdd(signatureProvider);
+                    if (ShouldCacheSignatureProvider(signatureProvider))
+                        CryptoProviderCache.TryAdd(signatureProvider);
                 }
             }
             else if (createAsymmetric)
@@ -518,6 +521,17 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return signatureProvider;
+        }
+
+        /// <summary>
+        /// For some security key types, in some runtimes, it's not possible to extract public key material and create an <see cref="SecurityKey.InternalId"/>.
+        /// In these cases, <see cref="SecurityKey.InternalId"/> will be an empty string, and these keys should not be cached.
+        /// </summary>
+        /// <param name="signatureProvider"><see cref="SignatureProvider"/> to be examined.</param>
+        /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
+        internal static bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
+        {
+            return signatureProvider.Key.InternalId.Length != 0;
         }
 
         /// <summary>

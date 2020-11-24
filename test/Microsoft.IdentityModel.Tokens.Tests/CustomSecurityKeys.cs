@@ -47,6 +47,13 @@ namespace Microsoft.IdentityModel.TestUtils
             _privateKeyStatus = privateKeyStatus;
         }
 
+        public CustomRsaSecurityKey(int keySize, PrivateKeyStatus privateKeyStatus, RSAParameters parameters, string InternalId)
+            : base(parameters)
+        {
+            _keySize = keySize;
+            _privateKeyStatus = privateKeyStatus;
+        }
+
 #pragma warning disable CS0672
         public override bool HasPrivateKey => true;
 #pragma warning restore CS0672
@@ -54,6 +61,8 @@ namespace Microsoft.IdentityModel.TestUtils
         public override PrivateKeyStatus PrivateKeyStatus => _privateKeyStatus;
 
         public override int KeySize => _keySize;
+
+        internal override string InternalId  => "";
     }
 
 }

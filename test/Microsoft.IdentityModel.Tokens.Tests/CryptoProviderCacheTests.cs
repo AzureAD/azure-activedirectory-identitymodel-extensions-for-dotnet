@@ -426,6 +426,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        /// <summary>
+        /// Checks that the Dispose() method is properly called on the InMemoryCryptoProviderCache.
+        [Fact]
+        public void CryptoProviderCacheDispose()
+        {
+            TestUtilities.WriteHeader($"{this}.CryptoProviderCacheDispose");
+            var context = new CompareContext();
+            var cache = new InMemoryCryptoProviderCachePublic();
+
+            cache.Dispose();
+
+            if (!cache.DisposeCalled)
+                context.AddDiff("InMemoryCryptoProviderCachePublic was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(TryRemoveTheoryData))]
         public void TryRemove(CryptoProviderCacheTheoryData theoryData)
         {
@@ -591,6 +608,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
     {
+        public bool DisposeCalled { get; set; } = false;
+
         public string GetCacheKeyPublic(SignatureProvider signatureProvider)
         {
             return base.GetCacheKey(signatureProvider);
@@ -600,6 +619,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             return base.GetCacheKey(securityKey, algorithm, typeofProvider);
         }
+
+#if NETCOREAPP2_1
+        protected override void Dispose(bool disposing)
+        {
+            DisposeCalled = true;
+            base.Dispose(disposing);
+        }
+#endif
     }
 }
 
