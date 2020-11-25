@@ -56,6 +56,10 @@ namespace Microsoft.IdentityModel.Xml
             public const string Nil = "nil";
             public const string PrefixList = "PrefixList";
             public const string Type = "Type";
+            /// <summary>
+            /// Lowercase type used for comliance with https://www.w3.org/TR/xmlschema-1/#xsi_type 
+            /// </summary>
+            public const string TypeLowerCase = "type";
             public const string URI = "URI";
         }
 

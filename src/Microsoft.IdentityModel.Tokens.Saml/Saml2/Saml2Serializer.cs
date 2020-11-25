@@ -1662,7 +1662,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     if ((xsiTypePrefix != null) && (xsiTypeSuffix != null))
                     {
                         writer.WriteAttributeString(XmlSignatureConstants.XmlNamepspacePrefix, Saml2Constants.ClaimValueTypeSerializationPrefix, null, xsiTypePrefix);
-                        writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, string.Concat(Saml2Constants.ClaimValueTypeSerializationPrefixWithColon, xsiTypeSuffix));
+                        writer.WriteAttributeString(XmlSignatureConstants.Attributes.TypeLowerCase, XmlSignatureConstants.XmlSchemaNamespace, string.Concat(Saml2Constants.ClaimValueTypeSerializationPrefixWithColon, xsiTypeSuffix));
                     }
 
                     writer.WriteString(value);
@@ -2193,7 +2193,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // @xsi:type
             if (subjectConfirmationData.KeyInfos.Count > 0)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.TypeLowerCase, XmlSignatureConstants.XmlSchemaNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
 
             // @Address - optional
             if (!string.IsNullOrEmpty(subjectConfirmationData.Address))

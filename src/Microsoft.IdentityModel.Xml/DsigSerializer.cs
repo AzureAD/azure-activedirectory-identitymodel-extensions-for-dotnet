@@ -434,7 +434,7 @@ namespace Microsoft.IdentityModel.Xml
                 {
                     Prefix = reader.Prefix,
                     Id = reader.GetAttribute(XmlSignatureConstants.Attributes.Id, null),
-                    Type = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, null),
+                    Type = reader.GetAttribute(XmlSignatureConstants.Attributes.TypeLowerCase, null),
                     Uri = reader.GetAttribute(XmlSignatureConstants.Attributes.URI, null)
                 };
 
@@ -781,7 +781,7 @@ namespace Microsoft.IdentityModel.Xml
 
             // @Type
             if (reference.Type != null)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, null, reference.Type);
+                writer.WriteAttributeString(XmlSignatureConstants.Attributes.TypeLowerCase, null, reference.Type);
 
             // <Transforms>
             writer.WriteStartElement(Prefix, XmlSignatureConstants.Elements.Transforms, XmlSignatureConstants.Namespace);

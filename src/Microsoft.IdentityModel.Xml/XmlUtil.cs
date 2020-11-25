@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Xml
             if (reader.NodeType != XmlNodeType.Element)
                 return null;
 
-            string xsiType = reader.GetAttribute(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace);
+            string xsiType = reader.GetAttribute(XmlSignatureConstants.Attributes.TypeLowerCase, XmlSignatureConstants.XmlSchemaNamespace);
             if (string.IsNullOrEmpty(xsiType))
                 return null;
 
