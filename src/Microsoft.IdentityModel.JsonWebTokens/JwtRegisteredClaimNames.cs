@@ -133,6 +133,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Nbf = "nbf";
 
         /// <summary>
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+        /// </summary>
+        public const string PhoneNumber = "phone_number";
+
+        /// <summary>
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+        /// </summary>
+        public const string PhoneNumber = "phone_number_verified";
+
+        /// <summary>
         /// </summary>
         public const string Prn = "prn";
 
