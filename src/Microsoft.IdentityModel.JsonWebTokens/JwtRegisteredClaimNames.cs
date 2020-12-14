@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
-        public const string PhoneNumber = "phone_number_verified";
+        public const string PhoneNumberVerified = "phone_number_verified";
 
         /// <summary>
         /// </summary>
