@@ -91,7 +91,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             try
             {
                 var providerForSigningDirect = new AsymmetricSignatureProvider(theoryData.SigningKey, theoryData.SigningAlgorithm, true);
+                providerForSigningDirect.ValidKeySize();
+
                 var providerForVerifyingDirect = new AsymmetricSignatureProvider(theoryData.VerifyKey, theoryData.VerifyAlgorithm, false);
+                providerForVerifyingDirect.ValidKeySize();
+
                 var providerForSigningFromFactory = theoryData.SigningKey.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var providerForVerifyingFromFactory = theoryData.VerifyKey.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
 
@@ -140,6 +144,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
                     SigningKey = KeyingMaterial.RsaSecurityKey_1024,
+                    VerifyKey = KeyingMaterial.RsaSecurityKey_1024_Public,
+                    VerifyAlgorithm = SecurityAlgorithms.RsaSha512,
                     ExpectedException = ExpectedException.ArgumentOutOfRangeException(),
                     TestId = "KeySizeSmallerThanRequiredSize"
                 });

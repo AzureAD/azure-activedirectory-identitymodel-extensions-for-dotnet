@@ -1915,7 +1915,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_128, SecurityAlgorithms.Aes256KeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10662:")
+                        ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10662:")
                     },
                     new CreateTokenTheoryData
                     {
@@ -1924,7 +1924,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = ExpectedException.ArgumentOutOfRangeException("IDX10662:")
+                        ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10662:")
                     },
                     new CreateTokenTheoryData
                     {
