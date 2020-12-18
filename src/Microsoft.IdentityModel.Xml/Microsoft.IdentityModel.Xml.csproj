@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\common.props" />
 
@@ -28,11 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System.Net.Http" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="$(MicrosoftAzureKeyVaultCryptographyVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net472'">
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 

@@ -1504,7 +1504,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     },
- #if NET461 || NET_CORE
+ #if NET461 || NET472 || NET_CORE
                     // RsaPss is not supported on .NET < 4.6
                     new CreateTokenTheoryData
                     {

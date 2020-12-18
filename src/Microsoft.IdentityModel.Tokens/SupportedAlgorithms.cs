@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.HmacSha512Signature
         };
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -328,7 +328,7 @@ namespace Microsoft.IdentityModel.Tokens
             // RSA-PSS is not available on .NET 4.5
             LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
-#elif NET461 || NETSTANDARD2_0
+#elif NET461 || NET472 || NETSTANDARD2_0
             // RSACryptoServiceProvider doesn't support RSA-PSS
             if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
             {
