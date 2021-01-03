@@ -42,6 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void Constructor()
         {
             var provider = new DerivedAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            provider.CreateSymmetricSignatureProvider();
             Assert.True(provider.GetKeyBytesCalled);
             Assert.True(provider.IsSupportedAlgorithmCalled);
             Assert.True(provider.ValidateKeySizeCalled);
@@ -225,7 +226,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     Provider = new DerivedAuthenticatedEncryptionProvider(),
                     TestId = "Test3"
                 },
-
                 new AuthenticatedEncryptionTheoryData
                 {
                     DecryptAlgorithm = SecurityAlgorithms.Aes192KeyWrap,

@@ -1127,7 +1127,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":{{""{JsonWebKeyParameterNames.Kid}"":""{Base64UrlEncoder.Encode(rsaJwkFromX509Key.ComputeJwkThumbprint())}"",""{JsonWebKeyParameterNames.E}"":""{rsaJwkFromX509Key.E}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{rsaJwkFromX509Key.N}""}}}}",
                         TestId = "ValidX509Key",
                     },
-#if NET_CORE
+#if NET472 || NET_CORE
                     new CreateSignedHttpRequestTheoryData
                     {
                         ExpectedClaim = ConfirmationClaimTypes.Cnf,

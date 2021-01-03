@@ -64,6 +64,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.SecurityKey, theoryData.Algorithm);
                 provider.Context = providerContext;
 
+                // validation is defered until first use
+                provider.WrapKey(Guid.NewGuid().ToByteArray());
+
                 theoryData.ExpectedException.ProcessNoException(context);
                 if (provider.Algorithm != theoryData.Algorithm)
                     context.AddDiff($"provider.Algorithm: '{provider.Algorithm}' != theoryData.Algorithm: '{theoryData.Algorithm}'.");
@@ -91,10 +94,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, null, "SecurityKeyNull", theoryData, ExpectedException.ArgumentNullException("key"));
                 SupportedAlgorithmTheoryData.AddTestCase(null, Default.SymmetricEncryptionKey128, "AlgorithmNull", theoryData, ExpectedException.ArgumentNullException("algorithm"));
                 SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128Encryption, Default.SymmetricEncryptionKey128, "Aes128Encryption", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
-                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KeyWrap, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KeyWrap", theoryData, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KeyWrap", theoryData, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KW", theoryData, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KW", theoryData, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KeyWrap, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KeyWrap", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KeyWrap", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KW", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KW", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
                 SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, new JsonWebKey { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K }, "JsonWebKey_RSA_Aes256KW", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
                 SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, KeyingMaterial.RsaSecurityKey_2048, "RsaSecurityKey_Aes256KW", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
                 SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, Default.SymmetricEncryptionKey128, "SymmetricKey_Aes128KeyWrap", theoryData);

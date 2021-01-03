@@ -52,12 +52,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         internal ECDsaAdapter()
         {
-#if NETSTANDARD2_0
+#if NET472
+            CreateECDsaFunction = CreateECDsaUsingECParams;
+#elif NETSTANDARD2_0
+            // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
+            // as NET461 is listed as supporting NETSTANDARD2_0, but DOES NOT support ECParameters.
+            // See: https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.ecparameters?view=netstandard-2.0
             if (SupportsECParameters())
                 CreateECDsaFunction = CreateECDsaUsingECParams;
             else
                 CreateECDsaFunction = CreateECDsaUsingCNGKey;
-#elif DESKTOP
+#else
             CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #endif
         }
@@ -70,6 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateECDsaFunction(jsonWebKey, usePrivateKey);
         }
 
+#if NET45 || NET461 || NETSTANDARD2_0
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -165,6 +171,7 @@ namespace Microsoft.IdentityModel.Tokens
                     keyBlobHandle.Free();
             }
         }
+#endif
 
         internal static ECDsa ECDsaNotSupported(JsonWebKey jsonWebKey, bool usePrivateKey)
         {
@@ -271,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -359,6 +366,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
         internal static bool SupportsECParameters()
         {
+#if NET472
+            return true;
+#else
             try
             {
                 LoadECParametersType();
@@ -368,6 +378,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return false;
             }
+#endif
         }
 
         /// <summary>

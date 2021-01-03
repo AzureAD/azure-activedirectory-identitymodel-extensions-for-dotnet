@@ -74,10 +74,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void CanComputeJwkThumbprint()
         {
-#if NET_CORE
-            Assert.True(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an ECDsaSecurityKey on .NET Core.");
+#if NET472 || NET_CORE
+            Assert.True(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an ECDsaSecurityKey on net472 or .net core.");
 #else
-            Assert.False(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "ECDsaSecurityKey shouldn't be able to compute JWK thumbprint on Deskop (non-netstandard2.0 target).");
+            Assert.False(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "ECDsaSecurityKey shouldn't be able to compute JWK thumbprint on Desktop (net452 and net461 targets).");
 #endif
         }
     }

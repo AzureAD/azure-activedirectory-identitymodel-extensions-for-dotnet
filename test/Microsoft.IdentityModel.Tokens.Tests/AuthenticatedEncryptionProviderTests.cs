@@ -96,6 +96,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var context = Guid.NewGuid().ToString();
                 var provider = new AuthenticatedEncryptionProvider(key, algorithm) { Context = context };
+                provider.CreateSymmetricSignatureProvider();
 
                 ee.ProcessNoException();
 
@@ -118,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test3", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test4", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.NoExceptionExpected);
-            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10668:"));
+            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10652:"));
             theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
             theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
 
@@ -133,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             key = Default.SymmetricEncryptionKey256;
             key.CryptoProviderFactory = new AuthenticatedEncryptionCryptoProviderFactory
             {
-                SymmetricSignatureProviderForSigning = new SymmetricSignatureProvider(key, SecurityAlgorithms.Aes128CbcHmacSha256)
+                SymmetricSignatureProviderForSigning = new SymmetricSignatureProvider(key, SecurityAlgorithms.HmacSha256),
             };
             theoryData.Add("Test10", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
 
@@ -420,7 +421,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
 
             ExpectedException expectedException = ExpectedException.ObjectDisposedException;
-            expectedException.SubstringExpected = decryptSignatureProviderDisposed.GetType().ToString();
+            expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
             theoryData.Add(new AuthenticatedEncryptionTheoryData
             {
                 AuthenticatedData = Guid.NewGuid().ToByteArray(),

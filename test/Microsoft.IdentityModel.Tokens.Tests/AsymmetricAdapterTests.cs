@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class AsymmetricAdapterTests
     {
         [Theory, MemberData(nameof(AsymmetricAdapterUsageTestCases))]
-        public void AsymmetricAdapterUsageTests(AsymmetricAdatperTheoryData theoryData)
+        public void AsymmetricAdapterUsageTests(AsymmetricAdapterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricAdapterUsageTests", theoryData);
 
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-#if NET461 || NETCOREAPP2_1
+#if NET461 || NET472 || NETCOREAPP2_1
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, SupportedAlgorithms.GetHashAlgorithmName(theoryData.Algorithm), true);
 #else
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, true);
@@ -67,12 +67,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<AsymmetricAdatperTheoryData> AsymmetricAdapterUsageTestCases
+        public static TheoryData<AsymmetricAdapterTheoryData> AsymmetricAdapterUsageTestCases
         {
-            get => new TheoryData<AsymmetricAdatperTheoryData>
+            get => new TheoryData<AsymmetricAdapterTheoryData>
             {
                 // X509
-                new AsymmetricAdatperTheoryData
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -82,8 +82,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // RSA
                 // RSACertificateExtensions.GetRSAPrivateKey - this results in 
-                #if NET461 || NETCOREAPP2_1
-                new AsymmetricAdatperTheoryData
+                #if NET461 || NET472 || NETCOREAPP2_1
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 #endif
 
                 // X509Certificte2.PrivateKey - this results in the RSA being of type RSACryptoServiceProviderProxy
-                new AsymmetricAdatperTheoryData
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -102,8 +102,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
 
                 // RSA.Create
-                #if NETCOREAPP2_1
-                new AsymmetricAdatperTheoryData
+                #if NET472 || NETCOREAPP2_1
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 #endif
 
                 // RSACryptoServiceProvider
-                new AsymmetricAdatperTheoryData
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
 
                 // RsaParameters
-                new AsymmetricAdatperTheoryData
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.RsaSha256),
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // ECD
                 // ECD object
-                new AsymmetricAdatperTheoryData
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.EcdsaSha256),
@@ -140,8 +140,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "KeyingMaterial_Ecdsa256Key"
                 },
 
-                #if NET_CORE
-                new AsymmetricAdatperTheoryData
+                #if NET472 || NETCOREAPP2_1
+                new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha256,
                     HashAlorithmString = SupportedAlgorithms.GetDigestFromSignatureAlgorithm(SecurityAlgorithms.EcdsaSha256),
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
-        public class AsymmetricAdatperTheoryData : TheoryDataBase
+        public class AsymmetricAdapterTheoryData : TheoryDataBase
         {
             public string Algorithm { get; set; }
 

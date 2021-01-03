@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Logging;
 using System.Reflection;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
 using System.Security.Cryptography.X509Certificates;
 #endif
 
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _useRSAOeapPadding = false;
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         private RSAEncryptionPadding _rsaEncryptionPadding;
 #endif
 
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SignDelegate SignatureFunction = SignatureFunctionNotFound;
         private VerifyDelegate VerifyFunction = VerifyFunctionNotFound;
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
             : this(key, algorithm, hashAlgorithm, requirePrivateKey)
@@ -169,8 +169,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return RSA.DecryptValue(data);
 #endif
 
-            // NET461 could have been passed RSACryptoServiceProvider
-#if NET461
+            // NET461 or NET472 could have been passed RSACryptoServiceProvider.
+#if NET461 || NET472
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Decrypt(data, _useRSAOeapPadding);
             else
@@ -227,8 +227,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return RSA.EncryptValue(data);
 #endif
 
-            // NET461 could have been passed RSACryptoServiceProvider
-#if NET461
+            // NET461 or NET472 could have been passed RSACryptoServiceProvider
+#if NET461 || NET472
             if (RsaCryptoServiceProviderProxy != null)
                 return RsaCryptoServiceProviderProxy.Encrypt(data, _useRSAOeapPadding);
 
@@ -243,7 +243,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private HashAlgorithm HashAlgorithm { get; set; }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         private HashAlgorithmName HashAlgorithmName { get; set; }
 
         private RSASignaturePadding RSASignaturePadding { get; set; }
@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingRsa(RSA rsa, string algorithm)
         {
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
             if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256, StringComparison.Ordinal) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature, StringComparison.Ordinal) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384, StringComparison.Ordinal) ||
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 #endif
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
             // Here we can use RSA straight up.
             _rsaEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
                         ? RSAEncryptionPadding.OaepSHA1
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsaSecurityKey.ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
         }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         private byte[] SignWithRsa(byte[] bytes)
         {
             return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding);
@@ -367,7 +367,7 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsaSecurityKey.ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
         }
 
-#if NET461 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
             return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
