@@ -45,39 +45,39 @@ namespace Microsoft.IdentityModel.Tokens
     public class InMemoryCryptoProviderCache: CryptoProviderCache
 #endif
     {
-        internal TokenCacheOptions _tokenCacheOptions;
+        internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
 #if NET461 || NET472 || NETSTANDARD2_0 
-        private MemoryCache _signingSignatureProviders;
-        private MemoryCache _verifyingSignatureProviders;
+        private readonly MemoryCache _signingSignatureProviders;
+        private readonly MemoryCache _verifyingSignatureProviders;
         private bool _disposed = false;
 #elif NET45
-        private MaxCapacityRefreshCache<string, SignatureProvider> _signingSignatureProviders;
-        private MaxCapacityRefreshCache<string, SignatureProvider> _verifyingSignatureProviders;
+        private readonly MaxCapacityRefreshCache<string, SignatureProvider> _signingSignatureProviders;
+        private readonly MaxCapacityRefreshCache<string, SignatureProvider> _verifyingSignatureProviders;
 #endif
 
         /// <summary>
-        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the default <see cref="TokenCacheOptions"/>.
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the default <see cref="CryptoProviderCacheOptions"/>.
         /// </summary>
-        public InMemoryCryptoProviderCache() : this(new TokenCacheOptions())
+        public InMemoryCryptoProviderCache() : this(new CryptoProviderCacheOptions())
         {
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="tokenCacheOptions"/>.
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
-        /// <param name="tokenCacheOptions">The options which can be used to configure the crypto provider cache.</param>
-        public InMemoryCryptoProviderCache(TokenCacheOptions tokenCacheOptions)
+        /// <param name="cryptoProviderCacheOptions">The options which can be used to configure the crypto provider cache.</param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
         {
-            if (tokenCacheOptions == null)
-                throw LogHelper.LogArgumentNullException(nameof(tokenCacheOptions));
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
-            _tokenCacheOptions = tokenCacheOptions;
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
 #if NET461 || NET472 || NETSTANDARD2_0
-            _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _tokenCacheOptions.SizeLimit }));
-            _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _tokenCacheOptions.SizeLimit }));
+            _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
+            _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
 #elif NET45
-            _signingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(tokenCacheOptions.SizeLimit, StringComparer.Ordinal);
-            _verifyingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(tokenCacheOptions.SizeLimit, StringComparer.Ordinal);
+            _signingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+            _verifyingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
 #endif
         }
 
@@ -170,15 +170,15 @@ namespace Microsoft.IdentityModel.Tokens
                 signatureProviderCache = _verifyingSignatureProviders;
 
 #if NET461 || NET472 || NETSTANDARD2_0 
-            var cacheEntryOptions = new MemoryCacheEntryOptions
-            {
-                SlidingExpiration = TimeSpan.FromDays(1),
-                Size = 1,
-            };
-
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.TryGetValue(cacheKey, out _))
             {
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    SlidingExpiration = TimeSpan.FromDays(1),
+                    Size = 1,
+                };
+
                 signatureProviderCache.Set(cacheKey, signatureProvider, cacheEntryOptions);
                 signatureProvider.CryptoProviderCache = this;
                 return true;
@@ -221,23 +221,17 @@ namespace Microsoft.IdentityModel.Tokens
 
             var cacheKey = GetCacheKeyPrivate(securityKey, algorithm, typeofProvider);
             if (willCreateSignatures)
-            {
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NET461 || NET472 || NETSTANDARD2_0
                 return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #elif NET45
-                _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
-                return signatureProvider != null;
+                return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #endif
-            }
             else
-            {
 #if NET461 || NET472 || NETSTANDARD2_0 
                 return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #elif NET45
-                _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
-                return signatureProvider != null;
+                return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #endif
-            }
         }
 
         /// <summary>
@@ -292,8 +286,9 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 #endif
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10699, cacheKey, ex));
                 return false;
             }
         }

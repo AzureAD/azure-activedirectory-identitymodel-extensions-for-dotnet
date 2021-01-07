@@ -23,11 +23,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+
 namespace Microsoft.IdentityModel.Tokens
 {
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-
     /// <summary>
     /// A cache that clears itself upon reaching max capacity.
     /// </summary>
@@ -40,17 +40,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the cache.
         /// </summary>
-        private ConcurrentDictionary<TKey, TValue> Cache { get; set; }
+        private ConcurrentDictionary<TKey, TValue> Cache { get; }
 
         /// <summary>
         /// Gets or sets the cache size limit.
         /// </summary>
-        private long SizeLimit { get; set; }
+        private long SizeLimit { get; }
 
         /// <summary>
         /// Gets or sets the lock for recycle operations.
         /// </summary>
-        private object RecycleLock { get; set; }
+        private object RecycleLock { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MaxCapacityRefreshCache{TKey,TValue}" /> class.
@@ -72,11 +72,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the value corresponding to <paramref name="value"/> from the cache.
+        /// Gets the value corresponding to <paramref name="cacheKey"/> from the cache.
         /// </summary>
         /// <param name="cacheKey">The cache key.</param>
         /// <param name="value">The cached value.</param>
-        /// <remarks>This method is non-blocking and thread-safe.</remarks>
         internal bool TryGetValue(TKey cacheKey, out TValue value)
         {
             RecycleCacheIfNeeded();
@@ -84,12 +83,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Sets the cache value.
+        /// Sets the <paramref name="cacheKey"/> along with its corresponding <paramref name="value"/>.
         /// </summary>
         /// <param name="cacheKey">The cache key.</param>
         /// <param name="value">The value.</param>
         /// <returns><paramref name="value"/> if it was successfully set, null otherwise.</returns>
-        /// <remarks>This method is non-blocking and thread-safe.</remarks>
         /// <remarks>This value will not be set if the cache already contains a key with the same name as <paramref name="cacheKey"/>.</remarks>
         internal TValue SetValue(TKey cacheKey, TValue value)
         {
@@ -126,7 +124,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         private void RecycleCacheIfNeeded()
         {
-            if (SizeLimit == Cache.Keys.Count)
+            if (SizeLimit <= Cache.Keys.Count)
             {
                 lock (RecycleLock)
                     Cache.Clear();

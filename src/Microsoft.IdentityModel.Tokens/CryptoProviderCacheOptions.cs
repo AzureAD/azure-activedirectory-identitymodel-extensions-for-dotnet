@@ -10,15 +10,16 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Specifies the TokenCacheOptions which can be used to configure the internal cryptoprovider cache.
+    /// Specifies the CryptoProviderCacheOptions which can be used to configure the internal cryptoprovider cache.
     /// For the net461, net472, and netstandard2.0 targets we are using the Microsoft.Extensions.Caching.Memory.MemoryCache class:
-    /// https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycache?view=dotnet-plat-ext-3.1
+    /// https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycache
     /// For the net45 target we are using our own simple caching implementation which clears the entire cache
     /// once the cache is at max capacity. We recommend upgrading to net461+ for a more comprehensive caching experience.
-    /// Any property on these TokenCacheOptions that corresponds directly to a property 
+    /// Any property on these CryptoProviderCacheOptions that corresponds directly to a property 
     /// used by Microsoft.Extensions.Caching.Memory.MemoryCache has the same name.
     /// </summary>
-    public class TokenCacheOptions
+    public class CryptoProviderCacheOptions
+
     {
         private int _sizeLimit = DefaultSizeLimit;
 
