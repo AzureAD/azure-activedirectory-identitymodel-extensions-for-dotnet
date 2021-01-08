@@ -19,7 +19,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// used by Microsoft.Extensions.Caching.Memory.MemoryCache has the same name.
     /// </summary>
     public class CryptoProviderCacheOptions
-
     {
         private int _sizeLimit = DefaultSizeLimit;
 

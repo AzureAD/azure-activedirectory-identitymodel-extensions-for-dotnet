@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
-        /// <param name="cryptoProviderCacheOptions">The options which can be used to configure the crypto provider cache.</param>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
         public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
         {
             if (cryptoProviderCacheOptions == null)
@@ -173,13 +173,11 @@ namespace Microsoft.IdentityModel.Tokens
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.TryGetValue(cacheKey, out _))
             {
-                var cacheEntryOptions = new MemoryCacheEntryOptions
+                signatureProviderCache.Set(cacheKey, signatureProvider, new MemoryCacheEntryOptions
                 {
                     SlidingExpiration = TimeSpan.FromDays(1),
                     Size = 1,
-                };
-
-                signatureProviderCache.Set(cacheKey, signatureProvider, cacheEntryOptions);
+                });
                 signatureProvider.CryptoProviderCache = this;
                 return true;
             }
