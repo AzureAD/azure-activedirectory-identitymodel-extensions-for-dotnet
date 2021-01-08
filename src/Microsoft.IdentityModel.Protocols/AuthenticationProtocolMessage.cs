@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
     public abstract class AuthenticationProtocolMessage
     {
         private string _postTitle = "Working...";
-        private string _script = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>"; 
+        private string _script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>"; 
         private string _scriptButtonText = "Submit";
         private string _scriptDisabledText = "Script is disabled. Click Submit to continue.";
 

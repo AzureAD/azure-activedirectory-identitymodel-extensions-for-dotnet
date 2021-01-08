@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         {
             var context = new CompareContext();
             string issuerAddress = "http://www.gotjwt.com";
-            var script = "<script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script>";
+            var script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>";
 
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
             IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, context);
