@@ -48,11 +48,6 @@ namespace Microsoft.IdentityModel.Tokens
         private long SizeLimit { get; }
 
         /// <summary>
-        /// Gets or sets the lock for recycle operations.
-        /// </summary>
-        private object RecycleLock { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MaxCapacityRefreshCache{TKey,TValue}" /> class.
         /// </summary>
         /// <param name="sizeLimit">The max number of items the cache is capable of holding.</param>
@@ -61,7 +56,6 @@ namespace Microsoft.IdentityModel.Tokens
             long sizeLimit,
             IEqualityComparer<TKey> comparer = null)
         {
-            RecycleLock = new object();
             SizeLimit = sizeLimit;
             Cache = new ConcurrentDictionary<TKey, TValue>(comparer ?? EqualityComparer<TKey>.Default);
         }
@@ -87,15 +81,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="cacheKey">The cache key.</param>
         /// <param name="value">The value.</param>
-        /// <returns><paramref name="value"/> if it was successfully set, null otherwise.</returns>
-        /// <remarks>This value will not be set if the cache already contains a key with the same name as <paramref name="cacheKey"/>.</remarks>
+        /// <returns><paramref name="value"/> if it was successfully set.</returns>
+        /// <remarks>If the cache already contains a key with the same name as <paramref name="cacheKey"/>, the corresponding value will be overridden with <paramref name="value"/>.</remarks>
         internal TValue SetValue(TKey cacheKey, TValue value)
         {
             RecycleCacheIfNeeded();
-            if (Cache.TryAdd(cacheKey, value))
-                return value;
-            else
-                return null;
+            Cache[cacheKey] = value;
+            return value;
         }
 
         /// <summary>
@@ -125,10 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         private void RecycleCacheIfNeeded()
         {
             if (SizeLimit <= Cache.Keys.Count)
-            {
-                lock (RecycleLock)
                     Cache.Clear();
-            }           
         }
     }
 }
