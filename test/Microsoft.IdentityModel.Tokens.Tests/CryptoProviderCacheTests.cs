@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Net.Http.Headers;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -424,6 +425,73 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 return theoryData;
             }
+        }
+
+        /// <summary>
+        /// Checks that the cache and any crypto providers contained inside of it are properly garbage collected.
+        /// </summary>
+        [Fact]
+        public void CryptoProviderCacheDisposal()
+        {
+            TestUtilities.WriteHeader($"{this}.CryptoProviderCacheDisposal");
+            var context = new CompareContext();
+            WeakReference cacheReference = null;
+            WeakReference cryptoProviderReference = null;
+
+            new Action(() =>
+            {
+                var cache = new InMemoryCryptoProviderCache();
+                var customCryptoProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
+                cache.TryAdd(customCryptoProvider);
+                cacheReference = new WeakReference(cache, true);
+                cryptoProviderReference = new WeakReference(customCryptoProvider, true);
+#if NET461 || NET472 || NETSTANDARD2_1
+                cache.Dispose();
+#endif
+            })();
+
+            // Both the cache and the crypto provider should have gone out of scope about now, 
+            // so the garbage collector can clean them up.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            if (cacheReference.Target != null)
+                context.AddDiff("CryptoProviderCache was not properly disposed of.");
+
+            if (cryptoProviderReference.Target != null)
+                context.AddDiff("CryptoProvider was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        /// <summary>
+        /// Checks to make sure a crypto provider is properly garbage collected of when removed from the cache.
+        /// </summary>
+        [Fact]
+        public void CryptoProviderDisposal()
+        {
+            TestUtilities.WriteHeader($"{this}.CryptoProviderDisposal");
+            var context = new CompareContext();
+            WeakReference cryptoProviderReference = null;
+            var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions() { SizeLimit = 3 });
+
+            new Action(() =>
+            {
+                var customCryptoProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
+                cache.TryAdd(customCryptoProvider);
+                cryptoProviderReference = new WeakReference(customCryptoProvider, true);
+                cache.TryRemove(customCryptoProvider);
+            })();
+
+            // Both the cache and the crypto provider added to it should have gone out of scope about now, 
+            // so the garbage collector can clean them both up.
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            if (cryptoProviderReference.Target != null)
+                context.AddDiff("CryptoProvider was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(TryRemoveTheoryData))]
