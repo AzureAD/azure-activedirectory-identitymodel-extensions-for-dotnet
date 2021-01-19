@@ -27,7 +27,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
@@ -46,24 +45,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var numberOfErrors = 0;
             void action()
             {
-                var jwt = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
-                var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out SecurityToken _);
-                var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters);
+                for (int loop = 0; loop < 5; loop++)
+                {
+                    var jwt = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                    var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out SecurityToken _);
+                    var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters);
 
-                if (tokenValidationResult.Exception != null && tokenValidationResult.IsValid)
+                    if (tokenValidationResult.Exception != null && tokenValidationResult.IsValid)
                         context.Diffs.Add("tokenValidationResult.IsValid, tokenValidationResult.Exception != null");
 
-                if (!tokenValidationResult.IsValid)
-                {
-                    numberOfErrors++;
-                    if (tokenValidationResult.Exception != null)
-                        throw tokenValidationResult.Exception;
-                    else
-                        throw new SecurityTokenException("something failed");
+                    if (!tokenValidationResult.IsValid)
+                    {
+                        numberOfErrors++;
+                        if (tokenValidationResult.Exception != null)
+                            throw tokenValidationResult.Exception;
+                        else
+                            throw new SecurityTokenException("something failed");
+                    }
                 }
             }
 
-            var actions = new Action[1000];
+            var actions = new Action[100];
             for (int i = 0; i < actions.Length; i++)
                 actions[i] = action;
 
@@ -122,6 +124,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var jwtRsa = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorRsa);
 
+                // RSACng
+                var securityTokenDescriptorRsaCng = new SecurityTokenDescriptor
+                {
+                    Claims = Default.PayloadDictionary,
+                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKeyCng_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                };
+
+                var tokenValidationParametersRsaCng = new TokenValidationParameters
+                {
+                    IssuerSigningKey = KeyingMaterial.RsaSecurityKeyCng_2048,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer
+                };
+
+                var jwtRsaCng = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorRsaCng);
+
                 // Symmetric
                 var securityTokenDescriptorSymmetric = new SecurityTokenDescriptor
                 {
@@ -155,6 +173,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
 
                 var jwtEncryptedRsaKW = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedRsaKW);
+
+                // Encrypted "RSA keywrap"
+                // RsaSecurityKeyRsaKWCng_2048
+                var securityTokenDescriptorEncryptedRsaKWCng = new SecurityTokenDescriptor
+                {
+                    Claims = Default.PayloadDictionary,
+                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKeyCng_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKeyCng_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256)
+                };
+
+                var tokenValidationParametersEncryptedRsaKWCng = new TokenValidationParameters
+                {
+                    TokenDecryptionKey = KeyingMaterial.RsaSecurityKeyCng_2048,
+                    IssuerSigningKey = KeyingMaterial.RsaSecurityKeyCng_2048,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer
+                };
+
+                var jwtEncryptedRsaKWCng = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedRsaKWCng);
 
                 // Encrypted "dir"
                 var securityTokenDescriptorEncryptedDir = new SecurityTokenDescriptor
@@ -198,6 +235,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,
                         JsonWebTokenHandler = jsonWebTokenHandler,
+                        Jwt = jwtRsaCng,
+                        TestId = "JwtRsaCng",
+                        TokenDescriptor = securityTokenDescriptorRsaCng,
+                        ValidationParameters = tokenValidationParametersRsaCng
+                    },
+                    new MultiThreadingTheoryData
+                    {
+                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
+                        JsonWebTokenHandler = jsonWebTokenHandler,
                         Jwt = jwtEcd,
                         TestId = "JwtEcd",
                         TokenDescriptor = securityTokenDescriptorEcd,
@@ -211,6 +257,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = "JwtRsaEncryptedRsaKW",
                         TokenDescriptor = securityTokenDescriptorEncryptedRsaKW,
                         ValidationParameters = tokenValidationParametersEncryptedRsaKW
+                    },
+                    new MultiThreadingTheoryData
+                    {
+                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
+                        JsonWebTokenHandler = jsonWebTokenHandler,
+                        Jwt = jwtEncryptedRsaKWCng,
+                        TestId = "JwtRsaEncryptedRsaKWCng",
+                        TokenDescriptor = securityTokenDescriptorEncryptedRsaKWCng,
+                        ValidationParameters = tokenValidationParametersEncryptedRsaKWCng
                     },
                     new MultiThreadingTheoryData
                     {
