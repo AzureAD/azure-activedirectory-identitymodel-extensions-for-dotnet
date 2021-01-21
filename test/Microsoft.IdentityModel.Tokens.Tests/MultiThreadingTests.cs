@@ -124,22 +124,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var jwtRsa = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorRsa);
 
-                // RSACng
-                var securityTokenDescriptorRsaCng = new SecurityTokenDescriptor
-                {
-                    Claims = Default.PayloadDictionary,
-                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKeyCng_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
-                };
-
-                var tokenValidationParametersRsaCng = new TokenValidationParameters
-                {
-                    IssuerSigningKey = KeyingMaterial.RsaSecurityKeyCng_2048,
-                    ValidAudience = Default.Audience,
-                    ValidIssuer = Default.Issuer
-                };
-
-                var jwtRsaCng = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorRsaCng);
-
                 // Symmetric
                 var securityTokenDescriptorSymmetric = new SecurityTokenDescriptor
                 {
@@ -174,6 +158,40 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var jwtEncryptedRsaKW = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedRsaKW);
 
+                // Encrypted "dir"
+                var securityTokenDescriptorEncryptedDir = new SecurityTokenDescriptor
+                {
+                    Claims = Default.PayloadDictionary,
+                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256)
+                };
+
+                var tokenValidationParametersEncryptedDir = new TokenValidationParameters
+                {
+                    TokenDecryptionKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                    IssuerSigningKey = KeyingMaterial.RsaSecurityKey_2048,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer
+                };
+
+                var jwtEncryptedDir = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedDir);
+
+#if NET452 || NET461 || NET472
+                // RSACng 
+                var securityTokenDescriptorRsaCng = new SecurityTokenDescriptor
+                {
+                    Claims = Default.PayloadDictionary,
+                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKeyCng_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                };
+
+                var tokenValidationParametersRsaCng = new TokenValidationParameters
+                {
+                    IssuerSigningKey = KeyingMaterial.RsaSecurityKeyCng_2048,
+                    ValidAudience = Default.Audience,
+                    ValidIssuer = Default.Issuer
+                };
+
+                var jwtRsaCng = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorRsaCng);
                 // Encrypted "RSA keywrap"
                 // RsaSecurityKeyRsaKWCng_2048
                 var securityTokenDescriptorEncryptedRsaKWCng = new SecurityTokenDescriptor
@@ -192,24 +210,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
 
                 var jwtEncryptedRsaKWCng = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedRsaKWCng);
-
-                // Encrypted "dir"
-                var securityTokenDescriptorEncryptedDir = new SecurityTokenDescriptor
-                {
-                    Claims = Default.PayloadDictionary,
-                    SigningCredentials = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
-                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.SymmetricSecurityKey2_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256)
-                };
-
-                var tokenValidationParametersEncryptedDir = new TokenValidationParameters
-                {
-                    TokenDecryptionKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                    IssuerSigningKey = KeyingMaterial.RsaSecurityKey_2048,
-                    ValidAudience = Default.Audience,
-                    ValidIssuer = Default.Issuer
-                };
-
-                var jwtEncryptedDir = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedDir);
+#endif
 
                 return new TheoryData<MultiThreadingTheoryData>()
                 {
@@ -235,15 +236,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,
                         JsonWebTokenHandler = jsonWebTokenHandler,
-                        Jwt = jwtRsaCng,
-                        TestId = "JwtRsaCng",
-                        TokenDescriptor = securityTokenDescriptorRsaCng,
-                        ValidationParameters = tokenValidationParametersRsaCng
-                    },
-                    new MultiThreadingTheoryData
-                    {
-                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
-                        JsonWebTokenHandler = jsonWebTokenHandler,
                         Jwt = jwtEcd,
                         TestId = "JwtEcd",
                         TokenDescriptor = securityTokenDescriptorEcd,
@@ -262,20 +254,31 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,
                         JsonWebTokenHandler = jsonWebTokenHandler,
-                        Jwt = jwtEncryptedRsaKWCng,
-                        TestId = "JwtRsaEncryptedRsaKWCng",
-                        TokenDescriptor = securityTokenDescriptorEncryptedRsaKWCng,
-                        ValidationParameters = tokenValidationParametersEncryptedRsaKWCng
-                    },
-                    new MultiThreadingTheoryData
-                    {
-                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
-                        JsonWebTokenHandler = jsonWebTokenHandler,
                         Jwt = jwtEncryptedDir,
                         TestId = "JwtRsaEncryptedDir",
                         TokenDescriptor = securityTokenDescriptorEncryptedDir,
                         ValidationParameters = tokenValidationParametersEncryptedDir
                     },
+#if NET452 || NET461 || NET472
+                    new MultiThreadingTheoryData
+                    {
+                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
+                        JsonWebTokenHandler = jsonWebTokenHandler,
+                        Jwt = jwtRsaCng,
+                        TestId = "JwtRsaCng",
+                        TokenDescriptor = securityTokenDescriptorRsaCng,
+                        ValidationParameters = tokenValidationParametersRsaCng
+                    },
+                    new MultiThreadingTheoryData
+                    {
+                        JwtSecurityTokenHandler = jwtSecurityTokenHandler,
+                        JsonWebTokenHandler = jsonWebTokenHandler,
+                        Jwt = jwtEncryptedRsaKWCng,
+                        TestId = "JwtRsaEncryptedRsaKWCng",
+                        TokenDescriptor = securityTokenDescriptorEncryptedRsaKWCng,
+                        ValidationParameters = tokenValidationParametersEncryptedRsaKWCng
+                    },
+#endif
                 };
             }
         }
