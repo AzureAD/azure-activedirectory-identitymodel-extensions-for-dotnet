@@ -2040,6 +2040,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
+                var handlerWithNoDefaultTimes = new JsonWebTokenHandler();
+                handlerWithNoDefaultTimes.SetDefaultTimesOnTokenCreation = false;
                 return new TheoryData<JwtTheoryData>
                 {
                      new JwtTheoryData
@@ -2273,6 +2275,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateLifetime = false,
                             ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256, SecurityAlgorithms.HmacSha256Signature }
                         },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWS_NoExp",
+                        Token = handlerWithNoDefaultTimes.CreateToken(new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            Claims = Default.PayloadDictionary.RemoveClaim(JwtRegisteredClaimNames.Exp)
+                        }),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:")
                     },
                     new JwtTheoryData
                     {

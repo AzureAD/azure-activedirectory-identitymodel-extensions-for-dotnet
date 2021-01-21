@@ -474,6 +474,12 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
             };
         }
+
+        public static Dictionary<string, object> RemoveClaim(this Dictionary<string, object> payloadClaims, string claimName)
+        {
+            payloadClaims.Remove(claimName);
+            return payloadClaims;
+        }
 #endif
 
 #if !CrossVersionTokenValidation
