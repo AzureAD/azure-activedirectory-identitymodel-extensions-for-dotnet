@@ -317,7 +317,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
 
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this), "Exponent"));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Exponent")));
 
             return new RSAParameters
             {
@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Tokens
         public override byte[] ComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Kty)), nameof(Kty)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Kty))));
 
             if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
                 return ComputeECThumbprint();
@@ -380,7 +380,7 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeOctThumbprint()
         {
             if (string.IsNullOrEmpty(K))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(K)), nameof(K)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(K))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{K}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -394,10 +394,10 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeRsaThumbprint()
         {
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(E)), nameof(E)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(E))));
 
             if (string.IsNullOrEmpty(N))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(N)), nameof(N)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(N))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{E}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.N}"":""{N}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -411,13 +411,13 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeECThumbprint()
         {
             if (string.IsNullOrEmpty(Crv))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Crv)), nameof(Crv)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Crv))));
 
             if (string.IsNullOrEmpty(X))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(X)), nameof(X)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(X))));
 
             if (string.IsNullOrEmpty(Y))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Y)), nameof(Y)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Y))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.X}"":""{X}"",""{JsonWebKeyParameterNames.Y}"":""{Y}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -448,13 +448,13 @@ namespace Microsoft.IdentityModel.Tokens
         private void PopulateWithPublicEcParams(JObject jwk)
         {
             if (string.IsNullOrEmpty(Crv))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Crv)), nameof(Crv)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Crv))));
 
             if (string.IsNullOrEmpty(X))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(X)), nameof(X)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(X))));
 
             if (string.IsNullOrEmpty(Y))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Y)), nameof(Y)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Y))));
 
             jwk.Add(JsonWebKeyParameterNames.Crv, Crv);
             jwk.Add(JsonWebKeyParameterNames.Kty, Kty);
@@ -465,10 +465,10 @@ namespace Microsoft.IdentityModel.Tokens
         private void PopulateWithPublicRsaParams(JObject jwk)
         {
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(E)), nameof(E)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(E))));
 
             if (string.IsNullOrEmpty(N))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(N)), nameof(N)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(N))));
 
             jwk.Add(JsonWebKeyParameterNames.E, E);
             jwk.Add(JsonWebKeyParameterNames.Kty, Kty);
