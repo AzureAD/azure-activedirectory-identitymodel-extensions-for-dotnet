@@ -1027,7 +1027,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void SetClaimsIdentityActorFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)
         {
             // bail here; nothing to add.
-            if (identity == null || attribute == null || attribute.Name != ClaimTypes.Actor || attribute.Values == null || attribute.Values.Count < 1)
+            if (identity == null || attribute == null || (attribute.Name != ClaimTypes.Actor && attribute.Name != _actor) || attribute.Values == null || attribute.Values.Count < 1)
                 return;
 
             Saml2Attribute actorAttribute = null;
