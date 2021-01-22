@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -91,6 +92,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <param name="tokenType"> will be added as the value for the 'typ' claim in the header. If it is null or empty <see cref="JwtConstants.HeaderType"/> will be used as token type</param>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
+            : this(signingCredentials, outboundAlgorithmMap, tokenType, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> will be added as the value for the 'typ' claim in the header. If it is null or empty <see cref="JwtConstants.HeaderType"/> will be used as token type</param>
+        /// <param name="additionalInnerHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the inner JWT token header.</param>
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType, IDictionary<string, object> additionalInnerHeaderClaims)
             : base(StringComparer.Ordinal)
         {
             if (signingCredentials == null)
@@ -115,6 +130,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
+            AddAdditionalClaims(additionalInnerHeaderClaims);
             SigningCredentials = signingCredentials;
         }
 
@@ -141,6 +157,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="tokenType"> provides the token type</param>
         /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
+            : this(encryptingCredentials, outboundAlgorithmMap, tokenType, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> provides the token type</param>
+        /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType, IDictionary<string, object> additionalHeaderClaims)
             : base(StringComparer.Ordinal)
         {
             if (encryptingCredentials == null)
@@ -165,6 +196,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
+            AddAdditionalClaims(additionalHeaderClaims);
             EncryptingCredentials = encryptingCredentials;
         }
 
@@ -353,6 +385,32 @@ namespace System.IdentityModel.Tokens.Jwt
 
             return null;
         }
+
+        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims)
+        {
+            if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12742, nameof(additionalHeaderClaims), string.Join(", ", DefaultHeaderParameters))));
+
+            if (additionalHeaderClaims != null)
+            {
+                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _))
+                    Cty = JwtConstants.HeaderType;
+
+                foreach (string claim in additionalHeaderClaims.Keys)
+                    this[claim] = additionalHeaderClaims[claim];
+            }
+            else
+                Cty = JwtConstants.HeaderType;
+        }
+
+        internal static IList<string> DefaultHeaderParameters = new List<string>()
+        {
+            JwtHeaderParameterNames.Alg,
+            JwtHeaderParameterNames.Kid,
+            JwtHeaderParameterNames.X5t,
+            JwtHeaderParameterNames.Enc,
+            JwtHeaderParameterNames.Zip
+        };
 
         /// <summary>
         /// Serializes this instance to JSON.

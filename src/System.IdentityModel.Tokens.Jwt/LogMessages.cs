@@ -64,6 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12739 = "IDX12739: JWT: '{0}' has three segments but is not in proper JWS format.";
         internal const string IDX12740 = "IDX12740: JWT: '{0}' has five segments but is not in proper JWE format.";
         internal const string IDX12741 = "IDX12741: JWT: '{0}' must have three segments (JWS) or five segments (JWE).";
+        internal const string IDX12742 = "IDX12742: ''{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
 #pragma warning restore 1591
     }
 }

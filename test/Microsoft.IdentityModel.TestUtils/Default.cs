@@ -689,7 +689,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet\r\nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer, OriginalIssuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
             };
         }
 
@@ -707,7 +707,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { ClaimTypes.HomePhone, "555.1212" },
                 { ClaimTypes.Role, new List<string>{"Developer", "Sales" } },
                 { ClaimTypes.StreetAddress, "123AnyWhereStreet\r\nSomeTown/r/nUSA" },
-                { ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien" }
+                { ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien" }
             };
         }
 
@@ -726,7 +726,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer, OriginalIssuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
             };
         }
 
@@ -745,7 +745,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer),
             };
         }
 
