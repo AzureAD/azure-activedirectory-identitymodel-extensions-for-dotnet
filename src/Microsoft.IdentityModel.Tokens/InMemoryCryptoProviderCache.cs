@@ -28,7 +28,7 @@
 using System;
 using System.Globalization;
 using Microsoft.IdentityModel.Logging;
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 #endif
@@ -39,20 +39,20 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines a cache for crypto providers.
     /// Current support is limited to <see cref="SignatureProvider"/> only.
     /// </summary>
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0
     public class InMemoryCryptoProviderCache : CryptoProviderCache, IDisposable
-#elif NET45
+#elif NET45 || NET461 || NET472
     public class InMemoryCryptoProviderCache: CryptoProviderCache
 #endif
     {
         internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
         private readonly MemoryCache _signingSignatureProviders;
         private readonly MemoryCache _verifyingSignatureProviders;
         private bool _disposed = false;
-#elif NET45
-        private readonly MaxCapacityRefreshCache<string, SignatureProvider> _signingSignatureProviders;
-        private readonly MaxCapacityRefreshCache<string, SignatureProvider> _verifyingSignatureProviders;
+#elif NET45 || NET461 || NET472
+        private readonly LRUCache<string, SignatureProvider> _signingSignatureProviders;
+        private readonly LRUCache<string, SignatureProvider> _verifyingSignatureProviders;
 #endif
 
         /// <summary>
@@ -72,12 +72,12 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-#if NET461 || NET472 || NETSTANDARD2_0
+#if NETSTANDARD2_0
             _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
             _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
-#elif NET45
-            _signingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
-            _verifyingSignatureProviders = new MaxCapacityRefreshCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+#elif NET45 || NET461 || NET472
+            _signingSignatureProviders = new LRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+            _verifyingSignatureProviders = new LRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
 #endif
         }
 
@@ -158,10 +158,10 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             var cacheKey = GetCacheKey(signatureProvider);
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
             MemoryCache signatureProviderCache;
-#elif NET45
-            MaxCapacityRefreshCache<string, SignatureProvider> signatureProviderCache;
+#elif NET45 || NET461 || NET472
+            LRUCache<string, SignatureProvider> signatureProviderCache;
 #endif
             // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Tokens
             else
                 signatureProviderCache = _verifyingSignatureProviders;
 
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.TryGetValue(cacheKey, out _))
             {
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens
                 signatureProvider.CryptoProviderCache = this;
                 return true;
             }
-#elif NET45
+#elif NET45 || NET461 || NET472
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.Contains(cacheKey))
             {
@@ -219,15 +219,15 @@ namespace Microsoft.IdentityModel.Tokens
 
             var cacheKey = GetCacheKeyPrivate(securityKey, algorithm, typeofProvider);
             if (willCreateSignatures)
-#if NET461 || NET472 || NETSTANDARD2_0
+#if NETSTANDARD2_0
                 return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
-#elif NET45
+#elif NET45 || NET461 || NET472
                 return _signingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #endif
             else
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
                 return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
-#elif NET45
+#elif NET45 || NET461 || NET472
                 return _verifyingSignatureProviders.TryGetValue(cacheKey, out signatureProvider);
 #endif
         }
@@ -248,10 +248,10 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             var cacheKey = GetCacheKey(signatureProvider);
-#if NET461 || NET472 || NETSTANDARD2_0 
+#if NETSTANDARD2_0 
             MemoryCache signatureProviderCache;
-#elif NET45
-            MaxCapacityRefreshCache<string, SignatureProvider> signatureProviderCache;
+#elif NET45 || NET461 || NET472
+            LRUCache<string, SignatureProvider> signatureProviderCache;
 #endif
             // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-#if NET45
+#if NET45 || NET461 || NET472
                 if (signatureProviderCache.TryRemove(cacheKey, out SignatureProvider provider))
                 {
                     provider.CryptoProviderCache = null;
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     return false; 
                 }
-#elif NET461 || NET472 || NETSTANDARD2_0
+#elif NETSTANDARD2_0
                 if (signatureProviderCache.TryGetValue(cacheKey, out SignatureProvider provider))
                 {
                     signatureProviderCache.Remove(cacheKey);
@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET461 || NET472 || NETSTANDARD2_0
+#if NETSTANDARD2_0
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
         /// </summary>
