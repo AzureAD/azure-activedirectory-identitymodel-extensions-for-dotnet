@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -33,7 +33,6 @@
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
     <Reference Include="System.IdentityModel" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   
   <ItemGroup>
