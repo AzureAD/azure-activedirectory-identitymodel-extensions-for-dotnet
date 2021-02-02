@@ -823,6 +823,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return SecurityTokenDescriptor(null, signingCredentials, null);
         }
+
         public static SecurityTokenDescriptor X509SecurityTokenDescriptor(X509SigningCredentials signingCredentials)
         {
             return X509SecurityTokenDescriptor(null, signingCredentials, null);

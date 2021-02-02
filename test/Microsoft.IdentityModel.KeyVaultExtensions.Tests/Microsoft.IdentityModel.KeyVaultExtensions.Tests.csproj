@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -16,10 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.KeyVaultExtensions\Microsoft.IdentityModel.KeyVaultExtensions.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
   </ItemGroup>
 
   <ItemGroup>
