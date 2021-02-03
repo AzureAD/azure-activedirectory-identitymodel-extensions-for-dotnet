@@ -33,85 +33,141 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class LRUCache<TKey, TValue>
     {
-        private int capacity;
-        private int count = 0;
-        Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>> map;
-        LinkedList<CacheItem<TKey, TValue>> doubleLinkedList = new LinkedList<CacheItem<TKey, TValue>>();
+        private int _capacity;
+        private int _count = 0;
+        private Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>> _map;
+        private LinkedList<CacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<CacheItem<TKey, TValue>>();
+        // Used to ensure that the cache is thread-safe.
+        private object _cacheLock = new object();
 
         internal LRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
-            this.capacity = capacity;
-            map = new Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>>(comparer ?? EqualityComparer<TKey>.Default);
+            _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
+            _map = new Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>>(comparer ?? EqualityComparer<TKey>.Default);
         }
 
         internal bool Contains(TKey key)
         {
-            return map.ContainsKey(key);
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            return _map.ContainsKey(key);
         }
 
         // [[TODO]]: How often and when should this method be called?
-        //internal int RemoveExpiredValues()
-        //{
-        //    // [[TODO]]: Iterate through list, mark items as expired, and then remove from the cache.
-        //}
+        internal int RemoveExpiredValues()
+        {
+            int numItemsRemoved = 0;
+            var node = _doubleLinkedList.First;
+            lock (_cacheLock)
+            {
+                while (node != null)
+                {
+                    var nextNode = node.Next;
+                    if (node.Value.ExpirationTime < DateTime.UtcNow)
+                    {
+                        _doubleLinkedList.Remove(node);
+                        numItemsRemoved++;
+                    }
+
+                    node = nextNode;
+                }
+            }
+
+            return numItemsRemoved;
+        }
 
         internal void SetValue(TKey key, TValue value)
         {
             SetValue(key, value, DateTime.MaxValue);
         }
 
-        // [[TODO]]: Needs locks and null checks.
         internal bool SetValue(TKey key, TValue value, DateTime? expirationTime)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (value == null)
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
+            if (expirationTime == null)
+                throw LogHelper.LogArgumentNullException(nameof(expirationTime));
+
             // item already expired
             if (expirationTime < DateTime.UtcNow)
                 return false;
 
             // just need to update value and move it to the top
-            if (map.ContainsKey(key))
+            if (_map.ContainsKey(key))
             {
-                var node = map[key];
-                doubleLinkedList.Remove(node);
-                doubleLinkedList.AddFirst(new CacheItem<TKey, TValue>(key, value, expirationTime));
+                lock (_cacheLock)
+                {
+                    // make sure node hasn't been removed by a different thread
+                    if (_map.TryGetValue(key, out var node))
+                        _doubleLinkedList.Remove(node);
+
+                    // add a new item regardless of whether the old item was removed or not
+                    _doubleLinkedList.AddFirst(new CacheItem<TKey, TValue>(key, value, expirationTime));
+                }
+    
                 return true;
             }
             else
             {
                 // if cache is full, then remove the least recently used node
-                if (count == capacity)
+                if (_count == _capacity)
                 {
-                    var lru = doubleLinkedList.Last;
-                    map.Remove(lru.Value.Key);
-                    doubleLinkedList.RemoveLast();
-                    count--;
+                    lock (_cacheLock)
+                    {
+                        var lru = _doubleLinkedList.Last;
+                        _map.Remove(lru.Value.Key);
+                        _doubleLinkedList.RemoveLast();
+                        _count--;
+                    }
+                 
                 }
 
                 // add a new node
                 var node = new LinkedListNode<CacheItem<TKey, TValue>>(new CacheItem<TKey, TValue>(key, value, expirationTime));
-                doubleLinkedList.AddFirst(node);
-                map[key] = node;
-                count++;
+
+                lock (_cacheLock)
+                {
+                    _doubleLinkedList.AddFirst(node);
+                    _map[key] = node;
+                    _count++;
+                }
+              
                 return true;
             }
         }
 
-        // [[TODO]]: Needs locks and null checks.
         // Each time a node gets accessed, it gets moved to the beginning (head) of the list.
         internal bool TryGetValue(TKey key, out TValue value)
         {
-            if (!map.ContainsKey(key))
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!_map.ContainsKey(key))
             {
                 value = default;
                 return false;
             }
 
-            var node = map[key];
-            doubleLinkedList.Remove(node);
-            doubleLinkedList.AddFirst(node);
+            LinkedListNode<CacheItem<TKey, TValue>> node;
+            lock (_cacheLock)
+            {
+                // make sure node hasn't been removed by a different thread
+                if (_map.TryGetValue(key, out node))
+                {
+                    _doubleLinkedList.Remove(node);
+                    _doubleLinkedList.AddFirst(node);
+                }
+            }
+
             // node.Value is a <key,value> pair containing a key and the node corresponding to it. To get the value that the user
             // is actually caching, we need to return the value of the node itself (Value.Value).
-            value = node.Value.Value;
-            return true;
+            value = node != null ? node.Value.Value : default;
+            return node != null;
         }
 
         /// <summary>
@@ -121,18 +177,30 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="value">The cache value.</param>
         internal bool TryRemove(TKey key, out TValue value)
         {
-            // [[TODO]]: Needs locks and null checks.
-            if (!map.ContainsKey(key))
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!_map.ContainsKey(key))
             {
                 value = default;
                 return false;
             }
 
-            var node = map[key];
-            doubleLinkedList.Remove(node);
-            map.Remove(key);
-            value = node.Value.Value;
-            count--;
+            lock (_cacheLock)
+            {
+                // check to make sure node wasn't removed by a different thread
+                if (!_map.TryGetValue(key, out var node))
+                {
+                    value = default;
+                    return false;
+                }
+
+                _doubleLinkedList.Remove(node);
+                _map.Remove(key);
+                value = node.Value.Value;
+                _count--;
+            }
+         
             return true;
         }
     }

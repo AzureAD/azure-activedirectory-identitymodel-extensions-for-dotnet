@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-#if NET461 || NET472 || NETCOREAPP2_1
+#if NETCOREAPP2_1
         /// <summary>
         /// Checks that the Dispose() method is properly called on the InMemoryCryptoProviderCache.
         [Fact]
@@ -622,7 +622,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return base.GetCacheKey(securityKey, algorithm, typeofProvider);
         }
 
-#if NET461 || NET472 || NETCOREAPP2_1
+#if NETCOREAPP2_1
         protected override void Dispose(bool disposing)
         {
             DisposeCalled = true;
