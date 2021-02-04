@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class LRUCache<TKey, TValue>
+    internal class LockingLRUCache<TKey, TValue> : ILRUCache<TKey, TValue>
     {
         private int _capacity;
         private int _count = 0;
@@ -40,13 +40,13 @@ namespace Microsoft.IdentityModel.Tokens
         // Used to ensure that the cache is thread-safe.
         private object _cacheLock = new object();
 
-        internal LRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal LockingLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>>(comparer ?? EqualityComparer<TKey>.Default);
         }
 
-        internal bool Contains(TKey key)
+        public bool Contains(TKey key)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         // [[TODO]]: How often and when should this method be called?
-        internal int RemoveExpiredValues()
+        public int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
             var node = _doubleLinkedList.First;
@@ -77,12 +77,12 @@ namespace Microsoft.IdentityModel.Tokens
             return numItemsRemoved;
         }
 
-        internal void SetValue(TKey key, TValue value)
+        public void SetValue(TKey key, TValue value)
         {
             SetValue(key, value, DateTime.MaxValue);
         }
 
-        internal bool SetValue(TKey key, TValue value, DateTime? expirationTime)
+        public bool SetValue(TKey key, TValue value, DateTime? expirationTime)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         // Each time a node gets accessed, it gets moved to the beginning (head) of the list.
-        internal bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, out TValue value)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The cache key.</param>
         /// <param name="value">The cache value.</param>
-        internal bool TryRemove(TKey key, out TValue value)
+        public bool TryRemove(TKey key, out TValue value)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));

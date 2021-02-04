@@ -51,8 +51,8 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly MemoryCache _verifyingSignatureProviders;
         private bool _disposed = false;
 #elif NET45 || NET461 || NET472
-        private readonly LRUCache<string, SignatureProvider> _signingSignatureProviders;
-        private readonly LRUCache<string, SignatureProvider> _verifyingSignatureProviders;
+        private readonly ILRUCache<string, SignatureProvider> _signingSignatureProviders;
+        private readonly ILRUCache<string, SignatureProvider> _verifyingSignatureProviders;
 #endif
 
         /// <summary>
@@ -76,8 +76,17 @@ namespace Microsoft.IdentityModel.Tokens
             _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
             _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
 #elif NET45 || NET461 || NET472
-            _signingSignatureProviders = new LRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
-            _verifyingSignatureProviders = new LRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+            // THE CODE BELOW IS FOR TESTING ONLY.
+            if (!cryptoProviderCacheOptions.UseLockingCache)
+            {
+                _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+                _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+            }
+            else
+            {
+                _signingSignatureProviders = new LockingLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+                _verifyingSignatureProviders = new LockingLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+            }
 #endif
         }
 
@@ -161,7 +170,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD2_0 
             MemoryCache signatureProviderCache;
 #elif NET45 || NET461 || NET472
-            LRUCache<string, SignatureProvider> signatureProviderCache;
+            ILRUCache<string, SignatureProvider> signatureProviderCache;
 #endif
             // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)
@@ -251,7 +260,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETSTANDARD2_0 
             MemoryCache signatureProviderCache;
 #elif NET45 || NET461 || NET472
-            LRUCache<string, SignatureProvider> signatureProviderCache;
+            ILRUCache<string, SignatureProvider> signatureProviderCache;
 #endif
             // Determine if we are caching a signing or a verifying SignatureProvider.
             if (signatureProvider.WillCreateSignatures)

@@ -49,5 +49,10 @@ namespace Microsoft.IdentityModel.Tokens
                 _sizeLimit = (value > 0) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
             }
         }
+
+        /// <summary>
+        /// ONLY FOR TESTING.
+        /// </summary>
+        public bool UseLockingCache { get; set; } = false;
     }
 }
