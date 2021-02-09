@@ -101,6 +101,39 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void SetValue()
+        {
+            TestUtilities.WriteHeader($"{this}.SetValue");
+            var context = new CompareContext($"{this}.SetValue");
+            var cache = new EventBasedLRUCache<int?, string>(1);
+
+            cache.SetValue(1, "one");
+            if (!cache.Contains(1))
+                context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
+
+            // The LRU item should be removed, allowing this value to be added even though the cache is full.
+            cache.SetValue(2, "two");
+            if (!cache.Contains(2))
+                context.AddDiff("The key value pair {2, 'two'} should have been added to the cache, but the Contains() method returned false.");
+
+            try
+            {
+                cache.SetValue(null, "three");
+                context.AddDiff("The first parameter passed into the SetValue() method was null, but no exception was thrown.");
+
+                cache.SetValue(3, null);
+                context.AddDiff("The second parameter passed into the SetValue() method was null, but no exception was thrown.");
+            }
+            catch (Exception ex)
+            {
+                if (!ex.GetType().Equals(typeof(ArgumentNullException)))
+                    context.AddDiff("The exception type thrown by Set() was not of type ArgumentNullException.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void MaintainLRUOrder()
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
@@ -115,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (i % 10 == 0 && i != 0)
                 {
                     // wait for the cache events to process
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
 
                     if (cache.LinkedListValues().Intersect(cache.MapValues()).Count() != 10)
                         context.AddDiff("Values in the map and corresponding linked list do not match up.");
