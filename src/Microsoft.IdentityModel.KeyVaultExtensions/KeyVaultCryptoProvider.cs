@@ -77,7 +77,9 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                         return cachedProvider;
 
                     var signatureProvider = new KeyVaultSignatureProvider(key, algorithm, willCreateSignatures);
-                    _cache.TryAdd(signatureProvider);
+                    if (CryptoProviderFactory.ShouldCacheSignatureProvider(signatureProvider))
+                        _cache.TryAdd(signatureProvider);
+
                     return signatureProvider;
                 }
             }
