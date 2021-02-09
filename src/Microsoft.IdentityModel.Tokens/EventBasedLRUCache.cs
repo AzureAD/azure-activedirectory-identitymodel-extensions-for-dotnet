@@ -34,12 +34,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    public class EventBasedLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
+    internal class EventBasedLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
     {
         private int _capacity;
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
@@ -47,12 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
         private bool _disposed = false;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="capacity"></param>
-        /// <param name="comparer"></param>
-        public EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
@@ -72,11 +62,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
         public bool Contains(TKey key)
         {
             if (key == null)
@@ -85,10 +70,6 @@ namespace Microsoft.IdentityModel.Tokens
             return _map.ContainsKey(key);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
@@ -118,23 +99,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
         public void SetValue(TKey key, TValue value)
         {
             SetValue(key, value, DateTime.MaxValue);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="expirationTime"></param>
-        /// <returns></returns>
         public bool SetValue(TKey key, TValue value, DateTime? expirationTime)
         {
             if (key == null)
@@ -209,11 +178,7 @@ namespace Microsoft.IdentityModel.Tokens
             return cacheItem != null;
         }
 
-        /// <summary>
         /// Removes a particular key from the cache.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <param name="value">The cache value.</param>
         public bool TryRemove(TKey key, out TValue value)
         {
             if (key == null)
@@ -243,7 +208,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
         /// <returns></returns>
-        public ICollection<LRUCacheItem<TKey, TValue>> Values()
+        internal LinkedList<LRUCacheItem<TKey, TValue>> LinkedListValues()
+        {
+            return _doubleLinkedList;
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        /// <returns></returns>
+        internal ICollection<LRUCacheItem<TKey, TValue>> MapValues()
         {
             return _map.Values;
         }
@@ -282,20 +256,20 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class LRUCacheItem<TKey, TValue>
+    internal class LRUCacheItem<TKey, TValue>
     {
         /// <summary>
         /// 
         /// </summary>
-        public TKey Key { get; set; }
+        internal TKey Key { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public TValue Value { get; set; }
+        internal TValue Value { get; set; }
         /// <summary>
         /// 
         /// </summary>
-        public DateTime ExpirationTime { get; set; }
+        internal DateTime ExpirationTime { get; set; }
 
         internal LRUCacheItem(TKey key, TValue value)
         {
