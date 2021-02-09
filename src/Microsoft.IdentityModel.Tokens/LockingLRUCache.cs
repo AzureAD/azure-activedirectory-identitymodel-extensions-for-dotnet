@@ -26,12 +26,15 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class LockingLRUCache<TKey, TValue> : ILRUCache<TKey, TValue>
+    internal class LockingLRUCache<TKey, TValue> : ILRUCache<TKey, TValue>, IDisposable
     {
         private int _capacity;
         private int _count = 0;
@@ -39,11 +42,27 @@ namespace Microsoft.IdentityModel.Tokens
         private LinkedList<CacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<CacheItem<TKey, TValue>>();
         // Used to ensure that the cache is thread-safe.
         private object _cacheLock = new object();
+        private readonly BlockingCollection<Action> _cleanupEventQueue = new BlockingCollection<Action>();
+        private bool _disposed = false;
 
         internal LockingLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new Dictionary<TKey, LinkedListNode<CacheItem<TKey, TValue>>>(comparer ?? EqualityComparer<TKey>.Default);
+
+            var thread = new Thread(new ThreadStart(OnStart));
+            thread.IsBackground = true;
+            thread.Start();
+
+            Task timerTask = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+        }
+
+        private void OnStart()
+        {
+            while (true)
+            {
+                _cleanupEventQueue.Take().Invoke();
+            }
         }
 
         public bool Contains(TKey key)
@@ -54,7 +73,6 @@ namespace Microsoft.IdentityModel.Tokens
             return _map.ContainsKey(key);
         }
 
-        // [[TODO]]: How often and when should this method be called?
         public int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
@@ -75,6 +93,15 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return numItemsRemoved;
+        }
+
+        async Task RemoveExpiredValuesPeriodically(TimeSpan interval)
+        {
+            while (true)
+            {
+                _cleanupEventQueue.Add(() => RemoveExpiredValues());
+                await Task.Delay(interval).ConfigureAwait(false);
+            }
         }
 
         public void SetValue(TKey key, TValue value)
@@ -202,6 +229,33 @@ namespace Microsoft.IdentityModel.Tokens
             }
          
             return true;
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_cleanupEventQueue"/>.
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                if (disposing)
+                {
+                    _cleanupEventQueue.Dispose();
+                }
+            }
         }
     }
 

@@ -134,6 +134,68 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact]
+        public void TryGetValue()
+        {
+            TestUtilities.WriteHeader($"{this}.TryGetValue");
+            var context = new CompareContext($"{this}.TryGetValue");
+            var cache = new EventBasedLRUCache<int?, string>(2);
+
+            cache.SetValue(1, "one");
+
+            if (!cache.TryGetValue(1, out var value))
+            {
+                context.AddDiff("The key value pair {1, 'one'} should be in the cache, but the TryGetValue() method returned false.");
+                if (!value.Equals("one"))
+                    context.AddDiff("The corresponding value for key '1' should be 'one' but was '" + value + "'.");
+            }
+
+            if (cache.TryGetValue(2, out _))
+                context.AddDiff("A key value pair with a key of '2' was never added to the cache, but the TryGetValue() method returned true.");
+
+            try
+            {
+                cache.TryGetValue(null, out _);
+                context.AddDiff("The first parameter passed into the TryGetValue() method was null, but no exception was thrown.");
+            }
+            catch (Exception ex)
+            {
+                if (!ex.GetType().Equals(typeof(ArgumentNullException)))
+                    context.AddDiff("The exception type thrown by TryGetValue() was not of type ArgumentNullException.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void TryRemove()
+        {
+            TestUtilities.WriteHeader($"{this}.RemoveValue");
+            var context = new CompareContext($"{this}.RemoveValue");
+            var cache = new EventBasedLRUCache<int?, string>(1);
+
+            cache.SetValue(1, "one");
+
+            if (!cache.TryRemove(1, out _))
+                context.AddDiff("The key value pair {1, 'one'} should have been removed from the cache, but the TryRemove() method returned false.");
+
+            if (cache.TryRemove(2, out _))
+                context.AddDiff("The key value pair {2, 'two'} was never added to the cache, but the TryRemove() method returned true.");
+
+            try
+            {
+                cache.TryRemove(null, out _);
+                context.AddDiff("The first parameter passed into the TryRemove() method was null, but no exception was thrown.");
+            }
+            catch (Exception ex)
+            {
+                if (!ex.GetType().Equals(typeof(ArgumentNullException)))
+                    context.AddDiff("The exception type thrown by TryRemove() was not of type ArgumentNullException.");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void MaintainLRUOrder()
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
