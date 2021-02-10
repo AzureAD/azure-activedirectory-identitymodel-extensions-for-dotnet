@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             set
             {
-                _sizeLimit = (value > 0) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
+                _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
             }
         }
 
