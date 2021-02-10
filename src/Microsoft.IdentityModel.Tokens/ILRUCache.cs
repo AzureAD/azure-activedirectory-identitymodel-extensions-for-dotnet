@@ -32,9 +32,8 @@ namespace Microsoft.IdentityModel.Tokens
     internal interface ILRUCache<TKey, TValue>
     {
         bool Contains(TKey key);
-        int RemoveExpiredValues();
         void SetValue(TKey key, TValue value);
-        bool SetValue(TKey key, TValue value, DateTime? expirationTime);
+        bool SetValue(TKey key, TValue value, DateTime expirationTime);
         bool TryGetValue(TKey key, out TValue value);
         bool TryRemove(TKey key, out TValue value);
     }

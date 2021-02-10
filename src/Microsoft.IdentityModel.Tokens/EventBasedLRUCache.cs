@@ -34,11 +34,23 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// This is an LRU cache implementation that relies on an event queue rather than locking to achieve thread safety.
+    /// This approach has been decided on in order to optimize the performance of the get and set operations on the cache.
+    /// This cache contains a doubly linked list in order to maintain LRU order, as well as a dictionary (map) to keep track of
+    /// keys and expiration times. The linked list (a structure which is not thread-safe) is NEVER modified directly inside
+    /// an API call (e.g. get, set, remove); it is only ever modified sequentially by a background thread. On the other hand,
+    /// the map is a <see cref="ConcurrentDictionary{TKey, TValue}"/> which may be modified directly inside an API call or
+    /// through eventual processing of the event queue. This implementation relies on the principle of 'eventual consistency':
+    /// though the map and it's corresponding linked list may be out of sync at any given point in time, they will eventually line up.
+    /// </summary>
+    /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
+    /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
     internal class EventBasedLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
     {
-        private int _capacity;
-        private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
-        private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
+        private readonly int _capacity;
+        private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+        private readonly LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
         private bool _disposed = false;
 
@@ -46,12 +58,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-
-            var thread = new Thread(new ThreadStart(OnStart));
-            thread.IsBackground = true;
-            thread.Start();
-
-            Task timerTask = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+            new Task(() => OnStart(), TaskCreationOptions.LongRunning).Start();
+            _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 
         private void OnStart()
@@ -70,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
             return _map.ContainsKey(key);
         }
 
-        public int RemoveExpiredValues()
+        internal int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
             var node = _doubleLinkedList.First;
@@ -104,16 +112,13 @@ namespace Microsoft.IdentityModel.Tokens
             SetValue(key, value, DateTime.MaxValue);
         }
 
-        public bool SetValue(TKey key, TValue value, DateTime? expirationTime)
+        public bool SetValue(TKey key, TValue value, DateTime expirationTime)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (value == null)
                 throw LogHelper.LogArgumentNullException(nameof(value));
-
-            if (expirationTime == null)
-                throw LogHelper.LogArgumentNullException(nameof(expirationTime));
 
             // item already expired
             if (expirationTime < DateTime.UtcNow)
@@ -122,12 +127,21 @@ namespace Microsoft.IdentityModel.Tokens
             // just need to update value and move it to the top
             if (_map.ContainsKey(key))
             {
+                var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
                 // make sure node hasn't been removed by a different thread
                 if (_map.TryGetValue(key, out var cacheItem))
-                    _eventQueue.Add(() => _doubleLinkedList.Remove(cacheItem));
+                {
+                    _eventQueue.Add(() =>
+                    {
+                        _doubleLinkedList.Remove(cacheItem);
+                        _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
 
-                // add a new item regardless of whether the old item was removed or not
-                _eventQueue.Add(() => _doubleLinkedList.AddFirst(new LRUCacheItem<TKey, TValue>(key, value, expirationTime)));
+                    });
+                }
+                else
+                {
+                    _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
+                }
 
                 return true;
             }
@@ -197,11 +211,9 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
             }
 
-            _eventQueue.Add(() => _doubleLinkedList.Remove(cacheItem));
-            _map.TryRemove(key, out _);
             value = cacheItem.Value;
-
-            return true;
+            _eventQueue.Add(() => _doubleLinkedList.Remove(cacheItem));
+            return _map.TryRemove(key, out _);
         }
 
         /// <summary>
@@ -261,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// 
         /// </summary>
-        internal TKey Key { get; set; }
+        internal TKey Key { get; }
         /// <summary>
         /// 
         /// </summary>
@@ -278,12 +290,12 @@ namespace Microsoft.IdentityModel.Tokens
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
         }
 
-        internal LRUCacheItem(TKey key, TValue value, DateTime? expirationTime)
+        internal LRUCacheItem(TKey key, TValue value, DateTime expirationTime)
         {
 
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-            ExpirationTime = expirationTime ?? throw LogHelper.LogArgumentNullException(nameof(expirationTime));
+            ExpirationTime = expirationTime;
         }
     }
 }

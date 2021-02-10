@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
             return _map.ContainsKey(key);
         }
 
-        public int RemoveExpiredValues()
+        internal int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
             var node = _doubleLinkedList.First;
@@ -109,16 +109,13 @@ namespace Microsoft.IdentityModel.Tokens
             SetValue(key, value, DateTime.MaxValue);
         }
 
-        public bool SetValue(TKey key, TValue value, DateTime? expirationTime)
+        public bool SetValue(TKey key, TValue value, DateTime expirationTime)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (value == null)
                 throw LogHelper.LogArgumentNullException(nameof(value));
-
-            if (expirationTime == null)
-                throw LogHelper.LogArgumentNullException(nameof(expirationTime));
 
             // item already expired
             if (expirationTime < DateTime.UtcNow)
@@ -261,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens
 
     internal class CacheItem<TKey, TValue>
     {
-        internal TKey Key { get; set; }
+        internal TKey Key { get; }
         internal TValue Value { get; set; }
         internal DateTime ExpirationTime { get; set; }
 
@@ -272,12 +269,12 @@ namespace Microsoft.IdentityModel.Tokens
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
         }
 
-        internal CacheItem(TKey key, TValue value, DateTime? expirationTime)
+        internal CacheItem(TKey key, TValue value, DateTime expirationTime)
         {
 
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-            ExpirationTime = expirationTime ?? throw LogHelper.LogArgumentNullException(nameof(expirationTime));
+            ExpirationTime = expirationTime;
         }
     }
 }
