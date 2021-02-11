@@ -34,8 +34,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Represents a ECDsa security key.
     /// </summary>
-    public class ECDsaSecurityKey : AsymmetricSecurityKey
+    public class ECDsaSecurityKey : AsymmetricSecurityKey, IDisposable
     {
+        private bool _disposed = false;
         private bool? _hasPrivateKey;
 
         internal ECDsaSecurityKey(JsonWebKey webKey, bool usePrivateKey)
@@ -139,6 +140,31 @@ namespace Microsoft.IdentityModel.Tokens
             }
 #endif
             throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="ECDsa"/>.
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            if (disposing)
+                ECDsa.Dispose();           
         }
     }
 }

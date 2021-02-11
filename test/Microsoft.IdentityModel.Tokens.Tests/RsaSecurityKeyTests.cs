@@ -61,6 +61,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         }
 
+        /// <summary>
+        /// Checks that the Dispose() method is properly called on the RsaSecurityKey.
+        [Fact]
+        public void RsaSecurityKeyDispose()
+        {
+            TestUtilities.WriteHeader($"{this}.RsaSecurityKeyDispose");
+            var context = new CompareContext();
+#if NET_CORE
+                var adHocRsa = RSA.Create();
+                adHocRsa.KeySize = 2048;
+#else
+            var adHocRsa = new RSACryptoServiceProvider(2048);
+#endif
+            var adHocRsaSecurityKey = new RsaSecurityKeyMock(adHocRsa);
+            adHocRsaSecurityKey.Dispose();
+            if (!adHocRsaSecurityKey.DisposeCalled)
+                context.AddDiff("RsaSecurityKeyMock was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         private void RsaSecurityKeyConstructor(RSAParameters parameters, ExpectedException ee)
         {
             try
@@ -169,6 +190,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CanComputeJwkThumbprint()
         {
             Assert.True(KeyingMaterial.DefaultRsaSecurityKey1.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an RSASecurityKey.");
+        }
+    }
+
+    public class RsaSecurityKeyMock : RsaSecurityKey
+    {
+        public bool DisposeCalled { get; set; } = false;
+
+        public RsaSecurityKeyMock(RSA rsa) : base(rsa) { }
+
+        protected override void Dispose(bool disposing)
+        {
+            DisposeCalled = true;
+            base.Dispose(disposing);
         }
     }
 }

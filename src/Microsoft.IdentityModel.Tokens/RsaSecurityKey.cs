@@ -34,13 +34,15 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Represents a Rsa security key.
     /// </summary>
-    public class RsaSecurityKey : AsymmetricSecurityKey
+    public class RsaSecurityKey : AsymmetricSecurityKey, IDisposable
     {
-        private bool? _hasPrivateKey;
+        private bool _disposed = false;
 
         private bool _foundPrivateKeyDetermined = false;
 
         private PrivateKeyStatus _foundPrivateKey;
+
+        private bool? _hasPrivateKey;
 
         internal RsaSecurityKey(JsonWebKey webKey)
             : base(webKey)
@@ -210,6 +212,31 @@ namespace Microsoft.IdentityModel.Tokens
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(rsaParameters.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(rsaParameters.Modulus)}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// If <paramref name="disposing"/> is true and <see cref="Rsa"/> != null, this method disposes of <see cref="Rsa"/>.
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            if (disposing && Rsa != null)
+                Rsa.Dispose();
         }
     }
 }

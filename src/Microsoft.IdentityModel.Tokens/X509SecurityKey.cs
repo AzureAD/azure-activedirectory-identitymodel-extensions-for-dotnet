@@ -35,12 +35,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// An <see cref="AsymmetricSecurityKey"/> that is backed by a <see cref="X509Certificate2"/>
     /// </summary>
-    public class X509SecurityKey : AsymmetricSecurityKey
+    public class X509SecurityKey : AsymmetricSecurityKey, IDisposable
     {
+        private bool _disposed = false;
         AsymmetricAlgorithm _privateKey;
         bool _privateKeyAvailabilityDetermined;
         AsymmetricAlgorithm _publicKey;
-        object _thisLock = new Object();
+        readonly object _thisLock = new Object();
 
         internal X509SecurityKey(JsonWebKey webKey)
             : base(webKey)
@@ -197,7 +198,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
-            return new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint();
+            using (var key = new RsaSecurityKey(PublicKey as RSA))
+                return key.ComputeJwkThumbprint();          
         }
 
         /// <summary>
@@ -219,6 +221,36 @@ namespace Microsoft.IdentityModel.Tokens
         public override int GetHashCode()
         {
             return Certificate.GetHashCode();
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_publicKey"/> and <see cref="_privateKey"/> (if non-null).
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+            if (disposing)
+            {
+                if (_privateKey != null)
+                    _privateKey.Dispose();
+
+                _publicKey.Dispose();
+            }
         }
     }
 }

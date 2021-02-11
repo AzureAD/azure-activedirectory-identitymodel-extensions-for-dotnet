@@ -39,7 +39,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Constructor()
         {
-
             // testing constructor that takes ECDsa instance
             ECDsaSecurityKeyConstructorWithEcdsa(null, ExpectedException.ArgumentNullException("ecdsa"));
 #if !NET_CORE
@@ -80,7 +79,39 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(KeyingMaterial.Ecdsa256Key.CanComputeJwkThumbprint(), "ECDsaSecurityKey shouldn't be able to compute JWK thumbprint on Desktop (net452 and net461 targets).");
 #endif
         }
+
+        /// <summary>
+        /// Checks that the Dispose() method is properly called on the ECDsaSecurityKey.
+        [Fact]
+        public void ECDsaSecurityKeyDispose()
+        {
+            TestUtilities.WriteHeader($"{this}.ECDsaSecurityKeyDispose");
+            var context = new CompareContext();
+#if !NET_CORE
+            var ecdsa = new ECDsaCng();
+#elif NET_CORE
+            var ecdsa = ECDsa.Create();
+#endif
+            var ecdsaSecurityKey = new ECDsaSecurityKeyMock(ecdsa);
+            ecdsaSecurityKey.Dispose();
+            if (!ecdsaSecurityKey.DisposeCalled)
+                context.AddDiff("ECDsaSecurityKeyMock was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+    }
+
+    public class ECDsaSecurityKeyMock : ECDsaSecurityKey
+    {
+        public bool DisposeCalled { get; set; } = false;
+
+        public ECDsaSecurityKeyMock(ECDsa ecdsa) : base(ecdsa) { }
+
+        protected override void Dispose(bool disposing)
+        {
+            DisposeCalled = true;
+            base.Dispose(disposing);
+        }
     }
 }
-
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

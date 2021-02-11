@@ -106,6 +106,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             Assert.True(KeyingMaterial.DefaultX509Key_2048.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an X509SecurityKey.");
         }
+
+        /// <summary>
+        /// Checks that the Dispose() method is properly called on the X509SecurityKey.
+        [Fact]
+        public void X509SecurityKeyDispose()
+        {
+            TestUtilities.WriteHeader($"{this}.X509SecurityKeyDispose");
+            var context = new CompareContext();
+
+            var x509SecurityKey = new X509SecurityKeyMock(KeyingMaterial.DefaultCert_2048);
+            x509SecurityKey.Dispose();
+            if (!x509SecurityKey.DisposeCalled)
+                context.AddDiff("X509SecurityKeyMock was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
     }
 
     public class X509SecurityKeyTheoryData : TheoryDataBase
@@ -133,6 +149,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public X509Certificate X509Certificate { get; set; }
 
         public X509SecurityKey X509SecurityKey { get; set; }
+    }
+    public class X509SecurityKeyMock : X509SecurityKey
+    {
+        public bool DisposeCalled { get; set; } = false;
+
+        public X509SecurityKeyMock(X509Certificate2 certificate) : base(certificate) { }
+
+        protected override void Dispose(bool disposing)
+        {
+            DisposeCalled = true;
+            base.Dispose(disposing);
+        }
     }
 }
 
