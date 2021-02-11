@@ -124,10 +124,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (expirationTime < DateTime.UtcNow)
                 return false;
 
+            var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
             // just need to update value and move it to the top
             if (_map.ContainsKey(key))
             {
-                var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
                 // make sure node hasn't been removed by a different thread
                 if (_map.TryGetValue(key, out var cacheItem))
                 {
@@ -158,10 +158,9 @@ namespace Microsoft.IdentityModel.Tokens
                     });
                 }
 
-                // add a new node
-                var node = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
-                _eventQueue.Add(() => _doubleLinkedList.AddFirst(node));
-                _map[key] = node;
+                // add the new node
+                _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
+                _map[key] = newCacheItem;
 
                 return true;
             }
@@ -179,9 +178,8 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
             }
 
-            LRUCacheItem<TKey, TValue> cacheItem;
             // make sure node hasn't been removed by a different thread
-            if (_map.TryGetValue(key, out cacheItem))
+            if (_map.TryGetValue(key, out var cacheItem))
                 _eventQueue.Add(() =>
                 {
                     _doubleLinkedList.Remove(cacheItem);
