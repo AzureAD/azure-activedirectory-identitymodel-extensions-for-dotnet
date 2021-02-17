@@ -254,6 +254,21 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
         }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long LinkedListCount => _doubleLinkedList.Count;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long MapCount => _map.Count;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long EventQueueCount => 0;
     }
 
     internal class CacheItem<TKey, TValue>

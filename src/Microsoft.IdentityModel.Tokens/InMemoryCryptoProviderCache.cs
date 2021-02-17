@@ -320,11 +320,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long LinkedListCount()
-        {
 #if NETSTANDARD2_0
+        public static long LinkedListCount()
+        {
             return 0;
 #elif NET45 || NET461 || NET472
+        public long LinkedListCount()
+        {
             return _signingSignatureProviders.LinkedListCount;
 #endif
         }
@@ -344,11 +346,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long EventQueueCount()
-        {
 #if NETSTANDARD2_0
+        public static long EventQueueCount()
+        {
             return 0;
 #elif NET45 || NET461 || NET472
+        public long EventQueueCount()
+        {
             return _signingSignatureProviders.EventQueueCount;
 #endif
         }
