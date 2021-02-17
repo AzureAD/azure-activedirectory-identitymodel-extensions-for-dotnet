@@ -218,19 +218,33 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
         /// <returns></returns>
-        internal LinkedList<LRUCacheItem<TKey, TValue>> LinkedListValues()
-        {
-            return _doubleLinkedList;
-        }
+        public LinkedList<LRUCacheItem<TKey, TValue>> LinkedListValues => _doubleLinkedList;
 
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
         /// <returns></returns>
-        internal ICollection<LRUCacheItem<TKey, TValue>> MapValues()
-        {
-            return _map.Values;
-        }
+        public ICollection<LRUCacheItem<TKey, TValue>> MapValues => _map.Values;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public BlockingCollection<Action> EventQueue => _eventQueue;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long LinkedListCount => _doubleLinkedList.Count;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long MapCount => _map.Count;
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long EventQueueCount => _eventQueue.Count;
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>

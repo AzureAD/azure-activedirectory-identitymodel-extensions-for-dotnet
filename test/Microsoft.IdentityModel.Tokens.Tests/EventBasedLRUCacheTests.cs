@@ -212,29 +212,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     // wait for the cache events to process
                     Thread.Sleep(1000);
 
-                    if (cache.LinkedListValues().Intersect(cache.MapValues()).Count() != 10)
+                    if (cache.LinkedListValues.Intersect(cache.MapValues).Count() != 10)
                         context.AddDiff("Values in the map and corresponding linked list do not match up.");
                 }
 
             }
 
             // Values 91-100 should now be in the cache, with 100 being first in the list and 91 being last.
-            if (cache.LinkedListValues().First.Value.Key != 100)
-                context.AddDiff("100 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues().First.Value.Key);
+            if (cache.LinkedListValues.First.Value.Key != 100)
+                context.AddDiff("100 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues.First.Value.Key);
 
-            if (cache.LinkedListValues().Last.Value.Key != 91)
-                context.AddDiff("91 should be the last value in the linked list, but instead it was : " + cache.LinkedListValues().Last.Value.Key);
+            if (cache.LinkedListValues.Last.Value.Key != 91)
+                context.AddDiff("91 should be the last value in the linked list, but instead it was : " + cache.LinkedListValues.Last.Value.Key);
 
             cache.SetValue(101, Guid.NewGuid().ToString());
 
             // wait for the cache events to process
             Thread.Sleep(1000);
 
-            if (cache.LinkedListValues().First.Value.Key != 101)
-                context.AddDiff("101 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues().First.Value.Key);
+            if (cache.LinkedListValues.First.Value.Key != 101)
+                context.AddDiff("101 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues.First.Value.Key);
 
-            if (cache.LinkedListValues().Last.Value.Key != 92)
-                context.AddDiff("92 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues().Last.Value.Key);
+            if (cache.LinkedListValues.Last.Value.Key != 92)
+                context.AddDiff("92 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues.Last.Value.Key);
 
             TestUtilities.AssertFailIfErrors(context);
         }
