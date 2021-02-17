@@ -321,11 +321,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
 #if NETSTANDARD2_0
-        public static long LinkedListCount()
+        public static long LinkedListCountSigning()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long LinkedListCount()
+        public long LinkedListCountSigning()
         {
             return _signingSignatureProviders.LinkedListCount;
 #endif
@@ -334,7 +334,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long MapCount()
+#if NETSTANDARD2_0
+        public static long LinkedListCountVerifying()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        public long LinkedListCountVerifying()
+        {
+            return _verifyingSignatureProviders.LinkedListCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long MapCountSigning()
         {
 #if NETSTANDARD2_0
             return _signingSignatureProviders.Count;
@@ -346,16 +360,42 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
+        public long MapCountVerifying()
+        {
 #if NETSTANDARD2_0
-        public static long EventQueueCount()
+            return _signingSignatureProviders.Count;
+#elif NET45 || NET461 || NET472
+            return _verifyingSignatureProviders.MapCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        public static long EventQueueCountSigning()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long EventQueueCount()
+        public long EventQueueCountSigning()
         {
             return _signingSignatureProviders.EventQueueCount;
 #endif
         }
-        #endregion
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+#if NETSTANDARD2_0
+        public static long EventQueueCountVerifying()
+        {
+            return 0;
+#elif NET45 || NET461 || NET472
+        public long EventQueueCountVerifying()
+        {
+            return _verifyingSignatureProviders.EventQueueCount;
+#endif
+        }
+    #endregion
     }
 }
