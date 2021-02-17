@@ -36,5 +36,24 @@ namespace Microsoft.IdentityModel.Tokens
         bool SetValue(TKey key, TValue value, DateTime expirationTime);
         bool TryGetValue(TKey key, out TValue value);
         bool TryRemove(TKey key, out TValue value);
+
+        #region FOR TESTING TO BE REMOVED OR INTERNAL BEFORE RELEASE
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long LinkedListCount { get; }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long MapCount { get; }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long EventQueueCount { get; }
+
+        #endregion
     }
 }

@@ -315,5 +315,43 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 #endif
+
+        #region FOR TESTING TO BE REMOVED OR INTERNAL BEFORE RELEASE
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long LinkedListCount()
+        {
+#if NETSTANDARD2_0
+            return 0;
+#elif NET45 || NET461 || NET472
+            return _signingSignatureProviders.LinkedListCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long MapCount()
+        {
+#if NETSTANDARD2_0
+            return _signingSignatureProviders.Count;
+#elif NET45 || NET461 || NET472
+            return _signingSignatureProviders.MapCount;
+#endif
+        }
+
+        /// <summary>
+        /// FOR TESTING ONLY.
+        /// </summary>
+        public long EventQueueCount()
+        {
+#if NETSTANDARD2_0
+            return 0;
+#elif NET45 || NET461 || NET472
+            return _signingSignatureProviders.EventQueueCount;
+#endif
+        }
+        #endregion
     }
 }
