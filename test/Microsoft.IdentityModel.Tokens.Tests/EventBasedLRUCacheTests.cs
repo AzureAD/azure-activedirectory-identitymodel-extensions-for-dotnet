@@ -210,7 +210,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (i % 10 == 0 && i != 0)
                 {
                     // wait for the cache events to process
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
+                    cache.WaitForProcessing();
 
                     if (cache.LinkedListValues.Intersect(cache.MapValues).Count() != 10)
                         context.AddDiff("Values in the map and corresponding linked list do not match up.");
@@ -228,7 +229,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             cache.SetValue(101, Guid.NewGuid().ToString());
 
             // wait for the cache events to process
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
+            cache.WaitForProcessing();
 
             if (cache.LinkedListValues.First.Value.Key != 101)
                 context.AddDiff("101 should be the first value in the linked list, but instead it was : " + cache.LinkedListValues.First.Value.Key);

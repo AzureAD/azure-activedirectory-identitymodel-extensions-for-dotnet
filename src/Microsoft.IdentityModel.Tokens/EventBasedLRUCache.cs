@@ -66,7 +66,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             while (true)
             {
-                _eventQueue.Take().Invoke();
+                if (_eventQueue.TryTake(out var action))
+                    action.Invoke();           
             }
         }
 
@@ -76,6 +77,17 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             return _map.ContainsKey(key);
+        }
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// </summary>
+        internal void WaitForProcessing()
+        {
+            while (_eventQueue.Count != 0)
+                continue;
+
+            return;
         }
 
         internal int RemoveExpiredValues()
@@ -134,8 +146,7 @@ namespace Microsoft.IdentityModel.Tokens
                     _eventQueue.Add(() =>
                     {
                         _doubleLinkedList.Remove(cacheItem);
-                        _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
-
+                        _doubleLinkedList.AddFirst(newCacheItem);
                     });
                 }
                 else
@@ -149,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // if cache is full, then remove the least recently used node
                 if (_map.Count >= _capacity)
-                {                
+                {
                     _eventQueue.Add(() =>
                     {
                         var lru = _doubleLinkedList.Last;
