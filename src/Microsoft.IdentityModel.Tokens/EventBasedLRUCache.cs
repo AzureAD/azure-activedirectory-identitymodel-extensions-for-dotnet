@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -58,8 +59,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            new Task(() => OnStart(), TaskCreationOptions.LongRunning).Start();
-            _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+            if (UseQueue)
+            {
+                new Task(() => OnStart(), TaskCreationOptions.LongRunning).Start();
+                _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+            }
         }
 
         private void OnStart()
@@ -67,7 +71,11 @@ namespace Microsoft.IdentityModel.Tokens
             while (true)
             {
                 if (_eventQueue.TryTake(out var action))
-                    action.Invoke();           
+                {
+                    action.Invoke();
+                    if (ProcessingDelay != 0)
+                        Thread.Sleep(ProcessingDelay);
+                }
             }
         }
 
@@ -136,25 +144,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (expirationTime < DateTime.UtcNow)
                 return false;
 
-            var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
             // just need to update value and move it to the top
-            if (_map.ContainsKey(key))
+            if (_map.TryGetValue(key, out var cacheItem))
             {
-                // make sure node hasn't been removed by a different thread
-                if (_map.TryGetValue(key, out var cacheItem))
+                cacheItem.Value = value;
+                cacheItem.ExpirationTime = expirationTime;
+                _eventQueue.Add(() =>
                 {
-                    _eventQueue.Add(() =>
-                    {
-                        _doubleLinkedList.Remove(cacheItem);
-                        _doubleLinkedList.AddFirst(newCacheItem);
-                    });
-                }
-                else
-                {
-                    _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
-                }
-
-                return true;
+                    _doubleLinkedList.Remove(cacheItem);
+                    _doubleLinkedList.AddFirst(cacheItem);
+                });
             }
             else
             {
@@ -167,14 +166,16 @@ namespace Microsoft.IdentityModel.Tokens
                         _map.TryRemove(lru.Value.Key, out _);
                         _doubleLinkedList.Remove(lru);
                     });
-                }
 
+                }
                 // add the new node
+                var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
                 _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
                 _map[key] = newCacheItem;
 
-                return true;
             }
+
+            return true;
         }
 
         /// Each time a node gets accessed, it gets moved to the beginning (head) of the list.
@@ -252,10 +253,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public long MapCount => _map.Count;
 
+        public List<TKey> Dupes => _doubleLinkedList.GroupBy(x => x.Key).Where(g => g.Count() > 1).Select(y => y.Key).ToList();
+
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
         public long EventQueueCount => _eventQueue.Count;
+
+        internal bool UseQueue { get; set; } = true;
+
+        internal int ProcessingDelay { get; set; } = 0;
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
