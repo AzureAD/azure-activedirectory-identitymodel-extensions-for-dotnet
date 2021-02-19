@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new EventBasedLRUCache<int?, string>(10);
+            var cache = new EventBasedValueLRUCache<int?, string>(10);
 
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(10);
+            var cache = new EventBasedValueLRUCache<int, string>(10);
 
             for (int i = 0; i <= 10; i++)
             {
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            var cache = new EventBasedValueLRUCache<int?, string>(1);
 
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new EventBasedLRUCache<int?, string>(2);
+            var cache = new EventBasedValueLRUCache<int?, string>(2);
 
             cache.SetValue(1, "one");
 
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            var cache = new EventBasedValueLRUCache<int?, string>(1);
 
             cache.SetValue(1, "one");
 
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10);
+            var cache = new EventBasedValueLRUCache<int, string>(10);
 
             for (int i = 0; i <= 100; i++)
             {

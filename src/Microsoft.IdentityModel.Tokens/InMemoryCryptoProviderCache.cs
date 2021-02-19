@@ -79,8 +79,8 @@ namespace Microsoft.IdentityModel.Tokens
             // THE CODE BELOW IS FOR TESTING ONLY.
             if (!cryptoProviderCacheOptions.UseLockingCache)
             {
-                _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
-                _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+                _signingSignatureProviders = new EventBasedValueLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
+                _verifyingSignatureProviders = new EventBasedValueLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
             }
             else
             {

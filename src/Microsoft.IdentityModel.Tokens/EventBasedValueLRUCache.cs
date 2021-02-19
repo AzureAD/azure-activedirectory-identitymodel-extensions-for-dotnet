@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    internal class EventBasedLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
+    internal class EventBasedValueLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
     {
         private readonly int _capacity;
         private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
         private bool _disposed = false;
 
-        internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedValueLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
@@ -170,9 +170,13 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 // add the new node
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
-                _eventQueue.Add(() => _doubleLinkedList.AddFirst(newCacheItem));
+                _eventQueue.Add(() =>
+                {
+                    // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
+                    _doubleLinkedList.Remove(newCacheItem);
+                    _doubleLinkedList.AddFirst(newCacheItem);
+                });
                 _map[key] = newCacheItem;
-
             }
 
             return true;
@@ -326,6 +330,20 @@ namespace Microsoft.IdentityModel.Tokens
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             ExpirationTime = expirationTime;
+        }
+
+        public override bool Equals(object obj)
+        {
+            LRUCacheItem<TKey, TValue> item = obj as LRUCacheItem<TKey, TValue>;
+            if (item == null)
+                return false;
+            else
+                return Key.Equals(item.Key);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }
