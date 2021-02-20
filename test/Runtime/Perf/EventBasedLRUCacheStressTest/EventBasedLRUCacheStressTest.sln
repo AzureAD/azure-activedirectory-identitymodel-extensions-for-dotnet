@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31005.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventBasedLRUCacheStressTest", "EventBasedLRUCacheStressTest\EventBasedLRUCacheStressTest.csproj", "{12535F0C-0DE9-4B6A-B0D8-6DDBBFF40283}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Tokens", "..\..\..\..\..\wilsonCache\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj", "{9EF14EA2-BA90-4910-8DB7-8BA3DB3E50FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Logging", "..\..\..\..\..\wilsonCache\src\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj", "{E2E7DF47-D4D8-436F-8877-4F746EDEEA14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12535F0C-0DE9-4B6A-B0D8-6DDBBFF40283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12535F0C-0DE9-4B6A-B0D8-6DDBBFF40283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12535F0C-0DE9-4B6A-B0D8-6DDBBFF40283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12535F0C-0DE9-4B6A-B0D8-6DDBBFF40283}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF14EA2-BA90-4910-8DB7-8BA3DB3E50FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF14EA2-BA90-4910-8DB7-8BA3DB3E50FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF14EA2-BA90-4910-8DB7-8BA3DB3E50FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF14EA2-BA90-4910-8DB7-8BA3DB3E50FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2E7DF47-D4D8-436F-8877-4F746EDEEA14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2E7DF47-D4D8-436F-8877-4F746EDEEA14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2E7DF47-D4D8-436F-8877-4F746EDEEA14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2E7DF47-D4D8-436F-8877-4F746EDEEA14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4FA1A07-7035-4552-8677-6792EDC0297D}
+	EndGlobalSection
+EndGlobal
