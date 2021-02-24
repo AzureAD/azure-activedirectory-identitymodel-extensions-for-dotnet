@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    internal class EventBasedValueLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
+    internal class EventBasedLRUCache<TKey, TValue> : ILRUCache<TKey,TValue>, IDisposable
     {
         private readonly int _capacity;
         private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
@@ -55,15 +55,12 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
         private bool _disposed = false;
 
-        internal EventBasedValueLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            if (UseQueue)
-            {
-                new Task(() => OnStart(), TaskCreationOptions.LongRunning).Start();
-                _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
-            }
+            new Task(() => OnStart(), TaskCreationOptions.LongRunning).Start();
+            _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 
         private void OnStart()
@@ -71,11 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
             while (true)
             {
                 if (_eventQueue.TryTake(out var action))
-                {
                     action.Invoke();
-                    if (ProcessingDelay != 0)
-                        Thread.Sleep(ProcessingDelay);
-                }
             }
         }
 
@@ -233,23 +226,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        /// <returns></returns>
-        public LinkedList<LRUCacheItem<TKey, TValue>> LinkedListValues => _doubleLinkedList;
-
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
-        /// <returns></returns>
-        public ICollection<LRUCacheItem<TKey, TValue>> MapValues => _map.Values;
-
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
-        public BlockingCollection<Action> EventQueue => _eventQueue;
-
-        /// <summary>
-        /// FOR TESTING ONLY.
-        /// </summary>
         public long LinkedListCount => _doubleLinkedList.Count;
 
         /// <summary>
@@ -257,16 +233,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public long MapCount => _map.Count;
 
-        public List<TKey> Dupes => _doubleLinkedList.GroupBy(x => x.Key).Where(g => g.Count() > 1).Select(y => y.Key).ToList();
-
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
         public long EventQueueCount => _eventQueue.Count;
-
-        internal bool UseQueue { get; set; } = true;
-
-        internal int ProcessingDelay { get; set; } = 0;
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
@@ -295,43 +265,22 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
     }
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
     internal class LRUCacheItem<TKey, TValue>
     {
-        /// <summary>
-        /// 
-        /// </summary>
         internal TKey Key { get; }
-        /// <summary>
-        /// 
-        /// </summary>
         internal TValue Value { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
         internal DateTime ExpirationTime { get; set; }
-
         internal LRUCacheItem(TKey key, TValue value)
         {
-
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
         }
-
         internal LRUCacheItem(TKey key, TValue value, DateTime expirationTime)
         {
-
             Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             ExpirationTime = expirationTime;
         }
-
         public override bool Equals(object obj)
         {
             LRUCacheItem<TKey, TValue> item = obj as LRUCacheItem<TKey, TValue>;
@@ -340,7 +289,6 @@ namespace Microsoft.IdentityModel.Tokens
             else
                 return Key.Equals(item.Key);
         }
-
         public override int GetHashCode()
         {
             return base.GetHashCode();

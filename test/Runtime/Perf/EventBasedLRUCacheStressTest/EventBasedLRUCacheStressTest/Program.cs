@@ -85,7 +85,7 @@ namespace EventBasedLRUValueCacheStressTest
         static void CacheOverflowTestMultithreaded()
         {
             //var cache = new EventBasedValueLRUCache<int, string>(1000);
-            var cache = new EventBasedReferenceLRUCache<int, string>(1000);
+            var cache = new EventBasedValueLRUCache<int, string>(1000);
 
             List<Task> taskList = new List<Task>();
 
