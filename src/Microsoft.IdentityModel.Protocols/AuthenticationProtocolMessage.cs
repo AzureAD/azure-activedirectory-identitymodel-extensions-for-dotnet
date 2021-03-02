@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Builds a form post using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>html with head set to 'Title', body containing a hiden from with action = IssuerAddress.</returns>
-        public virtual string BuildFormPost()
+        public virtual string BuildFormPosts()
         {
             var strBuilder = new StringBuilder();
             strBuilder.Append("<html><head><title>");
