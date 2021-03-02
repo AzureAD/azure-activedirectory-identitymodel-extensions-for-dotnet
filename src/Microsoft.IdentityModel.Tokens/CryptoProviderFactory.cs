@@ -202,13 +202,26 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateKeyWrapProvider(key, algorithm, false);
         }
 
-#pragma warning disable 1573
-        /// <inheritdoc cref="CreateForSigning(SecurityKey, string)" />
+        /// <summary>
+        /// Creates an instance of <see cref="KeyWrapProvider"/> for a specific &lt;SecurityKey, Algorithm>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use.</param>
+        /// <param name="algorithm">the algorithm to use.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">thrown if <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="KeyWrapProvider"/>.</exception>
+        /// <remarks>
+        /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
+        /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="AuthenticatedEncryptionProvider"/>.
+        /// </para>
+        /// <para>When finished with the <see cref="KeyWrapProvider"/> call <see cref="ReleaseKeyWrapProvider(KeyWrapProvider)"/>.</para>
+        /// </remarks>
+        /// <returns>an instance of <see cref="KeyWrapProvider"/></returns>
         public virtual KeyWrapProvider CreateKeyWrapProviderForUnwrap(SecurityKey key, string algorithm)
         {
             return CreateKeyWrapProvider(key, algorithm, true);
         }
-#pragma warning restore 1573
 
         private KeyWrapProvider CreateKeyWrapProvider(SecurityKey key, string algorithm, bool willUnwrap)
         {
@@ -259,14 +272,30 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateForSigning(key, algorithm, CacheSignatureProviders);
         }
 
-#pragma warning disable 1573
-        /// <inheritdoc cref="CreateForSigning(SecurityKey, string)" />
+        /// <summary>
+        /// Creates a <see cref="SignatureProvider"/> that creates a signature with the algorithm and <see cref="SecurityKey"/>.
+        /// </summary>
+        /// <param name="key">the <see cref="SecurityKey"/> to use for signing.</param>
+        /// <param name="algorithm">the algorithm to use for signing.</param>
         /// <param name="cacheProvider">indicates if the <see cref="SignatureProvider"/> should be cached for reuse.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">thrown if <see cref="SecurityKey.KeySize"/> is too small.</exception>
+        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assignable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <exception cref="NotSupportedException">thrown if the key / algorithm is not supported.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="SignatureProvider"/>.</exception>
+        /// <remarks>
+        /// <para>AsymmetricSignatureProviders require access to a PrivateKey for Signing.</para>
+        /// <para>When finished with the <see cref="SignatureProvider"/> call <see cref="ReleaseSignatureProvider(SignatureProvider)"/>.</para>
+        /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
+        /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="SignatureProvider"/>.
+        /// </para>
+        /// </remarks>
+        /// <returns>A <see cref="SignatureProvider"/> that can be used to create a signature using the <see cref="SecurityKey"/> and algorithm.</returns>
         public virtual SignatureProvider CreateForSigning(SecurityKey key, string algorithm, bool cacheProvider)
         {
             return CreateSignatureProvider(key, algorithm, true, cacheProvider);
         }
-#pragma warning restore 1573
 
         /// <summary>
         /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
@@ -290,14 +319,28 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateForVerifying(key, algorithm, CacheSignatureProviders);
         }
 
-#pragma warning disable 1573
-        /// <inheritdoc cref="CryptoProviderFactory.CreateForVerifying(SecurityKey, string)" />
+        /// <summary>
+        /// Creates a <see cref="SignatureProvider"/> that supports the <see cref="SecurityKey"/> and algorithm.
+        /// </summary>
+        /// <param name="key">The <see cref="SecurityKey"/> to use for signature verification.</param>
+        /// <param name="algorithm">The algorithm to use for verifying.</param>
         /// <param name="cacheProvider">should the <see cref="SignatureProvider"/> be cached.</param>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">thrown if <see cref="SecurityKey.KeySize"/> is too small.</exception>
+        /// <exception cref="NotSupportedException">thrown if <see cref="SecurityKey"/> is not assignable from <see cref="AsymmetricSecurityKey"/> or <see cref="SymmetricSecurityKey"/>.</exception>
+        /// <exception cref="NotSupportedException">thrown if the key / algorithm is not supported.</exception>
+        /// <exception cref="InvalidOperationException">thrown if <see cref="ICryptoProvider.Create(string, object[])"/> returns a type that is not assignable from <see cref="SignatureProvider"/>.</exception>
+        /// <remarks>When finished with the <see cref="SignatureProvider"/> call <see cref="ReleaseSignatureProvider(SignatureProvider)"/>.
+        /// <para>If <see cref="CustomCryptoProvider"/> is set and <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> returns true.
+        /// <see cref="ICryptoProvider.Create(string, object[])"/> is called to obtain the <see cref="SignatureProvider"/>.
+        /// </para>
+        /// </remarks>
+        /// <returns>A <see cref="SignatureProvider"/> that can be used to validate a signature using the <see cref="SecurityKey"/> and algorithm.</returns>
         public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm, bool cacheProvider)
         {
             return CreateSignatureProvider(key, algorithm, false, cacheProvider);
         }
-#pragma warning restore 1573
 
 #if NET461 || NET472 || NETSTANDARD2_0
         /// <summary>
