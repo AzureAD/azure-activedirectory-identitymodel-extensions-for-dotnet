@@ -1298,14 +1298,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateVadliateActorClaimProcessing))]
-        public void VadliateActorClaimProcessing(Saml2TheoryData theoryData)
+        [Theory, MemberData(nameof(CreateValidateActorClaimProcessing))]
+        public void ValidateActorClaimProcessing(Saml2TheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.VadliateActorClaimProcessing", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateActorClaimProcessing", theoryData);
             try
             {
                 var token = theoryData.Token;
                 var actorName = "TestActor";
+                theoryData.Handler.ActorClaimAttributeName = ClaimTypes.Actor;
                 ClaimsPrincipal claimPrinciple = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
                 ClaimsIdentity validatedIdentity = claimPrinciple?.Identities.FirstOrDefault(identity => identity.Actor != null);
@@ -1318,7 +1319,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<Saml2TheoryData> CreateVadliateActorClaimProcessing
+        public static TheoryData<Saml2TheoryData> CreateValidateActorClaimProcessing
         {
             get
             {
