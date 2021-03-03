@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return cryptoProvider;
             }
 
-            if (SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
+            if (SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key) || SupportedAlgorithms.IsSupportedAesGcmEncryptionAlgorithm(algorithm, key))
                 return new AuthenticatedEncryptionProvider(key, algorithm);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));

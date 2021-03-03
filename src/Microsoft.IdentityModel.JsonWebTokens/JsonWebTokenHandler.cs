@@ -751,7 +751,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
             byte[] wrappedKey = null;
-            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials,cryptoProviderFactory, out wrappedKey);
+            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, out wrappedKey);
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
             {

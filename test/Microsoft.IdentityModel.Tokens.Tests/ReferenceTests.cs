@@ -45,12 +45,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var providerForEncryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.EncryptionKey, testParams.Algorithm);
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.DecryptionKey, testParams.Algorithm);
-            var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
-            var plaintext = providerForDecryption.Decrypt(encryptionResult.Ciphertext, testParams.AuthenticationData, encryptionResult.IV, encryptionResult.AuthenticationTag);
+            var plaintext = providerForDecryption.Decrypt(testParams.Ciphertext, testParams.AuthenticationData, testParams.IV, testParams.AuthenticationTag);
 
-            Assert.True(Utility.AreEqual(encryptionResult.IV, testParams.IV), "Utility.AreEqual(encryptionResult.IV, testParams.IV)");
-            Assert.True(Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag), "Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
-            Assert.True(Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext), "Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
+            if(testParams.Algorithm != AES_256_GCM.Algorithm)
+            {
+                var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
+
+                Assert.True(Utility.AreEqual(encryptionResult.IV, testParams.IV), "Utility.AreEqual(encryptionResult.IV, testParams.IV)");
+                Assert.True(Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag), "Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
+                Assert.True(Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext), "Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
+            }
             Assert.True(Utility.AreEqual(plaintext, testParams.Plaintext), "Utility.AreEqual(plaintext, testParams.Plaintext)");
         }
 
@@ -59,6 +63,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var theoryData = new TheoryData<AuthenticationEncryptionTestParams>();
+
+                theoryData.Add(new AuthenticationEncryptionTestParams
+                {
+                    Algorithm = AES_256_GCM.Algorithm,
+                    AuthenticationData = AES_256_GCM.A,
+                    AuthenticationTag = AES_256_GCM.T,
+                    Ciphertext = AES_256_GCM.E,
+                    DecryptionKey = new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK),
+                    EncryptionKey = new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK),
+                    IV = AES_256_GCM.IV,
+                    Plaintext = AES_256_GCM.P,
+                    TestId = "AES_256_GCM"
+                });
 
                 theoryData.Add(new AuthenticationEncryptionTestParams
                 {

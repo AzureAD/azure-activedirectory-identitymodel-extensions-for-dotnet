@@ -90,7 +90,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             SecurityAlgorithms.Aes128CbcHmacSha256,
             SecurityAlgorithms.Aes192CbcHmacSha384,
-            SecurityAlgorithms.Aes256CbcHmacSha512
+            SecurityAlgorithms.Aes256CbcHmacSha512,
+            SecurityAlgorithms.Aes128Gcm,
+            SecurityAlgorithms.Aes192Gcm,
+            SecurityAlgorithms.Aes256Gcm
         };
 
         internal static readonly ICollection<string> SymmetricKeyWrapAlgorithms = new Collection<string>
@@ -263,6 +266,28 @@ namespace Microsoft.IdentityModel.Tokens
             if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
                || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
                || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
+                return false;
+
+            if (key is SymmetricSecurityKey)
+                return true;
+
+            if (key is JsonWebKey jsonWebKey)
+                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
+
+            return false;
+        }
+
+        internal static bool IsSupportedAesGcmEncryptionAlgorithm(string algorithm, SecurityKey key)
+        {
+            if (key == null)
+                return false;
+
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            if (!(algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal)))
                 return false;
 
             if (key is SymmetricSecurityKey)
