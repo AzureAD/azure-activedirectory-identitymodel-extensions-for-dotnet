@@ -1306,7 +1306,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             {
                 var token = theoryData.Token;
                 var actorName = "TestActor";
-                theoryData.Handler.ActorClaimAttributeName = ClaimTypes.Actor;
                 ClaimsPrincipal claimPrinciple = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
                 theoryData.ExpectedException.ProcessNoException(context);
                 ClaimsIdentity validatedIdentity = claimPrinciple?.Identities.FirstOrDefault(identity => identity.Actor != null);
