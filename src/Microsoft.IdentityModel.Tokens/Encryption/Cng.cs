@@ -7,108 +7,7 @@ using static Microsoft.IdentityModel.Tokens.Interop.BCrypt;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal static class CryptoThrowHelper
-    {
-        public static CryptographicException ToCryptographicException(this int hr)
-        {
-            string message = Interop.Kernel32.GetMessage(hr);
-
-            if ((hr & 0x80000000) != 0x80000000)
-                hr = (hr & 0x0000FFFF) | unchecked((int)0x80070000);
-
-            return new WindowsCryptographicException(hr, message);
-        }
-
-        private sealed class WindowsCryptographicException : CryptographicException
-        {
-            public WindowsCryptographicException(int hr, string message)
-                : base(message)
-            {
-                HResult = hr;
-            }
-
-            public WindowsCryptographicException(string message) : base(message)
-            {
-            }
-
-            public WindowsCryptographicException(string message, Exception innerException) : base(message, innerException)
-            {
-            }
-
-            public WindowsCryptographicException()
-            {
-            }
-        }
-    }
-
-    internal static class AesBCryptModes
-    {
-        internal static Lazy<SafeAlgorithmHandle> OpenAesAlgorithm(string cipherMode)
-        {
-            return new Lazy<SafeAlgorithmHandle>(() =>
-            {
-                SafeAlgorithmHandle hAlg = Cng.BCryptOpenAlgorithmProvider(Cng.BCRYPT_AES_ALGORITHM, null, Cng.OpenAlgorithmProviderFlags.NONE);
-                hAlg.SetCipherMode(cipherMode);
-
-                return hAlg;
-            });
-        }
-    }
-
-    internal static class CryptographicOperations
-    {
-        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        public static void ZeroMemory(byte[] buffer)
-        {
-            // NoOptimize to prevent the optimizer from deciding this call is unnecessary
-            // NoInlining to prevent the inliner from forgetting that the method was no-optimize
-            Array.Clear(buffer, 0, buffer.Length);
-        }
-    }
-
-    //
-    // Interop layer around Windows CNG api.
-    //
-    internal static class Cng
-    {
-        [Flags]
-        public enum OpenAlgorithmProviderFlags : int
-        {
-            NONE = 0x00000000,
-            BCRYPT_ALG_HANDLE_HMAC_FLAG = 0x00000008,
-        }
-
-        public const string BCRYPT_AES_ALGORITHM = "AES";
-
-        public const string BCRYPT_CHAIN_MODE_GCM = "ChainingModeGCM";
-
-        public static SafeAlgorithmHandle BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, OpenAlgorithmProviderFlags dwFlags)
-        {
-            SafeAlgorithmHandle hAlgorithm;
-            NTSTATUS ntStatus = Interop.BCrypt.BCryptOpenAlgorithmProvider(out hAlgorithm, pszAlgId, pszImplementation, (int)dwFlags);
-            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
-                throw LogHelper.LogExceptionMessage(CreateCryptographicException(ntStatus));
-            return hAlgorithm;
-        }
-
-        public static void SetCipherMode(this SafeAlgorithmHandle hAlg, string cipherMode)
-        {
-            NTSTATUS ntStatus = Interop.BCrypt.BCryptSetProperty(hAlg, BCryptPropertyStrings.BCRYPT_CHAINING_MODE, cipherMode, (cipherMode.Length + 1) * 2, 0);
-
-            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
-            {
-                throw LogHelper.LogExceptionMessage(CreateCryptographicException(ntStatus));
-            }
-        }
-
-        private static Exception CreateCryptographicException(NTSTATUS ntStatus)
-        {
-            int hr = ((int)ntStatus) | 0x01000000;
-            return hr.ToCryptographicException();
-        }
-    }
-
-    internal class AesAEAD
+    internal static class AesAead
     {
         public static void CheckArgumentsForNull(
             byte[] nonce,
@@ -175,14 +74,113 @@ namespace Microsoft.IdentityModel.Tokens
                         return;
                     case NTSTATUS.STATUS_AUTH_TAG_MISMATCH:
                         if (clearPlaintextOnFailure)
-                        {
                             CryptographicOperations.ZeroMemory(plaintext);
-                        }
 
                         throw LogHelper.LogExceptionMessage(new CryptographicException(LogHelper.FormatInvariant(LogMessages.IDX10714)));
                     default:
                         throw LogHelper.LogExceptionMessage(Interop.BCrypt.CreateCryptographicException(ntStatus));
                 }
+            }
+        }
+    }
+
+    internal static class AesBCryptModes
+    {
+        internal static Lazy<SafeAlgorithmHandle> OpenAesAlgorithm(string cipherMode)
+        {
+            return new Lazy<SafeAlgorithmHandle>(() =>
+            {
+                SafeAlgorithmHandle hAlg = Cng.BCryptOpenAlgorithmProvider(Cng.BCRYPT_AES_ALGORITHM, null, Cng.OpenAlgorithmProviderFlags.NONE);
+                hAlg.SetCipherMode(cipherMode);
+
+                return hAlg;
+            });
+        }
+    }
+
+    //
+    // Interop layer around Windows CNG api.
+    //
+    internal static class Cng
+    {
+        [Flags]
+        public enum OpenAlgorithmProviderFlags
+        {
+            NONE = 0x00000000,
+            BCRYPT_ALG_HANDLE_HMAC_FLAG = 0x00000008,
+        }
+
+        public const string BCRYPT_AES_ALGORITHM = "AES";
+
+        public const string BCRYPT_CHAIN_MODE_GCM = "ChainingModeGCM";
+
+        public static SafeAlgorithmHandle BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, OpenAlgorithmProviderFlags dwFlags)
+        {
+            SafeAlgorithmHandle hAlgorithm;
+            NTSTATUS ntStatus = Interop.BCrypt.BCryptOpenAlgorithmProvider(out hAlgorithm, pszAlgId, pszImplementation, (int)dwFlags);
+
+            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+                throw LogHelper.LogExceptionMessage(CreateCryptographicException(ntStatus));
+
+            return hAlgorithm;
+        }
+
+        public static void SetCipherMode(this SafeAlgorithmHandle hAlg, string cipherMode)
+        {
+            NTSTATUS ntStatus = Interop.BCrypt.BCryptSetProperty(hAlg, BCryptPropertyStrings.BCRYPT_CHAINING_MODE, cipherMode, (cipherMode.Length + 1) * 2, 0);
+
+            if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+                throw LogHelper.LogExceptionMessage(CreateCryptographicException(ntStatus));
+        }
+
+        private static Exception CreateCryptographicException(NTSTATUS ntStatus)
+        {
+            int hr = ((int)ntStatus) | 0x01000000;
+            return hr.ToCryptographicException();
+        }
+    }
+
+    internal static class CryptographicOperations
+    {
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        public static void ZeroMemory(byte[] buffer)
+        {
+            // NoOptimize to prevent the optimizer from deciding this call is unnecessary
+            // NoInlining to prevent the inliner from forgetting that the method was no-optimize
+            Array.Clear(buffer, 0, buffer.Length);
+        }
+    }
+
+    internal static class CryptoThrowHelper
+    {
+        public static CryptographicException ToCryptographicException(this int hr)
+        {
+            string message = Interop.Kernel32.GetMessage(hr);
+
+            if ((hr & 0x80000000) != 0x80000000)
+                hr = (hr & 0x0000FFFF) | unchecked((int)0x80070000);
+
+            return new WindowsCryptographicException(hr, message);
+        }
+
+        private sealed class WindowsCryptographicException : CryptographicException
+        {
+            public WindowsCryptographicException(int hr, string message)
+                : base(message)
+            {
+                HResult = hr;
+            }
+
+            public WindowsCryptographicException(string message) : base(message)
+            {
+            }
+
+            public WindowsCryptographicException(string message, Exception innerException) : base(message, innerException)
+            {
+            }
+
+            public WindowsCryptographicException()
+            {
             }
         }
     }

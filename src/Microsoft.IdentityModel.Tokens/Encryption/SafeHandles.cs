@@ -5,7 +5,19 @@ using static Microsoft.IdentityModel.Tokens.Interop;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal abstract class SafeBCryptHandle : SafeHandle, IDisposable
+    internal sealed class SafeAlgorithmHandle : SafeBCryptHandle
+    {
+        protected sealed override bool ReleaseHandle()
+        {
+            uint ntStatus = BCryptCloseAlgorithmProvider(handle, 0);
+            return ntStatus == 0;
+        }
+
+        [DllImport(Libraries.BCrypt)]
+        private static extern uint BCryptCloseAlgorithmProvider(IntPtr hAlgorithm, int dwFlags);
+    }
+
+    internal abstract class SafeBCryptHandle : SafeHandle
     {
         protected SafeBCryptHandle()
             : base(IntPtr.Zero, true)
@@ -21,18 +33,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         protected abstract override bool ReleaseHandle();
-    }
-
-    internal sealed class SafeAlgorithmHandle : SafeBCryptHandle
-    {
-        protected sealed override bool ReleaseHandle()
-        {
-            uint ntStatus = BCryptCloseAlgorithmProvider(handle, 0);
-            return ntStatus == 0;
-        }
-
-        [DllImport(Libraries.BCrypt)]
-        private static extern uint BCryptCloseAlgorithmProvider(IntPtr hAlgorithm, int dwFlags);
     }
 
     internal sealed class SafeKeyHandle : SafeBCryptHandle

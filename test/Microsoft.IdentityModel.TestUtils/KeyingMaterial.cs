@@ -233,7 +233,6 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256) { KeyId = "DefaultSymmetricSecurityKey_256" };
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256);
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
-        
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256_NoKeyId = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256);
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2_NoKeyId = new SigningCredentials(DefaultSymmetricSecurityKey_256_NoKeyId, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256);
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId = new EncryptingCredentials(DefaultSymmetricSecurityKey_256_NoKeyId, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);

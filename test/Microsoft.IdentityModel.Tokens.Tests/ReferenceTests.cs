@@ -43,6 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(AuthenticatedEncryptionTheoryData))]
         public void AuthenticatedEncryptionReferenceTest(AuthenticationEncryptionTestParams testParams)
         {
+            var context = new CompareContext();
             var providerForEncryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.EncryptionKey, testParams.Algorithm);
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.DecryptionKey, testParams.Algorithm);
             var plaintext = providerForDecryption.Decrypt(testParams.Ciphertext, testParams.AuthenticationData, testParams.IV, testParams.AuthenticationTag);
@@ -51,11 +52,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
 
-                Assert.True(Utility.AreEqual(encryptionResult.IV, testParams.IV), "Utility.AreEqual(encryptionResult.IV, testParams.IV)");
-                Assert.True(Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag), "Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
-                Assert.True(Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext), "Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
+                if (!Utility.AreEqual(encryptionResult.IV, testParams.IV))
+                    context.AddDiff($"!Utility.AreEqual(encryptionResult.IV, testParams.IV)");
+
+                if (!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag))
+                    context.AddDiff($"!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
+
+                if (!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext))
+                    context.AddDiff($"!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
             }
-            Assert.True(Utility.AreEqual(plaintext, testParams.Plaintext), "Utility.AreEqual(plaintext, testParams.Plaintext)");
+
+            if (!Utility.AreEqual(plaintext, testParams.Plaintext))
+                context.AddDiff($"!Utility.AreEqual(plaintext, testParams.Plaintext)");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<AuthenticationEncryptionTestParams> AuthenticatedEncryptionTheoryData

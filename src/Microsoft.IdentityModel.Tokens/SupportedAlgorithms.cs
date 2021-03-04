@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool IsSupportedAuthenticatedEncryptionAlgorithm(string algorithm, SecurityKey key)
+        internal static bool IsSupportedEncryptionAlgorithm(string algorithm, SecurityKey key)
         {
             if (key == null)
                 return false;
@@ -263,9 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal)))
+            if (!(IsAesCbc(algorithm) || IsAesGcm(algorithm)))
                 return false;
 
             if (key is SymmetricSecurityKey)
@@ -275,6 +273,26 @@ namespace Microsoft.IdentityModel.Tokens
                 return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
 
             return false;
+        }
+
+        internal static bool IsAesGcm(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            return algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal);
+        }
+
+        internal static bool IsAesCbc(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                return false;
+
+            return algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
+               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal);
         }
 
         internal static bool IsSupportedAesGcmEncryptionAlgorithm(string algorithm, SecurityKey key)
