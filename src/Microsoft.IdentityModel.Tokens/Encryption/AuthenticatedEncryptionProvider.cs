@@ -76,16 +76,19 @@ namespace Microsoft.IdentityModel.Tokens
             Algorithm = algorithm;
             _cryptoProviderFactory = key.CryptoProviderFactory;
 
-            if (SupportedAlgorithms.IsSupportedAesGcmEncryptionAlgorithm(algorithm, key))
+            if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key))
             {
+                if (SupportedAlgorithms.IsAesGcm(algorithm))
+                {
 #if NET_CORE
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, algorithm)));
 #endif
-                InitializeUsingAesGcm();
+                    InitializeUsingAesGcm();
+                }
+                else
+                    InitializeUsingAesCbc();
             }
-            else if (SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key))
-                InitializeUsingAesCbc();
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
         }
@@ -329,7 +332,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if 'key, algorithm' pair is supported.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            return SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key);
+            return SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key);
         }
 
         private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)

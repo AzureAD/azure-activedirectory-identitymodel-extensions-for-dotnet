@@ -9,6 +9,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static readonly SafeAlgorithmHandle s_aesGcm = AesBCryptModes.OpenAesAlgorithm(Cng.BCRYPT_CHAIN_MODE_GCM).Value;
         private SafeKeyHandle _keyHandle;
+        private bool _disposed = false;
+
         public AesGcm(byte[] key)
         {
             if (key == null)
@@ -24,13 +26,26 @@ namespace Microsoft.IdentityModel.Tokens
 
         public void Dispose()
         {
-            _keyHandle.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _disposed = true;
+                    _keyHandle.Dispose();
+                }
+            }
         }
 
         public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = null)
         {
-            AesAEAD.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
-            AesAEAD.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
+            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
+            AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
         }
     }
 }

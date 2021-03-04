@@ -32,10 +32,9 @@ namespace Microsoft.IdentityModel.Tokens
                 key.CopyTo(blob, sizeof(BCRYPT_KEY_DATA_BLOB_HEADER));
                 SafeKeyHandle hKey;
                 NTSTATUS ntStatus = BCryptImportKey(hAlg, IntPtr.Zero, BCRYPT_KEY_DATA_BLOB, out hKey, IntPtr.Zero, 0, blob, blobSize, 0);
+
                 if (ntStatus != NTSTATUS.STATUS_SUCCESS)
-                {
                     throw LogHelper.LogExceptionMessage(CreateCryptographicException(ntStatus));
-                }
 
                 return hKey;
             }
@@ -149,9 +148,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 int flags = FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY;
                 if (moduleHandle != IntPtr.Zero)
-                {
                     flags |= FORMAT_MESSAGE_FROM_HMODULE;
-                }
 
                 // First try to format the message into the stack based buffer.  Most error messages will fit.
                 char[] stackBuffer = new char[256]; // arbitrary stack limit
@@ -159,9 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     int length = FormatMessage(flags, moduleHandle, unchecked((uint)errorCode), 0, bufferPtr, stackBuffer.Length, IntPtr.Zero);
                     if (length > 0)
-                    {
                         return GetAndTrimString(stackBuffer, length);
-                    }
                 }
 
                 // We got back an error.  If the error indicated that there wasn't enough room to store
@@ -174,9 +169,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         int length = FormatMessage(flags | FORMAT_MESSAGE_ALLOCATE_BUFFER, moduleHandle, unchecked((uint)errorCode), 0, &nativeMsgPtr, 0, IntPtr.Zero);
                         if (length > 0)
-                        {
                             return GetAndTrimString(Marshal.PtrToStringAnsi(nativeMsgPtr).ToCharArray(), length);
-                        }
                     }
                     finally
                     {
@@ -191,9 +184,8 @@ namespace Microsoft.IdentityModel.Tokens
             private static string GetAndTrimString(char[] buffer, int length)
             {
                 while (length > 0 && buffer[length - 1] <= 32)
-                {
                     length--; // trim off spaces and non-printable ASCII chars at the end of the resource
-                }
+
                 return new string(buffer, 0, length);
             }
         }
@@ -204,6 +196,4 @@ namespace Microsoft.IdentityModel.Tokens
             internal const string Kernel32 = "kernel32.dll";
         }
     }
-
-
 }
