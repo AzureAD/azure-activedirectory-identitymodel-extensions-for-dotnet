@@ -620,13 +620,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return base.GetCacheKey(securityKey, algorithm, typeofProvider);
         }
 
-#if NETCOREAPP2_1
         protected override void Dispose(bool disposing)
         {
             DisposeCalled = true;
             base.Dispose(disposing);
         }
-#endif
     }
 }
 

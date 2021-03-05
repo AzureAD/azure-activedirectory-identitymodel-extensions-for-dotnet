@@ -49,12 +49,12 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private readonly int _capacity;
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
-        private double _compactionPercentage = .20;
+        private readonly double _compactionPercentage = .20;
         private readonly LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
         private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
-        private double _maxCapacityPercentage = .95;
+        private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
 
         internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
@@ -69,8 +69,16 @@ namespace Microsoft.IdentityModel.Tokens
         {
             while (!_disposed)
             {
-                if (_eventQueue.TryTake(out var action, 500))
-                    action.Invoke();
+                try
+                {
+                    if (_eventQueue.TryTake(out var action, 500))
+                        action.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
+                }
+               
             }
         }
 
@@ -308,10 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
             return item == null ? false : Key.Equals(item.Key);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key);
     }
 }
 
