@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
@@ -52,22 +53,27 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
+        private Task _eventQueueTask;
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
+        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private CancellationToken _cancellationToken;
 
         internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            new Task(OnStart, TaskCreationOptions.LongRunning).Start();
+            _cancellationToken = _tokenSource.Token;
+            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken, TaskCreationOptions.LongRunning);
+            _eventQueueTask.Start();
             _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 
-        private void OnStart()
+        private void OnStart(CancellationToken token)
         {
-            while (!_disposed)
+            while (!_disposed && !token.IsCancellationRequested)
             {
                 try
                 {
@@ -285,7 +291,13 @@ namespace Microsoft.IdentityModel.Tokens
                 _disposed = true;
                 if (disposing)
                 {
+                    _tokenSource.Cancel();
+                    _eventQueueTask.Wait();
+
+                    _eventQueueTask.Dispose();
                     _eventQueue.Dispose();
+                    _tokenSource.Dispose();
+
                     _eventQueue = null;
                     _map = null;
                     _doubleLinkedList = null;
