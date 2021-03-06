@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _cancellationToken = _tokenSource.Token;
-            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken, TaskCreationOptions.LongRunning);
+            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken);
             _eventQueueTask.Start();
             _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
