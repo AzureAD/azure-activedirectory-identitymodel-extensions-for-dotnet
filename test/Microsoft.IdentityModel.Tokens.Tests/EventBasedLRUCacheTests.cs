@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new EventBasedLRUCache<int?, string>(10);
+            var cache = new EventBasedLRUCache<int?, string>(10, TaskCreationOptions.None);
 
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(100);
+            var cache = new EventBasedLRUCache<int, string>(100, TaskCreationOptions.None);
 
             for (int i = 0; i <= 10; i++)
             {
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.None);
 
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new EventBasedLRUCache<int?, string>(2);
+            var cache = new EventBasedLRUCache<int?, string>(2, TaskCreationOptions.None);
 
             cache.SetValue(1, "one");
 
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.None);
 
             cache.SetValue(1, "one");
 
@@ -204,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10);
+            var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.None);
 
             for (int i = 0; i <= 100; i++)
             {
@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             cache.WaitForProcessing();
 
             // Cache size should be less than the capacity (somewhere between 8-10 items).
-            if (cache.LinkedList.Count() > 10)
+            if (cache.LinkedList.Count > 10)
                 context.AddDiff("Cache size is greater than the max!");
 
             // The linked list should be ordered in descending order as the largest items were added last,
@@ -266,7 +266,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            var cache = new EventBasedLRUCache<int, string>(1000);
+            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.None);
 
             List<Task> taskList = new List<Task>();
 
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new EventBasedLRUCache<int, string>(1000);
+            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.None);
 
             for (int i = 0; i < 100000; i++)
             {
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
 
             // Cache size should be less than the capacity (somewhere between 800-1000 items).
-            if (cache.LinkedList.Count() > 1000)
+            if (cache.LinkedList.Count > 1000)
                 context.AddDiff("Cache size is greater than the max!");
 
             // The linked list should be ordered in descending order as the largest items were added last,

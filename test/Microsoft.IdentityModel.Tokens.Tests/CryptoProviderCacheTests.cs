@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -197,7 +198,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#if NETCOREAPP
                 var sharedCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var sharedCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
@@ -366,7 +371,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
 
                 // Test different methods of finding
+#if NETCOREAPP
                 var cryptoProviderCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
                 var derivedKey = new DerivedSecurityKey("kid", 256);
                 var derivedKey2 = new DerivedSecurityKey("kid2", 256);
                 var signatureProvider = new CustomSignatureProvider(derivedKey, ALG.RsaSha256, true);
@@ -467,6 +476,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#if NETCOREAPP
+                var cache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
+
                 var theoryData =  new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
@@ -502,13 +517,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Removed = false,
-                        SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256){CryptoProviderCache = new InMemoryCryptoProviderCache()},
+                        SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256){CryptoProviderCache = cache},
                         TestId = "CryptoProvider!=ReferenceEquals"
                     }
                 };
 
                 // SignatureProvider found and removed
+#if NETCOREAPP
                 var cryptoProviderCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
+
                 var signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
                 cryptoProviderCache.TryAdd(signatureProvider);
                 theoryData.Add(new CryptoProviderCacheTheoryData
@@ -587,7 +607,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string Algorithm { get; set; }
 
+#if NETCOREAPP
         public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+        public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
 
         public bool Found { get; set; }
 
@@ -608,6 +632,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
     {
+#if NETCOREAPP
+        public InMemoryCryptoProviderCachePublic() : base()
+        {}
+
+#elif NET452 || NET461 || NET472
+        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None)
+        {}
+#endif
+
         public bool DisposeCalled { get; set; } = false;
 
         public string GetCacheKeyPublic(SignatureProvider signatureProvider)

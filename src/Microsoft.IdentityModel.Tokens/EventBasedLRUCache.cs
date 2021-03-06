@@ -57,11 +57,11 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
 
-        internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedLRUCache(int capacity, TaskCreationOptions options = TaskCreationOptions.LongRunning, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            new Task(OnStart, TaskCreationOptions.LongRunning).Start();
+            new Task(OnStart, options).Start();
             _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 

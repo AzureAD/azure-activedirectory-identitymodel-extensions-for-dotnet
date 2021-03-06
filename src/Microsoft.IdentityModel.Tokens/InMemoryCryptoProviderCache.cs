@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 #if NETSTANDARD2_0 
 using Microsoft.Extensions.Caching.Memory;
@@ -59,6 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
+#if NETSTANDARD2_0
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
@@ -69,14 +71,43 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-#if NETSTANDARD2_0
+
             _signingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
             _verifyingSignatureProviders = new MemoryCache(Options.Create(new MemoryCacheOptions() { SizeLimit = _cryptoProviderCacheOptions.SizeLimit }));
-#elif NET45 || NET461 || NET472
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal);
-#endif
         }
+
+#elif NET45 || NET461 || NET472
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
+
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, comparer: StringComparer.Ordinal);
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, comparer: StringComparer.Ordinal);
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
+        /// <param name="options">Options used to create the event queue thread.</param>
+        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, TaskCreationOptions options)
+        {
+            if (cryptoProviderCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
+
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal);
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal);
+        }
+#endif
 
         /// <summary>
         /// Returns the cache key to use when looking up an entry into the cache for a <see cref="SignatureProvider" />
