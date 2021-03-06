@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -858,7 +859,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestId = testId;
         }
 
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory{ CacheSignatureProviders = false };
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory
+        {
+            CacheSignatureProviders = false,
+#if NETCOREAPP
+            CryptoProviderCache = new InMemoryCryptoProviderCache()
+#elif NET452 || NET461 || NET472
+            CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None)
+#endif
+        };
 
         public ICryptoProvider CustomCryptoProvider { get; set; }
 

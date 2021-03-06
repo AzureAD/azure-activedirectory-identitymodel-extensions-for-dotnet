@@ -547,7 +547,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "SignatureProviderWasNotRemoved"
                 });
 
+#if NETCOREAPP
                 cryptoProviderCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
+
                 signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
                 cryptoProviderCache.TryAdd(signatureProvider);
 
