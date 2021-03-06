@@ -50,9 +50,9 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly int _capacity;
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
-        private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
-        private BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
-        private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+        private readonly LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
+        private readonly BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
+        private readonly ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
@@ -286,9 +286,6 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     _eventQueue.Dispose();
-                    _eventQueue = null;
-                    _map = null;
-                    _doubleLinkedList = null;
                 }
             }
         }
