@@ -73,49 +73,49 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        //[Fact]
-        //public void RemoveExpiredValues()
-        //{
-        //    TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
-        //    var context = new CompareContext($"{this}.RemoveExpiredValues");
-        //    var cache = new EventBasedLRUCache<int, string>(100);
+        [Fact]
+        public void RemoveExpiredValues()
+        {
+            TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
+            var context = new CompareContext($"{this}.RemoveExpiredValues");
+            var cache = new EventBasedLRUCache<int, string>(100);
 
-        //    try
-        //    {
-        //        for (int i = 0; i <= 10; i++)
-        //        {
-        //            // Only even values should expire.
-        //            if (i % 2 == 0)
-        //                cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
-        //            else
-        //                cache.SetValue(i, i.ToString());
-        //        }
+            try
+            {
+                for (int i = 0; i <= 10; i++)
+                {
+                    // Only even values should expire.
+                    if (i % 2 == 0)
+                        cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
+                    else
+                        cache.SetValue(i, i.ToString());
+                }
 
-        //        Thread.Sleep(5000);
-        //        cache.RemoveExpiredValues();
+                Thread.Sleep(5000);
+                cache.RemoveExpiredValues();
 
-        //        for (int i = 0; i <= 10; i++)
-        //        {
-        //            // Only even values should expire.
-        //            if (i % 2 == 0)
-        //            {
-        //                if (cache.Contains(i))
-        //                    context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should have expired and been removed, but the Contains() method returned true.");
-        //            }
-        //            else
-        //            {
-        //                if (!cache.Contains(i))
-        //                    context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should remain in the cache, but the Contains() method returned false.");
-        //            }
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        cache.Dispose();
-        //    }
+                for (int i = 0; i <= 10; i++)
+                {
+                    // Only even values should expire.
+                    if (i % 2 == 0)
+                    {
+                        if (cache.Contains(i))
+                            context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should have expired and been removed, but the Contains() method returned true.");
+                    }
+                    else
+                    {
+                        if (!cache.Contains(i))
+                            context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should remain in the cache, but the Contains() method returned false.");
+                    }
+                }
+            }
+            finally
+            {
+                cache.Dispose();
+            }
 
-        //    TestUtilities.AssertFailIfErrors(context);
-        //}
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         [Fact]
         public void SetValue()
@@ -234,52 +234,52 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        //[Fact]
-        //public void MaintainLRUOrder()
-        //{
-        //    TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
-        //    var context = new CompareContext($"{this}.MaintainLRUOrder");
-        //    var cache = new EventBasedLRUCache<int, string>(10);
+        [Fact]
+        public void MaintainLRUOrder()
+        {
+            TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
+            var context = new CompareContext($"{this}.MaintainLRUOrder");
+            var cache = new EventBasedLRUCache<int, string>(10);
 
-        //    try
-        //    {
-        //        for (int i = 0; i <= 100; i++)
-        //        {
-        //            cache.SetValue(i, Guid.NewGuid().ToString());
+            try
+            {
+                for (int i = 0; i <= 100; i++)
+                {
+                    cache.SetValue(i, Guid.NewGuid().ToString());
 
-        //            // check that list and map values match up every 10 items
-        //            // every 10th item should result in two LRU items being removed
-        //            if (i % 10 == 0 && i != 0)
-        //            {
-        //                // wait for the cache events to process
-        //                cache.WaitForProcessing();
+                    // check that list and map values match up every 10 items
+                    // every 10th item should result in two LRU items being removed
+                    if (i % 10 == 0 && i != 0)
+                    {
+                        // wait for the cache events to process
+                        cache.WaitForProcessing();
 
-        //                // check that all values match up
-        //                if (cache.LinkedList.Except(cache.MapValues).Count() != 0)
-        //                    context.AddDiff("Values in the map and corresponding linked list do not match up.");
-        //            }
+                        // check that all values match up
+                        if (cache.LinkedList.Except(cache.MapValues).Count() != 0)
+                            context.AddDiff("Values in the map and corresponding linked list do not match up.");
+                    }
 
-        //        }
+                }
 
-        //        cache.WaitForProcessing();
+                cache.WaitForProcessing();
 
-        //        // Cache size should be less than the capacity (somewhere between 8-10 items).
-        //        if (cache.LinkedList.Count() > 10)
-        //            context.AddDiff("Cache size is greater than the max!");
+                // Cache size should be less than the capacity (somewhere between 8-10 items).
+                if (cache.LinkedList.Count() > 10)
+                    context.AddDiff("Cache size is greater than the max!");
 
-        //        // The linked list should be ordered in descending order as the largest items were added last,
-        //        // and therefore are most recently used.
-        //        if (!IsDescending(cache.LinkedList))
-        //            context.AddDiff("LRU order was not maintained.");
-        //    }
-        //    finally
-        //    {
-        //        cache.Dispose();
-        //    }
+                // The linked list should be ordered in descending order as the largest items were added last,
+                // and therefore are most recently used.
+                if (!IsDescending(cache.LinkedList))
+                    context.AddDiff("LRU order was not maintained.");
+            }
+            finally
+            {
+                cache.Dispose();
+            }
 
 
-        //    TestUtilities.AssertFailIfErrors(context);
-        //}
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         internal bool IsDescending(LinkedList<LRUCacheItem<int, string>> data)
         {
