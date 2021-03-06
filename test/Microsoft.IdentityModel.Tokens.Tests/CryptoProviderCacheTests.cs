@@ -180,8 +180,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
+                bool shouldCreate = CryptoProviderFactory.ShouldCacheSignatureProvider(theoryData.SignatureProvider);
+
                 var added = theoryData.CryptoProviderCache.TryAdd(theoryData.SignatureProvider);
-                if (theoryData.Added != added)
+                if (theoryData.Added != added && shouldCreate)
                     context.Diffs.Add($"theoryData.Added:'{theoryData.Added}' != theoryData.CryptoProviderCache.TryAdd(theoryData.SignatureProvider)");
 
                 theoryData.ExpectedException.ProcessNoException(context);

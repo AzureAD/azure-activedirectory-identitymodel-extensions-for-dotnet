@@ -574,6 +574,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>True</c> if <paramref name="signatureProvider"/> should be cached, <c>false</c> otherwise.</returns>
         internal static bool ShouldCacheSignatureProvider(SignatureProvider signatureProvider)
         {
+            _ = signatureProvider ?? throw new ArgumentNullException(nameof(signatureProvider));
             return signatureProvider.Key.InternalId.Length != 0;
         }
 
