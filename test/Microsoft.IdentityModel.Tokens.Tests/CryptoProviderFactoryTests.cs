@@ -190,6 +190,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
             }
 
+            if (cryptoProviderFactory.CryptoProviderCache is IDisposable disposable)
+                disposable?.Dispose();
+
+            if (clone.CryptoProviderCache is IDisposable disposableClone)
+                disposableClone?.Dispose();
+
             context.Diffs.AddRange(getSetContext.Errors);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -833,6 +839,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 context.Diffs.Add("A SignatureProvider was added to CryptoProviderFactory.CryptoProviderCache, but ShouldCacheSignatureProvider() should return false as the key has an empty key id.");
 
             CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
+
+            if (CryptoProviderFactory.Default.CryptoProviderCache is IDisposable disposable)
+                disposable.Dispose();
 
             TestUtilities.AssertFailIfErrors(context);
         }
