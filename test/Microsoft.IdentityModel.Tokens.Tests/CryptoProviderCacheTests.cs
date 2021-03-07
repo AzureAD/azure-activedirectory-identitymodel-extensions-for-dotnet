@@ -330,11 +330,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#if NETCOREAPP
+                var cryptoProviderCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
+
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         First = true,
                         TestId = "SecurityKeyNULL",
@@ -342,6 +349,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "AlgorithmNULL",
@@ -350,6 +358,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = string.Empty,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "AlgorithmString.Empty",
@@ -358,6 +367,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "TypeofProviderNULL"
@@ -365,6 +375,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "TypeofProviderString.Empty",
@@ -373,11 +384,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
 
                 // Test different methods of finding
-#if NETCOREAPP
-                var cryptoProviderCache = new InMemoryCryptoProviderCache();
-#elif NET452 || NET461 || NET472
-                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
-#endif
+
                 var derivedKey = new DerivedSecurityKey("kid", 256);
                 var derivedKey2 = new DerivedSecurityKey("kid2", 256);
                 var signatureProvider = new CustomSignatureProvider(derivedKey, ALG.RsaSha256, true);
@@ -488,36 +495,42 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         ExpectedException = EE.ArgumentNullException(),
                         First = true,
                         TestId = "SignatureProviderNULL"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new SymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256),
                         TestId = "EmptyCache"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey(null, 256), ALG.HmacSha256),
                         TestId = "KeyIdnull"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey(string.Empty, 256), ALG.HmacSha256),
                         TestId = "KeyIdString.empty"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256),
                         TestId = "CryptoProviderFactorynull"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256){CryptoProviderCache = cache},
                         TestId = "CryptoProvider!=ReferenceEquals"
@@ -615,9 +628,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string Algorithm { get; set; }
 
 #if NETCOREAPP
-        public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache();
+        public CryptoProviderCache CryptoProviderCache { get; set; }
 #elif NET452 || NET461 || NET472
-        public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+        public CryptoProviderCache CryptoProviderCache { get; set; }
 #endif
 
         public bool Found { get; set; }
