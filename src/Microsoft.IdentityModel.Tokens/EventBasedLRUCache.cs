@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         async Task RemoveExpiredValuesPeriodically(TimeSpan interval)
         {
-            while (true)
+            while (!_disposed)
             {
                 _eventQueue.Add(() => RemoveExpiredValues());
                 await Task.Delay(interval).ConfigureAwait(false);
