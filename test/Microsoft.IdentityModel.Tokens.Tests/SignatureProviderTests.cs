@@ -859,15 +859,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestId = testId;
         }
 
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = InitFactory();
+
+        private static CryptoProviderFactory InitFactory()
         {
-            CacheSignatureProviders = false,
+            var factory = new CryptoProviderFactory
+            {
+                CacheSignatureProviders = false,
+            };
+
+            // the CryptoProviderFactory will create an InMemoryCryptoProviderCache by default,
+            // this is good for actual usage, not good for testing where we need to control
+            // how it is created. Dispose and replace it.
+            if (factory.CryptoProviderCache is IDisposable disposable)
+                disposable.Dispose();
+
 #if NETCOREAPP
-            CryptoProviderCache = new InMemoryCryptoProviderCache()
+            factory.CryptoProviderCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-            CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None)
+            factory.CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
 #endif
-        };
+
+            return factory;
+        }
 
         public ICryptoProvider CustomCryptoProvider { get; set; }
 
