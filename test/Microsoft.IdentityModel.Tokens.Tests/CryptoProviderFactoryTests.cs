@@ -840,9 +840,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
 
-            if (CryptoProviderFactory.Default.CryptoProviderCache is IDisposable disposable)
-                disposable.Dispose();
-
             TestUtilities.AssertFailIfErrors(context);
         }
     }
