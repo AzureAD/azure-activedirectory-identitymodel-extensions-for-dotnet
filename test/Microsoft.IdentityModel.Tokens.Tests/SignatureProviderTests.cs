@@ -846,7 +846,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class CryptoProviderFactoryTheoryData : TheoryDataBase
+    public class CryptoProviderFactoryTheoryData : TheoryDataBase, IDisposable
     {
         public CryptoProviderFactoryTheoryData() { }
 
@@ -892,6 +892,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public override string ToString()
         {
             return TestId + ", " + SigningAlgorithm + ", " + SigningKey;
+        }
+
+        public void Dispose()
+        {
+            if (CryptoProviderFactory?.CryptoProviderCache is IDisposable disposableCache)
+                disposableCache.Dispose();
         }
 
         public string VerifyAlgorithm { get; set; }
