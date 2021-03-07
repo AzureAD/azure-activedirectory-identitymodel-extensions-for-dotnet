@@ -621,7 +621,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class CryptoProviderCacheTheoryData : TheoryDataBase
+    public class CryptoProviderCacheTheoryData : TheoryDataBase, IDisposable
     {
         public bool Added { get; set; } = true;
 
@@ -648,6 +648,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string TypeofProvider { get; set; }
 
         public bool WillCreateSignatures { get; set; }
+
+        public void Dispose()
+        {
+            InMemoryCryptoProviderCachePublic?.Dispose();
+        }
     }
 
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
