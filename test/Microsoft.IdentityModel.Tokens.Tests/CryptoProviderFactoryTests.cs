@@ -190,6 +190,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
             }
 
+            if (cryptoProviderFactory.CryptoProviderCache is IDisposable disposable)
+                disposable?.Dispose();
+
+            if (clone.CryptoProviderCache is IDisposable disposableClone)
+                disposableClone?.Dispose();
+
             context.Diffs.AddRange(getSetContext.Errors);
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -590,7 +596,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+#if NETCOREAPP
                 var cache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), System.Threading.Tasks.TaskCreationOptions.None);
+#endif
                 var asymmetricSignatureProvider = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
                 var asymmetricSignatureProviderToRelease = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true);
                 var symmetricSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true) { ThrowOnDispose = new InvalidOperationException() };

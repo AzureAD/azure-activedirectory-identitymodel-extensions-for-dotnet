@@ -61,12 +61,12 @@ namespace Microsoft.IdentityModel.Tokens
         private CancellationTokenSource _tokenSource = new CancellationTokenSource();
         private CancellationToken _cancellationToken;
 
-        internal EventBasedLRUCache(int capacity, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedLRUCache(int capacity, TaskCreationOptions options = TaskCreationOptions.LongRunning, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _cancellationToken = _tokenSource.Token;
-            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken, TaskCreationOptions.LongRunning);
+            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken, options);
             _eventQueueTask.Start();
             _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         async Task RemoveExpiredValuesPeriodically(TimeSpan interval)
         {
-            while (true)
+            while (!_disposed)
             {
                 _eventQueue.Add(() => RemoveExpiredValues());
                 await Task.Delay(interval).ConfigureAwait(false);

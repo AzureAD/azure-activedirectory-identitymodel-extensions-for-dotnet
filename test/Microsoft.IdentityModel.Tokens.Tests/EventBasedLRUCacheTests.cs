@@ -42,9 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new EventBasedLRUCache<int?, string>(10);
-
-            try
+            using (var cache = new EventBasedLRUCache<int?, string>(10, TaskCreationOptions.LongRunning))
             {
                 cache.SetValue(1, "one");
                 if (!cache.Contains(1))
@@ -64,13 +62,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     if (!ex.GetType().Equals(typeof(ArgumentNullException)))
                         context.AddDiff("The exception type thrown by Contains(null) was not of type ArgumentNullException.");
                 }
-            }
-            finally
-            {
-                cache.Dispose();
-            }
 
-            TestUtilities.AssertFailIfErrors(context);
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         [Fact]
@@ -78,9 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(100);
-
-            try
+            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning))
             {
                 for (int i = 0; i <= 10; i++)
                 {
@@ -108,13 +100,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                             context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should remain in the cache, but the Contains() method returned false.");
                     }
                 }
+                TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                cache.Dispose();
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -122,9 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
-
-            try
+            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning))
             {
                 cache.SetValue(1, "one");
                 if (!cache.Contains(1))
@@ -148,13 +133,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     if (!ex.GetType().Equals(typeof(ArgumentNullException)))
                         context.AddDiff("The exception type thrown by Set() was not of type ArgumentNullException.");
                 }
+
+                TestUtilities.AssertFailIfErrors(context);
             }
-            finally
-            {
-                cache.Dispose();
-            }
-      
-            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -162,9 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new EventBasedLRUCache<int?, string>(2);
-
-            try
+            using (var cache = new EventBasedLRUCache<int?, string>(2, TaskCreationOptions.LongRunning))
             {
                 cache.SetValue(1, "one");
 
@@ -188,14 +167,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     if (!ex.GetType().Equals(typeof(ArgumentNullException)))
                         context.AddDiff("The exception type thrown by TryGetValue() was not of type ArgumentNullException.");
                 }
-            }
-            finally
-            {
-                cache.Dispose();
-            }
-    
 
-            TestUtilities.AssertFailIfErrors(context);
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         [Fact]
@@ -203,10 +177,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
-
-            try
+            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning))
             {
+
                 cache.SetValue(1, "one");
 
                 if (!cache.TryRemove(1, out _))
@@ -225,13 +198,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     if (!ex.GetType().Equals(typeof(ArgumentNullException)))
                         context.AddDiff("The exception type thrown by TryRemove() was not of type ArgumentNullException.");
                 }
-            }
-            finally
-            {
-                cache.Dispose();
-            }
 
-            TestUtilities.AssertFailIfErrors(context);
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         [Fact]
@@ -239,10 +208,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10);
-
-            try
+            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning))
             {
+
                 for (int i = 0; i <= 100; i++)
                 {
                     cache.SetValue(i, Guid.NewGuid().ToString());
@@ -264,21 +232,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 cache.WaitForProcessing();
 
                 // Cache size should be less than the capacity (somewhere between 8-10 items).
-                if (cache.LinkedList.Count() > 10)
+                if (cache.LinkedList.Count > 10)
                     context.AddDiff("Cache size is greater than the max!");
 
                 // The linked list should be ordered in descending order as the largest items were added last,
                 // and therefore are most recently used.
                 if (!IsDescending(cache.LinkedList))
                     context.AddDiff("LRU order was not maintained.");
-            }
-            finally
-            {
-                cache.Dispose();
-            }
 
-
-            TestUtilities.AssertFailIfErrors(context);
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         internal bool IsDescending(LinkedList<LRUCacheItem<int, string>> data)
@@ -309,10 +272,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            var cache = new EventBasedLRUCache<int, string>(1000);
-
-            try
+            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning))
             {
+
                 List<Task> taskList = new List<Task>();
 
                 for (int i = 0; i < 100000; i++)
@@ -329,13 +291,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // Cache size should be less than the capacity (somewhere between 800 - 1000 items).
                 if (cache.LinkedList.Count() > 1000)
                     context.AddDiff("Cache size is greater than the max!");
-            }
-            finally
-            {
-                cache.Dispose();
-            }
 
-            TestUtilities.AssertFailIfErrors(context);
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         [Fact(Skip = "Large test meant to be run manually.")]
@@ -343,28 +301,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new EventBasedLRUCache<int, string>(1000);
+            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.LongRunning);
 
-            try
+            for (int i = 0; i < 100000; i++)
             {
-                for (int i = 0; i < 100000; i++)
-                {
-                    cache.SetValue(i, i.ToString());
-                }
-
-                // Cache size should be less than the capacity (somewhere between 800-1000 items).
-                if (cache.LinkedList.Count() > 1000)
-                    context.AddDiff("Cache size is greater than the max!");
-
-                // The linked list should be ordered in descending order as the largest items were added last,
-                // and therefore are most recently used.
-                if (!IsDescending(cache.LinkedList))
-                    context.AddDiff("LRU order was not maintained.");
+                cache.SetValue(i, i.ToString());
             }
-            finally
-            {
-                cache.Dispose();
-            }   
+
+            // Cache size should be less than the capacity (somewhere between 800-1000 items).
+            if (cache.LinkedList.Count > 1000)
+                context.AddDiff("Cache size is greater than the max!");
+
+            // The linked list should be ordered in descending order as the largest items were added last,
+            // and therefore are most recently used.
+            if (!IsDescending(cache.LinkedList))
+                context.AddDiff("LRU order was not maintained.");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
     }
 }

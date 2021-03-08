@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -845,7 +846,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class CryptoProviderFactoryTheoryData : TheoryDataBase
+    public class CryptoProviderFactoryTheoryData : TheoryDataBase, IDisposable
     {
         public CryptoProviderFactoryTheoryData() { }
 
@@ -858,7 +859,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestId = testId;
         }
 
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory{ CacheSignatureProviders = false };
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = InitFactory();
+
+        private static CryptoProviderFactory InitFactory()
+        {
+            var factory = new CryptoProviderFactory
+            {
+                CacheSignatureProviders = false,
+            };
+
+            // the CryptoProviderFactory will create an InMemoryCryptoProviderCache by default,
+            // this is good for actual usage, not good for testing where we need to control
+            // how it is created. Dispose and replace it.
+            if (factory.CryptoProviderCache is IDisposable disposable)
+                disposable.Dispose();
+
+#if NETCOREAPP
+            factory.CryptoProviderCache = new InMemoryCryptoProviderCache();
+#elif NET452 || NET461 || NET472
+            factory.CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+#endif
+
+            return factory;
+        }
 
         public ICryptoProvider CustomCryptoProvider { get; set; }
 
@@ -883,6 +906,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public override string ToString()
         {
             return TestId + ", " + SigningAlgorithm + ", " + SigningKey;
+        }
+
+        public void Dispose()
+        {
+            if (CryptoProviderFactory?.CryptoProviderCache is IDisposable disposableCache)
+                disposableCache.Dispose();
         }
 
         public string VerifyAlgorithm { get; set; }
