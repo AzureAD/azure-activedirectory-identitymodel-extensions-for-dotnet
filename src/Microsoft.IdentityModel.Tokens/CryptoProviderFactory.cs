@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        internal CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache();
+        public CryptoProviderCache CryptoProviderCache { get; internal set; } = new InMemoryCryptoProviderCache();
 
         /// <summary>
         /// Extensibility point for creating custom cryptographic operators.
