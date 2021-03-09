@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 try
                 {
-                    if (_eventQueue.TryTake(out var action, 500))
+                    if (_eventQueue.TryTake(out var action, 50))
                         action.Invoke();
                 }
                 catch (Exception ex)
@@ -288,6 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _disposed = true;
                 if (disposing)
                 {
+                    _eventQueueTask.Wait();
                     _eventQueue.Dispose();
                     _eventQueue = null;
                     _map = null;
