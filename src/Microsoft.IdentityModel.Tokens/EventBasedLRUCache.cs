@@ -288,10 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _disposed = true;
                 if (disposing)
                 {
-                    _eventQueueTask.Wait();
-                    _eventQueueTask.Dispose();
                     _eventQueue.Dispose();
-
                     _eventQueue = null;
                     _map = null;
                     _doubleLinkedList = null;
