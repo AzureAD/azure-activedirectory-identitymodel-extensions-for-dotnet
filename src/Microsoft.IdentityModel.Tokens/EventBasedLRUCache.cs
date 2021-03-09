@@ -80,8 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
                 catch (Exception ex)
                 {
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
-                }
-               
+                }          
             }
         }
 
