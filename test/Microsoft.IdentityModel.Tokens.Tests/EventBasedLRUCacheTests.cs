@@ -210,7 +210,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext($"{this}.MaintainLRUOrder");
             using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning))
             {
-
                 for (int i = 0; i <= 100; i++)
                 {
                     cache.SetValue(i, Guid.NewGuid().ToString());
@@ -222,11 +221,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         // wait for the cache events to process
                         cache.WaitForProcessing();
 
-                        // check that all values match up
-                        if (cache.LinkedList.Except(cache.MapValues).Count() != 0)
-                            context.AddDiff("Values in the map and corresponding linked list do not match up.");
-                    }
+                        // Cache size should be less than the capacity (somewhere between 8-10 items).
+                        if (cache.LinkedList.Count > 10)
+                            context.AddDiff("Cache size is greater than the max!");
 
+                        // The linked list should be ordered in descending order as the largest items were added last,
+                        // and therefore are most recently used.
+                        if (!IsDescending(cache.LinkedList))
+                            context.AddDiff("LRU order was not maintained.");
+                    }
                 }
 
                 cache.WaitForProcessing();
