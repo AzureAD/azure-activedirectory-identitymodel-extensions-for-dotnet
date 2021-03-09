@@ -291,16 +291,16 @@ namespace Microsoft.IdentityModel.Tokens
                 _disposed = true;
                 if (disposing)
                 {
-                    _tokenSource.Cancel();
-                    try
-                    {
-                        _eventQueueTask.Wait();
-                    }
-                    catch (AggregateException)
-                    {
-                    }
-                    finally
-                    {
+                    //_tokenSource.Cancel();
+                    //try
+                    //{
+                    //    _eventQueueTask.Wait();
+                    //}
+                    //catch (AggregateException)
+                    //{
+                    //}
+                    //finally
+                    //{
                         _eventQueueTask.Dispose();
                         _eventQueue.Dispose();
                         _tokenSource.Dispose();
@@ -308,7 +308,7 @@ namespace Microsoft.IdentityModel.Tokens
                         _eventQueue = null;
                         _map = null;
                         _doubleLinkedList = null;
-                    }
+                    //}
                 }
             }
         }
