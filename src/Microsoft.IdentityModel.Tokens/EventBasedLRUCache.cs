@@ -58,22 +58,19 @@ namespace Microsoft.IdentityModel.Tokens
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
-        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
-        private CancellationToken _cancellationToken;
 
         internal EventBasedLRUCache(int capacity, TaskCreationOptions options = TaskCreationOptions.LongRunning, IEqualityComparer<TKey> comparer = null)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            _cancellationToken = _tokenSource.Token;
-            _eventQueueTask = new Task(() => OnStart(_cancellationToken), _cancellationToken, options);
+            _eventQueueTask = new Task(OnStart, options);
             _eventQueueTask.Start();
             _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 
-        private void OnStart(CancellationToken token)
+        private void OnStart()
         {
-            while (!_disposed && !token.IsCancellationRequested)
+            while (!_disposed)
             {
                 try
                 {
@@ -291,24 +288,13 @@ namespace Microsoft.IdentityModel.Tokens
                 _disposed = true;
                 if (disposing)
                 {
-                    //_tokenSource.Cancel();
-                    //try
-                    //{
-                    //    _eventQueueTask.Wait();
-                    //}
-                    //catch (AggregateException)
-                    //{
-                    //}
-                    //finally
-                    //{
-                        _eventQueueTask.Dispose();
-                        _eventQueue.Dispose();
-                        _tokenSource.Dispose();
+                    _eventQueueTask.Wait();
+                    _eventQueueTask.Dispose();
+                    _eventQueue.Dispose();
 
-                        _eventQueue = null;
-                        _map = null;
-                        _doubleLinkedList = null;
-                    //}
+                    _eventQueue = null;
+                    _map = null;
+                    _doubleLinkedList = null;
                 }
             }
         }
