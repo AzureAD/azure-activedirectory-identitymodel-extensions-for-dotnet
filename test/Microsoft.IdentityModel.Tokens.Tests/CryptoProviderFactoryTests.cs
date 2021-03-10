@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CreateAndReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAndReleaseSignatureProvidersTheoryData", theoryData);
-            var cryptoProviderFactory = new CryptoProviderFactory() { CacheSignatureProviders = false };
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()) { CacheSignatureProviders = false };
             try
             {
                 var signatureProvider = cryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
@@ -145,7 +145,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.WriteHeader($"{this}.GetSets");
             var context = new CompareContext($"{this}.GetSets");
 
-            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory();
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 7)
@@ -574,7 +575,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
-            var cryptoProviderFactory = new CryptoProviderFactory();
+
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
             try
             {
                 if (theoryData.CustomCryptoProvider != null)
@@ -596,11 +599,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NETCOREAPP
-                var cache = new InMemoryCryptoProviderCache();
-#elif NET452 || NET461 || NET472
-                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), System.Threading.Tasks.TaskCreationOptions.None, 50);
-#endif
+                var cache = CryptoProviderCacheTests.CreateCacheForTesting();
                 var asymmetricSignatureProvider = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
                 var asymmetricSignatureProviderToRelease = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true);
                 var symmetricSignatureProvider = new CustomSymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256, true) { ThrowOnDispose = new InvalidOperationException() };

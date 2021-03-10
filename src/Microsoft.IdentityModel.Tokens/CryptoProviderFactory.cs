@@ -84,6 +84,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CryptoProviderFactory()
         {
+            CryptoProviderCache = new InMemoryCryptoProviderCache();
+        }
+
+        /// <summary>
+        /// Default constructor for <see cref="CryptoProviderFactory"/>.
+        /// </summary>
+        public CryptoProviderFactory(CryptoProviderCache cache)
+        {
+            CryptoProviderCache = cache ?? throw LogHelper.LogArgumentNullException(nameof(cache));
         }
 
         /// <summary>
@@ -103,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get; internal set; } = new InMemoryCryptoProviderCache();
+        public CryptoProviderCache CryptoProviderCache { get; internal set; }
 
         /// <summary>
         /// Extensibility point for creating custom cryptographic operators.

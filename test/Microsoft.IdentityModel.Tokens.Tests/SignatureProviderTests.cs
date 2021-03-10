@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("ECDsa9", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key, KEY.Ecdsa521Key_Public),
 
                 // JsonWebKey
-                new SignatureProviderTheoryData("JsonWebKeyEcdsa1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public){ CryptoProviderFactory = new CryptoProviderFactory{ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
+                new SignatureProviderTheoryData("JsonWebKeyEcdsa1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa2", ALG.EcdsaSha256Signature, ALG.EcdsaSha256Signature, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa3", ALG.Aes256KeyWrap, ALG.EcdsaSha256Signature, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa4", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
                 new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
-                new SignatureProviderTheoryData("RsaSecurityKey1", ALG.RsaSha256, ALG.RsaSha256, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public){ CryptoProviderFactory = new CryptoProviderFactory{ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 100 } },
+                new SignatureProviderTheoryData("RsaSecurityKey1", ALG.RsaSha256, ALG.RsaSha256, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 100 } },
                 new SignatureProviderTheoryData("RsaSecurityKey2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKey3", ALG.RsaSha384, ALG.RsaSha384, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKey4", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
@@ -273,12 +273,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get => new TheoryData<SignatureProviderTheoryData>
             {
                 // JsonWebKey
-                new SignatureProviderTheoryData("JsonWebKeySymmetric1", ALG.HmacSha256, ALG.HmacSha256, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256){ CryptoProviderFactory = new CryptoProviderFactory{ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
+                new SignatureProviderTheoryData("JsonWebKeySymmetric1", ALG.HmacSha256, ALG.HmacSha256, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
                 new SignatureProviderTheoryData("JsonWebKeySymmetric2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256),
                 new SignatureProviderTheoryData("JsonWebKeySymmetric3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("JsonWebKeySymmetric4", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
-                new SignatureProviderTheoryData("SymmetricSecurityKey1", ALG.HmacSha256, ALG.HmacSha256, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256){ CryptoProviderFactory = new CryptoProviderFactory{ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 42 } },
+                new SignatureProviderTheoryData("SymmetricSecurityKey1", ALG.HmacSha256, ALG.HmacSha256, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 42 } },
                 new SignatureProviderTheoryData("SymmetricSecurityKey2", ALG.HmacSha256, ALG.HmacSha256, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
                 
                 // HmacSha256 <-> HmacSha256Signature
@@ -859,29 +859,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestId = testId;
         }
 
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = InitFactory();
-
-        private static CryptoProviderFactory InitFactory()
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
         {
-            var factory = new CryptoProviderFactory
-            {
-                CacheSignatureProviders = false,
-            };
-
-            // the CryptoProviderFactory will create an InMemoryCryptoProviderCache by default,
-            // this is good for actual usage, not good for testing where we need to control
-            // how it is created. Dispose and replace it.
-            if (factory.CryptoProviderCache is IDisposable disposable)
-                disposable.Dispose();
-
-#if NETCOREAPP
-            factory.CryptoProviderCache = new InMemoryCryptoProviderCache();
-#elif NET452 || NET461 || NET472
-            factory.CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
-#endif
-
-            return factory;
-        }
+            CacheSignatureProviders = false
+        };
 
         public ICryptoProvider CustomCryptoProvider { get; set; }
 
