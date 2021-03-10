@@ -67,12 +67,37 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+
+        [Fact]
+        public void DoNotRemoveExpiredValues()
+        {
+            TestUtilities.WriteHeader($"{this}.DoNotRemoveExpiredValues");
+            var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
+            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            {
+                for (int i = 0; i <= 10; i++)
+                        cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
+
+                Thread.Sleep(5000);
+                cache.RemoveExpiredValues();
+
+                // expired items are not removed by default, so all added items should still be in the cache
+                for (int i = 0; i <= 10; i++)
+                {
+                        if (!cache.Contains(i))
+                            context.AddDiff("The key value pair {" + i + ", '" + i.ToString() + "'} should remain in the cache, but the Contains() method returned false.");                   
+                }
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+        }
+
         [Fact]
         public void RemoveExpiredValues()
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: true))
             {
                 for (int i = 0; i <= 10; i++)
                 {

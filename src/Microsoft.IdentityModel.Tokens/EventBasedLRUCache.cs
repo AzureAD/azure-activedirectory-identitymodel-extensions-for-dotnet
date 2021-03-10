@@ -64,14 +64,16 @@ namespace Microsoft.IdentityModel.Tokens
             int capacity,
             TaskCreationOptions options = TaskCreationOptions.LongRunning,
             IEqualityComparer<TKey> comparer = null,
-            int tryTakeTimeout = 500)
+            int tryTakeTimeout = 500,
+            bool removeExpiredValues = false)
         {
             _tryTakeTimeout = tryTakeTimeout;
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _eventQueueTask = new Task(OnStart, options);
             _eventQueueTask.Start();
-            _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+            if (removeExpiredValues)
+                _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
         }
 
         private void OnStart()
