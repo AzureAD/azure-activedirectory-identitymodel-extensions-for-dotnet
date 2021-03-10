@@ -334,16 +334,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#region FOR TESTING TO BE REMOVED OR INTERNAL BEFORE RELEASE
+#region FOR TESTING (INTERNAL ONLY)
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
 #if NETSTANDARD2_0
-        public static long LinkedListCountSigning()
+        internal static long LinkedListCountSigning()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long LinkedListCountSigning()
+        internal long LinkedListCountSigning()
         {
             return _signingSignatureProviders.LinkedListCount;
 #endif
@@ -353,11 +353,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
 #if NETSTANDARD2_0
-        public static long LinkedListCountVerifying()
+        internal static long LinkedListCountVerifying()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long LinkedListCountVerifying()
+        internal long LinkedListCountVerifying()
         {
             return _verifyingSignatureProviders.LinkedListCount;
 #endif
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long MapCountSigning()
+        internal long MapCountSigning()
         {
 #if NETSTANDARD2_0
             return _signingSignatureProviders.Count;
@@ -378,7 +378,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long MapCountVerifying()
+        internal long MapCountVerifying()
         {
 #if NETSTANDARD2_0
             return _signingSignatureProviders.Count;
@@ -391,11 +391,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
 #if NETSTANDARD2_0
-        public static long EventQueueCountSigning()
+        internal static long EventQueueCountSigning()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long EventQueueCountSigning()
+        internal long EventQueueCountSigning()
         {
             return _signingSignatureProviders.EventQueueCount;
 #endif
@@ -405,11 +405,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
 #if NETSTANDARD2_0
-        public static long EventQueueCountVerifying()
+        internal static long EventQueueCountVerifying()
         {
             return 0;
 #elif NET45 || NET461 || NET472
-        public long EventQueueCountVerifying()
+        internal long EventQueueCountVerifying()
         {
             return _verifyingSignatureProviders.EventQueueCount;
 #endif

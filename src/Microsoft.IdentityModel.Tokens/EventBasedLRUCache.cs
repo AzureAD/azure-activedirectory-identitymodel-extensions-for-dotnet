@@ -244,6 +244,8 @@ namespace Microsoft.IdentityModel.Tokens
             return _map.TryRemove(key, out _);
         }
 
+#region FOR TESTING (INTERNAL ONLY)
+
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
@@ -253,12 +255,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long LinkedListCount => _doubleLinkedList.Count;
+        internal long LinkedListCount => _doubleLinkedList.Count;
 
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long MapCount => _map.Count;
+        internal long MapCount => _map.Count;
 
         /// <summary>
         /// FOR TESTING ONLY.
@@ -269,7 +271,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING ONLY.
         /// </summary>
-        public long EventQueueCount => _eventQueue.Count;
+        internal long EventQueueCount => _eventQueue.Count;
+#endregion
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
