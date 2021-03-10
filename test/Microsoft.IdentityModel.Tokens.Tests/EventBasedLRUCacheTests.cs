@@ -73,13 +73,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.DoNotRemoveExpiredValues");
             var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
-            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, cleanUpIntervalInSeconds: 5))
             {
                 for (int i = 0; i <= 10; i++)
                         cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
 
                 Thread.Sleep(5000);
-                cache.RemoveExpiredValues();
 
                 // expired items are not removed by default, so all added items should still be in the cache
                 for (int i = 0; i <= 10; i++)

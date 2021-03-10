@@ -59,21 +59,25 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
         private readonly int _tryTakeTimeout;
+        // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
+        private readonly bool _removeExpiredValues;
 
         internal EventBasedLRUCache(
             int capacity,
             TaskCreationOptions options = TaskCreationOptions.LongRunning,
             IEqualityComparer<TKey> comparer = null,
             int tryTakeTimeout = 500,
-            bool removeExpiredValues = false)
+            bool removeExpiredValues = false,
+            int cleanUpIntervalInSeconds = 300)
         {
             _tryTakeTimeout = tryTakeTimeout;
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
+            _removeExpiredValues = removeExpiredValues;
             _eventQueueTask = new Task(OnStart, options);
             _eventQueueTask.Start();
-            if (removeExpiredValues)
-                _ = RemoveExpiredValuesPeriodically(TimeSpan.FromMinutes(5));
+            if (_removeExpiredValues)
+                _ = RemoveExpiredValuesPeriodically(TimeSpan.FromSeconds(cleanUpIntervalInSeconds));
         }
 
         private void OnStart()
@@ -105,10 +109,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal void WaitForProcessing()
         {
-            while (_eventQueue.Count != 0)
-                continue;
-
-            return;
+            while (true)
+            {
+                if (_eventQueue.Count == 0)
+                    return;
+            }
         }
 
         internal int RemoveExpiredValues()
@@ -166,8 +171,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (value == null)
                 throw LogHelper.LogArgumentNullException(nameof(value));
 
-            // item already expired
-            if (expirationTime < DateTime.UtcNow)
+            // if item already expired, do not add it to the cache if the _removeExpiredValues setting is set to true
+            if (_removeExpiredValues && expirationTime < DateTime.UtcNow)
                 return false;
 
             // just need to update value and move it to the top
