@@ -95,14 +95,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
         /// <param name="options">Options used to create the event queue thread.</param>
-        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, TaskCreationOptions options)
+        /// <param name="tryTakeTimeout">The time used in ms for the timeout interval of the event queue. Defaults to 500 ms.</param>
+        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, TaskCreationOptions options, int tryTakeTimeout = 500)
         {
             if (cryptoProviderCacheOptions == null)
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
+            if (tryTakeTimeout <= 0)
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
+
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal);
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal);
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout);
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout);
         }
 #endif
 

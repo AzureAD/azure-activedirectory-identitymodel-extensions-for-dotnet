@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 var sharedCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                var sharedCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+                var sharedCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 var cryptoProviderCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
 
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
@@ -488,7 +488,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 var cache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
 
                 var theoryData =  new TheoryData<CryptoProviderCacheTheoryData>
@@ -541,7 +541,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 var cryptoProviderCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+                var cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
 
                 var signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
@@ -565,7 +565,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 cryptoProviderCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+                cryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
 
                 signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
@@ -662,7 +662,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {}
 
 #elif NET452 || NET461 || NET472
-        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None)
+        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50)
         {}
 #endif
 

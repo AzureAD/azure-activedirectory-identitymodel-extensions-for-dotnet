@@ -58,9 +58,15 @@ namespace Microsoft.IdentityModel.Tokens
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
+        private readonly int _tryTakeTimeout;
 
-        internal EventBasedLRUCache(int capacity, TaskCreationOptions options = TaskCreationOptions.LongRunning, IEqualityComparer<TKey> comparer = null)
+        internal EventBasedLRUCache(
+            int capacity,
+            TaskCreationOptions options = TaskCreationOptions.LongRunning,
+            IEqualityComparer<TKey> comparer = null,
+            int tryTakeTimeout = 500)
         {
+            _tryTakeTimeout = tryTakeTimeout;
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _eventQueueTask = new Task(OnStart, options);
@@ -74,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 try
                 {
-                    if (_eventQueue.TryTake(out var action, 50))
+                    if (_eventQueue.TryTake(out var action, _tryTakeTimeout))
                         action.Invoke();
                 }
                 catch (Exception ex)

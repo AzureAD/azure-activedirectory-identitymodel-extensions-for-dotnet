@@ -599,7 +599,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
                 var cache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), System.Threading.Tasks.TaskCreationOptions.None);
+                var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), System.Threading.Tasks.TaskCreationOptions.None, 50);
 #endif
                 var asymmetricSignatureProvider = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true) { ThrowOnDispose = new InvalidOperationException() };
                 var asymmetricSignatureProviderToRelease = new CustomAsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm, true);

@@ -877,7 +877,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NETCOREAPP
             factory.CryptoProviderCache = new InMemoryCryptoProviderCache();
 #elif NET452 || NET461 || NET472
-            factory.CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None);
+            factory.CryptoProviderCache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
 #endif
 
             return factory;
