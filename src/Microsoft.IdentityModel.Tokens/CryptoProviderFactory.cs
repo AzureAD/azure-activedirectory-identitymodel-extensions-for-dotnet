@@ -88,8 +88,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Default constructor for <see cref="CryptoProviderFactory"/>.
+        /// Inializes an isntance of a <see cref="CryptoProviderFactory"/>.
         /// </summary>
+        /// <param name="cache">
+        /// The cache to use for caching CryptoProviders
+        /// </param>
         public CryptoProviderFactory(CryptoProviderCache cache)
         {
             CryptoProviderCache = cache ?? throw LogHelper.LogArgumentNullException(nameof(cache));
@@ -104,6 +107,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
+            CryptoProviderCache = new InMemoryCryptoProviderCache();
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
