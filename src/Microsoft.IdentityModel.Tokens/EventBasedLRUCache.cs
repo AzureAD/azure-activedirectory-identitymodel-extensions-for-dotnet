@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
                 catch (Exception ex)
                 {
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
-                }          
+                }
             }
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal void WaitForProcessing()
         {
-            while (true)
+            while (!_disposed)
             {
                 if (_eventQueue.Count == 0)
                     return;
@@ -119,18 +119,25 @@ namespace Microsoft.IdentityModel.Tokens
         internal int RemoveExpiredValues()
         {
             int numItemsRemoved = 0;
-            var node = _doubleLinkedList.First;
-            while (node != null)
+            try
             {
-                var nextNode = node.Next;
-                if (node.Value.ExpirationTime < DateTime.UtcNow)
+                var node = _doubleLinkedList.First;
+                while (node != null)
                 {
-                    _doubleLinkedList.Remove(node);
-                    _map.TryRemove(node.Value.Key, out _);
-                    numItemsRemoved++;
-                }
+                    var nextNode = node.Next;
+                    if (node.Value.ExpirationTime < DateTime.UtcNow)
+                    {
+                        _doubleLinkedList.Remove(node);
+                        _map.TryRemove(node.Value.Key, out _);
+                        numItemsRemoved++;
+                    }
 
-                node = nextNode;
+                    node = nextNode;
+                }
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, nameof(RemoveExpiredValues), ex));
             }
 
             return numItemsRemoved;
@@ -151,10 +158,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         async Task RemoveExpiredValuesPeriodically(TimeSpan interval)
         {
-            while (!_disposed)
+            try
             {
-                _eventQueue.Add(() => RemoveExpiredValues());
-                await Task.Delay(interval).ConfigureAwait(false);
+                while (!_disposed)
+                {
+                    _eventQueue.Add(() => RemoveExpiredValues());
+                    await Task.Delay(interval).ConfigureAwait(false);
+                }
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, nameof(RemoveExpiredValuesPeriodically), ex));
             }
         }
 

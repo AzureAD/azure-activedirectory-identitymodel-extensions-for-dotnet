@@ -242,6 +242,7 @@ namespace Microsoft.IdentityModel.Tokens
         //EventBasedLRUCache errors
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";
         public const string IDX10901 = "IDX10901: CryptoProviderCacheOptions.SizeLimit must be greater than 10. Value: '{0}'";
+        public const string IDX10902 = "IDX10902: Object disposed exception in '{0}': '{1}'";
 #pragma warning restore 1591
     }
 }
