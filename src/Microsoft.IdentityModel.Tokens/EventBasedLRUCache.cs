@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
-        private Task _eventQueueTask;
+        private readonly Task _eventQueueTask;
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
@@ -349,7 +349,7 @@ namespace Microsoft.IdentityModel.Tokens
         public override bool Equals(object obj)
         {
             LRUCacheItem<TKey, TValue> item = obj as LRUCacheItem<TKey, TValue>;
-            return item == null ? false : Key.Equals(item.Key);
+            return item != null && Key.Equals(item.Key);
         }
 
         public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key);
