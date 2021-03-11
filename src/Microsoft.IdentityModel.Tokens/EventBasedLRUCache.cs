@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
             TaskCreationOptions options = TaskCreationOptions.LongRunning,
             IEqualityComparer<TKey> comparer = null,
             int tryTakeTimeout = 500,
-            bool removeExpiredValues = false,
+            bool removeExpiredValues = true,
             int cleanUpIntervalInSeconds = 300)
         {
             _tryTakeTimeout = tryTakeTimeout;

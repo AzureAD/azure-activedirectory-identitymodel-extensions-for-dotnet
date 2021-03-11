@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            using (var cache = new EventBasedLRUCache<int?, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int?, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
                 cache.SetValue(1, "one");
                 if (!cache.Contains(1))
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.DoNotRemoveExpiredValues");
             var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
-            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, cleanUpIntervalInSeconds: 5))
+            using (var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, cleanUpIntervalInSeconds: 5, removeExpiredValues: false))
             {
                 for (int i = 0; i <= 10; i++)
                         cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
                 cache.SetValue(1, "one");
                 if (!cache.Contains(1))
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            using (var cache = new EventBasedLRUCache<int?, string>(2, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int?, string>(2, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
                 cache.SetValue(1, "one");
 
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
 
                 cache.SetValue(1, "one");
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
                 for (int i = 0; i <= 1000; i++)
                 {
@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50))
+            using (var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
 
                 List<Task> taskList = new List<Task>();
@@ -336,7 +336,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.LongRunning, tryTakeTimeout: 50);
+            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false);
 
             for (int i = 0; i < 100000; i++)
             {
