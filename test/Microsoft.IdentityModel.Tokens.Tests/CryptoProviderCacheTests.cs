@@ -51,6 +51,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         });
 
+        [Fact]
+        public void CryptoProviderCacheOptions()
+        {
+            var options = new CryptoProviderCacheOptions();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = -1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 10);
+            options.SizeLimit = 11;
+        }
+
         /// <summary>
         /// Tests that a cache key generated from a <see cref="SignatureProvider"/> or a set of components are equal.
         /// </summary>

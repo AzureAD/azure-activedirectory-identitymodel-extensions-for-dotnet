@@ -135,6 +135,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext($"{this}.SetValue");
             using (var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, tryTakeTimeout: 50, removeExpiredValues: false))
             {
+                Assert.Throws<ArgumentNullException>(() => cache.SetValue(1, null));
+
+                cache.SetValue(1, "one");
+                if (!cache.Contains(1))
+                    context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
+
                 cache.SetValue(1, "one");
                 if (!cache.Contains(1))
                     context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
@@ -148,7 +154,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     cache.SetValue(null, "three");
                     context.AddDiff("The first parameter passed into the SetValue() method was null, but no exception was thrown.");
+                }
+                catch (Exception ex)
+                {
+                    if (!ex.GetType().Equals(typeof(ArgumentNullException)))
+                        context.AddDiff("The exception type thrown by Set() was not of type ArgumentNullException.");
+                }
 
+                try
+                {
                     cache.SetValue(3, null);
                     context.AddDiff("The second parameter passed into the SetValue() method was null, but no exception was thrown.");
                 }
@@ -277,6 +291,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 TestUtilities.AssertFailIfErrors(context);
             }
+        }
+
+        [Fact]
+        public void LRUCacheItemTests()
+        {
+            Assert.Throws<ArgumentNullException>(() => new LRUCacheItem<string, string>("1", null));
+            Assert.Throws<ArgumentNullException>(() => new LRUCacheItem<string, string>(null, "1"));
         }
 
         internal bool IsDescending(LinkedList<LRUCacheItem<int, string>> data)
