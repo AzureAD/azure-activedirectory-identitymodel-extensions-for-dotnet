@@ -36,6 +36,11 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class SignatureProvider : IDisposable
     {
         /// <summary>
+        /// Maintained by <see cref="CryptoProviderFactory"/>
+        /// </summary>
+        internal int _ReferenceCount;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>

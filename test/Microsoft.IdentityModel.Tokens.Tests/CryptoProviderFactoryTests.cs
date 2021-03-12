@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -577,6 +578,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
 
             var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+            // turning off caching also turns off ref counting considerations in the dipose algorithm.
+            cryptoProviderFactory.CacheSignatureProviders = false;
 
             try
             {
@@ -840,6 +843,129 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             CryptoProviderFactory.Default.ReleaseSignatureProvider(signatureProvider);
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            Assert.Equal(1, signing._ReferenceCount);
+
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            Assert.Equal(2, signing._ReferenceCount);
+            Assert.Equal(2, signing2._ReferenceCount);
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+
+            Assert.Equal(1, signing._ReferenceCount);
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+
+            Assert.Equal(0, signing._ReferenceCount);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_NoCaching()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest_NoCaching");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+            cryptoProviderFactory.CacheSignatureProviders = false;
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            Assert.Equal(0, signing._ReferenceCount);
+
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            Assert.Equal(0, signing._ReferenceCount);
+            Assert.Equal(0, signing2._ReferenceCount);
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+
+            Assert.Equal(0, signing._ReferenceCount);
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+
+            Assert.Equal(0, signing._ReferenceCount);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_Caching()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            cryptoProviderFactory.CryptoProviderCache.TryRemove(signing2);
+
+            Assert.Null(signing.CryptoProviderCache);
+            Assert.Null(signing2.CryptoProviderCache);
+
+            cryptoProviderFactory.ReleaseSignatureProvider(signing2);
+            var disposeCalled = (bool)signing2.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signing2);
+            Assert.False(disposeCalled);
+            cryptoProviderFactory.ReleaseSignatureProvider(signing);
+            disposeCalled = (bool)signing.GetType().GetField("_disposed", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(signing);
+            Assert.True(disposeCalled);
+        }
+
+        [Fact]
+        public void ReferenceCountingTest_MultiThreaded()
+        {
+            var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
+            var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
+
+            Task[] tasks = new Task[1000];
+
+            for (int i = 0; i < 1000; i++)
+            {
+                tasks[i] = Task.Run(() =>
+                {
+                    var rsaSha256 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+                    var hmacSha256 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+                    var hmacSha512 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey512, ALG.HmacSha512);
+                    var hmacSha384 = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+                    var rsaSha256Verifying = cryptoProviderFactory.CreateForVerifying(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+                    var hmacSha256Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+                    var hmacSha512Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512);
+                    var hmacSha384Verifying = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+                    cryptoProviderFactory.ReleaseSignatureProvider(rsaSha256);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha256);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha512);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha384);
+
+                    cryptoProviderFactory.ReleaseSignatureProvider(rsaSha256Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha256Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha512Verifying);
+                    cryptoProviderFactory.ReleaseSignatureProvider(hmacSha384Verifying);
+                });
+            }
+
+            Task.WaitAll(tasks);
+
+            var rsaSha256Final = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var hmacSha256Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+            var hmacSha512Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey512, ALG.HmacSha512);
+            var hmacSha384Final = cryptoProviderFactory.CreateForSigning(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+            var rsaSha256VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var hmacSha256VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey, SecurityAlgorithms.HmacSha256Signature);
+            var hmacSha512VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512);
+            var hmacSha384VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384);
+
+            Assert.Equal(1, rsaSha256Final._ReferenceCount);
+            Assert.Equal(1, hmacSha256Final._ReferenceCount);
+            Assert.Equal(1, hmacSha512Final._ReferenceCount);
+            Assert.Equal(1, hmacSha384Final._ReferenceCount);
+            Assert.Equal(1, rsaSha256VerifyingFinal._ReferenceCount);
+            Assert.Equal(1, hmacSha256VerifyingFinal._ReferenceCount);
+            Assert.Equal(1, hmacSha512VerifyingFinal._ReferenceCount);
+            Assert.Equal(1, hmacSha384VerifyingFinal._ReferenceCount);
         }
     }
 }

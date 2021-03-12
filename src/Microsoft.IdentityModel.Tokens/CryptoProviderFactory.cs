@@ -29,6 +29,7 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -549,12 +550,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (CacheSignatureProviders && cacheProvider)
             {
                 if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                {
+                    Interlocked.Increment(ref signatureProvider._ReferenceCount);
                     return signatureProvider;
+                }
 
                 lock (_cacheLock)
                 {
                     if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
+                    {
+                        Interlocked.Increment(ref signatureProvider._ReferenceCount);
                         return signatureProvider;
+                    }
 
                     if (createAsymmetric)
                         signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
@@ -562,7 +569,9 @@ namespace Microsoft.IdentityModel.Tokens
                         signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
                     if (ShouldCacheSignatureProvider(signatureProvider))
-                        CryptoProviderCache.TryAdd(signatureProvider);
+                        if (CryptoProviderCache.TryAdd(signatureProvider))
+                            Interlocked.Increment(ref signatureProvider._ReferenceCount);
+
                 }
             }
             else if (createAsymmetric)
@@ -692,9 +701,14 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
-            else if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
+
+            if (CacheSignatureProviders)
+                Interlocked.Decrement(ref signatureProvider._ReferenceCount);
+
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
                 CustomCryptoProvider.Release(signatureProvider);
-            else if (signatureProvider.CryptoProviderCache == null)
+            // if not caching, don't use ref counting to determine
+            else if (signatureProvider.CryptoProviderCache == null && (!CacheSignatureProviders || signatureProvider._ReferenceCount == 0))
                 signatureProvider.Dispose();
         }
     }
