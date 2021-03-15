@@ -60,6 +60,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
+        internal CryptoProviderFactory CryptoProviderFactory { get; set; }
+
 #if NETSTANDARD2_0
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
@@ -86,8 +88,15 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal);
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal);
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+        }
+
+        private void OnSignatureProviderRemovedFromCache(SignatureProvider signatureProvider)
+        {
+            signatureProvider.CryptoProviderCache = null;
+            if (signatureProvider.RefCount == 0)
+                signatureProvider.Dispose();
         }
 
         /// <summary>
@@ -105,8 +114,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false);
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false);
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
         }
 #endif
 
@@ -277,15 +286,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
 #if NET45 || NET461 || NET472
-                if (signatureProviderCache.TryRemove(cacheKey, out SignatureProvider provider))
-                {
-                    provider.CryptoProviderCache = null;
-                    return true;
-                }
-                else
-                {
-                    return false; 
-                }
+                return signatureProviderCache.TryRemove(cacheKey, out SignatureProvider provider);
 #elif NETSTANDARD2_0
                 if (signatureProviderCache.TryGetValue(cacheKey, out SignatureProvider provider))
                 {

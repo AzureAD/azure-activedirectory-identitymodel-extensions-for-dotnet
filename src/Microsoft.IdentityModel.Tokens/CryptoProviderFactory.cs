@@ -85,11 +85,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public CryptoProviderFactory()
         {
-            CryptoProviderCache = new InMemoryCryptoProviderCache();
+            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
         }
 
         /// <summary>
-        /// Inializes an isntance of a <see cref="CryptoProviderFactory"/>.
+        /// Initializes an instance of a <see cref="CryptoProviderFactory"/>.
         /// </summary>
         /// <param name="cache">
         /// The cache to use for caching CryptoProviders
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
-            CryptoProviderCache = new InMemoryCryptoProviderCache();
+            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
@@ -551,7 +551,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
                 {
-                    Interlocked.Increment(ref signatureProvider._ReferenceCount);
+                    signatureProvider.AddRef();
                     return signatureProvider;
                 }
 
@@ -559,7 +559,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
                     {
-                        Interlocked.Increment(ref signatureProvider._ReferenceCount);
+                        signatureProvider.AddRef();
                         return signatureProvider;
                     }
 
@@ -569,9 +569,7 @@ namespace Microsoft.IdentityModel.Tokens
                         signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
                     if (ShouldCacheSignatureProvider(signatureProvider))
-                        if (CryptoProviderCache.TryAdd(signatureProvider))
-                            Interlocked.Increment(ref signatureProvider._ReferenceCount);
-
+                        CryptoProviderCache.TryAdd(signatureProvider);
                 }
             }
             else if (createAsymmetric)
@@ -702,13 +700,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
 
-            if (CacheSignatureProviders)
-                Interlocked.Decrement(ref signatureProvider._ReferenceCount);
-
+            signatureProvider.Release();
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(signatureProvider.Algorithm))
                 CustomCryptoProvider.Release(signatureProvider);
-            // if not caching, don't use ref counting to determine
-            else if (signatureProvider.CryptoProviderCache == null && (!CacheSignatureProviders || signatureProvider._ReferenceCount == 0))
+            else if (signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0)
                 signatureProvider.Dispose();
         }
     }

@@ -854,32 +854,32 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
 
-            if (signing._ReferenceCount != 1)
+            if (signing.RefCount != 1)
                 context.AddDiff($"{nameof(signing)} reference count should have been 1");
 
             var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
 
-            if (signing._ReferenceCount != 2)
+            if (signing.RefCount != 2)
                 context.AddDiff($"{nameof(signing)} reference count should have been 2");
 
-            if (signing2._ReferenceCount != 2)
+            if (signing2.RefCount != 2)
                 context.AddDiff($"{nameof(signing2)} reference count should have been 2");
 
             cryptoProviderFactory.ReleaseSignatureProvider(signing2);
 
-            if (signing2._ReferenceCount != 1)
+            if (signing2.RefCount != 1)
                 context.AddDiff($"{nameof(signing2)} reference count should have been 1");
 
-            if (GetSignatureProviderIsDisposedByReflect(signing))
-                context.AddDiff($"{nameof(signing2)} should not have been disposed");
+            if (GetSignatureProviderIsDisposedByReflect(signing2))
+                context.AddDiff($"{nameof(signing2)} should NOT have been disposed");
 
             cryptoProviderFactory.ReleaseSignatureProvider(signing);
 
-            if (signing._ReferenceCount != 0)
+            if (signing.RefCount != 0)
                 context.AddDiff($"{nameof(signing)} reference count should have been 0");
 
-            if (!GetSignatureProviderIsDisposedByReflect(signing))
-                context.AddDiff($"{nameof(signing)} should have been disposed");
+            if (GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing)} should NOT have been disposed");
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -894,15 +894,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var signing = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
             var signing2 = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
 
-            if (signing._ReferenceCount != 0)
-                context.AddDiff($"{nameof(signing)} reference count should have been 0");
+            if (signing.RefCount != 1)
+                context.AddDiff($"{nameof(signing)} reference count should have been 1");
 
-            if (signing2._ReferenceCount != 0)
-                context.AddDiff($"{nameof(signing2)} reference count should have been 0");
+            if (signing2.RefCount != 1)
+                context.AddDiff($"{nameof(signing2)} reference count should have been 1");
 
             cryptoProviderFactory.ReleaseSignatureProvider(signing2);
 
-            if (signing2._ReferenceCount != 0)
+            if (signing2.RefCount != 0)
                 context.AddDiff($"{nameof(signing2)} reference count should have been 0");
 
             if (!GetSignatureProviderIsDisposedByReflect(signing2))
@@ -913,7 +913,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             if (!GetSignatureProviderIsDisposedByReflect(signing))
                 context.AddDiff($"{nameof(signing)} should have been disposed");
 
-            if (signing._ReferenceCount != 0)
+            if (signing.RefCount != 0)
                 context.AddDiff($"{nameof(signing)} reference count should have been 0");
 
             TestUtilities.AssertFailIfErrors(context);
@@ -997,29 +997,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var hmacSha512VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey512, ALG.HmacSha512);
             var hmacSha384VerifyingFinal = cryptoProviderFactory.CreateForVerifying(Default.SymmetricSigningKey384, ALG.HmacSha384);
 
-            if (rsaSha256Final._ReferenceCount != 0)
-                context.AddDiff($"{nameof(rsaSha256Final)} reference count should have been 0");
+            if (rsaSha256Final.RefCount != 1)
+                context.AddDiff($"{nameof(rsaSha256Final)} reference count should have been 1");
 
-            if (hmacSha256Final._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha256Final)} reference count should have been 0");
+            if (hmacSha256Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha256Final)} reference count should have been 1");
 
-            if (hmacSha512Final._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha512Final)} reference count should have been 0");
+            if (hmacSha512Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha512Final)} reference count should have been 1");
 
-            if (hmacSha384Final._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha384Final)} reference count should have been 0");
+            if (hmacSha384Final.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha384Final)} reference count should have been 1");
 
-            if (rsaSha256VerifyingFinal._ReferenceCount != 0)
-                context.AddDiff($"{nameof(rsaSha256VerifyingFinal)} reference count should have been 0");
+            if (rsaSha256VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(rsaSha256VerifyingFinal)} reference count should have been 1");
 
-            if (hmacSha256VerifyingFinal._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha256VerifyingFinal)} reference count should have been 0");
+            if (hmacSha256VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha256VerifyingFinal)} reference count should have been 1");
 
-            if (hmacSha512VerifyingFinal._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha512VerifyingFinal)} reference count should have been 0");
+            if (hmacSha512VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha512VerifyingFinal)} reference count should have been 1");
 
-            if (hmacSha384VerifyingFinal._ReferenceCount != 0)
-                context.AddDiff($"{nameof(hmacSha384VerifyingFinal)} reference count should have been 0");
+            if (hmacSha384VerifyingFinal.RefCount != 1)
+                context.AddDiff($"{nameof(hmacSha384VerifyingFinal)} reference count should have been 1");
 
             TestUtilities.AssertFailIfErrors(context);
         }

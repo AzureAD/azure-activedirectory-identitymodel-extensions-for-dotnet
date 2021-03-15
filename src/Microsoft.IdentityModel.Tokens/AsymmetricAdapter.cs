@@ -270,8 +270,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
+#if NET472
+                var rsa = RSA.Create(rsaSecurityKey.Parameters);
+#else
                 var rsa = RSA.Create();
                 rsa.ImportParameters(rsaSecurityKey.Parameters);
+#endif
                 InitializeUsingRsa(rsa, algorithm);
                 _disposeCryptoOperators = true;
             }

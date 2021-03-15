@@ -48,6 +48,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
     internal class EventBasedLRUCache<TKey, TValue> : IDisposable
     {
+        internal delegate void ItemRemoved(TValue Value);
+
         private readonly int _capacity;
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
@@ -128,7 +130,9 @@ namespace Microsoft.IdentityModel.Tokens
                     if (node.Value.ExpirationTime < DateTime.UtcNow)
                     {
                         _doubleLinkedList.Remove(node);
-                        _map.TryRemove(node.Value.Key, out _);
+                        if (_map.TryRemove(node.Value.Key, out var cacheItem))
+                            OnItemRemoved?.Invoke(cacheItem.Value);
+
                         numItemsRemoved++;
                     }
 
@@ -151,7 +155,9 @@ namespace Microsoft.IdentityModel.Tokens
             while (_map.Count > newCacheSize && _doubleLinkedList.Count > 0)
             {
                 var lru = _doubleLinkedList.Last;
-                _map.TryRemove(lru.Value.Key, out _);
+                if (_map.TryRemove(lru.Value.Key, out var cacheItem))
+                    OnItemRemoved?.Invoke(cacheItem.Value);
+
                 _doubleLinkedList.Remove(lru);
             }
         }
@@ -262,7 +268,19 @@ namespace Microsoft.IdentityModel.Tokens
 
             value = cacheItem.Value;
             _eventQueue.Add(() => _doubleLinkedList.Remove(cacheItem));
-            return _map.TryRemove(key, out _);
+            if (_map.TryRemove(key, out cacheItem))
+            {
+                OnItemRemoved?.Invoke(cacheItem.Value);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal ItemRemoved OnItemRemoved
+        {
+            get;
+            set;
         }
 
 #region FOR TESTING (INTERNAL ONLY)
