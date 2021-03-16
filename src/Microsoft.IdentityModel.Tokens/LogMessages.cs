@@ -228,6 +228,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10712 = "IDX10712: Unable to Encrypt, Internal EncryptionFunction is not available.";
         public const string IDX10713 = "IDX10713: Encrytion/Decryption using algorithm '{0}' is only supported on Windows platform.";
         public const string IDX10714 = "IDX10714: Unable to perform the decryption. There is a authentication tag mismatch.";
+        public const string IDX10715 = "IDX10715: Encryption using algorithm: '{0}' is not supported.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
