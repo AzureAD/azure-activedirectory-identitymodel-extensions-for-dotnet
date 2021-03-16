@@ -295,28 +295,6 @@ namespace Microsoft.IdentityModel.Tokens
                || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal);
         }
 
-        internal static bool IsSupportedAesGcmEncryptionAlgorithm(string algorithm, SecurityKey key)
-        {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (!(algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal)))
-                return false;
-
-            if (key is SymmetricSecurityKey)
-                return true;
-
-            if (key is JsonWebKey jsonWebKey)
-                return (jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet);
-
-            return false;
-        }
-
         private static bool IsSupportedEcdsaAlgorithm(string algorithm)
         {
             return EcdsaSigningAlgorithms.Contains(algorithm);
