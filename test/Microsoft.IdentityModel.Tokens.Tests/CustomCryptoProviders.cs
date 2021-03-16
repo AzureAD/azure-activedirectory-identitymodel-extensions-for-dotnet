@@ -125,16 +125,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
     public class CustomCryptoProviderFactory : CryptoProviderFactory
     {
-
-#if NETCOREAPP
-        public CustomCryptoProviderFactory()
-        {
-        }
-#else
         public CustomCryptoProviderFactory() : base(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50))
         {
         }
-#endif
 
         public CustomCryptoProviderFactory(ICryptoProvider cryptoProvider)
         {

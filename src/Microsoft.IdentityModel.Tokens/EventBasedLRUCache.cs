@@ -43,6 +43,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// the map is a <see cref="ConcurrentDictionary{TKey, TValue}"/> which may be modified directly inside an API call or
     /// through eventual processing of the event queue. This implementation relies on the principle of 'eventual consistency':
     /// though the map and it's corresponding linked list may be out of sync at any given point in time, they will eventually line up.
+    /// See here for more details:
+    /// https://aka.ms/identitymodel/caching
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
