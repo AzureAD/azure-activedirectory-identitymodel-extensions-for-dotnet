@@ -32,9 +32,11 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -293,11 +295,47 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
 
                 tokenHandler.InboundClaimTypeMap.Clear();
+                 var encryptionCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm128;
+                 encryptionCredentials.CryptoProviderFactory = new CryptoProviderFactoryMock();
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
                     {
                         First = true,
+                        TestId = "AesGcm128EncryptionWithMock",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = encryptionCredentials,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            TokenType = "TokenType"
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_128,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "AesGcm256Encryption",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm256,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            TokenType = "TokenType"
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10616:", typeof(NotSupportedException))
+                    },
+                    new CreateTokenTheoryData
+                    {
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -2832,6 +2870,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string Algorithm { get; set; }
 
         public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
+    }
+
+    // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.
+    public class CryptoProviderFactoryMock: CryptoProviderFactory
+    {
+        public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
+        {
+            if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
+                return new AuthenticatedEncryptionProviderMock(key, algorithm);
+
+            return null;
+        }
+    }
+
+    // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
+    public class AuthenticatedEncryptionProviderMock: AuthenticatedEncryptionProvider
+    {
+        public AuthenticatedEncryptionProviderMock(SecurityKey key, string algorithm): base(key, algorithm)
+        { }
+
+        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+        {
+            byte[] nonce = new byte[AesGcm.NonceSize];
+
+            // Generate secure nonce
+            var random = RandomNumberGenerator.Create();
+            random.GetBytes(nonce);
+
+            return Encrypt(plaintext, authenticatedData, nonce);
+        }
+
+        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
+        {
+            byte[] authenticationTag = new byte[AesGcm.TagSize];
+            byte[] ciphertext = new byte[plaintext.Length];
+
+            using (var aes = new AesGcm(GetKeyBytes(Key)))
+            {
+                aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
+            }
+
+            return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag); 
+        }
     }
 }
 

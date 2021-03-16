@@ -59,13 +59,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!_disposed && disposing)
             {
-                if (disposing)
-                {
-                    _disposed = true;
-                    _keyHandle.Dispose();
-                }
+                _disposed = true;
+                _keyHandle.Dispose();
             }
         }
 
@@ -74,5 +71,13 @@ namespace Microsoft.IdentityModel.Tokens
             AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
         }
+
+#region FOR TESTING ONLY
+        internal void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null)
+        {
+            AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
+            AesAead.Encrypt(_keyHandle, nonce, associatedData, plaintext, ciphertext, tag);
+        }
+#endregion
     }
 }

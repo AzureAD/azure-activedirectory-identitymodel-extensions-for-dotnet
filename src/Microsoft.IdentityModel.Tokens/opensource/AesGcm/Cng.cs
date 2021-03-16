@@ -109,6 +109,54 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
         }
+
+#region FOR TESTING ONLY
+        internal static unsafe void Encrypt(
+            SafeKeyHandle keyHandle,
+            byte[] nonce,
+            byte[] associatedData,
+            byte[] plaintext,
+            byte[] ciphertext,
+            byte[] tag)
+        {
+            fixed (byte* plaintextBytes = plaintext)
+            fixed (byte* nonceBytes = nonce)
+            fixed (byte* ciphertextBytes = ciphertext)
+            fixed (byte* tagBytes = tag)
+            fixed (byte* associatedDataBytes = associatedData)
+            {
+                BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO authInfo = BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO.Create();
+                authInfo.pbNonce = nonceBytes;
+                authInfo.cbNonce = nonce.Length;
+                authInfo.pbTag = tagBytes;
+                authInfo.cbTag = tag.Length;
+                authInfo.pbAuthData = associatedDataBytes;
+                if (associatedData == null)
+                    authInfo.cbAuthData = 0;
+                else
+                    authInfo.cbAuthData = associatedData.Length;
+
+                NTSTATUS ntStatus = Interop.BCrypt.BCryptEncrypt(
+                    keyHandle,
+                    plaintextBytes,
+                    plaintext.Length,
+                    new IntPtr(&authInfo),
+                    null,
+                    0,
+                    ciphertextBytes,
+                    ciphertext.Length,
+                    out int ciphertextBytesWritten,
+                    0);
+
+                Debug.Assert(plaintext.Length == ciphertextBytesWritten);
+
+                if (ntStatus != NTSTATUS.STATUS_SUCCESS)
+                {
+                    throw Interop.BCrypt.CreateCryptographicException(ntStatus);
+                }
+            }
+        }
+#endregion
     }
 
     internal static class AesBCryptModes
