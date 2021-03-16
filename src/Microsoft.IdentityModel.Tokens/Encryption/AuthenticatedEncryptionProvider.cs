@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AuthenticatedEncryptionResult EncryptWithAesGcm(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10699, Algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, Algorithm)));
         }
 
         private byte[] DecryptWithAesGcm(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
