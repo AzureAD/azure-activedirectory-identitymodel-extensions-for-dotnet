@@ -48,6 +48,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     {
         private const string _actor = "Actor";
         private Saml2Serializer _serializer = new Saml2Serializer();
+        private string _actorClaimName = DefaultActorClaimName;
+
+        /// <summary>
+        /// Default value of the Actor Claim Name used when processing actor claims.
+        /// </summary>
+        public static string DefaultActorClaimName = ClaimTypes.Actor;
 
         /// <summary>
         /// Gets or set the <see cref="Saml2Serializer"/> that will be used to read and write a <see cref="Saml2SecurityToken"/>.
@@ -57,6 +63,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             get { return _serializer; }
             set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
+        }
+
+        /// <summary>
+        /// Gets or set the actor claim attribute name that will be used when processing actor claims.
+        /// </summary>
+        public string ActorClaimName
+        {
+            get { return _actorClaimName; }
+            set { _actorClaimName = string.IsNullOrWhiteSpace(value) ? throw LogHelper.LogArgumentNullException(nameof(value)) : value; }
         }
 
         /// <summary>
@@ -1027,7 +1042,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         protected virtual void SetClaimsIdentityActorFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)
         {
             // bail here; nothing to add.
-            if (identity == null || attribute == null || attribute.Name != _actor || attribute.Values == null || attribute.Values.Count < 1)
+            if (identity == null || attribute == null || (attribute.Name != ActorClaimName) || attribute.Values == null || attribute.Values.Count < 1)
                 return;
 
             Saml2Attribute actorAttribute = null;

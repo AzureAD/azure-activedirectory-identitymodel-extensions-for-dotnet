@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml.Tests;
@@ -1296,7 +1297,51 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 };
             }
         }
+
+        [Theory, MemberData(nameof(CreateValidateActorClaimProcessing))]
+        public void ValidateActorClaimProcessing(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateActorClaimProcessing", theoryData);
+            try
+            {
+                var token = theoryData.Token;
+                var actorName = "TestActor";
+                ClaimsPrincipal claimPrinciple = theoryData.Handler.ValidateToken(token, theoryData.ValidationParameters, out SecurityToken validatedToken);
+                theoryData.ExpectedException.ProcessNoException(context);
+                ClaimsIdentity validatedIdentity = claimPrinciple?.Identities.FirstOrDefault(identity => identity.Actor != null);
+                IdentityComparer.AreStringsEqual(actorName, validatedIdentity.Actor.Name, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
         }
+
+        public static TheoryData<Saml2TheoryData> CreateValidateActorClaimProcessing
+        {
+            get
+            {
+                return new TheoryData<Saml2TheoryData>
+                {
+                    new Saml2TheoryData
+                    {
+                        Handler = new Saml2SecurityTokenHandler(),
+                        TestId = nameof(ReferenceTokens.Saml2Token_Actor_Claim),
+                        Token = ReferenceTokens.Saml2Token_Actor_Claim,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
+                            RequireSignedTokens = false,
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                };
+            }
+        }
+    }
 
     public class Saml2SecurityTokenHandlerPublic : Saml2SecurityTokenHandler
     {

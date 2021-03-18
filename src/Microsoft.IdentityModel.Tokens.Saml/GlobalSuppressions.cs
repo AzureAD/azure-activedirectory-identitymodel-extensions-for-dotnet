@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Breaking change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Tokens.Saml2.Saml2Constants.AcceptedDateTimeFormats")]
 [assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Breaking change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Tokens.Saml.SamlConstants.AcceptedDateTimeFormats")]
+[assembly: SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible", Justification = "Breaking Change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.DefaultActorClaimName")]
 [assembly: SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "Breaking change", Scope = "type", Target = "~T:Microsoft.IdentityModel.Tokens.Saml2.Saml2Constants")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "New object takes ownership", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CanReadToken(System.String)~System.Boolean")]
 [assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "New object takes ownership", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.CanReadToken(System.String)~System.Boolean")]
@@ -27,3 +28,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Exception is returned as string", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateSignature(Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken,System.String,Microsoft.IdentityModel.Tokens.TokenValidationParameters)~Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.Saml.SamlAssertion.CanonicalString")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Breaking change", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.Saml2.Saml2Assertion.CanonicalString")]
+
