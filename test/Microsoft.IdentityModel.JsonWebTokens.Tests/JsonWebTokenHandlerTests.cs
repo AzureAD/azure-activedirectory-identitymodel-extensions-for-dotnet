@@ -75,6 +75,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
                 ValidIssuer = "http://Default.Issuer.com",
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
@@ -233,6 +234,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateJWE(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWE", theoryData);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 string jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
@@ -446,6 +448,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateJWEUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 string jweFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
@@ -779,6 +782,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateJWS(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWS", theoryData);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 string jwsFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
@@ -985,6 +989,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithAdditionalHeaderClaims", theoryData);
             var handler = new JsonWebTokenHandler();
+            theoryData.ValidationParameters.ValidateLifetime = false;
 
             var jwtTokenString = handler.CreateToken(theoryData.TokenDescriptor);
             var jwtToken = handler.ValidateToken(jwtTokenString, theoryData.ValidationParameters).SecurityToken as JsonWebToken;
@@ -1142,6 +1147,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateJWSUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWSUsingSecurityTokenDescriptor", theoryData);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 string jwtFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
@@ -1609,6 +1615,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudience = Default.Audience,
+                ValidateLifetime = false,
                 ValidIssuer = Default.Issuer,
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
@@ -1629,6 +1636,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var innerJwt = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
             var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJwt, theoryData.EncryptingCredentials);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
@@ -1662,6 +1670,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
             var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 var tokenValidationResult = jsonWebTokenHandler.ValidateToken(jweCreatedInMemory, theoryData.ValidationParameters);
@@ -1758,6 +1767,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.RoundTripJWEInnerJWSKeyWrap", theoryData);
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var innerJws = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials);
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 var jweCreatedInMemory = jsonWebTokenHandler.EncryptToken(innerJws, theoryData.EncryptingCredentials);
@@ -1791,6 +1801,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             jwtSecurityTokenHandler.InboundClaimTypeMap.Clear();
+            theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
                 var jweCreatedInMemory = jsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.SigningCredentials, theoryData.EncryptingCredentials);
@@ -1981,6 +1992,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var tokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
                 ValidIssuer = "http://Default.Issuer.com",
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
