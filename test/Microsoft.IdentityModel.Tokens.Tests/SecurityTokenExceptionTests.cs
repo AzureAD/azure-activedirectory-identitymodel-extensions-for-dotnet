@@ -217,6 +217,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = "SecurityTokenInvalidAlgorithmSerializesPropertiesDefaultValue",
                         ExceptionType = typeof(SecurityTokenInvalidAlgorithmException),
                     },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenSignatureKeyNotFoundWithValidationErrorsExceptionSerializesPropertiesDefaultValue",
+                        ExceptionType = typeof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException),
+                    },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenSignatureKeyNotFoundWithValidationErrorsExceptionSerializesProperties",
+                        ExceptionType = typeof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException),
+                        ExceptionSetter = (ex) =>
+                        {
+                            if (!(ex is SecurityTokenSignatureKeyNotFoundWithValidationErrorsException securityTokenSignatureKeyNotFoundWithValidationErrorsException))
+                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException)} recieved type {ex.GetType()}");
+
+                            securityTokenSignatureKeyNotFoundWithValidationErrorsException.ValidIssuer = true;
+                            securityTokenSignatureKeyNotFoundWithValidationErrorsException.ValidLifetime = true;
+                        },
+                    },
                 };
             }
         }

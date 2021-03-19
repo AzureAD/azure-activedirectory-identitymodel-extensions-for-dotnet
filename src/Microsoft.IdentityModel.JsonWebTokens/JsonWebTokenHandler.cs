@@ -1140,7 +1140,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (kidMatched)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Kid, exceptionStrings, jwtToken)));
 
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Kid, exceptionStrings, jwtToken)));
+                var expires = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Exp, out var _) ? (DateTime?)jwtToken.ValidTo : null;
+                var notBefore = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Nbf, out var _) ? (DateTime?)jwtToken.ValidFrom : null;
+
+                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    jwtToken,
+                    notBefore,
+                    expires,
+                    jwtToken.Kid,
+                    validationParameters,
+                    exceptionStrings);
             }
 
             if (keysAttempted.Length > 0)

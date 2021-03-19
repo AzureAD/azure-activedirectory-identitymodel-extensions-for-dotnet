@@ -823,7 +823,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     // Removed until we have a way of matching a SecurityKey with a KeyInfo.
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch),
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -1009,8 +1009,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch)}NotTryAllIssuerSigningKeys",
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -1340,6 +1339,96 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                 };
             }
+        }
+
+        [Theory, MemberData(nameof(SecurityKeyNotFoundExceptionTestTheoryData))]
+        public void Saml2SecurityKeyNotFoundExceptionTest(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.SecurityKeyNotFoundExceptionTest", theoryData);
+
+            try
+            {
+                var handler = new Saml2SecurityTokenHandler();
+                var token = handler.CreateToken(theoryData.TokenDescriptor);
+                handler.ValidateToken(handler.WriteToken(token), theoryData.ValidationParameters, out var validationResult);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> SecurityKeyNotFoundExceptionTestTheoryData()
+        {
+            return new TheoryData<CreateTokenTheoryData>()
+            {
+                new CreateTokenTheoryData
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                     },
+                     ValidationParameters = new TokenValidationParameters
+                     {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidateIssuer = false
+                     },
+                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidateIssuer = false,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:")
+                }
+            };
         }
     }
 
