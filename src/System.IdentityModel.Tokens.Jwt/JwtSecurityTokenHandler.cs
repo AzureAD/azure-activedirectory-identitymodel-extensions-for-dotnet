@@ -1017,10 +1017,19 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (kidExists)
             {
-                if (kidMatched) 
+                if (kidMatched)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
 
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
+                DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
+
+                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    jwtToken,
+                    notBefore,
+                    expires,
+                    jwtToken.Header.Kid,
+                    validationParameters,
+                    exceptionStrings);
             }
 
             if (keysAttempted.Length > 0)
