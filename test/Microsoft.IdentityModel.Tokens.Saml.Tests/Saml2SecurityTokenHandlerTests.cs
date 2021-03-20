@@ -1366,6 +1366,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             {
                 new CreateTokenTheoryData
                 {
+                    First = true,
+                    TestId = "TokenExpired",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.SamlClaims),
@@ -1378,12 +1380,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                      ValidationParameters = new TokenValidationParameters
                      {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false
+                        ValidIssuer = Default.Issuer,
                      },
                      ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "InvalidIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.SamlClaims),
@@ -1398,6 +1401,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "ExpiredAndInvalidIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.SamlClaims),
@@ -1415,6 +1419,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "KeysDontMatchValidLifetimeAndIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.SamlClaims),
@@ -1424,7 +1429,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     ValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false,
+                        ValidIssuer = Default.Issuer,
                     },
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:")
                 }

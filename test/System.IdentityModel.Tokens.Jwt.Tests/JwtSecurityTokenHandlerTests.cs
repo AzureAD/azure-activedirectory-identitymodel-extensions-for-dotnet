@@ -2482,6 +2482,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 new CreateTokenTheoryData
                 {
+                    First = true,
+                    TestId = "TokenExpired",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
@@ -2493,12 +2495,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false
+                        ValidIssuer = Default.Issuer
                     },
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "InvalidIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaims),
@@ -2512,6 +2515,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "InvalidIssuerAndExpiredToken",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
@@ -2528,6 +2532,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "KeysDontMatch-ValidLifeTimeAndIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaims),
@@ -2536,10 +2541,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false,
+                        ValidIssuer = Default.Issuer,
                     },
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
-                }
+                },
             };
         }
     }

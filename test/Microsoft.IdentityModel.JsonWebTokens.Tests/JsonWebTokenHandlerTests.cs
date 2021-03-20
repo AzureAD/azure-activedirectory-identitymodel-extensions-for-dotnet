@@ -1727,7 +1727,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -2723,20 +2723,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 new CreateTokenTheoryData
                 {
+                    First = true,
+                    TestId = "TokenExpired",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                     },
                     ValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false
+                        ValidIssuer = Default.Issuer
                     },
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "InvalidIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaims),
@@ -2750,9 +2756,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "InvalidIssuerAndExpired",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                     },
                     ValidationParameters = new TokenValidationParameters
@@ -2763,6 +2773,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 },
                 new CreateTokenTheoryData
                 {
+                    TestId = "KeysDontMatch-ValidLifeTimeAndIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = new ClaimsIdentity(Default.PayloadClaims),
@@ -2771,10 +2782,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     ValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
-                        ValidateIssuer = false,
+                        ValidIssuer = Default.Issuer,
                     },
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
-                }
+                },
             };
         }
     }
