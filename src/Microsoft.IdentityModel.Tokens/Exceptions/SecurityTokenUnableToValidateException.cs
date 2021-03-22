@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         const string _ValidationFailureKey = _Prefix + nameof(ValidationFailure);
 
         /// <summary>
-        /// Indicates if the issuer was valid or not.
+        /// Indicates the type of the validation failure.
         /// </summary>
         public ValidationFailure ValidationFailure { get; set; } = ValidationFailure.None;
 
