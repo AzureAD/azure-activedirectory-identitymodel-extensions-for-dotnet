@@ -68,10 +68,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (validLifetime && validIssuer)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, kid, exceptionStrings, securityToken)));
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(
-                    validIssuer,
-                    validLifetime,
+            {
+                var validationFailure = ValidationFailure.None;
+
+                if (!validLifetime)
+                    validationFailure |= ValidationFailure.InvalidLifetime;
+
+                if (!validIssuer)
+                    validationFailure |= ValidationFailure.InvalidIssuer;
+
+                throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
+                    validationFailure,
                     LogHelper.FormatInvariant(TokenLogMessages.IDX10516, kid, exceptionStrings, securityToken, validLifetime, validIssuer)));
+            }
         }
 
         /// <summary>
@@ -105,10 +114,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (validLifetime && validIssuer)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10513, keyInfo, exceptionStrings, securityToken)));
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(
-                    validIssuer,
-                    validLifetime,
+            {
+                var validationFailure = ValidationFailure.None;
+
+                if (!validLifetime)
+                    validationFailure |= ValidationFailure.InvalidLifetime;
+
+                if (!validIssuer)
+                    validationFailure |= ValidationFailure.InvalidIssuer;
+
+                throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
+                    validationFailure,
                     LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, validLifetime, validIssuer)));
+            }
         }
 
     }

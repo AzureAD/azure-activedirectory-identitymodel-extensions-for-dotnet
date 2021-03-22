@@ -1735,7 +1735,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -2754,7 +2754,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2768,7 +2768,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2785,7 +2785,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {

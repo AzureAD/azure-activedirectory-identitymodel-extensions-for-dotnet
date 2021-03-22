@@ -898,7 +898,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.
         /// </exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundWithValidationErrorsException">
+        /// <exception cref="SecurityTokenUnableToValidateException">
         /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
         /// had validation errors or lifetime or issuer. This is not intended to be a signal to refresh keys.
         /// </exception>

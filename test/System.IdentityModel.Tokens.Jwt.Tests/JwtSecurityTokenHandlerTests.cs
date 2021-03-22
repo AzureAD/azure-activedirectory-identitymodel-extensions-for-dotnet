@@ -2497,7 +2497,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2511,7 +2511,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2528,7 +2528,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
                 },
                 new CreateTokenTheoryData
                 {

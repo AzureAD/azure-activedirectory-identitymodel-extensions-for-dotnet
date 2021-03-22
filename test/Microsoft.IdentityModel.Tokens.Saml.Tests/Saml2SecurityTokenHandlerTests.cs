@@ -823,7 +823,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     // Removed until we have a way of matching a SecurityKey with a KeyInfo.
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:"),
+                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch),
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -1009,7 +1009,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new Saml2TheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:"),
+                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:"),
                         Handler = new Saml2SecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch)}NotTryAllIssuerSigningKeys",
                         Token = ReferenceTokens.Saml2Token_AttributeTampered_NoKeyMatch,
@@ -1382,7 +1382,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer,
                      },
-                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                     ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -1397,7 +1397,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -1415,7 +1415,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10515:")
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
                 },
                 new CreateTokenTheoryData
                 {

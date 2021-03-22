@@ -219,20 +219,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     new SecurityTokenExceptionTheoryData
                     {
-                        TestId = "SecurityTokenSignatureKeyNotFoundWithValidationErrorsExceptionSerializesPropertiesDefaultValue",
-                        ExceptionType = typeof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException),
+                        TestId = "SecurityTokenUnableToValidateExceptionDefaultValue",
+                        ExceptionType = typeof(SecurityTokenUnableToValidateException),
                     },
                     new SecurityTokenExceptionTheoryData
                     {
-                        TestId = "SecurityTokenSignatureKeyNotFoundWithValidationErrorsExceptionSerializesProperties",
-                        ExceptionType = typeof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException),
+                        TestId = "SecurityTokenUnableToValidateExceptionProperties",
+                        ExceptionType = typeof(SecurityTokenUnableToValidateException),
                         ExceptionSetter = (ex) =>
                         {
-                            if (!(ex is SecurityTokenSignatureKeyNotFoundWithValidationErrorsException securityTokenSignatureKeyNotFoundWithValidationErrorsException))
-                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException)} recieved type {ex.GetType()}");
+                            if (!(ex is SecurityTokenUnableToValidateException securityTokenUnableToValidateException))
+                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenUnableToValidateException)} recieved type {ex.GetType()}");
 
-                            securityTokenSignatureKeyNotFoundWithValidationErrorsException.ValidIssuer = true;
-                            securityTokenSignatureKeyNotFoundWithValidationErrorsException.ValidLifetime = true;
+                            securityTokenUnableToValidateException.ValidationFailure = ValidationFailure.InvalidIssuer;
+                            securityTokenUnableToValidateException.ValidationFailure |= ValidationFailure.InvalidLifetime;
                         },
                     },
                 };

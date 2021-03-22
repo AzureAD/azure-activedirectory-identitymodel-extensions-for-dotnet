@@ -223,9 +223,9 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(SecurityTokenEncryptionKeyNotFoundException), substringExpected, innerTypeExpected);
         }
 
-        public static ExpectedException SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(string substringExpected = null, Type innerTypeExpected = null)
+        public static ExpectedException SecurityTokenUnableToValidateException(string substringExpected = null, Type innerTypeExpected = null)
         {
-            return new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException), substringExpected, innerTypeExpected);
+            return new ExpectedException(typeof(SecurityTokenUnableToValidateException), substringExpected, innerTypeExpected);
         }
 
         public static ExpectedException SecurityTokenEncryptionFailedException(string substringExpected = null, Type innerTypeExpected = null)

@@ -864,7 +864,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
-                ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
             );
 
             // encryption key not found
@@ -984,7 +984,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false
                 },
                 expectedPayload,
-                ExpectedException.SecurityTokenSignatureKeyNotFoundWithValidationErrorsException("IDX10516:")
+                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
             );
 
             theoryData.Add(

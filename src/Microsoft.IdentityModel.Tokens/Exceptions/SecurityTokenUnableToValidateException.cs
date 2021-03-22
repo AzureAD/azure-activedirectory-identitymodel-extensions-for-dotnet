@@ -36,53 +36,42 @@ namespace Microsoft.IdentityModel.Tokens
     /// to refresh keys.
     /// </summary>
     [Serializable]
-    public class SecurityTokenSignatureKeyNotFoundWithValidationErrorsException
-        : SecurityTokenException
+    public class SecurityTokenUnableToValidateException : SecurityTokenException
     {
         [NonSerialized]
-        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenSignatureKeyNotFoundWithValidationErrorsException) + ".";
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenUnableToValidateException) + ".";
 
         [NonSerialized]
-        const string _ValidIssuerKey = _Prefix + nameof(ValidIssuer);
-
-        [NonSerialized]
-        const string _ValidLifetimeKey = _Prefix + nameof(ValidLifetime);
+        const string _ValidationFailureKey = _Prefix + nameof(ValidationFailure);
 
         /// <summary>
         /// Indicates if the issuer was valid or not.
         /// </summary>
-        public bool ValidIssuer { get; set; }
-
-        /// <summary>
-        /// Indiciates if the life was valid or not.
-        /// </summary>
-        public bool ValidLifetime { get; set; }
+        public ValidationFailure ValidationFailure { get; set; } = ValidationFailure.None;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenSignatureKeyNotFoundException"/> class.
         /// </summary>
-        public SecurityTokenSignatureKeyNotFoundWithValidationErrorsException()
+        public SecurityTokenUnableToValidateException()
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenSignatureKeyNotFoundException"/> class.
         /// </summary>
-        /// <param name="validIssuer"><c>true</c> if the issuer is valid; otherwise <c>false</c></param>
-        /// <param name="validLifetime"><c>true</c> if the lifetime is valid; otherwise <c>false</c></param>
+        /// <param name="validationFailure">The validation failures.</param>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(bool validIssuer, bool validLifetime, string message)
+        public SecurityTokenUnableToValidateException(ValidationFailure validationFailure, string message)
             : base(message)
         {
-            ValidIssuer = validIssuer;
-            ValidLifetime = validLifetime;
+            ValidationFailure = validationFailure;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenSignatureKeyNotFoundException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(string message)
+        public SecurityTokenUnableToValidateException(string message)
             : base(message)
         {
         }
@@ -92,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(string message, Exception innerException)
+        public SecurityTokenUnableToValidateException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
@@ -102,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected SecurityTokenSignatureKeyNotFoundWithValidationErrorsException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenUnableToValidateException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             SerializationInfoEnumerator enumerator = info.GetEnumerator();
@@ -110,12 +99,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 switch (enumerator.Name)
                 {
-                    case _ValidIssuerKey:
-                        ValidIssuer = info.GetBoolean(_ValidIssuerKey);
-                        break;
-
-                    case _ValidLifetimeKey:
-                        ValidLifetime = info.GetBoolean(_ValidLifetimeKey);
+                    case _ValidationFailureKey:
+                        ValidationFailure = (ValidationFailure)info.GetValue(_ValidationFailureKey, typeof(ValidationFailure));
                         break;
 
                     default:
@@ -130,8 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             base.GetObjectData(info, context);
 
-            info.AddValue(_ValidIssuerKey, ValidIssuer);
-            info.AddValue(_ValidLifetimeKey, ValidLifetime);
+            info.AddValue(_ValidationFailureKey, ValidationFailure);
         }
     }
 }
