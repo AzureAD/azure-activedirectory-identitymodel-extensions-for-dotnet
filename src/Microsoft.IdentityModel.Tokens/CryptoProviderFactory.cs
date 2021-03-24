@@ -29,7 +29,6 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Security.Cryptography;
-using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens

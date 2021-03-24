@@ -32,13 +32,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Specifies the CryptoProviderCacheOptions which can be used to configure the internal cryptoprovider cache.
-    /// For the netstandard2.0 target we are using the Microsoft.Extensions.Caching.Memory.MemoryCache class:
-    /// https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.caching.memory.memorycache
-    /// For the net45, net461, and net472 desktop targets we are using our own simple LRU caching implementation.
+    /// We are using our own simple LRU caching implementation across all targets. 
     /// See <see cref="EventBasedLRUCache{TKey, TValue}"/> for more details.
-    /// We recommend upgrading to netstandard2.0 for a more comprehensive caching experience.
-    /// Any property on these CryptoProviderCacheOptions that corresponds directly to a property 
-    /// used by Microsoft.Extensions.Caching.Memory.MemoryCache has the same name.
     /// </summary>
     public class CryptoProviderCacheOptions
     {
@@ -52,12 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the size of the cache (in number of items). 
         /// 20% of the cache will be evicted whenever the cache gets to 95% of this size.
-        /// On the netstandard2.0 target, items will be evicted in the following order:
-        /// 1) All expired items.
-        /// 2) Least recently used items.
-        /// 3) Items with the earliest absolute expiration.
-        /// On the net45, net461, and net472 targets, only #2 (least recently used items) will be
-        /// taken into consideration.
+        /// Items will be evicted from least recently used to most recently used.
         /// </summary>
         public int SizeLimit
         {

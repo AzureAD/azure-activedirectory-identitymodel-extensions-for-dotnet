@@ -47,11 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     {
         public static Func<CryptoProviderFactory> CreateCryptoProviderFactory = new Func<CryptoProviderFactory>(() =>
         {
-#if NETCOREAPP
-            return new CryptoProviderFactory();
-#else
             return new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50));
-#endif
         });
 
 
