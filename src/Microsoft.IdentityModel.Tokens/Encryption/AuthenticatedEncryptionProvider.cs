@@ -28,6 +28,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -398,8 +399,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is SymmetricSecurityKey symmetricSecurityKey)
                 return symmetricSecurityKey.Key;
 
-            if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+            if (key is JsonWebKey jsonWebKey && JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
+                return GetKeyBytes(securityKey);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));
         }
