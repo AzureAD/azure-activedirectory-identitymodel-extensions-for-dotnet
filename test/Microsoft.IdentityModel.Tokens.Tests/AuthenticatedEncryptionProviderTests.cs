@@ -96,7 +96,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
         }
 
-
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Windows)]
 #endif
