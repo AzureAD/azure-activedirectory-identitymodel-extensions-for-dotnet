@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (SupportedAlgorithms.IsAesGcm(algorithm))
                 {
-#if NET_CORE
+#if NETSTANDARD2_0
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, algorithm)));
 #endif
