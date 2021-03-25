@@ -238,6 +238,90 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
         }
 
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+#endif
+        [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]
+        public void CreateJWEWithAesGcm(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithAesGcm", theoryData);
+            try
+            {
+                string jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                string jweFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
+
+                theoryData.ValidationParameters.ValidateLifetime = false;
+                var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
+                var validationResult = theoryData.JsonWebTokenHandler.ValidateToken(jweFromJsonHandler, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(validationResult.IsValid, theoryData.IsValid, context);
+                var validatedTokenFromJsonHandler = validationResult.SecurityToken;
+                IdentityComparer.AreEqual(validationResult.IsValid, theoryData.IsValid, context);
+                IdentityComparer.AreEqual(claimsPrincipal.Identity, validationResult.ClaimsIdentity, context);
+                IdentityComparer.AreEqual((validatedTokenFromJwtHandler as JwtSecurityToken).Claims, (validatedTokenFromJsonHandler as JsonWebToken).Claims, context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> CreateJWEWithAesGcmTheoryData
+        {
+            get
+            {
+                var tokenHandler = new JwtSecurityTokenHandler
+                {
+                    SetDefaultTimesOnTokenCreation = false
+                };
+
+                tokenHandler.InboundClaimTypeMap.Clear();
+                var encryptionCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm128;
+                encryptionCredentials.CryptoProviderFactory = new CryptoProviderFactoryMock();
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                    new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "AesGcm128EncryptionWithMock",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = encryptionCredentials,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            TokenType = "TokenType"
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_128,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "AesGcm256Encryption",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm256,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            TokenType = "TokenType"
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10616:", typeof(NotSupportedException))
+                    }
+                };
+            }
+        }
+
         // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the 
         // token string created by the JwtSecurityTokenHandler.
         [Theory, MemberData(nameof(CreateJWETheoryData))]
@@ -295,45 +379,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
 
                 tokenHandler.InboundClaimTypeMap.Clear();
-                 var encryptionCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm128;
-                 encryptionCredentials.CryptoProviderFactory = new CryptoProviderFactoryMock();
                 return new TheoryData<CreateTokenTheoryData>
                 {
-                    new CreateTokenTheoryData
-                    {
-                        First = true,
-                        TestId = "AesGcm128EncryptionWithMock",
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            EncryptingCredentials = encryptionCredentials,
-                            Subject = new ClaimsIdentity(Default.PayloadClaims),
-                            TokenType = "TokenType"
-                        },
-                        JsonWebTokenHandler = new JsonWebTokenHandler(),
-                        JwtSecurityTokenHandler = tokenHandler,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_128,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
-                        }
-                    },
-                    new CreateTokenTheoryData
-                    {
-                        TestId = "AesGcm256Encryption",
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm256,
-                            Subject = new ClaimsIdentity(Default.PayloadClaims),
-                            TokenType = "TokenType"
-                        },
-                        JsonWebTokenHandler = new JsonWebTokenHandler(),
-                        JwtSecurityTokenHandler = tokenHandler,
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10616:", typeof(NotSupportedException))
-                    },
                     new CreateTokenTheoryData
                     {
                         TokenDescriptor =  new SecurityTokenDescriptor

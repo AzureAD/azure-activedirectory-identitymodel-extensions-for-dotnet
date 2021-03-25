@@ -39,6 +39,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class ReferenceTests
     {
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+#endif
+        [Fact]
+        public void AesGcmReferenceTest()
+        {
+            var context = new CompareContext();
+            var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK), AES_256_GCM.Algorithm);
+            var plaintext = providerForDecryption.Decrypt(AES_256_GCM.E, AES_256_GCM.A, AES_256_GCM.IV, AES_256_GCM.T);
+
+            if (!Utility.AreEqual(plaintext, AES_256_GCM.P))
+                context.AddDiff($"!Utility.AreEqual(plaintext, testParams.Plaintext)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         [Theory, MemberData(nameof(AuthenticatedEncryptionTheoryData))]
         public void AuthenticatedEncryptionReferenceTest(AuthenticationEncryptionTestParams testParams)
@@ -47,20 +62,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var providerForEncryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.EncryptionKey, testParams.Algorithm);
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.DecryptionKey, testParams.Algorithm);
             var plaintext = providerForDecryption.Decrypt(testParams.Ciphertext, testParams.AuthenticationData, testParams.IV, testParams.AuthenticationTag);
+            var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
 
-            if(testParams.Algorithm != AES_256_GCM.Algorithm)
-            {
-                var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
+            if (!Utility.AreEqual(encryptionResult.IV, testParams.IV))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.IV, testParams.IV)");
 
-                if (!Utility.AreEqual(encryptionResult.IV, testParams.IV))
-                    context.AddDiff($"!Utility.AreEqual(encryptionResult.IV, testParams.IV)");
+            if (!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
 
-                if (!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag))
-                    context.AddDiff($"!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
-
-                if (!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext))
-                    context.AddDiff($"!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
-            }
+            if (!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
 
             if (!Utility.AreEqual(plaintext, testParams.Plaintext))
                 context.AddDiff($"!Utility.AreEqual(plaintext, testParams.Plaintext)");
@@ -73,19 +84,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get
             {
                 var theoryData = new TheoryData<AuthenticationEncryptionTestParams>();
-
-                theoryData.Add(new AuthenticationEncryptionTestParams
-                {
-                    Algorithm = AES_256_GCM.Algorithm,
-                    AuthenticationData = AES_256_GCM.A,
-                    AuthenticationTag = AES_256_GCM.T,
-                    Ciphertext = AES_256_GCM.E,
-                    DecryptionKey = new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK),
-                    EncryptionKey = new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK),
-                    IV = AES_256_GCM.IV,
-                    Plaintext = AES_256_GCM.P,
-                    TestId = "AES_256_GCM"
-                });
 
                 theoryData.Add(new AuthenticationEncryptionTestParams
                 {
