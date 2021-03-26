@@ -31,8 +31,8 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when a security token contained a key identifier but the key was not found by the runtime.
-    /// In addition, when validation errors exist over the security token. This exception is not intended to be used as a signal
+    /// This exception is thrown when a security token contained a key identifier but the key was not found by the runtime
+    /// and when validation errors exist over the security token. This exception is not intended to be used as a signal
     /// to refresh keys.
     /// </summary>
     [Serializable]

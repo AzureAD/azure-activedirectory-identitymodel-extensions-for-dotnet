@@ -38,8 +38,14 @@ namespace Microsoft.IdentityModel.Tokens
     internal static class InternalValidators
     {
         /// <summary>
-        /// Called after signature validity has already been determined
+        /// Called after signature validation has failed. Will always throw an exception.
         /// </summary>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
+        /// If the lifetime and issuer are valid
+        /// </exception>
+        /// <exception cref="SecurityTokenUnableToValidateException">
+        /// If the lifetime or issuer are invalid
+        /// </exception>
         internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string kid, TokenValidationParameters validationParameters, StringBuilder exceptionStrings)
         {
             bool validIssuer = false;
@@ -84,8 +90,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Called after signature validity has already been determined
+        /// Called after signature validation has failed. Will always throw an exception.
         /// </summary>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
+        /// If the lifetime and issuer are valid
+        /// </exception>
+        /// <exception cref="SecurityTokenUnableToValidateException">
+        /// If the lifetime or issuer are invalid
+        /// </exception>
         internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedSaml(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string keyInfo, TokenValidationParameters validationParameters, StringBuilder exceptionStrings)
         {
             bool validIssuer = false;
@@ -128,6 +140,5 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, validLifetime, validIssuer)));
             }
         }
-
     }
 }
