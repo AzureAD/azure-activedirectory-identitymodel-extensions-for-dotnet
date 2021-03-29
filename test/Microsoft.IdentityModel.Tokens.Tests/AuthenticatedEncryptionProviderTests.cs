@@ -89,12 +89,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Linux)]
-#endif
+
         [Fact]
         public void AesGcmEncryptionOnLinux()
         {
             Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
         }
+#endif
 
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Windows)]
