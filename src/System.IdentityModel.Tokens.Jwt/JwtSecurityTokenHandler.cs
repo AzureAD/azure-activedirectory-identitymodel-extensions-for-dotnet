@@ -894,8 +894,14 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentNullException">If 'jwt' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
-        /// This can indicate that a key refresh is required.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
+        /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
+        /// This can indicate that a key refresh is required.
+        /// </exception>
+        /// <exception cref="SecurityTokenUnableToValidateException">
+        /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
+        /// had validation errors or lifetime or issuer. This is not intended to be a signal to refresh keys.
+        /// </exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the 'token' does not have a key identifier.</exception>
         /// <returns>A <see cref="JwtSecurityToken"/> that has the signature validated if token was signed.</returns>
         /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
@@ -1017,10 +1023,19 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (kidExists)
             {
-                if (kidMatched) 
+                if (kidMatched)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
 
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
+                DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
+
+                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    jwtToken,
+                    notBefore,
+                    expires,
+                    jwtToken.Header.Kid,
+                    validationParameters,
+                    exceptionStrings);
             }
 
             if (keysAttempted.Length > 0)

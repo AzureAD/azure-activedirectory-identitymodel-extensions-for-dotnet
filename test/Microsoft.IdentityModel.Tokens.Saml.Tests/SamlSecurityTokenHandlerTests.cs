@@ -570,7 +570,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     // Removed until we have a way of matching a KeyInfo with a SecurityKey.
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
+                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_Valid),
                         Token = ReferenceTokens.SamlToken_Valid,
@@ -742,7 +742,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new SamlTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:"),
+                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:"),
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = $"{nameof(ReferenceTokens.SamlToken_Valid)}NotTryAllIssuerSigningKeys",
                         Token = ReferenceTokens.SamlToken_Valid,
@@ -1283,6 +1283,101 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                 };
             }
+        }
+
+        [Theory, MemberData(nameof(SecurityKeyNotFoundExceptionTestTheoryData))]
+        public void SamlSecurityKeyNotFoundExceptionTest(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.SecurityKeyNotFoundExceptionTest", theoryData);
+
+            try
+            {
+                var handler = new SamlSecurityTokenHandler();
+                var token = handler.CreateToken(theoryData.TokenDescriptor);
+                handler.ValidateToken(handler.WriteToken(token), theoryData.ValidationParameters, out var validationResult);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> SecurityKeyNotFoundExceptionTestTheoryData()
+        {
+            return new TheoryData<CreateTokenTheoryData>()
+            {
+                new CreateTokenTheoryData
+                {
+                    First = true,
+                    TestId = "TokenExpired",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                     },
+                     ValidationParameters = new TokenValidationParameters
+                     {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidIssuer = Default.Issuer,
+                     },
+                     ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TestId = "InvalidIssuer",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TestId = "ExpiredAndInvalidIssuer",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10515:")
+                },
+                new CreateTokenTheoryData
+                {
+                    TestId = "KeysDontMatchValidLifetimeAndIssuer",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                        Issuer = Default.Issuer,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidIssuer = Default.Issuer,
+                    },
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10513:")
+                }
+            };
         }
 
         private class SamlSecurityTokenHandlerPublic : SamlSecurityTokenHandler

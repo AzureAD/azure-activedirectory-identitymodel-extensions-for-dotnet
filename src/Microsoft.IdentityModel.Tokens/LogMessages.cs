@@ -108,6 +108,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10512 = "IDX10512: Signature validation failed. Token does not have KeyInfo. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10513 = "IDX10513: Signature validation failed. Unable to match key: \nKeyInfo: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'.";
         public const string IDX10514 = "IDX10514: Signature validation failed. Keys tried: '{0}'. \nKeyInfo: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'.";
+        public const string IDX10515 = "IDX10515: Signature validation failed. Unable to match key: \nKeyInfo: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'. Valid Lifetime: '{3}'. Valid Issuer: '{4}'";
+        public const string IDX10516 = "IDX10516: Signature validation failed. Unable to match key: \nkid: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'. Valid Lifetime: '{3}'. Valid Issuer: '{4}'";
 
         // encryption / decryption
         // public const string IDX10600 = "IDX10600:";

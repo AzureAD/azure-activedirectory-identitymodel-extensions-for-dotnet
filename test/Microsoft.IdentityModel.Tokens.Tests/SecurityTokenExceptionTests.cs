@@ -217,6 +217,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = "SecurityTokenInvalidAlgorithmSerializesPropertiesDefaultValue",
                         ExceptionType = typeof(SecurityTokenInvalidAlgorithmException),
                     },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenUnableToValidateExceptionDefaultValue",
+                        ExceptionType = typeof(SecurityTokenUnableToValidateException),
+                    },
+                    new SecurityTokenExceptionTheoryData
+                    {
+                        TestId = "SecurityTokenUnableToValidateExceptionProperties",
+                        ExceptionType = typeof(SecurityTokenUnableToValidateException),
+                        ExceptionSetter = (ex) =>
+                        {
+                            if (!(ex is SecurityTokenUnableToValidateException securityTokenUnableToValidateException))
+                                throw new ArgumentException($"expected argument of type {nameof(SecurityTokenUnableToValidateException)} recieved type {ex.GetType()}");
+
+                            securityTokenUnableToValidateException.ValidationFailure = ValidationFailure.InvalidIssuer;
+                            securityTokenUnableToValidateException.ValidationFailure |= ValidationFailure.InvalidLifetime;
+                        },
+                    },
                 };
             }
         }
