@@ -2712,11 +2712,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 var handler = new JsonWebTokenHandler();
-
                 var token = handler.CreateToken(theoryData.TokenDescriptor);
-
                 var validationResult = handler.ValidateToken(token, theoryData.ValidationParameters);
-
                 if (validationResult.Exception != null)
                 {
                     if (validationResult.IsValid)
