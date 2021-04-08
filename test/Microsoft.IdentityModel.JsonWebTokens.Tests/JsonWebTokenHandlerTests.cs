@@ -2941,7 +2941,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             byte[] nonce = new byte[AesGcm.NonceSize];
 
-            // Generate secure nonce
+            // Generate random nonce
             var random = RandomNumberGenerator.Create();
             random.GetBytes(nonce);
 

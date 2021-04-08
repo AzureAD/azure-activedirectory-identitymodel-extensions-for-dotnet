@@ -98,6 +98,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
 
 #if NET_CORE
+        [PlatformSpecific(TestPlatforms.OSX)]
+
+        [Fact]
+        public void AesGcmEncryptionOnMacOSX()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+        }
+#endif
+
+#if NET_CORE
         [PlatformSpecific(TestPlatforms.Windows)]
 #endif
         [Fact]
