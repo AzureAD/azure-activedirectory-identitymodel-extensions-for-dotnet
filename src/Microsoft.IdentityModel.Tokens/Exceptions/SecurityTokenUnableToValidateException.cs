@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// to refresh keys.
     /// </summary>
     [Serializable]
-    public class SecurityTokenUnableToValidateException : SecurityTokenException
+    public class SecurityTokenUnableToValidateException : SecurityTokenInvalidSignatureException
     {
         [NonSerialized]
         const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenUnableToValidateException) + ".";
