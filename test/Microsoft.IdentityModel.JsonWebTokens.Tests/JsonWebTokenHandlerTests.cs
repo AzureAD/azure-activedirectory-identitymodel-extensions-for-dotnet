@@ -317,6 +317,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         JwtSecurityTokenHandler = tokenHandler,
                         ExpectedException = ExpectedException.SecurityTokenEncryptionFailedException("IDX10616:", typeof(NotSupportedException))
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "AesGcm_InvalidDecryptionKeySize",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = encryptionCredentials,
+                            Subject = new ClaimsIdentity(Default.PayloadClaims),
+                            TokenType = "TokenType"
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        JwtSecurityTokenHandler = tokenHandler,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_64,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10653:")
                     }
                 };
             }

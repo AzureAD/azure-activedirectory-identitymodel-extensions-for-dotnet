@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         private Lazy<AuthenticatedKeys> _authenticatedkeys;
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
+        private Lazy<bool> _keySizeIsValid;
         private string _hmacAlgorithm;
         private Lazy<SymmetricSignatureProvider> _symmetricSignatureProvider;
         private DecryptionDelegate DecryptFunction;
@@ -76,7 +77,6 @@ namespace Microsoft.IdentityModel.Tokens
             Key = key;
             Algorithm = algorithm;
             _cryptoProviderFactory = key.CryptoProviderFactory;
-
             if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key))
             {
                 if (SupportedAlgorithms.IsAesGcm(algorithm))
@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void InitializeUsingAesGcm()
         {
-            ValidateKeySize(Key, Algorithm);
+            _keySizeIsValid = new Lazy<bool>(ValidKeySize);
             EncryptFunction = EncryptWithAesGcm;
             DecryptFunction = DecryptWithAesGcm;
         }
@@ -110,6 +110,12 @@ namespace Microsoft.IdentityModel.Tokens
             DecryptFunction = DecryptWithAesCbc;
         }
 
+        internal bool ValidKeySize()
+        {
+            ValidateKeySize(Key, Algorithm);
+            return true;
+        }
+
         private AuthenticatedEncryptionResult EncryptWithAesGcm(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, Algorithm)));
@@ -117,6 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] DecryptWithAesGcm(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
+            _ = _keySizeIsValid.Value;
             byte[] clearBytes = new byte[ciphertext.Length];
             using (var aes = new AesGcm(GetKeyBytes(Key)))
             {
