@@ -46,7 +46,6 @@ namespace System.IdentityModel.Tokens.Jwt
             { JwtRegisteredClaimNames.FamilyName, ClaimTypes.Surname },
             { JwtRegisteredClaimNames.Gender, ClaimTypes.Gender },
             { JwtRegisteredClaimNames.GivenName, ClaimTypes.GivenName },
-            { JwtRegisteredClaimNames.Name, ClaimTypes.Name },
             { JwtRegisteredClaimNames.NameId, ClaimTypes.NameIdentifier },
             { JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier },
             { JwtRegisteredClaimNames.Website, ClaimTypes.Webpage },
