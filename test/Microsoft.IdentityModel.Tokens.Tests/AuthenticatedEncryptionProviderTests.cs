@@ -88,20 +88,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class AuthenticatedEncryptionProviderTests
     {
 #if NET_CORE
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
 
         [Fact]
-        public void AesGcmEncryptionOnLinux()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
-        }
-#endif
-
-#if NET_CORE
-        [PlatformSpecific(TestPlatforms.OSX)]
-
-        [Fact]
-        public void AesGcmEncryptionOnMacOSX()
+        public void AesGcmEncryptionOnLinuxAndMac()
         {
             Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
         }
