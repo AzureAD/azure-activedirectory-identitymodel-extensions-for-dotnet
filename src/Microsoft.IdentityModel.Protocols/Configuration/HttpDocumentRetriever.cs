@@ -44,6 +44,16 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers.
+        /// </summary>
+        public static bool AllowAdditionalHeaderData { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers for this <see cref="HttpDocumentRetriever"/> instance.
+        /// </summary>
+        public bool SendAdditionalHeaderData { get; set; } = true;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HttpDocumentRetriever"/> class.
         /// </summary>
         public HttpDocumentRetriever()
@@ -87,6 +97,9 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
+                if (AllowAdditionalHeaderData && SendAdditionalHeaderData)
+                    IdentityModelTelemetryUtils.SetTelemetryData(httpClient);
+
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
                 var response = await httpClient.GetAsync(uri, cancel).ConfigureAwait(false);
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
