@@ -44,14 +44,20 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
-        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers.
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
         /// </summary>
-        public static bool AllowAdditionalHeaderData { get; set; } = true;
+        public static bool DefaultSendAdditionalHeaderData { get; set; } = true;
+
+        private bool _sendAdditionalHeaderData = DefaultSendAdditionalHeaderData;
 
         /// <summary>
-        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers for this <see cref="HttpDocumentRetriever"/> instance.
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers
         /// </summary>
-        public bool SendAdditionalHeaderData { get; set; } = true;
+        public bool SendAdditionalHeaderData
+        {
+            get { return _sendAdditionalHeaderData; }
+            set { _sendAdditionalHeaderData = value; }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpDocumentRetriever"/> class.
@@ -101,8 +107,8 @@ namespace Microsoft.IdentityModel.Protocols
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
                 using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
                 {
-                    if (AllowAdditionalHeaderData && SendAdditionalHeaderData)
-                        IdentityModelTelemetryParameters.SetTelemetryData(message);
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message);
 
                     response = await httpClient.SendAsync(message).ConfigureAwait(false);
                 }

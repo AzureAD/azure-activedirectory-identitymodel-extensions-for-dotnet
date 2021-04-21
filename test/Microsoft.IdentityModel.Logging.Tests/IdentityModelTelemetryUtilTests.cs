@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests
 {
-    public class IdentityModelTelemetryParametersTests
+    public class IdentityModelTelemetryUtilTests
     {
         [Theory, MemberData(nameof(SetTelemetryDataTheoryData), DisableDiscoveryEnumeration = true)]
         public void SetTelemetry(TelemetryTheoryData theoryData)
@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             try
             {
-                IdentityModelTelemetryParameters.SetTelemetryData(theoryData.HttpRequestMessage);
+                IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage);
                 // check if the resulting headers are as expected
                 if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers))
                     throw new ArgumentException("resulting headers are not matching the expected headers.");
@@ -59,13 +59,13 @@ namespace Microsoft.IdentityModel.Logging.Tests
                     },
                     new TelemetryTheoryData
                     {
-                        HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { { IdentityModelTelemetryParameters.skuTelemetry, "some-other-value"} }),
+                        HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { { IdentityModelTelemetryUtil.skuTelemetry, "some-other-value"} }),
                         ExpectedHeaders = BuildHttpRequestHeaders(),
                         TestId = "overwriteExistingHeaders"
                     },
                     new TelemetryTheoryData
                     {
-                        HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { { "header1", "value1" }, { IdentityModelTelemetryParameters.skuTelemetry, "some-other-value"}, {"header2", "value2"} }),
+                        HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { { "header1", "value1" }, { IdentityModelTelemetryUtil.skuTelemetry, "some-other-value"}, {"header2", "value2"} }),
                         ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"}, {"header2", "value2"} }),
                         TestId = "overwriteExistingButKeepOtherHeaders"
                     }
@@ -74,34 +74,49 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void AddParameterTest()
+        public void AddTelemetryDataTest()
         {
-            IdentityModelTelemetryParameters.AddParameter("parameter1", "value1");
-            Assert.True(IdentityModelTelemetryParameters.parameters.ContainsKey("parameter1") && IdentityModelTelemetryParameters.parameters["parameter1"] == "value1");
-            IdentityModelTelemetryParameters.AddParameter("parameter1", "value2");
-            Assert.True(IdentityModelTelemetryParameters.parameters.ContainsKey("parameter1") && IdentityModelTelemetryParameters.parameters["parameter1"] == "value2");
+            IdentityModelTelemetryUtil.AddTelemetryData("parameter1", "value1");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value1");
+            IdentityModelTelemetryUtil.AddTelemetryData("parameter1", "value2");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value2");
 
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryParameters.AddParameter(null, "value1"));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryParameters.AddParameter(IdentityModelTelemetryParameters.skuTelemetry, "value1"));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryParameters.AddParameter(IdentityModelTelemetryParameters.versionTelemetry, "value1"));
+            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.AddTelemetryData(null, "value1"));
+            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1"));
+            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.versionTelemetry, "value1"));
 
-            IdentityModelTelemetryParameters.AddParameter("parameter1", null);
-            Assert.True(!IdentityModelTelemetryParameters.parameters.ContainsKey("parameter1"));
+            IdentityModelTelemetryUtil.AddTelemetryData("parameter1", null);
+            Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1"));
         }
 
         [Fact]
-        public void RemoveParameterTest()
+        public void RemoveTelemetryDataTest()
         {
-            IdentityModelTelemetryParameters.AddParameter("parameter1", "value1");
-            Assert.True(IdentityModelTelemetryParameters.parameters.ContainsKey("parameter1") && IdentityModelTelemetryParameters.parameters["parameter1"] == "value1");
-            IdentityModelTelemetryParameters.RemoveParameter("parameter1");
-            Assert.True(!IdentityModelTelemetryParameters.parameters.ContainsKey("parameter1"));
+            IdentityModelTelemetryUtil.AddTelemetryData("parameter1", "value1");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value1");
+            IdentityModelTelemetryUtil.RemoveTelemetryData("parameter1");
+            Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1"));
 
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryParameters.RemoveParameter(null));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryParameters.RemoveParameter(IdentityModelTelemetryParameters.skuTelemetry));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryParameters.RemoveParameter(IdentityModelTelemetryParameters.versionTelemetry));
+            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(null));
+            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.skuTelemetry));
+            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.versionTelemetry));
         }
 
+        [Fact]
+        public void UpdateTelemetryDataTest()
+        {
+            IdentityModelTelemetryUtil.UpdateDefaultTelemetryData("parameter1", "value1");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value1");
+            IdentityModelTelemetryUtil.UpdateDefaultTelemetryData("parameter1", "value2");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value2");
+
+            IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1");
+            Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey(IdentityModelTelemetryUtil.skuTelemetry) && IdentityModelTelemetryUtil.telemetryData[IdentityModelTelemetryUtil.skuTelemetry] == "value1");
+            IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null);
+            Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey(IdentityModelTelemetryUtil.skuTelemetry));
+
+            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(null, "value1"));
+        }
         private static HttpRequestHeaders BuildHttpRequestHeaders(IDictionary<string, string> additionalHeaders = null, bool addDefaultTelemetryData = true)
         {
             var headers = new HttpClient().DefaultRequestHeaders;
@@ -114,7 +129,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             if (addDefaultTelemetryData)
             {
-                foreach (var header in IdentityModelTelemetryParameters.parameters)
+                foreach (var header in IdentityModelTelemetryUtil.telemetryData)
                     headers.Add(header.Key, header.Value);
             }
 
