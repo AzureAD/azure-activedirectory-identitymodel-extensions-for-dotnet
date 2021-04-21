@@ -1,6 +1,33 @@
-﻿using System;
+﻿
+//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.TestUtils;
@@ -22,7 +49,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage);
                 // check if the resulting headers are as expected
                 if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers))
-                    throw new ArgumentException("resulting headers are not matching the expected headers.");
+                    throw new ArgumentException("resulting headers do not match the expected headers.");
 
                 theoryData.ExpectedException.ProcessNoException(testContext);
             }
@@ -160,32 +187,6 @@ namespace Microsoft.IdentityModel.Logging.Tests
             public HttpRequestMessage HttpRequestMessage { get; set; }
 
             public HttpRequestHeaders ExpectedHeaders { get; set; }
-        }
-    }
-
-    /// <summary>
-    /// Helper extension of <see cref="HttpRequestHeaders"/> class.
-    /// </summary>
-    public static class HttpRequestHeadersExtension
-    {
-        /// <summary>
-        /// Clone <paramref name="headers"/> to a <see cref="IDictionary{String, strign}"/>.
-        /// </summary>
-        /// <param name="headers">Headers to clone to a <see cref="IDictionary{String, strign}"/></param>
-        /// <returns>Cloned headers in form of a <see cref="IDictionary{String, strign}"/>.</returns>
-        public static IDictionary<string, string> CloneToDictionary(this HttpRequestHeaders headers)
-        {
-            if (headers == null)
-                return null;
-
-            var result = new Dictionary<string, string>();
-
-            foreach (var header in headers)
-            {
-                result.Add(header.Key, header.Value.First());
-            }
-
-            return result;
         }
     }
 }

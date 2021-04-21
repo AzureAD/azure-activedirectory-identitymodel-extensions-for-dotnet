@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
-        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
+        /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
         /// </summary>
         public static bool DefaultSendAdditionalHeaderData { get; set; } = true;
 

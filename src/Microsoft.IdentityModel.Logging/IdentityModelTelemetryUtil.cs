@@ -1,4 +1,31 @@
-﻿using System;
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -14,13 +41,12 @@ namespace Microsoft.IdentityModel.Logging
         internal static readonly ConcurrentDictionary<string, string> telemetryData = new ConcurrentDictionary<string, string>();
         internal const string skuTelemetry = "x-client-SKU";
         internal const string versionTelemetry = "x-client-Ver";
-        internal const string osTelemetry = "x-client-OS";
-        internal static List<string> defaultTelemetryValues = new List<string> { skuTelemetry, versionTelemetry };
+        internal static readonly List<string> defaultTelemetryValues = new List<string> { skuTelemetry, versionTelemetry };
 
         /// <summary>
         /// Get the string that represents the client SKU.
         /// </summary>
-        public static string ClientSku { get;} =
+        public static string ClientSku =>
 #if NET45
             "ID_NET45";
 #elif NET461
@@ -34,7 +60,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Get the string that represents the client version.
         /// </summary>
-        public static string ClientVer { get; } = typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version.ToString();
+        public static string ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version.ToString();
 
         static IdentityModelTelemetryUtil()
         {
@@ -45,8 +71,8 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Adds a key and its value to the collection of telemetry data.
         /// </summary>
-        /// <param name="key"> Represents the name of the telemetry.</param>
-        /// <param name="value"> Represents the value of the telemetry.</param>
+        /// <param name="key"> The name of the telemetry.</param>
+        /// <param name="value"> The value of the telemetry.</param>
         public static void AddTelemetryData(string key, string value)
         {
             if (string.IsNullOrEmpty(key))
@@ -62,7 +88,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Removes a key and its value from the collection of telemetry data.
         /// </summary>
-        /// <param name="key"> Represents the name of the telemetry.</param>
+        /// <param name="key"> The name of the telemetry.</param>
         public static void RemoveTelemetryData(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -96,18 +122,17 @@ namespace Microsoft.IdentityModel.Logging
             {
                 if (telemetryData.ContainsKey(key))
                     telemetryData.TryRemove(key, out _);
-
             }
             else
+            {
                 telemetryData[key] = value;
+            }
         }
 
         internal static void CheckIfDefaultTelemetry(string parameter)
         {
             if (defaultTelemetryValues.Contains(parameter))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
-
-                return;
         }
     }
 }

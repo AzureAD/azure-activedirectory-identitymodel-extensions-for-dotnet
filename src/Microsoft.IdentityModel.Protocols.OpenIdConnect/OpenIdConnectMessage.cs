@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (this.EnableTelemetryParameters)
             {
                 clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, SkuTelemetryValue);
-                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString());
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, IdentityModelTelemetryUtil.ClientVer);
             }
         }
 
@@ -540,16 +540,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets the string that is sent as telemetry data in an OpenIdConnectMessage.
         /// </summary>
-        public string SkuTelemetryValue { get; set; } =
-#if NET45
-            "ID_NET45";
-#elif NET461
-            "ID_NET461";
-#elif NET472
-            "ID_NET472";
-#elif NETSTANDARD2_0
-            "ID_NETSTANDARD2_0";
-#endif
+        public string SkuTelemetryValue { get; set; } = IdentityModelTelemetryUtil.ClientSku;
 
         /// <summary>
         /// Gets or sets 'state'.
