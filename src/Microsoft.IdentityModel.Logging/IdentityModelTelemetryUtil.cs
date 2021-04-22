@@ -38,10 +38,14 @@ namespace Microsoft.IdentityModel.Logging
     /// </summary>
     public static class IdentityModelTelemetryUtil
     {
-        internal static readonly ConcurrentDictionary<string, string> telemetryData = new ConcurrentDictionary<string, string>();
         internal const string skuTelemetry = "x-client-SKU";
         internal const string versionTelemetry = "x-client-Ver";
         internal static readonly List<string> defaultTelemetryValues = new List<string> { skuTelemetry, versionTelemetry };
+        internal static readonly ConcurrentDictionary<string, string> telemetryData = new ConcurrentDictionary<string, string>()
+        {
+            [skuTelemetry] = ClientSku,
+            [versionTelemetry] = ClientVer
+        };
 
         /// <summary>
         /// Get the string that represents the client SKU.
@@ -62,12 +66,6 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         public static string ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version.ToString();
 
-        static IdentityModelTelemetryUtil()
-        {
-            telemetryData[skuTelemetry] = ClientSku;
-            telemetryData[versionTelemetry] = ClientVer;
-        }
-
         /// <summary>
         /// Adds a key and its value to the collection of telemetry data.
         /// </summary>
@@ -78,11 +76,11 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
+            if (string.IsNullOrEmpty(value))
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
             CheckIfDefaultTelemetry(key);
-            if (value == null)
-                RemoveTelemetryData(key);
-            else
-                telemetryData[key] = value;
+            telemetryData[key] = value;
         }
 
         /// <summary>
@@ -118,15 +116,10 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (value == null)
-            {
-                if (telemetryData.ContainsKey(key))
-                    telemetryData.TryRemove(key, out _);
-            }
-            else
-            {
-                telemetryData[key] = value;
-            }
+            if (string.IsNullOrEmpty(value))
+                throw LogHelper.LogArgumentNullException(nameof(value));
+
+            telemetryData[key] = value;
         }
 
         internal static void CheckIfDefaultTelemetry(string parameter)

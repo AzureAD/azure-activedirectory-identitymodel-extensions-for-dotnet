@@ -111,9 +111,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.AddTelemetryData(null, "value1"));
             Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1"));
             Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.versionTelemetry, "value1"));
-
-            IdentityModelTelemetryUtil.AddTelemetryData("parameter1", null);
-            Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1"));
+            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
         }
 
         [Fact]
@@ -139,9 +137,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1");
             Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey(IdentityModelTelemetryUtil.skuTelemetry) && IdentityModelTelemetryUtil.telemetryData[IdentityModelTelemetryUtil.skuTelemetry] == "value1");
-            IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null);
-            Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey(IdentityModelTelemetryUtil.skuTelemetry));
 
+            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
             Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(null, "value1"));
         }
         private static HttpRequestHeaders BuildHttpRequestHeaders(IDictionary<string, string> additionalHeaders = null, bool addDefaultTelemetryData = true)
