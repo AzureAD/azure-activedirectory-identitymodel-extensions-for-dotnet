@@ -100,15 +100,22 @@ namespace Microsoft.IdentityModel.Logging
         /// Removes a key and its value from the collection of telemetry data.
         /// </summary>
         /// <param name="key"> The name of the telemetry.</param>
-        public static void RemoveTelemetryData(string key)
+        /// <returns> true if the key is successfully removed; otherwise, false.</returns>
+        public static bool RemoveTelemetryData(string key)
         {
             if (string.IsNullOrEmpty(key))
-                throw LogHelper.LogArgumentNullException(nameof(key));
+            {
+                LogHelper.LogArgumentNullException(nameof(key));
+                return false;
+            }
 
             if (defaultTelemetryValues.Contains(key))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+            {
+                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+                return false;
+            }
 
-            telemetryData.TryRemove(key, out _);
+            return telemetryData.TryRemove(key, out _);
         }
 
         internal static void SetTelemetryData(HttpRequestMessage request)
@@ -125,15 +132,22 @@ namespace Microsoft.IdentityModel.Logging
             }
         }
 
-        internal static void UpdateDefaultTelemetryData(string key, string value)
+        internal static bool UpdateDefaultTelemetryData(string key, string value)
         {
             if (string.IsNullOrEmpty(key))
-                throw LogHelper.LogArgumentNullException(nameof(key));
+            {
+                LogHelper.LogArgumentNullException(nameof(key));
+                return false;
+            }
 
             if (string.IsNullOrEmpty(value))
-                throw LogHelper.LogArgumentNullException(nameof(value));
+            {
+                LogHelper.LogArgumentNullException(nameof(value));
+                return false;
+            }
 
             telemetryData[key] = value;
+            return true;
         }
     }
 }

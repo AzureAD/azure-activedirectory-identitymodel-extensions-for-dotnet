@@ -122,9 +122,9 @@ namespace Microsoft.IdentityModel.Logging.Tests
             IdentityModelTelemetryUtil.RemoveTelemetryData("parameter1");
             Assert.True(!IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1"));
 
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(null));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.skuTelemetry));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.versionTelemetry));
+            Assert.False(IdentityModelTelemetryUtil.RemoveTelemetryData(null));
+            Assert.False(IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.skuTelemetry));
+            Assert.False(IdentityModelTelemetryUtil.RemoveTelemetryData(IdentityModelTelemetryUtil.versionTelemetry));
         }
 
         [Fact]
@@ -138,8 +138,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
             IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1");
             Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey(IdentityModelTelemetryUtil.skuTelemetry) && IdentityModelTelemetryUtil.telemetryData[IdentityModelTelemetryUtil.skuTelemetry] == "value1");
 
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(null, "value1"));
+            Assert.False(IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
+            Assert.False(IdentityModelTelemetryUtil.UpdateDefaultTelemetryData(null, "value1"));
         }
         private static HttpRequestHeaders BuildHttpRequestHeaders(IDictionary<string, string> additionalHeaders = null, bool addDefaultTelemetryData = true)
         {
