@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (defaultTelemetryValues.Contains(key))
             {
-                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003)));
                 return false;
             }
 
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Logging
 
             if (defaultTelemetryValues.Contains(key))
             {
-                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003)));
                 return false;
             }
 
