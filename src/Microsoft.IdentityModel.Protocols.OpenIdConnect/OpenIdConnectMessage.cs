@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (this.EnableTelemetryParameters)
             {
                 clonedMessage.SetParameter(OpenIdConnectParameterNames.SkuTelemetry, SkuTelemetryValue);
-                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, IdentityModelTelemetryUtil.ClientVer);
+                clonedMessage.SetParameter(OpenIdConnectParameterNames.VersionTelemetry, typeof(OpenIdConnectMessage).GetTypeInfo().Assembly.GetName().Version.ToString());
             }
         }
 

@@ -71,16 +71,29 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         /// <param name="key"> The name of the telemetry.</param>
         /// <param name="value"> The value of the telemetry.</param>
-        public static void AddTelemetryData(string key, string value)
+        /// <returns> true if the key is successfully added; otherwise, false.</returns>
+        public static bool AddTelemetryData(string key, string value)
         {
             if (string.IsNullOrEmpty(key))
-                throw LogHelper.LogArgumentNullException(nameof(key));
+            {
+                LogHelper.LogArgumentNullException(nameof(key));
+                return false;
+            }
 
             if (string.IsNullOrEmpty(value))
-                throw LogHelper.LogArgumentNullException(nameof(value));
+            {
+                LogHelper.LogArgumentNullException(nameof(value));
+                return false;
+            }
 
-            CheckIfDefaultTelemetry(key);
+            if (defaultTelemetryValues.Contains(key))
+            {
+                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+                return false;
+            }
+
             telemetryData[key] = value;
+            return true;
         }
 
         /// <summary>
@@ -92,9 +105,10 @@ namespace Microsoft.IdentityModel.Logging
             if (string.IsNullOrEmpty(key))
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            CheckIfDefaultTelemetry(key);
-            if (telemetryData.ContainsKey(key))
-                telemetryData.TryRemove(key, out _);
+            if (defaultTelemetryValues.Contains(key))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
+
+            telemetryData.TryRemove(key, out _);
         }
 
         internal static void SetTelemetryData(HttpRequestMessage request)
@@ -120,12 +134,6 @@ namespace Microsoft.IdentityModel.Logging
                 throw LogHelper.LogArgumentNullException(nameof(value));
 
             telemetryData[key] = value;
-        }
-
-        internal static void CheckIfDefaultTelemetry(string parameter)
-        {
-            if (defaultTelemetryValues.Contains(parameter))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.MIML10003, defaultTelemetryValues)));
         }
     }
 }

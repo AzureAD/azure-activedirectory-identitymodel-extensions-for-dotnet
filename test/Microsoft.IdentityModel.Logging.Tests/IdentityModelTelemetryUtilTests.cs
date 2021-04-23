@@ -108,10 +108,10 @@ namespace Microsoft.IdentityModel.Logging.Tests
             IdentityModelTelemetryUtil.AddTelemetryData("parameter1", "value2");
             Assert.True(IdentityModelTelemetryUtil.telemetryData.ContainsKey("parameter1") && IdentityModelTelemetryUtil.telemetryData["parameter1"] == "value2");
 
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.AddTelemetryData(null, "value1"));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1"));
-            Assert.Throws<ArgumentException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.versionTelemetry, "value1"));
-            Assert.Throws<ArgumentNullException>(() => IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
+            Assert.False(IdentityModelTelemetryUtil.AddTelemetryData(null, "value1"));
+            Assert.False(IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, "value1"));
+            Assert.False(IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.versionTelemetry, "value1"));
+            Assert.False(IdentityModelTelemetryUtil.AddTelemetryData(IdentityModelTelemetryUtil.skuTelemetry, null));
         }
 
         [Fact]
