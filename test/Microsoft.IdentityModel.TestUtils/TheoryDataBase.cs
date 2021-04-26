@@ -41,6 +41,11 @@ namespace Microsoft.IdentityModel.TestUtils
             IdentityModelEventSource.ShowPII = true;
         }
 
+        public TheoryDataBase(bool showPII)
+        {
+            IdentityModelEventSource.ShowPII = showPII;
+        }
+
         public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 
         public bool First { get; set; } = false;

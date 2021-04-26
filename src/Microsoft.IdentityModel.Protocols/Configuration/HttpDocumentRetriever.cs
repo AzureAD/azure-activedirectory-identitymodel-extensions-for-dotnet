@@ -44,6 +44,22 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
+        /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
+        /// </summary>
+        public static bool DefaultSendAdditionalHeaderData { get; set; } = true;
+
+        private bool _sendAdditionalHeaderData = DefaultSendAdditionalHeaderData;
+
+        /// <summary>
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers
+        /// </summary>
+        public bool SendAdditionalHeaderData
+        {
+            get { return _sendAdditionalHeaderData; }
+            set { _sendAdditionalHeaderData = value; }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HttpDocumentRetriever"/> class.
         /// </summary>
         public HttpDocumentRetriever()
@@ -83,14 +99,21 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
 
             Exception unsuccessfulHttpResponseException;
+            HttpResponseMessage response;
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
-                var response = await httpClient.GetAsync(uri, cancel).ConfigureAwait(false);
-                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message);
 
+                    response = await httpClient.SendAsync(message).ConfigureAwait(false);
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
