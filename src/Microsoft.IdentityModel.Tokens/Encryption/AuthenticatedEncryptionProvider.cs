@@ -48,6 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         private Lazy<AuthenticatedKeys> _authenticatedkeys;
+        private DisposableObjectPool<AesGcm> _aesGcmObjectPool;
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
         private Lazy<bool> _keySizeIsValid;
@@ -97,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingAesGcm()
         {
             _keySizeIsValid = new Lazy<bool>(ValidKeySize);
+            _aesGcmObjectPool = new DisposableObjectPool<AesGcm>(CreateAesGcmInstance, 10);
             EncryptFunction = EncryptWithAesGcm;
             DecryptFunction = DecryptWithAesGcm;
         }
@@ -121,13 +123,30 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, Algorithm)));
         }
 
+        private AesGcm CreateAesGcmInstance()
+        {
+            return new AesGcm(GetKeyBytes(Key));
+        }
+
         private byte[] DecryptWithAesGcm(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             _ = _keySizeIsValid.Value;
             byte[] clearBytes = new byte[ciphertext.Length];
-            using (var aes = new AesGcm(GetKeyBytes(Key)))
+            AesGcm aes = null;
+            try
             {
+                aes = _aesGcmObjectPool.Allocate();
                 aes.Decrypt(iv, ciphertext, authenticationTag, clearBytes, authenticatedData);
+            }
+            catch
+            {
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _aesGcmObjectPool.Free(aes);
             }
 
             return clearBytes;
@@ -324,12 +343,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
-                return;
+            if (!_disposed)
+            {
+                _disposed = true;
+                if (disposing)
+                {
+                    if (_symmetricSignatureProvider != null)
+                        _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider.Value);
 
-            _disposed = true;
-            if (disposing && _symmetricSignatureProvider != null)
-                _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider.Value);
+                    foreach (var item in _aesGcmObjectPool.Items)
+                        item.Value?.Dispose();
+                }
+            }
         }
 
         /// <summary>
