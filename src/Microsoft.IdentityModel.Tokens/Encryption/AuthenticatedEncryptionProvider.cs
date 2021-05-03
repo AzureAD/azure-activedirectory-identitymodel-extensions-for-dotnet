@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingAesGcm()
         {
             _keySizeIsValid = new Lazy<bool>(ValidKeySize);
-            _aesGcmObjectPool = new DisposableObjectPool<AesGcm>(CreateAesGcmInstance, 10);
+            _aesGcmObjectPool = new DisposableObjectPool<AesGcm>(CreateAesGcmInstance);
             EncryptFunction = EncryptWithAesGcm;
             DecryptFunction = DecryptWithAesGcm;
         }
