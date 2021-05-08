@@ -115,6 +115,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public void AesGcm_Dispose()
+        {
+            AuthenticatedEncryptionProvider encryptionProvider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            encryptionProvider.Dispose();
+            var expectedException = ExpectedException.ObjectDisposedException;
+
+            try
+            {
+                encryptionProvider.Decrypt(AES_256_GCM.E, AES_256_GCM.A, AES_256_GCM.IV, AES_256_GCM.T);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+        }
+
         [Theory, MemberData(nameof(AEPConstructorTheoryData))]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
         {
