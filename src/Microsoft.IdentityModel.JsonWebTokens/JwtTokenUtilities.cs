@@ -280,8 +280,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static SecurityKey GetSecurityKey(EncryptingCredentials encryptingCredentials, CryptoProviderFactory cryptoProviderFactory, out byte[] wrappedKey)
         {
-            SecurityKey securityKey = null;
-            KeyWrapProvider kwProvider = null;
+            SecurityKey securityKey;
+            KeyWrapProvider kwProvider;
             wrappedKey = null;
 
             // if direct algorithm, look for support
@@ -465,6 +465,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return ResolveTokenSigningKeyWithConfig(kid, x5t, validationParameters);
             else
                 return null;
+        }
+
+        /// <summary>
+        /// Returns number of Jwt parts in token.
+        /// </summary>
+        /// <param name="token">Input token to count patrs.</param>
+        /// <returns>Value between 1 and <see cref="JwtConstants.MaxJwtSegmentCount"/> + 1.</returns>
+        internal static int CountTokenJwtParts(string token)
+        {
+            int tokenPartsCount = 1;
+            for (int i = 0; i < token.Length; i++)
+            {
+                if (token[i] == '.')
+                {
+                    tokenPartsCount++;
+                    if (tokenPartsCount > JwtConstants.MaxJwtSegmentCount)
+                        break;
+                }
+            }
+            return tokenPartsCount;
         }
     }
 }
