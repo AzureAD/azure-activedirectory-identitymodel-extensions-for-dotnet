@@ -2054,7 +2054,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <Audience> - 0-OO
             foreach (Uri uri in proxyRestriction.Audiences)
-                writer.WriteElementString(Prefix, Saml2Constants.Elements.Audience, uri.OriginalString);
+                writer.WriteElementString(Saml2Constants.Elements.Audience, Saml2Constants.Namespace, uri.OriginalString);
 
             writer.WriteEndElement();
         }
