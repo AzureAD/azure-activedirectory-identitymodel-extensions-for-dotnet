@@ -27,6 +27,8 @@
 
 using System;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Xml;
@@ -493,6 +495,55 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         }
         #endregion
 
+        #region Saml2ProxyRestriction
+
+        [Theory, MemberData(nameof(WriteSaml2ProxyRestrictionTheoryData))]
+        public void WriteSaml2ProxyRestriction(Saml2TheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteSaml2ProxyRestriction", theoryData);
+            var context = new CompareContext($"{this}.WriteSaml2ProxyRestriction, {theoryData.TestId}");
+            try
+            {
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false);
+                var envelopedWriter = new EnvelopedSignatureWriter(writer, Default.AsymmetricSigningCredentials, "ref#1");
+                (theoryData.Saml2Serializer as Saml2SerializerPublic).WriteProxyRestrictionPublic(writer, theoryData.ProxyRestriction);
+
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(xml, theoryData.Xml, context);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> WriteSaml2ProxyRestrictionTheoryData
+        {
+            get
+            {
+                var proxyRestriction = new Saml2ProxyRestriction();
+                proxyRestriction.Audiences.Add(new Uri(Default.Uri));
+
+                return new TheoryData<Saml2TheoryData>
+                {
+                    new Saml2TheoryData
+                    {
+                        Xml = "<saml:ProxyRestriction xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\"><saml:Audience>http://referenceUri</saml:Audience></saml:ProxyRestriction>",
+                        Saml2Serializer = new Saml2SerializerPublic(),
+                        ProxyRestriction = proxyRestriction,
+                        TestId = "WriteSaml2ProxyRestriction",
+                    }
+                };
+            }
+        }
+        #endregion
+
         #region Saml2Subject
         [Theory, MemberData(nameof(ReadSubjectTheoryData))]
         public void ReadSubject(Saml2TheoryData theoryData)
@@ -597,6 +648,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             public Saml2Subject ReadSubjectPublic(XmlDictionaryReader reader)
             {
                 return base.ReadSubject(reader);
+            }
+
+            public void WriteProxyRestrictionPublic(XmlWriter writer, Saml2ProxyRestriction proxyRestriction)
+            {
+                base.WriteProxyRestriction(writer, proxyRestriction);
             }
         }
     }
