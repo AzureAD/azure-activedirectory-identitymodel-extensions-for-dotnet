@@ -65,24 +65,34 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly int _tryTakeTimeout;
         // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
         private readonly bool _removeExpiredValues;
+        // if true, then items will be maintained in a LRU fashion, moving to front of list when accessed in the cache.
+        private readonly bool _maintainLRU;
+
+        private TaskCreationOptions _options;
 
         internal EventBasedLRUCache(
             int capacity,
             TaskCreationOptions options = TaskCreationOptions.LongRunning,
             IEqualityComparer<TKey> comparer = null,
             int tryTakeTimeout = 500,
-            bool removeExpiredValues = true,
-            int cleanUpIntervalInSeconds = 300)
+            bool removeExpiredValues = false,
+            int cleanUpIntervalInSeconds = 300,
+            bool maintainLRU = false
+            )
         {
             _tryTakeTimeout = tryTakeTimeout;
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _removeExpiredValues = removeExpiredValues;
+            _options = options;
+            _maintainLRU = maintainLRU;
             _eventQueueTask = new Task(OnStart, options);
             _eventQueueTask.Start();
             if (_removeExpiredValues)
                 _ = RemoveExpiredValuesPeriodically(TimeSpan.FromSeconds(cleanUpIntervalInSeconds));
         }
+
+        internal TaskCreationOptions Options => _options;
 
         private void OnStart()
         {
@@ -201,12 +211,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (_map.TryGetValue(key, out var cacheItem))
             {
                 cacheItem.Value = value;
-                cacheItem.ExpirationTime = expirationTime;
-                _eventQueue.Add(() =>
+                if (_removeExpiredValues)
+                    cacheItem.ExpirationTime = expirationTime;
+
+                // if maintaining a LRU move item to front
+                if (_maintainLRU)
                 {
-                    _doubleLinkedList.Remove(cacheItem);
-                    _doubleLinkedList.AddFirst(cacheItem);
-                });
+                    _eventQueue.Add(() =>
+                    {
+                        _doubleLinkedList.Remove(cacheItem);
+                        _doubleLinkedList.AddFirst(cacheItem);
+                    });
+                }
             }
             else
             {
@@ -222,10 +238,14 @@ namespace Microsoft.IdentityModel.Tokens
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
                 _eventQueue.Add(() =>
                 {
+                    // if maintaining a LRU move item to front
                     // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
-                    _doubleLinkedList.Remove(newCacheItem);
+                    if (_maintainLRU)
+                        _doubleLinkedList.Remove(newCacheItem);
+
                     _doubleLinkedList.AddFirst(newCacheItem);
                 });
+
                 _map[key] = newCacheItem;
             }
 
@@ -244,13 +264,20 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
             }
 
-            // make sure node hasn't been removed by a different thread
             if (_map.TryGetValue(key, out var cacheItem))
-                _eventQueue.Add(() =>
+            {
+
+                // make sure node hasn't been removed by a different thread
+                // if maintaining a LRU move item to front
+                if (_maintainLRU)
                 {
-                    _doubleLinkedList.Remove(cacheItem);
-                    _doubleLinkedList.AddFirst(cacheItem);
-                });
+                    _eventQueue.Add(() =>
+                    {
+                        _doubleLinkedList.Remove(cacheItem);
+                        _doubleLinkedList.AddFirst(cacheItem);
+                    });
+                }
+            }
 
             value = cacheItem != null ? cacheItem.Value : default;
             return cacheItem != null;
