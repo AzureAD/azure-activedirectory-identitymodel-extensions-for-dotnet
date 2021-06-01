@@ -282,11 +282,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
-                var rsaCsp = KeyingMaterial.DefaultCert_2048.PrivateKey as RSACryptoServiceProvider;
+                var rsaCsp = KeyingMaterial.CertSelfSigned2048_SHA256_2.PrivateKey as RSACryptoServiceProvider;
 #endif
 
                 var guid = Guid.NewGuid().ToByteArray();
-                var hashAlgorithm = SHA1.Create();
+                var hashAlgorithm = SHA256.Create();
 
                 return new TheoryData<RSACryptoServiceProviderProxyTheoryData>
                 {
@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         HashAlgorithm = hashAlgorithm,
                         Input = guid,
                         RsaCryptoServiceProvider = rsaCsp,
-                        TestId = "Test4",
+                        TestId = "Test5",
                         UseOAEP = true
                     }
                 };
@@ -356,10 +356,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
-                var rsaCsp = KeyingMaterial.DefaultCert_2048.PrivateKey as RSACryptoServiceProvider;
+                var rsaCsp = KeyingMaterial.CertSelfSigned1024_SHA256.PrivateKey as RSACryptoServiceProvider;
 #endif
 
-                var hashAlgorithm = SHA1.Create();
+                var hashAlgorithm = SHA256.Create();
                 return new TheoryData<RSACryptoServiceProviderProxyTheoryData>
                 {
                     new RSACryptoServiceProviderProxyTheoryData
