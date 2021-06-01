@@ -29,7 +29,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -88,6 +87,34 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class AuthenticatedEncryptionProviderTests
     {
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
+
+        [Fact]
+        public void AesGcmEncryptionOnLinuxAndMac()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+        }
+#endif
+
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+#endif
+        [Fact]
+        public void AesGcmEncryptionOnWindows()
+        {
+            var context = new CompareContext();
+            try
+            {
+                var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ ex.ToString()}");
+            }
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(AEPConstructorTheoryData))]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
         {
@@ -119,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test3", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test4", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
             theoryData.Add("Test5", Default.SymmetricEncryptionKey512, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.NoExceptionExpected);
-            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10652:"));
+            theoryData.Add("Test6", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128Encryption, ExpectedException.ArgumentException("IDX10668:"));
             theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
             theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
 
@@ -394,7 +421,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        #region DisposeTests
+#region DisposeTests
         public static TheoryData<AuthenticatedEncryptionTheoryData> DisposeTheoryData()
         {
             var theoryData = new TheoryData<AuthenticatedEncryptionTheoryData>();
@@ -617,7 +644,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-        #endregion
+#endregion
 
         [Theory, MemberData(nameof(EncryptDecryptTheoryData))]
         public void EncryptDecrypt(AuthenticatedEncryptionTheoryData theoryData)

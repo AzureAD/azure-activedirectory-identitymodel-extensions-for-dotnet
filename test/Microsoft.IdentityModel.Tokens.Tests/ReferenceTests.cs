@@ -39,19 +39,44 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class ReferenceTests
     {
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+#endif
+        [Fact]
+        public void AesGcmReferenceTest()
+        {
+            var context = new CompareContext();
+            var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(new SymmetricSecurityKey(RSAES_OAEP_KeyWrap.CEK), AES_256_GCM.Algorithm);
+            var plaintext = providerForDecryption.Decrypt(AES_256_GCM.E, AES_256_GCM.A, AES_256_GCM.IV, AES_256_GCM.T);
+
+            if (!Utility.AreEqual(plaintext, AES_256_GCM.P))
+                context.AddDiff($"!Utility.AreEqual(plaintext, testParams.Plaintext)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
 
         [Theory, MemberData(nameof(AuthenticatedEncryptionTheoryData))]
         public void AuthenticatedEncryptionReferenceTest(AuthenticationEncryptionTestParams testParams)
         {
+            var context = new CompareContext();
             var providerForEncryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.EncryptionKey, testParams.Algorithm);
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.DecryptionKey, testParams.Algorithm);
+            var plaintext = providerForDecryption.Decrypt(testParams.Ciphertext, testParams.AuthenticationData, testParams.IV, testParams.AuthenticationTag);
             var encryptionResult = providerForEncryption.Encrypt(testParams.Plaintext, testParams.AuthenticationData, testParams.IV);
-            var plaintext = providerForDecryption.Decrypt(encryptionResult.Ciphertext, testParams.AuthenticationData, encryptionResult.IV, encryptionResult.AuthenticationTag);
 
-            Assert.True(Utility.AreEqual(encryptionResult.IV, testParams.IV), "Utility.AreEqual(encryptionResult.IV, testParams.IV)");
-            Assert.True(Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag), "Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
-            Assert.True(Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext), "Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
-            Assert.True(Utility.AreEqual(plaintext, testParams.Plaintext), "Utility.AreEqual(plaintext, testParams.Plaintext)");
+            if (!Utility.AreEqual(encryptionResult.IV, testParams.IV))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.IV, testParams.IV)");
+
+            if (!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.AuthenticationTag, testParams.AuthenticationTag)");
+
+            if (!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext))
+                context.AddDiff($"!Utility.AreEqual(encryptionResult.Ciphertext, testParams.Ciphertext)");
+
+            if (!Utility.AreEqual(plaintext, testParams.Plaintext))
+                context.AddDiff($"!Utility.AreEqual(plaintext, testParams.Plaintext)");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<AuthenticationEncryptionTestParams> AuthenticatedEncryptionTheoryData
