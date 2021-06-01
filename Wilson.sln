@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "certs", "certs", "{1751FD49
 		test\Certs\SelfSigned1024_SHA1.pfx = test\Certs\SelfSigned1024_SHA1.pfx
 		test\Certs\SelfSigned1024_SHA256.pfx = test\Certs\SelfSigned1024_SHA256.pfx
 		test\Certs\SelfSigned2048_SHA256.pfx = test\Certs\SelfSigned2048_SHA256.pfx
+		test\Certs\SelfSigned2048_SHA256_2.pfx = test\Certs\SelfSigned2048_SHA256_2.pfx
 		test\Certs\SelfSigned2048_SHA256_Public.cer = test\Certs\SelfSigned2048_SHA256_Public.cer
 		test\Certs\SelfSigned2048_SHA384.pfx = test\Certs\SelfSigned2048_SHA384.pfx
 		test\Certs\SelfSigned2048_SHA512.pfx = test\Certs\SelfSigned2048_SHA512.pfx
