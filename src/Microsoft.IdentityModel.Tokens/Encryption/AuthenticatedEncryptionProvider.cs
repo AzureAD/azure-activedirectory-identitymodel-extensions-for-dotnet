@@ -349,10 +349,15 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     if (_symmetricSignatureProvider != null)
+                    {
                         _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider.Value);
+                    }
 
-                    foreach (var item in _aesGcmObjectPool.Items)
-                        item.Value?.Dispose();
+                    if (_aesGcmObjectPool != null)
+                    {
+                        foreach (var item in _aesGcmObjectPool.Items)
+                            item.Value?.Dispose();
+                    }
                 }
             }
         }
