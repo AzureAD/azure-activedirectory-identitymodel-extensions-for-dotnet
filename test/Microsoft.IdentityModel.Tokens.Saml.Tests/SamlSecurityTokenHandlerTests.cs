@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Handler = new SamlSecurityTokenHandler(),
                         TestId = nameof(ReferenceTokens.SamlToken_Valid),
                         Token = ReferenceTokens.SamlToken_Valid,
-                        XmlReader = new XmlTextReader(new StringReader(ReferenceTokens.SamlToken_Valid))
+                        XmlReader = XmlReader.Create(new StringReader(ReferenceTokens.SamlToken_Valid), new XmlReaderSettings() { XmlResolver = null })
                     }
                 };
             }
