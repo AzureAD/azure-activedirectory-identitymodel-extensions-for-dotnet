@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -55,6 +56,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
 
+                formatter.Binder = new ExceptionSerializationBinder();
                 var serializedException = formatter.Deserialize(memoryStream);
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -250,6 +252,35 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public Type ExceptionType { get; set; }
 
         public Action<Exception> ExceptionSetter { get; set; }
+    }
+
+    public class ExceptionSerializationBinder : SerializationBinder
+    {
+        public override Type BindToType(string assemblyName, string typeName)
+        {
+            // One way to discover expected types is through testing deserialization
+            // of **valid** data and logging the types used.
+
+            //Console.WriteLine($"BindToType('{assemblyName}', '{typeName}')");
+
+            if (typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException" ||
+                typeName == "Microsoft.IdentityModel.Tokens.ValidationFailure")
+            {
+                return null;
+            }
+            else
+            {
+                throw new ArgumentException("Unexpected type: ", nameof(typeName));
+            }
+        }
     }
 }
 
