@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (string.IsNullOrEmpty(xml))
                 return null;
 
-            return new XmlTextReader(new StringReader(xml));
+            return XmlReader.Create(new StringReader(xml), new XmlReaderSettings() { XmlResolver = null });
         }
 
         /// <summary>
