@@ -1075,7 +1075,7 @@ namespace Microsoft.IdentityModel.TestUtils
         private static SecureString ConvertToSecureString(string password)
         {
             if (password == null)
-                throw new ArgumentNullException("password");
+                throw new ArgumentNullException(nameof(password));
 
             var securePassword = new SecureString();
 
