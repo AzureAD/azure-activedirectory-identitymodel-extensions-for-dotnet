@@ -1,5 +1,5 @@
 {
-  "tool": "Credential Scanner",
+    "tool": "Credential Scanner",
     "suppressions": [
         {
             "file": "SelfSigned1024_SHA1.pfx",
