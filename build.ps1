@@ -138,10 +138,10 @@ CreateArtifactsRoot($artifactsRoot);
 pushd
 Set-Location $root
 Write-Host ""
-Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
+Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:ContinuousIntegrationBuild=true /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
+$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:ContinuousIntegrationBuild=true /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 
 if($p.ExitCode -ne 0)
 {
