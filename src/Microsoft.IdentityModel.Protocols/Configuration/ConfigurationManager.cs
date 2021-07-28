@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Protocols
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
+        private DateTimeOffset _lastForceRefresh = DateTimeOffset.MinValue;
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly string _metadataAddress;
@@ -222,15 +223,16 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If the last refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If the last force refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
         /// <para>If <see cref="RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (now >= DateTimeUtil.Add(_lastRefresh.UtcDateTime, RefreshInterval))
+            if (now >= DateTimeUtil.Add(_lastForceRefresh.UtcDateTime, RefreshInterval))
             {
                 _syncAfter = now;
+                _lastForceRefresh = now;
             }
         }
     }
