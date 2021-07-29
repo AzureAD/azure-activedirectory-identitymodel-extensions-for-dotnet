@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             TestUtilities.SetField(configManager, "_automaticRefreshInterval", TimeSpan.FromMilliseconds(1));
             configuration = configManager.GetConfigurationAsync().Result;
-            TestUtilities.SetField(configManager, "_lastForceRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configManager.RequestRefresh();
             configuration2 = configManager.GetConfigurationAsync().Result;
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Refresh should force pickup of new config
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
-            TestUtilities.SetField(configManager, "_lastForceRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
             TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configuration2 = configManager.GetConfigurationAsync().Result;
@@ -286,7 +286,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
-            TestUtilities.SetField(configManager, "_lastForceRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
             TestUtilities.SetField(configManager, "_metadataAddress", "http://someaddress.com");
             configuration2 = configManager.GetConfigurationAsync().Result;

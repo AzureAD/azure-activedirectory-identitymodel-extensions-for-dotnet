@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Protocols
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
-        private DateTimeOffset _lastForceRefresh = DateTimeOffset.MinValue;
+        private bool _isFirstForceRefresh = true;
         private Random _jitterer = new Random();
 
         private readonly SemaphoreSlim _refreshLock;
@@ -224,17 +224,21 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If the last force refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
         /// <para>If <see cref="RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
             var jitter = new TimeSpan((long)(RefreshInterval.Ticks * _jitterer.Next(0, 100) * 0.01));
-            if (now >= DateTimeUtil.Add(_lastForceRefresh.UtcDateTime, RefreshInterval.Add(jitter)))
+            if (_isFirstForceRefresh)
             {
                 _syncAfter = now;
-                _lastForceRefresh = now;
+                _isFirstForceRefresh = false;
+            }
+            else if (now >= DateTimeUtil.Add(_lastRefresh.UtcDateTime, RefreshInterval.Add(jitter)))
+            {
+                _syncAfter = now;
             }
         }
     }
