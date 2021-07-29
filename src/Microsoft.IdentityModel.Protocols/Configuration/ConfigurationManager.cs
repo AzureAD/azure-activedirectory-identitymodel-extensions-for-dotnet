@@ -62,12 +62,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public static readonly TimeSpan MinimumRefreshInterval = new TimeSpan(0, 0, 0, 1);
 
-        private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval;
+        private static TimeSpan _jitter = new TimeSpan(0,1,0,0);
+        private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval.Add(TimeSpan.FromMinutes(new Random().Next((int)_jitter.TotalMinutes)));
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
-        private bool _isFirstForceRefresh = true;
-        private Random _jitterer = new Random();
+        private bool _isFirstRefreshRequest = true;
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly string _metadataAddress;
@@ -230,13 +230,12 @@ namespace Microsoft.IdentityModel.Protocols
         public void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            var jitter = new TimeSpan((long)(RefreshInterval.Ticks * _jitterer.Next(0, 100) * 0.01));
-            if (_isFirstForceRefresh)
+            if (_isFirstRefreshRequest)
             {
                 _syncAfter = now;
-                _isFirstForceRefresh = false;
+                _isFirstRefreshRequest = false;
             }
-            else if (now >= DateTimeUtil.Add(_lastRefresh.UtcDateTime, RefreshInterval.Add(jitter)))
+            else if (now >= DateTimeUtil.Add(_lastRefresh.UtcDateTime, RefreshInterval))
             {
                 _syncAfter = now;
             }
