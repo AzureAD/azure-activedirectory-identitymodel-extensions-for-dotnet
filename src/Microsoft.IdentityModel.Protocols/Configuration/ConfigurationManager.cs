@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Protocols
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
         private DateTimeOffset _lastForceRefresh = DateTimeOffset.MinValue;
+        private Random _jitterer = new Random();
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly string _metadataAddress;
@@ -229,7 +230,8 @@ namespace Microsoft.IdentityModel.Protocols
         public void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (now >= DateTimeUtil.Add(_lastForceRefresh.UtcDateTime, RefreshInterval))
+            var jitter = new TimeSpan((long)(RefreshInterval.Ticks * _jitterer.Next(0, 100) * 0.01));
+            if (now >= DateTimeUtil.Add(_lastForceRefresh.UtcDateTime, RefreshInterval.Add(jitter)))
             {
                 _syncAfter = now;
                 _lastForceRefresh = now;

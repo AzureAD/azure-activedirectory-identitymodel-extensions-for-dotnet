@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 context.Diffs.Add("!object.ReferenceEquals(configuration2, configuration3) (5)");
             // Next force refresh should pickup config since, RefreshInterval is set to 1s
             configManager.RefreshInterval = TimeSpan.FromSeconds(1);
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             configManager.RequestRefresh();
             var configuration4 = configManager.GetConfigurationAsync().Result;
             if (IdentityComparer.AreEqual(configuration2, configuration4))
