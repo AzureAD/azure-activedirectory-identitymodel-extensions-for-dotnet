@@ -124,7 +124,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                 {
-                    new KeyValuePair<string, List<object>>("AutomaticRefreshInterval", new List<object>{defaultAutomaticRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
                     new KeyValuePair<string, List<object>>("RefreshInterval", new List<object>{defaultRefreshInterval, TimeSpan.FromHours(1), TimeSpan.FromHours(10)}),
                 },
                 Object = configManager,
@@ -176,15 +175,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (!object.ReferenceEquals(configuration, configuration2))
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2) (3)");
 
-            // Refresh should have no effect
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             configuration = configManager.GetConfigurationAsync().Result;
-            configManager.RefreshInterval = TimeSpan.FromHours(10);
+            // First force refresh should pickup new config
             configManager.RequestRefresh();
+            TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata2.json");
             configuration2 = configManager.GetConfigurationAsync().Result;
-            IdentityComparer.AreEqual(configuration, configuration2, context);
-            if (!object.ReferenceEquals(configuration, configuration2))
-                context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2) (4)");
+            if (IdentityComparer.AreEqual(configuration, configuration2))
+                context.Diffs.Add("IdentityComparer.AreEqual(configuration, configuration2), should be different");
+            if (object.ReferenceEquals(configuration, configuration2))
+                context.Diffs.Add("object.ReferenceEquals(configuration, configuration2) (4)");
+            // Next force refresh shouldn't pickup new config, as RefreshInterval hasn't passed
+            configManager.RequestRefresh();
+            TestUtilities.SetField(configManager, "_metadataAddress", "OpenIdConnectMetadata.json");
+            var configuration3 = configManager.GetConfigurationAsync().Result;
+            IdentityComparer.AreEqual(configuration2, configuration3, context);
+            if (!object.ReferenceEquals(configuration2, configuration3))
+                context.Diffs.Add("!object.ReferenceEquals(configuration2, configuration3) (5)");
+            // Next force refresh should pickup config since, RefreshInterval is set to 1s
+            configManager.RefreshInterval = TimeSpan.FromSeconds(1);
+            Thread.Sleep(1000);
+            configManager.RequestRefresh();
+            var configuration4 = configManager.GetConfigurationAsync().Result;
+            if (IdentityComparer.AreEqual(configuration2, configuration4))
+                context.Diffs.Add("IdentityComparer.AreEqual(configuration2, configuration4), should be different");
+            if (object.ReferenceEquals(configuration2, configuration4))
+                context.Diffs.Add("object.ReferenceEquals(configuration2, configuration4) (6)");
 
             // Refresh should force pickup of new config
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
