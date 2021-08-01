@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 Uri uri = new Uri(address);
-                return IsHttps(new Uri(address));
+                return IsHttps(uri);
             }
             catch (UriFormatException)
             {
