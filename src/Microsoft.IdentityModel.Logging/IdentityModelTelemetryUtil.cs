@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Logging
             return telemetryData.TryRemove(key, out _);
         }
 
-        internal static void SetTelemetryData(HttpRequestMessage request)
+        internal static void SetTelemetryData(HttpRequestMessage request, IDictionary<string, string> additionalHeaders)
         {
             if (request == null)
                 return;
@@ -129,6 +129,17 @@ namespace Microsoft.IdentityModel.Logging
                 // we don't want to add an additional value in case when a telemetry header already exists, but to overwrite it.
                 request.Headers.Remove(parameter.Key);
                 request.Headers.Add(parameter.Key, parameter.Value);
+            }
+
+            if (additionalHeaders != null)
+            {
+                foreach (var parameter in additionalHeaders)
+                {
+                    // remove this header if it already exists.
+                    // we don't want to add an additional value in case when a telemetry header already exists, but to overwrite it.
+                    request.Headers.Remove(parameter.Key);
+                    request.Headers.Add(parameter.Key, parameter.Value);
+                }
             }
         }
 
