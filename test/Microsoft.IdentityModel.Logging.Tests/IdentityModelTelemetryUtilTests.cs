@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                     {
                         HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { {"header1", "value1"} }),
                         ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"} }),
-                        TestId = "withAdditionalHeaders"
+                        TestId = "withAdditionalIncomingHeaders"
                     },
                     new TelemetryTheoryData
                     {
@@ -99,9 +99,9 @@ namespace Microsoft.IdentityModel.Logging.Tests
                     new TelemetryTheoryData
                     {
                         HttpRequestMessage = BuildHttpRequestMessage(),
-                        ExpectedHeaders = BuildHttpRequestHeaders(),
+                        ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"} }),
                         AdditionalHeaders = new Dictionary<string, string> { { "header1", "value1" } },
-                        TestId = "withXClientCurrentTelemetryHeader"
+                        TestId = "withAdditionalInputHeader"
                     },
                 };
             }
