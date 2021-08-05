@@ -960,56 +960,145 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token))), IsValid = false };
 
+            try
+            {
+                if (tokenParts.Length == JwtConstants.JweSegmentCount)
+                {
+                    JsonWebToken jwtToken = null;
+                    string decryptedJwt = null;
+                    jwtToken = new JsonWebToken(token);
+                    decryptedJwt = DecryptToken(jwtToken, validationParameters);
+                    // first parameter is null as it is only used in the case where a token is a JWS
+                    return ValidateToken(null, jwtToken, decryptedJwt, validationParameters);              
+                }
+                else
+                {
+                    // second and third parameters are null as they are only used when the token is a JWE
+                    return ValidateToken(token, null, null, validationParameters);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+        }
+
+        /// <summary>
+        ///  Private method for token validation, responsible for:
+        ///  (1) Obtaining a configuration from the <see cref="TokenValidationParameters.ConfigurationManager"/>.
+        ///  (2) Revalidating using the Last Known Good Configuration (if present), and obtaining a refreshed configuration (if necessary) and revalidating using it.
+        /// </summary>
+        /// <param name="token">The JWS string, only to be supplied if the token is a JWS.</param>
+        /// <param name="outerToken">The outer token of the JWE, only to be supplied if the token is a JWE.</param>
+        /// <param name="decryptedJwt">The inner decrypted token of the JWE, only to be supplied if the token is a JWE.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
+        /// <returns></returns>
+        private TokenValidationResult ValidateToken(string token, JsonWebToken outerToken, string decryptedJwt, TokenValidationParameters validationParameters)
+        {
             var validationParametersCopy = validationParameters;
-            if (validationParameters.ConfigurationManager != null)
+            if (validationParametersCopy.ConfigurationManager != null)
             {
                 try
                 {
+                    // TODO: Use overloads to get rid of the Clone() operation.
                     var configuration = validationParametersCopy.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
                     validationParametersCopy = validationParameters.Clone();
                     validationParametersCopy.Configuration = configuration;
                 }
                 catch (Exception ex)
                 {
-                    // If either a signing key or a valid issuer was not provided through the TVP, we want to stop processing on configuration retrieval failure.
-                    // Otherwise, we should keep going with validation.
-                    if ((validationParametersCopy.ValidateIssuer && string.IsNullOrWhiteSpace(validationParametersCopy.ValidIssuer) && validationParametersCopy.ValidIssuers.IsNullOrEmpty() && validationParametersCopy.IssuerValidator == null
-                        && validationParametersCopy.TokenDecryptionKey == null && validationParametersCopy.TokenDecryptionKeys.IsNullOrEmpty() && validationParametersCopy.TokenDecryptionKeyResolver == null)
-                        || (validationParametersCopy.RequireSignedTokens && validationParametersCopy.IssuerSigningKey == null && validationParametersCopy.IssuerSigningKeys.IsNullOrEmpty() && validationParametersCopy.IssuerSigningKeyResolver == null))
-                    {
-                        return new TokenValidationResult
-                        {
-                            Exception = ex,
-                            IsValid = false
-                        };
-                    }
-
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParametersCopy.ConfigurationManager.MetadataAddress));
+                    // Keep going with the validation as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them.
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParametersCopy.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
 
+            TokenValidationResult tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParametersCopy) : ValidateJWS(token, validationParametersCopy);
+            if (validationParametersCopy.ConfigurationManager != null)
+            {
+                if (tokenValidationResult.IsValid)
+                {
+                    // Set current configuration as LKG if it exists.
+                    if (validationParametersCopy.Configuration != null && validationParametersCopy.Configuration != validationParametersCopy.ConfigurationManager.LastKnownGoodConfiguration)
+                        validationParametersCopy.ConfigurationManager.LastKnownGoodConfiguration = validationParametersCopy.Configuration;
+
+                    return tokenValidationResult;
+                }
+                else if (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
+                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSigningKeyException))
+                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidIssuerException))
+                   || (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenUnableToValidateException))
+                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
+                   && (tokenValidationResult.Exception as SecurityTokenUnableToValidateException).ValidationFailure != ValidationFailure.InvalidLifetime)
+                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenSignatureKeyNotFoundException)))
+                {
+                    if (validationParametersCopy.ConfigurationManager.UseLastKnownGoodConfiguration
+                        && validationParametersCopy.ConfigurationManager.LastKnownGoodConfiguration != null
+                        && !(validationParametersCopy.ConfigurationManager.LastKnownGoodConfiguration == validationParametersCopy.Configuration))
+                    {
+                        // Inform the user that the LKG is expired.
+                        if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
+                            LogHelper.LogInformation(TokenLogMessages.IDX10263);
+                        else
+                        {
+                            validationParametersCopy.Configuration = validationParametersCopy.ConfigurationManager.LastKnownGoodConfiguration;
+                            tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParametersCopy) : ValidateJWS(token, validationParametersCopy); ;
+
+                            if (tokenValidationResult.IsValid)
+                                return tokenValidationResult;
+                        }
+                    }
+
+                    // If we were still unable to validate, attempt to refresh the configuration and validate using it.
+                    validationParametersCopy.ConfigurationManager.RequestRefresh();
+                    var lastConfig = validationParametersCopy.Configuration;
+                    validationParametersCopy.Configuration = validationParametersCopy.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+                    // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
+                    if (lastConfig != validationParametersCopy.Configuration)
+                        return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParametersCopy) : ValidateJWS(token, validationParametersCopy); ;
+                }
+            }
+
+            return tokenValidationResult;
+        }
+
+        private TokenValidationResult ValidateJWS(string token, TokenValidationParameters validationParameters)
+        {
             try
             {
-                if (tokenParts.Length == JwtConstants.JweSegmentCount)
+                var jsonWebToken = ValidateSignature(token, validationParameters);
+                return ValidateTokenPayload(jsonWebToken, validationParameters);
+            }
+            catch (Exception ex)
+            {
+                return new TokenValidationResult
                 {
-                    var jwtToken = new JsonWebToken(token);
-                    var decryptedJwt = DecryptToken(jwtToken, validationParametersCopy);
-                    var innerToken = ValidateSignature(decryptedJwt, validationParametersCopy);
-                    jwtToken.InnerToken = innerToken;
-                    var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParametersCopy);
-                    return new TokenValidationResult
-                    {
-                        SecurityToken = jwtToken,
-                        ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
-                        IsValid = true,
-                        TokenType = innerTokenValidationResult.TokenType
-                    };
-                }
-                else
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+        }
+
+        private TokenValidationResult ValidateJWE(JsonWebToken jwtToken, string decryptedJwt, TokenValidationParameters validationParameters)
+        {
+            try
+            {
+                var innerToken = ValidateSignature(decryptedJwt, validationParameters);
+                jwtToken.InnerToken = innerToken;
+                var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParameters);
+
+                return new TokenValidationResult
                 {
-                    var jsonWebToken = ValidateSignature(token, validationParametersCopy);
-                    return ValidateTokenPayload(jsonWebToken, validationParametersCopy);
-                }
+                    SecurityToken = jwtToken,
+                    ClaimsIdentity = innerTokenValidationResult.ClaimsIdentity,
+                    IsValid = true,
+                    TokenType = innerTokenValidationResult.TokenType
+                };
             }
             catch (Exception ex)
             {

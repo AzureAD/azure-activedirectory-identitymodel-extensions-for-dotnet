@@ -31,6 +31,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -115,8 +116,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 2)
-                Assert.True(false, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 7)
+                Assert.True(false, "Number of properties has changed from 7 to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -133,12 +134,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10108:"), context);
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"), context);
             TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"), context);
-            // TODO: To be added back in when we make the LKG feature public.
-            // When uncommenting these lines, remember to set the properties.Length check above to be equal to 6 and not 2.
-            //TestUtilities.SetGet(configManager, "CurrentConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
-            //TestUtilities.SetGet(configManager, "LastKnownGoodConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
-            //TestUtilities.SetGet(configManager, "UseLastKnownGoodConfiguration", true, ExpectedException.NoExceptionExpected, context);
-            //TestUtilities.SetGet(configManager, "MetadataAddress", "OpenIdConnectMetadata2.json", ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(configManager, "LastKnownGoodConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(configManager, "UseLastKnownGoodConfiguration", true, ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(configManager, "MetadataAddress", "OpenIdConnectMetadata2.json", ExpectedException.NoExceptionExpected, context);
+            TestUtilities.SetGet(configManager, "LastKnownGoodLifetime", TimeSpan.FromDays(5) - TimeSpan.FromDays(15), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10110:"), context);
             TestUtilities.AssertFailIfErrors("ConfigurationManager_GetSets", context.Errors);
         }
 
@@ -298,6 +297,43 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             IdentityComparer.AreEqual(configuration, configuration2, context);
             if (!object.ReferenceEquals(configuration, configuration2))
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test checks to make sure that the LastKnownGood (LKG) Configuration lifetime is properly reset at the time
+        // a new LKG is set.
+        [Fact]
+        public void ResetLastKnownGoodLifetime()
+        {
+            TestUtilities.WriteHeader($"{this}.ResetLastKnownGoodLifetime");
+            var context = new CompareContext();
+
+            var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+            var configurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig);
+
+            // set and retrieve config in order to set the first access time
+            configurationManager.LastKnownGoodConfiguration = validConfig;
+            var lkg = configurationManager.LastKnownGoodConfiguration;
+            var lkgConfigFirstUseField = typeof(BaseConfigurationManager).GetField("_lastKnownGoodConfigFirstUse", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var lkgConfigFirstUse1 = lkgConfigFirstUseField.GetValue(configurationManager as BaseConfigurationManager);
+
+            Thread.Sleep(1);
+
+            // set and retrieve config again to reset first access time
+            configurationManager.LastKnownGoodConfiguration = validConfig;
+            lkg = configurationManager.LastKnownGoodConfiguration;
+            var lkgConfigFirstUse2 = lkgConfigFirstUseField.GetValue(configurationManager as BaseConfigurationManager);
+
+            if (lkgConfigFirstUse1 == null)
+                context.AddDiff("Last known good first use time was not properly set for the first configuration.");
+
+            if (lkgConfigFirstUse2 == null)
+                context.AddDiff("Last known good first use time was not properly set for the second configuration.");
+
+            //LKG config first use was not reset when a new configuration was set
+            if (lkgConfigFirstUse1.Equals(lkgConfigFirstUse2))
+                context.AddDiff("Last known good first use time was not reset when a new LKG configuration was set.");
 
             TestUtilities.AssertFailIfErrors(context);
         }

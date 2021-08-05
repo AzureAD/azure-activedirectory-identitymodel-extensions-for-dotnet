@@ -403,7 +403,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
                         return signingKey;
                 }
-
             }
 
             return null;
