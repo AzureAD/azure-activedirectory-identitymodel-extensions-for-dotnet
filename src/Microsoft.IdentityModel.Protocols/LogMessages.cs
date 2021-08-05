@@ -40,8 +40,8 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX20000 = "IDX20000: The parameter '{0}' cannot be a 'null' or an empty object.";
 
         // properties, configuration 
-        internal const string IDX20106 = "IDX20106: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
-        internal const string IDX20107 = "IDX20107: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
+        // internal const string IDX20106 = "";
+        // internal const string IDX20107 = "";
         internal const string IDX20108 = "IDX20108: The address specified '{0}' is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false.";
 
         // configuration retrieval errors
