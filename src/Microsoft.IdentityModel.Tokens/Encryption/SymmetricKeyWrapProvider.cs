@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // Create the AES provider
                 SymmetricAlgorithm symmetricAlgorithm = Aes.Create();
-                symmetricAlgorithm.Mode = CipherMode.ECB;
+                symmetricAlgorithm.Mode = CipherMode.CBC;
                 symmetricAlgorithm.Padding = PaddingMode.None;
                 symmetricAlgorithm.KeySize = keyBytes.Length * 8;
                 symmetricAlgorithm.Key = keyBytes;
