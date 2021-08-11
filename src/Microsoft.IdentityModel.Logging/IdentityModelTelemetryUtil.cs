@@ -133,8 +133,8 @@ namespace Microsoft.IdentityModel.Logging
 
             if (additionalHeaders != null)
             {
-                foreach (var parameter in additionalHeaders)
-                    request.Headers.Add(parameter.Key, parameter.Value);
+                foreach (var header in additionalHeaders)
+                    request.Headers.Add(header.Key, header.Value);
             }
         }
 
