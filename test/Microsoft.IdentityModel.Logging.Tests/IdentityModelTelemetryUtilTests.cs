@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             try
             {
-                IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage);
+                IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage, theoryData.AdditionalHeaders);
                 // check if the resulting headers are as expected
                 if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers))
                     throw new ArgumentException("resulting headers do not match the expected headers.");
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                     {
                         HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { {"header1", "value1"} }),
                         ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"} }),
-                        TestId = "withAdditionalHeaders"
+                        TestId = "withAdditionalIncomingHeaders"
                     },
                     new TelemetryTheoryData
                     {
@@ -95,7 +95,14 @@ namespace Microsoft.IdentityModel.Logging.Tests
                         HttpRequestMessage = BuildHttpRequestMessage(new Dictionary<string, string> { { "header1", "value1" }, { IdentityModelTelemetryUtil.skuTelemetry, "some-other-value"}, {"header2", "value2"} }),
                         ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"}, {"header2", "value2"} }),
                         TestId = "overwriteExistingButKeepOtherHeaders"
-                    }
+                    },
+                    new TelemetryTheoryData
+                    {
+                        HttpRequestMessage = BuildHttpRequestMessage(),
+                        ExpectedHeaders = BuildHttpRequestHeaders(new Dictionary<string, string> { {"header1", "value1"} }),
+                        AdditionalHeaders = new Dictionary<string, string> { { "header1", "value1" } },
+                        TestId = "withAdditionalInputHeader"
+                    },
                 };
             }
         }
@@ -186,6 +193,8 @@ namespace Microsoft.IdentityModel.Logging.Tests
             public HttpRequestMessage HttpRequestMessage { get; set; }
 
             public HttpRequestHeaders ExpectedHeaders { get; set; }
+
+            public IDictionary<string, string> AdditionalHeaders { get; set; }
         }
     }
 }

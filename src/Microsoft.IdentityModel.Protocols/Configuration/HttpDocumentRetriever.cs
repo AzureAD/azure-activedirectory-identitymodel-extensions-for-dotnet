@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -58,6 +59,8 @@ namespace Microsoft.IdentityModel.Protocols
             get { return _sendAdditionalHeaderData; }
             set { _sendAdditionalHeaderData = value; }
         }
+
+        internal IDictionary<string, string> AdditionalHeaderData { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpDocumentRetriever"/> class.
@@ -108,7 +111,7 @@ namespace Microsoft.IdentityModel.Protocols
                 using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
                 {
                     if (SendAdditionalHeaderData)
-                        IdentityModelTelemetryUtil.SetTelemetryData(message);
+                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
 
                     response = await httpClient.SendAsync(message).ConfigureAwait(false);
                 }
