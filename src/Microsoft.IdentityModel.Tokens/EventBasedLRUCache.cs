@@ -60,9 +60,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region event queue
 
-        // the duration the _eventQueueTask should run after it is started, default to 120 seconds
+        // the time the _eventQueueTask should run after it is started (should continue even the queue is empty to reduce the task startup overhead), default to 120 seconds
         // TODO: consider implementing a better and yet simple algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
-        private int _eventQueueRunDurationInSeconds = 120;
+        public int EventQueueTaskExecutionTimeInSeconds { get; private set; } = 120;
 
         // the event queue task
         private Task _eventQueueTask;
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
             _cleanUpIntervalInMilliSeconds = 1000 * cleanUpIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
-            _eventQueueTaskStopTime = DateTime.Now;
+            _eventQueueTaskStopTime = DateTime.UtcNow;
 
             if (_removeExpiredValues)
                 _timer = new Timer(RemoveExpiredValuesPeriodically, null, _cleanUpIntervalInMilliSeconds, _cleanUpIntervalInMilliSeconds); // initial delay then ticks every periodInMilliSeconds
@@ -137,12 +137,6 @@ namespace Microsoft.IdentityModel.Tokens
                     return;
             }
         }
-
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// This is for tests to verify all tasks exit at the end of tests if the queue is empty.
-        /// </summary>
-        internal int TaskCount => _taskCount;
 
         internal int RemoveExpiredValues()
         {
@@ -316,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// This is the delegate for the event queue task (and the timer to remove the expired items if _removeExpiredValues is true).
-        /// The task keeps running until it is disposed or expired (DateTime.Now > _eventQueueTaskEndTime).
+        /// The task keeps running until it is disposed or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
         /// Note the task and timer are synchronized; both are running or stopped.
         /// </summary>
         private void EventQueueTaskAction()
@@ -328,7 +322,7 @@ namespace Microsoft.IdentityModel.Tokens
                 ResumeTimer();
             }
 
-            // Keep running until it is disposed, or expired (DateTime.Now > _eventQueueTaskEndTime).
+            // Keep running until it is disposed, or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
             while (!_disposed)
             {
                 // always set the state to EventQueueTaskRunning in case it was set to EventQueueTaskDoNotStop
@@ -340,7 +334,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         action?.Invoke();
                     }
-                    else if (DateTime.Now > _eventQueueTaskStopTime) // no more event to be processed, exit if expired
+                    else if (DateTime.UtcNow > _eventQueueTaskStopTime) // no more event to be processed, exit if expired
                     {
                         if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning) // if no other thread trying to start the task
                             break;
@@ -406,7 +400,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>the time when the event queue task should end</returns>
         private DateTime SetTaskEndTime()
         {
-            return DateTime.Now.AddSeconds(_eventQueueRunDurationInSeconds);
+            return DateTime.UtcNow.AddSeconds(EventQueueTaskExecutionTimeInSeconds);
         }
 
         /// <summary>
@@ -461,6 +455,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
         internal long EventQueueCount => _eventQueue.Count;
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// This is for tests to verify all tasks exit at the end of tests if the queue is empty.
+        /// </summary>
+        internal int TaskCount => _taskCount;
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// This is for tests to determin how long to wait for the event queue task to complete
+        /// </summary>
+        internal int TaskExecutionTimeInSeconds => EventQueueTaskExecutionTimeInSeconds;
 
 #endregion
 
