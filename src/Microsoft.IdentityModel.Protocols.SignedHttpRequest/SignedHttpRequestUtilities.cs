@@ -117,9 +117,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 TokenDecryptionKeys = decryptionKeys,
                 RequireSignedTokens = false,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
+                IssuerValidator = (issuer, token, tvp) => { return issuer; },
+                AudienceValidator = (audiences, token, tvp) => { return true; },
+                LifetimeValidator = (notBefore, expires, token, tvp) => { return true; },
                 ValidateIssuerSigningKey = false,
             };
 

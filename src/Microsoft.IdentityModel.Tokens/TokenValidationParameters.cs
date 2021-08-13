@@ -141,6 +141,11 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
 
+        private bool _requireExpirationTime;
+        private bool _validateAudience;
+        private bool _validateIssuer;
+        private bool _validateLifetime;
+
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
         /// </summary>
@@ -153,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
 
         /// <summary>
-        /// Default for the maximm token size.
+        /// Default for the maximum token size.
         /// </summary>
         /// <remarks>250 KB (kilobytes).</remarks>
         public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 250;
@@ -169,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens
             AlgorithmValidator = other.AlgorithmValidator;
             ActorValidationParameters = other.ActorValidationParameters?.Clone();
             AudienceValidator = other.AudienceValidator;
-            _authenticationType = other._authenticationType;
+            _authenticationType = other.AuthenticationType;
             ClockSkew = other.ClockSkew;
             CryptoProviderFactory = other.CryptoProviderFactory;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
@@ -183,7 +188,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
             RequireAudience = other.RequireAudience;
-            RequireExpirationTime = other.RequireExpirationTime;
+            _requireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
@@ -198,10 +203,10 @@ namespace Microsoft.IdentityModel.Tokens
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
-            ValidateAudience = other.ValidateAudience;
-            ValidateIssuer = other.ValidateIssuer;
+            _validateAudience = other.ValidateAudience;
+            _validateIssuer = other.ValidateIssuer;
             ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
-            ValidateLifetime = other.ValidateLifetime;
+            _validateLifetime = other.ValidateLifetime;
             ValidateTokenReplay = other.ValidateTokenReplay;
             ValidAlgorithms = other.ValidAlgorithms;
             ValidAudience = other.ValidAudience;
@@ -216,16 +221,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
-            RequireExpirationTime = true;
+            _requireExpirationTime = true;
             RequireSignedTokens = true;
             RequireAudience = true;
             SaveSigninToken = false;
             TryAllIssuerSigningKeys = true;
             ValidateActor = false;
-            ValidateAudience = true;
-            ValidateIssuer = true;
+            _validateAudience = true;
+            _validateIssuer = true;
             ValidateIssuerSigningKey = false;
-            ValidateLifetime = true;
+            _validateLifetime = true;
             ValidateTokenReplay = false;
         }
 
@@ -272,22 +277,6 @@ namespace Microsoft.IdentityModel.Tokens
                 _authenticationType = value;
             }
         }
-
-        ///// <summary>
-        ///// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
-        ///// </summary>
-        //public X509CertificateValidator CertificateValidator
-        //{
-        //    get
-        //    {
-        //        return _certificateValidator;
-        //    }
-
-        //    set
-        //    {
-        //        _certificateValidator = value;
-        //    }
-        //}
 
         /// <summary>
         /// Gets or sets the clock skew to apply when validating a time.
@@ -453,7 +442,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a value indicating whether tokens must have an 'expiration' value.
         /// </summary>
         [DefaultValue(true)]
-        public bool RequireExpirationTime { get; set; }
+        public bool RequireExpirationTime
+        {
+            get
+            {
+                return _requireExpirationTime;
+            }
+
+            [Obsolete(LogMessages.IDX10106, false)]
+            set
+            {
+                _requireExpirationTime = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether a <see cref="SecurityToken"/> can be considered valid if not signed.
@@ -511,7 +512,7 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityKey TokenDecryptionKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -578,7 +579,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// This boolean only applies to default audience validation. If <see cref="AudienceValidator"/> is set, it will be called regardless of whether this
         /// property is true or false.</remarks>
         [DefaultValue(true)]
-        public bool ValidateAudience { get; set; }
+        public bool ValidateAudience
+        {
+            get
+            {
+                return _validateAudience;
+            }
+
+            [Obsolete(LogMessages.IDX10109, false)]
+            set
+            {
+                _validateAudience = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a boolean to control if the issuer will be validated during token validation.
@@ -593,7 +606,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// property is true or false.
         /// </remarks>
         [DefaultValue(true)]
-        public bool ValidateIssuer { get; set; }
+        public bool ValidateIssuer
+        {
+            get
+            {
+                return _validateIssuer;
+            }
+
+            [Obsolete(LogMessages.IDX10107, false)]
+            set
+            {
+                _validateIssuer = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
@@ -614,7 +639,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// property is true or false.
         /// </remarks>
         [DefaultValue(true)]
-        public bool ValidateLifetime { get; set; }
+        public bool ValidateLifetime
+        {
+            get
+            {
+                return _validateLifetime;
+            }
+
+            [Obsolete(LogMessages.IDX10108, false)]
+            set
+            {
+                _validateLifetime = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a boolean to control if the token replay will be validated during token validation.

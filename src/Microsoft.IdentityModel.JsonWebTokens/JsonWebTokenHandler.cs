@@ -943,7 +943,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <returns>
+        /// A <see cref="TokenValidationResult"/> the caller should inspect to discover the result of the validation check.
+        /// </returns>
+        /// <remarks>
+        /// This method does not throw in the event of validation failure. The caller is expected to inspect the
+        /// <see cref="TokenValidationResult.IsValid"/> flag to determine if the passed <paramref name="token"/> passes
+        /// the validation checks. If <see cref="TokenValidationResult.IsValid"/> is <see langword="false"/> the caller is expected
+        /// to throw the exception stored in <see cref="TokenValidationResult.Exception"/>.
+        /// </remarks>
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrEmpty(token))

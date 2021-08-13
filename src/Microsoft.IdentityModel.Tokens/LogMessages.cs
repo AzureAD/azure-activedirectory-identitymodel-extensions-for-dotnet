@@ -47,6 +47,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
         public const string IDX10105 = "IDX10105: ClaimValue that is a collection of collections is not supported. Such ClaimValue is found for ClaimType : '{0}'";
 
+        public const string IDX10106 = "IDX10106: Using this property to alter the default value and disable expiry requirements is not recommended. https://aka.ms/wilson/tokenvalidation";
+        public const string IDX10107 = "IDX10107: Disabling issuer validation is not recommended, use IssuerValidator to set a custom validation delegate. https://aka.ms/wilson/tokenvalidation";
+        public const string IDX10108 = "IDX10108: Disabling lifetime validation is not recommended, use LifetimeValidator to set a custom validation delegate. https://aka.ms/wilson/tokenvalidation";
+        public const string IDX10109 = "IDX10109: Disabling audience validation is not recommended, use AudienceValidator to set a custom validation delegate. https://aka.ms/wilson/tokenvalidation";
+        
         // token validation
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null.";
         public const string IDX10205 = "IDX10205: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}'.";
