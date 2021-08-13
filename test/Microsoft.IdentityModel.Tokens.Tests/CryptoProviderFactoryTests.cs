@@ -1049,7 +1049,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(tmpProvider != null);
             }
 
-            var waitTimeInSeconds = cache.TaskExecutionTimeInSeconds;
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
             WaitTillTasksStarted(cache, waitTimeInSeconds); // wait for the event queue task to start
 
             Assert.True(cache.TaskCount > 0, $"ProviderCacheTest_EnsureNoLeakingTasks: unexpected task count: {cache.TaskCount}, expected: > 0");
@@ -1108,7 +1108,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
-            var waitTimeInSeconds = cache.TaskExecutionTimeInSeconds;
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
             WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
 
             // wait for all threads to finish
@@ -1126,7 +1126,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         /// <summary>
         /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
-        /// The JwtHeder is created with SymmetricEncryptingCredentials.
+        /// The JwtHeader is created with SymmetricEncryptingCredentials.
         /// </summary>
         [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials()
@@ -1155,7 +1155,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         /// <summary>
         /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
-        /// The JwtHeder is created with SigningCredentials.
+        /// The JwtHeader is created with SigningCredentials.
         /// </summary>
         [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials()
@@ -1185,7 +1185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             _ = handler.WriteToken(token);
 
             var cache = CryptoProviderFactory.Default.CryptoProviderCache as InMemoryCryptoProviderCache;
-            var waitTimeInSeconds = cache.TaskExecutionTimeInSeconds;
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
 
             WaitTillTasksStarted(cache, waitTimeInSeconds); // wait for the event queue task to start
             Assert.True(cache.TaskCount == 1, $"ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials: unexpected task count: {cache.TaskCount}, expected: 1");
@@ -1193,6 +1193,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials: unexpected task count: {cache.TaskCount}, expected: 0");
         }
+
+        /// <summary>
+        /// Calculate the wait time for a task to stop.
+        /// This is for adding more time allowing the task to exit properly.
+        /// </summary>
+        /// <param name="taskExecutionTimeInSeconds">The time the event queue task runs.</param>
+        /// <returns>1.2 times of the taskExecutionTimeInSeconds. Note that 1.2 is just a factor that provides enough time for the task to exit but not keeping tests waiting/sleeping for too long.</returns>
+        private long TaskStopWaitTimeInSeconds(long taskExecutionTimeInSeconds) => (long)(taskExecutionTimeInSeconds * 1.2);
 
         /// <summary>
         /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.

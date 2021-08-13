@@ -60,14 +60,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region event queue
 
-        // the time the _eventQueueTask should run after it is started (should continue even the queue is empty to reduce the task startup overhead), default to 120 seconds
-        // TODO: consider implementing a better and yet simple algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
+        // The time the _eventQueueTask should run after it is started (should continue even if the queue is empty to reduce the task startup overhead), default to 120 seconds.
+        // TODO: consider implementing a better algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
         public int EventQueueTaskExecutionTimeInSeconds { get; private set; } = 120;
 
         // the event queue task
         private Task _eventQueueTask;
 
-        // The time when the _eventQueueTask should end. The intent is to reduce the overhead costs of starting/ending tasks too refrequently
+        // The time when the _eventQueueTask should end. The intent is to reduce the overhead costs of starting/ending tasks too frequently
         // but at the same time keep the _eventQueueTask a short running task.
         // Since Task is based on thread pool the overhead should be reasonable.
         private DateTime _eventQueueTaskStopTime;
@@ -336,7 +336,12 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                     else if (DateTime.UtcNow > _eventQueueTaskStopTime) // no more event to be processed, exit if expired
                     {
-                        if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning) // if no other thread trying to start the task
+                        // Setting _eventQueueTaskState = EventQueueTaskStopped if the _eventQueueTaskEndTime has past and _eventQueueTaskState == EventQueueTaskRunning.
+                        // This means no other thread came in and it is safe to end this task.
+                        // If another thread adds new events while this task is still running, it will set the _eventQueueTaskState = EventQueueTaskDoNotStop instead of starting a new task.
+                        // The Interlocked.CompareExchange() call below will not succeed and the loop continues (until the event queue is empty and the _eventQueueTaskEndTime expires again).
+                        // This should prevent a rare (but theoretically possible) scenario caused by context switching.
+                        if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning)
                             break;
                     }
                 }
@@ -362,13 +367,13 @@ namespace Microsoft.IdentityModel.Tokens
              _eventQueueTaskStopTime = SetTaskEndTime(); // set the time when the _eventQueueTask should end
 
             // Setting _eventQueueTaskState to EventQueueTaskDoNotStop here will force the event queue task in EventQueueTaskAction to continue even it has past the _eventQueueTaskEndTime.
-            // It is mainly to prevent a rare (but theoratically possible) scenario caused by context switching
+            // It is mainly to prevent a rare (but theoretically possible) scenario caused by context switching
             // For example:
             //   1. the task execution in EventQueueTaskAction() checks _eventQueueTaskStopTime and it has already passed (ready to exit)
             //   2. the execution is switched to this thread (before it calls the Interlocked.CompareExchange() to set the _eventQueueTaskState to EventQueueTaskStopped)
             //   3. the _eventQueueTaskStopTime is extended but it can't stop the task from stopping as the task has already passed the time check
             //   4. now since the _eventQueueTaskState == EventQueueTaskRunning, it can be set to EventQueueTaskDoNotStop by the Interlocked.CompareExchange() below
-            //   5. if _eventQueueTaskState is successfully set to EventQueueTaskDoNotStop, the Interlocked.CompareExchang() in the EventQueueTaskAction() will fail
+            //   5. if _eventQueueTaskState is successfully set to EventQueueTaskDoNotStop, the Interlocked.CompareExchange() in the EventQueueTaskAction() will fail
             //      and the task will continue the while loop and the new _eventQueueTaskStopTime will keep the task running
             //   6. if _eventQueueTaskState is NOT set to EventQueueTaskDoNotStop because of context switch back to the EventQueueTaskAction() and the _eventQueueTaskState is
             //      set to EventQueueTaskStopped (task exits), then the second Interlocked.CompareExchange() below should set the _eventQueueTaskState to EventQueueTaskRunning
@@ -395,7 +400,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// The goal is to be able to track the incoming events and predict how long the task should run in order to
         /// avoid a long running task and reduce the overhead costs of restarting tasks.
         /// For example, maybe we can track the last three events' time and set the _eventQueueRunDurationInSeconds = 2 * average_time_between_events.
-        /// Note: tasks are based on thread poool so the overhead should not be huge but it shouls be minimized.
+        /// Note: tasks are based on thread pool so the overhead should not be huge but we should still try to minimize it.
         /// </summary>
         /// <returns>the time when the event queue task should end</returns>
         private DateTime SetTaskEndTime()
@@ -464,7 +469,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// FOR TESTING PURPOSES ONLY.
-        /// This is for tests to determin how long to wait for the event queue task to complete
+        /// This is for tests to determine how long to wait for the event queue task to complete.
         /// </summary>
         internal int TaskExecutionTimeInSeconds => EventQueueTaskExecutionTimeInSeconds;
 
