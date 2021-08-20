@@ -320,6 +320,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
         internal long TaskCount => _signingSignatureProviders.TaskCount + _verifyingSignatureProviders.TaskCount;
-#endregion
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// </summary>
+        internal long TaskExecutionTimeInSeconds => _signingSignatureProviders.TaskExecutionTimeInSeconds;
+        #endregion
     }
 }

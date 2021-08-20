@@ -27,10 +27,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Azure.Services.AppAuthentication;
+using Microsoft.IdentityModel.KeyVaultExtensions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -1028,10 +1032,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Testing adding/removing providers to the Default cache w/o leaking task at the end of test.
         /// </summary>
         [Fact]
-        public void ProviderCacheTest_EnsureNoLeakingTasks()
+        public void ProviderCache_EnsureNoLeakingTasks()
         {
-            int waitTimeoutInSeconds = 60;
-
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
 
@@ -1047,7 +1049,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(tmpProvider != null);
             }
 
-            WaitTillTasksStarted(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the tasks to start
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
+            WaitTillTasksStarted(cache, waitTimeInSeconds); // wait for the event queue task to start
 
             Assert.True(cache.TaskCount > 0, $"ProviderCacheTest_EnsureNoLeakingTasks: unexpected task count: {cache.TaskCount}, expected: > 0");
 
@@ -1058,9 +1061,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (var provider in verifyingProviders)
                 cache.TryRemove(provider);
 
-            WaitTillTasksComplete(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the task(s) to complete
-
-            Assert.True(cache.TaskCount == 0, $"ProviderCacheTest_EnsureNoLeakingTasks: unexpected task count: {cache.TaskCount}, expected: 0");
+            WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
+            Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoLeakingTasks: unexpected task count: {cache.TaskCount}, expected: 0");
 
             //=============================================================================================
             // repeat the steps and verify tasks will be restarted again and stopped when cache is empty...
@@ -1068,14 +1070,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             signingProviders = CreateSigningProviders(factory); // create signing providers
 
-            WaitTillTasksStarted(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the tasks to start
+            WaitTillTasksStarted(cache, waitTimeInSeconds); // wait for the event queue task to start
 
             // remove all signing providers
             foreach (var provider in signingProviders)
                 cache.TryRemove(provider);
 
-            WaitTillTasksComplete(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the task(s) to complete
-
+            WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"ProviderCacheTest_EnsureNoLeakingTasks 2: unexpected task count: {cache.TaskCount}, expected: 0");
 
             cache.Dispose();
@@ -1085,10 +1086,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Test adding and removing providers by multiple threads w/o exception.
         /// </summary>
         [Fact]
-        public void ProviderCacheTest_EnsureNoException_MultipleThreads()
+        public void ProviderCache_EnsureNoException_MultipleThreads()
         {
-            int waitTimeoutInSeconds = 60;
-
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
 
@@ -1109,7 +1108,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
-            WaitTillTasksComplete(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the task(s) to complete
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
+            WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
 
             // wait for all threads to finish
             foreach (Thread thread in signingThreads)
@@ -1118,19 +1118,96 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (Thread thread in verifyingThreads)
                 thread.Join();
 
-            WaitTillTasksComplete(cache, waitTimeoutInSeconds); // wait up to 60 seconds for the task(s) to complete
-
+            WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"ProviderCacheTest_EnsureNoException_MultipleThreads: unexpected task count: {cache.TaskCount}, expected: 0");
 
             cache.Dispose();
         }
 
         /// <summary>
+        /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
+        /// The JwtHeader is created with SymmetricEncryptingCredentials.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials()
+        {
+            var testClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+            };
+
+            var header = new JwtHeader(Default.SymmetricEncryptingCredentials);
+            JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
+            var token = new JwtSecurityToken(header, payload);
+
+            string certHash = "Test Cert Hash";
+            token.Header[JwtHeaderParameterNames.X5t] = certHash;
+            token.Header[JwtHeaderParameterNames.Kid] = certHash;
+
+            var handler = new JwtSecurityTokenHandler();
+            _ = handler.WriteToken(token);
+
+            // when JwtHeader is created with SymmetricEncryptingCredentials, the provider will not be added to cache (an error in logic???)
+            var cache = CryptoProviderFactory.Default.CryptoProviderCache as InMemoryCryptoProviderCache;
+            Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials: unexpected task count: {cache.TaskCount}, expected: 0");
+        }
+
+        /// <summary>
+        /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
+        /// The JwtHeader is created with SigningCredentials.
+        /// </summary>
+        [Fact]
+        public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials()
+        {
+            var testClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
+                new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
+            };
+
+            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: "IssuerName",
+                audience: "Audience",
+                claims: testClaims,
+                notBefore: DateTime.Now.AddHours(-1),
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: signingCredentials);
+
+            string certHash = "Test Cert Hash";
+
+            token.Header[JwtHeaderParameterNames.X5t] = certHash;
+            token.Header[JwtHeaderParameterNames.Kid] = certHash;
+
+            var handler = new JwtSecurityTokenHandler();
+            _ = handler.WriteToken(token);
+
+            var cache = CryptoProviderFactory.Default.CryptoProviderCache as InMemoryCryptoProviderCache;
+            var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
+
+            WaitTillTasksStarted(cache, waitTimeInSeconds); // wait for the event queue task to start
+            Assert.True(cache.TaskCount == 1, $"ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials: unexpected task count: {cache.TaskCount}, expected: 1");
+
+            WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
+            Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials: unexpected task count: {cache.TaskCount}, expected: 0");
+        }
+
+        /// <summary>
+        /// Calculate the wait time for a task to stop.
+        /// This is for adding more time allowing the task to exit properly.
+        /// </summary>
+        /// <param name="taskExecutionTimeInSeconds">The time the event queue task runs.</param>
+        /// <returns>1.2 times of the taskExecutionTimeInSeconds. Note that 1.2 is just a factor that provides enough time for the task to exit but not keeping tests waiting/sleeping for too long.</returns>
+        private long TaskStopWaitTimeInSeconds(long taskExecutionTimeInSeconds) => (long)(taskExecutionTimeInSeconds * 1.2);
+
+        /// <summary>
         /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.
         /// </summary>
         /// <param name="cache">the cache to check</param>
         /// <param name="secondsTimeout">the timeout in seconds</param>
-        private void WaitTillTasksStarted(InMemoryCryptoProviderCache cache, int secondsTimeout)
+        private void WaitTillTasksStarted(InMemoryCryptoProviderCache cache, long secondsTimeout)
         {
             int i = 0;
             for (; i < secondsTimeout; i++)
@@ -1147,7 +1224,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// </summary>
         /// <param name="cache">the cache to check</param>
         /// <param name="secondsTimeout">the timeout in seconds</param>
-        private void WaitTillTasksComplete(InMemoryCryptoProviderCache cache, int secondsTimeout)
+        private void WaitTillTasksComplete(InMemoryCryptoProviderCache cache, long secondsTimeout)
         {
             int i = 0;
             for (; i < secondsTimeout; i++)
