@@ -46,6 +46,18 @@ namespace Microsoft.IdentityModel.Tokens
         private static char base64UrlCharacter63 = '_';
 
         /// <summary>
+        /// Encoding table
+        /// </summary>
+        internal static readonly char[] s_base64Table =
+        {
+            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+            '0','1','2','3','4','5','6','7','8','9',
+            base64UrlCharacter62,
+            base64UrlCharacter63
+        };
+
+        /// <summary>
         /// The following functions perform base64url encoding which differs from regular base64 encoding as follows
         /// * padding is skipped so the pad character '=' doesn't have to be percent encoded
         /// * the 62nd and 63rd regular base64 encoding characters ('+' and '/') are replace with ('-' and '_')
@@ -76,7 +88,59 @@ namespace Microsoft.IdentityModel.Tokens
             if (inArray == null)
                 throw LogHelper.LogArgumentNullException("inArray");
 
-            return EncodeString(Convert.ToBase64String(inArray, offset, length));
+            int i;
+
+            char[] table = s_base64Table;
+
+
+            int j = 0;
+
+            int lengthmod3 = length % 3;
+            int limit = offset + (length - lengthmod3);
+            char[] output = new char[(length + 2) / 3 * 4];
+
+            for (i = offset; i < limit; i += 3)
+            {
+                byte d0 = inArray[i];
+                byte d1 = inArray[i + 1];
+                byte d2 = inArray[i + 2];
+
+                output[j + 0] = table[(d0 & 0xfc) >> 2];
+                output[j + 1] = table[((d0 & 0x03) << 4) | ((d1 & 0xf0) >> 4)];
+                output[j + 2] = table[((d1 & 0x0f) << 2) | ((d2 & 0xc0) >> 6)];
+                output[j + 3] = table[d2 & 0x3f];
+                j += 4;
+            }
+
+            //Where we left off before
+            i = limit;
+
+            switch (lengthmod3)
+            {
+                case 2:
+                    {
+                        byte d0 = inArray[i];
+                        byte d1 = inArray[i + 1];
+
+                        output[j + 0] = table[(d0 & 0xfc) >> 2];
+                        output[j + 1] = table[((d0 & 0x03) << 4) | ((d1 & 0xf0) >> 4)];
+                        output[j + 2] = table[(d1 & 0x0f) << 2];
+                        j += 3;
+                    }
+                    break;
+
+                case 1:
+                    {
+                        byte d0 = inArray[i];
+
+                        output[j + 0] = table[d0 >> 2];
+                        output[j + 1] = table[(d0 & 0x03) << 4];
+                        j += 2;
+                    }
+                    break;
+            }
+
+            return new(output, 0, j);
         }
 
         /// <summary>
@@ -92,7 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (inArray == null)
                 throw LogHelper.LogArgumentNullException("inArray");
 
-            return EncodeString(Convert.ToBase64String(inArray, 0, inArray.Length));
+            return Encode(inArray, 0, inArray.Length);
         }
 
         internal static string EncodeString(string str)
@@ -111,60 +175,46 @@ namespace Microsoft.IdentityModel.Tokens
 #if !NET45
         private unsafe static string UnsafeEncode(string str)
         {
-            bool needReplace = false;
-            int reductionSize = 0;
-            if (str[str.Length - 1] == base64PadCharacter)
-                reductionSize = 1;
+            int length = str.Length;
 
-            if (str[str.Length - 2] == base64PadCharacter)
-                reductionSize = 2;
-
-            int encodedLength = str.Length - reductionSize;
-            for (int i = 0; i < str.Length; i++)
+            if (str[length - 1] == base64PadCharacter)
             {
-                if (str[i] == base64Character62 || str[i] == base64Character63)
+                int reductionSize = 1;
+
+                if (str[length - 2] == base64PadCharacter)
                 {
-                    needReplace = true;
-                    break;
+                    reductionSize = 2;
                 }
+
+                str = str.Substring(0, length - reductionSize);
             }
 
-            if (needReplace)
+            fixed (char* pSrc = str)
             {
-                string encodedString = new string(char.MinValue, encodedLength);
-                fixed (char* dest = encodedString)
-                {
-                    for (int i = 0; i < encodedLength; i++)
-                    {
-                        if (str[i] == base64Character62)
-                            dest[i] = base64UrlCharacter62;
-                        else if (str[i] == base64Character63)
-                            dest[i] = base64UrlCharacter63;
-                        else
-                            dest[i] = str[i];
-                    }
-                }
+                char* end = pSrc + str.Length;
+                char* p = pSrc;
 
-                return encodedString;
-            }
-            else
-            {
-                if (encodedLength == str.Length)
+                while (p < end)
                 {
-                    return str;
-                }
-                else
-                {
-                    string encodedString = new string(char.MinValue, encodedLength);
-                    fixed (char* src = str)
-                    fixed (char* dest = encodedString)
+                    char ch = *p;
+
+                    if (ch < '0')
                     {
-                        Buffer.MemoryCopy(src, dest, encodedLength * 2, encodedLength * 2);
+                        if (ch == base64Character62)
+                        {
+                            *p = base64UrlCharacter62;
+                        }
+                        else if (ch == base64Character63)
+                        {
+                            *p = base64UrlCharacter63;
+                        }
                     }
 
-                    return encodedString;
+                    p++;
                 }
             }
+
+            return str;
         }
 #endif
 
