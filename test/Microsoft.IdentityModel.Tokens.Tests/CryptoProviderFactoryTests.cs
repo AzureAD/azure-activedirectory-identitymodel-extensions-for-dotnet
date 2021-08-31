@@ -1108,6 +1108,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
+            // The Dispose() call should not dispose of the cache resources, otherwise other threads will run into exceptions.
+            // However, this can change in the future.
+            cache.Dispose();
+
             var waitTimeInSeconds = TaskStopWaitTimeInSeconds(cache.TaskExecutionTimeInSeconds);
             WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
 
@@ -1121,6 +1125,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             WaitTillTasksComplete(cache, waitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"ProviderCacheTest_EnsureNoException_MultipleThreads: unexpected task count: {cache.TaskCount}, expected: 0");
 
+            // Call Dispose() one more time to ensure no ill effects.
             cache.Dispose();
         }
 

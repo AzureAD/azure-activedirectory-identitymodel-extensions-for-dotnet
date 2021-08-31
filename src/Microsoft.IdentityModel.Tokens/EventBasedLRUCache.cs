@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
-        private BlockingCollection<Action> _eventQueue = new BlockingCollection<Action>();
+        private ConcurrentQueue<Action> _eventQueue = new();
 
         #region event queue
 
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal EventBasedLRUCache(
             int capacity,
-            TaskCreationOptions options = TaskCreationOptions.LongRunning,
+            TaskCreationOptions options = TaskCreationOptions.None, // default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool
             IEqualityComparer<TKey> comparer = null,
             int tryTakeTimeout = 500,
             bool removeExpiredValues = true,
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="state">the timer state</param>
         protected void RemoveExpiredValuesPeriodically(object state)
         {
-            _eventQueue.Add(() => RemoveExpiredValues());
+            _eventQueue.Enqueue(() => RemoveExpiredValues());
         }
 
         public void SetValue(TKey key, TValue value)
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 cacheItem.Value = value;
                 cacheItem.ExpirationTime = expirationTime;
-                _eventQueue.Add(() =>
+                _eventQueue.Enqueue(() =>
                 {
                     _doubleLinkedList.Remove(cacheItem);
                     _doubleLinkedList.AddFirst(cacheItem);
@@ -228,14 +228,14 @@ namespace Microsoft.IdentityModel.Tokens
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
                 if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
                 {
-                    _eventQueue.Add(() =>
+                    _eventQueue.Enqueue(() =>
                     {
                         RemoveLRUs();
                     });
                 }
                 // add the new node
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
-                _eventQueue.Add(() =>
+                _eventQueue.Enqueue(() =>
                 {
                     // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
                     _doubleLinkedList.Remove(newCacheItem);
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             // make sure node hasn't been removed by a different thread
             if (_map.TryGetValue(key, out var cacheItem))
-                _eventQueue.Add(() =>
+                _eventQueue.Enqueue(() =>
                 {
                     _doubleLinkedList.Remove(cacheItem);
                     _doubleLinkedList.AddFirst(cacheItem);
@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             value = cacheItem.Value;
-            _eventQueue.Add(() => RemoveItemFromLinkedList(cacheItem));
+            _eventQueue.Enqueue(() => RemoveItemFromLinkedList(cacheItem));
             if (_map.TryRemove(key, out cacheItem))
             {
                 OnItemRemoved?.Invoke(cacheItem.Value);
@@ -330,7 +330,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 try
                 {
-                    if (_eventQueue.TryTake(out var action, _tryTakeTimeout))
+                    if (_eventQueue.TryDequeue(out var action))
                     {
                         action?.Invoke();
                     }
@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// This method is called after an item is added to the event queue, and the event queue task needs to be started if not running (_eventQueueTaskState != EventQueueTaskRunning).
-        /// Settitng _eventQueueTaskState to EventQueueTaskRunning should prevent multiple task being started.
+        /// Setting _eventQueueTaskState to EventQueueTaskRunning should prevent multiple task being started.
         /// </summary>
         private void StartEventQueueTaskIfNotRunning()
         {
@@ -386,12 +386,12 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
-            // if the task is stopped, set _eventQueueTaskState = EventQueueTaskRunning and start a new task
+            // If the task is stopped, set _eventQueueTaskState = EventQueueTaskRunning and start a new task.
+            // Note: we need to call the Task.Run() to start a new task on the default TaskScheduler (TaskScheduler.Default) so it does not interfere
+            // caller's TaskScheduler (if there is one) as some custom TaskSchedulers might be single-threaded and its execution can be blocked.
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskRunning, EventQueueTaskStopped) == EventQueueTaskStopped)
             {
-                var eventQueueTask = new Task(EventQueueTaskAction, _options);
-                eventQueueTask.Start();
-                _eventQueueTask = eventQueueTask;
+                _eventQueueTask = Task.Run(EventQueueTaskAction);
             }
         }
 
@@ -503,7 +503,6 @@ namespace Microsoft.IdentityModel.Tokens
                         _timer = null;
                     }
 
-                    _eventQueue.Dispose();
                     _eventQueue = null;
                     _map = null;
                     _doubleLinkedList = null;
