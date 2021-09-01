@@ -48,7 +48,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    internal class EventBasedLRUCache<TKey, TValue> : IDisposable
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
+    internal class EventBasedLRUCache<TKey, TValue>
     {
         internal delegate void ItemRemoved(TValue Value);
 
@@ -474,41 +475,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal int TaskExecutionTimeInSeconds => EventQueueTaskExecutionTimeInSeconds;
 
 #endregion
-
-        /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
-        /// </summary>
-        public void Dispose()
-        {
-            // Dispose of unmanaged resources.
-            Dispose(true);
-            // Suppress finalization.
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_eventQueue"/>.
-        /// </summary>
-        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-                if (disposing)
-                {
-                    if (_timer != null)
-                    {
-                        _timer.Dispose();
-                        _timer = null;
-                    }
-
-                    _eventQueue = null;
-                    _map = null;
-                    _doubleLinkedList = null;
-                }
-            }
-        }
     }
 
     internal class LRUCacheItem<TKey, TValue>

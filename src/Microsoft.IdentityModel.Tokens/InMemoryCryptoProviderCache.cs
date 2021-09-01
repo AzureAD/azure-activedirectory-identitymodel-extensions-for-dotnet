@@ -259,11 +259,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 _disposed = true;
-                if (disposing)
-                {
-                    _signingSignatureProviders.Dispose();
-                    _verifyingSignatureProviders.Dispose();
-                }
             }
         }
 
