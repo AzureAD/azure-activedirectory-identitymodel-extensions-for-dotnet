@@ -318,11 +318,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
             Interlocked.Increment(ref _taskCount);
 
-            if (_removeExpiredValues)
-            {
-                ResumeTimer();
-            }
-
             // Keep running until it is disposed, or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
             while (!_disposed)
             {
@@ -353,10 +348,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             Interlocked.Decrement(ref _taskCount);
-            if (_removeExpiredValues && _taskCount == 0) // pause the timer only if the _taskCount is 0 to avoid the scenario that it is being resumed (above)
-            {
-                PauseTimer();
-            }
         }
 
         /// <summary>
@@ -407,24 +398,6 @@ namespace Microsoft.IdentityModel.Tokens
         private DateTime SetTaskEndTime()
         {
             return DateTime.UtcNow.AddSeconds(EventQueueTaskExecutionTimeInSeconds);
-        }
-
-        /// <summary>
-        /// Pause the timer.
-        /// </summary>
-        private void PauseTimer()
-        {
-            if (_timer != null)
-                _timer.Change(Timeout.Infinite, Timeout.Infinite);
-        }
-
-        /// <summary>
-        /// Resume the timer.
-        /// </summary>
-        private void ResumeTimer()
-        {
-            if (_timer != null)
-                _timer.Change(_cleanUpIntervalInMilliSeconds, _cleanUpIntervalInMilliSeconds);
         }
 
         internal ItemRemoved OnItemRemoved
