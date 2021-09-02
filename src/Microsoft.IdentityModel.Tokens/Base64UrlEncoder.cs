@@ -36,14 +36,14 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public static class Base64UrlEncoder
     {
-        private static char base64PadCharacter = '=';
+        private const char base64PadCharacter = '=';
 #if NET45
-        private static string doubleBase64PadCharacter = "==";
+        private const string doubleBase64PadCharacter = "==";
 #endif
-        private static char base64Character62 = '+';
-        private static char base64Character63 = '/';
-        private static char base64UrlCharacter62 = '-';
-        private static char base64UrlCharacter63 = '_';
+        private const char base64Character62 = '+';
+        private const char base64Character63 = '/';
+        private const char base64UrlCharacter62 = '-';
+        private const char base64UrlCharacter63 = '_';
 
         /// <summary>
         /// Encoding table
