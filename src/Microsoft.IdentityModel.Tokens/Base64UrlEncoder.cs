@@ -67,8 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Base64Url encoding of the UTF8 bytes.</returns>
         public static string Encode(string arg)
         {
-            if (arg == null)
-                throw LogHelper.LogArgumentNullException("arg");
+            _ = arg ?? throw LogHelper.LogArgumentNullException("arg");
 
             return Encode(Encoding.UTF8.GetBytes(arg));
         }
@@ -85,16 +84,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray, int offset, int length)
         {
-            if (inArray == null)
-                throw LogHelper.LogArgumentNullException("inArray");
+            _ = inArray ?? throw LogHelper.LogArgumentNullException("inArray");
+
+            if (length < 0)
+            {
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(length), $"{nameof(length)} must be greater or equal than zero");
+            }
+
+            if (offset < 0)
+            {
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(offset), $"{nameof(offset)} must be greater or equal than zero");
+            }
+
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (inArray.Length < offset)
+            {
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(offset), $"Invalid value for {nameof(offset)} parameter");
+            }
+
+            if (inArray.Length < offset + length)
+            {
+                throw LogHelper.LogArgumentException<ArgumentException>(nameof(length), $"Invalid value for {nameof(length)} parameter");
+            }
 
             int i;
-
             char[] table = s_base64Table;
-
-
             int j = 0;
-
             int lengthmod3 = length % 3;
             int limit = offset + (length - lengthmod3);
             char[] output = new char[(length + 2) / 3 * 4];
@@ -138,6 +157,8 @@ namespace Microsoft.IdentityModel.Tokens
                         j += 2;
                     }
                     break;
+
+                //default or case 0: no further operations are needed.
             }
 
             return new(output, 0, j);
@@ -153,12 +174,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray)
         {
-            if (inArray == null)
-                throw LogHelper.LogArgumentNullException("inArray");
+            _ = inArray ?? throw LogHelper.LogArgumentNullException("inArray");
 
             return Encode(inArray, 0, inArray.Length);
         }
 
+        //TBD: Before removing EncodeString and its sub-methods, we would need to verify that InternalsVisibleTo("Microsoft.AzureAD.SmartSessionEvaluator...
+        // is not referencing this method. As of the moment of this comment, there's no reference to this method within Wilson.
         internal static string EncodeString(string str)
         {
 #if NET45
@@ -177,11 +199,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             int length = str.Length;
 
-            if (str[length - 1] == base64PadCharacter)
+            if (length > 0 && str[length - 1] == base64PadCharacter)
             {
                 int reductionSize = 1;
-
-                if (str[length - 2] == base64PadCharacter)
+                if (length > 1 && str[length - 2] == base64PadCharacter)
                 {
                     reductionSize = 2;
                 }
@@ -197,7 +218,6 @@ namespace Microsoft.IdentityModel.Tokens
                 while (p < end)
                 {
                     char ch = *p;
-
                     if (ch < '0')
                     {
                         if (ch == base64Character62)
@@ -224,9 +244,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>UTF8 bytes.</returns>
         public static byte[] DecodeBytes(string str)
         {
-            if (str == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
-
+            _ = str ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
 #if NET45
             // 62nd char of encoding
             str = str.Replace(base64UrlCharacter62, base64Character62);
