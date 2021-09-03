@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Base64Url encoding of the UTF8 bytes.</returns>
         public static string Encode(string arg)
         {
-            _ = arg ?? throw LogHelper.LogArgumentNullException("arg");
+            _ = arg ?? throw LogHelper.LogArgumentNullException(nameof(arg));
 
             return Encode(Encoding.UTF8.GetBytes(arg));
         }
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray, int offset, int length)
         {
-            _ = inArray ?? throw LogHelper.LogArgumentNullException("inArray");
+            _ = inArray ?? throw LogHelper.LogArgumentNullException(nameof(inArray));
 
             if (length == 0)
                 return string.Empty;
@@ -98,22 +98,22 @@ namespace Microsoft.IdentityModel.Tokens
             if (inArray.Length < offset + length)
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
 
-            int i;
-            char[] table = s_base64Table;
-            int j = 0;
             int lengthmod3 = length % 3;
             int limit = offset + (length - lengthmod3);
             char[] output = new char[(length + 2) / 3 * 4];
+            char[] table = s_base64Table;
+            int i, j = 0;
 
+            // takes 3 bytes from inArray and insert 4 bytes into output
             for (i = offset; i < limit; i += 3)
             {
                 byte d0 = inArray[i];
                 byte d1 = inArray[i + 1];
                 byte d2 = inArray[i + 2];
 
-                output[j + 0] = table[(d0 & 0xfc) >> 2];
-                output[j + 1] = table[((d0 & 0x03) << 4) | ((d1 & 0xf0) >> 4)];
-                output[j + 2] = table[((d1 & 0x0f) << 2) | ((d2 & 0xc0) >> 6)];
+                output[j + 0] = table[d0 >> 2];
+                output[j + 1] = table[((d0 & 0x03) << 4) | (d1 >> 4)];
+                output[j + 2] = table[((d1 & 0x0f) << 2) | (d2 >> 6)];
                 output[j + 3] = table[d2 & 0x3f];
                 j += 4;
             }
@@ -128,8 +128,8 @@ namespace Microsoft.IdentityModel.Tokens
                         byte d0 = inArray[i];
                         byte d1 = inArray[i + 1];
 
-                        output[j + 0] = table[(d0 & 0xfc) >> 2];
-                        output[j + 1] = table[((d0 & 0x03) << 4) | ((d1 & 0xf0) >> 4)];
+                        output[j + 0] = table[d0 >> 2];
+                        output[j + 1] = table[((d0 & 0x03) << 4) | (d1 >> 4)];
                         output[j + 2] = table[(d1 & 0x0f) << 2];
                         j += 3;
                     }
@@ -161,14 +161,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
         public static string Encode(byte[] inArray)
         {
-            _ = inArray ?? throw LogHelper.LogArgumentNullException("inArray");
+            _ = inArray ?? throw LogHelper.LogArgumentNullException(nameof(inArray));
 
             return Encode(inArray, 0, inArray.Length);
         }
 
         internal static string EncodeString(string str)
         {
-            _ = str ?? throw LogHelper.LogArgumentNullException("str");
+            _ = str ?? throw LogHelper.LogArgumentNullException(nameof(str));
 
             return Encode(Encoding.UTF8.GetBytes(str));
         }
