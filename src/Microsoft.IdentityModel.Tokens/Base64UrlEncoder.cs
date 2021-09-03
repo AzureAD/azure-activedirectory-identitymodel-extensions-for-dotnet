@@ -86,30 +86,17 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _ = inArray ?? throw LogHelper.LogArgumentNullException("inArray");
 
-            if (length < 0)
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(length), $"{nameof(length)} must be greater or equal than zero");
-            }
-
-            if (offset < 0)
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(offset), $"{nameof(offset)} must be greater or equal than zero");
-            }
-
             if (length == 0)
-            {
                 return string.Empty;
-            }
 
-            if (inArray.Length < offset)
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(offset), $"Invalid value for {nameof(offset)} parameter");
-            }
+            if (length < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
+
+            if (offset < 0 || inArray.Length < offset)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(offset), offset)));
 
             if (inArray.Length < offset + length)
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(length), $"Invalid value for {nameof(length)} parameter");
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
 
             int i;
             char[] table = s_base64Table;
