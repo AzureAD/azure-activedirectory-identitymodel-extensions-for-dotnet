@@ -90,13 +90,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return string.Empty;
 
             if (length < 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
 
             if (offset < 0 || inArray.Length < offset)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(offset), offset)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(offset), offset)));
 
             if (inArray.Length < offset + length)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
 
             int i;
             char[] table = s_base64Table;
@@ -166,64 +166,12 @@ namespace Microsoft.IdentityModel.Tokens
             return Encode(inArray, 0, inArray.Length);
         }
 
-        //TBD: Before removing EncodeString and its sub-methods, we would need to verify that InternalsVisibleTo("Microsoft.AzureAD.SmartSessionEvaluator...
-        // is not referencing this method. As of the moment of this comment, there's no reference to this method within Wilson.
         internal static string EncodeString(string str)
         {
-#if NET45
-            str = str.Split(base64PadCharacter)[0]; // Remove any trailing padding
-            str = str.Replace(base64Character62, base64UrlCharacter62);  // 62nd char of encoding
-            str = str.Replace(base64Character63, base64UrlCharacter63);  // 63rd char of encoding
+            _ = str ?? throw LogHelper.LogArgumentNullException("str");
 
-            return str;
-#else
-            return UnsafeEncode(str);
-#endif
+            return Encode(Encoding.UTF8.GetBytes(str));
         }
-
-#if !NET45
-        private unsafe static string UnsafeEncode(string str)
-        {
-            int length = str.Length;
-
-            if (length > 0 && str[length - 1] == base64PadCharacter)
-            {
-                int reductionSize = 1;
-                if (length > 1 && str[length - 2] == base64PadCharacter)
-                {
-                    reductionSize = 2;
-                }
-
-                str = str.Substring(0, length - reductionSize);
-            }
-
-            fixed (char* pSrc = str)
-            {
-                char* end = pSrc + str.Length;
-                char* p = pSrc;
-
-                while (p < end)
-                {
-                    char ch = *p;
-                    if (ch < '0')
-                    {
-                        if (ch == base64Character62)
-                        {
-                            *p = base64UrlCharacter62;
-                        }
-                        else if (ch == base64Character63)
-                        {
-                            *p = base64UrlCharacter63;
-                        }
-                    }
-
-                    p++;
-                }
-            }
-
-            return str;
-        }
-#endif
 
         /// <summary>
         ///  Converts the specified string, which encodes binary data as base-64-url digits, to an equivalent 8-bit unsigned integer array.</summary>
