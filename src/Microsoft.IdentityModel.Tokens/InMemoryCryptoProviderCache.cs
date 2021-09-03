@@ -241,6 +241,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Note: the EventBasedLRUCache is no longer being disposed of, but since this is a public class and can be used as base class of
+        /// custom cache implementations, we need to keep it as some implementations may override Dispose().
         /// </summary>
         public void Dispose()
         {

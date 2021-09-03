@@ -48,7 +48,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     internal class EventBasedLRUCache<TKey, TValue>
     {
         internal delegate void ItemRemoved(TValue Value);
@@ -379,8 +378,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // If the task is stopped, set _eventQueueTaskState = EventQueueTaskRunning and start a new task.
-            // Note: we need to call the Task.Run() to start a new task on the default TaskScheduler (TaskScheduler.Default) so it does not interfere
-            // caller's TaskScheduler (if there is one) as some custom TaskSchedulers might be single-threaded and its execution can be blocked.
+            // Note: we need to call the Task.Run() to start a new task on the default TaskScheduler (TaskScheduler.Default) so it does not interfere with
+            // the caller's TaskScheduler (if there is one) as some custom TaskSchedulers might be single-threaded and its execution can be blocked.
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskRunning, EventQueueTaskStopped) == EventQueueTaskStopped)
             {
                 _eventQueueTask = Task.Run(EventQueueTaskAction);
