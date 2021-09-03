@@ -60,9 +60,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region event queue
 
-        // The time the _eventQueueTask should run after it is started (should continue even if the queue is empty to reduce the task startup overhead), default to 120 seconds.
+        // The idle timeout, the _eventQueueTask will end after being idle for the specified time interval (execution continues even if the queue is empty to reduce the task startup overhead), default to 120 seconds.
         // TODO: consider implementing a better algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
-        public int EventQueueTaskExecutionTimeInSeconds { get; private set; } = 120;
+        private long _eventQueueTaskIdleTimeoutInSeconds = 120;
+        internal long EventQueueTaskIdleTimeoutInSeconds
+        {
+            get => _eventQueueTaskIdleTimeoutInSeconds;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "EventQueueTaskExecutionTimeInSeconds must be positive.");
+                _eventQueueTaskIdleTimeoutInSeconds = value;
+            }
+        }
 
         // the event queue task
         private Task _eventQueueTask;
@@ -396,7 +406,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>the time when the event queue task should end</returns>
         private DateTime SetTaskEndTime()
         {
-            return DateTime.UtcNow.AddSeconds(EventQueueTaskExecutionTimeInSeconds);
+            return DateTime.UtcNow.AddSeconds(EventQueueTaskIdleTimeoutInSeconds);
         }
 
         internal ItemRemoved OnItemRemoved
@@ -439,12 +449,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// This is for tests to verify all tasks exit at the end of tests if the queue is empty.
         /// </summary>
         internal int TaskCount => _taskCount;
-
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// This is for tests to determine how long to wait for the event queue task to complete.
-        /// </summary>
-        internal int TaskExecutionTimeInSeconds => EventQueueTaskExecutionTimeInSeconds;
 
 #endregion
     }
