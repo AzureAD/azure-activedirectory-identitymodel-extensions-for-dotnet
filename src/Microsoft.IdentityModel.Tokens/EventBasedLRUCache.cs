@@ -95,7 +95,6 @@ namespace Microsoft.IdentityModel.Tokens
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
         private bool _disposed = false;
-        private readonly int _tryTakeTimeout;
         // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
         private readonly bool _removeExpiredValues;
         private readonly int _cleanUpIntervalInMilliSeconds;
@@ -108,15 +107,21 @@ namespace Microsoft.IdentityModel.Tokens
         // for testing purpose only to verify the task count
         private int _taskCount = 0;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="capacity">The capacity of the cache, used to determine if experiencing overflow.</param>
+        /// <param name="options">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
+        /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
+        /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
+        /// <param name="cleanUpIntervalInSeconds">The period to wait to remove expired items, in milliseconds.</param>
         internal EventBasedLRUCache(
             int capacity,
-            TaskCreationOptions options = TaskCreationOptions.None, // default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool
+            TaskCreationOptions options = TaskCreationOptions.None,
             IEqualityComparer<TKey> comparer = null,
-            int tryTakeTimeout = 500,
-            bool removeExpiredValues = true,
+            bool removeExpiredValues = false,
             int cleanUpIntervalInSeconds = 300)
         {
-            _tryTakeTimeout = tryTakeTimeout;
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
@@ -125,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens
             _eventQueueTaskStopTime = DateTime.UtcNow;
 
             if (_removeExpiredValues)
-                _timer = new Timer(RemoveExpiredValuesPeriodically, null, _cleanUpIntervalInMilliSeconds, _cleanUpIntervalInMilliSeconds); // initial delay then ticks every periodInMilliSeconds
+                _timer = new Timer(RemoveExpiredValuesPeriodically, null, _cleanUpIntervalInMilliSeconds, _cleanUpIntervalInMilliSeconds);
         }
 
         public bool Contains(TKey key)
