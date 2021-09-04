@@ -89,8 +89,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
         }
 
         /// <summary>
@@ -241,6 +241,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Note: the EventBasedLRUCache is no longer being disposed of, but since this is a public class and can be used as base class of
+        /// custom cache implementations, we need to keep it as some implementations may override Dispose().
         /// </summary>
         public void Dispose()
         {
@@ -259,11 +261,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 _disposed = true;
-                if (disposing)
-                {
-                    _signingSignatureProviders.Dispose();
-                    _verifyingSignatureProviders.Dispose();
-                }
             }
         }
 
@@ -324,7 +321,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
-        internal long TaskExecutionTimeInSeconds => _signingSignatureProviders.TaskExecutionTimeInSeconds;
-        #endregion
+        internal long EventQueueTaskIdleTimeoutInSeconds
+        {
+            get => _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds;
+            set
+            {
+                _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
+                _verifyingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
+            }
+        }
+#endregion
     }
 }
