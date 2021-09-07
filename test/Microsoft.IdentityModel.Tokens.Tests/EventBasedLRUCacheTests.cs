@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
+        [Fact(Skip = "Large test meant to be run manually.")]
         public void RemoveExpiredValues()
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
+        [Fact(Skip = "Large test meant to be run manually.")]
         public void MaintainLRUOrder()
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
