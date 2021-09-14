@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
     [JsonObject]
-    public class OpenIdConnectConfiguration
+    public class OpenIdConnectConfiguration : BaseConfiguration
     {
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the 'issuer'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.Issuer, Required = Required.Default)]
-        public string Issuer { get; set; }
+        public override string Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the 'jwks_uri'
@@ -325,7 +325,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
         [JsonIgnore]
-        public ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
+        public override ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
         /// Gets the collection of 'subject_types_supported'.

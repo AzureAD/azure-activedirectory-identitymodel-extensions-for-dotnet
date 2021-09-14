@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,56 +26,26 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Xml;
+using System.Collections.ObjectModel;
 
-namespace Microsoft.IdentityModel.Protocols.WsFederation
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains WsFederation metadata that can be populated from a XML string.
+    ///  Represents a generic metadata configuration which is applicable for both XML and JSON based configurations.
     /// </summary>
-    public class WsFederationConfiguration : BaseConfiguration
+    public abstract class BaseConfiguration
     {
         /// <summary>
-        /// Initializes an new instance of <see cref="WsFederationConfiguration"/>.
+        /// Gets the issuer specified via the metadata endpoint.
         /// </summary>
-        public WsFederationConfiguration()
-        {
-        }
+        public virtual string Issuer { get; set; }
 
         /// <summary>
-        /// The <see cref="Xml.Signature"/> element that was found when reading metadata.
+        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to sign tokens.
         /// </summary>
-        public Signature Signature
+        public virtual ICollection<SecurityKey> SigningKeys
         {
             get;
-            set;
-        }
-
-        /// <summary>
-        /// The <see cref="Tokens.SigningCredentials"/> that was used to sign the metadata.
-        /// </summary>
-        public SigningCredentials SigningCredentials
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Get the <see cref="IList{KeyInfo}"/> that the IdentityProvider indicates are to be used signing keys.
-        /// </summary>
-        public ICollection<KeyInfo> KeyInfos
-        {
-            get;
-        } = new List<KeyInfo>();
-
-        /// <summary>
-        /// Gets or sets token endpoint.
-        /// </summary>
-        public string TokenEndpoint
-        {
-            get;
-            set;
-        }
+        } = new Collection<SecurityKey>();
     }
 }

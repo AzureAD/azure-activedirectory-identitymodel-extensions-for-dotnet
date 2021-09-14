@@ -1217,7 +1217,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// </summary>
         /// <param name="taskExecutionTimeInSeconds">The time the event queue task runs.</param>
         /// <returns>2 times of the taskExecutionTimeInSeconds. Note that 2 is just a reasonable factor which should provide enough time for the task to exit but not keeping tests waiting/sleeping for too long.</returns>
-        private long WaitTimeForTaskToStopInSeconds(long taskExecutionTimeInSeconds) => 2 * taskExecutionTimeInSeconds;
+        private long WaitTimeForTaskToStopInSeconds(long taskExecutionTimeInSeconds) => 3 * taskExecutionTimeInSeconds;
 
         /// <summary>
         /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.
