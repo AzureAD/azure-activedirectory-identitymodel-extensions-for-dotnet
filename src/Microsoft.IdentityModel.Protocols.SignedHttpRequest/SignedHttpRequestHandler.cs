@@ -483,6 +483,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 // validate signed http request signature
                 signedHttpRequest.SigningKey = await ValidateSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
+                // validate nonce claim
+                ValidateNonceAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken);
+
                 // validate signed http request payload
                 var validatedSignedHttpRequest = await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
@@ -646,6 +649,27 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
 
             throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23034, signedHttpRequest.EncodedToken)));
+        }
+
+        /// <summary>
+        /// Validates the nonce claim of the signed http request.
+        /// </summary>
+        /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+        /// <param name="popKey">A Pop key used to validate the signed http request nonce signature.</param>
+        /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        internal virtual void ValidateNonceAsync(JsonWebToken signedHttpRequest, SecurityKey popKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.NonceValidatorAsync != null)
+                    if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.NonceValidatorAsync(popKey, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken))
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidNonceClaimException("SignedHttpRequest nonce validation failed."));
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidNonceClaimException(LogHelper.FormatInvariant(LogMessages.IDX23036, ex.ToString()), ex));
+            }
         }
 
         /// <summary>

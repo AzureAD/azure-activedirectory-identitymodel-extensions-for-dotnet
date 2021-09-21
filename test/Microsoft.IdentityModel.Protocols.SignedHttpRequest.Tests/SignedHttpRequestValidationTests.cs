@@ -1683,8 +1683,50 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             ValidatedSignedHttpRequest = signedHttpRequest,
                         },
                         TestId = "ValidTest",
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequest,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            NonceValidatorAsync =  (popKey, signedHttpRequestToken, signedHttpRequestValidationContext, cancellationToken) => false
+                        },
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidNonceClaimException), "IDX23036", typeof(SignedHttpRequestInvalidNonceClaimException)),
+                        TestId = "InValidNonceValidationFailed"
+                    },
+                    new ValidateSignedHttpRequestTheoryData
+                    {
+                        SignedHttpRequestToken = signedHttpRequest,
+                        SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
+                        {
+                            ValidateB = false,
+                            ValidateH = false,
+                            ValidateM = false,
+                            ValidateP = false,
+                            ValidateQ = false,
+                            ValidateTs = false,
+                            ValidateU = false,
+                            NonceValidatorAsync =  (popKey, signedHttpRequestToken, signedHttpRequestValidationContext, cancellationToken) =>
+                            {
+                                var jwtSignedHttpRequest = signedHttpRequestToken as JsonWebToken;
+                                var nonce = jwtSignedHttpRequest.GetPayloadValue<string>(SignedHttpRequestClaimTypes.Nonce);
+                                return nonce == SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.GetValue(SignedHttpRequestClaimTypes.Nonce).ToString();
+                            }
+                        },
+                        ExpectedSignedHttpRequestValidationResult = new SignedHttpRequestValidationResult()
+                        {
+                            AccessTokenValidationResult = new TokenValidationResult()
+                            {
+                                IsValid = true,
+                                SecurityToken = validatedToken,
+                                ClaimsIdentity = resultingClaimsIdentity
+                            },
+                            IsValid = true,
+                            SignedHttpRequest = signedHttpRequest.EncodedToken,
+                            ValidatedSignedHttpRequest = signedHttpRequest,
+                        },
+                        TestId = "ValidTestWithNonce"
                     }
-
                 };
             }
         }
