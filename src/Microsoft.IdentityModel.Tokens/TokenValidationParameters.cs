@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the audience.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'audience', instead of typical processing.
+        /// If set, this delegate will be called to validate the 'audience', instead of default processing.
         /// This means that no default 'audience' validation will occur.
         /// Even if <see cref="ValidateAudience"/> is false, this delegate will still be called.
         /// </remarks>
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of typical processing.
+        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of default processing.
         /// This means that no default <see cref="SecurityKey"/> validation will occur.
         /// Even if <see cref="ValidateIssuerSigningKey"/> is false, this delegate will still be called.
         /// </remarks>
@@ -398,7 +398,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of typical processing.
+        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// </remarks>
@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the lifetime of the token, instead of typical processing.
+        /// If set, this delegate will be called to validate the lifetime of the token, instead of default processing.
         /// This means that no default lifetime validation will occur.
         /// Even if <see cref="ValidateLifetime"/> is false, this delegate will still be called.
         /// </remarks>
@@ -545,7 +545,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a delegate that will be used to validate the token replay of the token
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the token replay of the token, instead of typical processing.
+        /// If set, this delegate will be called to validate the token replay of the token, instead of default processing.
         /// This means no default token replay validation will occur.
         /// Even if <see cref="ValidateTokenReplay"/> is false, this delegate will still be called.
         /// </remarks>
@@ -564,7 +564,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'type' of the token, instead of typical processing.
+        /// If set, this delegate will be called to validate the 'type' of the token, instead of default processing.
         /// This means that no default 'type' validation will occur.
         /// </remarks>
         public TypeValidator TypeValidator { get; set; }
