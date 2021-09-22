@@ -1031,10 +1031,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Testing adding/removing providers to the Default cache w/o leaking task at the end of test.
         /// </summary>
-        [Fact (Skip = "test failing")]
+        [Fact]
         public void ProviderCache_EnsureNoHangingTasks()
         {
-            long taskIdleTimeoutInSeconds = 10;
+            long taskIdleTimeoutInSeconds = 1;
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
             SetTaskIdleTimeoutInSeconds(cache, taskIdleTimeoutInSeconds); // set the event queue task idle timeout
@@ -1083,12 +1083,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Test adding and removing providers by multiple threads w/o exception.
         /// </summary>
-        [Fact (Skip = "test failing")]
+        [Fact]
         public void ProviderCache_EnsureNoException_MultipleThreads()
         {
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 10); // set the event queue task idle timeout
+            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             int count = 5;
             List<Thread> signingThreads = new List<Thread>(count);
@@ -1130,11 +1130,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
         /// The JwtHeader is created with SymmetricEncryptingCredentials.
         /// </summary>
-        [Fact (Skip = "test failing")]
+        [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials()
         {
-            InMemoryCryptoProviderCache cache = CryptoProviderFactory.Default.CryptoProviderCache as InMemoryCryptoProviderCache;
-            SetTaskIdleTimeoutInSeconds(cache, 10); // set the event queue task idle timeout
+            var cache = new InMemoryCryptoProviderCache();
+            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             var testClaims = new List<Claim>
             {
@@ -1142,7 +1143,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
             };
 
-            var header = new JwtHeader(Default.SymmetricEncryptingCredentials);
+            var header = new JwtHeader(new EncryptingCredentials(
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Alg,
+                    KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Enc)
+                    { CryptoProviderFactory = cryptoProviderFactory });
+
             JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
             var token = new JwtSecurityToken(header, payload);
 
@@ -1161,19 +1167,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Test to ensure no hanging task at the end when calling the JwtSecurityTokenHandler.WriteToken() method.
         /// The JwtHeader is created with SigningCredentials.
         /// </summary>
-        [Fact (Skip = "test failing")]
+        [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials()
         {
-            InMemoryCryptoProviderCache cache = CryptoProviderFactory.Default.CryptoProviderCache as InMemoryCryptoProviderCache;
-            SetTaskIdleTimeoutInSeconds(cache, 10); // set the event queue task idle timeout
-
+            var cache = new InMemoryCryptoProviderCache();
+            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
             var testClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
                 new Claim(ClaimTypes.AuthenticationInstant, Default.AuthenticationInstant, ClaimValueTypes.DateTime, Default.Issuer)
             };
 
-            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256);
+            // create new key, set the newly created crypto provider factory on it
+            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256) { CryptoProviderFactory = cryptoProviderFactory };
 
             var token = new JwtSecurityToken(
                 issuer: "IssuerName",

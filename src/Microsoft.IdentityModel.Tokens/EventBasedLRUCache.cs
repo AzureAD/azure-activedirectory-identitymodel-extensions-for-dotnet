@@ -53,26 +53,34 @@ namespace Microsoft.IdentityModel.Tokens
         internal delegate void ItemRemoved(TValue Value);
 
         private readonly int _capacity;
+
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private ConcurrentQueue<Action> _eventQueue = new();
+        private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+
+        // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
+        private readonly double _maxCapacityPercentage = .95;
+
+        // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
+        private readonly bool _removeExpiredValues;
+        private readonly int _removeExpiredValuesIntervalInSeconds;
+        private readonly TaskCreationOptions _options;
+
+        // timer that removes expired items periodically
+        private Timer _timer = null;
+
+        // for testing purpose only to verify the task count
+        private int _taskCount = 0;
 
         #region event queue
+  
+        private int _eventQueuePollingInterval = 50;
 
         // The idle timeout, the _eventQueueTask will end after being idle for the specified time interval (execution continues even if the queue is empty to reduce the task startup overhead), default to 120 seconds.
         // TODO: consider implementing a better algorithm that tracks and predicts the usage patterns and adjusts this value dynamically.
         private long _eventQueueTaskIdleTimeoutInSeconds = 120;
-        internal long EventQueueTaskIdleTimeoutInSeconds
-        {
-            get => _eventQueueTaskIdleTimeoutInSeconds;
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), "EventQueueTaskExecutionTimeInSeconds must be positive.");
-                _eventQueueTaskIdleTimeoutInSeconds = value;
-            }
-        }
 
         // the event queue task
         private Task _eventQueueTask;
@@ -85,27 +93,40 @@ namespace Microsoft.IdentityModel.Tokens
         // task states used to ensure thread safety (Interlocked.CompareExchange)
         private const int EventQueueTaskStopped = 0; // task not started yet
         private const int EventQueueTaskRunning = 1; // task is running
-        private const int EventQueueTaskDoNotStop = 2; // force the task to continue even it has past the _eventQueueTaskStopTime, see StartEventQueueTaskIfNotRunning() for more details
-
+        private const int EventQueueTaskDoNotStop = 2; // force the task to continue even it has past the _eventQueueTaskStopTime, see StartEventQueueTaskIfNotRunning() for more details.
         private int _eventQueueTaskState = EventQueueTaskStopped;
 
+        internal ItemRemoved OnItemRemoved
+        {
+            get;
+            set;
+        }
+
+        internal long EventQueueTaskIdleTimeoutInSeconds
+        {
+            get => _eventQueueTaskIdleTimeoutInSeconds;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "EventQueueTaskExecutionTimeInSeconds must be positive.");
+                _eventQueueTaskIdleTimeoutInSeconds = value;
+            }
+        }
+
+        // If the task operating on the _eventQueue has not timed out and the _eventQueue is empty, this polling interval will be used
+        // to determine how often the cache should be checked for the presence of a new action.
+        private int EventQueuePollingInterval
+        {
+            get => _eventQueuePollingInterval;
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(value), "EventQueuePollingInterval must be positive.");
+                _eventQueuePollingInterval = value;
+            }
+        }
+
         #endregion
-
-        private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
-        // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
-        private readonly double _maxCapacityPercentage = .95;
-        private bool _disposed = false;
-        // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
-        private readonly bool _removeExpiredValues;
-        private readonly int _cleanUpIntervalInMilliSeconds;
-
-        private readonly TaskCreationOptions _options;
-
-        // timer that removes expired items periodically
-        private Timer _timer = null;
-
-        // for testing purpose only to verify the task count
-        private int _taskCount = 0;
 
         /// <summary>
         /// Constructor.
@@ -114,23 +135,30 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="options">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
         /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
         /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
-        /// <param name="cleanUpIntervalInSeconds">The period to wait to remove expired items, in milliseconds.</param>
+        /// <param name="removeExpiredValuesIntervalInSeconds">The period to wait to remove expired items, in milliseconds.</param>
         internal EventBasedLRUCache(
             int capacity,
             TaskCreationOptions options = TaskCreationOptions.None,
             IEqualityComparer<TKey> comparer = null,
             bool removeExpiredValues = false,
-            int cleanUpIntervalInSeconds = 300)
+            int removeExpiredValuesIntervalInSeconds = 300)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            _cleanUpIntervalInMilliSeconds = 1000 * cleanUpIntervalInSeconds;
+            _removeExpiredValuesIntervalInSeconds = 1000 * removeExpiredValuesIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
             _eventQueueTaskStopTime = DateTime.UtcNow;
 
             if (_removeExpiredValues)
-                _timer = new Timer(RemoveExpiredValuesPeriodically, null, _cleanUpIntervalInMilliSeconds, _cleanUpIntervalInMilliSeconds);
+                _timer = new Timer(RemoveExpiredValuesPeriodically, null, _removeExpiredValuesIntervalInSeconds, _removeExpiredValuesIntervalInSeconds);
+        }
+
+        private void AddActionToEventQueue(Action action)
+        {
+            _eventQueue.Enqueue(action);
+            // start the event queue task if it is not running
+            StartEventQueueTaskIfNotRunning();
         }
 
         public bool Contains(TKey key)
@@ -142,15 +170,48 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
+        /// This is the delegate for the event queue task (and the timer to remove the expired items if _removeExpiredValues is true).
+        /// The task keeps running until it is disposed or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
+        /// Note the task and timer are synchronized; both are running or stopped.
         /// </summary>
-        internal void WaitForProcessing()
+        private void EventQueueTaskAction()
         {
-            while (!_disposed)
+            Interlocked.Increment(ref _taskCount);
+            // Keep running until the queue is empty *AND* expired (DateTime.UtcNow > _eventQueueTaskEndTime).
+            while (true)
             {
-                if (_eventQueue.Count == 0)
-                    return;
+                // always set the state to EventQueueTaskRunning in case it was set to EventQueueTaskDoNotStop
+                _eventQueueTaskState = EventQueueTaskRunning;
+
+                try
+                {
+                    if (_eventQueue.TryDequeue(out var action))
+                    {
+                        action?.Invoke();
+                    }
+                    else if (DateTime.UtcNow > _eventQueueTaskStopTime) // no more event to be processed, exit if expired
+                    {
+                        // Setting _eventQueueTaskState = EventQueueTaskStopped if the _eventQueueTaskEndTime has past and _eventQueueTaskState == EventQueueTaskRunning.
+                        // This means no other thread came in and it is safe to end this task.
+                        // If another thread adds new events while this task is still running, it will set the _eventQueueTaskState = EventQueueTaskDoNotStop instead of starting a new task.
+                        // The Interlocked.CompareExchange() call below will not succeed and the loop continues (until the event queue is empty and the _eventQueueTaskEndTime expires again).
+                        // This should prevent a rare (but theoretically possible) scenario caused by context switching.
+                        if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning)
+                            break;
+
+                    }
+                    else // if empty, let the thread sleep for a specified number of milliseconds before attempting to retrieve another value from the queue
+                    {
+                        Thread.Sleep(_eventQueuePollingInterval);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
+                }
             }
+
+            Interlocked.Decrement(ref _taskCount);
         }
 
         internal int RemoveExpiredValues()
@@ -183,6 +244,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// The timer callback that adds a request to remove expired items from the event queue.
+        /// </summary>
+        /// <param name="state">the timer state</param>
+        protected void RemoveExpiredValuesPeriodically(object state)
+        {
+            if (_map.Count > 0)
+                AddActionToEventQueue(() => RemoveExpiredValues());
+        }
+
+        /// <summary>
         /// Remove items from the LinkedList by the desired compaction percentage.
         /// This should be a private method.
         /// </summary>
@@ -202,12 +273,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// The timer callback that adds a request to remove expired items from the event queue.
+        /// This is the method that determines the end time for the event queue task.
+        /// The goal is to be able to track the incoming events and predict how long the task should run in order to
+        /// avoid a long running task and reduce the overhead costs of restarting tasks.
+        /// For example, maybe we can track the last three events' time and set the _eventQueueRunDurationInSeconds = 2 * average_time_between_events.
+        /// Note: tasks are based on thread pool so the overhead should not be huge but we should still try to minimize it.
         /// </summary>
-        /// <param name="state">the timer state</param>
-        protected void RemoveExpiredValuesPeriodically(object state)
+        /// <returns>the time when the event queue task should end</returns>
+        private DateTime SetTaskEndTime()
         {
-            _eventQueue.Enqueue(() => RemoveExpiredValues());
+            return DateTime.UtcNow.AddSeconds(EventQueueTaskIdleTimeoutInSeconds);
         }
 
         public void SetValue(TKey key, TValue value)
@@ -232,7 +307,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 cacheItem.Value = value;
                 cacheItem.ExpirationTime = expirationTime;
-                _eventQueue.Enqueue(() =>
+                AddActionToEventQueue(() =>
                 {
                     _doubleLinkedList.Remove(cacheItem);
                     _doubleLinkedList.AddFirst(cacheItem);
@@ -249,119 +324,18 @@ namespace Microsoft.IdentityModel.Tokens
                     });
                 }
                 // add the new node
-                var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
-                _eventQueue.Enqueue(() =>
+                var existingCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
+                AddActionToEventQueue(() =>
                 {
                     // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
-                    _doubleLinkedList.Remove(newCacheItem);
-                    _doubleLinkedList.AddFirst(newCacheItem);
+                    _doubleLinkedList.Remove(existingCacheItem);
+                    _doubleLinkedList.AddFirst(existingCacheItem);
                 });
-                _map[key] = newCacheItem;
 
-                // start the event queue task if it is not running
-                StartEventQueueTaskIfNotRunning();
+                _map[key] = existingCacheItem;
             }
 
             return true;
-        }
-
-        /// Each time a node gets accessed, it gets moved to the beginning (head) of the list.
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
-
-            if (!_map.ContainsKey(key))
-            {
-                value = default;
-                return false;
-            }
-
-            // make sure node hasn't been removed by a different thread
-            if (_map.TryGetValue(key, out var cacheItem))
-                _eventQueue.Enqueue(() =>
-                {
-                    _doubleLinkedList.Remove(cacheItem);
-                    _doubleLinkedList.AddFirst(cacheItem);
-                });
-
-            value = cacheItem != null ? cacheItem.Value : default;
-            return cacheItem != null;
-        }
-
-        /// Removes a particular key from the cache.
-        public bool TryRemove(TKey key, out TValue value)
-        {
-            if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
-
-            if (!_map.TryGetValue(key, out var cacheItem))
-            {
-                value = default;
-                return false;
-            }
-
-            value = cacheItem.Value;
-            _eventQueue.Enqueue(() => RemoveItemFromLinkedList(cacheItem));
-            if (_map.TryRemove(key, out cacheItem))
-            {
-                OnItemRemoved?.Invoke(cacheItem.Value);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Remove an item from the LinkedList.
-        /// When the last item is removed from the LinkedList, the OnLinkedListItemRemoved() will cancel the running _eventQueue task.
-        /// </summary>
-        /// <param name="newCacheItem">the item to be removed</param>
-        private void RemoveItemFromLinkedList(LRUCacheItem<TKey, TValue> newCacheItem)
-        {
-            _doubleLinkedList.Remove(newCacheItem);
-        }
-
-
-        /// <summary>
-        /// This is the delegate for the event queue task (and the timer to remove the expired items if _removeExpiredValues is true).
-        /// The task keeps running until it is disposed or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
-        /// Note the task and timer are synchronized; both are running or stopped.
-        /// </summary>
-        private void EventQueueTaskAction()
-        {
-            Interlocked.Increment(ref _taskCount);
-
-            // Keep running until it is disposed, or expired (DateTime.UtcNow > _eventQueueTaskEndTime).
-            while (!_disposed)
-            {
-                // always set the state to EventQueueTaskRunning in case it was set to EventQueueTaskDoNotStop
-                _eventQueueTaskState = EventQueueTaskRunning;
-
-                try
-                {
-                    if (_eventQueue.TryDequeue(out var action))
-                    {
-                        action?.Invoke();
-                    }
-                    else if (DateTime.UtcNow > _eventQueueTaskStopTime) // no more event to be processed, exit if expired
-                    {
-                        // Setting _eventQueueTaskState = EventQueueTaskStopped if the _eventQueueTaskEndTime has past and _eventQueueTaskState == EventQueueTaskRunning.
-                        // This means no other thread came in and it is safe to end this task.
-                        // If another thread adds new events while this task is still running, it will set the _eventQueueTaskState = EventQueueTaskDoNotStop instead of starting a new task.
-                        // The Interlocked.CompareExchange() call below will not succeed and the loop continues (until the event queue is empty and the _eventQueueTaskEndTime expires again).
-                        // This should prevent a rare (but theoretically possible) scenario caused by context switching.
-                        if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning)
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
-                }
-            }
-
-            Interlocked.Decrement(ref _taskCount);
         }
 
         /// <summary>
@@ -370,7 +344,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         private void StartEventQueueTaskIfNotRunning()
         {
-             _eventQueueTaskStopTime = SetTaskEndTime(); // set the time when the _eventQueueTask should end
+            _eventQueueTaskStopTime = SetTaskEndTime(); // set the time when the _eventQueueTask should end
 
             // Setting _eventQueueTaskState to EventQueueTaskDoNotStop here will force the event queue task in EventQueueTaskAction to continue even it has past the _eventQueueTaskEndTime.
             // It is mainly to prevent a rare (but theoretically possible) scenario caused by context switching
@@ -401,26 +375,54 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// This is the method that determines the end time for the event queue task.
-        /// The goal is to be able to track the incoming events and predict how long the task should run in order to
-        /// avoid a long running task and reduce the overhead costs of restarting tasks.
-        /// For example, maybe we can track the last three events' time and set the _eventQueueRunDurationInSeconds = 2 * average_time_between_events.
-        /// Note: tasks are based on thread pool so the overhead should not be huge but we should still try to minimize it.
-        /// </summary>
-        /// <returns>the time when the event queue task should end</returns>
-        private DateTime SetTaskEndTime()
+        /// Each time a node gets accessed, it gets moved to the beginning (head) of the list.
+        public bool TryGetValue(TKey key, out TValue value)
         {
-            return DateTime.UtcNow.AddSeconds(EventQueueTaskIdleTimeoutInSeconds);
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!_map.ContainsKey(key))
+            {
+                value = default;
+                return false;
+            }
+
+            // make sure node hasn't been removed by a different thread
+            if (_map.TryGetValue(key, out var cacheItem))
+                AddActionToEventQueue(() =>
+                {
+                    _doubleLinkedList.Remove(cacheItem);
+                    _doubleLinkedList.AddFirst(cacheItem);
+                });
+
+            value = cacheItem != null ? cacheItem.Value : default;
+            return cacheItem != null;
         }
 
-        internal ItemRemoved OnItemRemoved
+        /// Removes a particular key from the cache.
+        public bool TryRemove(TKey key, out TValue value)
         {
-            get;
-            set;
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!_map.TryGetValue(key, out var cacheItem))
+            {
+                value = default;
+                return false;
+            }
+
+            value = cacheItem.Value;
+            AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
+            if (_map.TryRemove(key, out cacheItem))
+            {
+                OnItemRemoved?.Invoke(cacheItem.Value);
+                return true;
+            }
+
+            return false;
         }
 
-#region FOR TESTING (INTERNAL ONLY)
+        #region FOR TESTING (INTERNAL ONLY)
 
         /// <summary>
         /// FOR TESTING ONLY.
@@ -455,7 +457,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal int TaskCount => _taskCount;
 
-#endregion
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// </summary>
+        internal void WaitForProcessing()
+        {
+            while (true)
+            {
+                if (_eventQueue.Count == 0)
+                    return;
+            }
+        }
+
+        #endregion
     }
 
     internal class LRUCacheItem<TKey, TValue>

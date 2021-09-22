@@ -63,15 +63,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-        }
-
-        private void OnSignatureProviderRemovedFromCache(SignatureProvider signatureProvider)
-        {
-            signatureProvider.CryptoProviderCache = null;
-            if (signatureProvider.RefCount == 0)
-                signatureProvider.Dispose();
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
         }
 
         /// <summary>
@@ -89,8 +82,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
         }
 
         /// <summary>
@@ -330,6 +323,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _verifyingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
             }
         }
-#endregion
+
+        #endregion
     }
 }
