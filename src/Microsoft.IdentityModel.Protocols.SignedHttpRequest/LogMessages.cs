@@ -69,5 +69,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public const string IDX23033 = "IDX23033: Unable to validate the 'cnf' claim reference. Thumbprint of the JWK used to sign the SignedHttpRequest (root 'cnf' claim) does not match the expected thumbprint ('at' -> 'cnf' -> 'kid'). Expected value: '{0}', actual value: '{1}'. Root 'cnf' claim value: '{2}'. For more details, see https://aka.ms/IdentityModel/SignedHttpRequest.";
         public const string IDX23034 = "IDX23034: Signed http request signature validation failed. SignedHttpRequest: '{0}'";
         public const string IDX23035 = "IDX23035: Unable to resolve a PoP key from the 'jku' claim. Multiple keys are found in the referenced JWK Set document and the 'cnf' claim doesn't contain a 'kid' value.";
+        public const string IDX23036 = "IDX23036: Signed http request nonce validation failed. Exceptions caught: '{0}'.";
     }
 }

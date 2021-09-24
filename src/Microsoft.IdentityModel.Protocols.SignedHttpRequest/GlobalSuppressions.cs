@@ -11,3 +11,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1825: Avoid zero-length array allocations", Justification = "net45 target doesn't support Array.Empty")]
 [assembly: SuppressMessage("Globalization", "CA1308:Normalize strings to uppercase", Justification = "Headers need to be lowercase to calcuate appropriate hash", Scope = "type", Target = "~T:Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestHandler")]
 [assembly: SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "Breaking change", Scope = "type", Target = "~T:Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestHandler")]
+[assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "<Pending>", Scope = "member", Target = "~P:Microsoft.IdentityModel.Protocols.SignedHttpRequest.SignedHttpRequestInvalidNonceClaimException.PropertyBag")]

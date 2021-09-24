@@ -74,11 +74,21 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
-    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest which contains the 'nonce' claim to validate.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
     public delegate Task ReplayValidatorAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A delegate that will take control over SignedHttpRequest nonce validation, if set.
+    /// </summary>
+    /// <param name="key">the key use to validate server nonce.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
+    public delegate bool NonceValidatorAsync(SecurityKey key, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
@@ -141,6 +151,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks>
         public HttpClientProvider HttpClientProvider { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="NonceValidatorAsync"/> delegate.
+        /// </summary>
+        public NonceValidatorAsync NonceValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
