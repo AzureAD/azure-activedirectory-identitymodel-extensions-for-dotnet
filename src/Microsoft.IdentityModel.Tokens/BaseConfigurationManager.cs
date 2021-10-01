@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The most recently retrieved configuration.
         /// </summary>
-        public BaseConfiguration CurrentConfiguration { get; set; }
+        internal BaseConfiguration CurrentConfiguration { get; set; }
 
         /// <summary>
         /// 12 hours is the default time interval that afterwards, <see cref="GetBaseConfigurationAsync(CancellationToken)"/> will obtain new configuration.
@@ -74,12 +74,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
         /// </summary>
-        public BaseConfiguration LastKnownGoodConfiguration { get; set; }
+        internal BaseConfiguration LastKnownGoodConfiguration { get; set; }
 
         /// <summary>
         /// The metadata address to retrieve the configuration from.
         /// </summary>
-        public string MetadataAddress { get; set; }
+        internal string MetadataAddress { get; set; }
 
         /// <summary>
         /// 5 minutes is the minimum value for automatic refresh. <see cref="AutomaticRefreshInterval"/> can not be set less than this value.
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Indicates whether the last known good configuraton (LKG) can be used, false by default.
         /// </summary>
-        public bool UseLastKnownGoodConfiguration { get; set; } = false;
+        internal bool UseLastKnownGoodConfiguration { get; set; } = false;
 
         /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type Configuration.</returns>
-        public abstract Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel);
+        internal abstract Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel);
 
         /// <summary>
         /// Indicate that the configuration may be stale (as indicated by failing to process incoming tokens).
