@@ -115,8 +115,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 6)
-                Assert.True(false, "Number of properties has changed from 6 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 2)
+                Assert.True(false, "Number of properties has changed from 2 to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -133,10 +133,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetGet(configManager, "AutomaticRefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10108:"), context);
             TestUtilities.SetGet(configManager, "RefreshInterval", TimeSpan.FromMilliseconds(1), ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"), context);
             TestUtilities.SetGet(configManager, "RefreshInterval", Timeout.InfiniteTimeSpan, ExpectedException.ArgumentOutOfRangeException(substringExpected: "IDX10107:"), context);
-            TestUtilities.SetGet(configManager, "CurrentConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
-            TestUtilities.SetGet(configManager, "LastKnownGoodConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
-            TestUtilities.SetGet(configManager, "UseLastKnownGoodConfiguration", true, ExpectedException.NoExceptionExpected, context);
-            TestUtilities.SetGet(configManager, "MetadataAddress", "OpenIdConnectMetadata2.json", ExpectedException.NoExceptionExpected, context);
+            // TODO: To be added back in when we make the LKG feature public.
+            // When uncommenting these lines, remember to set the properties.Length check above to be equal to 6 and not 2.
+            //TestUtilities.SetGet(configManager, "CurrentConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
+            //TestUtilities.SetGet(configManager, "LastKnownGoodConfiguration", new OpenIdConnectConfiguration(), ExpectedException.NoExceptionExpected, context);
+            //TestUtilities.SetGet(configManager, "UseLastKnownGoodConfiguration", true, ExpectedException.NoExceptionExpected, context);
+            //TestUtilities.SetGet(configManager, "MetadataAddress", "OpenIdConnectMetadata2.json", ExpectedException.NoExceptionExpected, context);
             TestUtilities.AssertFailIfErrors("ConfigurationManager_GetSets", context.Errors);
         }
 

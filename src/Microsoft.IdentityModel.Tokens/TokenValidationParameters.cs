@@ -364,13 +364,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// We make a copy of the TokenValidationParameters passed in to the JsonWebTokenHandler.ValidateToken(...) method, so the value of this
         /// property will never change on the original object.
         /// </remarks>
-        public BaseConfiguration Configuration { get; set; }
+        internal BaseConfiguration Configuration { get; set; }
 
         /// <summary>
         /// If set, this property will be used to obtain the issuer and signing keys associated with the metadata endpoint of <see cref="BaseConfiguration.Issuer"/>.
         /// The obtained issuer and signing keys will then be used along with those present on the TokenValidationParameters for validation of the incoming token.
         /// </summary>
-        public BaseConfigurationManager ConfigurationManager { get; set; }
+        internal BaseConfigurationManager ConfigurationManager { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
