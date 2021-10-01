@@ -31,6 +31,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
@@ -959,15 +960,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14111, token))), IsValid = false };
 
+            var validationParametersCopy = validationParameters;
+            if (validationParameters.ConfigurationManager != null)
+            {
+                try
+                {
+                    var configuration = validationParametersCopy.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                    validationParametersCopy = validationParameters.Clone();
+                    validationParametersCopy.Configuration = configuration;
+                }
+                catch (Exception ex)
+                {
+                    // If either a signing key or a valid issuer was not provided through the TVP, we want to stop processing on configuration retrieval failure.
+                    // Otherwise, we should keep going with validation.
+                    if ((validationParametersCopy.ValidateIssuer && string.IsNullOrWhiteSpace(validationParametersCopy.ValidIssuer) && validationParametersCopy.ValidIssuers.IsNullOrEmpty() && validationParametersCopy.IssuerValidator == null
+                        && validationParametersCopy.TokenDecryptionKey == null && validationParametersCopy.TokenDecryptionKeys.IsNullOrEmpty() && validationParametersCopy.TokenDecryptionKeyResolver == null)
+                        || (validationParametersCopy.RequireSignedTokens && validationParametersCopy.IssuerSigningKey == null && validationParametersCopy.IssuerSigningKeys.IsNullOrEmpty() && validationParametersCopy.IssuerSigningKeyResolver == null))
+                    {
+                        return new TokenValidationResult
+                        {
+                            Exception = ex,
+                            IsValid = false
+                        };
+                    }
+
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParametersCopy.ConfigurationManager.MetadataAddress));
+                }
+            }
+
             try
             {
                 if (tokenParts.Length == JwtConstants.JweSegmentCount)
                 {
                     var jwtToken = new JsonWebToken(token);
-                    var decryptedJwt = DecryptToken(jwtToken, validationParameters);
-                    var innerToken = ValidateSignature(decryptedJwt, validationParameters);
+                    var decryptedJwt = DecryptToken(jwtToken, validationParametersCopy);
+                    var innerToken = ValidateSignature(decryptedJwt, validationParametersCopy);
                     jwtToken.InnerToken = innerToken;
-                    var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParameters);
+                    var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParametersCopy);
                     return new TokenValidationResult
                     {
                         SecurityToken = jwtToken,
@@ -978,8 +1007,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 else
                 {
-                    var jsonWebToken = ValidateSignature(token, validationParameters);
-                    return ValidateTokenPayload(jsonWebToken, validationParameters);
+                    var jsonWebToken = ValidateSignature(token, validationParametersCopy);
+                    return ValidateTokenPayload(jsonWebToken, validationParametersCopy);
                 }
             }
             catch (Exception ex)
