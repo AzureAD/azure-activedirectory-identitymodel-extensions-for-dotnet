@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,8 +38,8 @@ namespace Microsoft.IdentityModel.Protocols
     /// In this case, the configuration is obtained and passed to the constructor.
     /// </summary>
     /// <typeparam name="T">must be a class.</typeparam>
-    public class StaticConfigurationManager<T> : IConfigurationManager<T> where T : class
-    {
+    public class StaticConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
+    { 
         private T _configuration;
 
         /// <summary>
@@ -64,9 +65,19 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel"><see cref="CancellationToken"/>.</param>
+        /// <returns>Configuration of type T.</returns>
+        public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        {
+            return Task.FromResult(_configuration as BaseConfiguration);
+        }
+
+        /// <summary>
         /// For the this type, this is a no-op
         /// </summary>
-        public void RequestRefresh()
+        public override void RequestRefresh()
         {
         }
     }

@@ -1448,7 +1448,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10205", propertiesExpected: properties),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), substringExpected: "IDX10204", propertiesExpected: properties),
                         TestId = "ValidIssuers = List<string>()",
                         Token = jwt,
                         ValidationParameters = ValidateIssuerValidationParameters(null, new List<string>(), null, true)

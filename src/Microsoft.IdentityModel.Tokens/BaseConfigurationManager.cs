@@ -72,9 +72,14 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
 
         /// <summary>
-        /// The last known good configuration (a configuration retrieved in the past that we were able to successfully validate a token against).
+        /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
         /// </summary>
-        public BaseConfiguration LKGConfiguration { get; set; }
+        public BaseConfiguration LastKnownGoodConfiguration { get; set; }
+
+        /// <summary>
+        /// The metadata address to retrieve the configuration from.
+        /// </summary>
+        public string MetadataAddress { get; set; }
 
         /// <summary>
         /// 5 minutes is the minimum value for automatic refresh. <see cref="AutomaticRefreshInterval"/> can not be set less than this value.
@@ -102,9 +107,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Indicates whether the LKG can be used, false by default.
+        /// Indicates whether the last known good configuraton (LKG) can be used, false by default.
         /// </summary>
-        public bool UseLKG { get; set; } = false;
+        public bool UseLastKnownGoodConfiguration { get; set; } = false;
 
         /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
