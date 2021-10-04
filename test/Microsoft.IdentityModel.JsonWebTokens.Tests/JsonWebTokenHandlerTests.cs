@@ -96,6 +96,48 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
         }
 
+        [Fact]
+        public void ValidateTokenValidationResultThrowsWarning()
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultThrowsWarning", "ValidateTokenValidationResultThrowsWarning", true);
+
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            // similar to: "eyJhbGciOiJSUzI1NiIsImtpZCI6IlJzYVNlY3VyaXR5S2V5XzIwNDgiLCJ0eXAiOiJKV1QifQ.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwibmJmIjoiMTQ4OTc3NTYxNyIsImV4cCI6IjE2MTYwMDYwMTcifQ.GcIi6FGp1JS5VF70_ULa8g6GTRos9Y7rUZvPAo4hm10bBNfGhdd5uXgsJspiQzS8vwJQyPlq8a_BpL9TVKQyFIRQMnoZWe90htmNWszNYbd7zbLJZ9AuiDqDzqzomEmgcfkIrJ0VfbER57U46XPnUZQNng2XgMXrXmIKUqEph_vLGXYRQ4ndfwtRrR6BxQFd1PS1T5KpEoUTusI4VEsMcutzfXUygLDiRKIcnLFA0kQpeoHllO4Nb_Sxv63GCb0d1076FfSEYtyRxF4YSCz1In-ee5dwEK8Mw3nHscu-1hn0Fe98RBs-4OrUzI0WcV8mq9IIB3i-U-CqCJEP_hVCiA";
+
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
+                ValidIssuer = "http://Default.Issuer.com",
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
+            //IdentityModelEventSource.Logger
+            tokenValidationResult.TokenContext = new CallContext();
+            tokenValidationResult.TokenContext.CaptureLogs = true;
+
+            var claims = tokenValidationResult.Claims;
+            var warningId = "IDX10109";
+            var logs = IdentityModelEventSource.GetSources();
+            foreach(var log in logs)
+            {
+                var s = log.ToString();
+                var n = log.Name;
+                var e = log.ConstructionException;
+                
+            }
+            Assert.True(logs.Any(x => x.ToString().Contains(warningId)),
+                $"Claims was accessed and substring '{warningId}' was not found in TokenContext.Logs"); ;
+        }
+
         [Theory, MemberData(nameof(SegmentTheoryData))]
         public void SegmentCanRead(JwtTheoryData theoryData)
         {
