@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -38,6 +39,9 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private Lazy<IDictionary<string, object>> _claims => new Lazy<IDictionary<string, object>>(() => TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity?.Claims));
 
+        private bool _isValid;
+        private bool _hasIsValidBeenRead = false;
+
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
         /// </summary>
@@ -45,6 +49,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
+                if (!_hasIsValidBeenRead)
+                {
+                    LogHelper.LogWarning(LogMessages.IDX10109);
+                }
+
                 return _claims.Value;
             }
         }
@@ -52,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
-        public ClaimsIdentity ClaimsIdentity { get; set; }
+        public ClaimsIdentity ClaimsIdentity { set; get; }
 
         /// <summary>
         /// Gets or sets the <see cref="Exception"/> that occurred during validation.
@@ -67,7 +76,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// True if the token was successfully validated, false otherwise.
         /// </summary>
-        public bool IsValid { get; set; }
+        public bool IsValid
+        {
+            get
+            {
+                _hasIsValidBeenRead = true;
+                return _isValid;
+            }
+            set
+            {
+                _hasIsValidBeenRead = false;
+                _isValid = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of data that could be used in custom scenarios. This uses <see cref="StringComparer.Ordinal"/> for case-sensitive comparison of keys.
