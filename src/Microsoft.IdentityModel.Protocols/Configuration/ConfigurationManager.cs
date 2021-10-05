@@ -193,8 +193,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
-        /// <para>If <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
+        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public override void RequestRefresh()
         {

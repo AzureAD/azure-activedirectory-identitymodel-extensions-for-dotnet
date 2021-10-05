@@ -72,7 +72,6 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
     public class ExtensibilityTests
     {
-
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
