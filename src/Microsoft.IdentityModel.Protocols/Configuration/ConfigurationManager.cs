@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
+        private T _currentConfiguration;
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
@@ -123,7 +124,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            return await GetBaseConfigurationAsync(cancel).ConfigureAwait(false) as T;
+            return await GetBaseConfigurationAsync(cancel).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -132,12 +133,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type StandardConfiguration.</returns>
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
-        internal override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        internal async Task<T> GetBaseConfigurationAsync(CancellationToken cancel)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (CurrentConfiguration != null && _syncAfter > now)
+            if (_currentConfiguration != null && _syncAfter > now)
             {
-                return CurrentConfiguration;
+                return _currentConfiguration;
             }
 
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
@@ -149,15 +150,15 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
-                        CurrentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false) as BaseConfiguration;
-                        Contract.Assert(CurrentConfiguration != null);
+                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+                        Contract.Assert(_currentConfiguration != null);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
                     }
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-                        if (CurrentConfiguration == null) // Throw an exception if there's no configuration to return.
+                        if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
                         else
                             LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
@@ -165,12 +166,10 @@ namespace Microsoft.IdentityModel.Protocols
                 }
 
                 // Stale metadata is better than no metadata
-                if (CurrentConfiguration != null)
-                    return CurrentConfiguration;
+                if (_currentConfiguration != null)
+                    return _currentConfiguration;
                 else
-                {
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null"))));
-                }
             }
             finally
             {
@@ -180,8 +179,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         /// <summary>
         /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
-        /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
+        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public override void RequestRefresh()
         {

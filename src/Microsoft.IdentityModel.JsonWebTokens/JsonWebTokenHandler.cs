@@ -965,9 +965,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 try
                 {
-                    var configuration = validationParametersCopy.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                    //var configuration = validationParametersCopy.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
                     validationParametersCopy = validationParameters.Clone();
-                    validationParametersCopy.Configuration = configuration;
+                    //validationParametersCopy.Configuration = configuration;
                 }
                 catch (Exception ex)
                 {
