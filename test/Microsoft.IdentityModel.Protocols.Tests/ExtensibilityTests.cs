@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
 
         [Fact]
-        public void Asas()
+        public void ConfigurationManagerUsingCustomClass()
         {
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
@@ -103,9 +103,19 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var configuration = configManager.GetConfigurationAsync().Result;
             configManager.MetadataAddress = "IssuerMetadata.json";
             var configuration2 = configManager.GetConfigurationAsync().Result;
-            IdentityComparer.AreEqual(configuration, configuration2, context);
-            if (!object.ReferenceEquals(configuration, configuration2))
-                context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
+            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
+
+            // AutomaticRefreshInterval should pick up new bits.
+            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
+            configManager.RequestRefresh();
+            configuration = configManager.GetConfigurationAsync().Result;
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            configManager.MetadataAddress = "IssuerMetadata2.json";
+            configManager.RequestRefresh();
+            configuration2 = configManager.GetConfigurationAsync().Result;
+            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                context.Diffs.Add("IdentityComparer.AreEqual(configuration, configuration2)");
 
             TestUtilities.AssertFailIfErrors(context);
         }

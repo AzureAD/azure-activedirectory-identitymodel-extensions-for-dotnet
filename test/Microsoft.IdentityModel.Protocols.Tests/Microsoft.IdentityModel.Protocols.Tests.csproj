@@ -14,6 +14,9 @@
 
   <ItemGroup>
     <Compile Remove="CrossTokenTests.cs" />
+    <None Update="IssuerMetadata2.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="IssuerMetadata.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
