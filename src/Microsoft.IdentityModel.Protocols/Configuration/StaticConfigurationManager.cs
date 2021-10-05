@@ -64,7 +64,6 @@ namespace Microsoft.IdentityModel.Protocols
             return Task.FromResult(_configuration);
         }
 
-        /*
         /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
@@ -74,7 +73,6 @@ namespace Microsoft.IdentityModel.Protocols
         {
             return Task.FromResult(_configuration as BaseConfiguration);
         }
-        */
 
         /// <summary>
         /// For the this type, this is a no-op

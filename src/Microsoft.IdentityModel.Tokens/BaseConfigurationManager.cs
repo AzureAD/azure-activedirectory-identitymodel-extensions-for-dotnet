@@ -72,6 +72,14 @@ namespace Microsoft.IdentityModel.Tokens
         internal BaseConfiguration LastKnownGoodConfiguration { get; set; }
 
         /// <summary>
+        /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
+        /// This method may return a cached version of the configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type Configuration.</returns>
+        internal abstract Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel);
+
+        /// <summary>
         /// The metadata address to retrieve the configuration from.
         /// </summary>
         internal string MetadataAddress { get; set; }

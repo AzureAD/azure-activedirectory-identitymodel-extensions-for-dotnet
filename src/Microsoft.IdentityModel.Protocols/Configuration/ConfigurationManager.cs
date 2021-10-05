@@ -124,7 +124,21 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            return await GetBaseConfigurationAsync(cancel).ConfigureAwait(false);
+            return await GetConfigAsync(cancel).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Obtains an updated version of Configuration.
+        /// </summary>
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type T.</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        internal override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        {
+            var obj = await GetConfigAsync(cancel).ConfigureAwait(false);
+            if (obj is BaseConfiguration)
+                return obj as BaseConfiguration;
+            return null;
         }
 
         /// <summary>
@@ -133,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type StandardConfiguration.</returns>
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
-        internal async Task<T> GetBaseConfigurationAsync(CancellationToken cancel)
+        internal async Task<T> GetConfigAsync(CancellationToken cancel)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
             if (_currentConfiguration != null && _syncAfter > now)
