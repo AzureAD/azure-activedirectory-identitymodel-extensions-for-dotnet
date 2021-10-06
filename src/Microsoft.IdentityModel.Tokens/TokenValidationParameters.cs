@@ -359,8 +359,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// It will be used along with the other properties set on the TokenValidationParameters in order to validate the token.
         /// </summary>
         /// <remarks>
-        /// This property can be set to the <see cref="BaseConfigurationManager.CurrentConfiguration"/> or the <see cref="BaseConfigurationManager.LastKnownGoodConfiguration"/>
-        /// depending on where in the Wilson call stack it is being used.
         /// We make a copy of the TokenValidationParameters passed in to the JsonWebTokenHandler.ValidateToken(...) method, so the value of this
         /// property will never change on the original object.
         /// </remarks>
