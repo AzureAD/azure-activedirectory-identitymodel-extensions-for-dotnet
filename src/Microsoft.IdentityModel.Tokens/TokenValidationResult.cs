@@ -95,7 +95,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
             set
             {
-                _hasIsValidOrExceptionBeenRead = false;
                 _isValid = value;
             }
         }
