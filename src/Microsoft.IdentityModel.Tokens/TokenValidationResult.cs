@@ -40,7 +40,8 @@ namespace Microsoft.IdentityModel.Tokens
         private Lazy<IDictionary<string, object>> _claims => new Lazy<IDictionary<string, object>>(() => TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity?.Claims));
 
         private bool _isValid;
-        private bool _hasIsValidBeenRead = false;
+        private bool _hasIsValidOrExceptionBeenRead = false;
+        private Exception _exception;
 
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                if (!_hasIsValidBeenRead)
+                if (!_hasIsValidOrExceptionBeenRead)
                     LogHelper.LogWarning(LogMessages.IDX10109);
 
                 return _claims.Value;
@@ -64,7 +65,18 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="Exception"/> that occurred during validation.
         /// </summary>
-        public Exception Exception { get; set; }
+        public Exception Exception
+        {
+            get
+            {
+                _hasIsValidOrExceptionBeenRead = true;
+                return _exception;
+            }
+            set
+            {
+                _exception = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the issuer that was found in the token.
@@ -78,12 +90,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                _hasIsValidBeenRead = true;
+                _hasIsValidOrExceptionBeenRead = true;
                 return _isValid;
             }
             set
             {
-                _hasIsValidBeenRead = false;
+                _hasIsValidOrExceptionBeenRead = false;
                 _isValid = value;
             }
         }
