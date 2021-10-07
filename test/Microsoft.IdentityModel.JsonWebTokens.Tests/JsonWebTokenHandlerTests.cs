@@ -96,30 +96,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
         }
 
-        [Fact]
-        public void ValidateTokenValidationResultThrowsWarning()
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultThrowsWarning(JsonWebTokenTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultThrowsWarning");
+
             //create a listener and enable it for logs
             SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
-            //create token and token validation parameters
-            var tokenHandler = new JsonWebTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
-                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-            };
-            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidAudience = "http://Default.Audience.com",
-                ValidateLifetime = false,
-                ValidIssuer = "http://Default.Issuer.com",
-                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-            };
-
             //validate token
-            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
 
             //access claims without checking IsValid or Exception
             var claims = tokenValidationResult.Claims;
@@ -129,30 +115,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Contains(warningId, listener.TraceBuffer);
         }
 
-        [Fact]
-        public void ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead()
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead(JsonWebTokenTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead");
+
             //create a listener and enable it for logs
             SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
-            //create token and token validation parameters
-            var tokenHandler = new JsonWebTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
-                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-            };
-            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidAudience = "http://Default.Audience.com",
-                ValidateLifetime = false,
-                ValidIssuer = "http://Default.Issuer.com",
-                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-            };
-
             //validate token
-            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
 
             //checking IsValid first, then access claims
             var isValid = tokenValidationResult.IsValid;
@@ -163,12 +135,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.DoesNotContain(warningId, listener.TraceBuffer);
         }
 
-        [Fact]
-        public void ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead()
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead(JsonWebTokenTheoryData theoryData)
         {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead");
+
             //create a listener and enable it for logs
             SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //checking exception first, then access claims
+            var exception = tokenValidationResult.Exception;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        public static TheoryData<JsonWebTokenTheoryData> TokenValidationTheoryData()
+        {
+            var theoryData = new TheoryData<JsonWebTokenTheoryData>();
             //create token and token validation parameters
             var tokenHandler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -185,16 +174,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
 
-            //validate token
-            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
+            theoryData.Add(new JsonWebTokenTheoryData()
+            {
+                ValidationParameters = tokenValidationParameters,
+                TokenHandler = tokenHandler,
+                AccessToken = accessToken
+            });
 
-            //checking exception first, then access claims
-            var exception = tokenValidationResult.Exception;
-            var claims = tokenValidationResult.Claims;
-
-            //check if warning message was logged
-            var warningId = "IDX10109";
-            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(SegmentTheoryData))]
