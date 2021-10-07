@@ -50,9 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (!_hasIsValidBeenRead)
-                {
                     LogHelper.LogWarning(LogMessages.IDX10109);
-                }
 
                 return _claims.Value;
             }
@@ -61,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
-        public ClaimsIdentity ClaimsIdentity { set; get; }
+        public ClaimsIdentity ClaimsIdentity { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Exception"/> that occurred during validation.
