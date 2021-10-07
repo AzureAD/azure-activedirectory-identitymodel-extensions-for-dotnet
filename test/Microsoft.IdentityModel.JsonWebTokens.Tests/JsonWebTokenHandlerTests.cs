@@ -37,7 +37,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -101,9 +100,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void ValidateTokenValidationResultThrowsWarning()
         {
             //create a listener and enable it for logs
-            SampleListener listener = new SampleListener();
-            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
-            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Warning);
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
             //create token and token validation parameters
             var tokenHandler = new JsonWebTokenHandler();
@@ -124,7 +121,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             //validate token
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
 
-            //access claims without checking IsValid 
+            //access claims without checking IsValid or Exception
             var claims = tokenValidationResult.Claims;
 
             //check if warning message was logged
@@ -133,12 +130,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void ValidateTokenValidationResultDoesNotThrowWarning()
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead()
         {
             //create a listener and enable it for logs
-            SampleListener listener = new SampleListener();
-            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
-            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Warning);
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
 
             //create token and token validation parameters
             var tokenHandler = new JsonWebTokenHandler();
@@ -161,6 +156,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             //checking IsValid first, then access claims
             var isValid = tokenValidationResult.IsValid;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        [Fact]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead()
+        {
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //create token and token validation parameters
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
+                ValidIssuer = "http://Default.Issuer.com",
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            //validate token
+            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
+
+            //checking exception first, then access claims
+            var exception = tokenValidationResult.Exception;
             var claims = tokenValidationResult.Claims;
 
             //check if warning message was logged

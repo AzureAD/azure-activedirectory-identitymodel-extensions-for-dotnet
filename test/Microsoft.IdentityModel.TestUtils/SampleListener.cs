@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Diagnostics.Tracing;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -39,6 +40,14 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 TraceBuffer += eventData.Payload[0] + "\n";
             }
+        }
+
+        public static SampleListener CreateLoggerListener(EventLevel eventLevel)
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.Logger.LogLevel = eventLevel;
+            listener.EnableEvents(IdentityModelEventSource.Logger, eventLevel);
+            return listener;
         }
     }
 }
