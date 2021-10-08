@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
@@ -36,7 +37,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -94,6 +94,94 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
             Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultThrowsWarning(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultThrowsWarning");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //access claims without checking IsValid or Exception
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.Contains(warningId, listener.TraceBuffer);
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //checking IsValid first, then access claims
+            var isValid = tokenValidationResult.IsValid;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //checking exception first, then access claims
+            var exception = tokenValidationResult.Exception;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        public static TheoryData<JsonWebTokenTheoryData> TokenValidationTheoryData()
+        {
+            var theoryData = new TheoryData<JsonWebTokenTheoryData>();
+            //create token and token validation parameters
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
+                ValidIssuer = "http://Default.Issuer.com",
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            theoryData.Add(new JsonWebTokenTheoryData()
+            {
+                ValidationParameters = tokenValidationParameters,
+                TokenHandler = tokenHandler,
+                AccessToken = accessToken
+            });
+
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(SegmentTheoryData))]

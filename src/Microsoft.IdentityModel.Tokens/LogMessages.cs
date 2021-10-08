@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10106 = "IDX10106: The parameter {0} had an invalid value: '{1}'.";
         public const string IDX10107 = "IDX10107: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
         public const string IDX10108 = "IDX10108: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
+        public const string IDX10109 = "IDX10109: Warning: Claims is being accessed without first reading the properties TokenValidationResult.IsValid or TokenValidationResult.Exception. This could be a potential security issue.";
 
         // token validation
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null or empty.";
