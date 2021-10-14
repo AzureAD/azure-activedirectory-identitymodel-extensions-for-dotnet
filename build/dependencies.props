@@ -17,6 +17,6 @@
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
-    <IdentityModelVersion>6.8.0</IdentityModelVersion>
+    <IdentityModelVersion>6.13.1</IdentityModelVersion>
   </PropertyGroup>
 </Project>
