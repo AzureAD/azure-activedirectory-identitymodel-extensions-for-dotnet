@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Xml
             var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(digestAlgorithm);
 
             if (hashAlgorithm == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Digest)));
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Digest)));
 
             Reference reference = null;
             try
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Xml
 
                     var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
                     if (provider == null)
-                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
+                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Key.ToString(), MarkAsNonPII(_signingCredentials.Algorithm))));
 
                     try
                     {

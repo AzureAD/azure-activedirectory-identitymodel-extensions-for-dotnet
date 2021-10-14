@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
                     validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10516, kid, exceptionStrings, securityToken, validLifetime, validIssuer)));
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10516, kid, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
             }
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
                     validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, validLifetime, validIssuer)));
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
             }
         }
     }

@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, nameof(RemoveExpiredValues), ex));
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
             }
 
             return numItemsRemoved;

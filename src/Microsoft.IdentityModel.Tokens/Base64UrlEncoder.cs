@@ -90,13 +90,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return string.Empty;
 
             if (length < 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(length)), LogHelper.MarkAsNonPII(length))));
 
             if (offset < 0 || inArray.Length < offset)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(offset), offset)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(offset)), LogHelper.MarkAsNonPII(offset))));
 
             if (inArray.Length < offset + length)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, nameof(length), length)));
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(length)), LogHelper.MarkAsNonPII(length))));
 
             int lengthmod3 = length % 3;
             int limit = offset + (length - lengthmod3);

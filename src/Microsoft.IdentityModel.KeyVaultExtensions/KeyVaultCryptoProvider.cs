@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 }
             }
 
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
 
         /// <summary>

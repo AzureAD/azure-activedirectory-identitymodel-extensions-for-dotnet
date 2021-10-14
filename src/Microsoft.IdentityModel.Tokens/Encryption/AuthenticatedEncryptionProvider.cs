@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
         private Lazy<SymmetricSignatureProvider> _symmetricSignatureProvider;
         private DecryptionDelegate DecryptFunction;
         private EncryptionDelegate EncryptFunction;
+        private const string _className = "Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
@@ -84,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
 #if NETSTANDARD2_0
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, algorithm)));
+                    throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #endif
                     InitializeUsingAesGcm();
                 }
@@ -92,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
                     InitializeUsingAesCbc();
             }
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), key)));
         }
 
         private void InitializeUsingAesGcm()
@@ -120,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AuthenticatedEncryptionResult EncryptWithAesGcm(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, Algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, LogHelper.MarkAsNonPII(Algorithm))));
         }
 
         private AesGcm CreateAesGcmInstance()
@@ -221,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal SymmetricSignatureProvider CreateSymmetricSignatureProvider()
         {
             if (!IsSupportedAlgorithm(Key, Algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), Algorithm, Key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), Key)));
 
             ValidateKeySize(Key, Algorithm);
 
@@ -233,7 +234,7 @@ namespace Microsoft.IdentityModel.Tokens
                 symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
 
             if (symmetricSignatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, LogHelper.MarkAsNonPII(Algorithm))));
 
             return symmetricSignatureProvider;
         }
@@ -383,7 +384,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal))
                 keyLength = 16;
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), key)));
 
             var keyBytes = GetKeyBytes(key);
             byte[] aesKey = new byte[keyLength];
@@ -414,7 +415,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
                     return SecurityAlgorithms.HmacSha512;
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
         }
 
         /// <summary>
@@ -477,7 +478,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 256)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(256), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
@@ -485,7 +486,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 384)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes192CbcHmacSha384, 384, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(384), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
@@ -493,7 +494,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 512)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(512), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
@@ -501,7 +502,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes128Gcm.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 128)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes128Gcm, 128, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128Gcm), LogHelper.MarkAsNonPII(128), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
@@ -509,7 +510,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes192Gcm.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 192)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes192Gcm, 192, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192Gcm), LogHelper.MarkAsNonPII(192), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
@@ -517,12 +518,12 @@ namespace Microsoft.IdentityModel.Tokens
             if (SecurityAlgorithms.Aes256Gcm.Equals(algorithm, StringComparison.Ordinal))
             {
                 if (key.KeySize < 256)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes256Gcm, 256, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256Gcm), LogHelper.MarkAsNonPII(256), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
     }
 }

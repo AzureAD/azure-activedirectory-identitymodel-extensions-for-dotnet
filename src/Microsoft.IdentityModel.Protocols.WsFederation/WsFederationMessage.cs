@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(wsFederationMessage)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(wsFederationMessage))));
                 return;
             }
 
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(parameters)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(parameters))));
                 return;
             }
 
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (string.IsNullOrEmpty(wresult))
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(wresult)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(wresult))));
                 return null;
             }
 
@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(Wresult)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(Wresult))));
                 return null;
             }
 

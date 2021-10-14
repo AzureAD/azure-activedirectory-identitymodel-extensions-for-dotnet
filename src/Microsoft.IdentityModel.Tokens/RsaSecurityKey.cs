@@ -42,6 +42,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         private PrivateKeyStatus _foundPrivateKey;
 
+        private const string _className = "Microsoft.IdentityModel.Tokens.RsaSecurityKey";
+
         internal RsaSecurityKey(JsonWebKey webKey)
             : base(webKey)
         {
@@ -62,10 +64,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // must have modulus and exponent otherwise the crypto operations fail later
             if (rsaParameters.Modulus == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Modulus"))));
 
             if (rsaParameters.Exponent == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Exponent")));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Exponent"))));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             _foundPrivateKey = _hasPrivateKey.Value ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;

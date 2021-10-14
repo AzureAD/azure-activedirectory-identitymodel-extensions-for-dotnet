@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual int MaximumTokenSizeInBytes
         {
             get => _maximumTokenSizeInBytes; 
-            set => _maximumTokenSizeInBytes =  (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10101, value))) : value;
+            set => _maximumTokenSizeInBytes =  (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10101, LogHelper.MarkAsNonPII(value)))) : value;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
         public int TokenLifetimeInMinutes
         {
             get => _defaultTokenLifetimeInMinutes;
-            set => _defaultTokenLifetimeInMinutes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10104, value))) : value;
+            set => _defaultTokenLifetimeInMinutes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10104, LogHelper.MarkAsNonPII(value)))) : value;
         }
     }
 }

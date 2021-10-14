@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, MinimumAutomaticRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, LogHelper.MarkAsNonPII(MinimumAutomaticRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _automaticRefreshInterval = value;
             }
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, MinimumRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, LogHelper.MarkAsNonPII(MinimumRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _refreshInterval = value;
             }

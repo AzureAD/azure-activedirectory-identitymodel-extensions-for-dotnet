@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (value <= TimeSpan.Zero)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX21105, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX21105, LogHelper.MarkAsNonPII(value))));
                 }
 
                 _nonceLifetime = value;
@@ -380,20 +380,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                 // required claims
                 if (idToken.Payload.Aud.Count == 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Aud.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Aud.ToLowerInvariant()), idToken)));
 
                 if (!idToken.Payload.Exp.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Exp.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Exp.ToLowerInvariant()), idToken)));
 
                 if (!idToken.Payload.Iat.HasValue)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iat.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Iat.ToLowerInvariant()), idToken)));
 
                 if (idToken.Payload.Iss == null)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Iss.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Iss.ToLowerInvariant()), idToken)));
 
                 // sub is required in OpenID spec; but we don't want to block valid idTokens provided by some identity providers
                 if (RequireSub && (string.IsNullOrWhiteSpace(idToken.Payload.Sub)))
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, JwtRegisteredClaimNames.Sub.ToLowerInvariant(), idToken)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21314, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Sub.ToLowerInvariant()), idToken)));
 
                 // optional claims
                 if (RequireAcr && string.IsNullOrWhiteSpace(idToken.Payload.Acr))
@@ -448,10 +448,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21301, algorithm, typeof(HashAlgorithm)), ex));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21301, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(typeof(HashAlgorithm))), ex));
             }
 
-            throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21302, algorithm)));
+            throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21302, LogHelper.MarkAsNonPII(algorithm))));
         }
 
         /// <summary>
@@ -500,7 +500,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
             if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21300, expectedValue, hashItem, algorithm)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21300, expectedValue, hashItem, LogHelper.MarkAsNonPII(algorithm))));
             }
         }
 
@@ -632,11 +632,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             // if we get here then RequireNonce == true || validationContext.None != null || nonceFoundInJwt != null
             if (string.IsNullOrEmpty(validationContext.Nonce) && string.IsNullOrEmpty(nonceFoundInJwt))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21320, RequireNonce)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21320, LogHelper.MarkAsNonPII(RequireNonce))));
             else if (string.IsNullOrEmpty(validationContext.Nonce))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21323, RequireNonce)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21323, LogHelper.MarkAsNonPII(RequireNonce))));
             else if (string.IsNullOrEmpty(nonceFoundInJwt))
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21349, RequireNonce)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21349, LogHelper.MarkAsNonPII(RequireNonce))));
 
             if (!string.Equals(nonceFoundInJwt, validationContext.Nonce, StringComparison.Ordinal))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken)));
@@ -656,11 +656,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21326, timestamp, nonceFoundInJwt), ex));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21326, LogHelper.MarkAsNonPII(timestamp), nonceFoundInJwt), ex));
                 }
 
                 if (ticks <= 0)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21326, timestamp, nonceFoundInJwt)));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21326, LogHelper.MarkAsNonPII(timestamp), nonceFoundInJwt)));
 
                 try
                 {
@@ -668,12 +668,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 }
                 catch(Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21327, timestamp, DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture), DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture)), ex));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21327, LogHelper.MarkAsNonPII(timestamp), LogHelper.MarkAsNonPII(DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture))), ex));
                 }
 
                 DateTime utcNow = DateTime.UtcNow;
                 if (nonceTime + NonceLifetime < utcNow)
-                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, nonceTime.ToString(CultureInfo.InvariantCulture), utcNow.ToString(CultureInfo.InvariantCulture), NonceLifetime.ToString("c", CultureInfo.InvariantCulture))));
+                    throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, LogHelper.MarkAsNonPII(nonceTime.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(utcNow.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(NonceLifetime.ToString("c", CultureInfo.InvariantCulture)))));
             }
         }
 
@@ -707,12 +707,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
             else if (string.IsNullOrEmpty(validationContext.State))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21329, RequireState)));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21329, LogHelper.MarkAsNonPII(RequireState))));
             }
             else if (string.IsNullOrEmpty(validationContext.ProtocolMessage.State))
             {
                 // 'state' was sent, but message does not contain 'state'
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21330, RequireState.ToString())));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21330, LogHelper.MarkAsNonPII(RequireState))));
             }
 
             if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))
