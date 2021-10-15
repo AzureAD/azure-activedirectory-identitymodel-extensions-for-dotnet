@@ -8,10 +8,11 @@
 		<ApiCompatBaseline>$(SolutionDir)Tools\apiCompat\baseline\ApiCompatBaseline.$(TargetFramework).txt</ApiCompatBaseline>
 		<ApiCompatExcludeAttributeList>$(SolutionDir)Tools\apiCompat\ApiCompatExcludeAttributeList.txt</ApiCompatExcludeAttributeList>
 		<AllowMissingContractAssemblies>true</AllowMissingContractAssemblies>
+		<AdditionalApiCompatOptions>--respect-internals</AdditionalApiCompatOptions>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.DotNet.ApiCompat" Version="1.0.0-beta.19225.5" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.DotNet.ApiCompat" Version="7.0.0-beta.21507.3" PrivateAssets="All" />
 	</ItemGroup>
 
 	<ItemGroup>
