@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             var exception = await Assert.ThrowsAsync<ArgumentNullException>("address", () => configurationRetriever.GetConfigurationAsync(null, null, CancellationToken.None)).ConfigureAwait(false);
 
-            string netFrameworkErrorMessage = "IDX40101: Azure AD Issuer metadata address URL is required. \r\nParameter name: address";
+            string netFrameworkErrorMessage = "IDX40101: Azure AD issuer metadata address URL is required. \r\nParameter name: address";
             Assert.Equal(netFrameworkErrorMessage, exception.Message);
 
             exception = await Assert.ThrowsAsync<ArgumentNullException>("address", () => configurationRetriever.GetConfigurationAsync(string.Empty, null, CancellationToken.None)).ConfigureAwait(false);
