@@ -40,6 +40,13 @@ namespace Microsoft.IdentityModel.Validators
         /// <summary>
         /// Initializes a new instance of the <see cref="AadIssuerValidatorFactory"/> class.
         /// </summary>
+        public AadIssuerValidatorFactory():this(null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AadIssuerValidatorFactory"/> class.
+        /// </summary>
         /// <param name="httpClient">Optional HttpClient to use to retrieve the endpoint metadata (can be null).</param>
         public AadIssuerValidatorFactory(
             HttpClient httpClient = null)

@@ -30,13 +30,14 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Validators
 {
     /// <summary>
-    /// Generic class that validates token issuer from the Microsoft identity platform (AAD).
+    /// Generic class that validates either JsonWebTokens or JwtSecurityTokens issued from the Microsoft identity platform (AAD).
     /// </summary>
     public class AadIssuerValidator
     {
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Validators
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
         /// Personal accounts) and the various clouds.
         /// </summary>
-        /// <param name="actualIssuer">Issuer to validate (will be tenanted).</param>
+        /// <param name="issuer">Issuer to validate (will be tenanted).</param>
         /// <param name="securityToken">Received security token.</param>
         /// <param name="validationParameters">Token validation parameters.</param>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
@@ -68,13 +69,13 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
         public string Validate(
-            string actualIssuer,
+            string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            if (string.IsNullOrEmpty(actualIssuer))
+            if (string.IsNullOrEmpty(issuer))
             {
-                throw new ArgumentNullException(nameof(actualIssuer));
+                throw new ArgumentNullException(nameof(issuer));
             }
 
             if (securityToken == null)
@@ -97,18 +98,18 @@ namespace Microsoft.IdentityModel.Validators
             {
                 foreach (var validIssuerTemplate in validationParameters.ValidIssuers)
                 {
-                    if (IsValidIssuer(validIssuerTemplate, tenantId, actualIssuer))
+                    if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
                     {
-                        return actualIssuer;
+                        return issuer;
                     }
                 }
             }
 
             if (validationParameters.ValidIssuer != null)
             {
-                if (IsValidIssuer(validationParameters.ValidIssuer, tenantId, actualIssuer))
+                if (IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
                 {
-                    return actualIssuer;
+                    return issuer;
                 }
             }
 
@@ -123,9 +124,9 @@ namespace Microsoft.IdentityModel.Validators
                         AadIssuerV2 = issuerMetadata.Issuer;
                     }
 
-                    if (IsValidIssuer(AadIssuerV2, tenantId, actualIssuer))
+                    if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
                     {
-                        return actualIssuer;
+                        return issuer;
                     }
                 }
                 else
@@ -137,28 +138,28 @@ namespace Microsoft.IdentityModel.Validators
                         AadIssuerV1 = issuerMetadata.Issuer;
                     }
 
-                    if (IsValidIssuer(AadIssuerV1, tenantId, actualIssuer))
+                    if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
                     {
-                        return actualIssuer;
+                        return issuer;
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new SecurityTokenInvalidIssuerException(
-               string.Format(
-                   CultureInfo.InvariantCulture,
-                   LogMessages.IDX40103,
-                   actualIssuer),
-               ex);
-            }
-
-            // If a valid issuer is not found, throw
-            throw new SecurityTokenInvalidIssuerException(
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(
                 string.Format(
                     CultureInfo.InvariantCulture,
                     LogMessages.IDX40103,
-                    actualIssuer));
+                    issuer),
+                ex));
+            }
+
+            // If a valid issuer is not found, throw
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    LogMessages.IDX40103,
+                    issuer)));
         }
 
         private string CreateV1Authority()
