@@ -73,25 +73,17 @@ namespace Microsoft.IdentityModel.Validators
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            if (string.IsNullOrEmpty(issuer))
-            {
-                throw new ArgumentNullException(nameof(issuer));
-            }
+            _ = issuer ?? throw new ArgumentNullException(nameof(issuer));
 
-            if (securityToken == null)
-            {
-                throw new ArgumentNullException(nameof(securityToken));
-            }
+            _ = securityToken ?? throw new ArgumentNullException(nameof(securityToken));
 
-            if (validationParameters == null)
-            {
-                throw new ArgumentNullException(nameof(validationParameters));
-            }
+            _ = validationParameters ?? throw new ArgumentNullException(nameof(validationParameters));
 
             string tenantId = GetTenantIdFromToken(securityToken);
+
             if (string.IsNullOrWhiteSpace(tenantId))
             {
-                throw new SecurityTokenInvalidIssuerException(LogMessages.IDX40105);
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40105));
             }
 
             if (validationParameters.ValidIssuers != null)
