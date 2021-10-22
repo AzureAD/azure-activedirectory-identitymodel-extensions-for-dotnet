@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -223,7 +224,7 @@ namespace Microsoft.IdentityModel.Tokens
                     { InvalidIssuer = issuer });
 
             // Throw if all possible places to validate against are null or empty
-            if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && (validationParameters.ValidIssuers == null))
+            if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer) && validationParameters.ValidIssuers.IsNullOrEmpty() && string.IsNullOrWhiteSpace(validationParameters.Configuration?.Issuer))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
                     { InvalidIssuer = issuer });
 
@@ -246,6 +247,19 @@ namespace Microsoft.IdentityModel.Tokens
                         return issuer;
                     }
                 }
+            }
+
+            if (validationParameters.Configuration != null)
+            {
+                if (string.Equals(validationParameters.Configuration.Issuer, issuer, StringComparison.Ordinal))
+                {
+                    LogHelper.LogInformation(LogMessages.IDX10236, issuer);
+                    return issuer;
+                }
+
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10260, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), validationParameters.Configuration?.Issuer))
+                    { InvalidIssuer = issuer });
             }
 
             throw LogHelper.LogExceptionMessage(

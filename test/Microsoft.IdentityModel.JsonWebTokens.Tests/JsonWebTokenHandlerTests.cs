@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
@@ -36,7 +37,8 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -92,6 +94,94 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
             Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultThrowsWarning(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultThrowsWarning");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //access claims without checking IsValid or Exception
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.Contains(warningId, listener.TraceBuffer);
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithIsValidRead");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //checking IsValid first, then access claims
+            var isValid = tokenValidationResult.IsValid;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        [Theory, MemberData(nameof(TokenValidationTheoryData))]
+        public void ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResultDoesNotThrowWarningWithExceptionRead");
+
+            //create a listener and enable it for logs
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
+            //validate token
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+
+            //checking exception first, then access claims
+            var exception = tokenValidationResult.Exception;
+            var claims = tokenValidationResult.Claims;
+
+            //check if warning message was logged
+            var warningId = "IDX10109";
+            Assert.DoesNotContain(warningId, listener.TraceBuffer);
+        }
+
+        public static TheoryData<JsonWebTokenTheoryData> TokenValidationTheoryData()
+        {
+            var theoryData = new TheoryData<JsonWebTokenTheoryData>();
+            //create token and token validation parameters
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
+                ValidIssuer = "http://Default.Issuer.com",
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            theoryData.Add(new JsonWebTokenTheoryData()
+            {
+                ValidationParameters = tokenValidationParameters,
+                TokenHandler = tokenHandler,
+                AccessToken = accessToken
+            });
+
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(SegmentTheoryData))]
@@ -2488,6 +2578,131 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
             }
         }
+
+        [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
+        public void ValidateJWSWithConfig(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWS", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData
+        {
+            get
+            {
+                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                validConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+
+                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                invalidIssuerConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+
+                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+
+                var expiredSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                expiredSigningKeysConfig.SigningKeys.Add(KeyingMaterial.ExpiredX509SecurityKey_Public);
+
+                return new TheoryData<JwtTheoryData>
+                {
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10260: "),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501: "),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "CannotObtainConfig",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("DoesNotExist.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever()),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803: ", typeof(IOException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPValid" + "_" + "CannotObtainConfig",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("DoesNotExist.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever()),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
+                            ValidIssuer = Default.Issuer
+                        },
+                    }
+                };
+            }
+        }
+
 
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
         public void EncryptExistingJWSWithCompressionTest(CreateTokenTheoryData theoryData)

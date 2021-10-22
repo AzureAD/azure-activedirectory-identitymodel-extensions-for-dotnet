@@ -29,6 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -188,6 +191,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                        // new KeyValuePair<string, List<object>>("Configuration", new List<object>{(BaseConfiguration)null, new OpenIdConnectConfiguration(), new WsFederationConfiguration()}),
+                        // new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
                     },
                     Object = validationParameters,
                 };
