@@ -40,6 +40,10 @@ namespace Microsoft.IdentityModel.Validators
         /// <summary>
         /// Initializes a new instance of the <see cref="AadIssuerValidatorFactory"/> class.
         /// </summary>
+        /// <example><code>
+        /// AadIssuerValidatorFactory factory = new AadIssuerValidatorFactory();
+        /// TokenValidationParameters.IssuerValidator = factory.GetAadIssuerValidator(authority).Validate;
+        /// </code></example>
         public AadIssuerValidatorFactory():this(null)
         {
         }
@@ -48,6 +52,10 @@ namespace Microsoft.IdentityModel.Validators
         /// Initializes a new instance of the <see cref="AadIssuerValidatorFactory"/> class.
         /// </summary>
         /// <param name="httpClient">Optional HttpClient to use to retrieve the endpoint metadata (can be null).</param>
+        /// <example><code>
+        /// AadIssuerValidatorFactory factory = new AadIssuerValidatorFactory(httpClient);
+        /// TokenValidationParameters.IssuerValidator = factory.GetAadIssuerValidator(authority).Validate;
+        /// </code></example>
         public AadIssuerValidatorFactory(
             HttpClient httpClient = null)
         {
@@ -66,18 +74,13 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
         public AadIssuerValidator GetAadIssuerValidator(string aadAuthority)
         {
-            if (string.IsNullOrEmpty(aadAuthority))
-            {
-                throw new ArgumentNullException(nameof(aadAuthority));
-            }
+            _ = aadAuthority ?? throw new ArgumentNullException(nameof(aadAuthority));
 
             Uri.TryCreate(aadAuthority, UriKind.Absolute, out Uri authorityUri);
             string authorityHost = authorityUri?.Authority ?? new Uri(AadIssuerValidatorConstants.FallbackAuthority).Authority;
 
             if (_issuerValidators.TryGetValue(authorityHost, out AadIssuerValidator aadIssuerValidator))
-            {
                 return aadIssuerValidator;
-            }
 
             _issuerValidators[authorityHost] = new AadIssuerValidator(
                 HttpClient,

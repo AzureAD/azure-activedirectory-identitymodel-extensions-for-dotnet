@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -61,6 +60,10 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="issuer">Issuer to validate (will be tenanted).</param>
         /// <param name="securityToken">Received security token.</param>
         /// <param name="validationParameters">Token validation parameters.</param>
+        /// <example><code>
+        /// AadIssuerValidatorFactory factory = new AadIssuerValidatorFactory();
+        /// TokenValidationParameters.IssuerValidator = factory.GetAadIssuerValidator(authority).Validate;
+        /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
         /// authority from the configuration file, has a tenant ID, and optionally v2.0 (this web API
         /// accepts both V1 and V2 tokens).</remarks>
@@ -74,35 +77,27 @@ namespace Microsoft.IdentityModel.Validators
             TokenValidationParameters validationParameters)
         {
             _ = issuer ?? throw new ArgumentNullException(nameof(issuer));
-
             _ = securityToken ?? throw new ArgumentNullException(nameof(securityToken));
-
             _ = validationParameters ?? throw new ArgumentNullException(nameof(validationParameters));
 
             string tenantId = GetTenantIdFromToken(securityToken);
 
             if (string.IsNullOrWhiteSpace(tenantId))
-            {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40105));
-            }
 
             if (validationParameters.ValidIssuers != null)
             {
                 foreach (var validIssuerTemplate in validationParameters.ValidIssuers)
                 {
                     if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
-                    {
                         return issuer;
-                    }
                 }
             }
 
             if (validationParameters.ValidIssuer != null)
             {
                 if (IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
-                {
                     return issuer;
-                }
             }
 
             try
@@ -117,9 +112,7 @@ namespace Microsoft.IdentityModel.Validators
                     }
 
                     if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
-                    {
                         return issuer;
-                    }
                 }
                 else
                 {
@@ -131,35 +124,22 @@ namespace Microsoft.IdentityModel.Validators
                     }
 
                     if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
-                    {
                         return issuer;
-                    }
                 }
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    LogMessages.IDX40103,
-                    issuer),
-                ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40103, issuer), ex));
             }
 
             // If a valid issuer is not found, throw
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    LogMessages.IDX40103,
-                    issuer)));
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40103, issuer)));
         }
 
         private string CreateV1Authority()
         {
             if (AadAuthority.Contains(AadIssuerValidatorConstants.Organizations))
-            {
                 return AadAuthority.Replace($"{AadIssuerValidatorConstants.Organizations}/v2.0", AadIssuerValidatorConstants.Common);
-            }
 
             return AadAuthority.Replace("/v2.0", string.Empty);
         }
@@ -187,9 +167,7 @@ namespace Microsoft.IdentityModel.Validators
         private static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
         {
             if (string.IsNullOrEmpty(validIssuerTemplate))
-            {
                 return false;
-            }
 
             if (validIssuerTemplate.Contains("{tenantid}"))
             {
@@ -225,15 +203,11 @@ namespace Microsoft.IdentityModel.Validators
             if (securityToken is JwtSecurityToken jwtSecurityToken)
             {
                 if (jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.Tid, out object tid))
-                {
                     return (string)tid;
-                }
 
                 jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.TenantId, out object tenantId);
                 if (tenantId != null)
-                {
                     return (string)tenantId;
-                }
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
                 return GetTenantIdFromIss(jwtSecurityToken.Issuer);
@@ -243,15 +217,11 @@ namespace Microsoft.IdentityModel.Validators
             {
                 jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tid);
                 if (tid != null)
-                {
                     return tid;
-                }
 
                 jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.TenantId, out string tenantId);
                 if (tenantId != null)
-                {
                     return tenantId;
-                }
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
                 return GetTenantIdFromIss(jsonWebToken.Issuer);
@@ -268,21 +238,15 @@ namespace Microsoft.IdentityModel.Validators
         private static string GetTenantIdFromIss(string iss)
         {
             if (string.IsNullOrEmpty(iss))
-            {
                 return string.Empty;
-            }
 
             var uri = new Uri(iss);
 
             if (uri.Segments.Length == 3)
-            {
                 return uri.Segments[1].TrimEnd('/');
-            }
 
             if (uri.Segments.Length == 5 && uri.Segments[1].TrimEnd('/') == AadIssuerValidatorConstants.Tfp)
-            {
                 throw new SecurityTokenInvalidIssuerException(LogMessages.IDX40104);
-            }
 
             return string.Empty;
         }
