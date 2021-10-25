@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
         public MicrosoftIdentityIssuerValidatorTest()
         {
+            Logging.IdentityModelEventSource.ShowPII = true;
             _httpClient = new HttpClient();
         }
 

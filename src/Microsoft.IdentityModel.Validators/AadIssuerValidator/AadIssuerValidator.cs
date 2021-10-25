@@ -33,6 +33,7 @@ using System.Net.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Validators
@@ -92,9 +93,9 @@ namespace Microsoft.IdentityModel.Validators
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            _ = issuer ?? throw new ArgumentNullException(nameof(issuer));
-            _ = securityToken ?? throw new ArgumentNullException(nameof(securityToken));
-            _ = validationParameters ?? throw new ArgumentNullException(nameof(validationParameters));
+            _ = issuer ?? throw LogHelper.LogArgumentNullException(nameof(issuer));
+            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
+            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             string tenantId = GetTenantIdFromToken(securityToken);
 
@@ -128,9 +129,9 @@ namespace Microsoft.IdentityModel.Validators
                         }
                         else
                         {
-                            IssuerMetadata issuerMetadata =
+                            OpenIdConnectConfiguration openIdConnectConfig =
                             CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV2 = issuerMetadata.Issuer;
+                            AadIssuerV2 = openIdConnectConfig.Issuer;
                         }
                     }
 
@@ -143,9 +144,9 @@ namespace Microsoft.IdentityModel.Validators
                     {
                         if (IsV2Authority)
                         {
-                            IssuerMetadata issuerMetadata =
+                            OpenIdConnectConfiguration openIdConnectConfig =
                                 CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV1 = issuerMetadata.Issuer;
+                            AadIssuerV1 = openIdConnectConfig.Issuer;
                         }
                         else
                         {
@@ -217,23 +218,23 @@ namespace Microsoft.IdentityModel.Validators
             return aadV2Authority.Replace("/v2.0", string.Empty);
         }
 
-        private ConfigurationManager<IssuerMetadata> CreateConfigManager(
+        private ConfigurationManager<OpenIdConnectConfiguration> CreateConfigManager(
             string aadAuthority)
         {
             if (HttpClient != null)
             {
                 return
-                 new ConfigurationManager<IssuerMetadata>(
+                 new ConfigurationManager<OpenIdConnectConfiguration>(
                      $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
-                     new IssuerConfigurationRetriever(),
+                     new OpenIdConnectConfigurationRetriever(),
                      HttpClient);
             }
             else
             {
                 return
-                new ConfigurationManager<IssuerMetadata>(
+                new ConfigurationManager<OpenIdConnectConfiguration>(
                     $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
-                    new IssuerConfigurationRetriever());
+                    new OpenIdConnectConfigurationRetriever());
             }
         }
 
@@ -246,11 +247,9 @@ namespace Microsoft.IdentityModel.Validators
             {
                 try
                 {
-                    Uri issuerFromTemplateUri = new Uri(validIssuerTemplate.Replace("{tenantid}", tenantId));
+                    string issuerFromTemplate = validIssuerTemplate.Replace("{tenantid}", tenantId);
 
-                    Uri actualIssuerUri = new Uri(actualIssuer);
-
-                    return issuerFromTemplateUri.AbsoluteUri == actualIssuerUri.AbsoluteUri;
+                    return issuerFromTemplate == actualIssuer;
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch
@@ -278,8 +277,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.Tid, out object tid))
                     return (string)tid;
 
-                jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.TenantId, out object tenantId);
-                if (tenantId != null)
+                if (jwtSecurityToken.Payload.TryGetValue(AadIssuerValidatorConstants.TenantId, out object tenantId))
                     return (string)tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
@@ -288,12 +286,10 @@ namespace Microsoft.IdentityModel.Validators
 
             if (securityToken is JsonWebToken jsonWebToken)
             {
-                jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tid);
-                if (tid != null)
+                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tid))
                     return tid;
 
-                jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.TenantId, out string tenantId);
-                if (tenantId != null)
+                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tenantId))
                     return tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
@@ -319,7 +315,7 @@ namespace Microsoft.IdentityModel.Validators
                 return uri.Segments[1].TrimEnd('/');
 
             if (uri.Segments.Length == 5 && uri.Segments[1].TrimEnd('/') == AadIssuerValidatorConstants.Tfp)
-                throw new SecurityTokenInvalidIssuerException(LogMessages.IDX40104);
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40104));
 
             return string.Empty;
         }
