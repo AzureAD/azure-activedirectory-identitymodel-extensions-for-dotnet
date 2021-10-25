@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -45,13 +47,27 @@ namespace Microsoft.IdentityModel.Validators
             string aadAuthority)
         {
             HttpClient = httpClient;
-            AadAuthority = aadAuthority.TrimEnd('/');
+            IsV2Authority = aadAuthority.Contains("v2.0");
+            if (IsV2Authority)
+            {
+                AadAuthorityV2 = aadAuthority.TrimEnd('/');
+                AadAuthorityV1 = CreateV1Authority(AadAuthorityV2);
+            }
+            else
+            {
+                AadAuthorityV1 = aadAuthority.TrimEnd('/');
+                AadAuthorityV2 = AadAuthorityV1 + "/v2.0";
+            }
         }
 
         private HttpClient HttpClient { get; }
         internal string AadIssuerV1 { get; set; }
         internal string AadIssuerV2 { get; set; }
-        internal string AadAuthority { get; set; }
+        internal string AadAuthorityV2 { get; set; }
+        internal string AadAuthorityV1 { get; set; }
+        internal bool IsV2Authority { get; set; }
+        private static readonly IDictionary<string, AadIssuerValidator> s_issuerValidators = new ConcurrentDictionary<string, AadIssuerValidator>();
+
 
         /// <summary>
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
@@ -61,8 +77,8 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="securityToken">Received security token.</param>
         /// <param name="validationParameters">Token validation parameters.</param>
         /// <example><code>
-        /// AadIssuerValidatorFactory factory = new AadIssuerValidatorFactory();
-        /// TokenValidationParameters.IssuerValidator = factory.GetAadIssuerValidator(authority).Validate;
+        /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
+        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
         /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
         /// authority from the configuration file, has a tenant ID, and optionally v2.0 (this web API
@@ -106,9 +122,16 @@ namespace Microsoft.IdentityModel.Validators
                 {
                     if (AadIssuerV2 == null)
                     {
-                        IssuerMetadata issuerMetadata =
-                            CreateConfigManager(AadAuthority).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                        AadIssuerV2 = issuerMetadata.Issuer;
+                        if (IsV2Authority)
+                        {
+                            AadIssuerV2 = validationParameters.Configuration.Issuer;
+                        }
+                        else
+                        {
+                            IssuerMetadata issuerMetadata =
+                            CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                            AadIssuerV2 = issuerMetadata.Issuer;
+                        }
                     }
 
                     if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
@@ -118,9 +141,16 @@ namespace Microsoft.IdentityModel.Validators
                 {
                     if (AadIssuerV1 == null)
                     {
-                        IssuerMetadata issuerMetadata =
-                            CreateConfigManager(CreateV1Authority()).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                        AadIssuerV1 = issuerMetadata.Issuer;
+                        if (IsV2Authority)
+                        {
+                            IssuerMetadata issuerMetadata =
+                                CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+                            AadIssuerV1 = issuerMetadata.Issuer;
+                        }
+                        else
+                        {
+                            AadIssuerV1 = validationParameters.Configuration.Issuer;
+                        }
                     }
 
                     if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
@@ -136,12 +166,55 @@ namespace Microsoft.IdentityModel.Validators
             throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40103, issuer)));
         }
 
-        private string CreateV1Authority()
+        /// <summary>
+        /// Gets an <see cref="AadIssuerValidator"/> for an Azure Active Directory (AAD) authority.
+        /// </summary>
+        /// <param name="aadAuthority">The authority to create the validator for, e.g. https://login.microsoftonline.com/. </param>
+        /// <param name="httpClient">Optional HttpClient to use to retrieve the endpoint metadata (can be null).</param>
+        /// <example><code>
+        /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
+        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// </code></example>
+        /// <returns>A <see cref="AadIssuerValidator"/> for the aadAuthority.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
+        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient)
         {
-            if (AadAuthority.Contains(AadIssuerValidatorConstants.Organizations))
-                return AadAuthority.Replace($"{AadIssuerValidatorConstants.Organizations}/v2.0", AadIssuerValidatorConstants.Common);
+            _ = aadAuthority ?? throw new ArgumentNullException(nameof(aadAuthority));
 
-            return AadAuthority.Replace("/v2.0", string.Empty);
+            Uri.TryCreate(aadAuthority, UriKind.Absolute, out Uri authorityUri);
+            string authorityHost = authorityUri?.Authority ?? new Uri(AadIssuerValidatorConstants.FallbackAuthority).Authority;
+
+            if (s_issuerValidators.TryGetValue(authorityHost, out AadIssuerValidator aadIssuerValidator))
+                return aadIssuerValidator;
+
+            s_issuerValidators[authorityHost] = new AadIssuerValidator(
+                httpClient,
+                aadAuthority);
+
+            return s_issuerValidators[authorityHost];
+        }
+
+        /// <summary>
+        /// Gets an <see cref="AadIssuerValidator"/> for an Azure Active Directory (AAD) authority.
+        /// </summary>
+        /// <param name="aadAuthority">The authority to create the validator for, e.g. https://login.microsoftonline.com/. </param>
+        /// <example><code>
+        /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority);
+        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// </code></example>
+        /// <returns>A <see cref="AadIssuerValidator"/> for the aadAuthority.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
+        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority)
+        {
+            return GetAadIssuerValidator(aadAuthority, null);
+        }
+
+        private static string CreateV1Authority(string aadV2Authority)
+        {
+            if (aadV2Authority.Contains(AadIssuerValidatorConstants.Organizations))
+                return aadV2Authority.Replace($"{AadIssuerValidatorConstants.Organizations}/v2.0", AadIssuerValidatorConstants.Common);
+
+            return aadV2Authority.Replace("/v2.0", string.Empty);
         }
 
         private ConfigurationManager<IssuerMetadata> CreateConfigManager(
