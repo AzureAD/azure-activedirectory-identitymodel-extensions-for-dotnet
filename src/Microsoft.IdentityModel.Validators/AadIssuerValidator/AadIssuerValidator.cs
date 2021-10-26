@@ -39,7 +39,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Validators
 {
     /// <summary>
-    /// Generic class that validates either JsonWebTokens or JwtSecurityTokens issued from the Microsoft identity platform (AAD).
+    /// Generic class that validates the issuer for either JsonWebTokens or JwtSecurityTokens issued from the Microsoft identity platform (AAD).
     /// </summary>
     public class AadIssuerValidator
     {
@@ -67,8 +67,7 @@ namespace Microsoft.IdentityModel.Validators
         internal string AadAuthorityV2 { get; set; }
         internal string AadAuthorityV1 { get; set; }
         internal bool IsV2Authority { get; set; }
-        private static readonly IDictionary<string, AadIssuerValidator> s_issuerValidators = new ConcurrentDictionary<string, AadIssuerValidator>();
-
+        internal static readonly IDictionary<string, AadIssuerValidator> s_issuerValidators = new ConcurrentDictionary<string, AadIssuerValidator>();
 
         /// <summary>
         /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
@@ -82,7 +81,7 @@ namespace Microsoft.IdentityModel.Validators
         /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
         /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
-        /// authority from the configuration file, has a tenant ID, and optionally v2.0 (this web API
+        /// authority from the configuration file, has a tenant ID, and optionally v2.0 (if this web API
         /// accepts both V1 and V2 tokens).</remarks>
         /// <returns>The <c>issuer</c> if it's valid, or otherwise <c>SecurityTokenInvalidIssuerException</c> is thrown.</returns>
         /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
@@ -180,7 +179,8 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
         public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient)
         {
-            _ = aadAuthority ?? throw new ArgumentNullException(nameof(aadAuthority));
+            if(string.IsNullOrEmpty(aadAuthority))
+                throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
 
             Uri.TryCreate(aadAuthority, UriKind.Absolute, out Uri authorityUri);
             string authorityHost = authorityUri?.Authority ?? new Uri(AadIssuerValidatorConstants.FallbackAuthority).Authority;
@@ -251,9 +251,7 @@ namespace Microsoft.IdentityModel.Validators
 
                     return issuerFromTemplate == actualIssuer;
                 }
-#pragma warning disable CA1031 // Do not catch general exception types
                 catch
-#pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // if something faults, ignore
                 }

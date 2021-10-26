@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
         // AadIssuerValidation
         public const string AadAuthority = "aadAuthority";
         public const string InvalidAuthorityFormat = "login.microsoft.com";
-        public const string ActualIssuer = "actualIssuer";
+        public const string Issuer = "issuer";
         public const string SecurityToken = "securityToken";
         public const string ValidationParameters = "validationParameters";
         public const string TenantId = "http://schemas.microsoft.com/identity/claims/tenantid";
@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public const string TenantIdAsGuid = "f645ad92-e38d-4d1a-b510-d1b09a74a8ca";
         public const string ProductionPrefNetworkUSEnvironment = "login.microsoftonline.us";
         public const string AadInstance = "https://login.microsoftonline.com";
+        public const string AuthorityV1 = AadInstance + "/common";
         public const string AuthorityCommonTenant = AadInstance + "/common/";
         public const string AuthorityOrganizationsTenant = AadInstance + "/organizations/";
         public const string AuthorityOrganizationsUSTenant = "https://" + ProductionPrefNetworkUSEnvironment + "/organizations";
