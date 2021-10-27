@@ -62,6 +62,7 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         private HttpClient HttpClient { get; }
+
         internal string AadIssuerV1 { get; set; }
         internal string AadIssuerV2 { get; set; }
         internal string AadAuthorityV2 { get; set; }
