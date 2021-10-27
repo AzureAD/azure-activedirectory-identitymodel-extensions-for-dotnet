@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Specific scope values that are interesting to OpenID Connect.  See http://openid.net/specs/openid-connect-messages-1_0.html#scopes
+    /// Specific scope values that are interesting to OpenID Connect.  See https://openid.net/specs/openid-connect-messages-1_0.html#scopes
     /// </summary>
     /// <remarks>Can be used to determine the scope by consumers of an <see cref="OpenIdConnectMessage"/>.
     /// For example: OpenIdConnectMessageTests.Publics() sets <see cref="OpenIdConnectMessage.Scope"/>
@@ -36,22 +36,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     public static class OpenIdConnectScope
     {
         /// <summary>
-        /// Indicates email scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// Indicates email scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string Email = "email";
 
         /// <summary>
-        /// Indicates offline_access scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// Indicates offline_access scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string OfflineAccess = "offline_access";
 
         /// <summary>
-        /// Indicates openid scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// Indicates openid scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string OpenId = "openid";
 
         /// <summary>
-        /// Indicates openid profile scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// Indicates openid profile scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string OpenIdProfile = "openid profile";
 
