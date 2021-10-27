@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
         // The percentage of the cache to be removed when _maxCapacityPercentage is reached.
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
-        private ConcurrentQueue<Action> _eventQueue = new();
+        private ConcurrentQueue<Action> _eventQueue = new ConcurrentQueue<Action>();
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
 
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
