@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Validators
             string tenantId = GetTenantIdFromToken(securityToken);
 
             if (string.IsNullOrWhiteSpace(tenantId))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40105));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
 
             if (validationParameters.ValidIssuers != null)
             {
@@ -160,11 +160,11 @@ namespace Microsoft.IdentityModel.Validators
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40103, issuer), ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, issuer), ex));
             }
 
             // If a valid issuer is not found, throw
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40103, issuer)));
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, issuer)));
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Validators
                 return uri.Segments[1].TrimEnd('/');
 
             if (uri.Segments.Length == 5 && uri.Segments[1].TrimEnd('/') == AadIssuerValidatorConstants.Tfp)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40104));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40002));
 
             return string.Empty;
         }

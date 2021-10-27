@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() => validator.Validate(string.Empty, jwtSecurityToken, validationParams));
 
-            IdentityComparer.AreEqual(LogMessages.IDX40105, exception.Message);
+            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message);
 
             Assert.Throws<ArgumentNullException>(ValidatorConstants.SecurityToken, () => validator.Validate(ValidatorConstants.AadIssuer, null, validationParams));
 
@@ -170,13 +170,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var validationParameters = new TokenValidationParameters();
 
             var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() => validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, validationParameters));
-            IdentityComparer.AreEqual(LogMessages.IDX40105, exception.Message, context);
+            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message, context);
 
             exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() => validator.Validate(ValidatorConstants.AadIssuer, jsonWebToken, validationParameters));
-            IdentityComparer.AreEqual(LogMessages.IDX40105, exception.Message, context);
+            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message, context);
 
             exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() => validator.Validate(ValidatorConstants.AadIssuer, securityToken, validationParameters));
-            IdentityComparer.AreEqual(LogMessages.IDX40105, exception.Message, context);
+            IdentityComparer.AreEqual(LogMessages.IDX40003, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -354,7 +354,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             JwtSecurityToken jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.AadIssuer, claims: new[] { issClaim, tidClaim });
             var expectedErrorMessage = string.Format(
                     CultureInfo.InvariantCulture,
-                    LogMessages.IDX40103,
+                    LogMessages.IDX40001,
                     invalidIssuerToValidate);
 
             var exception = Assert.Throws<SecurityTokenInvalidIssuerException>(() =>
@@ -428,7 +428,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     {
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                     }));
-            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40103, ValidatorConstants.B2CIssuer2), exception.Message, context);
+            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, ValidatorConstants.B2CIssuer2), exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -452,7 +452,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuer },
                     }));
 
-            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40103, issuerWithInvalidTid), exception.Message, context);
+            IdentityComparer.AreEqual(string.Format(LogMessages.IDX40001, issuerWithInvalidTid), exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -498,7 +498,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                         ValidIssuers = new[] { ValidatorConstants.B2CIssuerTfp },
                     }));
 
-            IdentityComparer.AreEqual(LogMessages.IDX40104, exception.Message, context);
+            IdentityComparer.AreEqual(LogMessages.IDX40002, exception.Message, context);
             TestUtilities.AssertFailIfErrors(context);
         }
     }
