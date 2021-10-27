@@ -36,8 +36,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CallContext
     {
-        private static CallContext _defaultContext = new CallContext(Guid.NewGuid()) { CaptureLogs = false };
-
         /// <summary>
         /// Instantiates a new <see cref="CallContext"/> with a default activityId.
         /// </summary>
@@ -63,11 +61,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// Useful when debugging.
         /// </summary>
         public bool CaptureLogs { get; set; } = false;
-
-        /// <summary>
-        /// Instantiates a new singleton <see cref="CallContext"/> with a false <see cref="CaptureLogs"/>.
-        /// </summary>
-        public static CallContext Default { get => _defaultContext; }
 
         /// <summary>
         /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
