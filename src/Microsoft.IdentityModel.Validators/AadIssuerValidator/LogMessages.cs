@@ -39,12 +39,10 @@ namespace Microsoft.IdentityModel.Validators
         // public const string IDX40000 = "IDX40000:";
 
         // Token validation
-        public const string IDX40101 = "IDX40101: Azure AD issuer metadata address URL is required. ";
-        public const string IDX40102 = "IDX40102: No metadata document retriever is provided. ";
-        public const string IDX40103 = "IDX40103: Issuer: '{0}', does not match any of the valid issuers provided for this application. ";
-        public const string IDX40104 = "IDX40104: Microsoft.IdentityModel does not support a B2C issuer with 'tfp' in the URI. See https://aka.ms/ms-id-web/b2c-issuer for details. ";
+        public const string IDX40001 = "IDX40001: Issuer: '{0}', does not match any of the valid issuers provided for this application. ";
+        public const string IDX40002 = "IDX40002: Microsoft.IdentityModel does not support a B2C issuer with 'tfp' in the URI. See https://aka.ms/ms-id-web/b2c-issuer for details. ";
 
         // Protocol
-        public const string IDX40105 = "IDX40105: Neither `tid` nor `tenantId` claim is present in the token obtained from Microsoft identity platform. ";
+        public const string IDX40003 = "IDX40003: Neither `tid` nor `tenantId` claim is present in the token obtained from Microsoft identity platform. ";
     }
 }
