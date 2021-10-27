@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,17 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens
+// Microsoft.IdentityModel.Validators
+// Range: 40000 - 40999
+
+namespace Microsoft.IdentityModel.Validators
 {
     /// <summary>
-    /// Constants for JsonWebKeyUse (sec 4.2)
-    /// https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
+    /// Log messages and codes
     /// </summary>
-    public static class JsonWebKeyUseNames
+    internal static class LogMessages
     {
-#pragma warning disable 1591
-        public const string Sig = "sig";
-        public const string Enc = "enc";
-#pragma warning restore 1591
+        // general
+        // public const string IDX40000 = "IDX40000:";
+
+        // Token validation
+        public const string IDX40101 = "IDX40101: Azure AD issuer metadata address URL is required. ";
+        public const string IDX40102 = "IDX40102: No metadata document retriever is provided. ";
+        public const string IDX40103 = "IDX40103: Issuer: '{0}', does not match any of the valid issuers provided for this application. ";
+        public const string IDX40104 = "IDX40104: Microsoft.IdentityModel does not support a B2C issuer with 'tfp' in the URI. See https://aka.ms/ms-id-web/b2c-issuer for details. ";
+
+        // Protocol
+        public const string IDX40105 = "IDX40105: Neither `tid` nor `tenantId` claim is present in the token obtained from Microsoft identity platform. ";
     }
 }

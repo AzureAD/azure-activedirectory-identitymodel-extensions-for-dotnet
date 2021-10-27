@@ -49,10 +49,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10106 = "IDX10106: The parameter {0} had an invalid value: '{1}'.";
         public const string IDX10107 = "IDX10107: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
         public const string IDX10108 = "IDX10108: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
+        public const string IDX10109 = "IDX10109: Warning: Claims is being accessed without first reading the properties TokenValidationResult.IsValid or TokenValidationResult.Exception. This could be a potential security issue.";
 
         // token validation
         public const string IDX10204 = "IDX10204: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace AND validationParameters.ValidIssuers is null or empty.";
-        public const string IDX10205 = "IDX10205: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}'.";
+        public const string IDX10205 = "IDX10205: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. ";
         public const string IDX10206 = "IDX10206: Unable to validate audience. The 'audiences' parameter is empty.";
         public const string IDX10207 = "IDX10207: Unable to validate audience. The 'audiences' parameter is null.";
         public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";

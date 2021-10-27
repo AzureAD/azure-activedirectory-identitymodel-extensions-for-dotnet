@@ -89,6 +89,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Validators", "src\Microsoft.IdentityModel.Validators\Microsoft.IdentityModel.Validators.csproj", "{DA585910-0E6C-45A5-AABD-30917130FD63}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Validators.Tests", "test\Microsoft.IdentityModel.Validators.Tests\Microsoft.IdentityModel.Validators.Tests.csproj", "{D17F097F-6024-40BA-A7A0-015BB90F203B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -203,6 +207,14 @@ Global
 		{15944563-F7DA-4150-B5F1-6144EBF2CE23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15944563-F7DA-4150-B5F1-6144EBF2CE23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15944563-F7DA-4150-B5F1-6144EBF2CE23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA585910-0E6C-45A5-AABD-30917130FD63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA585910-0E6C-45A5-AABD-30917130FD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA585910-0E6C-45A5-AABD-30917130FD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA585910-0E6C-45A5-AABD-30917130FD63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D17F097F-6024-40BA-A7A0-015BB90F203B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D17F097F-6024-40BA-A7A0-015BB90F203B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D17F097F-6024-40BA-A7A0-015BB90F203B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D17F097F-6024-40BA-A7A0-015BB90F203B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -238,6 +250,8 @@ Global
 		{8DFF1DEA-F01F-4CE4-9471-5D2CEFB7E59F} = {EB14B99B-2255-45BC-BF14-E488DCD4A4BA}
 		{C768FBB5-DE0D-4970-918C-96B37485E34C} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{15944563-F7DA-4150-B5F1-6144EBF2CE23} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{DA585910-0E6C-45A5-AABD-30917130FD63} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
+		{D17F097F-6024-40BA-A7A0-015BB90F203B} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}

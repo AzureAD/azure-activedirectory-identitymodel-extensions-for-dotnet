@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation that is encoded with base-64-url digits. Parameters specify
+        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation which is encoded with base-64-url digits. Parameters specify
         /// the subset as an offset in the input array, and the number of elements in the array to convert.
         /// </summary>
         /// <param name="inArray">An array of 8-bit unsigned integers.</param>
@@ -152,8 +152,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation that is encoded with base-64-url digits. Parameters specify
-        /// the subset as an offset in the input array, and the number of elements in the array to convert.
+        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation which is encoded with base-64-url digits.
         /// </summary>
         /// <param name="inArray">An array of 8-bit unsigned integers.</param>
         /// <returns>The string representation in base 64 url encoding of length elements of inArray, starting at position offset.</returns>

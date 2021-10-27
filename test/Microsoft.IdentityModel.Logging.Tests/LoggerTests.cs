@@ -29,6 +29,7 @@ using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Logging.Tests
@@ -238,16 +239,5 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
     }
 
-    class SampleListener : EventListener
-    {
-        public string TraceBuffer { get; set; }
 
-        protected override void OnEventWritten(EventWrittenEventArgs eventData)
-        {
-            if (eventData != null && eventData.Payload.Count > 0)
-            {
-                TraceBuffer += eventData.Payload[0] + "\n";
-            }
-        }
-    }
 }

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,17 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.IdentityModel.Tokens
+using System.Diagnostics.Tracing;
+using Microsoft.IdentityModel.Logging;
+
+namespace Microsoft.IdentityModel.TestUtils
 {
-    /// <summary>
-    /// Constants for JsonWebKeyUse (sec 4.2)
-    /// https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
-    /// </summary>
-    public static class JsonWebKeyUseNames
+    public class SampleListener : EventListener
     {
-#pragma warning disable 1591
-        public const string Sig = "sig";
-        public const string Enc = "enc";
-#pragma warning restore 1591
+        public string TraceBuffer { get; set; }
+
+        protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        {
+            if (eventData != null && eventData.Payload.Count > 0)
+            {
+                TraceBuffer += eventData.Payload[0] + "\n";
+            }
+        }
+
+        public static SampleListener CreateLoggerListener(EventLevel eventLevel)
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.Logger.LogLevel = eventLevel;
+            listener.EnableEvents(IdentityModelEventSource.Logger, eventLevel);
+            return listener;
+        }
     }
 }

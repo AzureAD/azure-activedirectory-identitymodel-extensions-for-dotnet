@@ -56,7 +56,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string OpenIdProfile = "openid profile";
 
         /// <summary>
-        /// Indicates user_impersonation scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// Indicates phone profile scope see: https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
+        /// </summary>
+        public const string Phone = "phone";
+
+        /// <summary>
+        /// Indicates user_impersonation scope see: http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims.
         /// </summary>
         public const string UserImpersonation = "user_impersonation";
     }
