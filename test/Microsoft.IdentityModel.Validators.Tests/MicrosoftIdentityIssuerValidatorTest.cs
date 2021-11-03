@@ -86,6 +86,24 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Fact]
+        public void GetIssuerValidator_TwoTenants()
+        {
+            var context = new CompareContext();
+            var validator = CreateIssuerValidator(ValidatorConstants.AuthorityV1);
+
+            IdentityComparer.AreEqual(ValidatorConstants.AuthorityV1, validator.AadAuthorityV1, context);
+            IdentityComparer.AreEqual(ValidatorConstants.AuthorityCommonTenantWithV2, validator.AadAuthorityV2, context);
+            IdentityComparer.AreBoolsEqual(false, validator.IsV2Authority, context);
+
+            validator = CreateIssuerValidator(ValidatorConstants.AuthorityWithTenantSpecified);
+            IdentityComparer.AreEqual(ValidatorConstants.AuthorityWithTenantSpecified, validator.AadAuthorityV1, context);
+            IdentityComparer.AreEqual(ValidatorConstants.AuthorityWithTenantSpecifiedWithV2, validator.AadAuthorityV2, context);
+            IdentityComparer.AreBoolsEqual(false, validator.IsV2Authority, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void GetIssuerValidator_CommonAuthorityInAliases()
         {
             var context = new CompareContext();

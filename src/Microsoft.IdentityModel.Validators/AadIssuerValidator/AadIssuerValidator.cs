@@ -183,17 +183,14 @@ namespace Microsoft.IdentityModel.Validators
             if(string.IsNullOrEmpty(aadAuthority))
                 throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
 
-            Uri.TryCreate(aadAuthority, UriKind.Absolute, out Uri authorityUri);
-            string authorityHost = authorityUri?.Authority ?? new Uri(AadIssuerValidatorConstants.FallbackAuthority).Authority;
-
-            if (s_issuerValidators.TryGetValue(authorityHost, out AadIssuerValidator aadIssuerValidator))
+            if (s_issuerValidators.TryGetValue(aadAuthority, out AadIssuerValidator aadIssuerValidator))
                 return aadIssuerValidator;
 
-            s_issuerValidators[authorityHost] = new AadIssuerValidator(
+            s_issuerValidators[aadAuthority] = new AadIssuerValidator(
                 httpClient,
                 aadAuthority);
 
-            return s_issuerValidators[authorityHost];
+            return s_issuerValidators[aadAuthority];
         }
 
         /// <summary>
