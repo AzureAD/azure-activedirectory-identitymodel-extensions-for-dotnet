@@ -276,10 +276,9 @@ namespace Microsoft.IdentityModel.TestUtils
             get => DateTime.Parse(ExpiresString);
         }
 
-
         public static string ExpiresString
         {
-            get => "2025-03-17T18:33:37.080Z";
+            get => DateTime.MaxValue.ToString("s") + "Z";
         }
 
         public static HashAlgorithm HashAlgorithm
