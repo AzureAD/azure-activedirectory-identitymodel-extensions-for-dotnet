@@ -17,7 +17,7 @@ Note that to get help, you need to run the latest version.
  * [ ] M.IM.Tokens
  * [ ] M.IM.Tokens.Jwt
  * [ ] M.IM.Validators
-* Other (please describe)
+ * Other (please describe)
 
 **Is this a new or an existing app?**
 <!-- Ex:
@@ -39,7 +39,8 @@ A clear and concise description of what you expected to happen (or code).
 A clear and concise description of what happens, e.g. an exception is thrown, UI freezes.
 
 **Possible solution**
-<!--- Only if you have suggestions on a fix for the bug. -->
+<!-- Only if you have suggestions on a fix for the bug. -->
 
 **Additional context / logs / screenshots / links to code**
+<!-- Please do not include any customer data or Personal Identifiable Information (PII) in any content posted to GitHub. See https://docs.microsoft.com/en-us/compliance/regulatory/gdpr#gdpr-faqs for more info on PII.-->
 Add any other context about the problem here, such as logs and screenshots or links to code.
