@@ -98,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10258 = "IDX10258: Token type validated. Type: '{0}'.";
         public const string IDX10260 = "IDX10260: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{3}'.";
         public const string IDX10261 = "IDX10261: Unable to retrieve configuration. \nProceeding with token validation as the relevant properties have been set manually on the TokenValidationParameters.";
+        public const string IDX10262 = "IDX10262: One of the issuers in TokenValidationParameters.ValidIssuers was null or the empty string.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
