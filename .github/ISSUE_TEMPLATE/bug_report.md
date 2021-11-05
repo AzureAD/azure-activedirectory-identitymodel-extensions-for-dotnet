@@ -13,19 +13,19 @@ Note that to get help, you need to run the latest version.
 
 **Where is the issue?**
  * [ ] M.IM.JsonWebTokens
+ * [ ] M.IM.KeyVaultExtensions
+ * [ ] M.IM.Logging
+ * [ ] M.IM.ManagedKeyVaultSecurityKey
  * [ ] M.IM.Protocols
  * [ ] M.IM.Protocols.OpenIdConnect
  * [ ] M.IM.Protocols.SignedHttpRequest
  * [ ] M.IM.Protocols.WsFederation
+ * [ ] M.IM.TestExtensions
  * [ ] M.IM.Tokens
- * [ ] S.IM.Tokens.Jwt
  * [ ] M.IM.Tokens.Saml
  * [ ] M.IM.Validators
- * [ ] M.IM.Logging
  * [ ] M.IM.Xml
- * [ ] M.IM.KeyVaultExtensions
- * [ ] M.IM.ManagedKeyVaultSecurityKey
- * [ ] M.IM.TestExtensions
+ * [ ] S.IM.Tokens.Jwt
  * Other (please describe)
 
 **Is this a new or an existing app?**
