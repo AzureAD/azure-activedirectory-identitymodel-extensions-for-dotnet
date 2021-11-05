@@ -358,7 +358,7 @@ namespace Microsoft.IdentityModel.TestUtils
             writer.Flush();
 
             // for debugging purposes use a local variable.
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.TestUtils
             serializer.WriteSignedInfo(writer, signedInfo);
             writer.Flush();
 
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 
@@ -393,7 +393,7 @@ namespace Microsoft.IdentityModel.TestUtils
             serializer.WriteReference(writer, reference);
             writer.Flush();
 
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 

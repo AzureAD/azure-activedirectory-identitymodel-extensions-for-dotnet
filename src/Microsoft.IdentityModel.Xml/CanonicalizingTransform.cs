@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Xml
                 streamWriter.WriteTo(writer);
                 writer.EndCanonicalization();
                 writer.Flush();
-                return Encoding.UTF8.GetString(stream.ToArray());
+                return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
             }
         }
     }

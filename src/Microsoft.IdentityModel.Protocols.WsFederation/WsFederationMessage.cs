@@ -288,9 +288,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                                         writer.WriteNode(xmlReader, true);
                                         writer.Flush();
                                     }
-                                    ms.Seek(0, SeekOrigin.Begin);
-                                    var tokenBytes = ms.ToArray();
-                                    token = Encoding.UTF8.GetString(tokenBytes);
+                                    token = Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
                                 }
 
                                 // </RequestedSecurityToken>

@@ -820,7 +820,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     dictionaryWriter.Flush();
                 }
 
-                return Encoding.UTF8.GetString(memoryStream.ToArray());
+                return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             }
         }
 
@@ -1341,7 +1341,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     WriteToken(writer, samlToken);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
             }
         }
