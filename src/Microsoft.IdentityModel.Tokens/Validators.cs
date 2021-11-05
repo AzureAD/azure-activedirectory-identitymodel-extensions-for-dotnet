@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(str))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10235);
+                        LogHelper.LogInformation(LogMessages.IDX10262);
                         continue;
                     }
                         
