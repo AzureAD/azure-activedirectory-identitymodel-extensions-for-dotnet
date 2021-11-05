@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     writer.Flush();
                 }
 
-                return Encoding.UTF8.GetString(ms.ToArray());
+                return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
             }
         }
 
@@ -1240,7 +1240,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
                     WriteToken(writer, samlToken);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
             }
         }

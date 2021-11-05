@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Xml
                     reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
                     {
                         Uri = _referenceUri,
-                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
+                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.GetBuffer(), 0, (int)_canonicalStream.Length)),
                         DigestMethod = digestAlgorithm
                     };
                 }
