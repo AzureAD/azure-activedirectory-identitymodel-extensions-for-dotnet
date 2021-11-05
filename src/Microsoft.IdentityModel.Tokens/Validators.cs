@@ -239,7 +239,10 @@ namespace Microsoft.IdentityModel.Tokens
                 foreach (string str in validationParameters.ValidIssuers)
                 {
                     if (string.IsNullOrEmpty(str))
+                    {
+                        LogHelper.LogInformation(LogMessages.IDX10262);
                         continue;
+                    }
                         
                     if (string.Equals(str, issuer, StringComparison.Ordinal))
                     {
