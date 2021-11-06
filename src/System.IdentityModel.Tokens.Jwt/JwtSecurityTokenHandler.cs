@@ -1014,7 +1014,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     if (key != null)
                     {
-                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (kidExists && !kidMatched && key.KeyId != null)
                             kidMatched = jwtToken.Header.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }

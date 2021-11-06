@@ -1156,7 +1156,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     if (key != null)
                     {
-                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (kidExists && !kidMatched && key.KeyId != null)
                             kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }

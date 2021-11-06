@@ -48,7 +48,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string Generate(XmlEement dataElement)
         {
-            var stringBuilder = new StringBuilder($"<{dataElement.Name}>");
+            int initialCapacity = (dataElement.Name.Length + 3) * 2;
+            var stringBuilder = new StringBuilder(initialCapacity);
+            stringBuilder.Append('<').Append(dataElement.Name).Append('>');
             if (dataElement.Value is string str)
                 stringBuilder.Append(str);
             else if (dataElement.Value is XmlEement element)
@@ -59,7 +61,7 @@ namespace Microsoft.IdentityModel.TestUtils
             else
                 throw new TestException($"dataElement.Value must be of type: '{typeof(string)}' or '{typeof(XmlEement)} or '{typeof(List<XmlEement>)}' was: {dataElement.Value.GetType()}.");
 
-            stringBuilder.Append($"</{dataElement.Name}>");
+            stringBuilder.Append("</").Append(dataElement.Name).Append('>');
             return stringBuilder.ToString();
         }
     }
@@ -450,10 +452,10 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string TransformsXml(string prefix, List<string> transforms, string @namespace)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append($"<{prefix}Transforms {@namespace}>");
+            stringBuilder.Append('<').Append(prefix).Append("Transforms ").Append(@namespace).Append('>');
             foreach (var transform in transforms)
                 stringBuilder.Append(transform);
-            stringBuilder.Append($"</{prefix}Transforms >");
+            stringBuilder.Append("</").Append(prefix).Append("Transforms >");
 
             return stringBuilder.ToString();
         }
