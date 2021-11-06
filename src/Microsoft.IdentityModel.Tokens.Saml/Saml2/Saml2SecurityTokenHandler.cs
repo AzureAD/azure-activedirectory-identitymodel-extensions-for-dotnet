@@ -757,7 +757,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (attributes == null)
                 throw LogArgumentNullException(nameof(attributes));
 
-            var distinctAttributes = new Dictionary<Saml2AttributeKeyComparer.AttributeKey, Saml2Attribute>(attributes.Count, new Saml2AttributeKeyComparer());
+            var distinctAttributes = new Dictionary<Saml2AttributeKeyComparer.AttributeKey, Saml2Attribute>(attributes.Count, Saml2AttributeKeyComparer.Instance);
             foreach (var attribute in attributes)
             {
                 if (attribute != null)
