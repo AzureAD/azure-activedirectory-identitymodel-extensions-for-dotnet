@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Xml
         public int MaximumReferenceTransforms
         {
             get => _maximumReferenceTransforms;
-            set => _maximumReferenceTransforms = value < 0 ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX30600, value))) : value;
+            set => _maximumReferenceTransforms = value < 0 ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX30600, LogHelper.MarkAsNonPII(value)))) : value;
         }
 
         /// <summary>

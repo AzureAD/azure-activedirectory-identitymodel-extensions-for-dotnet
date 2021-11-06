@@ -344,18 +344,32 @@ namespace Microsoft.IdentityModel.Logging
 
         private static string RemovePII(object arg)
         {
-            if (arg == null)
-                return string.Empty;
-
-            if (arg is Exception ex && ex.GetType().FullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal))
+            if (arg is Exception ex && IsCustomException(ex))
                 return ex.ToString();
 
-            return arg.GetType().ToString();
+            if (arg is NonPII)
+                return arg.ToString();
+
+            return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg?.GetType().ToString() ?? "Null");
         }
 
         internal static bool IsCustomException(Exception ex)
         {
             return ex.GetType().FullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Marks a log message argument (<paramref name="arg"/>) as NonPII.
+        /// </summary>
+        /// <param name="arg">A log message argument to be marked as NonPII.</param>
+        /// <returns>An argument marked as NonPII.</returns>
+        /// <remarks>
+        /// Marking an argument as NonPII in <see cref="LogHelper.FormatInvariant"/> calls will result in logging
+        /// that argument in cleartext, regardless of the <see cref="IdentityModelEventSource.ShowPII"/> flag value.
+        /// </remarks>
+        public static object MarkAsNonPII(object arg)
+        {
+            return new NonPII(arg);
         }
     }
 }

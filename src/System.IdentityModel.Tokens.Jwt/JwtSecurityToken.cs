@@ -201,7 +201,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(notBefore.Value))));
             }
 
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);

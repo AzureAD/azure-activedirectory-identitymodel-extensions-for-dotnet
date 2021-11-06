@@ -49,6 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private IDictionary<string, string> _inboundClaimTypeMap;
         private static string _jsonClaimType = _namespace + "/json_type";
         private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
+        private const string _className = "System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler";
         private IDictionary<string, string> _outboundClaimTypeMap;
         private IDictionary<string, string> _outboundAlgorithmMap = null;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
@@ -95,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         static JwtSecurityTokenHandler()
         {
-            LogHelper.LogVerbose("Assembly version info: " + typeof(JwtSecurityTokenHandler).AssemblyQualifiedName);
+            LogHelper.LogVerbose("Assembly version info: " + LogHelper.MarkAsNonPII(typeof(JwtSecurityTokenHandler).AssemblyQualifiedName));
         }
 
         /// <summary>
@@ -301,7 +302,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
-                LogHelper.LogInformation(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes);
+                LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
                 return false;
             }
 
@@ -606,7 +607,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, encryptingCredentials.Enc, encryptingCredentials.Key), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), encryptingCredentials.Key), ex));
                 }
             }
         }
@@ -659,7 +660,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
             if (!CanReadToken(token))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12709, token)));
@@ -733,7 +734,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
 
@@ -822,7 +823,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             JwtSecurityToken jwtToken = token as JwtSecurityToken;
             if (jwtToken == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12706, GetType(), typeof(JwtSecurityToken), token.GetType()), nameof(token)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12706, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(typeof(JwtSecurityToken)), LogHelper.MarkAsNonPII(token.GetType())), nameof(token)));
 
             var encodedPayload = jwtToken.EncodedPayload;
             var encodedSignature = string.Empty;
@@ -874,7 +875,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), algorithm ?? "Null")));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(algorithm))));
 
             try
             {
@@ -922,7 +923,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 var validatedJwt = validatedJwtToken as JwtSecurityToken;
                 if (validatedJwt == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, typeof(JwtSecurityToken), validatedJwtToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10506, LogHelper.MarkAsNonPII(typeof(JwtSecurityToken)), LogHelper.MarkAsNonPII(validatedJwtToken.GetType()), token)));
 
                 return validatedJwt;
             }
@@ -937,7 +938,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 jwtToken = securityToken as JwtSecurityToken;
                 if (jwtToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, typeof(JwtSecurityToken), securityToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, LogHelper.MarkAsNonPII(typeof(JwtSecurityToken)), LogHelper.MarkAsNonPII(securityToken.GetType()), token)));
             }
             else
             { 
@@ -1098,7 +1099,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
 
                     if (CanReadToken(jwtClaim.Value))
                     {
@@ -1137,7 +1138,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, JwtRegisteredClaimNames.Actort, jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
 
                     if (CanReadToken(jwtClaim.Value))
                     {

@@ -2011,7 +2011,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (string.IsNullOrEmpty(nameIdentifier.Value))
-                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX13151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
+                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX13151, MarkAsNonPII(Saml2Constants.Elements.NameID), MarkAsNonPII("nameIdentifier.Value")));
 
             // @Format - optional
             if (null != nameIdentifier.Format)

@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal AsymmetricAdapter CreateAsymmetricAdapter()
         {
             if (!IsSupportedAlgorithm(Key, Algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, Algorithm, Key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(Algorithm), Key)));
 
             return new AsymmetricAdapter(Key, Algorithm, _willUnwrap);
         }

@@ -118,11 +118,11 @@ namespace Microsoft.IdentityModel.Tokens
 
                 byte[] x = Base64UrlEncoder.DecodeBytes(jsonWebKey.X);
                 if (x.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.X), cbKey, x.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, LogHelper.MarkAsNonPII(nameof(jsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.X)), cbKey, LogHelper.MarkAsNonPII(x.Length))));
 
                 byte[] y = Base64UrlEncoder.DecodeBytes(jsonWebKey.Y);
                 if (y.Length > cbKey)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.Y), cbKey, y.Length)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, LogHelper.MarkAsNonPII(nameof(jsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.Y)), cbKey, LogHelper.MarkAsNonPII(y.Length))));
 
                 Marshal.WriteInt64(keyBlobPtr, 0, dwMagic);
                 Marshal.WriteInt64(keyBlobPtr, 4, cbKey);
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     byte[] d = Base64UrlEncoder.DecodeBytes(jsonWebKey.D);
                     if (d.Length > cbKey)
-                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, nameof(jsonWebKey), nameof(jsonWebKey.D), cbKey, d.Length)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(jsonWebKey), LogHelper.FormatInvariant(LogMessages.IDX10675, LogHelper.MarkAsNonPII(nameof(jsonWebKey)), LogHelper.MarkAsNonPII(nameof(jsonWebKey.D)), cbKey, LogHelper.MarkAsNonPII(d.Length))));
 
                     foreach (byte b in d)
                         Marshal.WriteByte(keyBlobPtr, index++, b);
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens
                     keyByteCount = 66;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, LogHelper.MarkAsNonPII(curveId))));
             }
             return keyByteCount;
         }
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens
                         magicNumber = KeyBlobMagicNumber.BCRYPT_ECDSA_PUBLIC_P521_MAGIC;
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, LogHelper.MarkAsNonPII(curveId))));
             }
             return (uint)magicNumber;
         }
@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.Tokens
                 case JsonWebKeyECTypes.P521:
                     return ECCurve.NamedCurves.nistP521;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, curveId)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, LogHelper.MarkAsNonPII(curveId))));
             }
         }
 

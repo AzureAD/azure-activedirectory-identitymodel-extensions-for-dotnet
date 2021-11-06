@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10100, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10100, LogHelper.MarkAsNonPII(value))));
 
                 _clockSkew = value;
             }

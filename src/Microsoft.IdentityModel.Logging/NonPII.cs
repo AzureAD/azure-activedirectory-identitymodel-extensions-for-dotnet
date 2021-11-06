@@ -13,7 +13,7 @@
 // furnished to do so, subject to the following conditions :
 //
 // The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.CryptoProviderCacheOptions
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -25,40 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Logging;
-
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
-    /// Specifies the CryptoProviderCacheOptions which can be used to configure the internal cryptoprovider cache.
-    /// We are using our own simple LRU caching implementation across all targets. 
-    /// See <see cref="EventBasedLRUCache{TKey, TValue}"/> for more details.
+    /// An internal structure that is used to mark an argument as NonPII.
+    /// Arguments wrapped with a NonPII structure will be considered as NonPII in the message logging process.
     /// </summary>
-    public class CryptoProviderCacheOptions
+    internal struct NonPII
     {
-        private int _sizeLimit = DefaultSizeLimit;
+        /// <summary>
+        /// Argument wrapped with a <see cref="NonPII"/> structure is considered as NonPII in the message logging process.
+        /// </summary>
+        public object Argument { get; set; }
 
         /// <summary>
-        /// Default value for <see cref="SizeLimit"/>.
+        /// Creates an instance of <see cref="NonPII"/> that wraps the <paramref name="argument"/>.
         /// </summary>
-        public static readonly int DefaultSizeLimit = 1000;
-
-        /// <summary>
-        /// Gets or sets the size of the cache (in number of items). 
-        /// 20% of the cache will be evicted whenever the cache gets to 95% of this size.
-        /// Items will be evicted from least recently used to most recently used.
-        /// </summary>
-        public int SizeLimit
+        /// <param name="argument">An argument that is considered as NonPII.</param>
+        public NonPII(object argument)
         {
-            get
-            {
-                return _sizeLimit;
-            }
-            set
-            {
-                _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, LogHelper.MarkAsNonPII(value))));
-            }
+            Argument = argument;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the <see cref="Argument"/>.
+        /// </summary>
+        /// <returns><c>Null</c> if the <see cref="Argument"/> is <c>null</c>, otherwise calls <see cref="System.ValueType.ToString()"/> method of the <see cref="Argument"/>.</returns>
+        public override string ToString()
+        {
+            return Argument?.ToString() ?? "Null";
         }
     }
 }

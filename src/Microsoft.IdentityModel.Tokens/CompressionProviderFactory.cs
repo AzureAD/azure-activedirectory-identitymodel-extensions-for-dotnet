@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (algorithm.Equals(CompressionAlgorithms.Deflate, StringComparison.Ordinal))
                 return new DeflateCompressionProvider();
 
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
     }
 }
