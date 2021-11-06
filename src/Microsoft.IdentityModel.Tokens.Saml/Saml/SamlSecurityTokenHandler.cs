@@ -1095,7 +1095,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     if (key != null)
                     {
-                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (canMatchKey && !keyMatched && key.KeyId != null)
                             keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
                     }
