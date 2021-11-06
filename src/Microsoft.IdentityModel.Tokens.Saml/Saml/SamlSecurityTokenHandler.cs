@@ -195,10 +195,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 // Use unique attribute if name, value type, or issuer differ
                 var attributeKey = new SamlAttributeKeyComparer.AttributeKey(attribute);
-                if (distinctAttributes.ContainsKey(attributeKey))
+                if (distinctAttributes.TryGetValue(attributeKey, out var attr))
                 {
                     foreach (var attributeValue in attribute.Values)
-                        distinctAttributes[attributeKey].Values.Add(attributeValue);
+                        attr.Values.Add(attributeValue);
                 }
                 else
                 {

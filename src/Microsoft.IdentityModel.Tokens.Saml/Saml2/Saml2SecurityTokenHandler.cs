@@ -689,7 +689,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
 
             if (claim.Properties.TryGetValue(ClaimProperties.SamlAttributeFriendlyName, out string displayName))
-                attribute.FriendlyName = claim.Properties[ClaimProperties.SamlAttributeFriendlyName];
+                attribute.FriendlyName = displayName;
 
             return attribute;
         }
@@ -758,10 +758,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (attribute != null)
                 {
                     var attributeKey = new Saml2AttributeKeyComparer.AttributeKey(attribute);
-                    if (distinctAttributes.ContainsKey(attributeKey))
+                    if (distinctAttributes.TryGetValue(attributeKey, out Saml2Attribute attr))
                     {
                         foreach (string value in attribute.Values)
-                            distinctAttributes[attributeKey].Values.Add(value);
+                            attr.Values.Add(value);
                     }
                     else
                     {
@@ -944,17 +944,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13306));
 
                         nameIdentifierClaim = claim.Value;
-                        if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierFormat))
-                            nameIdentifierFormat = claim.Properties[ClaimProperties.SamlNameIdentifierFormat];
+                        string propValue;
+                        if (claim.Properties.TryGetValue(ClaimProperties.SamlNameIdentifierFormat, out propValue))
+                            nameIdentifierFormat = propValue;
 
-                        if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierNameQualifier))
-                            nameIdentifierNameQualifier = claim.Properties[ClaimProperties.SamlNameIdentifierNameQualifier];
+                        if (claim.Properties.TryGetValue(ClaimProperties.SamlNameIdentifierNameQualifier, out propValue))
+                            nameIdentifierNameQualifier = propValue;
 
-                        if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierSPNameQualifier))
-                            nameIdentifierSpNameQualifier = claim.Properties[ClaimProperties.SamlNameIdentifierSPNameQualifier];
+                        if (claim.Properties.TryGetValue(ClaimProperties.SamlNameIdentifierSPNameQualifier, out propValue))
+                            nameIdentifierSpNameQualifier = propValue;
 
-                        if (claim.Properties.ContainsKey(ClaimProperties.SamlNameIdentifierSPProvidedId))
-                            nameIdentifierSpProviderId = claim.Properties[ClaimProperties.SamlNameIdentifierSPProvidedId];
+                        if (claim.Properties.TryGetValue(ClaimProperties.SamlNameIdentifierSPProvidedId, out propValue))
+                            nameIdentifierSpProviderId = propValue;
                     }
                 }
             }
