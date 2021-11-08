@@ -199,23 +199,11 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             string algorithm = null;
 
-            // Testset 1 with PII logging off
-            IdentityModelEventSource.ShowPII = false;
-
             LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant("Algorithm not supported exception 1: {0}", algorithm)));
             LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant("Algorithm not supported exception 2: {0}", LogHelper.MarkAsNonPII(algorithm))));
 
             Assert.Contains("Algorithm not supported exception 1: [PII of type 'Null' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]", listener.TraceBuffer);
             Assert.Contains("Algorithm not supported exception 2: Null", listener.TraceBuffer);
-
-            // Testset 2 with PII logging on
-            IdentityModelEventSource.ShowPII = true;
-
-            LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant("Algorithm not supported exception 3: {0}", algorithm)));
-            LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant("Algorithm not supported exception 4: {0}", LogHelper.MarkAsNonPII(algorithm))));
-
-            Assert.Contains("Algorithm not supported exception 3: ", listener.TraceBuffer);
-            Assert.Contains("Algorithm not supported exception 4: Null", listener.TraceBuffer);
         }
 
         
@@ -226,23 +214,11 @@ namespace Microsoft.IdentityModel.Logging.Tests
             IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
 
-            // Testset 1 with PII logging off
-            IdentityModelEventSource.ShowPII = false;
-
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 1: {0}", new SecurityTokenCompressionFailedException("custom inner exception"))));
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 2: {0}", new InvalidOperationException("system exception"))));
 
             Assert.Contains("Main exception 1: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception", listener.TraceBuffer);
             Assert.Contains("Main exception 2: [PII of type 'System.InvalidOperationException' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]", listener.TraceBuffer);
-
-            // Testset 2 with PII logging on
-            IdentityModelEventSource.ShowPII = true;
-
-            LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 3: {0}", new SecurityTokenCompressionFailedException("custom inner exception"))));
-            LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(LogHelper.FormatInvariant("Main exception 4: {0}", new InvalidOperationException("system exception"))));
-
-            Assert.Contains("Main exception 3: Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException: custom inner exception", listener.TraceBuffer);
-            Assert.Contains("Main exception 4: System.InvalidOperationException: system exception", listener.TraceBuffer);
         }
     }
 }
