@@ -466,6 +466,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
                 return null;
         }
+
+        /// <summary>
+        /// No intermediate string allocation equivalent of
+        /// <code>encoding.GetBytes(input1 + separator + input2)</code>
+        /// </summary>
+        internal static byte[] GetBytes(Encoding encoding, string input1, byte separator, string input2)
+        {
+            byte[] output = new byte[encoding.GetByteCount(input1) + encoding.GetByteCount(input2) + 1];
+            int bytesWritten = encoding.GetBytes(input1, 0, input1.Length, output, 0);
+            output[bytesWritten++] = separator;
+            encoding.GetBytes(input2, 0, input2.Length, output, bytesWritten);
+            return output;
+        }
     }
 }
 

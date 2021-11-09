@@ -945,7 +945,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 jwtToken = ReadJwtToken(token);
             }
                 
-            byte[] encodedBytes = Encoding.UTF8.GetBytes(jwtToken.RawHeader + "." + jwtToken.RawPayload);
             if (string.IsNullOrEmpty(jwtToken.RawSignature))
             {
                 if (validationParameters.RequireSignedTokens)
@@ -996,6 +995,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (keys != null)
             {
+                var encodedBytes = JwtTokenUtilities.GetBytes(Encoding.UTF8, jwtToken.RawHeader, (byte)'.', jwtToken.RawPayload);
                 foreach (var key in keys)
                 {
                     try

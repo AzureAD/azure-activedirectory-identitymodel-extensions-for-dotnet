@@ -1087,7 +1087,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 jwtToken = new JsonWebToken(token);
             }
 
-            var encodedBytes = Encoding.UTF8.GetBytes(jwtToken.EncodedHeader + "." + jwtToken.EncodedPayload);
             if (string.IsNullOrEmpty(jwtToken.EncodedSignature))
             {
                 if (validationParameters.RequireSignedTokens)
@@ -1138,6 +1137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (keys != null)
             {
+                var encodedBytes = JwtTokenUtilities.GetBytes(Encoding.UTF8, jwtToken.EncodedHeader, (byte)'.', jwtToken.EncodedPayload);
                 foreach (var key in keys)
                 {
                     try
