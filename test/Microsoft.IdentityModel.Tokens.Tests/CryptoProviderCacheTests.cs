@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public static Func<CryptoProviderCache> CreateCacheForTesting = new Func<CryptoProviderCache>(() =>
         {
-            return new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
+            return new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50);
         });
 
         [Fact]
@@ -654,7 +654,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
     {
-        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50)
+        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), 50)
         {}
 
         public bool DisposeCalled { get; set; } = false;

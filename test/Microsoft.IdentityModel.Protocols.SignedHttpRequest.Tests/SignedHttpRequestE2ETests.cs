@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     {
         public static Func<CryptoProviderFactory> CreateCryptoProviderFactory = new Func<CryptoProviderFactory>(() =>
         {
-            return new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50));
+            return new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50));
         });
 
 

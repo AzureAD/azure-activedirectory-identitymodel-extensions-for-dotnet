@@ -42,8 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new EventBasedLRUCache<int?, string>(10, TaskCreationOptions.LongRunning, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int?, string>(10);
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff("Cache should contain the key value pair {1, 'one'}, but the Contains() method returned false.");
@@ -72,8 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.DoNotRemoveExpiredValues");
             var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, removeExpiredValuesIntervalInSeconds: 5, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int, string>(11, removeExpiredValuesIntervalInSeconds: 5, removeExpiredValues: false);
             for (int i = 0; i <= 10; i++)
                     cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
 
@@ -94,8 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(11, TaskCreationOptions.LongRunning, removeExpiredValues: true);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int, string>(11, removeExpiredValues: true);
             for (int i = 0; i <= 10; i++)
             {
                 // Only even values should expire.
@@ -131,8 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int?, string>(1);
             Assert.Throws<ArgumentNullException>(() => cache.SetValue(1, null));
 
             cache.SetValue(1, "one");
@@ -178,8 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new EventBasedLRUCache<int?, string>(2, TaskCreationOptions.LongRunning, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int?, string>(2);
             cache.SetValue(1, "one");
 
             if (!cache.TryGetValue(1, out var value))
@@ -211,8 +206,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new EventBasedLRUCache<int?, string>(1, TaskCreationOptions.LongRunning, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int?, string>(1);
 
             cache.SetValue(1, "one");
 
@@ -241,8 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, removeExpiredValues: false);
-            cache.EventQueueTaskIdleTimeoutInSeconds = 5;
+            var cache = new EventBasedLRUCache<int, string>(10);
             for (int i = 0; i <= 1000; i++)
             {
                 cache.SetValue(i, Guid.NewGuid().ToString());
@@ -290,11 +283,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void LRUCacheItemTests()
         {
-            Assert.Throws<ArgumentNullException>(() => new LRUCacheItem<string, string>("1", null));
-            Assert.Throws<ArgumentNullException>(() => new LRUCacheItem<string, string>(null, "1"));
+            Assert.Throws<ArgumentNullException>(() => new ProviderCacheItem<string, string>("1", null));
+            Assert.Throws<ArgumentNullException>(() => new ProviderCacheItem<string, string>(null, "1"));
         }
 
-        internal bool IsDescending(LinkedList<LRUCacheItem<int, string>> data)
+        internal bool IsDescending(LinkedList<ProviderCacheItem<int, string>> data)
         {
             if (data.First == null)
                 return true;
@@ -322,7 +315,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            var cache = new EventBasedLRUCache<int, string>(10, TaskCreationOptions.LongRunning, removeExpiredValues: false);
+            var cache = new EventBasedLRUCache<int, string>(10);
 
             List<Task> taskList = new List<Task>();
 
@@ -349,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new EventBasedLRUCache<int, string>(1000, TaskCreationOptions.LongRunning, removeExpiredValues: false);
+            var cache = new EventBasedLRUCache<int, string>(1000);
 
             for (int i = 0; i < 100000; i++)
             {

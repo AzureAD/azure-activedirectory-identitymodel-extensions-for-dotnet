@@ -37,6 +37,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CryptoProviderCacheOptions
     {
+        /// <summary>
+        /// Cache types.
+        /// </summary>
+        public enum ProviderCacheType
+        {
+            /// <summary>
+            /// EventBasedLRUCache
+            /// </summary>
+            LRU,
+
+            /// <summary>
+            /// Hash-based cache
+            /// </summary>
+            Hash
+        };
+
         private int _sizeLimit = DefaultSizeLimit;
 
         /// <summary>
@@ -60,5 +76,10 @@ namespace Microsoft.IdentityModel.Tokens
                 _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, value)));
             }
         }
+
+        /// <summary>
+        /// The desired cache type for caching providers. Default to LRU.
+        /// </summary>
+        public ProviderCacheType CacheType { get; set; } = ProviderCacheType.LRU;
     }
 }
