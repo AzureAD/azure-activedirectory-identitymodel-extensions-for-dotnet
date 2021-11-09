@@ -41,13 +41,13 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens.
     /// See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
     public class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Gets the Base64Url encoded string representation of the following JWT header: 
+        /// Gets the Base64Url encoded string representation of the following JWT header:
         /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
         /// </summary>
         /// <return>The Base64Url encoded string representation of the unsigned JWT header.</return>
@@ -57,10 +57,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
         /// <return>The type of <see cref="JsonWebToken"/></return>
-        public Type TokenType
-        {
-            get { return typeof(JsonWebToken); }
-        }
+        public Type TokenType => typeof(JsonWebToken);
 
         /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
@@ -105,10 +102,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
         /// <returns>'true', indicating this instance can validate a <see cref="JsonWebToken"/>.</returns>
-        public virtual bool CanValidateToken
-        {
-            get { return true; }
-        }
+        public virtual bool CanValidateToken => true;
 
         private static JObject CreateDefaultJWEHeader(EncryptingCredentials encryptingCredentials, string compressionAlgorithm, string tokenType)
         {
@@ -585,14 +579,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     identity.AddClaim(claim);
                 }
-
             }
 
             return identity;
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text 
+        /// Decrypts a JWE and returns the clear text
         /// </summary>
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
@@ -787,7 +780,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                     var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
                     return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal) ?
-                        string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)):
+                        string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)) :
                         string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
                 }
                 catch (Exception ex)
@@ -970,7 +963,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     jwtToken = new JsonWebToken(token);
                     decryptedJwt = DecryptToken(jwtToken, validationParameters);
                     // first parameter is null as it is only used in the case where a token is a JWS
-                    return ValidateToken(null, jwtToken, decryptedJwt, validationParameters);              
+                    return ValidateToken(null, jwtToken, decryptedJwt, validationParameters);
                 }
                 else
                 {
@@ -1242,7 +1235,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }
                 }
-
             }
 
             if (kidExists)

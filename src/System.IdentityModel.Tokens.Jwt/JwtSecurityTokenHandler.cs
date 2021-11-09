@@ -31,9 +31,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.JsonWebTokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -43,7 +43,6 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
-
         private delegate bool CertMatcher(X509Certificate2 cert);
         private ISet<string> _inboundClaimFilter;
         private IDictionary<string, string> _inboundClaimTypeMap;
@@ -115,7 +114,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JwtSecurityToken"/>. 
+        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JwtSecurityToken"/>.
         /// <para>If this is set to true, the <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping. Otherwise, no mapping occurs.</para>
         /// <para>The default value is true.</para>
         /// </summary>
@@ -132,9 +131,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (!_mapInboundClaims && value && _inboundClaimTypeMap.Count == 0)
                     _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
 
-                _mapInboundClaims = value;            
+                _mapInboundClaims = value;
             }
-        } 
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JwtSecurityToken"/>. 
@@ -188,7 +187,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 return _outboundAlgorithmMap;
             }
         }
-
 
         /// <summary>Gets or sets the <see cref="ISet{String}"/> used to filter claims when populating a <see cref="ClaimsIdentity"/> claims form a <see cref="JwtSecurityToken"/>.
         /// When a <see cref="JwtSecurityToken"/> is validated, claims with types found in this <see cref="ISet{String}"/> will not be added to the <see cref="ClaimsIdentity"/>.
@@ -257,28 +255,19 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
         /// <returns>'true', indicating this instance can validate a <see cref="JwtSecurityToken"/>.</returns>
-        public override bool CanValidateToken
-        {
-            get { return true; }
-        }
+        public override bool CanValidateToken => true;
 
         /// <summary>
         /// Gets the value that indicates if this instance can write a <see cref="SecurityToken"/>.
         /// </summary>
         /// <returns>'true', indicating this instance can write a <see cref="JwtSecurityToken"/>.</returns>
-        public override bool CanWriteToken
-        {
-            get { return true; }
-        }
+        public override bool CanWriteToken => true;
 
         /// <summary>
         /// Gets the type of the <see cref="JwtSecurityToken"/>.
         /// </summary>
         /// <return>The type of <see cref="JwtSecurityToken"/></return>
-        public override Type TokenType
-        {
-            get { return typeof(JwtSecurityToken); }
-        }
+        public override Type TokenType => typeof(JwtSecurityToken);
 
         /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
@@ -636,7 +625,6 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (_outboundClaimTypeMap.TryGetValue(claimType, out string type))
                     claims[type] = claimCollection[claimType];
-
                 else
                     claims[claimType] = claimCollection[claimType];
             }
@@ -684,7 +672,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             return ReadJwtToken(token);
         }
-        
+
         /// <summary>
         /// Deserializes token with the provided <see cref="TokenValidationParameters"/>.
         /// </summary>
@@ -722,7 +710,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="SecurityTokenReplayAddFailedException"><paramref name="token"/> could not be added to the <see cref="TokenValidationParameters.TokenReplayCache"/>.</exception>
         /// <exception cref="SecurityTokenReplayDetectedException"><paramref name="token"/> is found in the cache.</exception>
         /// <returns> A <see cref="ClaimsPrincipal"/> from the JWT. Does not include claims found in the JWT header.</returns>
-        /// <remarks> 
+        /// <remarks>
         /// Many of the exceptions listed above are not thrown directly from this method. See <see cref="Validators"/> to examine the call graph.
         /// </remarks>
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
@@ -850,7 +838,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var header = jwtToken.EncryptingCredentials == null ? jwtToken.Header : new JwtHeader(jwtToken.SigningCredentials);
             encodedHeader = header.Base64UrlEncode();
             if (jwtToken.SigningCredentials != null)
-                encodedSignature =  JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
+                encodedSignature = JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
             if (jwtToken.EncryptingCredentials != null)
                 return EncryptToken(new JwtSecurityToken(header, jwtToken.Payload, encodedHeader, encodedPayload, encodedSignature), jwtToken.EncryptingCredentials, jwtToken.Header.Typ).RawData;
@@ -941,10 +929,10 @@ namespace System.IdentityModel.Tokens.Jwt
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, LogHelper.MarkAsNonPII(typeof(JwtSecurityToken)), LogHelper.MarkAsNonPII(securityToken.GetType()), token)));
             }
             else
-            { 
+            {
                 jwtToken = ReadJwtToken(token);
             }
-                
+
             byte[] encodedBytes = Encoding.UTF8.GetBytes(jwtToken.RawHeader + "." + jwtToken.RawPayload);
             if (string.IsNullOrEmpty(jwtToken.RawSignature))
             {
@@ -1019,7 +1007,6 @@ namespace System.IdentityModel.Tokens.Jwt
                             kidMatched = jwtToken.Header.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }
                 }
-
             }
 
             if (kidExists)
@@ -1076,7 +1063,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
-            
+
             return MapInboundClaims ? CreateClaimsIdentityWithMapping(jwtToken, actualIssuer, validationParameters) : CreateClaimsIdentityWithoutMapping(jwtToken, actualIssuer, validationParameters);
         }
 
@@ -1168,8 +1155,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If <see cref="ClaimsIdentity.BootstrapContext"/> is not null:
         /// <para>&#160;&#160;If 'type' is 'string', return as string.</para>
         /// <para>&#160;&#160;if 'type' is 'BootstrapContext' and 'BootstrapContext.SecurityToken' is 'JwtSecurityToken'</para>
-        /// <para>&#160;&#160;&#160;&#160;if 'JwtSecurityToken.RawData' != null, return RawData.</para>        
-        /// <para>&#160;&#160;&#160;&#160;else return <see cref="JwtSecurityTokenHandler.WriteToken( SecurityToken )"/>.</para>        
+        /// <para>&#160;&#160;&#160;&#160;if 'JwtSecurityToken.RawData' != null, return RawData.</para>
+        /// <para>&#160;&#160;&#160;&#160;else return <see cref="JwtSecurityTokenHandler.WriteToken( SecurityToken )"/>.</para>
         /// <para>&#160;&#160;if 'BootstrapContext.Token' != null, return 'Token'.</para>
         /// <para>default: <see cref="JwtSecurityTokenHandler.WriteToken(SecurityToken)"/> new ( <see cref="JwtSecurityToken"/>( actor.Claims ).</para>
         /// </remarks>
@@ -1296,7 +1283,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (!string.IsNullOrEmpty(jwtToken.Header.Kid))
             {
-                if (validationParameters.TokenDecryptionKey != null 
+                if (validationParameters.TokenDecryptionKey != null
                     && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Header.Kid, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                     return validationParameters.TokenDecryptionKey;
 
@@ -1340,7 +1327,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text 
+        /// Decrypts a JWE and returns the clear text
         /// </summary>
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
