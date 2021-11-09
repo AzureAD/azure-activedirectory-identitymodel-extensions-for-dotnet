@@ -233,7 +233,7 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain .Net type that was recognized when JwtPayload.Claims serialized the value to JSON.
+        /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain .Net type that was recognized when <see cref="JwtPayload.Claims"/> serialized the value to JSON.
         /// <para>See <seealso cref="InboundClaimTypeMap"/> for more information.</para>
         /// </summary>
         /// <exception cref="ArgumentException">If <see cref="string"/>.IsNullOrWhiteSpace('value') is true.</exception>
@@ -272,9 +272,9 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Gets the type of the <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/>.
+        /// Gets the type of the <see cref="JwtSecurityToken"/>.
         /// </summary>
-        /// <return>The type of <see cref="System.IdentityModel.Tokens.Jwt.JwtSecurityToken"/></return>
+        /// <return>The type of <see cref="JwtSecurityToken"/></return>
         public override Type TokenType
         {
             get { return typeof(JwtSecurityToken); }
@@ -452,7 +452,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para><see cref="EncryptingCredentials.EncryptingCredentials(SecurityKey, string, string)"/> is used to encrypt <see cref="JwtSecurityToken.RawData"/> or <see cref="JwtSecurityToken.RawPayload"/> .</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        /// <exception cref="ArgumentException">If <paramref name="expires"/> &lt;= <paramref name="notBefore"/>.</exception>
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials, null, null);
@@ -479,7 +479,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para><see cref="EncryptingCredentials.EncryptingCredentials(SecurityKey, string, string)"/> is used to encrypt <see cref="JwtSecurityToken.RawData"/> or <see cref="JwtSecurityToken.RawPayload"/> .</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        /// <exception cref="ArgumentException">If <paramref name="expires"/> &lt;= <paramref name="notBefore"/>.</exception>
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer, string audience, ClaimsIdentity subject, DateTime? notBefore, DateTime? expires, DateTime? issuedAt, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, IDictionary<string, object> claimCollection)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials, claimCollection, null);
@@ -503,7 +503,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para><see cref="SigningCredentials.SigningCredentials(SecurityKey, string)"/> is used to sign <see cref="JwtSecurityToken.RawData"/>.</para>
         /// </remarks>
         /// <returns>A <see cref="JwtSecurityToken"/>.</returns>
-        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notBefore'.</exception>
+        /// <exception cref="ArgumentException">If <paramref name="expires"/> &lt;= <paramref name="notBefore"/>.</exception>
         public virtual JwtSecurityToken CreateJwtSecurityToken(string issuer = null, string audience = null, ClaimsIdentity subject = null, DateTime? notBefore = null, DateTime? expires = null, DateTime? issuedAt = null, SigningCredentials signingCredentials = null)
         {
             return CreateJwtSecurityTokenPrivate(issuer, audience, subject, notBefore, expires, issuedAt, signingCredentials, null, null, null);
@@ -649,10 +649,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
-        /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
-        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// <remarks><para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public JwtSecurityToken ReadJwtToken(string token)
         {
@@ -675,10 +675,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
-        /// <exception cref="ArgumentNullException">'token' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
-        /// <remarks><para>If the 'token' is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// <remarks><para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
         public override SecurityToken ReadToken(string token)
         {
@@ -810,7 +810,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <para>If either <see cref="JwtSecurityToken.SigningCredentials"/> or <see cref="JwtSecurityToken.InnerToken"/>.SigningCredentials are set, the JWT will be signed.</para>
         /// <para>If <see cref="JwtSecurityToken.EncryptingCredentials"/> is set, a JWE will be created using the JWT above as the plaintext.</para>
         /// </remarks>
-        /// <exception cref="ArgumentNullException">'token' is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null.</exception>
         /// <exception cref="ArgumentException">'token' is not a not <see cref="JwtSecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.SigningCredentials"/> and <see cref="JwtSecurityToken.InnerToken"/> are set.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">both <see cref="JwtSecurityToken.InnerToken"/> and <see cref="JwtSecurityToken.InnerToken"/>.EncryptingCredentials are set.</exception>
@@ -892,21 +892,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="token">A JWS token.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> that contains signing keys.</param>
-        /// <exception cref="ArgumentNullException">If 'jwt' is null or whitespace.</exception>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
-        /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
+        /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.
         /// </exception>
         /// <exception cref="SecurityTokenUnableToValidateException">
-        /// If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
+        /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
         /// had validation errors or lifetime or issuer. This is not intended to be a signal to refresh keys.
         /// </exception>
-        /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the 'token' does not have a key identifier.</exception>
+        /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the <paramref name="token"/> does not have a key identifier.</exception>
         /// <returns>A <see cref="JwtSecurityToken"/> that has the signature validated if token was signed.</returns>
-        /// <remarks><para>If the 'token' is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
-        /// <para>If the 'token' signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.It is the responsibility of <see cref="TokenValidationParameters.SignatureValidator"/> to set the <see cref="JwtSecurityToken.SigningKey"/></para></remarks>
+        /// <remarks><para>If the <paramref name="token"/> is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
+        /// <para>If the <paramref name="token"/> signature is validated, then the <see cref="JwtSecurityToken.SigningKey"/> will be set to the key that signed the 'token'.It is the responsibility of <see cref="TokenValidationParameters.SignatureValidator"/> to set the <see cref="JwtSecurityToken.SigningKey"/></para></remarks>
         protected virtual JwtSecurityToken ValidateSignature(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -1345,8 +1345,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
         /// <returns>the decoded / cleartext contents of the JWE.</returns>
-        /// <exception cref="ArgumentNullException">if 'jwtToken' is null.</exception>
-        /// <exception cref="ArgumentNullException">if 'validationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="jwtToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenException">if 'jwtToken.Header.enc' is null or empty.</exception>
         /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">if 'jwtToken.Header.kid' is not null AND decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
