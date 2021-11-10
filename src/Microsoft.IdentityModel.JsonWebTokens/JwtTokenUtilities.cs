@@ -32,7 +32,6 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -43,13 +42,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A class which contains useful methods for processing JWT tokens.
     /// </summary>
-    public class JwtTokenUtilities
+    public static class JwtTokenUtilities
     {
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
         public static Regex RegexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
-        
+
         /// <summary>
         /// Regex that is used to figure out if a token is in JWE format.
         /// </summary>
@@ -280,8 +279,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static SecurityKey GetSecurityKey(EncryptingCredentials encryptingCredentials, CryptoProviderFactory cryptoProviderFactory, out byte[] wrappedKey)
         {
-            SecurityKey securityKey = null;
-            KeyWrapProvider kwProvider = null;
+            SecurityKey securityKey;
+            KeyWrapProvider kwProvider;
             wrappedKey = null;
 
             // if direct algorithm, look for support
@@ -332,9 +331,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     decryptionKeys.Add(key);
 
             return decryptionKeys;
-
         }
-
 
         /// <summary>
         /// Gets the <see cref="DateTime"/> using the number of seconds from 1970-01-01T0:0:0Z (UTC)
@@ -420,7 +417,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters)
         {
             if (!string.IsNullOrEmpty(kid))
-            {              
+            {
                 if (validationParameters.IssuerSigningKey != null
                     && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                     return validationParameters.IssuerSigningKey;
@@ -465,4 +462,3 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
     }
 }
-

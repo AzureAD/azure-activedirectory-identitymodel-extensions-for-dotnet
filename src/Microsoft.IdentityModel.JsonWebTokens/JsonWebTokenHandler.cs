@@ -27,9 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -44,13 +42,13 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens.
     /// See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
     public class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Gets the Base64Url encoded string representation of the following JWT header: 
+        /// Gets the Base64Url encoded string representation of the following JWT header:
         /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
         /// </summary>
         /// <return>The Base64Url encoded string representation of the unsigned JWT header.</return>
@@ -60,10 +58,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
         /// <return>The type of <see cref="JsonWebToken"/></return>
-        public Type TokenType
-        {
-            get { return typeof(JsonWebToken); }
-        }
+        public Type TokenType => typeof(JsonWebToken);
 
         /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
@@ -108,10 +103,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
         /// <returns>'true', indicating this instance can validate a <see cref="JsonWebToken"/>.</returns>
-        public virtual bool CanValidateToken
-        {
-            get { return true; }
-        }
+        public virtual bool CanValidateToken => true;
 
         private static JObject CreateDefaultJWEHeader(EncryptingCredentials encryptingCredentials, string compressionAlgorithm, string tokenType)
         {
@@ -135,7 +127,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private static JObject CreateDefaultJWSHeader(SigningCredentials signingCredentials, string tokenType)
         {
-            JObject header = null;
+            JObject header;
 
             if (signingCredentials == null)
             {
@@ -442,7 +434,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>       
+        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
@@ -588,14 +580,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     identity.AddClaim(claim);
                 }
-
             }
 
             return identity;
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text 
+        /// Decrypts a JWE and returns the clear text
         /// </summary>
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
@@ -754,7 +745,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (cryptoProviderFactory == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
-            byte[] wrappedKey = null;
+            byte[] wrappedKey;
             SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, out wrappedKey);
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
@@ -789,7 +780,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                     var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
                     return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg) ?
-                        string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)):
+                        string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)) :
                         string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
                 }
                 catch (Exception ex)
@@ -1058,14 +1049,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
-                            return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); ;
+                            return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
                     }
                 }
             }
 
             return tokenValidationResult;
         }
-     
+
         private TokenValidationResult ValidateJWS(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             try
@@ -1272,7 +1263,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }
                 }
-
             }
 
             // Get information on where keys used during token validation came from for debugging purposes.
