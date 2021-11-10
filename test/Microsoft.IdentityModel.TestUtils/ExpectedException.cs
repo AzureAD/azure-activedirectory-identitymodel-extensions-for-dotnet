@@ -143,21 +143,25 @@ namespace Microsoft.IdentityModel.TestUtils
                     return;
                 }
 
-                if (exception.InnerException != null && InnerTypeExpected == null && !IgnoreInnerException)
+                if (!IgnoreInnerException)
                 {
-                    HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null && !IgnoreInnerException.\nexception.InnerException: " + exception.InnerException, errors);
-                    return;
-                }
+                    if (exception.InnerException != null && InnerTypeExpected == null)
+                    {
+                        HandleError("exception.InnerException != null && expectedException.InnerTypeExpected == null && !IgnoreInnerException.\nexception.InnerException: " + exception.InnerException, errors);
+                        return;
+                    }
 
-                if (exception.InnerException == null && InnerTypeExpected != null && !IgnoreInnerException)
-                {
-                    HandleError("exception.InnerException == null && expectedException.InnerTypeExpected != null && !IgnoreInnerException.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors);
-                    return;
-                }
+                    if (exception.InnerException == null && InnerTypeExpected != null)
+                    {
+                        HandleError("exception.InnerException == null && expectedException.InnerTypeExpected != null && !IgnoreInnerException.\nexpectedException.InnerTypeExpected: " + InnerTypeExpected, errors);
+                        return;
+                    }
 
-                if ((InnerTypeExpected != null) && (exception.InnerException.GetType() != InnerTypeExpected) && !IgnoreInnerException)
-                {
-                    HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
+                    if ((InnerTypeExpected != null) && (exception.InnerException.GetType() != InnerTypeExpected))
+                    {
+                        HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
+                        return;
+                    }
                 }
             }
 

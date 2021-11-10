@@ -247,10 +247,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
 
                 return decryptionProvider.Decrypt(
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.Ciphertext),
-                    Encoding.ASCII.GetBytes(decryptionParameters.EncodedHeader),
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.InitializationVector),
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.AuthenticationTag));
+                    decryptionParameters.CiphertextBytes,
+                    decryptionParameters.HeaderAsciiBytes,
+                    decryptionParameters.InitializationVectorBytes,
+                    decryptionParameters.AuthenticationTagBytes);
             }
         }
 

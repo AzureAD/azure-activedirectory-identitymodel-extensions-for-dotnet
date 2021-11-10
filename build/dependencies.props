@@ -15,6 +15,8 @@
     <SystemRuntimeSerializationXmlVersion>4.3.0</SystemRuntimeSerializationXmlVersion>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
+    <SystemTextEncoding>4.3.0</SystemTextEncoding>
+    <SystemTextJson>4.7.2</SystemTextJson>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
   </PropertyGroup>
 </Project>

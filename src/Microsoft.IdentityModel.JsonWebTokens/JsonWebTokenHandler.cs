@@ -618,13 +618,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, new JwtTokenDecryptionParameters
             {
                 Alg = jwtToken.Alg,
-                AuthenticationTag = jwtToken.AuthenticationTag,
-                Ciphertext = jwtToken.Ciphertext,
+                AuthenticationTagBytes = jwtToken.AuthenticationTagBytes,
+                CiphertextBytes = jwtToken.CiphertextBytes,
                 DecompressionFunction = JwtTokenUtilities.DecompressToken,
                 Enc = jwtToken.Enc,
                 EncodedHeader = jwtToken.EncodedHeader,
                 EncodedToken = jwtToken.EncodedToken,
-                InitializationVector = jwtToken.InitializationVector,
+                HeaderAsciiBytes = jwtToken.EncodedHeaderAsciiBytes,
+                InitializationVectorBytes = jwtToken.InitializationVectorBytes,
                 Keys = keys,
                 Zip = jwtToken.Zip,
             });
@@ -830,7 +831,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
-                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                        var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
                 }
@@ -841,7 +842,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 keysAttempted.AppendLine(key.ToString());
             }
 
-            if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
+            if (unwrappedKeys.Count > 0 && exceptionStrings.Length == 0)
                 return unwrappedKeys;
             else
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, keysAttempted, exceptionStrings, jwtToken)));
@@ -1090,6 +1091,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 var innerToken = ValidateSignature(decryptedJwt, validationParameters);
                 jwtToken.InnerToken = innerToken;
+                // todo should we do this or delegate to inner payload in the JsonWebToken
+                jwtToken.Payload = innerToken.Payload;
                 var innerTokenValidationResult = ValidateTokenPayload(innerToken, validationParameters);
 
                 return new TokenValidationResult
@@ -1176,7 +1179,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 jwtToken = new JsonWebToken(token);
             }
 
-            var encodedBytes = Encoding.UTF8.GetBytes(jwtToken.EncodedHeader + "." + jwtToken.EncodedPayload);
             if (string.IsNullOrEmpty(jwtToken.EncodedSignature))
             {
                 if (validationParameters.RequireSignedTokens)
@@ -1214,16 +1216,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
             var kidExists = !string.IsNullOrEmpty(jwtToken.Kid);
-            byte[] signatureBytes;
-
-            try
-            {
-                signatureBytes = Base64UrlEncoder.DecodeBytes(jwtToken.EncodedSignature);
-            }
-            catch (FormatException e)
-            {
-                throw new SecurityTokenInvalidSignatureException(TokenLogMessages.IDX10508, e);
-            }
 
             if (keys != null)
             {
@@ -1231,7 +1223,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     try
                     {
-                        if (ValidateSignature(encodedBytes, signatureBytes, key, jwtToken.Alg, jwtToken, validationParameters))
+                        if (ValidateSignature(jwtToken, key, validationParameters))
                         {
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
                             jwtToken.SigningKey = key;
@@ -1279,31 +1271,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Obtains a <see cref="SignatureProvider "/> and validates the signature.
         /// </summary>
-        /// <param name="encodedBytes">Bytes to validate.</param>
-        /// <param name="signature">Signature to compare against.</param>
-        /// <param name="key"><See cref="SecurityKey"/> to use.</param>
-        /// <param name="algorithm">Crypto algorithm to use.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">Priority will be given to <see cref="TokenValidationParameters.CryptoProviderFactory"/> over <see cref="SecurityKey.CryptoProviderFactory"/>.</param>
         /// <returns>'true' if signature is valid.</returns>
-        internal static bool ValidateSignature(byte[] encodedBytes, byte[] signature, SecurityKey key, string algorithm, SecurityToken securityToken, TokenValidationParameters validationParameters)
+        internal static bool ValidateSignature(JsonWebToken jsonWebToken, SecurityKey key, TokenValidationParameters validationParameters)
         {
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-            if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
+            if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
-                LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(algorithm), key);
+                LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), key);
                 return false;
             }
 
-            Validators.ValidateAlgorithm(algorithm, key, securityToken, validationParameters);
+            Validators.ValidateAlgorithm(jsonWebToken.Alg, key, jsonWebToken, validationParameters);
 
-            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
+            var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(algorithm))));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
 
             try
             {
-                return signatureProvider.Verify(encodedBytes, signature);
+                return signatureProvider.Verify(jsonWebToken.MessageBytes, jsonWebToken.SignatureBytes);
             }
             finally
             {

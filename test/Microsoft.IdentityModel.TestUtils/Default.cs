@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-            }.ToString();
+            }.ToString(Json.Formatting.None);
         }
 
         public static List<Claim> PayloadClaims

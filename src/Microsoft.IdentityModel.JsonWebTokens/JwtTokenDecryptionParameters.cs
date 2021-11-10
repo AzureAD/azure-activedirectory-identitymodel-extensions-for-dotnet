@@ -36,6 +36,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     internal class JwtTokenDecryptionParameters
     {
+        public byte[] CiphertextBytes { get; set; }
+
+        public byte[] HeaderAsciiBytes { get; set; }
+
+        public byte[] InitializationVectorBytes { get; set; }
+
+        public byte[] AuthenticationTagBytes { get; set; }
+
         /// <summary>
         /// Gets or sets signature algorithm that was used to create the signature.
         /// </summary>
