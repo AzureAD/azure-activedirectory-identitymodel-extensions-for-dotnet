@@ -159,6 +159,14 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     TestId = "AAD common: WsFed"
                 });
 
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    TestId = "Client Miss Configuration"
+                });
+
                 return theoryData;
             }
         }

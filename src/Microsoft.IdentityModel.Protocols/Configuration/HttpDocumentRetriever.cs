@@ -44,6 +44,11 @@ namespace Microsoft.IdentityModel.Protocols
         private HttpClient _httpClient;
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
+#pragma warning disable 1591
+        public const string StatusCode = "status_code";
+        public const string ResponseContent = "response_content";
+#pragma warning disable 1591
+
         /// <summary>
         /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
         /// </summary>
@@ -120,7 +125,14 @@ namespace Microsoft.IdentityModel.Protocols
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
-                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent))
+                 {
+                     Data =
+                     {
+                         { StatusCode, response.StatusCode },
+                         { ResponseContent, responseContent }
+                     }
+                 };
             }
             catch (Exception ex)
             {
