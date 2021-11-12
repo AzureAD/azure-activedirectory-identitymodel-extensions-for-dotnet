@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
-        /// <para>see: https://datatracker.ietf.org/doc/html/rfc7519 </para>
+        /// <para>See: https://datatracker.ietf.org/doc/html/rfc7519 </para>
         /// </summary>
         /// <param name="token">String that should represent a valid JWT.</param>
         /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching:
