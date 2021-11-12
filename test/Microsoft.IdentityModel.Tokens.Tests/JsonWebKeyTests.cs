@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ComputeJwkThumbprintSpec()
         {
-            // https://tools.ietf.org/html/rfc7638#section-3.1
+            // https://datatracker.ietf.org/doc/html/rfc7638#section-3.1
             var context = TestUtilities.WriteHeader($"{this}.ComputeJwkThumbprintSpec", "", true);
 
             var jwk = new JsonWebKey()

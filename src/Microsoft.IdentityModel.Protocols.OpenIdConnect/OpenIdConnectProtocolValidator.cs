@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         /// <summary>
         /// Gets the algorithm mapping between OpenIdConnect and .Net for Hash algorithms.
-        /// a <see cref="IDictionary{TKey, TValue}"/> that contains mappings from the JWT namespace http://tools.ietf.org/html/rfc7518 to .Net.
+        /// a <see cref="IDictionary{TKey, TValue}"/> that contains mappings from the JWT namespace https://datatracker.ietf.org/doc/html/rfc7518 to .Net.
         /// </summary>
         public IDictionary<string, string> HashAlgorithmMap
         {
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (validationContext.ValidatedIdToken == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21332));
 
-            // 'refresh_token' should not be returned from 'authorization_endpoint'. http://tools.ietf.org/html/rfc6749#section-4.2.2.
+            // 'refresh_token' should not be returned from 'authorization_endpoint'. https://datatracker.ietf.org/doc/html/rfc6749#section-4.2.2.
             if (!string.IsNullOrEmpty(validationContext.ProtocolMessage.RefreshToken))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21335));
 

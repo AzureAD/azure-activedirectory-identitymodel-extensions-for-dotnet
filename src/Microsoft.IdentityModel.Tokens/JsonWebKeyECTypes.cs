@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Constants for JsonWebKey Elliptical Curve Types
-    /// https://tools.ietf.org/html/rfc7518#section-6.2.1.1
+    /// https://datatracker.ietf.org/doc/html/rfc7518#section-6.2.1.1
     /// </summary>
     public static class JsonWebKeyECTypes
     {

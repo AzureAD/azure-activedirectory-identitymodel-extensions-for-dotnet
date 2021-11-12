@@ -35,7 +35,7 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a JSON Web Key as defined in http://tools.ietf.org/html/rfc7517.
+    /// Represents a JSON Web Key as defined in https://datatracker.ietf.org/doc/html/rfc7517.
     /// </summary>
     [JsonObject]
     public class JsonWebKey : SecurityKey
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="JsonWebKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
@@ -357,7 +357,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="JsonWebKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
@@ -428,7 +428,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates a JsonWebKey representation of an asymmetric public key.
         /// </summary>
         /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.2</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.2</remarks>
         internal string RepresentAsAsymmetricPublicJwk()
         {
             JObject jwk = new JObject();

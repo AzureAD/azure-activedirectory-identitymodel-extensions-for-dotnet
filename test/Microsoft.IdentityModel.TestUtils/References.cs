@@ -29,7 +29,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.1.  Test Cases for AES_128_CBC_HMAC_SHA_256
     public static class AES_128_CBC_HMAC_SHA_256
     {
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.2.  Test Cases for AES_192_CBC_HMAC_SHA_256
     public static class AES_192_CBC_HMAC_SHA_384
     {
@@ -253,7 +253,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
   
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.3.  Test Cases for AES_256_CBC_HMAC_SHA_512
     public static class AES_256_CBC_HMAC_SHA_512
     {
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.1.4
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.4
     // A.1.4 Content encryption using AES-GCM 256
     public static class AES_256_GCM
     {
@@ -450,7 +450,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.3.3
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.3
     // A.3.3 Key Encryption: Aes128 Key Wrap
     public static class AES128_KeyWrap
     {
@@ -490,7 +490,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.1.3
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.3
     // A.1.3 Key wrap: RSAES-OAEP + JsonWebKey
     public static class RSAES_OAEP_KeyWrap
     {
@@ -559,7 +559,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.2.3
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.2.3
     // A.2.3 Key wrap: RSAES-PKCS1-v1_5 + JsonWebKey
     public static class RSAES_PKCS1_KeyWrap
     {

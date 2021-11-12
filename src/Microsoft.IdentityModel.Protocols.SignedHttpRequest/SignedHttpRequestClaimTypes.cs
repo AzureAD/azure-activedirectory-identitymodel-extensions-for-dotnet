@@ -35,42 +35,42 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public static class SignedHttpRequestClaimTypes
     {
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string At = "at";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string Ts = "ts";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string M = "m";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string U = "u";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string P = "p";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string Q = "q";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string H = "h";
 
         /// <summary>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </summary>
         public const string B = "b";
 

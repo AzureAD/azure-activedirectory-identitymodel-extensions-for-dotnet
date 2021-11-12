@@ -51,43 +51,43 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Ts"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateTs { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.M"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateM { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.U"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateU { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.P"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>
         public bool CreateP { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Q"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateQ { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.H"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateH { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.B"/> claim should be created and added or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks> 
         public bool CreateB { get; set; } = false;
 
         /// <summary>

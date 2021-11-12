@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="SymmetricSecurityKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
             return true;
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="SymmetricSecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{Base64UrlEncoder.Encode(Key)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.Octet}""}}";
