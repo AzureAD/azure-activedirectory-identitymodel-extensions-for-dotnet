@@ -172,6 +172,8 @@ namespace Microsoft.IdentityModel.Tokens
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
+            Configuration = other.Configuration;
+            ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
@@ -370,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this property will be used to obtain the issuer and signing keys associated with the metadata endpoint of <see cref="BaseConfiguration.Issuer"/>.
         /// The obtained issuer and signing keys will then be used along with those present on the TokenValidationParameters for validation of the incoming token.
         /// </summary>
-        internal BaseConfigurationManager ConfigurationManager { get; set; }
+        public BaseConfigurationManager ConfigurationManager { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.

@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>Configuration of type T.</returns>
-        internal override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
             return Task.FromResult(_configuration as BaseConfiguration);
         }
