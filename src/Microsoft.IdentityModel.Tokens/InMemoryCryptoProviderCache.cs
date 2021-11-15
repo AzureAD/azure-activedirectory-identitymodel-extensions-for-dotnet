@@ -43,7 +43,14 @@ namespace Microsoft.IdentityModel.Tokens
         private IProviderCache<string, SignatureProvider> _verifyingSignatureProviders;
 
         /// <summary>
-        /// 
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the default <see cref="CryptoProviderCacheOptions"/>.
+        /// </summary>
+        public InMemoryCryptoProviderCache() : this(new CryptoProviderCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
         /// <param name="cryptoProviderCacheOptions"></param>
         public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
