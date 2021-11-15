@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(webKey)
         {
             if (string.IsNullOrEmpty(webKey.K))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, typeof(SymmetricSecurityKey))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)))));
 
             _key = Base64UrlEncoder.DecodeBytes(webKey.K);
             _keySize = _key.Length * 8;
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.Length == 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, typeof(SymmetricSecurityKey))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)))));
 
             _key = key.CloneByteArray();
             _keySize = _key.Length * 8;

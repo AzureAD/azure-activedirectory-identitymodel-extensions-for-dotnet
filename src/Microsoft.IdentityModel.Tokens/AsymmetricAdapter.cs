@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
+                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
                 }
             }
             else if (key is ECDsaSecurityKey ecdsaKey)
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
                 InitializeUsingEcdsaSecurityKey(ecdsaKey);
             }
             else
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
         }
 
         internal byte[] Decrypt(byte[] data)
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
             else
             {
                 // In NET45 we only support RSACryptoServiceProvider or "System.Security.Cryptography.RSACng"
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, typeof(RSACryptoServiceProvider).ToString(), _rsaCngTypeName, rsa.GetType().ToString())));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, LogHelper.MarkAsNonPII(typeof(RSACryptoServiceProvider).ToString()), LogHelper.MarkAsNonPII(_rsaCngTypeName), LogHelper.MarkAsNonPII(rsa.GetType().ToString()))));
             }
 #endif
 

@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
         public StaticConfigurationManager(T configuration)
         {
             if (configuration == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), LogHelper.FormatInvariant(LogMessages.IDX20000, nameof(configuration))));
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), LogHelper.FormatInvariant(LogMessages.IDX20000, LogHelper.MarkAsNonPII(nameof(configuration)))));
 
             _configuration = configuration;
         }
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>
         /// <returns>Configuration of type T.</returns>
-        internal override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
             return Task.FromResult(_configuration as BaseConfiguration);
         }

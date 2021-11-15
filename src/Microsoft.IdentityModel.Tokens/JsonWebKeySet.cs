@@ -40,6 +40,8 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKeySet
     {
+        private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
+
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
@@ -75,12 +77,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 

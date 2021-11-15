@@ -51,8 +51,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public int SizeLimit
         {
+<<<<<<< HEAD
             get => _sizeLimit;
             set => _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, value)));
+=======
+            get
+            {
+                return _sizeLimit;
+            }
+            set
+            {
+                _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, LogHelper.MarkAsNonPII(value))));
+            }
+>>>>>>> dev
         }
 
         /// <summary>

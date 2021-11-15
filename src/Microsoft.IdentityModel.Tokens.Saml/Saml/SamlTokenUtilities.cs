@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         {
                             valueType = GetXsiTypeForValue(item);
                             if (valueType == null && item is IEnumerable)
-                                throw new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10105, claimType));
+                                throw new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10105, LogHelper.MarkAsNonPII(claimType)));
 
                             claims.Add(new Claim(claimType, item.ToString(), valueType));
                         }

@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Xml
                 tokenStream.WriteTo(writer);
                 writer.EndCanonicalization();
                 writer.Flush();
-                return hash.ComputeHash(stream.ToArray());
+                return hash.ComputeHash(stream.GetBuffer(), 0, (int)stream.Length);
             }
         }
     }

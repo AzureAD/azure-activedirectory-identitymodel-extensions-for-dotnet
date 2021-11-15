@@ -40,6 +40,9 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval;
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
+        private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
+        private BaseConfiguration _lastKnownGoodConfiguration;
+        private DateTime? _lastKnownGoodConfigFirstUse = null;
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -50,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, MinimumAutomaticRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, LogHelper.MarkAsNonPII(MinimumAutomaticRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _automaticRefreshInterval = value;
             }
@@ -62,14 +65,14 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(0, 12, 0, 0);
 
         /// <summary>
+        /// 1 hour is the default time interval that a last known good configuration will last for.
+        /// </summary>
+        public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
+
+        /// <summary>
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
-
-        /// <summary>
-        /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
-        /// </summary>
-        internal BaseConfiguration LastKnownGoodConfiguration { get; set; }
 
         /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
@@ -77,12 +80,53 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type Configuration.</returns>
-        internal abstract Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel);
+        /// <remarks>This method on the base class throws a <see cref="NotImplementedException"/> as it is meant to be
+        /// overridden by the class that extends it.</remarks>
+        public virtual Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
+        /// </summary>
+        public BaseConfiguration LastKnownGoodConfiguration
+        {
+            get
+            {
+                // only set this value the first time the last known good configuration is used for validation
+                // AND if there is actually a LKG set
+                if (_lastKnownGoodConfigFirstUse == null && _lastKnownGoodConfiguration != null)
+                    _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
+
+                return _lastKnownGoodConfiguration;
+            }
+            set
+            {
+                _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+                _lastKnownGoodConfigFirstUse = null; // reset this value as a new last known good configuration was set (and has not been used yet)
+            }
+        }
+
+        /// <summary>
+        /// The length of time that a last known good configuration is valid for.
+        /// </summary>
+        public TimeSpan LastKnownGoodLifetime
+        {
+            get { return _lastKnownGoodLifetime; }
+            set
+            {
+                if (value < TimeSpan.Zero)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10110, value)));
+
+                _lastKnownGoodLifetime = value;
+            }
+        }
 
         /// <summary>
         /// The metadata address to retrieve the configuration from.
         /// </summary>
-        internal string MetadataAddress { get; set; }
+        public string MetadataAddress { get; set; }
 
         /// <summary>
         /// 5 minutes is the minimum value for automatic refresh. <see cref="AutomaticRefreshInterval"/> can not be set less than this value.
@@ -103,16 +147,23 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, MinimumRefreshInterval, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, LogHelper.MarkAsNonPII(MinimumRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _refreshInterval = value;
             }
         }
 
         /// <summary>
-        /// Indicates whether the last known good configuraton (LKG) can be used, false by default.
+        /// Indicates whether the last known good feature should be used, true by default.
         /// </summary>
-        internal bool UseLastKnownGoodConfiguration { get; set; } = false;
+        public bool UseLastKnownGoodConfiguration { get; set; } = true;
+
+        /// <summary>
+        /// Indicates whether the last known good configuration is still fresh, depends on when the LKG was first used and it's lifetime.
+        /// </summary>
+        // The _lastKnownGoodConfiguration private variable is accessed rather than the property (LastKnownGoodConfiguration) as we do not want this access
+        // to trigger a change in _lastKnownGoodConfigFirstUse.
+        public bool IsLastKnownGoodValid => _lastKnownGoodConfiguration != null && (_lastKnownGoodConfigFirstUse == null || DateTime.UtcNow < _lastKnownGoodConfigFirstUse + LastKnownGoodLifetime);
 
         /// <summary>
         /// Indicate that the configuration may be stale (as indicated by failing to process incoming tokens).

@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (value != null && NotOnOrAfter.HasValue)
                 {
                     if (value.Value >= NotOnOrAfter.Value)
-                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13513, value, NotOnOrAfter)));
+                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13513, MarkAsNonPII(value), MarkAsNonPII(NotOnOrAfter))));
                 }
 
                 _notBefore = value;
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (value != null && NotBefore.HasValue)
                 {
                     if (value.Value <= NotBefore.Value)
-                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, value, NotBefore)));
+                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, MarkAsNonPII(value), MarkAsNonPII(NotBefore))));
                 }
 
                 _notOnOrAfter = value;

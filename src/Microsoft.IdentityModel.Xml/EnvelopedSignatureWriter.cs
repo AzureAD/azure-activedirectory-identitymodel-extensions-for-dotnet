@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Xml
             var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(digestAlgorithm);
 
             if (hashAlgorithm == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Digest)));
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Digest)));
 
             Reference reference = null;
             try
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Xml
                     reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
                     {
                         Uri = _referenceUri,
-                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
+                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.GetBuffer(), 0, (int)_canonicalStream.Length)),
                         DigestMethod = digestAlgorithm
                     };
                 }
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Xml
 
                     var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
                     if (provider == null)
-                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
+                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Key.ToString(), MarkAsNonPII(_signingCredentials.Algorithm))));
 
                     try
                     {

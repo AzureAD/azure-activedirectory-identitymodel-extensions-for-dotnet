@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         internal const string Actor = "Actor";
+        private const string _className = "Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler";
 
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
@@ -195,10 +196,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 // Use unique attribute if name, value type, or issuer differ
                 var attributeKey = new SamlAttributeKeyComparer.AttributeKey(attribute);
-                if (distinctAttributes.ContainsKey(attributeKey))
+                if (distinctAttributes.TryGetValue(attributeKey, out var attr))
                 {
                     foreach (var attributeValue in attribute.Values)
-                        distinctAttributes[attributeKey].Values.Add(attributeValue);
+                        attr.Values.Add(attributeValue);
                 }
                 else
                 {
@@ -236,10 +237,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             int lastSlashIndex = claimType.LastIndexOf('/');
             if ((lastSlashIndex == 0) || (lastSlashIndex == -1))
-                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, claimType)));
+                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, MarkAsNonPII(claimType))));
 
             if (lastSlashIndex == claim.Type.Length - 1)
-                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, claimType)));
+                throw LogExceptionMessage(new SamlSecurityTokenException(FormatInvariant(LogMessages.IDX11523, MarkAsNonPII(claimType))));
 
             return new SamlAttribute(
                 claimType.Substring(0, lastSlashIndex),
@@ -360,7 +361,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, LogHelper.MarkAsNonPII(ClaimsIdentity.DefaultIssuer));
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
@@ -553,7 +554,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     writer.Flush();
                 }
 
-                return Encoding.UTF8.GetString(ms.ToArray());
+                return Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
             }
         }
 
@@ -641,7 +642,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (statement == null)
                 throw LogArgumentNullException(nameof(statement));
 
-            LogHelper.LogWarning(LogMessages.IDX11516, statement.GetType());
+            LogHelper.LogWarning(LogMessages.IDX11516, LogHelper.MarkAsNonPII(statement.GetType()));
         }
 
         /// <summary>
@@ -745,7 +746,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(token));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
             using (var reader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(token), XmlDictionaryReaderQuotas.Max))
             {
@@ -778,7 +779,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var assertion = Serializer.ReadAssertion(reader);
             if (assertion == null)
-                throw LogExceptionMessage(new SamlSecurityTokenReadException(FormatInvariant(TokenLogMessages.IDX10254, this.GetType(), "ReadSamlToken", Serializer.GetType(), "ReadAssertion", typeof(SamlAssertion))));
+                throw LogExceptionMessage(
+                    new SamlSecurityTokenReadException(FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ReadSamlToken"), LogHelper.MarkAsNonPII(Serializer.GetType()), LogHelper.MarkAsNonPII("ReadAssertion"), LogHelper.MarkAsNonPII(typeof(SamlAssertion)))));
 
             return new SamlSecurityToken(assertion);
         }
@@ -1020,14 +1022,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10505, token)));
 
                 if (!(validatedSamlToken is SamlSecurityToken validatedSaml))
-                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10506, typeof(SamlSecurityToken), validatedSamlToken.GetType(), token)));
+                    throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10506, LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)), LogHelper.MarkAsNonPII(validatedSamlToken.GetType()), token)));
 
                 return validatedSaml;
             }
 
             var samlToken = ReadSamlToken(token);
             if (samlToken == null)
-                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, GetType(), "ValidateSignature", GetType(), "ReadSamlToken", typeof(SamlSecurityToken))));
+                throw LogExceptionMessage(
+                    new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateSignature"), LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ReadSamlToken"), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)))));
 
             return ValidateSignature(samlToken, samlToken.Assertion.CanonicalString, validationParameters);
         }
@@ -1092,7 +1095,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                     if (key != null)
                     {
-                        keysAttempted.AppendLine(key.ToString() + " , KeyId: " + key.KeyId);
+                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (canMatchKey && !keyMatched && key.KeyId != null)
                             keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
                     }
@@ -1163,7 +1166,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = ReadSamlToken(reader);
             if (samlToken == null)
-                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, GetType(), "ValidateToken", GetType(), "ReadSamlToken", typeof(SamlSecurityToken))));
+                throw LogExceptionMessage(
+                    new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateToken"), LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ReadSamlToken"), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)))));
 
             ValidateSignature(samlToken, samlToken.Assertion.CanonicalString, validationParameters);
 
@@ -1189,11 +1193,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogArgumentNullException(nameof(validationParameters));
 
             if (token.Length > MaximumTokenSizeInBytes)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, token.Length, MaximumTokenSizeInBytes)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
             var samlToken = ValidateSignature(token, validationParameters);
             if (samlToken == null)
-                throw LogExceptionMessage(new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, GetType(), "ValidateToken", GetType(), "ValidateSignature", typeof(SamlSecurityToken))));
+                throw LogExceptionMessage(new SecurityTokenValidationException(
+                    FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateToken"), LogHelper.MarkAsNonPII(GetType()), LogHelper.MarkAsNonPII("ValidateSignature"), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)))));
 
             return ValidateToken(samlToken, token, validationParameters, out validatedToken);
         }
@@ -1232,7 +1237,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)), LogHelper.MarkAsNonPII(token.GetType()))));
 
             using (var memoryStream = new MemoryStream())
             {
@@ -1240,7 +1245,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
                     WriteToken(writer, samlToken);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
             }
         }
@@ -1264,7 +1269,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var samlToken = token as SamlSecurityToken;
             if (samlToken == null)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, GetType(), typeof(SamlSecurityToken), token.GetType())));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX11400, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)), LogHelper.MarkAsNonPII(token.GetType()))));
 
             if (samlToken.Assertion == null)
                 throw LogArgumentNullException(nameof(samlToken.Assertion));

@@ -538,7 +538,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
             }
 
             return value;
@@ -639,7 +639,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
             }
 
             return value;

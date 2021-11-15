@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(method));
 
             if (!method.IsAbsoluteUri)
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(method), method), nameof(method)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(method)), method), nameof(method)));
 
             _method = method;
             SubjectConfirmationData = subjectConfirmationData;
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(Method), value), nameof(value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(Method)), value), nameof(value)));
 
                 _method = value;
             }

@@ -143,6 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
+        /// The value is <c>"AuthenticationTypes.Federation"</c>.
         /// </summary>
         public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
@@ -171,6 +172,8 @@ namespace Microsoft.IdentityModel.Tokens
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
+            Configuration = other.Configuration;
+            ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
@@ -294,6 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the clock skew to apply when validating a time.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">If 'value' is less than 0.</exception>
+        /// The default is <c>300</c> seconds (5 minutes).
         [DefaultValue(300)]
         public TimeSpan ClockSkew
         {
@@ -305,7 +309,7 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 if (value < TimeSpan.Zero)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10100, value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10100, LogHelper.MarkAsNonPII(value))));
 
                 _clockSkew = value;
             }
@@ -368,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this property will be used to obtain the issuer and signing keys associated with the metadata endpoint of <see cref="BaseConfiguration.Issuer"/>.
         /// The obtained issuer and signing keys will then be used along with those present on the TokenValidationParameters for validation of the incoming token.
         /// </summary>
-        internal BaseConfigurationManager ConfigurationManager { get; set; }
+        public BaseConfigurationManager ConfigurationManager { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
@@ -377,6 +381,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
+        /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
         public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
@@ -435,6 +440,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>
         /// Controls the value <see cref="ClaimsIdentity.Name"/> returns. It will return the first <see cref="Claim.Value"/> where the <see cref="Claim.Type"/> equals <see cref="NameClaimType"/>.
+        /// The default is <see cref="ClaimsIdentity.DefaultNameClaimType"/>.
         /// </remarks>
         public string NameClaimType
         {
@@ -465,18 +471,21 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
+        /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
         public bool RequireAudience { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether tokens must have an 'expiration' value.
+        /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
         public bool RequireExpirationTime { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether a <see cref="SecurityToken"/> can be considered valid if not signed.
+        /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
         public bool RequireSignedTokens { get; set; }
@@ -487,6 +496,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// <para>Controls the results of <see cref="ClaimsPrincipal.IsInRole( string )"/>.</para>
         /// <para>Each <see cref="Claim"/> where <see cref="Claim.Type"/> == <see cref="RoleClaimType"/> will be checked for a match against the 'string' passed to <see cref="ClaimsPrincipal.IsInRole(string)"/>.</para>
+        /// The default is <see cref="ClaimsIdentity.DefaultRoleClaimType"/>.
         /// </remarks>
         public string RoleClaimType
         {
@@ -513,7 +523,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a boolean to control if the original token should be saved after the security token is validated.
         /// </summary>
-        /// <remarks>The runtime will consult this value and save the original token that was validated.</remarks>
+        /// <remarks>The runtime will consult this value and save the original token that was validated.
+        /// The default is <c>false</c>.
+        /// </remarks>
         [DefaultValue(false)]
         public bool SaveSigninToken { get; set; }
 
@@ -569,6 +581,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token kid or if token kid is empty.
+        /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]
         public bool TryAllIssuerSigningKeys { get; set; }
@@ -587,6 +600,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a value indicating if an actor token is detected, whether it should be validated.
+        /// The default is <c>false</c>.
         /// </summary>
         [DefaultValue(false)]
         public bool ValidateActor { get; set; }
@@ -597,7 +611,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>Validation of the audience, mitigates forwarding attacks. For example, a site that receives a token, could not replay it to another side.
         /// A forwarded token would contain the audience of the original site.
         /// This boolean only applies to default audience validation. If <see cref="AudienceValidator"/> is set, it will be called regardless of whether this
-        /// property is true or false.</remarks>
+        /// property is true or false.
+        /// The default is <c>true</c>.
+        /// </remarks>
         [DefaultValue(true)]
         public bool ValidateAudience { get; set; }
 
@@ -612,6 +628,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// to the application that accepts tokens for contoso.
         /// This boolean only applies to default issuer validation. If <see cref= "IssuerValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
+        /// The default is <c>true</c>.
         /// </remarks>
         [DefaultValue(true)]
         public bool ValidateIssuer { get; set; }
@@ -623,6 +640,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. 
         /// This boolean only applies to default signing key validation. If <see cref= "IssuerSigningKeyValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
+        /// The default is <c>false</c>.
         /// </remarks>
         [DefaultValue(false)]
         public bool ValidateIssuerSigningKey { get; set; }
@@ -633,6 +651,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This boolean only applies to default lifetime validation. If <see cref= "LifetimeValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
+        /// The default is <c>true</c>.
         /// </remarks>
         [DefaultValue(true)]
         public bool ValidateLifetime { get; set; }
@@ -643,6 +662,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This boolean only applies to default token replay validation. If <see cref= "TokenReplayValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
+        /// The default is <c>false</c>.
         /// </remarks>
         [DefaultValue(false)]
         public bool ValidateTokenReplay { get; set; }
@@ -652,26 +672,31 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>
         /// If set to a non-empty collection, only the algorithms listed will be considered valid.
+        /// The default is <c>null</c>.
         /// </remarks>
         public IEnumerable<string> ValidAlgorithms { get; set; }
 
         /// <summary>
         /// Gets or sets a string that represents a valid audience that will be used to check against the token's audience.
+        /// The default is <c>null</c>.
         /// </summary>
         public string ValidAudience { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid audiences that will be used to check against the token's audience.
+        /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidAudiences { get; set; }
 
         /// <summary>
-        /// Gets or sets a <see cref="String"/> that represents a valid issuer that will be used to check against the token's issuer.
+        /// Gets or sets a <see cref="string"/> that represents a valid issuer that will be used to check against the token's issuer.
+        /// The default is <c>null</c>.
         /// </summary>
         public string ValidIssuer { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
+        /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidIssuers { get; set; }
 
@@ -679,6 +704,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
+        /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
     }

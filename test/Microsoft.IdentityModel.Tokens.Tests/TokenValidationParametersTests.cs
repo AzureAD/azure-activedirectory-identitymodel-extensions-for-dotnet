@@ -45,8 +45,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 43)
-                Assert.True(false, "Number of properties has changed from 43 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 44)
+                Assert.True(false, "Number of properties has changed from 44 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -164,8 +164,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 43)
-                Assert.True(false, "Number of public fields has changed from 43 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 44)
+                Assert.True(false, "Number of public fields has changed from 44 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -191,8 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
                         new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        // new KeyValuePair<string, List<object>>("Configuration", new List<object>{(BaseConfiguration)null, new OpenIdConnectConfiguration(), new WsFederationConfiguration()}),
-                        // new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
+                        new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
                     },
                     Object = validationParameters,
                 };

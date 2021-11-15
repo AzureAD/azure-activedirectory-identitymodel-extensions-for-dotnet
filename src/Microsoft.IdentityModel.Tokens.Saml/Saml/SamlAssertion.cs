@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                                 writer.StartCanonicalization(c14nStream, false, null);
                                 serializer.WriteAssertion(writer, this);
                                 writer.Flush();
-                                _canonicalString = Encoding.UTF8.GetString(c14nStream.ToArray());
+                                _canonicalString = Encoding.UTF8.GetString(c14nStream.GetBuffer(), 0, (int)c14nStream.Length);
                             }
                         }
                         catch

@@ -41,6 +41,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     [JsonObject]
     public class OpenIdConnectConfiguration : BaseConfiguration
     {
+        private const string _className = "Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration";
+
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
         /// </summary>
@@ -91,12 +93,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX21806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 
