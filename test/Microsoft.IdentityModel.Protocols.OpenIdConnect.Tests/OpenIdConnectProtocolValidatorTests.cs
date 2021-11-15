@@ -1495,7 +1495,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.Add(validator, SecurityAlgorithms.ExclusiveC14nWithComments, customHashAlgorithm.GetType(), ExpectedException.NoExceptionExpected);
 
-                var cryptoProviderFactory = new CryptoProviderFactory(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50));
+                var cryptoProviderFactory = new CryptoProviderFactory();
 
                 // Default CryptoProviderFactory faults on this 'hash' algorithm
                 validator = new OpenIdConnectProtocolValidator()

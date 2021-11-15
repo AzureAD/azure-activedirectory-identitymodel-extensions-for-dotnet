@@ -33,8 +33,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.IdentityModel.KeyVaultExtensions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -1035,7 +1033,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void ProviderCache_EnsureNoHangingTasks()
         {
             long taskIdleTimeoutInSeconds = 1;
-            var cache = new InMemoryCryptoProviderCache();
+            var cache = CryptoProviderCacheFactory.Create() as InMemoryCryptoProviderCache;
             var factory = new CryptoProviderFactory(cache);
 
             // create signing providers
@@ -1074,9 +1072,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 cache.TryRemove(provider);
 
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
-
-            // Dispose() should not throw any exception.
-            cache.Dispose();
         }
 
         /// <summary>
@@ -1085,7 +1080,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ProviderCache_EnsureNoException_MultipleThreads()
         {
-            var cache = new InMemoryCryptoProviderCache();
+            var cache = CryptoProviderCacheFactory.Create() as InMemoryCryptoProviderCache;
             var factory = new CryptoProviderFactory(cache);
 
             int count = 5;
@@ -1105,10 +1100,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
-            // The Dispose() call should not dispose of the cache resources, otherwise other threads will run into exceptions.
-            // However, this can change in the future.
-            cache.Dispose();
-
             int maxWaitTimeInSeconds = 5; // max wait time for the event queue task to complete
             WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(maxWaitTimeInSeconds));
 
@@ -1120,9 +1111,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 thread.Join();
 
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
-
-            // Call Dispose() one more time to ensure no ill effects.
-            cache.Dispose();
         }
 
         /// <summary>
@@ -1132,8 +1120,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials()
         {
-            var cache = new InMemoryCryptoProviderCache();
-            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+            var cache = CryptoProviderCacheFactory.Create() as InMemoryCryptoProviderCache;
+            var factory = new CryptoProviderFactory(cache);
 
             var testClaims = new List<Claim>
             {
@@ -1145,7 +1133,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Alg,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Enc)
-                    { CryptoProviderFactory = cryptoProviderFactory });
+                    { CryptoProviderFactory = factory });
 
             JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
             var token = new JwtSecurityToken(header, payload);
@@ -1168,8 +1156,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials()
         {
-            var cache = new InMemoryCryptoProviderCache();
-            CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
+            var cache = CryptoProviderCacheFactory.Create() as InMemoryCryptoProviderCache;
+            var factory = new CryptoProviderFactory(cache);
+
             var testClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
@@ -1177,7 +1166,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
 
             // create new key, set the newly created crypto provider factory on it
-            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256) { CryptoProviderFactory = cryptoProviderFactory };
+            var signingCredentials = new SigningCredentials(new X509SecurityKey(KeyingMaterial.DefaultCert_2048), SecurityAlgorithms.RsaSha256) { CryptoProviderFactory = factory };
 
             var token = new JwtSecurityToken(
                 issuer: "IssuerName",

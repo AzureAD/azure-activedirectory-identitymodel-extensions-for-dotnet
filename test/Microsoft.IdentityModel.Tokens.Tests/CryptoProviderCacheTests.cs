@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -44,19 +43,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public static Func<CryptoProviderCache> CreateCacheForTesting = new Func<CryptoProviderCache>(() =>
         {
-            return new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50);
+            return CryptoProviderCacheFactory.Create();
         });
-
-        [Fact]
-        public void CryptoProviderCacheOptions()
-        {
-            var options = new CryptoProviderCacheOptions();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 0);
-            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = -1);
-            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 10);
-            options.SizeLimit = 11;
-        }
 
         /// <summary>
         /// Tests that a cache key generated from a <see cref="SignatureProvider"/> or a set of components are equal.
@@ -69,8 +57,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-                var keyFromComponents = theoryData.InMemoryCryptoProviderCachePublic.GetCacheKeyPublic(theoryData.SecurityKey, theoryData.Algorithm, theoryData.TypeofProvider);
-                var keyFromProvider = theoryData.InMemoryCryptoProviderCachePublic.GetCacheKeyPublic(theoryData.SignatureProvider);
+                var keyFromComponents = theoryData.InMemoryCryptoProviderCache.GetCacheKey(theoryData.SecurityKey, theoryData.Algorithm, theoryData.TypeofProvider);
+                var keyFromProvider = theoryData.InMemoryCryptoProviderCache.GetCacheKey(theoryData.SignatureProvider);
                 if (keyFromProvider.Equals(keyFromComponents) != theoryData.ShouldCacheKeysMatch)
                     context.Diffs.Add($"theoryData.CacheKeysMatch:{Environment.NewLine}keyFromComponents: '{keyFromComponents}'{Environment.NewLine}!={Environment.NewLine}keyFromProvider:    '{keyFromProvider}'.");
 
@@ -453,23 +441,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        /// <summary>
-        /// Checks that the Dispose() method is properly called on the InMemoryCryptoProviderCache.
-        [Fact]
-        public void CryptoProviderCacheDispose()
-        {
-            TestUtilities.WriteHeader($"{this}.CryptoProviderCacheDispose");
-            var context = new CompareContext();
-            var cache = new InMemoryCryptoProviderCachePublic();
-
-            cache.Dispose();
-
-            if (!cache.DisposeCalled)
-                context.AddDiff("InMemoryCryptoProviderCachePublic was not properly disposed of.");
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
         [Theory, MemberData(nameof(TryRemoveTheoryData))]
         public void TryRemove(CryptoProviderCacheTheoryData theoryData)
         {
@@ -632,7 +603,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public bool Found { get; set; }
 
-        public InMemoryCryptoProviderCachePublic InMemoryCryptoProviderCachePublic { get; set; } = new InMemoryCryptoProviderCachePublic();
+        internal CryptoProviderCache InMemoryCryptoProviderCache { get; set; } = CryptoProviderCacheFactory.Create() as InMemoryCryptoProviderCache;
 
         public bool Removed { get; set; } = true;
 
@@ -648,31 +619,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public void Dispose()
         {
-            InMemoryCryptoProviderCachePublic?.Dispose();
-        }
-    }
-
-    public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
-    {
-        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), 50)
-        {}
-
-        public bool DisposeCalled { get; set; } = false;
-
-        public string GetCacheKeyPublic(SignatureProvider signatureProvider)
-        {
-            return base.GetCacheKey(signatureProvider);
-        }
-
-        public string GetCacheKeyPublic(SecurityKey securityKey, string algorithm, string typeofProvider)
-        {
-            return base.GetCacheKey(securityKey, algorithm, typeofProvider);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            DisposeCalled = true;
-            base.Dispose(disposing);
         }
     }
 }

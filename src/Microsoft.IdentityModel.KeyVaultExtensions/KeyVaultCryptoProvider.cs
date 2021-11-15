@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// </summary>
         public KeyVaultCryptoProvider()
         {
-            _cache = new InMemoryCryptoProviderCache();
+            _cache = CryptoProviderCacheFactory.Create();
         }
 
         /// <summary>

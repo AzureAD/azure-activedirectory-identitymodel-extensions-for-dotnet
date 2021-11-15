@@ -42,7 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new EventBasedLRUCache<int?, string>(10);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff("Cache should contain the key value pair {1, 'one'}, but the Contains() method returned false.");
@@ -71,7 +72,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.DoNotRemoveExpiredValues");
             var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(11, removeExpiredValuesIntervalInSeconds: 5, removeExpiredValues: false);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity, RemoveExpiredValues = false });
             for (int i = 0; i <= 10; i++)
                     cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
 
@@ -92,7 +94,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
-            var cache = new EventBasedLRUCache<int, string>(11, removeExpiredValues: true);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity, RemoveExpiredValues = true });
             for (int i = 0; i <= 10; i++)
             {
                 // Only even values should expire.
@@ -128,7 +131,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
             Assert.Throws<ArgumentNullException>(() => cache.SetValue(1, null));
 
             cache.SetValue(1, "one");
@@ -174,7 +178,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new EventBasedLRUCache<int?, string>(2);
+            int cacheCapacity = 20;
+            var cache = new EventBasedLRUCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
             cache.SetValue(1, "one");
 
             if (!cache.TryGetValue(1, out var value))
@@ -206,7 +211,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new EventBasedLRUCache<int?, string>(1);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
 
             cache.SetValue(1, "one");
 
@@ -235,7 +241,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10);
+            int cacheCapacity = 11;
+            var cache = new EventBasedLRUCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
             for (int i = 0; i <= 1000; i++)
             {
                 cache.SetValue(i, Guid.NewGuid().ToString());
@@ -251,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     Thread.Sleep(10);
 
                     // Cache size should be less than the capacity (somewhere between 8-10 items).
-                    if (cache.LinkedList.Count > 10)
+                    if (cache.LinkedList.Count > cacheCapacity)
                         context.AddDiff("Cache size is greater than the max!");
 
                     // The linked list should be ordered in descending order as the largest items were added last,
@@ -283,11 +290,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void LRUCacheItemTests()
         {
-            Assert.Throws<ArgumentNullException>(() => new ProviderCacheItem<string, string>("1", null));
-            Assert.Throws<ArgumentNullException>(() => new ProviderCacheItem<string, string>(null, "1"));
+            Assert.Throws<ArgumentNullException>(() => new CacheItem<string, string>("1", null));
+            Assert.Throws<ArgumentNullException>(() => new CacheItem<string, string>(null, "1"));
         }
 
-        internal bool IsDescending(LinkedList<ProviderCacheItem<int, string>> data)
+        internal bool IsDescending(LinkedList<CacheItem<int, string>> data)
         {
             if (data.First == null)
                 return true;
@@ -315,7 +322,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            var cache = new EventBasedLRUCache<int, string>(10);
+            int cacheCapacity = 10;
+            var cache = new EventBasedLRUCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
 
             List<Task> taskList = new List<Task>();
 
@@ -342,15 +350,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new EventBasedLRUCache<int, string>(1000);
+            int cacheCapacity = 1000;
+            var cache = new EventBasedLRUCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 100 * cacheCapacity; i++)
             {
                 cache.SetValue(i, i.ToString());
             }
 
             // Cache size should be less than the capacity (somewhere between 800-1000 items).
-            if (cache.LinkedList.Count > 1000)
+            if (cache.LinkedList.Count > cacheCapacity)
                 context.AddDiff("Cache size is greater than the max!");
 
             // The linked list should be ordered in descending order as the largest items were added last,

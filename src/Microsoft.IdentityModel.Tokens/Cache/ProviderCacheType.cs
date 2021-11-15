@@ -25,38 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using Microsoft.IdentityModel.Logging;
-
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class ProviderCacheItem<TKey, TValue>
+    /// <summary>
+    /// Cache types.
+    /// </summary>
+    public enum ProviderCacheType
     {
-        internal TKey Key { get; }
-        internal TValue Value { get; set; }
-        internal DateTime ExpirationTime { get; set; }
+        /// <summary>
+        /// The Least Recently Used (LRU) cache type organizes items in order of use.
+        /// This cache type removes the least recently used items when the cache is full.
+        /// </summary>
+        LRU,
 
-
-        internal ProviderCacheItem(TKey key, TValue value)
-        {
-            Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
-            Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-        }
-
-        internal ProviderCacheItem(TKey key, TValue value, DateTime expirationTime)
-        {
-            Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
-            Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-            ExpirationTime = expirationTime;
-        }
-
-        public override bool Equals(object obj)
-        {
-            ProviderCacheItem<TKey, TValue> item = obj as ProviderCacheItem<TKey, TValue>;
-            return item != null && Key.Equals(item.Key);
-        }
-
-        public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key);
-    }
+        /// <summary>
+        /// This cache type does not track or organize items in order of use.
+        /// When the cache is full, items will be removed in random order.
+        /// </summary>
+        RandomEvict
+    };
 }

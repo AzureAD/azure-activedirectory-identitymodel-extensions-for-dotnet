@@ -48,9 +48,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    internal class EventBasedLRUCache<TKey, TValue> : HashCache<TKey, TValue>
+    internal class EventBasedLRUCache<TKey, TValue> : RandomEvictCache<TKey, TValue>
     {
-        private readonly LinkedList<ProviderCacheItem<TKey, TValue>> _doubleLinkedList = new();
+        private readonly LinkedList<CacheItem<TKey, TValue>> _doubleLinkedList = new();
         private readonly ConcurrentQueue<Action> _eventQueue = new();
 
         // if true, expired values will not be added to the cache and clean-up of expired values will occur on a 5 minute interval
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
         // task states used to ensure thread safety (Interlocked.CompareExchange)
         private const int EventQueueTaskStopped = 0; // task not started yet
         private const int EventQueueTaskRunning = 1; // task is running
-        private const int EventQueueTaskDoNotStop = 2; // force the task to continue even it has past the _eventQueueTaskStopTime, see StartEventQueueTaskIfNotRunning() for more details.
+        private const int EventQueueTaskDoNotStop = 2; // force the task to continue, see StartEventQueueTaskIfNotRunning() for more details.
         private int _eventQueueTaskState = EventQueueTaskStopped;
 
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
@@ -77,18 +77,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="capacity">The capacity of the cache, used to determine if experiencing overflow.</param>
+        /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the cache settings.</param>
         /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
-        /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
-        /// <param name="removeExpiredValuesIntervalInSeconds">The period to wait to remove expired items, in milliseconds.</param>
         internal EventBasedLRUCache(
-            int capacity,
-            IEqualityComparer<TKey> comparer = null,
-            bool removeExpiredValues = false,
-            int removeExpiredValuesIntervalInSeconds = 300) : base(capacity, comparer)
+            CryptoProviderCacheOptions cryptoProviderCacheOptions,
+            IEqualityComparer<TKey> comparer = null) : base(cryptoProviderCacheOptions, comparer)
         {
-            _removeExpiredValuesIntervalInSeconds = 1000 * removeExpiredValuesIntervalInSeconds;
-            _removeExpiredValues = removeExpiredValues;
+            _removeExpiredValuesIntervalInSeconds = 1000 * cryptoProviderCacheOptions.RemoveExpiredValuesIntervalInSeconds;
+            _removeExpiredValues = cryptoProviderCacheOptions.RemoveExpiredValues;
             _dueForExpiredValuesRemoval = DateTime.UtcNow.AddSeconds(_removeExpiredValuesIntervalInSeconds);
 
             AppDomain.CurrentDomain.ProcessExit += (sender, e) => { DomainProcessExit(sender, e); };
@@ -133,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             Interlocked.Increment(ref _taskCount);
 
-            // Keep running until the queue is empty *AND* expired (DateTime.UtcNow > _eventQueueTaskEndTime).
+            // Keep running until the queue is empty or the AppDomain is about to be unloaded or the application is ready to exit.
             while (!_shouldStopImmediately)
             {
                 // always set the state to EventQueueTaskRunning in case it was set to EventQueueTaskDoNotStop (there is a new item just added to the queue)
@@ -155,10 +151,10 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                     else // no more event to be processed, exit
                     {
-                        // Setting _eventQueueTaskState = EventQueueTaskStopped if the _eventQueueTaskEndTime has past and _eventQueueTaskState == EventQueueTaskRunning.
+                        // Setting _eventQueueTaskState = EventQueueTaskStopped if _eventQueueTaskState == EventQueueTaskRunning.
                         // This means no other thread came in and it is safe to end this task.
                         // If another thread adds new events while this task is still running, it will set the _eventQueueTaskState = EventQueueTaskDoNotStop instead of starting a new task.
-                        // The Interlocked.CompareExchange() call below will not succeed and the loop continues (until the event queue is empty and the _eventQueueTaskEndTime expires again).
+                        // The Interlocked.CompareExchange() call below will not succeed and the loop continues (until the event queue is empty).
                         // This should prevent a rare (but theoretically possible) scenario caused by context switching.
                         if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskStopped, EventQueueTaskRunning) == EventQueueTaskRunning)
                             break;
@@ -226,25 +222,26 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// This method is called after an item is added to the event queue, and the event queue task needs to be started if not running (_eventQueueTaskState != EventQueueTaskRunning).
-        /// Setting _eventQueueTaskState to EventQueueTaskRunning should prevent multiple task being started.
+        /// This method is called after an item is added to the event queue. It will start the event queue task if one is not already running (_eventQueueTaskState != EventQueueTaskRunning).
+        /// Using CompareExchange to set the _eventQueueTaskState prevents multiple tasks from being started.
         /// </summary>
         private void StartEventQueueTaskIfNotRunning()
         {
-            // Setting _eventQueueTaskState to EventQueueTaskDoNotStop here will force the event queue task in EventQueueTaskAction to continue even it has past the _eventQueueTaskEndTime.
-            // It is mainly to prevent a rare (but theoretically possible) scenario caused by context switching
+            // Setting _eventQueueTaskState to EventQueueTaskDoNotStop here will force the event queue task in EventQueueTaskAction to continue even if the event queue is empty and it is ready to exit.
+            // It is mainly to prevent a rare (but theoretically possible) thread synchronization issue.
             // For example:
-            //   1. the task execution in EventQueueTaskAction() checks _eventQueueTaskStopTime and it has already passed (ready to exit)
-            //   2. the execution is switched to this thread (before it calls the Interlocked.CompareExchange() to set the _eventQueueTaskState to EventQueueTaskStopped)
-            //   3. the _eventQueueTaskStopTime is extended but it can't stop the task from stopping as the task has already passed the time check
-            //   4. now since the _eventQueueTaskState == EventQueueTaskRunning, it can be set to EventQueueTaskDoNotStop by the Interlocked.CompareExchange() below
-            //   5. if _eventQueueTaskState is successfully set to EventQueueTaskDoNotStop, the Interlocked.CompareExchange() in the EventQueueTaskAction() will fail
-            //      and the task will continue the while loop and the new _eventQueueTaskStopTime will keep the task running
-            //   6. if _eventQueueTaskState is NOT set to EventQueueTaskDoNotStop because of context switch back to the EventQueueTaskAction() and the _eventQueueTaskState is
+            //   1. the task execution in EventQueueTaskAction() checks event queue and it is empty (ready to exit)
+            //   2. the execution is switched to this thread (before the event queue task calls the Interlocked.CompareExchange() to set the _eventQueueTaskState to EventQueueTaskStopped)
+            //   3. now since the _eventQueueTaskState == EventQueueTaskRunning, it can be set to EventQueueTaskDoNotStop by the Interlocked.CompareExchange() below
+            //   4. if _eventQueueTaskState is successfully set to EventQueueTaskDoNotStop, the Interlocked.CompareExchange() in the EventQueueTaskAction() will fail
+            //      and the task will continue the while loop and the new event will keep the task running
+            //   5. if _eventQueueTaskState is NOT set to EventQueueTaskDoNotStop because of context switch back to the EventQueueTaskAction() and the _eventQueueTaskState is
             //      set to EventQueueTaskStopped (task exits), then the second Interlocked.CompareExchange() below should set the _eventQueueTaskState to EventQueueTaskRunning
             //      and start a task again (though this scenario is unlikely to happen)
             //
-            // Though this kind of context switching is probably unlikely to happen, this hopefully will take care of it.
+            // Without the EventQueueTaskDoNotStop state, this execution of this thread could pass the second CompareExchange() call below after step 2 above. The event queue task would still exit
+            // since it has already checked the event queue in step 1, and no new task would be started to process the newly added event.
+            // Though this scenario is probably unlikely to happen, using EventQueueTaskDoNotStop will prevent it.
 
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskDoNotStop, EventQueueTaskRunning) == EventQueueTaskRunning)
             {
@@ -295,7 +292,7 @@ namespace Microsoft.IdentityModel.Tokens
                     });
                 }
                 // add the new node
-                var existingCacheItem = new ProviderCacheItem<TKey, TValue>(key, value, expirationTime);
+                var existingCacheItem = new CacheItem<TKey, TValue>(key, value, expirationTime);
                 AddActionToEventQueue(() =>
                 {
                     // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
@@ -373,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING ONLY.
         /// </summary>
         /// <returns></returns>
-        internal LinkedList<ProviderCacheItem<TKey, TValue>> LinkedList => _doubleLinkedList;
+        internal LinkedList<CacheItem<TKey, TValue>> LinkedList => _doubleLinkedList;
 
         /// <summary>
         /// FOR TESTING ONLY.

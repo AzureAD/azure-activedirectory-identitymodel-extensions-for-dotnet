@@ -348,7 +348,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var handler = new JwtSecurityTokenHandler();
             var asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null);
 
-            var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50);
+            var cache = CryptoProviderFactory.Default.CryptoProviderCache;
 
             var cryptorProviderFactory = new CryptoProviderFactory(cache);
             asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;

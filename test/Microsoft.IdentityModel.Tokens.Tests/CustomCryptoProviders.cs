@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
     public class CustomCryptoProviderFactory : CryptoProviderFactory
     {
-        public CustomCryptoProviderFactory() : base(new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), 50))
+        public CustomCryptoProviderFactory() : base()
         {
         }
 

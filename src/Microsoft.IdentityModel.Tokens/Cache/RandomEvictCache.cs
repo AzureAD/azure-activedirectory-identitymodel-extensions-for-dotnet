@@ -34,7 +34,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class HashCache<TKey, TValue> : IProviderCache<TKey, TValue>
+    internal class RandomEvictCache<TKey, TValue> : IProviderCache<TKey, TValue>
     {
         // delegates
         internal delegate void ItemRemoved(TValue Value);
@@ -44,12 +44,12 @@ namespace Microsoft.IdentityModel.Tokens
         protected readonly int _capacity;
 
         // the percentage of the cache to be removed when _maxCapacityPercentage is reached
-        protected readonly double _compactionPercentage = .20;
+        protected readonly double _compactionPercentage = CryptoProviderCacheOptions.DefaultCompactionPercentage;
 
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
-        protected readonly double _maxCapacityPercentage = .95;
+        protected readonly double _maxCapacityPercentage = CryptoProviderCacheOptions.DefaultMaxCapacityPercentage;
 
-        private readonly ConcurrentDictionary<TKey, ProviderCacheItem<TKey, TValue>> _map;
+        private readonly ConcurrentDictionary<TKey, CacheItem<TKey, TValue>> _map;
 
         private const int CompactionStateNotRunning = 0; // no compaction running
         private const int CompactionStateInProgress = 1; // compaction in progress
@@ -57,13 +57,21 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region constructors
 
-        public HashCache(
-            int capacity,
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the cache settings.</param>
+        /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
+        internal RandomEvictCache(
+            CryptoProviderCacheOptions cryptoProviderCacheOptions,
             IEqualityComparer<TKey> comparer = null)
         {
-            _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
-            _map = new ConcurrentDictionary<TKey, ProviderCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
+            _capacity = cryptoProviderCacheOptions.SizeLimit;
+            _compactionPercentage = cryptoProviderCacheOptions.CompactionPercentage;
+            _maxCapacityPercentage = cryptoProviderCacheOptions.MaxCapacityPercentage;
+            _map = new ConcurrentDictionary<TKey, CacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
         }
+
         #endregion
 
         #region public
@@ -74,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the value to get or set.</param>
         /// For get, if the specified key is not found, a <exception cref="KeyNotFoundException"> will be thrown.</exception>
         /// For set, if the key is null throw an <exception cref="ArgumentNullException"> will be thrown.</exception>
-        public ProviderCacheItem<TKey, TValue> this[TKey key]
+        public CacheItem<TKey, TValue> this[TKey key]
         {
             get => _map[key];
             set => _map[key] = value;
@@ -102,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (NeedsCompaction && Interlocked.CompareExchange(ref _compactionState, CompactionStateInProgress, CompactionStateNotRunning) == CompactionStateNotRunning)
                 ThreadPool.QueueUserWorkItem(CompactCache);
 
-            _map[key] = new ProviderCacheItem<TKey, TValue>(key, value, expirationTime);
+            _map[key] = new CacheItem<TKey, TValue>(key, value, expirationTime);
 
             return true;
         }
@@ -114,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             value = default;
-            var found = TryGetValueInternal(key, out ProviderCacheItem<TKey, TValue> val);
+            var found = TryGetValueInternal(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val.Value;
 
@@ -129,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             value = default;
 
-            var found = TryRemoveInternal(key, out ProviderCacheItem<TKey, TValue> val);
+            var found = TryRemoveInternal(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val.Value;
 
@@ -147,11 +155,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the value to get.</param>
         /// <param name="value">The object that has the specified key, or the default value of the type if the not found.</param>
         /// <returns>true if the key was found, otherwise, false.</returns>
-        protected virtual bool TryGetValueInternal(TKey key, out ProviderCacheItem<TKey, TValue> value)
+        protected virtual bool TryGetValueInternal(TKey key, out CacheItem<TKey, TValue> value)
         {
             value = default;
 
-            var found = _map.TryGetValue(key, out ProviderCacheItem<TKey, TValue> val);
+            var found = _map.TryGetValue(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val;
 
@@ -164,11 +172,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the element to remove and return.</param>
         /// <param name="value">The object removed from the cache, or the default value of the TValue type if key does not exist.</param>
         /// <returns>true if the object was removed successfully; otherwise, false.</returns>
-        protected virtual bool TryRemoveInternal(TKey key, out ProviderCacheItem<TKey, TValue> value)
+        protected virtual bool TryRemoveInternal(TKey key, out CacheItem<TKey, TValue> value)
         {
             value = default;
 
-            var found = _map.TryRemove(key, out ProviderCacheItem<TKey, TValue> val);
+            var found = _map.TryRemove(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val;
 

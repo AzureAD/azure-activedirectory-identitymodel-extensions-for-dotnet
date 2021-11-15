@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -38,28 +39,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class CryptoProviderCacheOptions
     {
         /// <summary>
-        /// Cache types.
-        /// </summary>
-        public enum ProviderCacheType
-        {
-            /// <summary>
-            /// EventBasedLRUCache
-            /// </summary>
-            LRU,
-
-            /// <summary>
-            /// Hash-based cache
-            /// </summary>
-            Hash
-        };
-
-        private int _sizeLimit = DefaultSizeLimit;
-
-        /// <summary>
         /// Default value for <see cref="SizeLimit"/>.
         /// </summary>
         public static readonly int DefaultSizeLimit = 1000;
 
+        private int _sizeLimit = DefaultSizeLimit;
         /// <summary>
         /// Gets or sets the size of the cache (in number of items). 
         /// 20% of the cache will be evicted whenever the cache gets to 95% of this size.
@@ -67,18 +51,66 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public int SizeLimit
         {
-            get
-            {
-                return _sizeLimit;
-            }
-            set
-            {
-                _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, value)));
-            }
+            get => _sizeLimit;
+            set => _sizeLimit = (value > 10) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(SizeLimit), LogHelper.FormatInvariant(LogMessages.IDX10901, value)));
         }
 
         /// <summary>
-        /// The desired cache type for caching providers. Default to LRU.
+        /// The default percentage of the cache to be removed when _maxCapacityPercentage is reached
+        /// </summary>
+        public const double DefaultCompactionPercentage = .20;
+
+        private const double MinCompactionPercentageValue = DefaultCompactionPercentage;
+        private const double MaxCompactionPercentageValue = 0.9;
+        private double _compactionPercentage = DefaultCompactionPercentage;
+        /// <summary>
+        /// Gets or sets the percentage of the cache to be removed when _maxCapacityPercentage is reached.
+        /// </summary>
+        public double CompactionPercentage
+        {
+            get => _compactionPercentage;
+            set => _compactionPercentage = (value >= MinCompactionPercentageValue && value <= MaxCompactionPercentageValue) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(CompactionPercentage), LogHelper.FormatInvariant(LogMessages.IDX10903, MinCompactionPercentageValue, MaxCompactionPercentageValue, value)));
+        }
+
+        /// <summary>
+        /// Default percentage of _capacity, when reached, _compactionPercentage% of the cache will be removed.
+        /// </summary>
+        public const double DefaultMaxCapacityPercentage = .95;
+
+        private const double MinCapacityPercentageValue = 0.5;
+        private const double MaxCapacityPercentageValue = 1.0;
+        private double _maxCapacityPercentage = DefaultMaxCapacityPercentage;
+        /// <summary>
+        /// Gets or sets the percentage of _capacity, when reached, _compactionPercentage% of the cache will be removed.
+        /// </summary>
+        public double MaxCapacityPercentage
+        {
+            get => _maxCapacityPercentage;
+            set => _maxCapacityPercentage = (value >= MinCapacityPercentageValue && value <= MaxCapacityPercentageValue) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(MaxCapacityPercentage), LogHelper.FormatInvariant(LogMessages.IDX10904, MinCapacityPercentageValue, MaxCapacityPercentageValue, value)));
+        }
+
+        /// <summary>
+        /// The default value of the period to wait to remove expired items, in seconds.
+        /// </summary>
+        public const int DefaultRemoveExpiredValuesIntervalInSeconds = 300;
+
+        private int _removeExpiredValuesIntervalInSeconds = DefaultRemoveExpiredValuesIntervalInSeconds;
+        /// <summary>
+        /// Gets or sets the period to wait to remove expired items, in seconds.
+        /// </summary>
+        public int RemoveExpiredValuesIntervalInSeconds
+        {
+            get => _removeExpiredValuesIntervalInSeconds;
+            set => _removeExpiredValuesIntervalInSeconds = (value > 0) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(RemoveExpiredValuesIntervalInSeconds), LogHelper.FormatInvariant(LogMessages.IDX10905, value)));
+        }
+
+        /// <summary>
+        /// Gets or sets the whether or not to remove expired items.
+        /// </summary>
+        public bool RemoveExpiredValues { get; set; } = false;
+
+        /// <summary>
+        /// The desired cache type for caching providers. Defaults to LRU.
         /// </summary>
         public ProviderCacheType CacheType { get; set; } = ProviderCacheType.LRU;
     }

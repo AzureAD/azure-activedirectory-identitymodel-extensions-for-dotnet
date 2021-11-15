@@ -71,6 +71,8 @@ namespace Microsoft.IdentityModel.Tokens
             set => _defaultSignatureProviderObjectPoolCacheSize = value > 0 ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10698, value)));
         }
 
+        #region constructors
+
         /// <summary>
         /// Static constructor that initializes the default <see cref="CryptoProviderFactory"/>.
         /// </summary>
@@ -81,18 +83,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Default constructor for <see cref="CryptoProviderFactory"/>.
+        /// By default the EventBasedLRUCache will be used as the internal caches in the provider cache.
         /// </summary>
         public CryptoProviderFactory()
         {
-            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
+            CryptoProviderCache = CryptoProviderCacheFactory.Create(new CryptoProviderCacheOptions());
         }
 
         /// <summary>
         /// Initializes an instance of a <see cref="CryptoProviderFactory"/>.
         /// </summary>
-        /// <param name="cache">
-        /// The cache to use for caching CryptoProviders
-        /// </param>
+        /// <param name="cache">The cache to use for caching CryptoProviders.</param>
         public CryptoProviderFactory(CryptoProviderCache cache)
         {
             CryptoProviderCache = cache ?? throw LogHelper.LogArgumentNullException(nameof(cache));
@@ -102,16 +103,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// Constructor that creates a deep copy of given <see cref="CryptoProviderFactory"/> object.
         /// </summary>
         /// <param name="other"><see cref="CryptoProviderFactory"/> to copy from.</param>
-        public CryptoProviderFactory(CryptoProviderFactory other)
+        public CryptoProviderFactory(CryptoProviderFactory other) : this()
         {
             if (other == null)
                 throw LogHelper.LogArgumentNullException(nameof(other));
 
-            CryptoProviderCache = new InMemoryCryptoProviderCache() { CryptoProviderFactory = this };
             CustomCryptoProvider = other.CustomCryptoProvider;
             CacheSignatureProviders = other.CacheSignatureProviders;
             SignatureProviderObjectPoolCacheSize = other.SignatureProviderObjectPoolCacheSize;
         }
+
+        #endregion
 
         /// <summary>
         /// Gets the <see cref="CryptoProviderCache"/>

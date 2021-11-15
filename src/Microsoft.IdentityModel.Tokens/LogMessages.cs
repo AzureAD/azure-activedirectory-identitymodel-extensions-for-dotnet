@@ -254,6 +254,9 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";
         public const string IDX10901 = "IDX10901: CryptoProviderCacheOptions.SizeLimit must be greater than 10. Value: '{0}'";
         public const string IDX10902 = "IDX10902: Object disposed exception in '{0}': '{1}'";
+        public const string IDX10903 = "IDX10903: CryptoProviderCacheOptions.CompactionPercentage must be between '{0}' and '{1}'. Value: '{2}'";
+        public const string IDX10904 = "IDX10904: CryptoProviderCacheOptions.MaxCapacityPercentage must be between '{0}' and '{1}'. Value: '{2}'";
+        public const string IDX10905 = "IDX10905: CryptoProviderCacheOptions.RemoveExpiredValuesIntervalInSeconds must be positive. Value: '{0}'";
 #pragma warning restore 1591
     }
 }

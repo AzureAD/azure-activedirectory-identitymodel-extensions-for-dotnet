@@ -37,14 +37,14 @@ using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    public class HashCacheTests
+    public class RandomEvictCacheTests
     {
         [Fact]
         public void Contains()
         {
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
-            var cache = new HashCache<int?, string>(10);
+            var cache = new RandomEvictCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = 11 });
             cache.SetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff($"HashCache should contain the key value pair [1, 'one'], but the {CurrentMethod} method returned false.");
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
-            var cache = new HashCache<int?, string>(1);
+            var cache = new RandomEvictCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = 11 });
             Assert.Throws<ArgumentNullException>(() => cache.SetValue(1, null));
 
             cache.SetValue(1, "one");
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
-            var cache = new HashCache<int?, string>(2);
+            var cache = new RandomEvictCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = 20 });
             cache.SetValue(1, "one");
 
             if (!cache.TryGetValue(1, out var value))
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.RemoveValue");
             var context = new CompareContext($"{this}.RemoveValue");
-            var cache = new HashCache<int?, string>(1);
+            var cache = new RandomEvictCache<int?, string>(new CryptoProviderCacheOptions { SizeLimit = 11 });
 
             cache.SetValue(1, "one");
 
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
-            var cache = new HashCache<int, string>(cacheCapacity);
+            var cache = new RandomEvictCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
 
             List<Task> taskList = new List<Task>();
 
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
             var context = new CompareContext($"{this}.CacheOverflowTestSequential");
-            var cache = new HashCache<int, string>(cacheCapacity);
+            var cache = new RandomEvictCache<int, string>(new CryptoProviderCacheOptions { SizeLimit = cacheCapacity });
 
             for (int i = 0; i < 100000; i++)
             {

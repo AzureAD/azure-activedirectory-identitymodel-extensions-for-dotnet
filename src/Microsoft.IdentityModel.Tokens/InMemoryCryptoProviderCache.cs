@@ -27,7 +27,6 @@
 
 using System;
 using System.Globalization;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -36,62 +35,23 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines a cache for crypto providers.
     /// Current support is limited to <see cref="SignatureProvider"/> only.
     /// </summary>
-    public class InMemoryCryptoProviderCache: CryptoProviderCache, IDisposable
-
+    internal class InMemoryCryptoProviderCache: CryptoProviderCache
     {
         internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
-        private bool _disposed = false;
         private IProviderCache<string, SignatureProvider> _signingSignatureProviders;
         private IProviderCache<string, SignatureProvider> _verifyingSignatureProviders;
 
         /// <summary>
-        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the default <see cref="CryptoProviderCacheOptions"/>.
-        /// </summary>
-        public InMemoryCryptoProviderCache() : this(new CryptoProviderCacheOptions())
-        {
-        }
-
-        internal CryptoProviderFactory CryptoProviderFactory { get; set; }
-
-        /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
-        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        /// <param name="signingSignatureProviders">The cache for signing signature providers.</param>
+        /// <param name="verifyingSignatureProviders">The cache for verifying signature providers.</param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, IProviderCache<string, SignatureProvider> signingSignatureProviders, IProviderCache<string, SignatureProvider> verifyingSignatureProviders)
         {
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions ?? throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
-            CreateProviderCache();
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
-        /// </summary>
-        /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
-        /// <param name="tryTakeTimeout">The time used in ms for the timeout interval of the event queue. Defaults to 500 ms.</param>
-        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, int tryTakeTimeout = 500)
-        {
-            if (tryTakeTimeout <= 0)
-                throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
-
-            _cryptoProviderCacheOptions = cryptoProviderCacheOptions ?? throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
-            CreateProviderCache();
-        }
-
-        /// <summary>
-        /// Create the _signingSignatureProviders and _verifyingSignatureProviders caches based on the specified cache type from _cryptoProviderCacheOptions.
-        /// </summary>
-        protected void CreateProviderCache()
-        {
-            if (_cryptoProviderCacheOptions.CacheType == CryptoProviderCacheOptions.ProviderCacheType.LRU)
-            {
-                _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(_cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-                _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(_cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-            }
-            else
-            {
-                _signingSignatureProviders = new HashCache<string, SignatureProvider>(_cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-                _verifyingSignatureProviders = new HashCache<string, SignatureProvider>(_cryptoProviderCacheOptions.SizeLimit, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-            }
+            _signingSignatureProviders = signingSignatureProviders;
+            _verifyingSignatureProviders = verifyingSignatureProviders;
         }
 
         /// <summary>
@@ -100,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="signatureProvider">the <see cref="SignatureProvider"/> to create the key for.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
         /// <returns>the cache key to use for finding a <see cref="SignatureProvider"/>.</returns>
-        protected override string GetCacheKey(SignatureProvider signatureProvider)
+        internal override string GetCacheKey(SignatureProvider signatureProvider)
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
@@ -118,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if algorithm is null or empty string.</exception>
         /// <exception cref="ArgumentNullException">if typeofProvider is null or empty string.</exception>
         /// <returns>the cache key to use for finding a crypto provider.</returns>
-        protected override string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider)
+        internal override string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
             if (securityKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(securityKey));
@@ -206,7 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Trys to remove a <see cref="SignatureProvider"/> from this cache.
+        /// Tries to remove a <see cref="SignatureProvider"/> from this cache.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to remove.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
@@ -240,37 +200,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
-        /// Note: the cache is no longer being disposed of, but since this is a public class and can be used as base class of
-        /// custom cache implementations, we need to keep it as some implementations may override Dispose().
-        /// </summary>
-        public void Dispose()
-        {
-            // Dispose of unmanaged resources.
-            Dispose(true);
-            // Suppress finalization.
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_signingSignatureProviders"/> and <see cref="_verifyingSignatureProviders"/>.
-        /// </summary>
-        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                _disposed = true;
-            }
-        }
-
 #region FOR TESTING (INTERNAL ONLY)
 
        /// <summary>
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
-        internal long TaskCount => ((EventBasedLRUCache<string, SignatureProvider>)_signingSignatureProviders).TaskCount + ((EventBasedLRUCache<string, SignatureProvider>)_verifyingSignatureProviders).TaskCount;
+        internal long TaskCount => ((RandomEvictCache<string, SignatureProvider>)_signingSignatureProviders).TaskCount + ((RandomEvictCache<string, SignatureProvider>)_verifyingSignatureProviders).TaskCount;
 
         #endregion
     }
