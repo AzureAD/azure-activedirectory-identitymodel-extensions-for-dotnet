@@ -35,11 +35,23 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines a cache for crypto providers.
     /// Current support is limited to <see cref="SignatureProvider"/> only.
     /// </summary>
-    public class InMemoryCryptoProviderCache: CryptoProviderCache
+    public class InMemoryCryptoProviderCache: CryptoProviderCache, IDisposable
     {
         internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
+        private bool _disposed = false;
         private IProviderCache<string, SignatureProvider> _signingSignatureProviders;
         private IProviderCache<string, SignatureProvider> _verifyingSignatureProviders;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions"></param>
+        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
+            _cryptoProviderCacheOptions = cryptoProviderCacheOptions ?? throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
+            _signingSignatureProviders = CryptoProviderCacheFactory.CreateSignatureProviderCache(cryptoProviderCacheOptions);
+            _verifyingSignatureProviders = CryptoProviderCacheFactory.CreateSignatureProviderCache(cryptoProviderCacheOptions);
+        }
 
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
@@ -73,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityKey">the key that is used to by the crypto provider.</param>
         /// <param name="algorithm">the algorithm that is used by the crypto provider.</param>
-        /// <param name="typeofProvider">the typeof the crypto provider obtained by calling object.GetType().</param>
+        /// <param name="typeofProvider">the type of the crypto provider obtained by calling object.GetType().</param>
         /// <exception cref="ArgumentNullException">if securityKey is null.</exception>
         /// <exception cref="ArgumentNullException">if algorithm is null or empty string.</exception>
         /// <exception cref="ArgumentNullException">if typeofProvider is null or empty string.</exception>
@@ -103,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Trys to adds a <see cref="SignatureProvider"/> to this cache.
+        /// Tries to adds a <see cref="SignatureProvider"/> to this cache.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to cache.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
@@ -200,9 +212,34 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#region FOR TESTING (INTERNAL ONLY)
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Note: the EventBasedLRUCache is no longer being disposed of, but since this is a public class and can be used as base class of
+        /// custom cache implementations, we need to keep it as some implementations may override Dispose().
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
 
-       /// <summary>
+        /// <summary>
+        /// If <paramref name="disposing"/> is true, this method disposes of <see cref="_signingSignatureProviders"/> and <see cref="_verifyingSignatureProviders"/>.
+        /// </summary>
+        /// <param name="disposing">True if called from the <see cref="Dispose()"/> method, false otherwise.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+            }
+        }
+
+        #region FOR TESTING (INTERNAL ONLY)
+
+        /// <summary>
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
         internal long TaskCount => ((RandomEvictCache<string, SignatureProvider>)_signingSignatureProviders).TaskCount + ((RandomEvictCache<string, SignatureProvider>)_verifyingSignatureProviders).TaskCount;

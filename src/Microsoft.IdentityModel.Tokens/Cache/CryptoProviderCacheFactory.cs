@@ -41,27 +41,37 @@ namespace Microsoft.IdentityModel.Tokens
         /// Create a new instance of InMemoryCryptoProviderCache and the _signingSignatureProviders and _verifyingSignatureProviders caches based on the cache type in _cryptoProviderCacheOptions.
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the internal cryptoprovider cache.</param>
+        /// <returns>A new instance of CryptoProviderCache.</returns>
         internal static CryptoProviderCache Create(CryptoProviderCacheOptions cryptoProviderCacheOptions)
         {
             if (cryptoProviderCacheOptions == null)
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             IProviderCache<string, SignatureProvider> signingProvidersCache;
-            IProviderCache<string, SignatureProvider> verifyinfProvidersCache;
+            IProviderCache<string, SignatureProvider> verifyingProvidersCache;
 
             // Create the signature provider caches based on the ProviderCacheType.
+            signingProvidersCache = CreateSignatureProviderCache(cryptoProviderCacheOptions);
+            verifyingProvidersCache = CreateSignatureProviderCache(cryptoProviderCacheOptions);
+
+            return new InMemoryCryptoProviderCache(cryptoProviderCacheOptions, signingProvidersCache, verifyingProvidersCache);
+        }
+
+        /// <summary>
+        /// Create a new instance of SignatureProvider based on the cache type in _cryptoProviderCacheOptions.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the internal cryptoprovider cache.</param>
+        /// <returns>A new instance of SignatureProvider.</returns>
+        internal static IProviderCache<string, SignatureProvider> CreateSignatureProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
             if (cryptoProviderCacheOptions.CacheType == ProviderCacheType.LRU)
             {
-                signingProvidersCache = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-                verifyinfProvidersCache = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+                return new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
             }
             else
             {
-                signingProvidersCache = new RandomEvictCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
-                verifyinfProvidersCache = new RandomEvictCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+                return new RandomEvictCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
             }
-
-            return new InMemoryCryptoProviderCache(cryptoProviderCacheOptions, signingProvidersCache, verifyinfProvidersCache);
         }
     }
 }
