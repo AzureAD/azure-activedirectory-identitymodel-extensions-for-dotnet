@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <summary>
         /// See: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10
-        /// also:https://datatracker.ietf.org/doc/html/rfc7519#section-5.2
+        /// Also: https://datatracker.ietf.org/doc/html/rfc7519#section-5.2
         /// </summary>
         public const string Cty = "cty";
 
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string IV = "iv";
 
         /// <summary>
-        /// see:https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.2
+        /// See: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.2
         /// </summary>
         public const string Jku = "jku";
 
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <summary>
         /// See: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9
-        /// also:https://datatracker.ietf.org/doc/html/rfc7519#section-5.1
+        /// Also: https://datatracker.ietf.org/doc/html/rfc7519#section-5.1
         /// </summary>
         public const string Typ = "typ";
 
