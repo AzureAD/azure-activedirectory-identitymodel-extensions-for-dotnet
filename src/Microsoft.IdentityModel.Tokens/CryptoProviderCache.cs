@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="signatureProvider">the <see cref="SignatureProvider"/> to create the key for.</param>
         /// <returns>the cache key to use for finding a <see cref="SignatureProvider"/>.</returns>
-        internal abstract string GetCacheKey(SignatureProvider signatureProvider);
+        protected internal abstract string GetCacheKey(SignatureProvider signatureProvider);
 
         /// <summary>
         /// Returns the 'key' that will be used to find a crypto provider in this cache.
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="algorithm">the algorithm that is used by the crypto provider.</param>
         /// <param name="typeofProvider">the typeof the crypto provider obtained by calling object.GetType().</param>
         /// <returns>the cache key to use for finding a crypto provider.</returns>
-        internal abstract string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider);
+        protected internal abstract string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider);
 
         /// <summary>
         /// Tries to adds a <see cref="SignatureProvider"/> to this cache.

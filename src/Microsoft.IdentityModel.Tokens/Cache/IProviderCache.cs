@@ -29,7 +29,12 @@ using System;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal interface IProviderCache<TKey, TValue>
+    /// <summary>
+    /// The provider interface.
+    /// </summary>
+    /// <typeparam name="TKey">The key of a provider, used for cache operations.</typeparam>
+    /// <typeparam name="TValue">The value of a provider.</typeparam>
+    public interface IProviderCache<TKey, TValue>
     {
         /// <summary>
         /// Determines whether the cache contains the specified key.

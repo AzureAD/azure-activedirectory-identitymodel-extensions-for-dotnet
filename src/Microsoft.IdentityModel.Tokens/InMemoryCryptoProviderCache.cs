@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines a cache for crypto providers.
     /// Current support is limited to <see cref="SignatureProvider"/> only.
     /// </summary>
-    internal class InMemoryCryptoProviderCache: CryptoProviderCache
+    public class InMemoryCryptoProviderCache: CryptoProviderCache
     {
         internal CryptoProviderCacheOptions _cryptoProviderCacheOptions;
         private IProviderCache<string, SignatureProvider> _signingSignatureProviders;
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="signatureProvider">the <see cref="SignatureProvider"/> to create the key for.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
         /// <returns>the cache key to use for finding a <see cref="SignatureProvider"/>.</returns>
-        internal override string GetCacheKey(SignatureProvider signatureProvider)
+        protected internal override string GetCacheKey(SignatureProvider signatureProvider)
         {
             if (signatureProvider == null)
                 throw LogHelper.LogArgumentNullException(nameof(signatureProvider));
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if algorithm is null or empty string.</exception>
         /// <exception cref="ArgumentNullException">if typeofProvider is null or empty string.</exception>
         /// <returns>the cache key to use for finding a crypto provider.</returns>
-        internal override string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider)
+        protected internal override string GetCacheKey(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
             if (securityKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(securityKey));
