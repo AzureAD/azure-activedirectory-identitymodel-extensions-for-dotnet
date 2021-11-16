@@ -28,7 +28,7 @@
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Grant types for token requests. See http://tools.ietf.org/html/rfc6749.
+    /// Grant types for token requests. See https://datatracker.ietf.org/doc/html/rfc6749.
     /// </summary>
     public static class OpenIdConnectGrantTypes
     {

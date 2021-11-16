@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    /// <remarks>provides support for http://tools.ietf.org/html/rfc7517.</remarks>
+    /// <remarks>provides support for https://datatracker.ietf.org/doc/html/rfc7517.</remarks>
     [JsonObject]
     public class JsonWebKeySet
     {
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens
             foreach (var webKey in Keys)
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
-                // https://tools.ietf.org/html/rfc7517#section-4.2
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
                 if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal))
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use));

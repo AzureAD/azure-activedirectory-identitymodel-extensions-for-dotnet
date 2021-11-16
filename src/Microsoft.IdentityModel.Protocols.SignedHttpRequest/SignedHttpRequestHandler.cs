@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
     {
-        // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
+        // (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
 
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
 
             // set the "typ" header claim to "pop"
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.2
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-6.2
             header[JwtHeaderParameterNames.Alg] = signedHttpRequestDescriptor.SigningCredentials.Algorithm;
             header[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
 
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
             // u claim: The HTTP URL host component as a JSON string. This MAY include the port separated from the host by a colon in host:port format.
             // Including the port if it not the default port for the httpRequestUri scheme.
             var httpUrlHostComponent = httpRequestUri.Host;
@@ -746,7 +746,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.U, out string uClaimValue) || uClaimValue == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
             // u: The HTTP URL host component as a JSON string.
             // This MAY include the port separated from the host by a colon in host:port format.
             var expectedUClaimValue = httpRequestUri.Host;
@@ -1018,7 +1018,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.1</remarks>
         internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(JObject cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (cnf == null)
@@ -1097,7 +1097,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             // If there are multiple keys in the referenced JWK Set document, a "kid" member MUST also be included
             // with the referenced key's JWK also containing the same "kid" value.
-            // https://tools.ietf.org/html/rfc7800#section-3.5
+            // https://datatracker.ietf.org/doc/html/rfc7800#section-3.5
             else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
             {
                 foreach (var key in popKeys)
@@ -1235,10 +1235,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Sanitizes the query params to comply with the specification.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
         private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
         {
-            // Remove repeated query params according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated query params according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -1286,12 +1286,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Sanitizes the headers to comply with the specification.
         /// </summary>
         /// <remarks>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
         /// </remarks>
         private static Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
-            // Remove repeated headers according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated headers according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1303,7 +1303,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (string.IsNullOrEmpty(headerName))
                     continue;
 
-                // Don't include the authorization header (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1).
+                // Don't include the authorization header (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1).
                 if (string.Equals(headerName, SignedHttpRequestConstants.AuthorizationHeader, StringComparison.OrdinalIgnoreCase))
                     continue;
 

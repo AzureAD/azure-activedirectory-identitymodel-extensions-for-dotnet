@@ -29,7 +29,7 @@ namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
     /// List of registered claims from different sources
-    /// http://tools.ietf.org/html/rfc7519#section-4
+    /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
     /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
     /// </summary>
     public struct JwtRegisteredClaimNames
@@ -49,7 +49,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Amr = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Amr;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Aud = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Aud;
 
@@ -84,7 +84,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Email = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Exp = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Exp;
 
@@ -104,17 +104,17 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string GivenName = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.GivenName;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Iat = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iat;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Iss = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Iss;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Jti = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Jti;
 
@@ -133,7 +133,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Nonce = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Nonce;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Nbf = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Nbf;
 
@@ -147,12 +147,12 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Sid = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sid;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Sub = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub;
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-5
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-5
         /// </summary>
         public const string Typ = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Typ;
 

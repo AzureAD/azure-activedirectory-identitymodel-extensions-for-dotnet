@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="RsaSecurityKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
             return (Rsa != null || (Parameters.Exponent != null && Parameters.Modulus != null));
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="RsaSecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
             var rsaParameters = Parameters;

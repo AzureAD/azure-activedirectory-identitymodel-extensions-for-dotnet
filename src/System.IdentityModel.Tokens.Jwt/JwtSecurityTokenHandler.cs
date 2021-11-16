@@ -39,7 +39,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: http://tools.ietf.org/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515
     /// </summary>
     public class JwtSecurityTokenHandler : SecurityTokenHandler
     {
@@ -282,7 +282,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Determines if the string is a well formed Json Web Token (JWT).
-        /// <para>see: http://tools.ietf.org/html/rfc7519 </para>
+        /// <para>See: https://datatracker.ietf.org/doc/html/rfc7519 </para>
         /// </summary>
         /// <param name="token">String that should represent a valid JWT.</param>
         /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching one of:
