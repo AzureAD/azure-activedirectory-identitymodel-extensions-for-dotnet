@@ -35,6 +35,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Protocols;
@@ -2658,6 +2659,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData
                     {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid" + "_IssuerValidatorReturnsTrue",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidatorWithConfiguration = (issuer, securityToken, validationParameters, configuration) => { return issuer; },
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                    },
+                    new JwtTheoryData
+                    {
                         TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
@@ -2670,6 +2686,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501: "),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SigningKeyResolverValid",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKeyResolverWithConfiguration =  (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.DefaultX509Key_2048 }; }
+                        },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid" + "_IssuerSigningKeyValidatorReturnsFalse",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) => { return false; }
+                        },
                     },
                     new JwtTheoryData
                     {
@@ -2834,10 +2880,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters) =>
+                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
-                                if (validationParameters.Configuration == validConfigKeyValidationFails)
+                                if (configuration == validConfigKeyValidationFails)
                                     return false;
                                 else
                                     return true;
@@ -2916,10 +2962,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters) =>
+                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
-                                if (validationParameters.Configuration == validConfigKeyValidationFails)
+                                if (configuration == validConfigKeyValidationFails)
                                     return false;
                                 else
                                     return true;
@@ -3136,10 +3182,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters) =>
+                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
-                                if (validationParameters.Configuration == validConfigKeyValidationFails)
+                                if (configuration == validConfigKeyValidationFails)
                                     return false;
                                 else
                                     return true;
@@ -3223,10 +3269,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters) =>
+                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
-                                if (validationParameters.Configuration == validConfigKeyValidationFails)
+                                if (configuration == validConfigKeyValidationFails)
                                     return false;
                                 else
                                     return true;

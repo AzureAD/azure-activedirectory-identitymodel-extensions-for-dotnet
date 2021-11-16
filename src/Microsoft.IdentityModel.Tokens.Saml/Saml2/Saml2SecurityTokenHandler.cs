@@ -1320,7 +1320,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="securityToken">The <see cref="Saml2SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>The issuer to use when creating the <see cref="Claim"/>(s) in the <see cref="ClaimsIdentity"/>.</returns>
-        /// <remarks><see cref="Validators.ValidateIssuer"/> for additional details.</remarks>
+        /// <remarks><see cref="Validators.ValidateIssuer(string, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             return Validators.ValidateIssuer(issuer, securityToken, validationParameters);
