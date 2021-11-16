@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -91,6 +92,12 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             {
                 aex.Handle((x) =>
                 {
+                    if (x.Data.Count > 0)
+                    {
+                        Assert.True(x.Data.Contains(HttpDocumentRetriever.StatusCode));
+                        Assert.True(x.Data.Contains(HttpDocumentRetriever.ResponseContent));
+                        Assert.Equal(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode);
+                    }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
@@ -164,6 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
                     DocumentRetriever = documentRetriever,
                     ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    ExpectedStatusCode = HttpStatusCode.BadRequest,
                     TestId = "Client Miss Configuration"
                 });
 
@@ -177,6 +185,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         public string Address { get; set; }
 
         public IDocumentRetriever DocumentRetriever { get; set; }
+
+        public HttpStatusCode ExpectedStatusCode { get; set; }
 
         public override string ToString()
         {
