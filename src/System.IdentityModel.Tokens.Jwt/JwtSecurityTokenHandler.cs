@@ -306,21 +306,16 @@ namespace System.IdentityModel.Tokens.Jwt
                 return false;
             }
 
-            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
-            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
-            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
+            switch (JwtTokenUtilities.DetectTokenType(token))
             {
-                return JwtTokenUtilities.RegexJws.IsMatch(token);
+                case JwtTokenType.JWS:
+                    return JwtTokenUtilities.RegexJws.IsMatch(token);
+                case JwtTokenType.JWE:
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token);
+                default:
+                    LogHelper.LogInformation(LogMessages.IDX12720);
+                    return false;
             }
-            else if (tokenParts.Length == JwtConstants.JweSegmentCount)
-            {
-                return JwtTokenUtilities.RegexJwe.IsMatch(token);
-            }
-
-            LogHelper.LogInformation(LogMessages.IDX12720);
-            return false;
         }
 
         /// <summary>
@@ -576,7 +571,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (cryptoProviderFactory == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
-            byte[] wrappedKey = null;
+            byte[] wrappedKey;
             SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, out wrappedKey);
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
@@ -616,7 +611,7 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             foreach (Claim claim in claims)
             {
-                string type = null;
+                string type;
                 if (_outboundClaimTypeMap.TryGetValue(claim.Type, out type))
                 {
                     yield return new Claim(type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer, claim.Subject);
@@ -736,31 +731,23 @@ namespace System.IdentityModel.Tokens.Jwt
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
-            var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-
-            if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12741, token)));
-
-            ClaimsPrincipal claimsPrincipal = null;
-            SecurityToken signatureValidatedToken = null;
-
-            if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            switch (JwtTokenUtilities.DetectTokenType(token))
             {
-                var jwtToken = ReadJwtToken(token);
-                var decryptedJwt = DecryptToken(jwtToken, validationParameters);
-                var innerToken = ValidateSignature(decryptedJwt, validationParameters);
-                jwtToken.InnerToken = innerToken;
-                signatureValidatedToken = jwtToken;
-                claimsPrincipal = ValidateTokenPayload(innerToken, validationParameters);
+                case JwtTokenType.JWE:
+                    var jwtToken = ReadJwtToken(token);
+                    var decryptedJwt = DecryptToken(jwtToken, validationParameters);
+                    var innerToken = ValidateSignature(decryptedJwt, validationParameters);
+                    jwtToken.InnerToken = innerToken;
+                    validatedToken = jwtToken;
+                    return ValidateTokenPayload(innerToken, validationParameters);
+                case JwtTokenType.JWS:
+                    var signatureValidatedToken = ValidateSignature(token, validationParameters);
+                    var claimsPrincipal = ValidateTokenPayload(signatureValidatedToken, validationParameters);
+                    validatedToken = signatureValidatedToken;
+                    return claimsPrincipal;
+                default:
+                   throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12741, token)));
             }
-            else
-            {
-                signatureValidatedToken = ValidateSignature(token, validationParameters);
-                claimsPrincipal = ValidateTokenPayload(signatureValidatedToken as JwtSecurityToken, validationParameters);
-            }
-
-            validatedToken = signatureValidatedToken;
-            return claimsPrincipal;
         }
 
         /// <summary>
@@ -827,7 +814,6 @@ namespace System.IdentityModel.Tokens.Jwt
 
             var encodedPayload = jwtToken.EncodedPayload;
             var encodedSignature = string.Empty;
-            var encodedHeader = string.Empty;
             if (jwtToken.InnerToken != null)
             {
                 if (jwtToken.SigningCredentials != null)
@@ -848,7 +834,7 @@ namespace System.IdentityModel.Tokens.Jwt
             // if EncryptingCredentials isn't set, then we need to create JWE
             // first create a new header with the SigningCredentials, Create a JWS then wrap it in a JWE
             var header = jwtToken.EncryptingCredentials == null ? jwtToken.Header : new JwtHeader(jwtToken.SigningCredentials);
-            encodedHeader = header.Base64UrlEncode();
+            var encodedHeader = header.Base64UrlEncode();
             if (jwtToken.SigningCredentials != null)
                 encodedSignature =  JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
