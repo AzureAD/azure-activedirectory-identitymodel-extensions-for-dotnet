@@ -260,12 +260,6 @@ namespace Microsoft.IdentityModel.Tokens
         #region public methods/interface implementation
 
         /// <inheritdoc/>
-        public override void SetValue(TKey key, TValue value)
-        {
-            SetValue(key, value, DateTime.MaxValue);
-        }
-
-        /// <inheritdoc/>
         public override bool SetValue(TKey key, TValue value, DateTime expirationTime)
         {
             ValidateValues(key, value, expirationTime);

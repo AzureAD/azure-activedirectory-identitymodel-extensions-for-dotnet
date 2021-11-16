@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="cryptoProviderCacheOptions">The options used to configure the <see cref="InMemoryCryptoProviderCache"/>.</param>
         /// <param name="signingSignatureProviders">The cache for signing signature providers.</param>
         /// <param name="verifyingSignatureProviders">The cache for verifying signature providers.</param>
-        public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, IProviderCache<string, SignatureProvider> signingSignatureProviders, IProviderCache<string, SignatureProvider> verifyingSignatureProviders)
+        internal InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions, IProviderCache<string, SignatureProvider> signingSignatureProviders, IProviderCache<string, SignatureProvider> verifyingSignatureProviders)
         {
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions ?? throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
             _signingSignatureProviders = signingSignatureProviders;
