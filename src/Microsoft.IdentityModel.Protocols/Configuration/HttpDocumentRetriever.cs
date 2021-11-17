@@ -125,14 +125,9 @@ namespace Microsoft.IdentityModel.Protocols
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
-                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent))
-                 {
-                     Data =
-                     {
-                         { StatusCode, response.StatusCode },
-                         { ResponseContent, responseContent }
-                     }
-                 };
+                unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
+                unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
             }
             catch (Exception ex)
             {
