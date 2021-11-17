@@ -34,7 +34,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class RandomEvictCache<TKey, TValue> : IProviderCache<TKey, TValue>
+    internal class MaximumSizeCache<TKey, TValue> : IProviderCache<TKey, TValue>
     {
         // delegates
         internal delegate void ItemRemoved(TValue Value);
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the cache settings.</param>
         /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
-        internal RandomEvictCache(
+        internal MaximumSizeCache(
             CryptoProviderCacheOptions cryptoProviderCacheOptions,
             IEqualityComparer<TKey> comparer = null)
         {

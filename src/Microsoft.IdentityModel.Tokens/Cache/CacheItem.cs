@@ -43,10 +43,8 @@ namespace Microsoft.IdentityModel.Tokens
             Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
         }
 
-        internal CacheItem(TKey key, TValue value, DateTime expirationTime)
+        internal CacheItem(TKey key, TValue value, DateTime expirationTime) : this(key, value)
         {
-            Key = key ?? throw LogHelper.LogArgumentNullException(nameof(key));
-            Value = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             ExpirationTime = expirationTime;
         }
 

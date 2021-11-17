@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.
         /// </summary>
-        /// <param name="cryptoProviderCacheOptions"></param>
+        /// <param name="cryptoProviderCacheOptions">The options for creating SignatureProvider caches.</param>
         public InMemoryCryptoProviderCache(CryptoProviderCacheOptions cryptoProviderCacheOptions)
         {
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions ?? throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
@@ -249,7 +249,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
-        internal long TaskCount => ((RandomEvictCache<string, SignatureProvider>)_signingSignatureProviders).TaskCount + ((RandomEvictCache<string, SignatureProvider>)_verifyingSignatureProviders).TaskCount;
+        internal long TaskCount => ((MaximumSizeCache<string, SignatureProvider>)_signingSignatureProviders).TaskCount + ((MaximumSizeCache<string, SignatureProvider>)_verifyingSignatureProviders).TaskCount;
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// </summary>
+        internal Type SigningSignatureProviderCacheType => _signingSignatureProviders.GetType();
+
+        /// <summary>
+        /// FOR TESTING PURPOSES ONLY.
+        /// </summary>
+        internal Type VerifyingSignatureProviderCacheType => _verifyingSignatureProviders.GetType();
 
         #endregion
     }

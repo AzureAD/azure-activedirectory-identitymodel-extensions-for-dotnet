@@ -31,14 +31,14 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// The provider cache factory that creates crypto provider caches.
+    /// The factory that creates the <see cref="InMemoryCryptoProviderCache"/> and the signature provider caches it contains (_signingSignatureProviders and _verifyingSignatureProviders) based on the <see cref="CryptoProviderCacheOptions"/>.
     /// </summary>
     internal class CryptoProviderCacheFactory
     {
         internal static CryptoProviderCache Create() => Create(new CryptoProviderCacheOptions());
 
         /// <summary>
-        /// Create a new instance of InMemoryCryptoProviderCache and the _signingSignatureProviders and _verifyingSignatureProviders caches based on the cache type in _cryptoProviderCacheOptions.
+        /// Create a new instance of <see cref="InMemoryCryptoProviderCache"/> and the _signingSignatureProviders and _verifyingSignatureProviders caches based on the cache type in _cryptoProviderCacheOptions.
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the internal cryptoprovider cache.</param>
         /// <returns>A new instance of CryptoProviderCache.</returns>
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Create a new instance of SignatureProvider based on the cache type in _cryptoProviderCacheOptions.
+        /// Create a new instance of SignatureProvider cache based on the cache type in _cryptoProviderCacheOptions.
         /// </summary>
         /// <param name="cryptoProviderCacheOptions">Specifies the options which can be used to configure the internal cryptoprovider cache.</param>
         /// <returns>A new instance of SignatureProvider.</returns>
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                return new RandomEvictCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+                return new MaximumSizeCache<string, SignatureProvider>(cryptoProviderCacheOptions, StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
             }
         }
     }

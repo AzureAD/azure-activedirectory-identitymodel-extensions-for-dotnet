@@ -42,6 +42,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// This cache type does not track or organize items in order of use.
         /// When the cache is full, items will be removed in random order.
         /// </summary>
-        RandomEvict
+        MaximumSize
     };
 }

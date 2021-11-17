@@ -83,11 +83,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Default constructor for <see cref="CryptoProviderFactory"/>.
-        /// By default the EventBasedLRUCache will be used as the internal caches in the provider cache.
+        /// By default the EventBasedLRUCache will be used as the caching implementation for the InMemoryCryptoProviderCache..
         /// </summary>
-        public CryptoProviderFactory()
+        public CryptoProviderFactory() : this(new CryptoProviderCacheOptions())
         {
-            CryptoProviderCache = CryptoProviderCacheFactory.Create(new CryptoProviderCacheOptions());
+        }
+
+        /// <summary>
+        /// Initializes an instance of a <see cref="CryptoProviderFactory"/> with the specified options.
+        /// </summary>
+        /// <param name="cryptoProviderCacheOptions">The options which can be used to create the cryptoprovider cache.</param>
+        public CryptoProviderFactory(CryptoProviderCacheOptions cryptoProviderCacheOptions)
+        {
+            CryptoProviderCache = CryptoProviderCacheFactory.Create(cryptoProviderCacheOptions);
         }
 
         /// <summary>

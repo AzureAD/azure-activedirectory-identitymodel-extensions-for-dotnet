@@ -206,6 +206,30 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         /// <summary>
+        /// Ensure the right types of SigningSignatureProviderCache and VerifyingSignatureProviderCache caches are created.
+        /// </summary>
+        [Fact]
+        public void EnsureSignatureProviderCacheTypes()
+        {
+            var cryptoProviderFactory = new CryptoProviderFactory();
+            var providerCache = cryptoProviderFactory.CryptoProviderCache as InMemoryCryptoProviderCache;
+            Assert.NotNull(providerCache);
+            Assert.True(providerCache.SigningSignatureProviderCacheType == typeof(EventBasedLRUCache<string, SignatureProvider>));
+            Assert.True(providerCache.VerifyingSignatureProviderCacheType == typeof(EventBasedLRUCache<string, SignatureProvider>));
+
+            cryptoProviderFactory = new CryptoProviderFactory(new CryptoProviderCacheOptions { CacheType = ProviderCacheType.LRU });
+            providerCache = cryptoProviderFactory.CryptoProviderCache as InMemoryCryptoProviderCache;
+            Assert.NotNull(providerCache);
+            Assert.True(providerCache.SigningSignatureProviderCacheType == typeof(EventBasedLRUCache<string, SignatureProvider>));
+            Assert.True(providerCache.VerifyingSignatureProviderCacheType == typeof(EventBasedLRUCache<string, SignatureProvider>));
+
+            cryptoProviderFactory = new CryptoProviderFactory(new CryptoProviderCacheOptions { CacheType = ProviderCacheType.MaximumSize });
+            providerCache = cryptoProviderFactory.CryptoProviderCache as InMemoryCryptoProviderCache;
+            Assert.True(providerCache.SigningSignatureProviderCacheType == typeof(MaximumSizeCache<string, SignatureProvider>));
+            Assert.True(providerCache.VerifyingSignatureProviderCacheType == typeof(MaximumSizeCache<string, SignatureProvider>));
+        }
+
+        /// <summary>
         /// Tests that SymmetricSignatureProviders that fault will be removed from cache
         /// </summary>
         /// <param name="theoryData"></param>

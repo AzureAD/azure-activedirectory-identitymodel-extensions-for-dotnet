@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <typeparam name="TKey">The key type to be used by the cache.</typeparam>
     /// <typeparam name="TValue">The value type to be used by the cache</typeparam>
-    internal class EventBasedLRUCache<TKey, TValue> : RandomEvictCache<TKey, TValue>
+    internal class EventBasedLRUCache<TKey, TValue> : MaximumSizeCache<TKey, TValue>
     {
         private readonly LinkedList<CacheItem<TKey, TValue>> _doubleLinkedList = new();
         private readonly ConcurrentQueue<Action> _eventQueue = new();

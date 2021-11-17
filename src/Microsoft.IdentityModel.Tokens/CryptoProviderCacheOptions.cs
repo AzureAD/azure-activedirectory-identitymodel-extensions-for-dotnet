@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the whether or not to remove expired items.
+        /// Gets or sets the value that determines whether or not to remove expired values.
         /// </summary>
         public bool RemoveExpiredValues { get; set; } = false;
 
