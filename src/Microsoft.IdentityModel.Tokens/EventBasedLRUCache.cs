@@ -243,7 +243,9 @@ namespace Microsoft.IdentityModel.Tokens
             // After step (2) the event queue task is still running and the state is still EventQueueTaskRunning (even though the EventQueueTaskAction() method has already checked that the queue is empty
             // and is about to stop the task). This method (StartEventQueueTaskIfNotRunning()) will return, the execution will switch over to EventQueueTaskAction(),
             // and the task will terminate. This means no new task would be started to process the newly added event.
-            // This scenario is unlikely to happen, as it can only occur if the event queue task ALREADY checked the queue and it was empty and the new event was added AFTER that check.
+            //
+            // This scenario is unlikely to happen, as it can only occur if the event queue task ALREADY checked the queue and it was empty, and the new event was added AFTER that check but BEFORE the
+            // event queue task set the _eventQueueTaskState to EventQueueTaskStopped.
 
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskDoNotStop, EventQueueTaskRunning) == EventQueueTaskRunning)
             {
