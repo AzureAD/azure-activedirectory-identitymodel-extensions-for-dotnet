@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens
                     if (node.Value.ExpirationTime < DateTime.UtcNow)
                     {
                         _doubleLinkedList.Remove(node);
-                        if (base.TryRemoveInternal(node.Value.Key, out var cacheItem))
+                        if (TryRemoveCacheItem(node.Value.Key, out var cacheItem))
                             OnItemRemoved?.Invoke(cacheItem.Value);
 
                         numItemsRemoved++;
@@ -211,10 +211,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // use the _capacity for the newCacheSize calculation in the case where the cache is experiencing overflow
             var newCacheSize = CalculateNewCacheSize();
-            while (base.Count > newCacheSize && _doubleLinkedList.Count > 0)
+            while (Count > newCacheSize && _doubleLinkedList.Count > 0)
             {
                 var lru = _doubleLinkedList.Last;
-                if (base.TryRemoveInternal(lru.Value.Key, out var cacheItem))
+                if (TryRemoveCacheItem(lru.Value.Key, out var cacheItem))
                     OnItemRemoved?.Invoke(cacheItem.Value);
 
                 _doubleLinkedList.Remove(lru);
@@ -266,10 +266,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <inheritdoc/>
         public override bool SetValue(TKey key, TValue value, DateTime expirationTime)
         {
-            ValidateValues(key, value, expirationTime);
+            ValidateValues(key, value);
+
+            // if item already expired, do not add it to the cache if the _removeExpiredValues setting is set to true
+            if (_removeExpiredValues && expirationTime < DateTime.UtcNow)
+                return false;
 
             // just need to update value and move it to the top
-            if (base.TryGetValueInternal(key, out var cacheItem))
+            if (TryGetCacheItem(key, out var cacheItem))
             {
                 cacheItem.Value = value;
                 cacheItem.ExpirationTime = expirationTime;
@@ -313,7 +317,7 @@ namespace Microsoft.IdentityModel.Tokens
             value = default;
 
             // if the provider is not in the cache
-            if (!base.TryGetValueInternal(key, out var cacheItem))
+            if (!TryGetCacheItem(key, out var cacheItem))
             {
                 return false;
             }
@@ -321,7 +325,7 @@ namespace Microsoft.IdentityModel.Tokens
             // if the item has expired, remove it
             if (cacheItem.ExpirationTime <= DateTime.UtcNow)
             {
-                _ = base.TryRemoveInternal(key, out _);
+                _ = TryRemoveCacheItem(key, out _);
                 return false;
             }
 
@@ -343,7 +347,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (!base.TryGetValueInternal(key, out var cacheItem))
+            if (!TryGetCacheItem(key, out var cacheItem))
             {
                 value = default;
                 return false;
@@ -351,7 +355,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             value = cacheItem.Value;
             AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
-            if (base.TryRemoveInternal(key, out cacheItem))
+            if (TryRemoveCacheItem(key, out cacheItem))
             {
                 OnItemRemoved?.Invoke(cacheItem.Value);
                 return true;

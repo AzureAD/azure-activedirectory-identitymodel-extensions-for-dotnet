@@ -27,10 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Reflection;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 using System.Diagnostics;

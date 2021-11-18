@@ -106,7 +106,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <inheritdoc/>
         public virtual bool SetValue(TKey key, TValue value, DateTime expirationTime)
         {
-            ValidateValues(key, value, expirationTime);
+            ValidateValues(key, value);
+
+            // if cache limit is exceeded, start the compacting operation using a thread-pool thread (if it has not been started, _compactionState == CompactionStateNotRunning)
             if (NeedsCompaction && Interlocked.CompareExchange(ref _compactionState, CompactionStateInProgress, CompactionStateNotRunning) == CompactionStateNotRunning)
                 ThreadPool.QueueUserWorkItem(CompactCache);
 
@@ -122,7 +124,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             value = default;
-            var found = TryGetValueInternal(key, out CacheItem<TKey, TValue> val);
+            var found = TryGetCacheItem(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val.Value;
 
@@ -137,7 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             value = default;
 
-            var found = TryRemoveInternal(key, out CacheItem<TKey, TValue> val);
+            var found = TryRemoveCacheItem(key, out CacheItem<TKey, TValue> val);
             if (found)
                 value = val.Value;
 
@@ -145,7 +147,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         #endregion
-
 
         #region protected
 
@@ -155,16 +156,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the value to get.</param>
         /// <param name="value">The object that has the specified key, or the default value of the type if the not found.</param>
         /// <returns>true if the key was found, otherwise, false.</returns>
-        protected virtual bool TryGetValueInternal(TKey key, out CacheItem<TKey, TValue> value)
-        {
-            value = default;
-
-            var found = _map.TryGetValue(key, out CacheItem<TKey, TValue> val);
-            if (found)
-                value = val;
-
-            return found;
-        }
+        protected virtual bool TryGetCacheItem(TKey key, out CacheItem<TKey, TValue> value) => _map.TryGetValue(key, out value);
 
         /// <summary>
         /// Attempts to remove and return the value that has the specified key from the cache.
@@ -172,25 +164,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the element to remove and return.</param>
         /// <param name="value">The object removed from the cache, or the default value of the TValue type if key does not exist.</param>
         /// <returns>true if the object was removed successfully; otherwise, false.</returns>
-        protected virtual bool TryRemoveInternal(TKey key, out CacheItem<TKey, TValue> value)
-        {
-            value = default;
-
-            var found = _map.TryRemove(key, out CacheItem<TKey, TValue> val);
-            if (found)
-                value = val;
-
-            return found;
-        }
+        protected virtual bool TryRemoveCacheItem(TKey key, out CacheItem<TKey, TValue> value) => _map.TryRemove(key, out value);
 
         /// <summary>
         /// Validate the key, value and check the expiration time before adding the item is added to the cache.
         /// </summary>
         /// <param name="key">The key of the item to be added to the cache.</param>
         /// <param name="value">The value of the item to be added to the cache.</param>
-        /// <param name="expirationTime">The expiration time of the item.</param>
         /// <returns>true if valid, false otherwise.</returns>
-        protected static bool ValidateValues(TKey key, TValue value, DateTime expirationTime)
+        protected static bool ValidateValues(TKey key, TValue value)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
@@ -198,8 +180,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (value == null)
                 throw LogHelper.LogArgumentNullException(nameof(value));
 
-            // if item already expired, do not add it to the cache
-            return expirationTime >= DateTime.UtcNow;
+            return true;
         }
 
         /// <summary>
