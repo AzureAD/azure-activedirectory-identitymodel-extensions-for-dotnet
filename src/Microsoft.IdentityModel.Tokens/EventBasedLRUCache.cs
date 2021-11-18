@@ -235,13 +235,15 @@ namespace Microsoft.IdentityModel.Tokens
             //   3. now since the _eventQueueTaskState == EventQueueTaskRunning, it can be set to EventQueueTaskDoNotStop by the Interlocked.CompareExchange() below
             //   4. if _eventQueueTaskState is successfully set to EventQueueTaskDoNotStop, the Interlocked.CompareExchange() in the EventQueueTaskAction() will fail
             //      and the task will continue the while loop and the new event will keep the task running
-            //   5. if _eventQueueTaskState is NOT set to EventQueueTaskDoNotStop because of context switch back to the EventQueueTaskAction() and the _eventQueueTaskState is
+            //   5. if _eventQueueTaskState is NOT set to EventQueueTaskDoNotStop because execution switches back to the EventQueueTaskAction() and the _eventQueueTaskState is
             //      set to EventQueueTaskStopped (task exits), then the second Interlocked.CompareExchange() below should set the _eventQueueTaskState to EventQueueTaskRunning
             //      and start a task again (though this scenario is unlikely to happen)
             //
-            // Without the EventQueueTaskDoNotStop state, this execution of this thread could pass the second CompareExchange() call below after step 2 above. The event queue task would still exit
-            // since it has already checked the event queue in step 1, and no new task would be started to process the newly added event.
-            // Though this scenario is probably unlikely to happen, using EventQueueTaskDoNotStop will prevent it.
+            // Without the EventQueueTaskDoNotStop state check below, steps (3), (4) and (5) above will not be applicable.
+            // After step (2) the event queue task is still running and the state is still EventQueueTaskRunning (even though the EventQueueTaskAction() method has already checked that the queue is empty
+            // and is about to stop the task). This method (StartEventQueueTaskIfNotRunning()) will return, the execution will switch over to EventQueueTaskAction(),
+            // and the task will terminate. This means no new task would be started to process the newly added event.
+            // This scenario is unlikely to happen, as it can only occur if the event queue task ALREADY checked the queue and it was empty and the new event was added AFTER that check.
 
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskDoNotStop, EventQueueTaskRunning) == EventQueueTaskRunning)
             {
