@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
@@ -94,14 +94,18 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     if (x.Data.Count > 0)
                     {
-                        Assert.True(x.Data.Contains(HttpDocumentRetriever.StatusCode));
-                        Assert.True(x.Data.Contains(HttpDocumentRetriever.ResponseContent));
-                        Assert.Equal(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode);
+                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
+                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.StatusCode)");
+                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
+                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.ResponseContent)");
+                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
                     }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData

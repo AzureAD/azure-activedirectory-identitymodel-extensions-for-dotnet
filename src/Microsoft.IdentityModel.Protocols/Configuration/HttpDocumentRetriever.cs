@@ -44,10 +44,15 @@ namespace Microsoft.IdentityModel.Protocols
         private HttpClient _httpClient;
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
-#pragma warning disable 1591
+        /// <summary>
+        /// The key is used to add status code into ex.Data.
+        /// </summary>
         public const string StatusCode = "status_code";
+
+        /// <summary>
+        /// The key is used to add response content into ex.Data.
+        /// </summary>
         public const string ResponseContent = "response_content";
-#pragma warning disable 1591
 
         /// <summary>
         /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
