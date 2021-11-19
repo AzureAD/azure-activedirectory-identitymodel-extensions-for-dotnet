@@ -213,13 +213,17 @@ namespace Microsoft.IdentityModel.Tokens
             var newCacheSize = CalculateNewCacheSize();
             while (_map.Count > newCacheSize)
             {
+                // Since all items could have been removed by the public TryRemove() method, leaving the map empty, we need to check if a default value is returned.
+                // Remove the item from the map only if the returned item is NOT default value.
                 var item = _map.FirstOrDefault();
-                if (_map.TryRemove(item.Key, out var cacheItem))
+                if (!item.Equals(default))
+                {
+                    if (_map.TryRemove(item.Key, out var cacheItem))
                     OnItemRemoved?.Invoke(cacheItem.Value);
+                }
             }
 
-            // reset the _compactionState to CompactionStateNotRunning
-            _compactionState = CompactionStateNotRunning;
+            Interlocked.Exchange(ref _compactionState, CompactionStateNotRunning);
         }
 
         /// <summary>

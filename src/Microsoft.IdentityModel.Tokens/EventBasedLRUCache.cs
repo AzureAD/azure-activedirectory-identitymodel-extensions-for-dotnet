@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
             while (!_shouldStopImmediately)
             {
                 // always set the state to EventQueueTaskRunning in case it was set to EventQueueTaskDoNotStop (there is a new item just added to the queue)
-                _eventQueueTaskState = EventQueueTaskRunning;
+                Interlocked.Exchange(ref _eventQueueTaskState, EventQueueTaskRunning);
 
                 try
                 {
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (TryRemoveCacheItem(lru.Value.Key, out var cacheItem))
                     OnItemRemoved?.Invoke(cacheItem.Value);
 
-                _doubleLinkedList.Remove(lru);
+                _doubleLinkedList.RemoveLast();
             }
         }
 
