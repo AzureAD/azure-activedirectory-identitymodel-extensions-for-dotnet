@@ -2716,6 +2716,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateLifetime = false,
                             IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) => { return false; }
                         },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232: ")
                     },
                     new JwtTheoryData
                     {
