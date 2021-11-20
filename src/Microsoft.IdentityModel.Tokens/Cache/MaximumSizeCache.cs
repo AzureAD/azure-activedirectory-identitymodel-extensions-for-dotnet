@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="key">The key of the value to get or set.</param>
         /// For get, if the specified key is not found, a <exception cref="KeyNotFoundException"> will be thrown.</exception>
         /// For set, if the key is null throw an <exception cref="ArgumentNullException"> will be thrown.</exception>
-        public CacheItem<TKey, TValue> this[TKey key]
+        protected CacheItem<TKey, TValue> this[TKey key]
         {
             get => _map[key];
             set => _map[key] = value;
