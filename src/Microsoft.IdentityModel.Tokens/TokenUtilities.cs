@@ -154,21 +154,30 @@ namespace Microsoft.IdentityModel.Tokens
 
 
         /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="configuration"/>.
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/>.
         /// </summary>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="configuration"/></returns>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/>.</returns>
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration)
+        {
+            LogHelper.LogInformation(TokenLogMessages.IDX10265);
+
+            if (configuration?.SigningKeys != null)
+                foreach (SecurityKey key in configuration.SigningKeys)
+                    yield return key;
+        }
+
+        /// <summary>
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
         internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             LogHelper.LogInformation(TokenLogMessages.IDX10264);
 
-            List<SecurityKey> keys = new List<SecurityKey>();
-            if (configuration?.SigningKeys != null)
-                foreach (SecurityKey key in configuration.SigningKeys)
-                    keys.Add(key);
-
-            return keys.Concat(GetAllSigningKeys(validationParameters));
+            return GetAllSigningKeys(configuration).Concat(GetAllSigningKeys(validationParameters));
         }
 
         /// <summary>

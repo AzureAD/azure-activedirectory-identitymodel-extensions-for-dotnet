@@ -1283,10 +1283,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             }
 
+            // Get information on where keys used during token validation came from for debugging purposes.
+            var keysInTokenValidationParameters = TokenUtilities.GetAllSigningKeys(validationParameters);
+            var keysInConfiguration = TokenUtilities.GetAllSigningKeys(configuration);
+            var numKeysInTokenValidationParameters = keysInTokenValidationParameters.Count();
+            var numKeysInConfiguration = keysInConfiguration.Count();
+
             if (kidExists)
             {
                 if (kidMatched)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Kid, exceptionStrings, jwtToken)));
+                {
+                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Kid, StringComparison.Ordinal));
+                    var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
+                        keysAttempted,
+                        LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                        LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                        LogHelper.MarkAsNonPII(keyLocation),
+                        jwtToken.Kid, exceptionStrings, jwtToken)));
+                }
 
                 var expires = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Exp, out var _) ? (DateTime?)jwtToken.ValidTo : null;
                 var notBefore = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Nbf, out var _) ? (DateTime?)jwtToken.ValidFrom : null;
@@ -1298,11 +1314,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     jwtToken.Kid,
                     validationParameters,
                     configuration,
-                    exceptionStrings);
+                    exceptionStrings,
+                    numKeysInTokenValidationParameters,
+                    numKeysInConfiguration);
             }
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
+                    keysAttempted,
+                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                    exceptionStrings, jwtToken)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }
