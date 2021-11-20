@@ -32,6 +32,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -94,11 +95,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     if (x.Data.Count > 0)
                     {
-                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
-                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.StatusCode)");
-                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
-                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.ResponseContent)");
-                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
+                        if (!x.Data.Contains(HttpResponseConstants.StatusCode))
+                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
+                        if (!x.Data.Contains(HttpResponseConstants.ResponseContent))
+                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
+                        IdentityComparer.AreEqual(x.Data[HttpResponseConstants.StatusCode], theoryData.ExpectedStatusCode, context);
                     }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;

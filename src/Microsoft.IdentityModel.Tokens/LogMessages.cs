@@ -102,6 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10262 = "IDX10262: One of the issuers in TokenValidationParameters.ValidIssuers was null or an empty string. See https://aka.ms/wilson/tokenvalidation for details.";
         public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
+        public const string IDX10265 = "IDX10265: Network error occurred. Status code: '{0}'. \nResponse content: '{1}'. \nAttempting to retrieve configuration again from authority: '{2}'.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
