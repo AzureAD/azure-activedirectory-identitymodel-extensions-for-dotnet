@@ -45,16 +45,6 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
-        /// The key is used to add status code into ex.Data.
-        /// </summary>
-        public const string StatusCode = "status_code";
-
-        /// <summary>
-        /// The key is used to add response content into ex.Data.
-        /// </summary>
-        public const string ResponseContent = "response_content";
-
-        /// <summary>
         /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
         /// </summary>
         public static bool DefaultSendAdditionalHeaderData { get; set; } = true;
@@ -131,8 +121,8 @@ namespace Microsoft.IdentityModel.Protocols
                     return responseContent;
 
                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
-                unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
-                unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
+                unsuccessfulHttpResponseException.Data.Add(HttpResponseConstants.StatusCode, response.StatusCode);
+                unsuccessfulHttpResponseException.Data.Add(HttpResponseConstants.ResponseContent, responseContent);
             }
             catch (Exception ex)
             {

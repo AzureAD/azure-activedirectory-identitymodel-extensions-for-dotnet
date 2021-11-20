@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -1008,9 +1010,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    // Keep going with the validation as the TokenValidationParameters may have the issuer and signing key set
+                    // The exception is not re-thrown here as the TokenValidationParameters may have the issuer and signing key set
                     // directly on them.
                     LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+
+                    // Retry configuration retrieval on network failure (ServiceUnavailable or RequestTimeout).
+                    if (ex.GetType().Equals(typeof(InvalidOperationException)) && ex.Message.Contains("IDX20803 :")
+                        && ex.InnerException != null && ex.InnerException is IOException ioException
+                        && ioException.Data.Contains(HttpResponseConstants.StatusCode) &&
+                        (ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
+                    {
+                        try
+                        {
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
+                            currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                        }
+                        catch (Exception retryException)
+                        {
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, retryException.ToString()));
+                        }
+                    }
                 }
             }
 
@@ -1019,7 +1038,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    // Set current configuration as LKG if it exists.
+                    // Set current configuration as LKG if it exists and is not the same as the LKG.
                     if (currentConfiguration != null && currentConfiguration != validationParameters.ConfigurationManager.LastKnownGoodConfiguration)
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
@@ -1052,14 +1071,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         }
                     }
 
-                    // If we were still unable to validate, attempt to refresh the configuration and validate using it.
-                    validationParameters.ConfigurationManager.RequestRefresh();
-                    var lastConfig = currentConfiguration;
-                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+                    // If we were still unable to validate, attempt to refresh the configuration and validate using it
+                    // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
+                    // network error as this case should have already been hit before. This refresh handles the case
+                    // where a new valid configuration was somehow published during validation time.
+                    if (currentConfiguration != null)
+                    {
+                        validationParameters.ConfigurationManager.RequestRefresh();
+                        var lastConfig = currentConfiguration;
+                        currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-                    // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
-                    if (lastConfig != currentConfiguration)
-                        return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
+                        // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
+                        if (lastConfig != currentConfiguration)
+                            return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); ;
+                    }
                 }
             }
 
