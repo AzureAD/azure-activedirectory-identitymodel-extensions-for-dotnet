@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -80,7 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
@@ -91,10 +92,20 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             {
                 aex.Handle((x) =>
                 {
+                    if (x.Data.Count > 0)
+                    {
+                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
+                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.StatusCode)");
+                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
+                            context.AddDiff("!x.Data.Contains(HttpDocumentRetriever.ResponseContent)");
+                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
+                    }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData
@@ -159,6 +170,15 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     TestId = "AAD common: WsFed"
                 });
 
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    ExpectedStatusCode = HttpStatusCode.BadRequest,
+                    TestId = "Client Miss Configuration"
+                });
+
                 return theoryData;
             }
         }
@@ -169,6 +189,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         public string Address { get; set; }
 
         public IDocumentRetriever DocumentRetriever { get; set; }
+
+        public HttpStatusCode ExpectedStatusCode { get; set; }
 
         public override string ToString()
         {
