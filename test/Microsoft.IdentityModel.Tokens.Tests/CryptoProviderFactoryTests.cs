@@ -33,8 +33,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.IdentityModel.KeyVaultExtensions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -1037,7 +1035,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             long taskIdleTimeoutInSeconds = 1;
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, taskIdleTimeoutInSeconds); // set the event queue task idle timeout
 
             // create signing providers
             var signingProviders = CreateSigningProviders(factory);
@@ -1088,7 +1085,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             int count = 5;
             List<Thread> signingThreads = new List<Thread>(count);
@@ -1111,7 +1107,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // However, this can change in the future.
             cache.Dispose();
 
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(cache.EventQueueTaskIdleTimeoutInSeconds)); // wait for the event queue task to complete
+            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(MaxEventQueueTaskWaitTimeInSeconds));
 
             // wait for all threads to finish
             foreach (Thread thread in signingThreads)
@@ -1135,7 +1131,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             var testClaims = new List<Claim>
             {
@@ -1172,7 +1167,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
+
             var testClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
@@ -1203,20 +1198,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private void AssertNoHangingingTasks(InMemoryCryptoProviderCache cache, string callName)
         {
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(cache.EventQueueTaskIdleTimeoutInSeconds)); // wait for the event queue task to complete
+            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(MaxEventQueueTaskWaitTimeInSeconds)); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"{callName}: unexpected task count: {cache.TaskCount}, expected: 0");
         }
 
         /// <summary>
-        /// Set the LRU cache event queue task idle timeout, the task will end after being idle for the specified time interval.
-        /// The default value is 120 seconds so setting this to a smaller value can reduce the time needed to run unit tests.
+        /// The max wait time (in seconds) for the event queue task to exit.
         /// </summary>
-        /// <param name="cache">The LRU cache to set the task execution time.</param>
-        /// <param name="taskIdleTimeoutInSeconds">The value to set to, in seconds.</param>
-        private void SetTaskIdleTimeoutInSeconds(InMemoryCryptoProviderCache cache, long taskIdleTimeoutInSeconds)
-        {
-            cache.EventQueueTaskIdleTimeoutInSeconds = taskIdleTimeoutInSeconds;
-        }
+        private int MaxEventQueueTaskWaitTimeInSeconds => 5;
 
         /// <summary>
         /// Calculate the wait time for a task to stop.

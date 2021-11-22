@@ -311,19 +311,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal long TaskCount => _signingSignatureProviders.TaskCount + _verifyingSignatureProviders.TaskCount;
 
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// </summary>
-        internal long EventQueueTaskIdleTimeoutInSeconds
-        {
-            get => _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds;
-            set
-            {
-                _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
-                _verifyingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
-            }
-        }
-
         #endregion
     }
 }
