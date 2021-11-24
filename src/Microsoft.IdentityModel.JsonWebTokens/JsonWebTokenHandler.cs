@@ -1003,35 +1003,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             BaseConfiguration currentConfiguration = null;
             if (validationParameters.ConfigurationManager != null)
-            {
-                try
-                {
-                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    // The exception is not re-thrown here as the TokenValidationParameters may have the issuer and signing key set
-                    // directly on them.
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
-
-                    // Retry configuration retrieval on network failure (ServiceUnavailable or RequestTimeout).
-                    if (ex.GetType().Equals(typeof(InvalidOperationException)) && ex.Message.Contains("IDX20803 :")
-                        && ex.InnerException != null && ex.InnerException is IOException ioException
-                        && ioException.Data.Contains(HttpResponseConstants.StatusCode) &&
-                        (ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
-                    {
-                        try
-                        {
-                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
-                            currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                        }
-                        catch (Exception retryException)
-                        {
-                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, retryException.ToString()));
-                        }
-                    }
-                }
-            }
+                currentConfiguration = GetConfigurationAndRetryOnNetworkError(validationParameters);
 
             TokenValidationResult tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
             if (validationParameters.ConfigurationManager != null)
@@ -1087,6 +1059,63 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return tokenValidationResult;
+        }
+
+        private static BaseConfiguration GetConfigurationAndRetryOnNetworkError(TokenValidationParameters validationParameters)
+        {
+            BaseConfiguration currentConfiguration;
+            try
+            {
+                currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                return currentConfiguration;
+            }
+            catch (Exception ex)
+            {
+                IOException ioException;
+                if ((ioException = IsIOExceptionWithFailureInformation(ex)) != null)
+                {
+                    // Retry configuration retrieval on network failure (ServiceUnavailable or RequestTimeout).
+                    if (ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
+                        try
+                        {
+                            currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                            return currentConfiguration;
+                        }
+                        catch (Exception retryException)
+                        {
+                            if ((ioException = IsIOExceptionWithFailureInformation(retryException)) != null)
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], retryException.ToString()));
+                            else
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
+                    }
+                }
+                else
+                {
+                    // The exception is not re-thrown here as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them.
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                }
+            }
+
+            return null;
+        }
+
+        private static IOException IsIOExceptionWithFailureInformation(Exception ex)
+        {
+            if (ex.GetType().Equals(typeof(InvalidOperationException)) && ex.Message.Contains("IDX20803 :")
+                && ex.InnerException != null && ex.InnerException is IOException ioException
+                && ioException.Data.Contains(HttpResponseConstants.StatusCode)
+                && ioException.Data.Contains(HttpResponseConstants.ResponseContent))
+                return ioException;
+
+            return null;
         }
 
         private TokenValidationResult ValidateJWS(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration)

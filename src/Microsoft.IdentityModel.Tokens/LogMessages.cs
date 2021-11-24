@@ -98,11 +98,12 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10257 = "IDX10257: Token type validation failed. Type: '{0}'. Did not match: validationParameters.TokenTypes: '{1}'.";
         public const string IDX10258 = "IDX10258: Token type validated. Type: '{0}'.";
         public const string IDX10260 = "IDX10260: Issuer validation failed. Issuer: '{0}'. Did not match: validationParameters.ValidIssuer: '{1}' or validationParameters.ValidIssuers: '{2}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{3}'.";
-        public const string IDX10261 = "IDX10261: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}.";
+        public const string IDX10261 = "IDX10261: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
         public const string IDX10262 = "IDX10262: One of the issuers in TokenValidationParameters.ValidIssuers was null or an empty string. See https://aka.ms/wilson/tokenvalidation for details.";
         public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
-        public const string IDX10265 = "IDX10265: Network error occurred. Status code: '{0}'. \nResponse content: '{1}'. \nAttempting to retrieve configuration again from authority: '{2}'.";
+        public const string IDX10265 = "IDX10265: Network error occurred. Status code: '{0}'. \nResponse content: '{1}'. \nAttempting to retrieve configuration again from authority: '{2}'. See https://aka.ms/validate-using-configuration-manager for additional information.";
+        public const string IDX10266 = "IDX10266: Unable to retrieve configuration from authority: '{0}'. Status code: '{0}'. \nResponse content: '{1}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {3}. See https://aka.ms/validate-using-configuration-manager for additional information.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
