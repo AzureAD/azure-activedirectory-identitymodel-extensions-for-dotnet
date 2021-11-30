@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="options">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
         /// <param name="comparer">The equality comparison implementation to be used by the map when comparing keys.</param>
         /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
-        /// <param name="removeExpiredValuesIntervalInSeconds">The period to wait to remove expired items, in milliseconds.</param>
+        /// <param name="removeExpiredValuesIntervalInSeconds">The period to wait to remove expired items, in seconds.</param>
         /// <param name="maintainLRU">Whether or not to maintain items in a LRU fashion, moving to front of list when accessed in the cache.</param>
         internal EventBasedLRUCache(
             int capacity,
@@ -114,10 +114,14 @@ namespace Microsoft.IdentityModel.Tokens
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
-            _removeExpiredValuesIntervalInSeconds = 1000 * removeExpiredValuesIntervalInSeconds;
+            _removeExpiredValuesIntervalInSeconds = removeExpiredValuesIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
             _maintainLRU = maintainLRU;
             _dueForExpiredValuesRemoval = DateTime.UtcNow.AddSeconds(_removeExpiredValuesIntervalInSeconds);
+
+            // add event handlers for the AppDonain unload/exit
+            AppDomain.CurrentDomain.ProcessExit += DomainProcessExit;
+            AppDomain.CurrentDomain.DomainUnload += DomainUnload;
         }
 
         /// <summary>
@@ -136,6 +140,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Stop the event queue task if it is running. This allows the task/thread to terminate gracefully.
+        /// Currently there is no unmanaged resource, if any is added in the future it should be disposed of in this method.
         /// </summary>
         private void StopEventQueueTask() => _shouldStopImmediately = true;
 
@@ -247,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_map.TryRemove(lru.Value.Key, out var cacheItem))
                     OnItemRemoved?.Invoke(cacheItem.Value);
 
-                _doubleLinkedList.Remove(lru);
+                _doubleLinkedList.RemoveLast();
             }
         }
 
