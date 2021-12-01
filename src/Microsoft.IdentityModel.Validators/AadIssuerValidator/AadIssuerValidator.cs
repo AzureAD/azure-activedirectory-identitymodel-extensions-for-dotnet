@@ -30,6 +30,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
+using System.Threading;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Validators
                     {
                         if (IsV2Authority)
                         {
-                            AadIssuerV2 = validationParameters.Configuration.Issuer;
+                            AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
                         }
                         else
                         {
@@ -150,7 +151,7 @@ namespace Microsoft.IdentityModel.Validators
                         }
                         else
                         {
-                            AadIssuerV1 = validationParameters.Configuration.Issuer;
+                            AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
                         }
                     }
 

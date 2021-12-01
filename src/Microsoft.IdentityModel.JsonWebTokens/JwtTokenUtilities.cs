@@ -379,17 +379,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
         /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        private static SecurityKey ResolveTokenSigningKeyWithConfig(string kid, string x5t, TokenValidationParameters validationParameters)
+        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (validationParameters.Configuration?.SigningKeys == null)
+            if (configuration?.SigningKeys == null)
                 return null;
 
             if (!string.IsNullOrEmpty(kid))
             {
-                foreach (SecurityKey signingKey in validationParameters.Configuration.SigningKeys)
+                foreach (SecurityKey signingKey in configuration.SigningKeys)
                 {
                     if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                         return signingKey;
@@ -398,14 +399,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!string.IsNullOrEmpty(x5t))
             {
-                foreach (SecurityKey signingKey in validationParameters.Configuration.SigningKeys)
+                foreach (SecurityKey signingKey in configuration.SigningKeys)
                 {
                     if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
                         return signingKey;
                 }
             }
 
-            return null;
+            return ResolveTokenSigningKey(kid, x5t, validationParameters);
         }
 
         /// <summary>
@@ -460,10 +461,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (validationParameters.Configuration != null)
-                return ResolveTokenSigningKeyWithConfig(kid, x5t, validationParameters);
-            else
-                return null;
+            return null;
         }
     }
 }

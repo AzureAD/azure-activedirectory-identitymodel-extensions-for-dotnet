@@ -1505,6 +1505,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidationDelegates.IssuerValidatorThrows,
                             true)
                     },
+                    new JwtTheoryData
+                    {
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IssuerValidatorThrows"),
+                        Token = jwt,
+                        TestId = "ValidationDelegates.IssuerValidatorThrows, ValidateIssuer: true",
+                        ValidationParameters = ValidateIssuerValidationParameters(
+                            Default.Issuer,
+                            Default.Issuers,
+                            ValidationDelegates.IssuerValidatorThrows,
+                            true)
+                    },
                 };
             }
         }

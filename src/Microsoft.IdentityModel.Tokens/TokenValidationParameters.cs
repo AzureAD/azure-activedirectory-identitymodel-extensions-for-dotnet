@@ -60,7 +60,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="kid">A key identifier. It may be null.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A <see cref="SecurityKey"/> to use when validating a signature.</returns>
+    /// <remarks> If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+    /// priority.</remarks>
     public delegate IEnumerable<SecurityKey> IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for IssuerSigningKeyResolverUsingConfiguration.
+    /// </summary>
+    /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated. It may be null.</param>
+    /// <param name="kid">A key identifier. It may be null.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="configuration"><see cref="BaseConfiguration"/> required for validation.</param>
+    /// <returns>A <see cref="SecurityKey"/> to use when validating a signature.</returns>
+    /// <remarks> If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+    /// priority.</remarks>
+    public delegate IEnumerable<SecurityKey> IssuerSigningKeyResolverUsingConfiguration(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
     /// Definition for IssuerSigningKeyValidator.
@@ -68,7 +83,20 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <remarks> If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+    /// priority.</remarks>
     public delegate bool IssuerSigningKeyValidator(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for IssuerSigningKeyValidatorUsingConfiguration.
+    /// </summary>
+    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="configuration"><see cref="BaseConfiguration"/> required for validation.</param>
+    /// <remarks> If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+    /// priority.</remarks>
+    public delegate bool IssuerSigningKeyValidatorUsingConfiguration(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
     /// Definition for IssuerValidator.
@@ -77,8 +105,24 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
-    /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.</remarks>
+    /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
+    /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
+    /// priority.</remarks>
     public delegate string IssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for IssuerValidatorUsingConfiguration.
+    /// </summary>
+    /// <param name="issuer">The issuer to validate.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="configuration"><see cref="BaseConfiguration"/> required for validation.</param>
+    /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
+    /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
+    /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
+    /// priority.
+    /// </remarks>
+    public delegate string IssuerValidatorUsingConfiguration(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
     /// Definition for LifetimeValidator.
@@ -104,6 +148,14 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="token">A securityToken with a signature.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     public delegate SecurityToken SignatureValidator(string token, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for SignatureValidator.
+    /// </summary>
+    /// <param name="token">A securityToken with a signature.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="configuration">The <see cref="BaseConfiguration"/> that is required for validation.</param>
+    public delegate SecurityToken SignatureValidatorUsingConfiguration(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
     /// Definition for TokenReader.
@@ -172,7 +224,6 @@ namespace Microsoft.IdentityModel.Tokens
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
-            Configuration = other.Configuration;
             ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
@@ -359,16 +410,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// This property represents the metadata (specifically the issuer and signing keys) retrieved by the <see cref="ConfigurationManager"/>.
-        /// It will be used along with the other properties set on the TokenValidationParameters in order to validate the token.
-        /// </summary>
-        /// <remarks>
-        /// We make a copy of the TokenValidationParameters passed in to the JsonWebTokenHandler.ValidateToken(...) method, so the value of this
-        /// property will never change on the original object.
-        /// </remarks>
-        internal BaseConfiguration Configuration { get; set; }
-
-        /// <summary>
         /// If set, this property will be used to obtain the issuer and signing keys associated with the metadata endpoint of <see cref="BaseConfiguration.Issuer"/>.
         /// The obtained issuer and signing keys will then be used along with those present on the TokenValidationParameters for validation of the incoming token.
         /// </summary>
@@ -394,8 +435,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of default processing.
         /// This means that no default <see cref="SecurityKey"/> validation will occur.
         /// Even if <see cref="ValidateIssuerSigningKey"/> is false, this delegate will still be called.
+        /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+        /// priority.
         /// </remarks>
         public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of default processing.
+        /// This means that no default <see cref="SecurityKey"/> validation will occur.
+        /// Even if <see cref="ValidateIssuerSigningKey"/> is false, this delegate will still be called.
+        /// This delegate should be used if properties from the configuration retrieved from the authority are necessary to validate the
+        /// issuer signing key.
+        /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyValidatorUsingConfiguration takes
+        /// priority.
+        /// </remarks>
+        public IssuerSigningKeyValidatorUsingConfiguration IssuerSigningKeyValidatorUsingConfiguration { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for signature validation.
@@ -407,8 +464,23 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
+        /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+        /// priority.
         /// </remarks>
         public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation using the
+        /// <see cref="TokenValidationParameters"/> and <see cref="BaseConfiguration"/>.
+        /// </summary>
+        /// <remarks>
+        /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
+        /// This delegate should be used if properties from the configuration retrieved from the authority are necessary to resolve the
+        /// issuer signing key.
+        /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
+        /// priority.
+        /// </remarks>
+        public IssuerSigningKeyResolverUsingConfiguration IssuerSigningKeyResolverUsingConfiguration { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IEnumerable{SecurityKey}"/> used for signature validation.
@@ -422,8 +494,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
+        /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
+        /// priority. 
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
+        /// This means that no default 'issuer' validation will occur.
+        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
+        /// This delegate should be used if properties from the configuration retrieved from the authority are necessary to validate the issuer.
+        /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
+        /// priority.
+        /// </remarks>
+        public IssuerValidatorUsingConfiguration IssuerValidatorUsingConfiguration { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the lifetime of the token
@@ -536,6 +624,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to signature of the token, instead of default processing.
         /// </remarks>
         public SignatureValidator SignatureValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the signature of the token using the <see cref="TokenValidationParameters"/> and
+        /// the <see cref="BaseConfiguration"/>.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to signature of the token, instead of default processing.
+        /// </remarks>
+        public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
