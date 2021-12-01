@@ -2667,7 +2667,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidatorWithConfiguration = (issuer, securityToken, validationParameters, configuration) => { return issuer; },
+                            IssuerValidatorUsingConfiguration = (issuer, securityToken, validationParameters, configuration) => { return issuer; },
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -2699,7 +2699,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyResolverWithConfiguration =  (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.DefaultX509Key_2048 }; }
+                            IssuerSigningKeyResolverUsingConfiguration =  (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.DefaultX509Key_2048 }; }
                         },
                     },
                     new JwtTheoryData
@@ -2714,7 +2714,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) => { return false; }
+                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) => { return false; }
                         },
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232: ")
                     },
@@ -2881,7 +2881,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
+                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
                                 if (configuration == validConfigKeyValidationFails)
@@ -2963,7 +2963,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
+                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
                                 if (configuration == validConfigKeyValidationFails)
@@ -3183,7 +3183,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
+                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
                                 if (configuration == validConfigKeyValidationFails)
@@ -3270,7 +3270,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateIssuer = true,
                             ValidateAudience = false,
                             ValidateLifetime = false,
-                            IssuerSigningKeyValidatorWithConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
+                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
                             {
                                 // mock failing on issuer validation the first time
                                 if (configuration == validConfigKeyValidationFails)

@@ -126,8 +126,7 @@ namespace Microsoft.IdentityModel.Validators
                     {
                         if (IsV2Authority)
                         {
-                            BaseConfiguration openIdConnectConfig = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV2 = openIdConnectConfig.Issuer;
+                            AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
                         }
                         else
                         {
@@ -152,8 +151,7 @@ namespace Microsoft.IdentityModel.Validators
                         }
                         else
                         {
-                            BaseConfiguration openIdConnectConfig = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV1 = openIdConnectConfig.Issuer;
+                            AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
                         }
                     }
 

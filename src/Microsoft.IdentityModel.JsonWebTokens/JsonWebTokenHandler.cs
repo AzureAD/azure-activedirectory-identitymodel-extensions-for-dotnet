@@ -1025,17 +1025,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     return tokenValidationResult;
                 }
-                else if (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
-                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSigningKeyException))
-                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidIssuerException))
-                   || (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenUnableToValidateException))
+                else if (tokenValidationResult.Exception is SecurityTokenInvalidSignatureException
+                   || tokenValidationResult.Exception is SecurityTokenInvalidSigningKeyException
+                   || tokenValidationResult.Exception is SecurityTokenInvalidIssuerException
+                   || (tokenValidationResult.Exception is SecurityTokenUnableToValidateException
                    // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
                    && (tokenValidationResult.Exception as SecurityTokenUnableToValidateException).ValidationFailure != ValidationFailure.InvalidLifetime)
-                   || tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenSignatureKeyNotFoundException)))
+                   || tokenValidationResult.Exception is SecurityTokenSignatureKeyNotFoundException)
                 {
                     if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
                         && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null
-                        && !(validationParameters.ConfigurationManager.LastKnownGoodConfiguration == currentConfiguration))
+                        && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != currentConfiguration)
                     {
                         // Inform the user that the LKG is expired.
                         if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
@@ -1057,7 +1057,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                     if (lastConfig != currentConfiguration)
-                        return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); ;
+                        return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
                 }
             }
 
@@ -1118,6 +1118,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
+                // Infinite recursion should not occur here, as the JsonWebToken passed into this method is (1) constructed from a string
+                // AND (2) the signature is successfully validated on it. (1) implies that even if there are nested actor tokens,
+                // they must end at some point since they cannot reference one another. (2) means that the token has a valid signature
+                // and (since issuer validation occurs first) came from a trusted authority.
+                // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
+                // this code will still work properly.
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
             Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration);
@@ -1143,9 +1149,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.SignatureValidatorWithConfiguration != null)
+            if (validationParameters.SignatureValidatorUsingConfiguration != null)
             {
-                var validatedToken = validationParameters.SignatureValidatorWithConfiguration(token, validationParameters, configuration);
+                var validatedToken = validationParameters.SignatureValidatorUsingConfiguration(token, validationParameters, configuration);
                 if (validatedToken == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
 
@@ -1197,9 +1203,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
-            if (validationParameters.IssuerSigningKeyResolverWithConfiguration != null)
+            if (validationParameters.IssuerSigningKeyResolverUsingConfiguration != null)
             {
-                keys = validationParameters.IssuerSigningKeyResolverWithConfiguration(token, jwtToken, jwtToken.Kid, validationParameters, configuration);
+                keys = validationParameters.IssuerSigningKeyResolverUsingConfiguration(token, jwtToken, jwtToken.Kid, validationParameters, configuration);
             }
             else if (validationParameters.IssuerSigningKeyResolver != null)
             {

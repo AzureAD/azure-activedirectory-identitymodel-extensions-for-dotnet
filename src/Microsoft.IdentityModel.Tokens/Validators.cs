@@ -228,8 +228,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.IssuerValidatorWithConfiguration != null)
-                return validationParameters.IssuerValidatorWithConfiguration(issuer, securityToken, validationParameters, configuration);
+            if (validationParameters.IssuerValidatorUsingConfiguration != null)
+                return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
 
             if (validationParameters.IssuerValidator != null)
                 return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
@@ -320,9 +320,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.IssuerSigningKeyValidatorWithConfiguration != null)
+            if (validationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
             {
-                if (!validationParameters.IssuerSigningKeyValidatorWithConfiguration(securityKey, securityToken, validationParameters, configuration))
+                if (!validationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, validationParameters, configuration))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)) { SigningKey = securityKey });
 
                 return;
