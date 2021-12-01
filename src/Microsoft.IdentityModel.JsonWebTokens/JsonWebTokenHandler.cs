@@ -1025,7 +1025,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     return tokenValidationResult;
                 }
-                else if (tokenValidationResult.Exception is SecurityTokenInvalidSignatureException
+                // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
+                // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
+                else if (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
                    || tokenValidationResult.Exception is SecurityTokenInvalidSigningKeyException
                    || tokenValidationResult.Exception is SecurityTokenInvalidIssuerException
                    || (tokenValidationResult.Exception is SecurityTokenUnableToValidateException
