@@ -66,15 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
         /// </summary>
-        /// <remarks>
-        /// Will be deprecated in the next major release. Start moving towards using <see cref="LogData"/> instead
-        /// </remarks>
         public ICollection<string> Logs { get; private set; } = new Collection<string>();
-
-        /// <summary>
-        /// A collection of log and <see cref="EventLevel"/> key value pairs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
-        /// </summary>
-        public ICollection<KeyValuePair<string, EventLevel>> LogData { get; private set; } = new Collection<KeyValuePair<string, EventLevel>>();
 
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
