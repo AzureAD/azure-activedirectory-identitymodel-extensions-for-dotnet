@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Builds a Url using the current IssuerAddress and the parameters that have been set.
+        /// Builds a URL using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>UrlEncoded string.</returns>
         /// <remarks>Each parameter &lt;Key, Value&gt; is first transformed using <see cref="Uri.EscapeDataString(string)"/>.</remarks>
