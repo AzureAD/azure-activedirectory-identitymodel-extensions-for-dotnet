@@ -1079,7 +1079,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
                     // directly on them, allowing the library to continue with token validation.
                     IOException innerIoException;
-                    if ((innerIoException = GetInnerIOExceptionWithFailureInformation(ex)) != null && innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable))
+                    if ((innerIoException = GetInnerIOExceptionWithFailureInformation(ex)) != null && (innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
                     {
                         if (i < maxAttempt) // logging exception details and that we will attempt to retry configuration retrieval
                             LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
