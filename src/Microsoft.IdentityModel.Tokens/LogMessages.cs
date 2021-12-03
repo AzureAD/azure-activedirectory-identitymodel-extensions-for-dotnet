@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
         public const string IDX10265 = "IDX10265: Network error occurred. Status code: '{0}'. \nResponse content: '{1}'. \nAttempting to retrieve configuration again from authority: '{2}'. See https://aka.ms/validate-using-configuration-manager for additional information.";
-        public const string IDX10266 = "IDX10266: Unable to retrieve configuration from authority: '{0}'. Status code: '{0}'. \nResponse content: '{1}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {3}. See https://aka.ms/validate-using-configuration-manager for additional information.";
+        public const string IDX10266 = "IDX10266: Unable to retrieve configuration from authority: '{0}'. Status code: '{1}'. \nResponse content: '{2}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {3}. See https://aka.ms/validate-using-configuration-manager for additional information.";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
