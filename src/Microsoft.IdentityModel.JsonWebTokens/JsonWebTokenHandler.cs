@@ -1066,52 +1066,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static BaseConfiguration GetConfigurationAndRetryOnNetworkError(TokenValidationParameters validationParameters)
         {
             BaseConfiguration currentConfiguration;
-            try
+            int maxAttempt = 2;
+            for (int i = 1; i <= maxAttempt; i++)
             {
-                currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                return currentConfiguration;
-            }
-            catch (Exception ex)
-            {
-                IOException ioException;
-                if ((ioException = IsIOExceptionWithFailureInformation(ex)) != null)
+                try
                 {
-                    // Retry configuration retrieval on network failure (ServiceUnavailable or RequestTimeout).
-                    if (ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || ioException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable))
-                    {
-                        LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
-                        try
-                        {
-                            currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                            return currentConfiguration;
-                        }
-                        catch (Exception retryException)
-                        {
-                            if ((ioException = IsIOExceptionWithFailureInformation(retryException)) != null)
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], retryException.ToString()));
-                            else
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
-                        }
-                    }
-                    else
-                    {
-                        LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, ioException.Data[HttpResponseConstants.StatusCode], ioException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
-                    }
+                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                    return currentConfiguration;
                 }
-                else
+                catch (Exception ex)
                 {
-                    // The exception is not re-thrown here as the TokenValidationParameters may have the issuer and signing key set
-                    // directly on them.
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them, allowing the library to continue with token validation.
+                    IOException innerIoException;
+                    if ((innerIoException = GetInnerIOExceptionWithFailureInformation(ex)) != null && innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        if (i < maxAttempt) // logging exception details and that we will attempt to retry configuration retrieval
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
+                        else // logging exception details and that token validation will continue in case relevant properties are set on the TVP
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
+                    }
+                    else // if the exception type does not indicate the need to retry we should break
+                    {
+                        if (innerIoException != null) // log additional information on the HTTP status code and response if it is available
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
+                        else
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+
+                        break;
+                    }
                 }
             }
 
             return null;
         }
 
-        private static IOException IsIOExceptionWithFailureInformation(Exception ex)
+        private static IOException GetInnerIOExceptionWithFailureInformation(Exception ex)
         {
-            if (ex.GetType().Equals(typeof(InvalidOperationException)) && ex.Message.Contains("IDX20803 :")
+            if (ex.GetType().Equals(typeof(InvalidOperationException))
                 && ex.InnerException != null && ex.InnerException is IOException ioException
                 && ioException.Data.Contains(HttpResponseConstants.StatusCode)
                 && ioException.Data.Contains(HttpResponseConstants.ResponseContent))
