@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenUnableToValidateException">
         /// If the lifetime or issuer are invalid
         /// </exception>
-        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string kid, TokenValidationParameters validationParameters, StringBuilder exceptionStrings)
+        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string kid, TokenValidationParameters validationParameters, BaseConfiguration configuration, StringBuilder exceptionStrings)
         {
             bool validIssuer = false;
             bool validLifetime = false;
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters);
+                Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters, configuration);
                 validIssuer = true;
             }
             catch (Exception)

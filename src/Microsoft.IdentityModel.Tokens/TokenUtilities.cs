@@ -150,10 +150,25 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeys != null)
                 foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
                     yield return key;
+        }
 
-            if (validationParameters.Configuration?.SigningKeys != null)
-                foreach (SecurityKey key in validationParameters.Configuration.SigningKeys)
-                    yield return key;
+
+        /// <summary>
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="configuration"/></returns>
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
+            LogHelper.LogInformation(TokenLogMessages.IDX10264);
+
+            List<SecurityKey> keys = new List<SecurityKey>();
+            if (configuration?.SigningKeys != null)
+                foreach (SecurityKey key in configuration.SigningKeys)
+                    keys.Add(key);
+
+            return keys.Concat(GetAllSigningKeys(validationParameters));
         }
 
         /// <summary>

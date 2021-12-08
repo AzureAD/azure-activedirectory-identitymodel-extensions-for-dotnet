@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
             var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
 
-            var tokenValidationParams = new TokenValidationParameters() { Configuration = new OpenIdConnectConfiguration() { Issuer = issuer } };
+            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = issuer }) };
 
             IdentityComparer.AreEqual(issuer, validator.Validate(issuer, jwtSecurityToken, tokenValidationParams), context);
             TestUtilities.AssertFailIfErrors(context);
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.AadIssuer);
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.AadIssuer, claims: new[] { issClaim, tidClaim });
-            var tokenValidationParams = new TokenValidationParameters() { Configuration = new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.AadIssuer } };
+            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.AadIssuer }) };
 
             var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, tokenValidationParams);
 
@@ -317,7 +317,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.V1Issuer);
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.V1Issuer, claims: new[] { issClaim, tidClaim });
 
-            var tokenValidationParams = new TokenValidationParameters() { Configuration = new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.V1Issuer } };
+            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.V1Issuer }) };
 
             var actualIssuer = validator.Validate(ValidatorConstants.V1Issuer, jwtSecurityToken, tokenValidationParams);
 

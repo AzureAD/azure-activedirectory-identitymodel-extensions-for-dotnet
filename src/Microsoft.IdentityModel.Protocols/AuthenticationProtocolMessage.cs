@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
     public abstract class AuthenticationProtocolMessage
     {
         private string _postTitle = "Working...";
-        private string _script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>"; 
+        private string _script = "<script>window.setTimeout(function() {document.forms[0].submit();}, 0);</script>"; 
         private string _scriptButtonText = "Submit";
         private string _scriptDisabledText = "Script is disabled. Click Submit to continue.";
 
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Builds a Url using the current IssuerAddress and the parameters that have been set.
+        /// Builds a URL using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>UrlEncoded string.</returns>
         /// <remarks>Each parameter &lt;Key, Value&gt; is first transformed using <see cref="Uri.EscapeDataString(string)"/>.</remarks>
