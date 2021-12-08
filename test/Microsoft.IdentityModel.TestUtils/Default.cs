@@ -689,7 +689,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet\r\nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer, OriginalIssuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
             };
         }
 
@@ -707,7 +707,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { ClaimTypes.HomePhone, "555.1212" },
                 { ClaimTypes.Role, new List<string>{"Developer", "Sales" } },
                 { ClaimTypes.StreetAddress, "123AnyWhereStreet\r\nSomeTown/r/nUSA" },
-                { ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien" }
+                { ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien" }
             };
         }
 
@@ -726,7 +726,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer, OriginalIssuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer, OriginalIssuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer, OriginalIssuer),
             };
         }
 
@@ -745,7 +745,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(ClaimTypes.Role, "Developer", ClaimValueTypes.String, Issuer),
                 new Claim(ClaimTypes.Role, "Sales", ClaimValueTypes.String, Issuer),
                 new Claim(ClaimTypes.StreetAddress, "123AnyWhereStreet/r/nSomeTown/r/nUSA", ClaimValueTypes.String, Issuer),
-                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sébastien", ClaimValueTypes.String, Issuer),
+                new Claim(ClaimsIdentity.DefaultNameClaimType, "Jean-Sï¿½bastien", ClaimValueTypes.String, Issuer),
             };
         }
 
@@ -802,6 +802,28 @@ namespace Microsoft.IdentityModel.TestUtils
                 SigningCredentials = signingCredentials,
                 Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
             };
+        }
+
+        public static SecurityTokenDescriptor SecurityTokenDescriptor(SigningCredentials signingCredentials, List<Claim> claims)
+        {
+            var securityTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Audience = Audience,
+                EncryptingCredentials = null,
+                Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                Issuer = claims?.FirstOrDefault(c => c.Type == "iss")?.Value ?? Issuer,
+                IssuedAt = DateTime.UtcNow,
+                NotBefore = DateTime.UtcNow,
+                SigningCredentials = signingCredentials,
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims),
+            };
+
+            if (securityTokenDescriptor.Claims == null)
+                securityTokenDescriptor.Claims = new Dictionary<string, object>();
+
+            foreach (Claim c in claims)
+                securityTokenDescriptor.Claims.Add(c.Type, c.Value);
+            return securityTokenDescriptor;
         }
 
         public static SecurityTokenDescriptor X509SecurityTokenDescriptor(EncryptingCredentials encryptingCredentials, X509SigningCredentials signingCredentials, List<Claim> claims)
@@ -887,7 +909,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     KeyInfo = KeyInfo,
                     Prefix = "ds",
                     SignedInfo = SignedInfoNS,
-                    SignatureValue = "biUXAYkV/sx8E7B/0POdk4J5LDkgsRLqHwZDvlJOHSDrsKuGlAlg6+oCfuV14j7uNGu/NSoOFavDSXuS9tJNAxGfeWuy3AOOeXqG+VtJY+cEJtw2WpjSs9xVc3aP58OM/x2phYOZ60Gp4h+mjjG76q7NSAoPrqaVTpw67efbB30pvPSLqTTYdXSOodcKBS25fmEFLraHvWnxAyvFCqbteIOcuOeCDL68dTcqTwVXSZIfeU3Xz8dztA7S4+DuIVuPyEFz9oV3ku8LaNfBO1Zu+v76bZMvLy2iBWhH756UILSLgEndFEOVeAb/PDzXqhwAU4NCUOeNe2WBE6nttNKmXQ==",                    
+                    SignatureValue = "biUXAYkV/sx8E7B/0POdk4J5LDkgsRLqHwZDvlJOHSDrsKuGlAlg6+oCfuV14j7uNGu/NSoOFavDSXuS9tJNAxGfeWuy3AOOeXqG+VtJY+cEJtw2WpjSs9xVc3aP58OM/x2phYOZ60Gp4h+mjjG76q7NSAoPrqaVTpw67efbB30pvPSLqTTYdXSOodcKBS25fmEFLraHvWnxAyvFCqbteIOcuOeCDL68dTcqTwVXSZIfeU3Xz8dztA7S4+DuIVuPyEFz9oV3ku8LaNfBO1Zu+v76bZMvLy2iBWhH756UILSLgEndFEOVeAb/PDzXqhwAU4NCUOeNe2WBE6nttNKmXQ==",
                 };
 
                 return signature;

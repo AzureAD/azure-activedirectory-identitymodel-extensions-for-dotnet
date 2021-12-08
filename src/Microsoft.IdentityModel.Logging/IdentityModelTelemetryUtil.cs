@@ -59,6 +59,8 @@ namespace Microsoft.IdentityModel.Logging
             "ID_NET472";
 #elif NETSTANDARD2_0
             "ID_NETSTANDARD2_0";
+#elif NETCOREAPP3_1
+            "ID_NETCOREAPP3_1";
 #endif
 
         /// <summary>

@@ -96,12 +96,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             public bool Equals(AttributeKey other)
             {
                 return other != null &&
-                    FriendlyName.Equals(other.FriendlyName, StringComparison.Ordinal) &&
-                    Name.Equals(other.Name, StringComparison.Ordinal) &&
-                    NameFormat.Equals(other.NameFormat, StringComparison.Ordinal) &&
-                    Namespace.Equals(other.Namespace, StringComparison.Ordinal) &&
-                    OriginalIssuer.Equals(other.OriginalIssuer, StringComparison.Ordinal) &&
-                    ValueType.Equals(other.ValueType, StringComparison.Ordinal);
+                    FriendlyName.Equals(other.FriendlyName) &&
+                    Name.Equals(other.Name) &&
+                    NameFormat.Equals(other.NameFormat) &&
+                    Namespace.Equals(other.Namespace) &&
+                    OriginalIssuer.Equals(other.OriginalIssuer) &&
+                    ValueType.Equals(other.ValueType);
             }
         }
 

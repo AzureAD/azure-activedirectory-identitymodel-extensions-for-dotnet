@@ -32,6 +32,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Logging;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -1172,6 +1173,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidateSignature(samlToken, samlToken.Assertion.CanonicalString, validationParameters);
 
             return ValidateToken(samlToken, samlToken.Assertion.CanonicalString, validationParameters, out validatedToken);
+        }
+
+        /// <inheritdoc/>
+        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
+        {
+            try
+            {
+                var claimsPrincipal = ValidateToken(token, validationParameters, out var validatedToken);
+                return Task.FromResult(new TokenValidationResult
+                {
+                    SecurityToken = validatedToken,
+                    ClaimsIdentity = claimsPrincipal?.Identities.First(),
+                    IsValid = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new TokenValidationResult
+                {
+                    IsValid = false,
+                    Exception = ex
+                });
+            }
         }
 
         /// <summary>

@@ -97,6 +97,17 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> AdditionalHeaderClaims { get; set; }
 
         /// <summary>
+        /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the inner JWT token header.
+        /// The 'alg', 'kid', 'x5t', 'enc', and 'zip' claims are added by default based on the <see cref="SigningCredentials"/>,
+        /// <see cref="EncryptingCredentials"/>, and/or <see cref="CompressionAlgorithm"/> provided and SHOULD NOT be included in this dictionary as this
+        /// will result in an exception being thrown. 
+        /// <remarks>
+        /// For JsonWebTokenHandler, these claims are merged with <see cref="AdditionalHeaderClaims"/> while adding to the inner JWT header.
+        /// </remarks>
+        /// </summary>
+        public IDictionary<string, object> AdditionalInnerHeaderClaims { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used to create a security token.
         /// </summary>
         public SigningCredentials SigningCredentials { get; set; }

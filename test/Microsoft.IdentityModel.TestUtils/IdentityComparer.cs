@@ -1023,13 +1023,13 @@ namespace Microsoft.IdentityModel.TestUtils
                             localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
 #if CrossVersionTokenValidation
-                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "AuthenticationType", StringComparison.Ordinal) && String.Equals(Convert.ToString(val1), AuthenticationTypes.Federation, StringComparison.Ordinal) && String.Equals(Convert.ToString(val2), "AuthenticationTypes.Federation", StringComparison.Ordinal))
+                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "AuthenticationType") && String.Equals(Convert.ToString(val1), AuthenticationTypes.Federation) && String.Equals(Convert.ToString(val2), "AuthenticationTypes.Federation"))
                             continue;
-                        else if (type == typeof(Claim) && String.Equals(propertyInfo.Name, "Value", StringComparison.Ordinal) && (String.Equals((val1 as string), "urn:oasis:names:tc:SAML:1.0:am:password", StringComparison.Ordinal) || String.Equals((val2 as string), "urn:oasis:names:tc:SAML:1.0:am:password", StringComparison.Ordinal)))
+                        else if (type == typeof(Claim) && String.Equals(propertyInfo.Name, "Value") && (String.Equals((val1 as string), "urn:oasis:names:tc:SAML:1.0:am:password") || String.Equals((val2 as string), "urn:oasis:names:tc:SAML:1.0:am:password")))
                             continue;
-                        else if (type == typeof(ClaimsPrincipal) && String.Equals(propertyInfo.Name, "Claims", StringComparison.Ordinal) && (val1 as IEnumerable<Claim>).Count() == 0)
+                        else if (type == typeof(ClaimsPrincipal) && String.Equals(propertyInfo.Name, "Claims") && (val1 as IEnumerable<Claim>).Count() == 0)
                             continue;
-                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "Claims", StringComparison.Ordinal) && (val1 as IEnumerable<Claim>).Count() == 0)
+                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "Claims") && (val1 as IEnumerable<Claim>).Count() == 0)
                             continue;
 #endif
                         else if (val1.GetType().BaseType == typeof(System.ValueType) && !_equalityDict.Keys.Contains(val1.GetType().ToString()))

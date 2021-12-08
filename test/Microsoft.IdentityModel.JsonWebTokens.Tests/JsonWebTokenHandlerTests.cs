@@ -35,7 +35,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Protocols;
@@ -68,6 +67,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 context.AddDiff("!JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader.Equals(rawHeader)");
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void CreateTokenThrowsNullArgumentException()
+        {
+            var handler = new JsonWebTokenHandler();
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken(null, Default.SymmetricEncryptingCredentials, new Dictionary<string, object> { {"key", "value" } }));
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", (EncryptingCredentials) null, new Dictionary<string, object> { { "key", "value" } }));
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", Default.SymmetricEncryptingCredentials, (Dictionary<string, object>) null));
         }
 
         [Fact]
@@ -332,6 +340,34 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Windows)]
 #endif
+        /// <summary>
+        /// Verify the results from ValidateToken() and ValidateTokenAsync() should match.
+        /// </summary>
+        /// <param name="theoryData">The test data.</param>
+        [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]
+        public void TokenValidationResultsShouldMatch(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.TokenValidationResultCompare", theoryData);
+            try
+            {
+                string jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+
+                theoryData.ValidationParameters.ValidateLifetime = false;
+                var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
+                var validationResult = theoryData.JwtSecurityTokenHandler.ValidateTokenAsync(jweFromJwtHandler, theoryData.ValidationParameters).Result;
+
+                // verify the results from asynchronous and synchronous are the same
+                IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipal.Identity as ClaimsIdentity, validationResult.ClaimsIdentity, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]
         public void CreateJWEWithAesGcm(CreateTokenTheoryData theoryData)
         {
@@ -500,7 +536,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
                             Subject = new ClaimsIdentity(Default.PayloadClaims),
-                            TokenType = "TokenType"
+                            TokenType = "TokenType",
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         JwtSecurityTokenHandler = tokenHandler,
@@ -1188,6 +1224,170 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        [Theory, MemberData(nameof(CreateJWEWithPayloadStringTheoryData))]
+        public void CreateJWEWithPayloadString(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithPayloadString", theoryData);
+            var handler = new JsonWebTokenHandler();
+            string jwtTokenWithSigning = null;
+            JsonWebToken jsonTokenWithSigning = null;
+            CompressionProviderFactory.Default = new CompressionProviderFactory();
+            try
+            {
+                var jwtToken = handler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.EncryptingCredentials, theoryData.TokenDescriptor.AdditionalHeaderClaims);
+                var jsonToken = new JsonWebToken(jwtToken);
+
+                if (theoryData.TokenDescriptor.SigningCredentials != null)
+                {
+                    jwtTokenWithSigning = handler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials, CompressionAlgorithms.Deflate, theoryData.TokenDescriptor.AdditionalHeaderClaims, theoryData.TokenDescriptor.AdditionalInnerHeaderClaims);
+                    jsonTokenWithSigning = new JsonWebToken(jwtTokenWithSigning);
+                }
+
+                if (theoryData.TokenDescriptor.AdditionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out object ctyValue))
+                {
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonTokenWithSigning != null && !jsonTokenWithSigning.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    {
+                        context.AddDiff($"'Cty' claim does not exist in the outer header but present in theoryData.AdditionalHeaderClaims.");
+                    }
+                    else
+                        IdentityComparer.AreEqual(ctyValue.ToString(), headerCtyValue.ToString(), context);
+                }
+                else
+                {
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonTokenWithSigning != null && !jsonTokenWithSigning.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    {
+                        context.AddDiff($"'Cty' claim does not exist in the outer header. It is expected to have the default value '{JwtConstants.HeaderType}'.");
+                    }
+                    else
+                        IdentityComparer.AreEqual(JwtConstants.HeaderType, headerCtyValue.ToString(), context);
+                }
+
+                if (theoryData.TokenDescriptor.AdditionalInnerHeaderClaims != null)
+                {
+                    theoryData.ValidationParameters.ValidateLifetime = false;
+                    var result = handler.ValidateToken(jwtTokenWithSigning, theoryData.ValidationParameters);
+                    var token = result.SecurityToken as JsonWebToken;
+                    if (theoryData.TokenDescriptor.AdditionalInnerHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out object innerCtyValue))
+                    {
+                        if (!token.InnerToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
+                        {
+                            context.AddDiff($"'Cty' claim does not exist in the inner header but present in theoryData.AdditionalHeaderClaims.");
+                        }
+                        else
+                            IdentityComparer.AreEqual(innerCtyValue.ToString(), headerCtyValue.ToString(), context);
+                    }
+                    else
+                    {
+                        if (!token.InnerToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
+                        {
+                            context.AddDiff($"'Cty' claim does not exist in the inner header. It is expected to have the default value '{JwtConstants.HeaderType}'.");
+                        }
+                        else
+                            IdentityComparer.AreEqual(JwtConstants.HeaderType, headerCtyValue.ToString(), context);
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> CreateJWEWithPayloadStringTheoryData
+        {
+            get
+            {
+                return new TheoryData<CreateTokenTheoryData>
+                {
+                    new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "JsonPayload",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{ {"int", "123" } },
+                        },
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "JsonPayload_CtyInAdditionalClaims",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str"}}
+                        },
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "NonJsonPayload",
+                        Payload = Guid.NewGuid().ToString(),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "NonJWT"}}
+                        },
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "CtyInBothAdditionalClaims",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.SymmetricSigningCredentials,
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_outer"}},
+                            AdditionalInnerHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_inner"}}
+                        },
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
+                            TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "CtyInOuterAdditionalClaims",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.SymmetricSigningCredentials,
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str"}},
+                            AdditionalInnerHeaderClaims = new Dictionary<string, object>{ {"int", "123" } },
+                        },
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
+                            TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "DefaultParameterinAdditionalInnerHeaderClaims",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.SymmetricSigningCredentials,
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{ { JwtHeaderParameterNames.Cty, "str" } },
+                            AdditionalInnerHeaderClaims = new Dictionary<string, object>{ { JwtHeaderParameterNames.Enc, "str" } },
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
+                    },
+                };
+            }
+        }
+
         // This test checks to make sure that additional header claims are added as expected to the outer token header.
         [Theory, MemberData(nameof(CreateJWEWithAdditionalHeaderClaimsTheoryData))]
         public void CreateJWEWithAdditionalHeaderClaims(CreateTokenTheoryData theoryData)
@@ -1196,22 +1396,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var handler = new JsonWebTokenHandler();
             theoryData.ValidationParameters.ValidateLifetime = false;
 
-            var jwtTokenString = handler.CreateToken(theoryData.TokenDescriptor);
-            var jwtToken = handler.ValidateToken(jwtTokenString, theoryData.ValidationParameters).SecurityToken as JsonWebToken;
+            var jwtTokenFromDescriptor = handler.CreateToken(theoryData.TokenDescriptor);
+            var validatedJwtTokenFromDescriptor = handler.ValidateToken(jwtTokenFromDescriptor, theoryData.ValidationParameters).SecurityToken as JsonWebToken;
             var jwtTokenToCompare = handler.ValidateToken(theoryData.JwtToken, theoryData.ValidationParameters).SecurityToken as JsonWebToken;
 
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
                 { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "EncryptedKey" } },
             };
-            IdentityComparer.AreEqual(jwtToken, jwtTokenToCompare, context);
+            IdentityComparer.AreEqual(validatedJwtTokenFromDescriptor, jwtTokenToCompare, context);
 
             foreach (var key in theoryData.TokenDescriptor.AdditionalHeaderClaims.Keys)
             {
-                if (jwtToken.InnerToken.TryGetHeaderValue(key, out string headerValue) && !key.Equals(JwtHeaderParameterNames.Typ))
-                    context.AddDiff($"Inner JWT header should not contain the '{key}' claim.");
-
-                if (!jwtToken.TryGetHeaderValue(key, out headerValue))
+                if (!validatedJwtTokenFromDescriptor.TryGetHeaderValue(key, out string headerValue))
                     context.AddDiff($"JWE header does not contain the '{key}' claim.");
 
                 var headerValueToCompare = jwtTokenToCompare.GetHeaderValue<string>(key);
@@ -1233,6 +1430,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         First = true,
                         TestId = "JWEDirectEncryption",
+                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Claims = Default.PayloadDictionary,
@@ -1251,7 +1449,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new CreateTokenTheoryData
                     {
+                        TestId = "JWEDirectEncryptionWithCty",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Claims = Default.PayloadDictionary,
+                            SigningCredentials = Default.SymmetricSigningCredentials,
+                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                            AdditionalHeaderClaims = new Dictionary<string, object>() { { JwtHeaderParameterNames.Cty, JwtConstants.HeaderType} }
+                        },
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
+                            TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        JwtToken = ReferenceTokens.JWEDirectEcryptionWithCtyInAdditionalHeaderClaims
+                    },
+                    new CreateTokenTheoryData
+                    {
                         TestId = "JWEDirectEncryptionWithDifferentTyp",
+                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Claims = Default.PayloadDictionary,
@@ -1271,6 +1490,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrapping",
+                       Payload = Default.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = Default.SymmetricSigningCredentials,
@@ -1290,6 +1510,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrappingDifferentTyp",
+                       Payload = Default.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = Default.SymmetricSigningCredentials,
@@ -1309,6 +1530,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrappingUnsignedInnerJwt",
+                       Payload = Default.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
@@ -1327,6 +1549,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                         TestId = "JWEDirectEncryptionUnsignedInnerJWT",
+                        Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Claims = Default.PayloadDictionary,
@@ -2583,8 +2806,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
         public void ValidateJWSWithConfig(JwtTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ValidateJWS", theoryData);
-
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfig", theoryData);
             try
             {
                 var handler = new JsonWebTokenHandler();
@@ -2616,149 +2838,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
-                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                validConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
-                invalidIssuerConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+                var theoryData = new TheoryData<JwtTheoryData>();
+                foreach (var sharedTheoryData in JwtTestDatasets.ValidateJwsWithConfigTheoryData)
+                    theoryData.Add(sharedTheoryData);
 
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
-
-                return new TheoryData<JwtTheoryData>
+                theoryData.Add(new JwtTheoryData
                 {
-                    new JwtTheoryData
+                    TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SignatureValidatorReturnsValidToken",
+                    Token = Default.AsymmetricJws,
+                    ValidationParameters = new TokenValidationParameters
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ShouldSetLastKnownConfiguration = true
+                        ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
+                        ValidateIssuerSigningKey = true,
+                        RequireSignedTokens = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = false,
+                        SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return new JsonWebToken(Default.AsymmetricJwt) { SigningKey = KeyingMaterial.DefaultX509Key_2048 }; },
                     },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10260: "),
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid" + "_IssuerValidatorReturnsTrue",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            IssuerValidatorUsingConfiguration = (issuer, securityToken, validationParameters, configuration) => { return issuer; },
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501: "),
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SigningKeyResolverValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyResolverUsingConfiguration =  (token, securityToken, kid, validationParameters, configuration) => { return new List<SecurityKey>() { KeyingMaterial.DefaultX509Key_2048 }; }
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid" + "_IssuerSigningKeyValidatorReturnsFalse",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) => { return false; }
-                        },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232: ")
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "CannotObtainConfig",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("DoesNotExist.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever()),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803: ", typeof(IOException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPValid" + "_" + "CannotObtainConfig",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>("DoesNotExist.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever()),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
-                            ValidIssuer = Default.Issuer
-                        },
-                        ShouldSetLastKnownConfiguration = false
-                    }
-                };
+                });
+
+                return theoryData;
             }
         }
-
         [Theory, MemberData(nameof(ValidateJwsWithLastKnownGoodTheoryData))]
         public void ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ValidateJWS", theoryData);
-
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
             try
             {
                 var handler = new JsonWebTokenHandler();
@@ -2781,281 +2889,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JwtTheoryData> ValidateJwsWithLastKnownGoodTheoryData
-        {
-            get
-            {
-                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                validConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-
-                // a special IssuerSigningKeyValidator in the tests below is set to fail if this configuration is used in order
-                // to mock issuer signing key validation failure
-                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                validConfigKeyValidationFails.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
-                invalidIssuerConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-
-                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
-
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
-                incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
-
-                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P256, Default.X509AsymmetricSigningCredentials.Key.KeyId, KeyingMaterial.P256_D, KeyingMaterial.P256_X, KeyingMaterial.P256_Y));
-
-                var expiredSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.X509AsymmetricSigningCredentials);
-                expiredSecurityTokenDescriptor.NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1);
-                expiredSecurityTokenDescriptor.Expires = DateTime.UtcNow + TimeSpan.FromDays(2);
-                var expiredJws = Default.Jwt(expiredSecurityTokenDescriptor);
-
-                return new TheoryData<JwtTheoryData>
-                {
-                    new JwtTheoryData
-                    {
-                        First = true,
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigIssuerInvalid" + "_" + "LKGValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "IssuerSigningKeyValidationFails" + "_" + "LKGValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
-                            {
-                                // mock failing on issuer validation the first time
-                                if (configuration == validConfigKeyValidationFails)
-                                    return false;
-                                else
-                                    return true;
-                            },
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGExpired",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigIssuerInvalid" + "_" + "LKGExpired",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGExpired",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGExpired",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "IssuerSigningKeyValidationFails" + "_" + "LKGExpired",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
-                            {
-                                // mock failing on issuer validation the first time
-                                if (configuration == validConfigKeyValidationFails)
-                                    return false;
-                                else
-                                    return true;
-                            },
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigValid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, invalidIssuerConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigKeyInvalid",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, invalidIssuerConfig, incorrectSigningKeysConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {UseLastKnownGoodConfiguration = false },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff" + "_RequestRefreshSucceeds",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig, validConfig) { UseLastKnownGoodConfiguration = false },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(expiredJws) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid" + "_TokenNotYetValid",
-                        Token = expiredJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig, validConfig) { UseLastKnownGoodConfiguration = true },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = true,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    }
-                };
-            }
-        }
+        public static TheoryData<JwtTheoryData> ValidateJwsWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJwsWithLastKnownGoodTheoryData;
 
         [Theory, MemberData(nameof(ValidateJWEWithLastKnownGoodTheoryData))]
         public void ValidateJWEWithLastKnownGood(JwtTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ValidateJWS", theoryData);
-
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
             try
             {
                 var handler = new JsonWebTokenHandler();
@@ -3078,292 +2917,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JwtTheoryData> ValidateJWEWithLastKnownGoodTheoryData
-        {
-            get
-            {
-                var jwe = new JsonWebTokenHandler().CreateToken(Default.PayloadString, Default.SymmetricSigningCredentials, Default.SymmetricEncryptingCredentials);
-                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                validConfig.SigningKeys.Add(Default.SymmetricSigningKey256);
-
-                // a special IssuerSigningKeyValidator in the tests below is set to fail if this configuration is used in order
-                // to mock issuer signing key validation failure
-                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                validConfigKeyValidationFails.SigningKeys.Add(Default.SymmetricSigningKey256);
-
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
-                invalidIssuerConfig.SigningKeys.Add(Default.SymmetricSigningKey256);
-
-                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
-
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
-                incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
-
-                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
-
-                var notYetValidSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.SymmetricEncryptingCredentials, Default.X509AsymmetricSigningCredentials, null);
-                notYetValidSecurityTokenDescriptor.NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1);
-                notYetValidSecurityTokenDescriptor.Expires = DateTime.UtcNow + TimeSpan.FromDays(2);
-                var notYetValidJwe = Default.Jwt(notYetValidSecurityTokenDescriptor);
-                var notYetValidJweConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-                notYetValidJweConfig.SigningKeys.Add(Default.X509AsymmetricSigningCredentials.Key);
-   
-                return new TheoryData<JwtTheoryData>
-                {
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerInvalid" + "_" + "LKGValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerSigningKeyValidationFails" + "_" + "LKGValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
-                            {
-                                // mock failing on issuer validation the first time
-                                if (configuration == validConfigKeyValidationFails)
-                                    return false;
-                                else
-                                    return true;
-                            },
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGExpired",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerInvalid" + "_" + "LKGExpired",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGExpired",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGExpired",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerSigningKeyValidationFails" + "_" + "LKGExpired",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, validationParameters, configuration) =>
-                            {
-                                // mock failing on issuer validation the first time
-                                if (configuration == validConfigKeyValidationFails)
-                                    return false;
-                                else
-                                    return true;
-                            },
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigValid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, invalidIssuerConfig, validConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigKeyInvalid",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, invalidIssuerConfig, incorrectSigningKeysConfig),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {UseLastKnownGoodConfiguration = false },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff" + "_RequestRefreshSucceeds",
-                        Token = jwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig, validConfig) {UseLastKnownGoodConfiguration = false },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(notYetValidJwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid" + "_TokenNotYetValid",
-                        Token = notYetValidJwe,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, notYetValidJweConfig, notYetValidJweConfig) { UseLastKnownGoodConfiguration = true },
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = true,
-                            TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    }
-                };
-            }
-        }
-
+        public static TheoryData<JwtTheoryData> ValidateJWEWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJWEWithLastKnownGoodTheoryData;
 
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
         public void EncryptExistingJWSWithCompressionTest(CreateTokenTheoryData theoryData)
@@ -3836,7 +3390,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
-            byte[] nonce = new byte[AesGcm.NonceSize];
+            byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
 
             // Generate random nonce
             var random = RandomNumberGenerator.Create();
@@ -3847,10 +3401,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            byte[] authenticationTag = new byte[AesGcm.TagSize];
+            byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
             byte[] ciphertext = new byte[plaintext.Length];
 
-            using (var aes = new AesGcm(GetKeyBytes(Key)))
+            using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
             {
                 aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
             }

@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.SampleTests
         /// </summary>
         public SampleTokenValidationClass()
         {
-            JwtHandler = new JsonWebTokenHandler();
+            JsonWebTokenHandler = new JsonWebTokenHandler();
             JwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             TokenValidationParameters = new TokenValidationParameters()
             {
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.SampleTests
         /// <summary>
         /// Gets or sets the <see cref="JsonWebTokenHandler"/> instance used for the validation operations.
         /// </summary>
-        public JsonWebTokenHandler JwtHandler { get; set; }
+        public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JwtSecurityTokenHandler"/> instance used for the validation operations.
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.SampleTests
         /// <param name="token">The token to validate.</param>
         public void ValidateTokenShimWithDeprecatedModel(string token)
         {
-            var result = ValidateTokenShimWithDeprecatedModel(token, TokenValidationParameters);            
+            var result = ValidateTokenShimWithDeprecatedModel(token, TokenValidationParameters);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.SampleTests
         /// </param>
         public void ValidateTokenShim(string token, TokenValidationParameters tokenValidationParameters)
         {
-            var result = JwtHandler.ValidateToken(token, tokenValidationParameters);
+            var result = JsonWebTokenHandler.ValidateToken(token, tokenValidationParameters);
 
             if (!result.IsValid)
             {

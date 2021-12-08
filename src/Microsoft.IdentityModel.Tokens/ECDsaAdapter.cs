@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         internal ECDsaAdapter()
         {
-#if NET472
+#if NET472 || NETCOREAPP3_1
             CreateECDsaFunction = CreateECDsaUsingECParams;
 #elif NETSTANDARD2_0
             // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NETCOREAPP3_1
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -349,11 +349,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (curve.Oid == null)
                 throw LogHelper.LogArgumentNullException(nameof(curve.Oid));
 
-            if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP256.Oid.Value, StringComparison.Ordinal) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP256.Oid.FriendlyName, StringComparison.Ordinal))
+            if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP256.Oid.Value) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP256.Oid.FriendlyName))
                 return JsonWebKeyECTypes.P256;
-            else if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP384.Oid.Value, StringComparison.Ordinal) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP384.Oid.FriendlyName, StringComparison.Ordinal))
+            else if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP384.Oid.Value) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP384.Oid.FriendlyName))
                 return JsonWebKeyECTypes.P384;
-            else if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP521.Oid.Value, StringComparison.Ordinal) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP521.Oid.FriendlyName, StringComparison.Ordinal))
+            else if (string.Equals(curve.Oid.Value, ECCurve.NamedCurves.nistP521.Oid.Value) || string.Equals(curve.Oid.FriendlyName, ECCurve.NamedCurves.nistP521.Oid.FriendlyName))
                 return JsonWebKeyECTypes.P521;
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, (curve.Oid.Value ?? curve.Oid.FriendlyName) ?? "null")));
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
         internal static bool SupportsECParameters()
         {
-#if NET472
+#if NET472 || NETCOREAPP3_1
             return true;
 #else
             try

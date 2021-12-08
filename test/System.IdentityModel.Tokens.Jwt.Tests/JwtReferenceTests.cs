@@ -40,8 +40,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Base64UrlEncoding(string testId, string dataToEncode, string encodedData)
         {
             TestUtilities.WriteHeader($"Base64UrlEncoding - {testId}", true);
-            Assert.True(dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal), "dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal)");
-            Assert.True(encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal), "encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal)");
+            Assert.True(dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData)), "dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData))");
+            Assert.True(encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode)), "encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode))");
         }
 
         public static TheoryData<string, string, string> Base64UrlEncodingTheoryData
@@ -63,7 +63,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void JwtEncoding(string testId, JwtHeader header, string encodedData)
         {
             TestUtilities.WriteHeader($"JwtEncoding - {testId}", true);
-            Assert.True(encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal), "encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal)");
+            Assert.True(encodedData.Equals(header.Base64UrlEncode()), "encodedData.Equals(header.Base64UrlEncode())");
         }
 
         public static TheoryData<string, JwtHeader, string> JwtEncodingTheoryData
@@ -90,7 +90,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // Signatures aren't necessarily deterministic across different algorithms
             if (testParams.DeterministicSignatures)
-                Assert.True(testParams.EncodedSignature.Equals(encodedSignature, StringComparison.Ordinal), "encodedSignature != testParams.EncodedSignature");
+                Assert.True(testParams.EncodedSignature.Equals(encodedSignature), "encodedSignature != testParams.EncodedSignature");
             Assert.True(providerForVerifying.Verify(Encoding.UTF8.GetBytes(testParams.EncodedData), Base64UrlEncoder.DecodeBytes(testParams.EncodedSignature)), "Verify Failed");
         }
 

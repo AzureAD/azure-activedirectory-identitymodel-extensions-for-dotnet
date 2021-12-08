@@ -46,7 +46,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenUnableToValidateException">
         /// If the lifetime or issuer are invalid
         /// </exception>
-        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string kid, TokenValidationParameters validationParameters, BaseConfiguration configuration, StringBuilder exceptionStrings)
+        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+            SecurityToken securityToken,
+            DateTime? notBefore,
+            DateTime? expires,
+            string kid,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration,
+            StringBuilder exceptionStrings,
+            int numKeysInConfiguration,
+            int numKeysInTokenValidationParameters)
         {
             bool validIssuer = false;
             bool validLifetime = false;
@@ -72,7 +81,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validLifetime && validIssuer)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501, kid, exceptionStrings, securityToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10501,
+                    kid,
+                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                    exceptionStrings, securityToken)));
             else
             {
                 var validationFailure = ValidationFailure.None;
@@ -85,7 +99,12 @@ namespace Microsoft.IdentityModel.Tokens
 
                 throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
                     validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10516, kid, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10516,
+                    kid,
+                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                    exceptionStrings, securityToken,
+                    LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
             }
         }
 

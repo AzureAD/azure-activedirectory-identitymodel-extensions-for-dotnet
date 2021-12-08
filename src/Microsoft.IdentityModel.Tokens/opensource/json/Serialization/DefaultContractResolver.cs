@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 // MemberBase is problematic to serialize. Large, self referencing instances, etc
                 if (typeof(Exception).IsAssignableFrom(objectType))
                 {
-                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite", StringComparison.Ordinal)).ToList();
+                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite")).ToList();
                 }
             }
             else
@@ -1377,7 +1377,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             // warning - this method use to cause errors with Intellitrace. Retest in VS Ultimate after changes
             IValueProvider valueProvider;
 
-#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0)
+#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0 || NETCOREAPP3_1)
             if (DynamicCodeGeneration)
             {
                 valueProvider = new DynamicValueProvider(member);

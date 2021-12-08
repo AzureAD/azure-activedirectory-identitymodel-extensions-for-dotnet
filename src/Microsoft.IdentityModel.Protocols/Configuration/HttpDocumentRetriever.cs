@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,12 +46,12 @@ namespace Microsoft.IdentityModel.Protocols
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
 
         /// <summary>
-        /// The key is used to add status code into ex.Data.
+        /// The key is used to add status code into <see cref="Exception.Data"/>.
         /// </summary>
         public const string StatusCode = "status_code";
 
         /// <summary>
-        /// The key is used to add response content into ex.Data.
+        /// The key is used to add response content into <see cref="Exception.Data"/>.
         /// </summary>
         public const string ResponseContent = "response_content";
 
@@ -118,13 +119,7 @@ namespace Microsoft.IdentityModel.Protocols
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
-                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
-                {
-                    if (SendAdditionalHeaderData)
-                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
-
-                    response = await httpClient.SendAsync(message).ConfigureAwait(false);
-                }
+                response = await SendAsyncAndRetryOnNetworkError(httpClient, uri).ConfigureAwait(false);
 
                 var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)
@@ -140,6 +135,38 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
+        }
+
+        private async Task<HttpResponseMessage> SendAsyncAndRetryOnNetworkError(HttpClient httpClient, Uri uri)
+        {
+            int maxAttempt = 2;
+            HttpResponseMessage response = null;
+            for (int i = 1; i <= maxAttempt; i++)
+            {
+                // need to create a new message each time since you cannot send the same message twice
+                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
+
+                    response = await httpClient.SendAsync(message).ConfigureAwait(false);
+                    if (response.IsSuccessStatusCode)
+                        return response;
+
+                    if (response.StatusCode.Equals(HttpStatusCode.RequestTimeout) || response.StatusCode.Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        if (i < maxAttempt) // logging exception details and that we will attempt to retry document retrieval
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false), message.RequestUri));
+                    }
+                    else // if the exception type does not indicate the need to retry we should break
+                    {
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
+                        break;
+                    }
+                }
+            }
+
+            return response;
         }
     }
 }

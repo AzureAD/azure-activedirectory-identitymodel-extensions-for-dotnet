@@ -27,13 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -273,31 +270,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     message.Content.Headers.Add(contentHeader.Key, contentHeader.Value);
 
             return message;
-        }
-
-        internal static HttpResponseMessage CreateHttpResponseMessage(string json)
-        {
-            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json, Encoding.UTF8, "application/json") };
-        }
-
-        internal static HttpClient SetupHttpClientThatReturns(string json)
-        {
-            return new HttpClient(new MockHttpMessageHandler(CreateHttpResponseMessage(json)));
-        }
-    }
-
-    public class MockHttpMessageHandler : HttpMessageHandler
-    {
-        private HttpResponseMessage _httpResponseMessage;
-
-        public MockHttpMessageHandler(HttpResponseMessage httpResponseMessage)
-        {
-            _httpResponseMessage = httpResponseMessage;
-        }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            return await Task.FromResult(_httpResponseMessage);
         }
     }
 }

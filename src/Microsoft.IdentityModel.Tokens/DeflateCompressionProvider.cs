@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the compression algorithm is supported, false otherwise.</returns>
         public bool IsSupportedAlgorithm(string algorithm)
         {
-            return Algorithm.Equals(algorithm, StringComparison.Ordinal);
+            return Algorithm.Equals(algorithm);
         }
     }
 }

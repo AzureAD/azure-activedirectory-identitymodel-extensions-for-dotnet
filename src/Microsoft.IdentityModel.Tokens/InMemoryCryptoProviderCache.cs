@@ -253,6 +253,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (!_disposed)
             {
+                // Stop the event queue tasks if they are running.
+                _signingSignatureProviders.StopEventQueueTask();
+                _verifyingSignatureProviders.StopEventQueueTask();
+
                 _disposed = true;
             }
         }
@@ -310,19 +314,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// FOR TESTING PURPOSES ONLY.
         /// </summary>
         internal long TaskCount => _signingSignatureProviders.TaskCount + _verifyingSignatureProviders.TaskCount;
-
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// </summary>
-        internal long EventQueueTaskIdleTimeoutInSeconds
-        {
-            get => _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds;
-            set
-            {
-                _signingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
-                _verifyingSignatureProviders.EventQueueTaskIdleTimeoutInSeconds = value;
-            }
-        }
 
         #endregion
     }

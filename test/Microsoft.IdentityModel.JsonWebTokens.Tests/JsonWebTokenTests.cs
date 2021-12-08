@@ -624,7 +624,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
 
             // both claim value types should be DateTime
-            Assert.True(string.Equals(claimA.ValueType, ClaimValueTypes.DateTime, StringComparison.Ordinal), "ClaimValueType is not DateTime.");
+            Assert.True(string.Equals(claimA.ValueType, ClaimValueTypes.DateTime), "ClaimValueType is not DateTime.");
             // claim value shouldn't contain any quotes
             Assert.DoesNotContain("\"", claimA.Value);
         }

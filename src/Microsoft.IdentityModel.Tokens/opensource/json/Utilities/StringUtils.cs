@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             else
             {
                 // multiple results returned. now filter using case sensitivity
-                IEnumerable<TSource> caseSensitiveResults = source.Where(s => string.Equals(valueSelector(s), testValue, StringComparison.Ordinal));
+                IEnumerable<TSource> caseSensitiveResults = source.Where(s => string.Equals(valueSelector(s), testValue));
                 return caseSensitiveResults.SingleOrDefault();
             }
         }

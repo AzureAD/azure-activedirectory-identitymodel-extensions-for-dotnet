@@ -523,7 +523,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
