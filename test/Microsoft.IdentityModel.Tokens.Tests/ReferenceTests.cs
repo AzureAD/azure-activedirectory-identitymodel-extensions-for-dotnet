@@ -26,7 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -42,6 +47,38 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Windows)]
 #endif
+#if NET472 || NETCOREAPP3_1
+        [Fact]
+        public void ECDH_ESReferenceTest()
+        {
+            var context = new CompareContext();
+            // arrange
+            string alg = ECDH_ES.Alg;
+            string enc = ECDH_ES.Enc;
+            string apu = ECDH_ES.Apu;
+            string apv = ECDH_ES.Apv;
+
+            var aliceEcdsaSecurityKey = new ECDsaSecurityKey(ECDH_ES.AliceEphereralPrivateKey, true);
+            var aliceKeyExchangeProvider = new EcdhKeyExchangeProvider(aliceEcdsaSecurityKey, ECDH_ES.BobEphereralPublicKey, alg, enc);
+
+            var bobEcdsaSecurityKey = new ECDsaSecurityKey(ECDH_ES.BobEphereralPrivateKey, true);
+            var bobKeyExchangeProvider = new EcdhKeyExchangeProvider(bobEcdsaSecurityKey, ECDH_ES.AliceEphereralPublicKey, alg, enc);
+
+            // act
+            SecurityKey aliceCek = aliceKeyExchangeProvider.GenerateKdf(apu, apv);
+            SecurityKey bobCek = bobKeyExchangeProvider.GenerateKdf(apu, apv);
+
+            // assert
+            // compare KDFs are the same and they're matching with expected
+            if (!Utility.AreEqual(((SymmetricSecurityKey)aliceCek).Key, ((SymmetricSecurityKey)bobCek).Key)) 
+                context.AddDiff($"!Utility.AreEqual(aliceCek, bobCek)");
+            if (!Utility.AreEqual(((SymmetricSecurityKey)aliceCek).Key, ECDH_ES.DerivedKeyBytes))
+                context.AddDiff($"!Utility.AreEqual(aliceCek, ECDH_ES.DerivedKeyBytes)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+#endif
+
         [Fact]
         public void AesGcmReferenceTest()
         {

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
@@ -302,6 +303,31 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, tokenValidationParams);
 
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AadIssuer)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AadIssuer)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.V1Issuer)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.V1Issuer)]
+        public void ValidateJsonWebToken_ReturnsIssuer(string tidClaimType, string issuer)
+        {
+            var context = new CompareContext();
+            var validator = new AadIssuerValidator(_httpClient, issuer);
+            var tidClaim = new Claim(tidClaimType, ValidatorConstants.TenantIdAsGuid);
+
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
+            List<Claim> claims = new List<Claim>();
+            claims.Add(tidClaim);
+            claims.Add(issClaim);
+
+            var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor(Default.SymmetricSigningCredentials, claims)));
+            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = issuer }) };
+
+            var actualIssuer = validator.Validate(issuer, jsonWebToken, tokenValidationParams);
+
+            IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 

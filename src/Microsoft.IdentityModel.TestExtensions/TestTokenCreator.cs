@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
-            return token.Substring(0, token.LastIndexOf('.')) + "InvalidSignature";
+            return token.Substring(0, token.LastIndexOf('.')) + ".InvalidSignature";
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
-            return token.Substring(0, token.LastIndexOf('.'));
+            return token.Substring(0, token.LastIndexOf('.') + 1);
         }
 
         /// <summary>

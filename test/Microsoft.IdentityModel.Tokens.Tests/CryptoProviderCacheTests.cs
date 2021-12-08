@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SignatureProvider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_384, ALG.HmacSha384, true),
                         TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_256)
                     },
-#if NET472 || NET_CORE 
+#if NET472 || NET_CORE
                     // ecdsa signature provider should be added to the cache on NET472 and NET_CORE.
                     new CryptoProviderCacheTheoryData
                     {

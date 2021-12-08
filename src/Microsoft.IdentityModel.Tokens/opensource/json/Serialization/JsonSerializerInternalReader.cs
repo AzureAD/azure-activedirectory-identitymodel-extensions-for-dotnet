@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 string id = null;
                 if (Serializer.MetadataPropertyHandling != MetadataPropertyHandling.Ignore
                     && reader.TokenType == JsonToken.PropertyName
-                    && string.Equals(reader.Value.ToString(), JsonTypeReflector.IdPropertyName, StringComparison.Ordinal))
+                    && string.Equals(reader.Value.ToString(), JsonTypeReflector.IdPropertyName))
                 {
                     reader.ReadAndAssert();
                     id = reader.Value?.ToString();
@@ -490,7 +490,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                     // if the content is inside $value then read past it
                     if (Serializer.MetadataPropertyHandling != MetadataPropertyHandling.Ignore
                         && reader.TokenType == JsonToken.PropertyName
-                        && string.Equals(reader.Value.ToString(), JsonTypeReflector.ValuePropertyName, StringComparison.Ordinal))
+                        && string.Equals(reader.Value.ToString(), JsonTypeReflector.ValuePropertyName))
                     {
                         reader.ReadAndAssert();
 
@@ -696,7 +696,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                     {
                         propertyName = reader.Value.ToString();
 
-                        if (string.Equals(propertyName, JsonTypeReflector.RefPropertyName, StringComparison.Ordinal))
+                        if (string.Equals(propertyName, JsonTypeReflector.RefPropertyName))
                         {
                             reader.ReadAndAssert();
                             if (reader.TokenType != JsonToken.String && reader.TokenType != JsonToken.Null)
@@ -729,7 +729,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                                 metadataProperty = true;
                             }
                         }
-                        else if (string.Equals(propertyName, JsonTypeReflector.TypePropertyName, StringComparison.Ordinal))
+                        else if (string.Equals(propertyName, JsonTypeReflector.TypePropertyName))
                         {
                             reader.ReadAndAssert();
                             string qualifiedTypeName = reader.Value.ToString();
@@ -740,7 +740,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                             metadataProperty = true;
                         }
-                        else if (string.Equals(propertyName, JsonTypeReflector.IdPropertyName, StringComparison.Ordinal))
+                        else if (string.Equals(propertyName, JsonTypeReflector.IdPropertyName))
                         {
                             reader.ReadAndAssert();
 
@@ -749,7 +749,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                             reader.ReadAndAssert();
                             metadataProperty = true;
                         }
-                        else if (string.Equals(propertyName, JsonTypeReflector.ArrayValuesPropertyName, StringComparison.Ordinal))
+                        else if (string.Equals(propertyName, JsonTypeReflector.ArrayValuesPropertyName))
                         {
                             reader.ReadAndAssert();
                             object list = CreateList(reader, objectType, contract, member, existingValue, id);

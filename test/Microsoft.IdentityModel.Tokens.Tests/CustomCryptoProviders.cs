@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
 
             foreach (var alg in AdditionalHashAlgorithms)
-                if (alg.Equals(algorithm, StringComparison.Ordinal))
+                if (alg.Equals(algorithm))
                     return true;
 
             return false;

@@ -123,18 +123,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (securityToken.Issuer.EndsWith("v2.0", StringComparison.OrdinalIgnoreCase))
                 {
                     if (AadIssuerV2 == null)
-                    {
-                        if (IsV2Authority)
-                        {
-                            AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-                        }
-                        else
-                        {
-                            OpenIdConnectConfiguration openIdConnectConfig =
-                            CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV2 = openIdConnectConfig.Issuer;
-                        }
-                    }
+                        AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
 
                     if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
                         return issuer;
@@ -142,18 +131,7 @@ namespace Microsoft.IdentityModel.Validators
                 else
                 {
                     if (AadIssuerV1 == null)
-                    {
-                        if (IsV2Authority)
-                        {
-                            OpenIdConnectConfiguration openIdConnectConfig =
-                                CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                            AadIssuerV1 = openIdConnectConfig.Issuer;
-                        }
-                        else
-                        {
-                            AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-                        }
-                    }
+                        AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
 
                     if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
                         return issuer;
@@ -286,7 +264,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tid))
                     return tid;
 
-                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tenantId))
+                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.TenantId, out string tenantId))
                     return tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
