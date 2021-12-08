@@ -1057,9 +1057,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (var provider in verifyingProviders)
                 cache.TryRemove(provider);
 
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(taskIdleTimeoutInSeconds)); // wait for the event queue task to complete
-            Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoHangingTasks: unexpected task count: {cache.TaskCount}, expected: 0");
-
             //=============================================================================================
             // repeat the steps and verify tasks will be restarted again and stopped when cache is empty...
             //=============================================================================================
@@ -1071,10 +1068,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (var provider in signingProviders)
                 cache.TryRemove(provider);
 
-            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
-
-            // Dispose() should not throw any exception.
+            // Dispose() should stop the event queue task if it is running.
             cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
         }
 
         /// <summary>
@@ -1103,12 +1100,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
-            // The Dispose() call should not dispose of the cache resources, otherwise other threads will run into exceptions.
-            // However, this can change in the future.
-            cache.Dispose();
-
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(MaxEventQueueTaskWaitTimeInSeconds));
-
             // wait for all threads to finish
             foreach (Thread thread in signingThreads)
                 thread.Join();
@@ -1116,10 +1107,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (Thread thread in verifyingThreads)
                 thread.Join();
 
-            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
-
-            // Call Dispose() one more time to ensure no ill effects.
+            // Dispose() should stop the event queue task if it is running.
             cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
         }
 
         /// <summary>
@@ -1153,6 +1144,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             var handler = new JwtSecurityTokenHandler();
             _ = handler.WriteToken(token);
+
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
 
             // when JwtHeader is created with SymmetricEncryptingCredentials, the provider will not be added to cache (an error in logic???)
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials");
@@ -1193,12 +1187,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var handler = new JwtSecurityTokenHandler();
             _ = handler.WriteToken(token);
 
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials");
         }
 
         private void AssertNoHangingingTasks(InMemoryCryptoProviderCache cache, string callName)
         {
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(MaxEventQueueTaskWaitTimeInSeconds)); // wait for the event queue task to complete
+            WaitTillTaskComplete(cache, MaxEventQueueTaskWaitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"{callName}: unexpected task count: {cache.TaskCount}, expected: 0");
         }
 
@@ -1206,14 +1203,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// The max wait time (in seconds) for the event queue task to exit.
         /// </summary>
         private int MaxEventQueueTaskWaitTimeInSeconds => 5;
-
-        /// <summary>
-        /// Calculate the wait time for a task to stop.
-        /// This is for adding more time allowing the task to exit properly.
-        /// </summary>
-        /// <param name="taskExecutionTimeInSeconds">The time the event queue task runs.</param>
-        /// <returns>2 times of the taskExecutionTimeInSeconds. Note that 2 is just a reasonable factor which should provide enough time for the task to exit but not keeping tests waiting/sleeping for too long.</returns>
-        private long WaitTimeForTaskToStopInSeconds(long taskExecutionTimeInSeconds) => 3 * taskExecutionTimeInSeconds;
 
         /// <summary>
         /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.

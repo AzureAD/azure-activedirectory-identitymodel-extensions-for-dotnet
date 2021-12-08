@@ -253,6 +253,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (!_disposed)
             {
+                // Stop the event queue tasks if they are running.
+                _signingSignatureProviders.StopEventQueueTask();
+                _verifyingSignatureProviders.StopEventQueueTask();
+
                 _disposed = true;
             }
         }
