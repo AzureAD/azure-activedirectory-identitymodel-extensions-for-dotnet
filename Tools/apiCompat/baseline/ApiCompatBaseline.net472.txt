@@ -1,2 +1,0 @@
-MembersMustExist : Member 'System.String Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.ResponseContent' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.String Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.StatusCode' does not exist in the implementation but it does exist in the contract.

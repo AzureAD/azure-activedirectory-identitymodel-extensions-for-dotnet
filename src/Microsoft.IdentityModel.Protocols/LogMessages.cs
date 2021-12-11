@@ -50,6 +50,9 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX20805 = "IDX20805: Obtaining information from metadata endpoint: '{0}'.";
         internal const string IDX20806 = "IDX20806: Unable to obtain an updated configuration from: '{0}'. Returning the current configuration.";
         internal const string IDX20807 = "IDX20807: Unable to retrieve document from: '{0}'. HttpResponseMessage: '{1}', HttpResponseMessage.Content: '{2}'.";
+        internal const string IDX20808 = "IDX20808: Network error occurred. Status code: '{0}'. \nResponse content: '{1}'. \nAttempting to retrieve document again from: '{2}'.";
+        internal const string IDX20809 = "IDX20809: Unable to retrieve document from: '{0}'. Status code: '{1}'. \nResponse content: '{2}'.";
+
 #pragma warning restore 1591
     }
 }

@@ -696,7 +696,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            HttpClientProvider = () => SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
+                            HttpClientProvider = () => HttpResponseMessageUtils.SetupHttpClientThatReturns(string.Empty),
                         },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", null, true),
                         TestId = "InvalidNoContentReturned",
@@ -707,7 +707,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             RequireHttpsForJkuResourceRetrieval = false,
-                            HttpClientProvider = () => SignedHttpRequestTestUtils.SetupHttpClientThatReturns(string.Empty),
+                            HttpClientProvider = () => HttpResponseMessageUtils.SetupHttpClientThatReturns(string.Empty),
                         },
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", null, true),
                         TestId = "InvalidHttpNoContentReturned",
@@ -728,7 +728,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            HttpClientProvider = () => SignedHttpRequestTestUtils.SetupHttpClientThatReturns("{\"test\": 1}"),
+                            HttpClientProvider = () => HttpResponseMessageUtils.SetupHttpClientThatReturns("{\"test\": 1}"),
                         },
                         ExpectedNumberOfPopKeysReturned = 0,
                         TestId = "Valid0KeysReturned",
@@ -738,7 +738,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            HttpClientProvider = () => SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetString1),
+                            HttpClientProvider = () => HttpResponseMessageUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetString1),
                         },
                         ExpectedNumberOfPopKeysReturned = 2,
                         TestId = "Valid2KeysReturned",
@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         JkuSetUrl = "https://www.contoso.com",
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
-                            HttpClientProvider = () => SignedHttpRequestTestUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetECCString),
+                            HttpClientProvider = () => HttpResponseMessageUtils.SetupHttpClientThatReturns(DataSets.JsonWebKeySetECCString),
                         },
                         ExpectedNumberOfPopKeysReturned = 3,
                         TestId = "Valid3KeysReturned",

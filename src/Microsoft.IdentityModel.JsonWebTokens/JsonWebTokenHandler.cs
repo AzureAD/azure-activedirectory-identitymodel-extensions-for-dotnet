@@ -1003,7 +1003,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             BaseConfiguration currentConfiguration = null;
             if (validationParameters.ConfigurationManager != null)
-                currentConfiguration = GetConfigurationAndRetryOnNetworkError(validationParameters);
+            {
+                try
+                {
+                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
+                    // directly on them, allowing the library to continue with token validation.
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                }
+            }
 
             TokenValidationResult tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
             if (validationParameters.ConfigurationManager != null)
@@ -1045,7 +1056,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
-                    // network error as this case should have already been hit before. This refresh handles the case
+                    // retrieval error as this case should have already been hit before. This refresh handles the case
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
@@ -1062,56 +1073,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return tokenValidationResult;
         }
-
-        private static BaseConfiguration GetConfigurationAndRetryOnNetworkError(TokenValidationParameters validationParameters)
-        {
-            BaseConfiguration currentConfiguration;
-            int maxAttempt = 2;
-            for (int i = 1; i <= maxAttempt; i++)
-            {
-                try
-                {
-                    currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                    return currentConfiguration;
-                }
-                catch (Exception ex)
-                {
-                    // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
-                    // directly on them, allowing the library to continue with token validation.
-                    IOException innerIoException;
-                    if ((innerIoException = GetInnerIOExceptionWithFailureInformation(ex)) != null && (innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.RequestTimeout) || innerIoException.Data[HttpResponseConstants.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
-                    {
-                        if (i < maxAttempt) // logging exception details and that we will attempt to retry configuration retrieval
-                            LogHelper.LogInformation(LogHelper.FormatInvariant(TokenLogMessages.IDX10265, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], validationParameters.ConfigurationManager.MetadataAddress));
-                        else // logging exception details and that token validation will continue in case relevant properties are set on the TVP
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
-                    }
-                    else // if the exception type does not indicate the need to retry we should break
-                    {
-                        if (innerIoException != null) // log additional information on the HTTP status code and response if it is available
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10266, validationParameters.ConfigurationManager.MetadataAddress, innerIoException.Data[HttpResponseConstants.StatusCode], innerIoException.Data[HttpResponseConstants.ResponseContent], ex.ToString()));
-                        else
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
-
-                        break;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private static IOException GetInnerIOExceptionWithFailureInformation(Exception ex)
-        {
-            if (ex.GetType().Equals(typeof(InvalidOperationException))
-                && ex.InnerException != null && ex.InnerException is IOException ioException
-                && ioException.Data.Contains(HttpResponseConstants.StatusCode)
-                && ioException.Data.Contains(HttpResponseConstants.ResponseContent))
-                return ioException;
-
-            return null;
-        }
-
+     
         private TokenValidationResult ValidateJWS(string token, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             try

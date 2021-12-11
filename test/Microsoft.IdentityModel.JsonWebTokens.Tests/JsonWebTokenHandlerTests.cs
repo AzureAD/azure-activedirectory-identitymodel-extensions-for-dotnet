@@ -2627,16 +2627,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
                 var requestTimedOutException = new IOException();
-                requestTimedOutException.Data.Add(HttpResponseConstants.StatusCode, HttpStatusCode.RequestTimeout);
-                requestTimedOutException.Data.Add(HttpResponseConstants.ResponseContent, "requestTimedOutException");
+                requestTimedOutException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.RequestTimeout);
+                requestTimedOutException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestTimedOutException");
 
                 var requestServiceUnavailableException = new IOException();
-                requestServiceUnavailableException.Data.Add(HttpResponseConstants.StatusCode, HttpStatusCode.RequestTimeout);
-                requestServiceUnavailableException.Data.Add(HttpResponseConstants.ResponseContent, "requestServiceUnavailableException");
+                requestServiceUnavailableException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.RequestTimeout);
+                requestServiceUnavailableException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestServiceUnavailableException");
 
                 var requestNotFoundException = new IOException();
-                requestNotFoundException.Data.Add(HttpResponseConstants.StatusCode, HttpStatusCode.NotFound);
-                requestNotFoundException.Data.Add(HttpResponseConstants.ResponseContent, "requestNotFoundException");
+                requestNotFoundException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.NotFound);
+                requestNotFoundException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestNotFoundException");
 
                 return new TheoryData<JwtTheoryData>
                 {
@@ -2762,49 +2762,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         ShouldSetLastKnownConfiguration = false
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigRequestTimedOut" + "_Refresh_Succeeds",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig, new InvalidOperationException("IDX20803 :", requestTimedOutException)),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigServiceUnavailable" + "_Refresh_Succeeds",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig, new InvalidOperationException("IDX20803 :", requestServiceUnavailableException)),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                    },
-                    new JwtTheoryData
-                    {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigStatusCodeNotFound" + "_UnableToValidate",
-                        Token = Default.AsymmetricJws,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig, new InvalidOperationException("IDX20803 :", requestNotFoundException)),
-                            ValidateIssuerSigningKey = true,
-                            RequireSignedTokens = true,
-                            ValidateIssuer = true,
-                            ValidateAudience = false,
-                            ValidateLifetime = false,
-                        },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException), "IDX10516: ")
                     },
                 };
             }

@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -95,11 +96,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     if (x.Data.Count > 0)
                     {
-                        if (!x.Data.Contains(HttpResponseConstants.StatusCode))
+                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
                             context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
-                        if (!x.Data.Contains(HttpResponseConstants.ResponseContent))
+                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
                             context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
-                        IdentityComparer.AreEqual(x.Data[HttpResponseConstants.StatusCode], theoryData.ExpectedStatusCode, context);
+                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
                     }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;
@@ -178,6 +179,36 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
                     ExpectedStatusCode = HttpStatusCode.BadRequest,
                     TestId = "Client Miss Configuration"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.RequestTimeout)),
+                    TestId = "RequestTimeout_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.ServiceUnavailable)),
+                    TestId = "RequestTimeout_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.ServiceUnavailable)),
+                    TestId = "ServiceUnavailable_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.NotFound)),
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    ExpectedStatusCode = HttpStatusCode.NotFound,
+                    TestId = "NotFound_NoRefresh"
                 });
 
                 return theoryData;
