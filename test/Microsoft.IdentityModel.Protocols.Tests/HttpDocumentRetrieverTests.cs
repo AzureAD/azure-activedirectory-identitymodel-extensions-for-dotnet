@@ -29,11 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -192,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 {
                     Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
                     DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.ServiceUnavailable)),
-                    TestId = "RequestTimeout_RefreshSucceeds"
+                    TestId = "ServiceUnavailable_RefreshSucceeds"
                 });
 
                 theoryData.Add(new DocumentRetrieverTheoryData

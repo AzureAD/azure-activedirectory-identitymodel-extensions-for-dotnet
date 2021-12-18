@@ -27,13 +27,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;

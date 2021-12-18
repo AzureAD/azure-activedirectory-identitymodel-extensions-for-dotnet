@@ -29,7 +29,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Utility methods for constructing <see cref="HttpResponseMessage"/> objects for testing purposes.

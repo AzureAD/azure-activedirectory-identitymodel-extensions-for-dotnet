@@ -29,7 +29,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// A mock <see cref="HttpMessageHandler"/>.
