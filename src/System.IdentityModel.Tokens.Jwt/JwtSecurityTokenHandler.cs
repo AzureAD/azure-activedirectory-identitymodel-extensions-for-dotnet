@@ -35,6 +35,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using System.Linq;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -1022,10 +1023,25 @@ namespace System.IdentityModel.Tokens.Jwt
 
             }
 
+            // Get information on where keys used during token validation came from for debugging purposes.
+            // TODO: Once the LKG feature is added to JwtSecurityTokenHandler, this will need to account for the keys
+            // in the Configuration as well.
+            var keysInTokenValidationParameters = TokenUtilities.GetAllSigningKeys(validationParameters);
+            var numKeysInTokenValidationParameters = keysInTokenValidationParameters.Count();
+
             if (kidExists)
             {
                 if (kidMatched)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511, keysAttempted, jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                {
+                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Header.Kid, StringComparison.Ordinal));
+                    var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
+                        keysAttempted,
+                        LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                        LogHelper.MarkAsNonPII(0), LogHelper.MarkAsNonPII(keyLocation),
+                        jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                }
 
                 DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
                 DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
@@ -1037,11 +1053,18 @@ namespace System.IdentityModel.Tokens.Jwt
                     jwtToken.Header.Kid,
                     validationParameters,
                     null,
-                    exceptionStrings);
+                    exceptionStrings,
+                    numKeysInTokenValidationParameters,
+                    0);
             }
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503, keysAttempted, exceptionStrings, jwtToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
+                    keysAttempted,
+                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                    LogHelper.MarkAsNonPII(0),
+                    exceptionStrings, jwtToken)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }
