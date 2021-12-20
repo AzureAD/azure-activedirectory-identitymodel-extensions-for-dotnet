@@ -19,6 +19,8 @@ namespace Microsoft.IdentityModel.TestUtils
     {
         private T _configuration;
         private T _refreshedConfiguration;
+        private bool _firstGet = true;
+        private Exception _exToThrowOnFirstGet;
 
         /// <summary>
         /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance.
@@ -30,6 +32,19 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration)));
 
             _configuration = configuration;
+        }
+
+        /// <summary>
+        /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance.
+        /// </summary>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or OpenIdConnectConfiguration.</param>
+        public MockConfigurationManager(T configuration, Exception exToThrowOnFirstGet)
+        {
+            if (configuration == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration)));
+
+            _configuration = configuration;
+            _exToThrowOnFirstGet = exToThrowOnFirstGet;
         }
 
         /// <summary>
@@ -76,6 +91,12 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <returns>Configuration of type T.</returns>
         public override Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
+            if (_exToThrowOnFirstGet != null && _firstGet)
+            {
+                _firstGet = false;
+                throw _exToThrowOnFirstGet;
+            }
+
             return Task.FromResult(_configuration as BaseConfiguration);
         }
 

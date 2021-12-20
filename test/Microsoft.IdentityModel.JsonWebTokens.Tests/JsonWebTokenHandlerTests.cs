@@ -32,6 +32,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -2625,6 +2626,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
+                var requestTimedOutException = new IOException();
+                requestTimedOutException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.RequestTimeout);
+                requestTimedOutException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestTimedOutException");
+
+                var requestServiceUnavailableException = new IOException();
+                requestServiceUnavailableException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.RequestTimeout);
+                requestServiceUnavailableException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestServiceUnavailableException");
+
+                var requestNotFoundException = new IOException();
+                requestNotFoundException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.NotFound);
+                requestNotFoundException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestNotFoundException");
+
                 return new TheoryData<JwtTheoryData>
                 {
                     new JwtTheoryData
@@ -2731,7 +2744,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803: ", typeof(IOException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException), "IDX10516: ")
                     },
                     new JwtTheoryData
                     {
@@ -2749,7 +2762,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         ShouldSetLastKnownConfiguration = false
-                    }
+                    },
                 };
             }
         }
