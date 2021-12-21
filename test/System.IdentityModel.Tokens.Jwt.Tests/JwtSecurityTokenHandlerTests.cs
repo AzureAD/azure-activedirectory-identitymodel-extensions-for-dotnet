@@ -29,10 +29,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Json.Linq;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -1848,6 +1848,66 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = false
             };
         }
+
+        [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
+        public void ValidateJWSWithConfig(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfig", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData => JwtTestDatasets.ValidateJwsWithConfigTheoryData;
+
+        [Theory, MemberData(nameof(ValidateJwsWithLastKnownGoodTheoryData))]
+        public void ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJwsWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJwsWithLastKnownGoodTheoryData;
+
+        [Theory, MemberData(nameof(ValidateJWEWithLastKnownGoodTheoryData))]
+        public void ValidateJWEWithLastKnownGood(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJWEWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJWEWithLastKnownGoodTheoryData;
 
         [Theory, MemberData(nameof(ValidateTokenTheoryData))]
         public void ValidateToken(JwtTheoryData theoryData)

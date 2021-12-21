@@ -1047,7 +1047,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         else
                         {
                             currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
-                            tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); ;
+                            tokenValidationResult = decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); 
 
                             if (tokenValidationResult.IsValid)
                                 return tokenValidationResult;
