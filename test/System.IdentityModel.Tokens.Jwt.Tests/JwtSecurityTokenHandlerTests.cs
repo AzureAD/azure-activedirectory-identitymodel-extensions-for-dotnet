@@ -29,10 +29,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Json.Linq;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -1848,6 +1850,96 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = false
             };
         }
+
+        [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
+        public void ValidateJWSWithConfig(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfig", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)
+                    context.AddDiff("validationResult.IsValid, but the configuration was not set as the LastKnownGoodConfiguration");
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<JwtTheoryData>();
+                foreach (var sharedTheoryData in JwtTestDatasets.ValidateJwsWithConfigTheoryData)
+                    theoryData.Add(sharedTheoryData);
+
+                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SignatureValidatorReturnsValidToken",
+                    Token = Default.AsymmetricJws,
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
+                        ValidateIssuerSigningKey = true,
+                        RequireSignedTokens = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = false,
+                        SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return new JwtSecurityToken(Default.AsymmetricJwt) { SigningKey = KeyingMaterial.DefaultX509Key_2048 }; },
+                    },
+                });
+
+                return theoryData;
+            }
+        }
+
+        [Theory, MemberData(nameof(ValidateJwsWithLastKnownGoodTheoryData))]
+        public void ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJwsWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJwsWithLastKnownGoodTheoryData;
+
+        [Theory, MemberData(nameof(ValidateJWEWithLastKnownGoodTheoryData))]
+        public void ValidateJWEWithLastKnownGood(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
+
+            try
+            {
+                new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ValidateJWEWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJWEWithLastKnownGoodTheoryData;
 
         [Theory, MemberData(nameof(ValidateTokenTheoryData))]
         public void ValidateToken(JwtTheoryData theoryData)
