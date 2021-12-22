@@ -119,6 +119,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<SecurityKey> GetSigningKeys()
         {
             var signingKeys = new List<SecurityKey>();
+            var errorList = new List<Exception>();
             foreach (var webKey in Keys)
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
