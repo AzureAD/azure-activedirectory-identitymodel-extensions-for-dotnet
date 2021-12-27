@@ -36,45 +36,48 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
     /// <summary>
     /// Validates OpenIdConnectConfiguration.
     /// </summary>
-    public class OpenIdConnectConfigurationValidator
+    public class OpenIdConnectConfigurationExecutor
     {
         /// <summary>
-        /// Additional validation policy.
+        /// Additional OpenIdConfiguration Validator.
         /// </summary>
-        public List<IConfigurationValidationPolicy> AdditionalConfigurationValidaionPolicies { get; }
+        public List<IOpenIdConfigurationValidator> AdditionalConfigurationValidaionPolicy { get; }
 
         /// <summary>
-        /// 
+        /// Default OpenIdConfiguration Validator.
         /// </summary>
-        public List<ConfigurationValidationResult> ConfigurationValidationResults { get; } = new List<ConfigurationValidationResult>();
+        public IOpenIdConfigurationValidator DefaultOpenIdConfigurationValidator { get; } = new OpenIdConfigurationValidator();
 
         /// <summary>
-        /// Validates a OpenIdConnectConfiguration by using current policy set.
+        /// Validates a OpenIdConnectConfiguration by using current validator.
         /// </summary>
-        /// <param name="openIdConnectConfiguration">The OpenIdConnectConfiguration to validate</param>
-        /// <returns></returns>
-        public List<ConfigurationValidationResult> Validate(OpenIdConnectConfiguration openIdConnectConfiguration)
+        /// <param name="openIdConnectConfiguration">The OpenIdConnectConfiguration to validate.</param>
+        public void Validate(OpenIdConnectConfiguration openIdConnectConfiguration)
         {
             if (openIdConnectConfiguration == null)
                 throw new ArgumentNullException(nameof(openIdConnectConfiguration));
 
-            var allPolicies = new List<IConfigurationValidationPolicy>
+            var allValidators = new List<IOpenIdConfigurationValidator>
             {
-                new ConfigurationValidationPolicy()
+                DefaultOpenIdConfigurationValidator
             };
-            if (AdditionalConfigurationValidaionPolicies != null)
-                allPolicies.AddRange(AdditionalConfigurationValidaionPolicies);
 
-            foreach (IConfigurationValidationPolicy policy in allPolicies)
+            var exceptions = new List<OpenIdConnectConfigurationValidationException>();
+
+            if (AdditionalConfigurationValidaionPolicy != null)
+                allValidators.AddRange(AdditionalConfigurationValidaionPolicy);
+
+            foreach (IOpenIdConfigurationValidator policy in allValidators)
             {
-                ConfigurationValidationResult result = policy.ValidateConfiguration(openIdConnectConfiguration);
+                OpenIdConfigurationValidationResult result = policy.Validate(openIdConnectConfiguration);
                 if (!result.Succeeded)
                 {
-                    ConfigurationValidationResults.Add(result);
+                    exceptions.Add(result.Exception);
                 }
             }
-            return ConfigurationValidationResults;
-            // Or throw exception
+
+            if (exceptions.Any())
+                throw new OpenIdConnectConfigurationValidationException("Invalid configuraiton", new AggregateException(exceptions));
         }
     }
 }

@@ -43,6 +43,11 @@ namespace Microsoft.IdentityModel.Tokens
         private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
 
         /// <summary>
+        /// The key is used to add convert key error message into <see cref="AdditionalData"/>.
+        /// </summary>
+        public const string ConvertKeyError = "convert_key_error";
+
+        /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
         /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
