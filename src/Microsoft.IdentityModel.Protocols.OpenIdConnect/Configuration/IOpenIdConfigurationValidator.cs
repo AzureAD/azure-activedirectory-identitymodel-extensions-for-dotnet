@@ -33,14 +33,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// <summary>
     /// Interface that defines a policy for validating configuration data.
     /// </summary>
-    public interface IConfigurationValidationPolicy
+    public interface IOpenIdConfigurationValidator
     {
         /// <summary>
         /// Validate the retrieved configuration.
         /// This method will throw if the configuration cannot be retrieved, instead of returning null.
         /// </summary>
         /// <param name="openIdConnectConfiguration">The <see cref="OpenIdConnectConfiguration"/></param>
-        /// <returns><see cref="ConfigurationValidationResult"/></returns>
-        ConfigurationValidationResult ValidateConfiguration(OpenIdConnectConfiguration openIdConnectConfiguration);
+        /// <returns><see cref="OpenIdConfigurationValidationResult"/></returns>
+        OpenIdConfigurationValidationResult Validate(OpenIdConnectConfiguration openIdConnectConfiguration);
     }
 }

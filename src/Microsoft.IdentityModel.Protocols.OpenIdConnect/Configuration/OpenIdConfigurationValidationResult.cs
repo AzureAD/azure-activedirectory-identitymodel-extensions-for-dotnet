@@ -30,14 +30,14 @@ using System.ComponentModel;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Represents the result of validation a <see cref="IConfigurationValidationPolicy"/>.
+    /// Represents the result of validation a <see cref="IOpenIdConfigurationValidator"/>.
     /// </summary>
-    public class ConfigurationValidationResult
+    public class OpenIdConfigurationValidationResult
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public ConfigurationValidationResult() { }
+        public OpenIdConfigurationValidationResult() { }
 
         /// <summary>
         /// Gets or sets the Exception that was thrown during the configuration validation.
