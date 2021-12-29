@@ -37,6 +37,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -2609,8 +2610,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData => JwtTestDatasets.ValidateJwsWithLastKnownGoodTheoryData;
+        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<JwtTheoryData>();
+                foreach (var sharedTheoryData in JwtTestDatasets.ValidateJwsWithConfigTheoryData)
+                    theoryData.Add(sharedTheoryData);
 
+                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+                theoryData.Add(new JwtTheoryData
+                {
+                    TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SignatureValidatorReturnsValidToken",
+                    Token = Default.AsymmetricJws,
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig),
+                        ValidateIssuerSigningKey = true,
+                        RequireSignedTokens = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = false,
+                        SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return new JsonWebToken(Default.AsymmetricJwt) { SigningKey = KeyingMaterial.DefaultX509Key_2048 }; },
+                    },
+                });
+
+                return theoryData;
+            }
+        }
         [Theory, MemberData(nameof(ValidateJwsWithLastKnownGoodTheoryData))]
         public void ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
         {

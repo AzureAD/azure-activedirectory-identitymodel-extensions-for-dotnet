@@ -42,7 +42,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public static class JwtTestDatasets
     {
-        public static TheoryData<JwtTheoryData> ValidateJwsWithConfigTheoryData
+        public static List<JwtTheoryData> ValidateJwsWithConfigTheoryData
         {
             get
             {
@@ -67,7 +67,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 requestNotFoundException.Data.Add(HttpDocumentRetriever.StatusCode, HttpStatusCode.NotFound);
                 requestNotFoundException.Data.Add(HttpDocumentRetriever.ResponseContent, "requestNotFoundException");
 
-                return new TheoryData<JwtTheoryData>
+                return new List<JwtTheoryData>
                 {
                     new JwtTheoryData
                     {
@@ -161,7 +161,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232: ")
                     },
                     new JwtTheoryData
-                    {
+                    {   
+                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid" + "_SignatureValidatorReturnsNull",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            SignatureValidatorUsingConfiguration = (token, validationParameters, configuration) => { return null; },
+                        },
+                        ShouldSetLastKnownConfiguration = true,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10505: ")
+                    },
+                    new JwtTheoryData {
                         TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "CannotObtainConfig",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
