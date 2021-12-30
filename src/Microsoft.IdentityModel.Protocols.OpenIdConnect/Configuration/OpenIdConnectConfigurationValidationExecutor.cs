@@ -36,40 +36,40 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
     /// <summary>
     /// Validates OpenIdConnectConfiguration.
     /// </summary>
-    public class OpenIdConnectConfigurationExecutor
+    public class OpenIdConnectConfigurationValidationExecutor : Protocols.Configuration.IConfigurationValidationExecutor<OpenIdConnectConfiguration>
     {
         /// <summary>
-        /// Additional OpenIdConfiguration Validator.
+        /// Additional OpenIdConfiguration Validators.
         /// </summary>
-        public List<IOpenIdConfigurationValidator> AdditionalConfigurationValidaionPolicy { get; }
+        public List<IConfigurationValidator<OpenIdConnectConfiguration>> AdditionalOpenIdConnectConfigurationValidators { get; }
 
         /// <summary>
         /// Default OpenIdConfiguration Validator.
         /// </summary>
-        public IOpenIdConfigurationValidator DefaultOpenIdConfigurationValidator { get; } = new OpenIdConfigurationValidator();
+        public IConfigurationValidator<OpenIdConnectConfiguration> DefaultOpenIdConnectConfigurationValidator { get; } = new OpenIdConnectConfigurationValidator();
 
         /// <summary>
         /// Validates a OpenIdConnectConfiguration by using current validator.
         /// </summary>
         /// <param name="openIdConnectConfiguration">The OpenIdConnectConfiguration to validate.</param>
-        public void Validate(OpenIdConnectConfiguration openIdConnectConfiguration)
+        public void ValidateConfiguration(OpenIdConnectConfiguration openIdConnectConfiguration)
         {
             if (openIdConnectConfiguration == null)
                 throw new ArgumentNullException(nameof(openIdConnectConfiguration));
 
-            var allValidators = new List<IOpenIdConfigurationValidator>
+            var allValidators = new List<IConfigurationValidator<OpenIdConnectConfiguration>>
             {
-                DefaultOpenIdConfigurationValidator
+                DefaultOpenIdConnectConfigurationValidator
             };
 
-            var exceptions = new List<OpenIdConnectConfigurationValidationException>();
+            var exceptions = new List<ConfigurationValidationException>();
 
-            if (AdditionalConfigurationValidaionPolicy != null)
-                allValidators.AddRange(AdditionalConfigurationValidaionPolicy);
+            if (AdditionalOpenIdConnectConfigurationValidators != null)
+                allValidators.AddRange(AdditionalOpenIdConnectConfigurationValidators);
 
-            foreach (IOpenIdConfigurationValidator policy in allValidators)
+            foreach (IConfigurationValidator<OpenIdConnectConfiguration> validator in allValidators)
             {
-                OpenIdConfigurationValidationResult result = policy.Validate(openIdConnectConfiguration);
+                ConfigurationValidationResult result = validator.Validate(openIdConnectConfiguration);
                 if (!result.Succeeded)
                 {
                     exceptions.Add(result.Exception);
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             }
 
             if (exceptions.Any())
-                throw new OpenIdConnectConfigurationValidationException("Invalid configuraiton", new AggregateException(exceptions));
+                throw new ConfigurationValidationException("Invalid configuraiton", new AggregateException(exceptions));
         }
     }
 }

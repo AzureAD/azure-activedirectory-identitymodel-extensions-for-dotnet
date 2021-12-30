@@ -32,9 +32,9 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 {
     /// <summary>
-    /// Defines a class for validating the OpenIdConnectConfiguration by using current policy.
+    /// Defines a class for validating the OpenIdConnectConfiguration by using default policy.
     /// </summary>
-    public class OpenIdConfigurationValidator : IOpenIdConfigurationValidator
+    public class OpenIdConnectConfigurationValidator : IConfigurationValidator<OpenIdConnectConfiguration>
     {
         private int _minimumNumberOfKeys = DefaultMinimumNumberOfKeys;
 
@@ -47,17 +47,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
         /// Validates a OpenIdConnectConfiguration by using current policy.
         /// </summary>
         /// <param name="openIdConnectConfiguration">The OpenIdConnectConfiguration to validate.</param>
-        /// <returns>A <see cref="OpenIdConfigurationValidationResult"/> that contains validation result.</returns>
-        public OpenIdConfigurationValidationResult Validate(OpenIdConnectConfiguration openIdConnectConfiguration)
+        /// <returns>A <see cref="ConfigurationValidationResult"/> that contains validation result.</returns>
+        public ConfigurationValidationResult Validate(OpenIdConnectConfiguration openIdConnectConfiguration)
         {
             if (openIdConnectConfiguration == null)
                 throw new ArgumentNullException(nameof(openIdConnectConfiguration));
 
             if (openIdConnectConfiguration.JsonWebKeySet == null)
             {
-                return new OpenIdConfigurationValidationResult
+                return new ConfigurationValidationResult
                 {
-                    Exception = new OpenIdConnectConfigurationValidationException("Invalid configuation: didn't contain any JsonWebKeys."),
+                    Exception = new ConfigurationValidationException("Invalid configuation: didn't contain any JsonWebKeys."),
                     Succeeded = false
                 };
             }
@@ -66,23 +66,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             {
                 if (openIdConnectConfiguration.JsonWebKeySet.AdditionalData.ContainsKey(JsonWebKeySet.ConvertKeyError))
                 {
-                    return new OpenIdConfigurationValidationResult
+                    return new ConfigurationValidationResult
                     {
-                        Exception = new OpenIdConnectConfigurationValidationException("Invalid configuation: not enough keys:" + openIdConnectConfiguration.JsonWebKeySet.AdditionalData[JsonWebKeySet.ConvertKeyError]),
+                        Exception = new ConfigurationValidationException("Invalid configuation: not enough keys:" + openIdConnectConfiguration.JsonWebKeySet.AdditionalData[JsonWebKeySet.ConvertKeyError]),
                         Succeeded = false
                     };
                 }
                 else
                 {
-                    return new OpenIdConfigurationValidationResult
+                    return new ConfigurationValidationResult
                     {
-                        Exception = new OpenIdConnectConfigurationValidationException("Invalid configuation: not enough keys:"),
+                        Exception = new ConfigurationValidationException("Invalid configuation: not enough keys:"),
                         Succeeded = false
                     };
                 }
             }
 
-            return new OpenIdConfigurationValidationResult
+            return new ConfigurationValidationResult
             {
                 Succeeded = true
             };

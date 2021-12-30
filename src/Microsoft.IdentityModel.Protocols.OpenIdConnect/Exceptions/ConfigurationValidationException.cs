@@ -35,12 +35,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// This exception is thrown when an OpenIdConnect protocol handler encounters a protocol error.
     /// </summary>
     [Serializable]
-    public class OpenIdConnectConfigurationValidationException : Exception
+    public class ConfigurationValidationException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
         /// </summary>
-        public OpenIdConnectConfigurationValidationException()
+        public ConfigurationValidationException()
         {
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public OpenIdConnectConfigurationValidationException(String message)
+        public ConfigurationValidationException(String message)
             : base(message)
         {
         }
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public OpenIdConnectConfigurationValidationException(String message, Exception innerException)
+        public ConfigurationValidationException(String message, Exception innerException)
             : base(message, innerException)
         {
         }
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
-        protected OpenIdConnectConfigurationValidationException(SerializationInfo info, StreamingContext context)
+        protected ConfigurationValidationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }

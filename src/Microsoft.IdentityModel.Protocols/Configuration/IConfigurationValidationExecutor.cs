@@ -25,22 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Threading;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
+namespace Microsoft.IdentityModel.Protocols.Configuration
 {
     /// <summary>
-    /// Interface that defines a policy for validating configuration data.
+    /// Interface that defines a executor for validating configuration data.
     /// </summary>
-    public interface IOpenIdConfigurationValidator
+    /// <typeparam name="T">The type of the configuration metadata.</typeparam>
+    public interface IConfigurationValidationExecutor<T>
     {
         /// <summary>
-        /// Validate the retrieved configuration.
-        /// This method will throw if the configuration cannot be retrieved, instead of returning null.
+        /// Validate the retrieved configuration by using <see cref="IConfigurationValidator{T}"/>.
         /// </summary>
-        /// <param name="openIdConnectConfiguration">The <see cref="OpenIdConnectConfiguration"/></param>
-        /// <returns><see cref="OpenIdConfigurationValidationResult"/></returns>
-        OpenIdConfigurationValidationResult Validate(OpenIdConnectConfiguration openIdConnectConfiguration);
+        /// <param name="configuration">Configuration of type T.</param>
+        void ValidateConfiguration(T configuration);
     }
 }
