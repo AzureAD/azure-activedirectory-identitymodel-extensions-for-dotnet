@@ -31,8 +31,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -50,6 +50,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
+        private IConfigurationValidationExecutor<T> _validationExecutor;
         private T _currentConfiguration;
 
         /// <summary>
@@ -143,6 +144,7 @@ namespace Microsoft.IdentityModel.Protocols
                         _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
+                        _validationExecutor.ValidateConfiguration(_currentConfiguration);
                     }
                     catch (Exception ex)
                     {

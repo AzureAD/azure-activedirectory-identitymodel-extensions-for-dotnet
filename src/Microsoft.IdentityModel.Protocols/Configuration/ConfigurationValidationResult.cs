@@ -27,22 +27,22 @@
 
 using System.ComponentModel;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
+namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Represents the result of validation a <see cref="IOpenIdConfigurationValidator"/>.
+    /// Represents the result of validation a <see cref="IConfigurationValidator"/>.
     /// </summary>
-    public class OpenIdConfigurationValidationResult
+    public class ConfigurationValidationResult
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public OpenIdConfigurationValidationResult() { }
+        public ConfigurationValidationResult() { }
 
         /// <summary>
         /// Gets or sets the Exception that was thrown during the configuration validation.
         /// </summary>
-        public OpenIdConnectConfigurationValidationException Exception { get; set; }
+        public ConfigurationValidationException Exception { get; set; }
 
         /// <summary>
         /// Gets or sets a bool indicating if the configuration validation was successful.
