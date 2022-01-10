@@ -84,8 +84,8 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken(
                 testTokenCreator.CreateTokenWithNoSignature,
-                typeof(ArgumentException),
-                "IDX14111");
+                typeof(SecurityTokenInvalidSignatureException),
+                "IDX10504:");
         }
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken(
                 testTokenCreator.CreateTokenWithInvalidSignature,
-                typeof(ArgumentException),
-                "IDX14111");
+                typeof(SecurityTokenInvalidSignatureException),
+                "IDX10511:");
         }
 
         /// <summary>
@@ -508,7 +508,7 @@ namespace Microsoft.IdentityModel.SampleTests
             {
                 action();
 
-                if (innerExceptionType != null || innerExceptionType != null)
+                if (innerExceptionType != null || !string.IsNullOrEmpty(innerExceptionMessagePart))
                     throw new TestException(
                         string.Format(
                             "Expected an exception of type '{0}' containing '{1}' in the message.",
