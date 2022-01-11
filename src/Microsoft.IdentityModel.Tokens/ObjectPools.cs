@@ -126,16 +126,26 @@ namespace Microsoft.IdentityModel.Tokens
         internal void Free(T obj)
         {
             var items = Items;
+            bool returned = false;
             for (int i = 0; i < items.Length; i++)
             {
                 if (items[i].Value == null)
                 {
-                    // Intentionally not using interlocked here. 
-                    // In a worst case scenario two objects may be stored into same slot.
-                    // It is very unlikely to happen and will only mean that one of the objects will get collected.
-                    items[i].Value = obj;
-                    break;
+                    // We need to know if we returned the object. If we didn't, it needs to get disposed.
+                    if (null == Interlocked.CompareExchange(ref items[i].Value, obj, null))
+                    {
+                        returned = true;
+                        break;
+                    }
                 }
+            }
+
+            // Our pool is full, we can't hold on to this object, so it will get dropped / garbage collected.
+            // However this object was disposable, so we should dispose it now, else the disposal work
+            // would have to be done by the finalizer, which may impact high performance scenarios (since the finalizer queue is worked on sequentially.)
+            if (!returned)
+            {
+                obj.Dispose();
             }
         }
     }
