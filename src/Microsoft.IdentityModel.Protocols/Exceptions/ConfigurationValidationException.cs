@@ -28,7 +28,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
+namespace Microsoft.IdentityModel.Protocols
 {
 
     /// <summary>
@@ -38,14 +38,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     public class ConfigurationValidationException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+        /// Initializes a new instance of the <see cref="ConfigurationValidationException"/> class.
         /// </summary>
         public ConfigurationValidationException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+        /// Initializes a new instance of the <see cref="ConfigurationValidationException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         public ConfigurationValidationException(String message)
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+        /// Initializes a new instance of the <see cref="ConfigurationValidationException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+        /// Initializes a new instance of the <see cref="ConfigurationValidationException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>

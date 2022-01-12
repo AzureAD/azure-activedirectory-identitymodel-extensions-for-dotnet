@@ -100,6 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21812 = "IDX21812: Retrieving json web keys from: '{0}'.";
         internal const string IDX21813 = "IDX21813: Deserializing json web keys: '{0}'.";
         internal const string IDX21815 = "IDX21815: Error deserializing json: '{0}' into '{1}'.";
+        internal const string IDX21816 = "The number of signing keys must be greater or equal to '{0}'. value: '{1}'.";
 #pragma warning restore 1591
     }
 }

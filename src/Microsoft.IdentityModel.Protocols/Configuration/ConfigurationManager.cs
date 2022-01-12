@@ -50,7 +50,6 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
-        private IConfigurationValidationExecutor<T> _validationExecutor;
         private T _currentConfiguration;
 
         /// <summary>
@@ -138,13 +137,14 @@ namespace Microsoft.IdentityModel.Protocols
                 if (_syncAfter <= now)
                 {
                     try
-                    {
+                    { 
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
-                        _validationExecutor.ValidateConfiguration(_currentConfiguration);
+                        if ( ValidationExecutor != null && ValidationExecutor.ShouldValidateConfiguration )
+                            ValidationExecutor.ValidateConfiguration(_currentConfiguration);
                     }
                     catch (Exception ex)
                     {
@@ -200,6 +200,11 @@ namespace Microsoft.IdentityModel.Protocols
                 _syncAfter = now;
             }
         }
+
+        /// <summary>
+        /// Gets or sets a configuration validation executor.
+        /// </summary>
+        public ConfigurationValidationExecutor<T> ValidationExecutor { get; set; }
 
         /// <summary>
         /// 12 hours is the default time interval that afterwards, <see cref="GetBaseConfigurationAsync(CancellationToken)"/> will obtain new configuration.

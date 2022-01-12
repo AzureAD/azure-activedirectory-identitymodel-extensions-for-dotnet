@@ -30,7 +30,7 @@ using System.ComponentModel;
 namespace Microsoft.IdentityModel.Protocols
 {
     /// <summary>
-    /// Represents the result of validation a <see cref="IConfigurationValidator"/>.
+    /// Represents the result of validation a <see cref="IConfigurationValidator{T}"/>.
     /// </summary>
     public class ConfigurationValidationResult
     {
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols
         public ConfigurationValidationResult() { }
 
         /// <summary>
-        /// Gets or sets the Exception that was thrown during the configuration validation.
+        /// Gets or sets the <see cref="ConfigurationValidationException"/> that occurred during validation of the SignedHttpRequest.
         /// </summary>
         public ConfigurationValidationException Exception { get; set; }
 

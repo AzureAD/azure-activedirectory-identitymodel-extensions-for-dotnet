@@ -53,11 +53,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             if (openIdConnectConfiguration == null)
                 throw new ArgumentNullException(nameof(openIdConnectConfiguration));
 
-            if (openIdConnectConfiguration.JsonWebKeySet == null)
+            if (openIdConnectConfiguration.JsonWebKeySet == null || openIdConnectConfiguration.JsonWebKeySet.Keys.Count == 0)
             {
                 return new ConfigurationValidationResult
                 {
-                    Exception = new ConfigurationValidationException("Invalid configuation: didn't contain any JsonWebKeys."),
+                    Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration has no key in JsonWebKeySet."),
                     Succeeded = false
                 };
             }
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException("Invalid configuation: not enough keys:" + openIdConnectConfiguration.JsonWebKeySet.AdditionalData[JsonWebKeySet.ConvertKeyError]),
+                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}. Invalid keys:" + openIdConnectConfiguration.JsonWebKeySet.AdditionalData[JsonWebKeySet.ConvertKeyError]),
                         Succeeded = false
                     };
                 }
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException("Invalid configuation: not enough keys:"),
+                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}."),
                         Succeeded = false
                     };
                 }
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             set
             {
                 if (value < _minimumNumberOfKeys)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20808, LogHelper.MarkAsNonPII(DefaultMinimumNumberOfKeys), LogHelper.MarkAsNonPII(value))));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX21816, LogHelper.MarkAsNonPII(DefaultMinimumNumberOfKeys), LogHelper.MarkAsNonPII(value))));
 
                 _minimumNumberOfKeys = value;
             }
